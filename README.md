@@ -1,2 +1,0 @@
-# tlpipe
-The Tianlai pipeline.

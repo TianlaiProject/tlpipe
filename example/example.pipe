@@ -1,0 +1,27 @@
+# -*- mode: python; -*-
+
+# Example input file for pipeline manager.
+
+# Each of these calls only uses the relevant parts of the .pipe file.
+
+pipe_modules = []
+
+from tlpipe.timestream import convert
+pipe_modules.append(convert.Conversion)
+# parameters for data conversion comes here
+
+from tlpipe.cal import cal
+pipe_modules.append(cal.Calibration)
+# parameters for calibration comes here
+
+from tlpipe.map import mapmaking
+pipe_modules.append(mapmaking.MapMaking)
+# parameters for map-making comes here
+
+from tlpipe.foreground import foreground
+pipe_modules.append(foreground.FgSub)
+# parameters for foreground subtraction comes here
+
+from tlpipe.powerspectrum import ps
+pipe_modules.append(ps.Ps)
+# parameters for powerspectrum estimation comes here
