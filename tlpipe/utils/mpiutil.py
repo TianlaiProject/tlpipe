@@ -44,6 +44,16 @@ class _close_message(object):
         return "<Close message>"
 
 
+def active_comm(aprocs):
+    """Return a communicator consists of processes in `aprocs`."""
+    if _comm is None:
+        return None
+    else:
+        # create a new communicator from active processes
+        comm = _comm.Create(_comm.Get_group().Incl(aprocs))
+        return comm
+
+
 def active(aprocs):
     """Make processes in `aprocs` active, while others wait."""
     if _comm is None:

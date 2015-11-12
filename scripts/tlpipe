@@ -62,7 +62,8 @@ def execute(pipe_file_or_dict, feedback=2) :
         # only active processes execute tasks in module
         if mpiutil.rank in inst.aprocs:
             inst.execute()
-            del inst
+
+        del inst
 
     if mpiutil.rank0:
         # now remove the run indicator flag
