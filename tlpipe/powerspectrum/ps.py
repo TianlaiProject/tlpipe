@@ -28,11 +28,7 @@ class Ps(object):
         aprocs = set(self.params['aprocs']) & procs
         self.aprocs = (list(aprocs) + list(set(range(nprocs)) - aprocs))[:nprocs]
         assert 0 in self.aprocs, 'Process 0 must be active'
-        self.comm = mpiutil.active(self.aprocs) # communicator consists of active processes
-
-    def __del__(self):
-        # close the waiting of inactive processes and synchronize
-        mpiutil.close(self.aprocs)
+        self.comm = mpiutil.active_comm(self.aprocs) # communicator consists of active processes
 
     def execute(self):
 
