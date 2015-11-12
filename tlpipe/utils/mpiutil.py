@@ -39,6 +39,41 @@ except ImportError:
     warnings.warn("Warning: mpi4py not installed.")
 
 
+class _close_message(object):
+    def __repr__(self):
+        return "<Close message>"
+
+
+def active(aprocs):
+    """Make processes in `aprocs` active, while others wait."""
+    if _comm is None:
+        return None
+    else:
+        # create a new communicator from active processes
+        comm = _comm.Create(_comm.Get_group().Incl(aprocs))
+        if rank not in aprocs:
+            while True:
+                # Event loop.
+                # Sit here and await instructions.
+
+                # Blocking receive to wait for instructions.
+                task = _comm.recv(source=0, tag=MPI.ANY_TAG)
+
+                # Check if message is special sentinel signaling end.
+                # If so, stop.
+                if isinstance(task, _close_message):
+                    break
+
+        return comm
+
+
+def close(aprocs):
+    """Send a message to the waiting processes to close their waiting."""
+    if rank0:
+        for i in list(set(range(size)) - set(aprocs)):
+            _comm.isend(_close_message(), dest=i)
+
+
 def partition_list_alternate(full_list, i, n):
     """Partition a list into `n` pieces. Return the `i`th partition."""
     return full_list[i::n]

@@ -10,6 +10,7 @@ import getpass
 import time
 import argparse
 from tlpipe.kiyopy import parse_ini
+from tlpipe.utils import mpiutil
 
 
 params_init = {
@@ -17,19 +18,19 @@ params_init = {
               # list should contain an executable accepting only parameter file
               # or dict.
               'modules' : [],
-              'processes' : 1
               }
 
 
 def execute(pipe_file_or_dict, feedback=2) :
     """Execute all the modules listed in the input file."""
 
-    # start a flag indicating that this pipeline is running
-    busy_filename = "/tmp/pipeline.%s.%s.busy" % (os.getpid(), getpass.getuser())
-    print "flagging running pipeline with %s" % busy_filename
-    busyfile = open(busy_filename, "w")
-    busyfile.write("%10.15f" % time.time())
-    busyfile.close()
+    if mpiutil.rank0:
+        # start a flag indicating that this pipeline is running
+        busy_filename = "/tmp/pipeline.%s.%s.busy" % (os.getpid(), getpass.getuser())
+        print "flagging running pipeline with %s" % busy_filename
+        busyfile = open(busy_filename, "w")
+        busyfile.write("%10.15f" % time.time())
+        busyfile.close()
 
     params, module_params = parse_ini.parse(pipe_file_or_dict, params_init,
                                        prefix='pipe_',return_undeclared=True,
@@ -54,12 +55,18 @@ def execute(pipe_file_or_dict, feedback=2) :
             mod = module
             pars = module_params
         if feedback > 1 :
-            print 'Excuting analysis module: ' + str(mod)
-        # mod(pars, feedback=feedback).execute(params['processes'])
-        mod(pars, feedback=feedback).execute()
+            if mpiutil.rank0:
+                 print 'Excuting analysis module: ' + str(mod)
 
-    # now remove the run indicator flag
-    os.remove(busy_filename)
+        inst = mod(pars, feedback=feedback)
+        # only active processes execute tasks in module
+        if mpiutil.rank in inst.aprocs:
+            inst.execute()
+            del inst
+
+    if mpiutil.rank0:
+        # now remove the run indicator flag
+        os.remove(busy_filename)
 
 
 parser = argparse.ArgumentParser(description='The pipeline manager.')
@@ -69,10 +76,4 @@ parser.set_defaults(func=execute)
 
 args = parser.parse_args()
 args.func(args.pipfile, args.feedback)
-
-
-# If this file is run from the command line, execute the main function.
-# if __name__ == "__main__":
-#     import sys
-#     execute(str(sys.argv[1]))
 
