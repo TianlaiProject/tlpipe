@@ -58,6 +58,9 @@ def execute(pipe_file_or_dict, feedback=2) :
             if mpiutil.rank0:
                  print 'Excuting analysis module: ' + str(mod)
 
+        # sync here before execute next module
+        mpiutil.barrier()
+
         inst = mod(pars, feedback=feedback)
         # only active processes execute tasks in module
         if mpiutil.rank in inst.aprocs:
