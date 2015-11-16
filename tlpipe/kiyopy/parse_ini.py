@@ -20,6 +20,7 @@ Revision History:
 """
 
 import custom_exceptions as ce
+from tlpipe.utils import mpiutil
 
 def parse(ini_data, params, return_undeclared=False, prefix='',
           feedback=2, type_check=False, checking=-1):
@@ -47,7 +48,7 @@ def parse(ini_data, params, return_undeclared=False, prefix='',
             in the keys of params) when read from the input file or dictionary.
             The prefix is not added to the returned output dictionary.
         feedback: integer 1 to 10, default 2.  Desired feedback level,
-            controling what to pring to the standard out.
+            controlling what to print to the standard out.
         type_check: Boolian default False. Whethar to raise an exception if the
             recived value for a parameter is a different type than the default
             value.
@@ -85,17 +86,20 @@ def parse(ini_data, params, return_undeclared=False, prefix='',
         
     if isinstance(ini_data, str) :
         if feedback > 0 :
-            print 'Reading parameters from file: '+ ini_data
+            if mpiutil.rank0:
+                print 'Reading parameters from file: '+ ini_data
         # Convert local variables defined in python script to dictionary.
         # This is in a separate function to avoid namespace issues.
         dict_to_parse = _execute_parameter_file(ini_data)
     elif isinstance(ini_data, dict) :
         if feedback > 0 :
-            print 'Reading parameters from dictionary.'
+            if mpiutil.rank0:
+                print 'Reading parameters from dictionary.'
         dict_to_parse = ini_data
     elif ini_data is None :
         if feedback > 0 :
-            print 'No input, all parameters defaulted.'
+            if mpiutil.rank0:
+                print 'No input, all parameters defaulted.'
         if return_undeclared :
             return dict(params), {}
         else :
@@ -151,9 +155,10 @@ def parse_dict(dict_to_parse, params, return_undeclared=False, prefix='',
                             "and asked for strict type checking. "
                             "Parameter name: " + key)
                     elif feedback > 1:
-                        print ("Warning: Assigned an input "
-                            "parameter to the value of the wrong type. "
-                            "Parameter name: " + key)
+                        if mpiutil.rank0:
+                            print ("Warning: Assigned an input "
+                                "parameter to the value of the wrong type. "
+                                "Parameter name: " + key)
                 out_params[key] = invalue
                 found_match_flag = True
                 defaulted_params[key]=False
@@ -165,12 +170,15 @@ def parse_dict(dict_to_parse, params, return_undeclared=False, prefix='',
     # Check if parameters have remained a default value and print information
     # about the parameters that were set. Depending on feedback level.
     if feedback > 1 :
-        print "Parameters set."
+        if mpiutil.rank0:
+            print "Parameters set."
         for key, value in out_params.iteritems():
             if defaulted_params[key] :
-                print "parameter: "+key+" defaulted to value: "+str(value)
+                if mpiutil.rank0:
+                    print "parameter: "+key+" defaulted to value: "+str(value)
             elif feedback > 2 :
-                print "parameter: "+key+" obtained value: "+str(value)
+                if mpiutil.rank0:
+                    print "parameter: "+key+" obtained value: "+str(value)
 
     if return_undeclared :
         return out_params, undeclared
