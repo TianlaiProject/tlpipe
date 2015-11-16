@@ -118,6 +118,7 @@ class TLDish_Array(object):
                           antenna_diameter = antenna_diameter)
             self.ants.append(ant)
         self.antenna_array = Antenna_Array(ants=self.ants, location=observer_location)
+        self.antenna_array_mask = np.zeros(antenna_coordinate.shape[0]).astype('bool')
 
     def convert_to_XYZ(self, antenna_coor, observer_location):
 
