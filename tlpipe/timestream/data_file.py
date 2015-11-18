@@ -80,7 +80,8 @@ class DataFile(object):
 
         self.filename = filename
 
-        raw_data = np.fromfile(filename, dtype=np.int32)
+        # raw_data = np.fromfile(filename, dtype=np.int32)
+        raw_data = np.fromfile(filename, dtype='>i4') # note dtype
         dot_bit = params32ch.dot_bit
         block_size = params32ch.block_size
         # int_time = params32ch.int_time
@@ -107,8 +108,10 @@ class DataFile(object):
             raise DataFlagError('Data flat incorrect in file %s' % filename)
 
         # validate count value
-        cnt1 = raw_data[:, 0, 1].newbyteorder()
-        cnt2 = raw_data[:, 1, 1].newbyteorder()
+        # cnt1 = raw_data[:, 0, 1].newbyteorder()
+        # cnt2 = raw_data[:, 1, 1].newbyteorder()
+        cnt1 = raw_data[:, 0, 1]
+        cnt2 = raw_data[:, 1, 1]
         if not ((cnt1 == cnt2).all() and (np.diff(cnt1) == 1).all()):
             raise DataFlagError('Data counter incorrect in file %s' % filename)
 
@@ -141,7 +144,8 @@ class DataFile(object):
             if n_nums[i] == 1:
                 new_data[:, :, i] = raw_data[:, :, n_sums[i]]
             elif n_nums[i] == 2:
-                new_data[:, :, i] = raw_data[:, :, n_sums[i]] + 1.0J * raw_data[:, :, n_sums[i]+1]
+                # new_data[:, :, i] = raw_data[:, :, n_sums[i]] + 1.0J * raw_data[:, :, n_sums[i]+1]
+                new_data[:, :, i] = raw_data[:, :, n_sums[i]+1] + 1.0J * raw_data[:, :, n_sums[i]]
 
         del raw_data
         self.data = new_data / 2**dot_bit # now visibilities
