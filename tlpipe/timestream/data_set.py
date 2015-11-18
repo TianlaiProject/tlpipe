@@ -21,7 +21,7 @@ class DataSet(object):
             f43_data = data_file.DataFile(f43)
             if f43_data.flag != 'f43':
                 raise ValueError('Incorrect data file %s' % f43)
-            if not (f12_data.start_cnt == f43_data.cnt and f12_data.end_cnt == f43_data.cnt):
+            if not (f12_data.start_cnt == f43_data.start_cnt and f12_data.end_cnt == f43_data.end_cnt):
                 raise ValueError('Data file %s and %s do not align'% (f12, f43))
 
             this_start_cnt = f12_data.start_cnt
