@@ -7,6 +7,7 @@ except ImportError:
 
 import os
 import glob
+from time import time
 import itertools as it
 import bisect
 import numpy as np
@@ -33,7 +34,7 @@ params_init = {
                'graph_dir': 'graph', # obsolute path if start with '/', else relative to 'root_dir'
                'output_dir': 'data_hdf5_multibl', # obsolute path if start with '/', else relative to 'root_dir'
                'extra_info': '', # str to add to the output file name
-               'pickle_file': None, # default
+               'pickle_file': 'test.pickle', # obsolute path if start with '/', else file in current dir
                'plot': False,
               }
 prefix = 'cv_'
@@ -145,11 +146,22 @@ class Conversion(object):
         f_axis = np.arange(0, n_f * delta_f, delta_f) + 685
 
 
+        # create the channel pair dict
         bl_dict = {}
         for ind, pair in enumerate(chosen_ch_pairs):
             bl_dict['%d_%d' % pair] = ind
+
+        # generage output file name
+        if self.params['extra_info'] == '':
+            output_name = output_dir + '/' + chosen_fname_str + '_' + self.pdict['sources'][0] + '.hdf5'
+        else:
+            output_name = output_dir + '/' + chosen_fname_str + '_' + self.pdict['sources'][0] + '_' + self.params['extra_info'] + '.hdf5'
+        if os.path.exists(output_name):
+            output_name_old = output_name
+            output_name = output_name.replace('.hdf5', '_%s.hdf5' % time())
+            print 'Warning: File %s exists, save the output file as %s...' % (output_name_old, output_name)
+
         # save data to file
-        output_name = output_dir + '/' + chosen_fname_str + '_' + self.pdict['sources'][0] + '_' + self.params['extra_info'] + '.hdf5'
         with h5py.File(output_name, 'w') as f:
             vis = f.create_dataset('vis', data=vis)
             vis.attrs['start_time'] = str(start_time_ephem)
@@ -167,7 +179,12 @@ class Conversion(object):
     def load_pickle(self):
         """Load in parameters in the pickle file."""
 
-        pdict = pickle.load(open(self.params['pickle_file'], "rb"))
+        if self.params['pickle_file'].startswith('/'):
+            pickle_file = self.params['pickle_file']
+        else:
+            pickle_file = os.getcwd() + '/' + self.params['pickle_file']
+        assert os.path.exists(pickle_file), 'pickle parameter file %s does not exists' % pickle_file
+        pdict = pickle.load(open(pickle_file, "rb"))
         self.pdict = pdict
         self.chans = sorted(remove(None, pdict['xchans'] + pdict['ychans']))
         self.timezone = pdict['timezone']
