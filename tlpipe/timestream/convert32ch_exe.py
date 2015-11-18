@@ -28,7 +28,7 @@ params_init = {
                'start_time': 0,  # second; Assign starting time here
                'stop_time': 3600,  # second; Use -1 to load all of the raw data.
                'root_dir': '/home/data2', # Work directory; including 'data', 'graph', 'tmp' and so on.
-               'data_dir': 'data', #
+               'data_dir': 'data', #obsolute path if start with '/', else relative to 'root_dir'
                'data_time': '20151113001433',
                'graph_dir': 'graph', # obsolute path if start with '/', else relative to 'root_dir'
                'output_dir': 'data_hdf5_multibl', # obsolute path if start with '/', else relative to 'root_dir'
@@ -84,7 +84,10 @@ class Conversion(object):
 
         # set relevant dir
         root_dir = self.params['root_dir']
-        data_dir = root_dir + '/' + self.params['data_dir'] + '/' + self.params['data_time'] + '/'
+        if self.params['data_dir'].startswith('/'):
+            data_dir = self.params['data_dir'] + '/' + self.params['data_time'] + '/'
+        else:
+            data_dir = root_dir + '/' + self.params['data_dir'] + '/' + self.params['data_time'] + '/'
         if self.params['graph_dir'].startswith('/'):
             graph_dir = self.params['graph_dir'] + '/'
         else:
@@ -96,7 +99,9 @@ class Conversion(object):
 
         f12_lists, f43_lists, file_size = self.get_datafile_info(data_dir)
         ncnt_per_file = file_size / (2 * params32ch.block_size) # number of count per file
-        delt_t = int(self.int_time) ### only work for integer integration time
+        ### NOTE: following calculation only work for integer integration time
+        ### NOTE: fix it for none integer integration time
+        delt_t = int(self.int_time)
         start_time = self.params['start_time']
         start_file, start_offset = divmod(start_time, ncnt_per_file * delt_t)
         stop_time = self.params['stop_time']

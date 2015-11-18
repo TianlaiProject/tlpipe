@@ -3,7 +3,10 @@ import numpy as np
 import data_file
 
 class DataSet(object):
-    """Visibility data set."""
+    """Visibility data set.
+
+    Data is saved in self.data of shape (ntime, nfreq, nch_pair), which contains visibilities loaded from a series of data files.
+    """
 
     def __init__(self, f12_file_list, f43_file_list, check_cnt=True):
 

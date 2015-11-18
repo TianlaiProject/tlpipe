@@ -71,7 +71,10 @@ class DataCntError(Exception):
 
 
 class DataFile(object):
-    """Class corresponds to a single data file."""
+    """Class to load a single data file, subtract relevant info from it and convert the data to visibility data set.
+
+    The converted visibility data is saved in self.data, which is a numpy array of shape (ncnt, nfreq, -1).
+    """
 
     def __init__(self, filename):
 
