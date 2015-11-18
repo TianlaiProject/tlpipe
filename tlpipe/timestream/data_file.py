@@ -50,12 +50,12 @@ def F2list():
     return np.concatenate((redlist, orangelist, yellowlist, greenlist))
 
 def F3list():
-    lst = self.F2list.copy()
+    lst = F2list().copy()
     lst[:, 1] += 8
     return lst
 
 def F4list():
-    lst = self.F1list.copy()
+    lst = F1list().copy()
     lst[:, :2] += 16
     return lst
 
@@ -81,7 +81,7 @@ class DataFile(object):
         dot_bit = params32ch.dot_bit
         block_size = params32ch.block_size
         # int_time = params32ch.int_time
-        raw_data = raw_data.reshape(-1, 2, self.block_size/4)
+        raw_data = raw_data.reshape(-1, 2, block_size/4)
 
         self.nfreq = params32ch.nfreq # number of frequencies
         self.ncnt = raw_data.shape[0] # number of count
@@ -133,7 +133,7 @@ class DataFile(object):
         n_nums = np.array([num(ch1, ch2) for (ch1, ch2) in self.ch_pairs])
         assert np.sum(n_nums) == raw_data.shape[-1], 'Incorrect data shape'
         n_sums = np.cumsum(np.insert(n_nums, 0, 0))
-        new_data = np.empty((self.ncnt, self.freq, self.nch_pair), dtype=np.complex64)
+        new_data = np.empty((self.ncnt, self.nfreq, self.nch_pair), dtype=np.complex64)
         for i in range(len(n_nums)):
             if n_nums[i] == 1:
                 new_data[:, :, i] = raw_data[:, :, n_sums[i]]
