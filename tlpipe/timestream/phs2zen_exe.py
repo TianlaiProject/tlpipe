@@ -1,9 +1,9 @@
 """Module to phase data to zenith."""
 
-# try:
-#     import cPickle as pickle
-# except ImportError:
-#     import pickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 
 import os
 import numpy as np
@@ -23,11 +23,11 @@ from tlpipe.utils import mpiutil
 params_init = {
                'nprocs': mpiutil.size, # number of processes to run this module
                'aprocs': range(mpiutil.size), # list of active process rank no.
-               'data_dir': './',  # directory the data in
-               'data_file': 'data.npy',
-               'freq_file': 'data_freq.npy',
-               'time_file': 'data_time.npy',
-               'ants_file': 'data_ants.npy',
+               # 'data_dir': './',  # directory the data in
+               'data_file': './data.npy',
+               'freq_file': './data_freq.npy',
+               'time_file': './data_time.npy',
+               'ants_file': './data_ants.npy',
                'az': 0.0, # degree
                'alt': 90.0, # degree
                'output_dir': './output/', # output directory
@@ -217,7 +217,13 @@ class Phs2zen(object):
         # save data phased to zenith
         if mpiutil.rank0:
             with h5py.File(output_dir + 'data_phs2zen.hdf5', 'w') as f:
-                f.create_dataset('data_phs2zen', data=data_phs2zen)
+                dset = f.create_dataset('data_phs2zen', data=data_phs2zen)
+                dset.attrs['ants'] = ants
+                dset.attrs['ts'] = ts
+                dset.attrs['freq'] = freq
+                dset.attrs['bls'] = pickle.dumps(bls) # save as list
+                dset.attrs['az'] = self.params['az']
+                dset.attrs['alt'] = self.params['alt']
             # save data integrate over time
             with h5py.File(output_dir + 'data_int_time.hdf5', 'w') as f:
-                f.create_dataset('data_int_time ', data=data_int_time)
+                f.create_dataset('data_int_time', data=data_int_time)
