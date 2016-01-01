@@ -94,15 +94,15 @@ def partition_list_mpi(full_list):
     return partition_list_alternate(full_list, rank, size)
 
 
-def mpirange(*args):
+def mpirange(*args, **kargs):
     """An MPI aware version of `range`, each process gets its own sub section.
     """
     full_list = range(*args)
 
-    #if alternate:
-    return partition_list_alternate(full_list, rank, size)
-    #else:
-    #    return np.array_split(full_list, size)[rank]
+    if kargs.get('alt', False):
+        return partition_list_alternate(full_list, rank, size)
+    else:
+        return np.array_split(full_list, size)[rank]
 
 
 def barrier():
