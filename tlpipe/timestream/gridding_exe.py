@@ -67,7 +67,7 @@ def conv_kernal(u, v, sigma, l0=0, m0=0):
 def conv_gauss(arr, rc, cc, sigma, val=1.0, l0=0, m0=0, pix=1, npix=4):
     for r in range(-npix, npix):
         for c in range(-npix, npix):
-            arr[rc+r, cc+c] += conv_kernal(r*pix, c*pix, sigma, l0, m0)
+            arr[rc+r, cc+c] += val * conv_kernal(r*pix, c*pix, sigma, l0, m0)
 
 
 
