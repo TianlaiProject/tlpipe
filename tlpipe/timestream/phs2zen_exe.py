@@ -8,10 +8,9 @@ except ImportError:
 import os
 import numpy as np
 from scipy.optimize import curve_fit
-from scipy.interpolate import UnivariateSpline
-from scipy.linalg import eigh, inv
-import aipy as a
-# import ephem
+# from scipy.interpolate import UnivariateSpline
+# from scipy.linalg import eigh, inv
+# import aipy as a
 import h5py
 
 from tlpipe.kiyopy import parse_ini
@@ -135,6 +134,8 @@ class Phs2zen(object):
 
                 # divide phase
                 data_slice_dphs = data_slice / (data_slice_new / np.abs(data_slice_new))
+                # fill invalid values (divide 0 or something else) by 0.0
+                data_slice_dphs[np.logical_not(np.isfinite(data_slice_dphs))] = 0.0
                 # save data after phas2 to zenith
                 data_phs2zen[:, bl_ind, pol_ind, :] = data_slice_dphs
 
