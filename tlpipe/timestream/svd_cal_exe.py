@@ -9,7 +9,7 @@ import os
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.interpolate import UnivariateSpline
-from scipy.linalg import eigh, inv
+from scipy.linalg import eigh, inv, pinv2, LinAlgError
 import aipy as a
 # import ephem
 import h5py
@@ -127,8 +127,14 @@ class SVDCal(object):
                     # 2x2 gain for this freq
                     Gi = Gmat[2*i:2*(i+1)]
                     Gj = Gmat[2*j:2*(j+1)]
-                    Giinv = inv(Gi)
-                    GjHinv = inv(Gj.T.conj())
+                    try:
+                        Giinv = inv(Gi)
+                    except LinAlgError:
+                        Giinv = pinv2(Gi)
+                    try:
+                        GjHinv = inv(Gj.T.conj())
+                    except LinAlgError:
+                        GjHinv = pinv2(Gj.T.conj())
                     # nt x 2 x 2 visibility after calibrate
                     VijGj = np.dot(Vij, GjHinv)
                     Vij_cal = np.dot(Giinv[np.newaxis, :, :], VijGj)[0].swapaxes(0, 1)
