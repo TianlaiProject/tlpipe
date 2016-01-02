@@ -111,7 +111,8 @@ class Gridding(object):
         nbls = len(bls)
 
 
-        assert self.comm.size <= nt, 'Can not have nprocs (%d) > nt (%d)' % (self.comm.size, nt)
+        if self.comm is not None:
+            assert self.comm.size <= nt, 'Can not have nprocs (%d) > nt (%d)' % (self.comm.size, nt)
 
 
         res = self.params['res']

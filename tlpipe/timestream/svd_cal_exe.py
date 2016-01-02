@@ -76,7 +76,8 @@ class SVDCal(object):
         nbls = len(bls)
 
 
-        assert self.comm.size <= nfreq, 'Can not have nprocs (%d) > nfreq (%d)' % (self.comm.size, nfreq)
+        if self.comm is not None:
+            assert self.comm.size <= nfreq, 'Can not have nprocs (%d) > nfreq (%d)' % (self.comm.size, nfreq)
 
 
         data_cal = np.zeros_like(data_phs2zen) # save data after cal

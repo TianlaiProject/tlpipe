@@ -86,7 +86,8 @@ class Phs2zen(object):
         nbls = len(bls)
 
 
-        assert self.comm.size <= nbls, 'Can not have nprocs (%d) > nbls (%d)' % (self.comm.size, nbls)
+        if self.comm is not None:
+            assert self.comm.size <= nbls, 'Can not have nprocs (%d) > nbls (%d)' % (self.comm.size, nbls)
 
 
         for pol_ind in range(npol):
