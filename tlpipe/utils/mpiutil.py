@@ -105,6 +105,17 @@ def mpirange(*args, **kargs):
         return np.array_split(full_list, size)[rank]
 
 
+def mpilist(lst, alt=False):
+    """A sub list from the input `lst` for this process.
+
+       The sub list is a continuous section of `lst` if `alt` is false,
+       else it consists of alternate elements of `lst`.
+    """
+
+    lst1 = mpirange(len(lst), alt=alt)
+    return [ lst[i] for i in lst1 ]
+
+
 def barrier():
     if size > 1:
         _comm.Barrier()
