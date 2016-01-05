@@ -7,15 +7,16 @@ except ImportError:
 
 import os
 import numpy as np
-from scipy.optimize import curve_fit
-from scipy.interpolate import UnivariateSpline
-from scipy.linalg import eigh, inv
+# from scipy.optimize import curve_fit
+# from scipy.interpolate import UnivariateSpline
+# from scipy.linalg import eigh, inv
 import aipy as a
 # import ephem
 import h5py
 
 from tlpipe.kiyopy import parse_ini
 from tlpipe.utils import mpiutil
+from tlpipe.core import tldishes
 
 
 # Define a dictionary with keys the names of parameters to be read from
@@ -24,7 +25,7 @@ params_init = {
                'nprocs': mpiutil.size, # number of processes to run this module
                'aprocs': range(mpiutil.size), # list of active process rank no.
                # 'data_dir': './',  # directory the data in
-               'data_cal_stokes_file': 'data_cal_stokes.hdf5',
+               'data_file': 'data_cal_stokes.hdf5',
                'output_dir': './output/', # output directory
                'pol': 'I',
                'res': 1.0, # resolution, unit: wavelength
@@ -94,25 +95,24 @@ class Gridding(object):
             if not os.path.exists(output_dir):
                 os.mkdir(output_dir)
 
-        with h5py.File(self.params['data_cal_stokes_file'], 'r') as f:
-            dset = f['data_cal_stokes']
-            data_cal_stokes = dset[...]
+        with h5py.File(self.params['data_file'], 'r') as f:
+            dset = f['data']
+            # data_cal_stokes = dset[...]
             ants = dset.attrs['ants']
-            ts = dset.attrs['ts']
+            ts = f['time'][...]
             freq = dset.attrs['freq']
-            bls = pickle.loads(dset.attrs['bls']) # as list
-            az = dset.attrs['az']
-            alt = dset.attrs['alt']
+            az = np.radians(dset.attrs['az_alt'][0][0])
+            alt = np.radians(dset.attrs['az_alt'][0][1])
 
-        npol = data_cal_stokes.shape[2]
-        nt = len(ts)
-        nfreq = len(freq)
-        nants = len(ants)
-        nbls = len(bls)
+            npol = dset.shape[2]
+            nt = len(ts)
+            nfreq = len(freq)
+            nants = len(ants)
+            bls = [(ants[i], ants[j]) for i in range(nants) for j in range(i, nants)]
+            nbls = len(bls)
 
-
-        if self.comm is not None:
-            assert self.comm.size <= nt, 'Can not have nprocs (%d) > nt (%d)' % (self.comm.size, nt)
+            lt, st, et = mpiutil.split_local(nt)
+            local_data = dset[st:et] # data section used only in this process
 
 
         res = self.params['res']
@@ -127,10 +127,11 @@ class Gridding(object):
 
         src = 'cas'
         cat = 'misc'
-        cal = 'tldishes'
+        # cal = 'tldishes'
         # calibrator
         srclist, cutoff, catalogs = a.scripting.parse_srcs(src, cat)
-        cat = a.cal.get_catalog(cal, srclist, cutoff, catalogs)
+        # cat = a.cal.get_catalog(cal, srclist, cutoff, catalogs)
+        cat = a.src.get_catalog(srclist, cutoff, catalogs)
         assert(len(cat) == 1), 'Allow only one calibrator'
         s = cat.values()[0]
         if mpiutil.rank0:
@@ -144,9 +145,10 @@ class Gridding(object):
         pt_top = a.coord.azalt2top((np.radians(az), np.radians(alt)))
 
         # array
-        aa = a.cal.get_aa(cal, 1.0e-3 * freq) # use GHz
-        for ti in mpiutil.mpirange(nt): # mpi among time
-            t = ts[ti]
+        # aa = a.cal.get_aa(cal, 1.0e-3 * freq) # use GHz
+        aa = tldishes.get_aa(1.0e-3 * freq) # use GHz
+        for ti, t_ind in enumerate(range(st, et)): # mpi among time
+            t = ts[t_ind]
             aa.set_jultime(t)
             s.compute(aa)
             # get the topocentric coordinate of the calibrator at the current time
@@ -165,13 +167,13 @@ class Gridding(object):
             l0 = np.dot(pt_top, uvec)
             m0 = np.dot(pt_top, vvec)
 
-            for bl_ind in range(len(bls)):
+            for bl_ind in range(nbls):
                 i, j = bls[bl_ind]
                 if i == j:
                     continue
                 us, vs, ws = aa.gen_uvw(i-1, j-1, src=s) # NOTE start from 0
                 for fi, (u, v) in enumerate(zip(us.flat, vs.flat)):
-                    val = data_cal_stokes[ti, bl_ind, 0, fi] # only I here
+                    val = local_data[ti, bl_ind, 0, fi] # only I here
                     if np.isfinite(val):
                         up = np.int(u / res)
                         vp = np.int(v / res)
