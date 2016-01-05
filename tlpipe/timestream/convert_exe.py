@@ -80,7 +80,7 @@ class Convert(object):
         #     assert self.comm.size <= nfiles, 'Can not have nprocs (%d) > nfiles (%d)' % (self.comm.size, nfiles)
 
         for data_file in mpiutil.mpilist(data_files):
-            output_file = output_dir + data_file.split('/')[-1].replace('.hdf5', 'conv.hdf5')
+            output_file = output_dir + data_file.split('/')[-1].replace('.hdf5', '_conv.hdf5')
             with h5py.File(data_file, 'r') as fin, h5py.File(output_file, 'w') as fout:
                 vis_dataset = fin['vis']
                 time_zone = get_value(vis_dataset.attrs['timezone'])
