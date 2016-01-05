@@ -246,6 +246,53 @@ def split_local(n, comm=None):
     return pse[:, m]
 
 
+def gather_local(global_array, local_array, local_start, root=0, comm=_comm):
+    """
+    Gather data array in each process to the global array in `root` process.
+
+    Parameters
+    ----------
+    global_array : np.ndarray
+        The global array which will collect data from `local_array` in each process.
+    local_array : np.ndarray
+        The local array in each process to be collected to `global_array`.
+    local_start : N-tuple
+        The starting index of the local array to be placed in `global_array`.
+    root : integer
+        The process local array gathered to.
+    comm : MPI communicator
+        MPI communicator that array is distributed over. Default is MPI.COMM_WORLD.
+
+    """
+
+    local_size = local_array.shape
+
+    if comm is None or comm.size == 1:
+        # only one process
+        slc = [slice(s, s+n) for (s, n) in zip(local_start, local_size)]
+        global_array[slc] = local_array.copy()
+    else:
+        local_sizes = comm.gather(local_size, root=root)
+        local_starts = comm.gather(local_start, root=root)
+        mpi_type = typemap(local_array.dtype)
+
+        # Each process should send its local sections.
+        sreq = comm.Isend([np.ascontiguousarray(local_array), mpi_type], dest=root, tag=0)
+
+        if comm.rank == root:
+            # create newtype corresponding to the local array section in the global array
+            sub_type = [ mpi_type.Create_subarray(global_array.shape, local_sizes[i], local_starts[i]).Commit() for i in range(comm.size) ] # default order=ORDER_C
+            # Post each receive
+            reqs = [ comm.Irecv([global_array, sub_type[sr]], source=sr, tag=0) for sr in range(comm.size) ]
+
+            # Wait for requests to complete
+            MPI.Prequest.Waitall(reqs)
+
+        # Wait on send request. Important, as can get weird synchronisation
+        # bugs otherwise as processes exit before completing their send.
+        sreq.Wait()
+
+
 def transpose_blocks(row_array, shape, comm=None):
     """
     Take a 2D matrix which is split between processes row-wise and split it
