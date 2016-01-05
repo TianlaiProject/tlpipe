@@ -234,15 +234,6 @@ class Phs2zen(object):
             mpiutil.gather_local(data_int_time, local_int_time, (sbl, 0, 0), root=0, comm=self.comm)
 
 
-            # if mpiutil.rank0:
-            #     self.comm.Reduce(mpiutil.IN_PLACE, data_phs2zen, op=mpiutil.SUM, root=0)
-            # else:
-            #     self.comm.Reduce(data_phs2zen, data_phs2zen, op=mpiutil.SUM, root=0)
-            # if mpiutil.rank0:
-            #     self.comm.Reduce(mpiutil.IN_PLACE, data_int_time, op=mpiutil.SUM, root=0)
-            # else:
-            #     self.comm.Reduce(data_int_time, data_int_time, op=mpiutil.SUM, root=0)
-
         # save data phased to zenith
         if mpiutil.rank0:
             with h5py.File(output_dir + 'data_phs2zen.hdf5', 'w') as f:
@@ -253,12 +244,5 @@ class Phs2zen(object):
                 with h5py.File(data_files[0], 'r') as fin:
                     for attrs_name, attrs_value in fin['data'].attrs.iteritems():
                         dset.attrs[attrs_name] = attrs_value
-                # dset.attrs['ants'] = ants
-                # dset.attrs['ts'] = ts
-                # dset.attrs['freq'] = freq
-                # dset.attrs['bls'] = pickle.dumps(bls) # save as list
-                # dset.attrs['az'] = self.params['az']
-                # dset.attrs['alt'] = self.params['alt']
-            # # save data integrate over time
-            # with h5py.File(output_dir + 'data_int_time.hdf5', 'w') as f:
-            #     f.create_dataset('data_int_time', data=data_int_time)
+                # update some attrs
+                dset.attrs['history'] = dset.attrs['history'] + 'Phased data to zenith.\n'
