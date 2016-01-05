@@ -277,20 +277,25 @@ def gather_local(global_array, local_array, local_start, root=0, comm=_comm):
         mpi_type = typemap(local_array.dtype)
 
         # Each process should send its local sections.
-        sreq = comm.Isend([np.ascontiguousarray(local_array), mpi_type], dest=root, tag=0)
+        if np.prod(local_size) > 0:
+            # send only when array is non-empty
+            sreq = comm.Isend([np.ascontiguousarray(local_array), mpi_type], dest=root, tag=0)
 
         if comm.rank == root:
+            # list of processes which have non-empty array
+            nonempty_procs = [ i for i in range(comm.size) if np.prod(local_sizes[i]) > 0 ]
             # create newtype corresponding to the local array section in the global array
-            sub_type = [ mpi_type.Create_subarray(global_array.shape, local_sizes[i], local_starts[i]).Commit() for i in range(comm.size) ] # default order=ORDER_C
+            sub_type = [ mpi_type.Create_subarray(global_array.shape, local_sizes[i], local_starts[i]).Commit() for i in nonempty_procs ] # default order=ORDER_C
             # Post each receive
-            reqs = [ comm.Irecv([global_array, sub_type[sr]], source=sr, tag=0) for sr in range(comm.size) ]
+            reqs = [ comm.Irecv([global_array, sub_type[si]], source=sr, tag=0) for (si, sr) in enumerate(nonempty_procs) ]
 
             # Wait for requests to complete
             MPI.Prequest.Waitall(reqs)
 
         # Wait on send request. Important, as can get weird synchronisation
         # bugs otherwise as processes exit before completing their send.
-        sreq.Wait()
+        if np.prod(local_size) > 0:
+            sreq.Wait()
 
 
 def transpose_blocks(row_array, shape, comm=None):
