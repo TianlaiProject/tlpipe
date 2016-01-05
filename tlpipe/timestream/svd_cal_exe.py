@@ -67,8 +67,8 @@ class SVDCal(object):
             ts = f['time'][...]
             freq = dset.attrs['freq']
             # bls = pickle.loads(dset.attrs['bls']) # as list
-            az = np.radians(dset.attrs['az_alt'][0][0])
-            alt = np.radians(dset.attrs['az_alt'][0][1])
+            # az = np.radians(dset.attrs['az_alt'][0][0])
+            # alt = np.radians(dset.attrs['az_alt'][0][1])
 
             npol = dset.shape[2]
             nt = len(ts)
@@ -194,7 +194,7 @@ class SVDCal(object):
 
             # save stokes data
             with h5py.File(output_dir + 'data_cal_stokes.hdf5', 'w') as f:
-                dset = f.create_dataset('data_cal_stokes', data=data_cal_stokes)
+                dset = f.create_dataset('data', data=data_cal_stokes)
                 # copy metadata from input file
                 with h5py.File(output_file, 'r') as fin:
                     f.create_dataset('time', data=fin['time'])
