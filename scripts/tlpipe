@@ -43,9 +43,10 @@ def execute(pipe_file_or_dict, feedback=2) :
     if not os.path.exists(output_dir):
         if mpiutil.rank0:
             os.mkdir(output_dir)
-    # set environment var
-    if mpiutil.rank0:
-        os.environ['TL_OUTPUT'] = output_dir + '/'
+
+    # sync here and set environment var
+    mpiutil.barrier()
+    os.environ['TL_OUTPUT'] = output_dir + '/'
 
     for module in params['modules'] :
         # Module is either the python object that should be executed, or a
@@ -79,12 +80,15 @@ def execute(pipe_file_or_dict, feedback=2) :
 
         del inst
 
+
+    # remove environment var set earlier
+    del(os.environ['TL_OUTPUT'])
+
     if mpiutil.rank0:
         # now remove the run indicator flag
+        # it may already removed by the os for a long time running pipeline
         if os.path.exists(busy_filename):
             os.remove(busy_filename)
-        # remove setted environment var
-        del(os.environ['TL_OUTPUT'])
         # done for the pipeline
         if feedback > 1:
             print
