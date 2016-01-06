@@ -17,7 +17,9 @@ params_init = {
               # A list of modules that should be executed.  All entries of the
               # list should contain an executable accepting only parameter file
               # or dict.
-              'modules' : [],
+              'modules': [],
+              # output directory of pipeline data, default in current-dir/output/
+              'output_dir': 'output/',
               }
 
 
@@ -35,6 +37,15 @@ def execute(pipe_file_or_dict, feedback=2) :
     params, module_params = parse_ini.parse(pipe_file_or_dict, params_init,
                                        prefix='pipe_',return_undeclared=True,
                                        feedback=feedback)
+
+    # create output directory if it does not already exist
+    output_dir = os.path.abspath(os.path.normpath(os.path.expanduser(params["output_dir"])))
+    if not os.path.exists(output_dir):
+        if mpiutil.rank0:
+            os.mkdir(output_dir)
+    # set environment var
+    if mpiutil.rank0:
+        os.environ['TL_OUTPUT'] = output_dir + '/'
 
     for module in params['modules'] :
         # Module is either the python object that should be executed, or a
@@ -70,7 +81,22 @@ def execute(pipe_file_or_dict, feedback=2) :
 
     if mpiutil.rank0:
         # now remove the run indicator flag
-        os.remove(busy_filename)
+        if os.path.exists(busy_filename):
+            os.remove(busy_filename)
+        # remove setted environment var
+        del(os.environ['TL_OUTPUT'])
+        # done for the pipeline
+        if feedback > 1:
+            print
+            print
+            print "=========================================="
+            print "=                                        ="
+            print "=        DONE FOR THE PIPELINE!!         ="
+            print "=           CONGRATULATIONS!!            ="
+            print "=                                        ="
+            print "=========================================="
+
+
 
 
 parser = argparse.ArgumentParser(description='The pipeline manager.')
