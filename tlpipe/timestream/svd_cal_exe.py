@@ -7,11 +7,7 @@ except ImportError:
 
 import os
 import numpy as np
-# from scipy.optimize import curve_fit
-# from scipy.interpolate import UnivariateSpline
 from scipy.linalg import eigh, inv, pinv2, LinAlgError
-import aipy as a
-# import ephem
 import h5py
 
 from tlpipe.kiyopy import parse_ini
@@ -23,9 +19,7 @@ from tlpipe.utils import mpiutil
 params_init = {
                'nprocs': mpiutil.size, # number of processes to run this module
                'aprocs': range(mpiutil.size), # list of active process rank no.
-               # 'data_dir': './',  # directory the data in
                'data_file': 'data_phs2zen.hdf5',
-               'output_dir': './output/', # output directory
               }
 prefix = 'sc_'
 
@@ -51,12 +45,9 @@ class SVDCal(object):
 
     def execute(self):
 
-        output_dir = self.params['output_dir']
-        if mpiutil.rank0:
-            if not os.path.exists(output_dir):
-                os.mkdir(output_dir)
-
+        output_dir = os.environ['TL_OUTPUT']
         data_file = self.params['data_file']
+
         with h5py.File(data_file, 'r') as f:
             dset = f['data']
             data_shp = dset.shape
@@ -66,9 +57,6 @@ class SVDCal(object):
             ants = dset.attrs['ants']
             ts = f['time'][...]
             freq = dset.attrs['freq']
-            # bls = pickle.loads(dset.attrs['bls']) # as list
-            # az = np.radians(dset.attrs['az_alt'][0][0])
-            # alt = np.radians(dset.attrs['az_alt'][0][1])
 
             npol = dset.shape[2]
             nt = len(ts)
@@ -183,22 +171,4 @@ class SVDCal(object):
                     for attrs_name, attrs_value in fin['data'].attrs.iteritems():
                         dset.attrs[attrs_name] = attrs_value
                 # update some attrs
-                dset.attrs['history'] = dset.attrs['history'] + 'SVD calibration.\n'
-
-            # convert to Stokes I, Q, U, V
-            data_cal_stokes = np.zeros_like(data_cal)
-            data_cal_stokes[:, :, 0, :] = 0.5 * (data_cal[:, :, 0] + data_cal[:, :, 1]) # I
-            data_cal_stokes[:, :, 1, :] = 0.5 * (data_cal[:, :, 0] - data_cal[:, :, 1]) # Q
-            data_cal_stokes[:, :, 2, :] = 0.5 * (data_cal[:, :, 2] + data_cal[:, :, 3]) # U
-            data_cal_stokes[:, :, 3, :] = -0.5J * (data_cal[:, :, 2] - data_cal[:, :, 3]) # V
-
-            # save stokes data
-            with h5py.File(output_dir + 'data_cal_stokes.hdf5', 'w') as f:
-                dset = f.create_dataset('data', data=data_cal_stokes)
-                # copy metadata from input file
-                with h5py.File(output_file, 'r') as fin:
-                    f.create_dataset('time', data=fin['time'])
-                    for attrs_name, attrs_value in fin['data'].attrs.iteritems():
-                        dset.attrs[attrs_name] = attrs_value
-                # update some attrs
-                dset.attrs['history'] = dset.attrs['history'] + 'SVD calibration.\n'
+                dset.attrs['history'] = dset.attrs['history'] + 'SVD calibration with parameters %s.\n' % self.params
