@@ -7,7 +7,7 @@ setup(
     packages = find_packages(),
     requires = ['numpy', 'scipy', 'h5py'],
     package_data = {},
-    scripts = ['scripts/tlpipe'],
+    scripts = ['scripts/tlpipe', 'scripts/h5info'],
 
     # metadata for upload to PyPI
     author = "Shifan Zuo",
