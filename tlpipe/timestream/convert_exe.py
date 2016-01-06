@@ -12,6 +12,8 @@ import ephem
 
 from tlpipe.kiyopy import parse_ini
 from tlpipe.utils import mpiutil
+from tlpipe.utils.pickle_util import get_value
+from tlpipe.utils.date_util import get_ephdate
 
 
 # Define a dictionary with keys the names of parameters to be read from
@@ -19,35 +21,10 @@ from tlpipe.utils import mpiutil
 params_init = {
                'nprocs': mpiutil.size, # number of processes to run this module
                'aprocs': range(mpiutil.size), # list of active process rank no.
-               # 'data_dir': './',  # directory the data in
                'data_files': ['./data.hdf5'],
-               'output_dir': './output/', # output directory
               }
 prefix = 'cv_'
 
-
-def get_value(val):
-    try:
-        val = pickle.loads(val)
-    except:
-        pass
-
-    return val
-
-
-def get_ephdate(local_time, tzone='UTC+08'):
-    """Convert `local_time` to ephem utc date."""
-    local_time = ephem.Date(local_time)
-    tz = int(tzone[3:])
-    utc_time = local_time - tz * ephem.hour
-
-    return utc_time
-
-
-def get_juldate(local_time, tzone='UTC+08'):
-    """Convert `local_time` to Julian date."""
-
-    return ephem.julian_date(get_ephdate(local_time, tzone))
 
 
 class Convert(object):
@@ -68,16 +45,10 @@ class Convert(object):
 
     def execute(self):
 
-        output_dir = self.params['output_dir']
-        if mpiutil.rank0:
-            if not os.path.exists(output_dir):
-                os.mkdir(output_dir)
-
+        output_dir = os.environ['TL_OUTPUT']
         data_files = self.params['data_files']
         nfiles = len(data_files)
         assert nfiles > 0, 'No input data files'
-        # if self.comm is not None:
-        #     assert self.comm.size <= nfiles, 'Can not have nprocs (%d) > nfiles (%d)' % (self.comm.size, nfiles)
 
         for data_file in mpiutil.mpilist(data_files):
             output_file = output_dir + data_file.split('/')[-1].replace('.hdf5', '_conv.hdf5')
@@ -142,5 +113,5 @@ class Convert(object):
                 fout.create_dataset('time', data=time_juldate)
                 data.attrs['axes'] = ['time', 'bls', 'pol', 'freq']
                 data.attrs['pol'] = ['xx', 'yy', 'xy', 'yx']
-                data.attrs['history'] = 'Data conversion from (time, freq, chpairs) to (time, bls, pol, freq).\n'
+                data.attrs['history'] = 'Data conversion from (time, freq, chpairs) to (time, bls, pol, freq) with parameters %s.\n' % self.params
                 del data.attrs['bl_dict']
