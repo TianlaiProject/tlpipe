@@ -9,8 +9,6 @@ import os
 import numpy as np
 from scipy.optimize import curve_fit
 # from scipy.interpolate import UnivariateSpline
-# from scipy.linalg import eigh, inv
-# import aipy as a
 import h5py
 
 from tlpipe.kiyopy import parse_ini
@@ -22,9 +20,7 @@ from tlpipe.utils import mpiutil
 params_init = {
                'nprocs': mpiutil.size, # number of processes to run this module
                'aprocs': range(mpiutil.size), # list of active process rank no.
-               # 'data_dir': './',  # directory the data in
                'data_files': ['./data.hdf5'],
-               'output_dir': './output/', # output directory
               }
 prefix = 'ph_'
 
@@ -53,11 +49,7 @@ class Phs2zen(object):
 
     def execute(self):
 
-        output_dir = self.params['output_dir']
-        if mpiutil.rank0:
-            if not os.path.exists(output_dir):
-                os.mkdir(output_dir)
-
+        output_dir = os.environ['TL_OUTPUT']
         data_files = self.params['data_files']
         nfiles = len(data_files)
         assert nfiles > 0, 'No input data files'
@@ -83,11 +75,6 @@ class Phs2zen(object):
         nants = len(ants)
         bls = [(ants[i], ants[j]) for i in range(nants) for j in range(i, nants)]
         nbls = len(bls)
-
-
-        # if self.comm is not None:
-        #     assert self.comm.size <= nbls, 'Can not have nprocs (%d) > nbls (%d)' % (self.comm.size, nbls)
-
 
         lbls, sbl, ebl = mpiutil.split_local(nbls)
         local_bls = range(sbl, ebl)
@@ -245,4 +232,4 @@ class Phs2zen(object):
                     for attrs_name, attrs_value in fin['data'].attrs.iteritems():
                         dset.attrs[attrs_name] = attrs_value
                 # update some attrs
-                dset.attrs['history'] = dset.attrs['history'] + 'Phased data to zenith.\n'
+                dset.attrs['history'] = dset.attrs['history'] + 'Phased data to zenith with parameters %s.\n' % self.params
