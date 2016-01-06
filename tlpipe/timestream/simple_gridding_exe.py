@@ -20,9 +20,7 @@ from tlpipe.core import tldishes
 params_init = {
                'nprocs': mpiutil.size, # number of processes to run this module
                'aprocs': range(mpiutil.size), # list of active process rank no.
-               # 'data_dir': './',  # directory the data in
                'data_file': 'data_cal_stokes.hdf5',
-               'output_dir': './output/', # output directory
                'pol': 'I',
                'res': 1.0, # resolution, unit: wavelength
                'max_wl': 200.0, # max wavelength
@@ -35,7 +33,7 @@ pol_dict = {'I': 0, 'Q': 1, 'U': 2, 'V': 3}
 
 
 class Gridding(object):
-    """Gridding."""
+    """Simple gridding without Gauss convolution."""
 
     def __init__(self, parameter_file_or_dict=None, feedback=2):
 
@@ -52,12 +50,10 @@ class Gridding(object):
 
     def execute(self):
 
-        output_dir = self.params['output_dir']
-        if mpiutil.rank0:
-            if not os.path.exists(output_dir):
-                os.mkdir(output_dir)
+        output_dir = os.environ['TL_OUTPUT']
+        data_file = self.params['data_file']
 
-        with h5py.File(self.params['data_file'], 'r') as f:
+        with h5py.File(data_file, 'r') as f:
             dset = f['data']
             # data_cal_stokes = dset[...]
             ants = dset.attrs['ants']
@@ -145,7 +141,7 @@ class Gridding(object):
             uv_imag_fft = np.fft.ifftshift(uv_imag_fft)
 
             # save data
-            with h5py.File(output_dir + 'uv_imag.hdf5', 'w') as f:
+            with h5py.File(output_dir + 'uv_imag_noconv.hdf5', 'w') as f:
                 f.create_dataset('uv_cov', data=uv_cov)
                 f.create_dataset('uv', data=uv)
                 f.create_dataset('uv_cov_fft', data=uv_cov_fft)
