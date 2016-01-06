@@ -1,4 +1,4 @@
-"""Module to gridding visibilites to uv plane."""
+"""Module to gridding visibilities to uv plane."""
 
 try:
     import cPickle as pickle
@@ -108,7 +108,7 @@ class Gridding(object):
             nt = len(ts)
             nfreq = len(freq)
             nants = len(ants)
-            bls = [(ants[i], ants[j]) for i in range(nants) for j in range(i, nants)]
+            bls = [(ants[i], ants[j]) for i in range(nants) for j in range(i, nants)] # start from 1
             nbls = len(bls)
 
             lt, st, et = mpiutil.split_local(nt)
