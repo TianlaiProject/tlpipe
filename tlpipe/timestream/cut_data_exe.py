@@ -19,7 +19,7 @@ params_init = {
                'aprocs': range(mpiutil.size), # list of active process rank no.
                'input_file': 'data.hdf5', # abs path if start with /, else relative to os.environ['TL_OUTPUT']
                'span': 5 * 60, # second, before and after transit time
-               'output_files': ['cut_before_transit.hdf5', 'cut_after_transit.hdf5'],
+               'output_file': ['cut_before_transit.hdf5', 'cut_after_transit.hdf5'],
               }
 prefix = 'cut_'
 
@@ -43,7 +43,7 @@ class Cut(object):
     def execute(self):
 
         input_file = input_path(self.params['input_file'])
-        output_files = output_path(self.params['output_files'])
+        output_file = output_path(self.params['output_file'])
         span = self.params['span']
 
         if mpiutil.rank0:
@@ -80,7 +80,7 @@ class Cut(object):
                 print 'transit_ind:', transit_ind
                 vis_before_transit = dset[transit_ind-int(span * int_time):transit_ind]
                 vis_after_transit = dset[transit_ind:transit_ind+int(span * int_time)]
-                with h5py.File(output_files[0], 'w') as fb:
+                with h5py.File(output_file[0], 'w') as fb:
                     db = fb.create_dataset('vis', data=vis_before_transit)
                     # copy metadata from input file
                     for attrs_name, attrs_value in dset.attrs.iteritems():
@@ -89,7 +89,7 @@ class Cut(object):
                     db.attrs['start_time'] = new_start_time
                     db.attrs['end_time'] = transit_time_lst[0]
 
-                with h5py.File(output_files[1], 'w') as fb:
+                with h5py.File(output_file[1], 'w') as fb:
                     db = fb.create_dataset('vis', data=vis_after_transit)
                     # copy metadata from input file
                     for attrs_name, attrs_value in dset.attrs.iteritems():
