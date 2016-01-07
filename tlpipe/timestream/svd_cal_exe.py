@@ -12,6 +12,7 @@ import h5py
 
 from tlpipe.kiyopy import parse_ini
 from tlpipe.utils import mpiutil
+from tlpipe.utils.path_util import input_path, output_path
 
 
 # Define a dictionary with keys the names of parameters to be read from
@@ -19,7 +20,10 @@ from tlpipe.utils import mpiutil
 params_init = {
                'nprocs': mpiutil.size, # number of processes to run this module
                'aprocs': range(mpiutil.size), # list of active process rank no.
-               'data_file': 'data_phs2zen.hdf5',
+               'input_file': 'data_phs2zen.hdf5',
+               'output_file': 'data_cal.hdf5',
+               'eigval_file': 'eigval.hdf5',
+               'gain_file': 'gain.hdf5',
               }
 prefix = 'sc_'
 
@@ -45,10 +49,12 @@ class SVDCal(object):
 
     def execute(self):
 
-        output_dir = os.environ['TL_OUTPUT']
-        data_file = self.params['data_file']
+        input_file = input_path(self.params['input_file'])
+        output_file = output_path(self.params['output_file'])
+        eigval_file = output_path(self.params['eigval_file'])
+        gain_file = output_path(self.params['gain_file'])
 
-        with h5py.File(data_file, 'r') as f:
+        with h5py.File(input_file, 'r') as f:
             dset = f['data']
             data_shp = dset.shape
             data_type = dset.dtype
@@ -154,19 +160,18 @@ class SVDCal(object):
         # save data after cal
         if mpiutil.rank0:
             # save eigval
-            with h5py.File(output_dir + 'eigval.hdf5', 'w') as f:
+            with h5py.File(eigval_file, 'w') as f:
                 dset = f.create_dataset('eigval', data=eigval)
                 dset.attrs['ants'] = ants
             # save eigval
-            with h5py.File(output_dir + 'gain.hdf5', 'w') as f:
+            with h5py.File(gain_file, 'w') as f:
                 dset = f.create_dataset('gain', data=gain)
                 dset.attrs['ants'] = ants
 
-            output_file = output_dir + 'data_cal.hdf5'
             with h5py.File(output_file, 'w') as f:
                 dset = f.create_dataset('data', data=data_cal)
                 # copy metadata from input file
-                with h5py.File(data_file, 'r') as fin:
+                with h5py.File(input_file, 'r') as fin:
                     f.create_dataset('time', data=fin['time'])
                     for attrs_name, attrs_value in fin['data'].attrs.iteritems():
                         dset.attrs[attrs_name] = attrs_value
