@@ -54,8 +54,6 @@ class Cut(object):
                 print 'start_time:', start_time
                 end_time = get_value(dset.attrs['end_time'])
                 print 'end_time:', end_time
-                # start_obs_time_lst = get_value(dset.attrs['start_obs_time'])
-                # end_obs_time_lst = get_value(dset.attrs['end_obs_time'])
                 transit_time_lst = get_value(dset.attrs['transit_time'])
                 print 'transit_time:', transit_time_lst[0]
                 int_time = get_value(dset.attrs['int_time'])
@@ -64,15 +62,13 @@ class Cut(object):
                 start_time = get_ephdate(start_time, time_zone) # utc
                 end_time = get_ephdate(end_time, time_zone) # utc
                 transit_time = get_ephdate(transit_time_lst[0], time_zone) # utc
+                new_start_utc_time = transit_time - span * ephem.second
+                new_end_utc_time = transit_time + span * ephem.second
                 tz = int(time_zone[3:])
-                new_start_time = str(ephem.Date(transit_time + tz * ephem.hour - span * ephem.second))
+                new_start_time = str(ephem.Date(new_start_utc_time + tz * ephem.hour))
                 print 'new_start_time:', new_start_time
-                new_end_time = str(ephem.Date(transit_time + tz * ephem.hour + span * ephem.second))
+                new_end_time = str(ephem.Date(new_end_utc_time + tz * ephem.hour))
                 print 'new_end_time:', new_end_time
-                # new_start_obs_time_lst = [str(ephem.Date(get_ephdate(st, time_zone) + tz * ephem.hour - span * ephem.second)) for st in start_obs_time_lst]
-                # print new_start_obs_time_lst
-                # new_end_obs_time_lst = [str(ephem.Date(get_ephdate(et, time_zone) + tz * ephem.hour + span * ephem.second)) for et in end_obs_time_lst]
-                # print new_end_obs_time_lst
 
                 # cut data
                 eph_time = np.arange(start_time, end_time, int_time * ephem.second)
