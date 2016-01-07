@@ -59,8 +59,8 @@ class Gridding(object):
             ants = dset.attrs['ants']
             ts = f['time'][...]
             freq = dset.attrs['freq']
-            az = np.radians(dset.attrs['az_alt'][0][0])
-            alt = np.radians(dset.attrs['az_alt'][0][1])
+            # az = np.radians(dset.attrs['az_alt'][0][0])
+            # alt = np.radians(dset.attrs['az_alt'][0][1])
 
             npol = dset.shape[2]
             nt = len(ts)
