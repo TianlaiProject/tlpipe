@@ -9,6 +9,7 @@ from tlpipe.kiyopy import parse_ini
 from tlpipe.utils import mpiutil
 from tlpipe.utils.pickle_util import get_value
 from tlpipe.utils.date_util import get_ephdate
+from tlpipe.utils.path_util import input_path, output_path
 
 
 # Define a dictionary with keys the names of parameters to be read from
@@ -16,8 +17,9 @@ from tlpipe.utils.date_util import get_ephdate
 params_init = {
                'nprocs': mpiutil.size, # number of processes to run this module
                'aprocs': range(mpiutil.size), # list of active process rank no.
-               'data_file': './data.hdf5',
+               'input_file': 'data.hdf5', # abs path if start with /, else relative to os.environ['TL_OUTPUT']
                'span': 5 * 60, # second, before and after transit time
+               'output_files': ['cut_before_transit.hdf5', 'cut_after_transit.hdf5'],
               }
 prefix = 'cut_'
 
@@ -40,11 +42,12 @@ class Cut(object):
 
     def execute(self):
 
-        output_dir = os.environ['TL_OUTPUT']
+        input_file = input_path(self.params['input_file'])
+        output_files = output_path(self.params['output_files'])
         span = self.params['span']
 
         if mpiutil.rank0:
-            with h5py.File(self.params['data_file'], 'r') as f:
+            with h5py.File(input_file, 'r') as f:
 
                 dset = f['vis']
                 start_time = get_value(dset.attrs['start_time'])
@@ -77,7 +80,7 @@ class Cut(object):
                 print 'transit_ind:', transit_ind
                 vis_before_transit = dset[transit_ind-int(span * int_time):transit_ind]
                 vis_after_transit = dset[transit_ind:transit_ind+int(span * int_time)]
-                with h5py.File(output_dir + 'test_before_transit.hdf5', 'w') as fb:
+                with h5py.File(output_files[0], 'w') as fb:
                     db = fb.create_dataset('vis', data=vis_before_transit)
                     # copy metadata from input file
                     for attrs_name, attrs_value in dset.attrs.iteritems():
@@ -86,7 +89,7 @@ class Cut(object):
                     db.attrs['start_time'] = new_start_time
                     db.attrs['end_time'] = transit_time_lst[0]
 
-                with h5py.File(output_dir + 'test_after_transit.hdf5', 'w') as fb:
+                with h5py.File(output_files[1], 'w') as fb:
                     db = fb.create_dataset('vis', data=vis_after_transit)
                     # copy metadata from input file
                     for attrs_name, attrs_value in dset.attrs.iteritems():
