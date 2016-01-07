@@ -67,10 +67,12 @@ def get_uvvec(s0_top, n_top):
 def conv_kernal(u, v, sigma, l0=0, m0=0):
     return np.exp(-2.0J * np.pi * (u * l0 + v * m0)) * np.exp(-0.5 * (2 * np.pi * sigma)**2 * (u**2 + v**2))
 
-def conv_gauss(arr, rc, cc, sigma, val=1.0, l0=0, m0=0, pix=1, npix=4):
-    for r in range(-npix, npix):
-        for c in range(-npix, npix):
-            arr[rc+r, cc+c] += val * conv_kernal(r*pix, c*pix, sigma, l0, m0)
+def conv_gauss(arr, c, vp, up, sigma, val=1.0, l0=0, m0=0, pix=1, npix=4):
+    for ri in range(-npix, npix):
+        for ci in range(-npix, npix):
+            tmp = val * conv_kernal(ri*pix, ci*pix, sigma, l0, m0)
+            arr[c+(vp+ri), c+(up+ci)] += tmp
+            arr[c-(vp+ri), c-(up+ci)] += np.conj(tmp) # append conjugate
 
 
 
@@ -140,7 +142,7 @@ class Gridding(object):
 
 
         # pointting vector in topocentric coord
-        pt_top = a.coord.azalt2top((np.radians(az), np.radians(alt)))
+        pt_top = a.coord.azalt2top((az, alt))
 
         # array
         aa = tldishes.get_aa(1.0e-3 * freq) # use GHz
@@ -178,10 +180,8 @@ class Gridding(object):
                         # uv_cov[center-vp, center-up] += 1.0 # append conjugate
                         # uv[center+vp, center+up] += val
                         # uv[center-vp, center-up] += np.conj(val)# append conjugate
-                        conv_gauss(uv_cov, center+vp, center+up, sigma, 1.0, l0, m0, res)
-                        conv_gauss(uv_cov, center-vp, center-up, sigma, 1.0, l0, m0, res) # append conjugate
-                        conv_gauss(uv, center+vp, center+up, sigma, val, l0, m0, res)
-                        conv_gauss(uv, center-vp, center-up, sigma, np.conj(val), l0, m0, res) # append conjugate
+                        conv_gauss(uv_cov, center, vp, up, sigma, 1.0, l0, m0, res)
+                        conv_gauss(uv, center, vp, up, sigma, val, l0, m0, res)
 
 
         # Reduce data in separate processes
