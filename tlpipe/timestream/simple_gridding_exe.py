@@ -13,6 +13,7 @@ import h5py
 from tlpipe.kiyopy import parse_ini
 from tlpipe.utils import mpiutil
 from tlpipe.core import tldishes
+from tlpipe.utils.path_util import input_path, output_path
 
 
 # Define a dictionary with keys the names of parameters to be read from
@@ -20,7 +21,8 @@ from tlpipe.core import tldishes
 params_init = {
                'nprocs': mpiutil.size, # number of processes to run this module
                'aprocs': range(mpiutil.size), # list of active process rank no.
-               'data_file': 'data_cal_stokes.hdf5',
+               'input_file': 'data_cal_stokes.hdf5',
+               'output_file': 'uv_imag_noconv.hdf5',
                'pol': 'I',
                'res': 1.0, # resolution, unit: wavelength
                'max_wl': 200.0, # max wavelength
@@ -50,10 +52,10 @@ class Gridding(object):
 
     def execute(self):
 
-        output_dir = os.environ['TL_OUTPUT']
-        data_file = self.params['data_file']
+        input_file = input_path(self.params['input_file'])
+        output_file = output_path(self.params['output_file'])
 
-        with h5py.File(data_file, 'r') as f:
+        with h5py.File(input_file, 'r') as f:
             dset = f['data']
             # data_cal_stokes = dset[...]
             ants = dset.attrs['ants']
@@ -141,7 +143,7 @@ class Gridding(object):
             uv_imag_fft = np.fft.ifftshift(uv_imag_fft)
 
             # save data
-            with h5py.File(output_dir + 'uv_imag_noconv.hdf5', 'w') as f:
+            with h5py.File(output_file, 'w') as f:
                 f.create_dataset('uv_cov', data=uv_cov)
                 f.create_dataset('uv', data=uv)
                 f.create_dataset('uv_cov_fft', data=uv_cov_fft)
