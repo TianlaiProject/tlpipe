@@ -14,6 +14,7 @@ from tlpipe.kiyopy import parse_ini
 from tlpipe.utils import mpiutil
 from tlpipe.utils.pickle_util import get_value
 from tlpipe.utils.date_util import get_ephdate
+from tlpipe.utils.path_util import input_path, output_path
 
 
 # Define a dictionary with keys the names of parameters to be read from
@@ -21,7 +22,8 @@ from tlpipe.utils.date_util import get_ephdate
 params_init = {
                'nprocs': mpiutil.size, # number of processes to run this module
                'aprocs': range(mpiutil.size), # list of active process rank no.
-               'data_files': ['./data.hdf5'],
+               'input_file': ['cut_before_transit.hdf5', 'cut_after_transit.hdf5'],
+               'output_file': ['cut_before_transit_conv.hdf5', 'cut_after_transit_conv.hdf5'],
               }
 prefix = 'cv_'
 
@@ -45,14 +47,14 @@ class Convert(object):
 
     def execute(self):
 
-        output_dir = os.environ['TL_OUTPUT']
-        data_files = self.params['data_files']
-        nfiles = len(data_files)
-        assert nfiles > 0, 'No input data files'
+        input_file = input_path(self.params['input_file'])
+        output_file = output_path(self.params['output_file'])
 
-        for data_file in mpiutil.mpilist(data_files):
-            output_file = output_dir + data_file.split('/')[-1].replace('.hdf5', '_conv.hdf5')
-            with h5py.File(data_file, 'r') as fin, h5py.File(output_file, 'w') as fout:
+        nfiles = len(input_file)
+        assert nfiles > 0, 'No input data file'
+
+        for infile, outfile in zip(mpiutil.mpilist(input_file), mpiutil.mpilist(output_file)):
+            with h5py.File(infile, 'r') as fin, h5py.File(outfile, 'w') as fout:
                 vis_dataset = fin['vis']
                 time_zone = get_value(vis_dataset.attrs['timezone'])
                 start_time = get_value(vis_dataset.attrs['start_time'])
