@@ -13,6 +13,7 @@ import h5py
 
 from tlpipe.kiyopy import parse_ini
 from tlpipe.utils import mpiutil
+from tlpipe.utils.path_util import input_path, output_path
 
 
 # Define a dictionary with keys the names of parameters to be read from
@@ -20,7 +21,8 @@ from tlpipe.utils import mpiutil
 params_init = {
                'nprocs': mpiutil.size, # number of processes to run this module
                'aprocs': range(mpiutil.size), # list of active process rank no.
-               'data_files': ['./data.hdf5'],
+               'input_file': ['cut_before_transit_conv.hdf5', 'cut_after_transit_conv.hdf5'],
+               'output_file': 'data_phs2zen.hdf5',
               }
 prefix = 'ph_'
 
@@ -49,13 +51,14 @@ class Phs2zen(object):
 
     def execute(self):
 
-        output_dir = os.environ['TL_OUTPUT']
-        data_files = self.params['data_files']
-        nfiles = len(data_files)
-        assert nfiles > 0, 'No input data files'
+        input_file = input_path(self.params['input_file'])
+        output_file = output_path(self.params['output_file'])
+
+        nfiles = len(input_file)
+        assert nfiles > 0, 'No input data file'
 
         # read in ants, freq, time info from data files
-        with h5py.File(data_files[0], 'r') as f:
+        with h5py.File(input_file[0], 'r') as f:
             dataset = f['data']
             data_shp = dataset.shape
             data_type = dataset.dtype
@@ -81,7 +84,7 @@ class Phs2zen(object):
         # local data section corresponding to local bls
         local_data = np.array([], dtype=data_type).reshape((0, lbls, npol, nfreq))
         ts = np.array([], dtype=np.float64)
-        for ind, data_file in enumerate(data_files):
+        for ind, data_file in enumerate(input_file):
             with h5py.File(data_file, 'r') as f:
                 local_data = np.concatenate((local_data, f['data'][:, sbl:ebl, :, :]), axis=0)
                 ts = np.concatenate((ts, f['time'][...])) # Julian date
@@ -195,7 +198,7 @@ class Phs2zen(object):
                 local_int_time[bi, pol_ind, :] = data_slice_int_time
 
                 # save data to file
-                filename = output_dir + 'data_slice_%d_%d_%s.hdf5' % (bls[bl_ind][0], bls[bl_ind][1], pol_dict[pol_ind])
+                filename = output_path('data_slice_%d_%d_%s.hdf5' % (bls[bl_ind][0], bls[bl_ind][1], pol_dict[pol_ind]))
                 with h5py.File(filename, 'w') as f:
                     f.create_dataset('data_slice', data=data_slice)
                     f.create_dataset('data_slice_fft_freq', data=data_slice_fft_freq)
@@ -223,12 +226,12 @@ class Phs2zen(object):
 
         # save data phased to zenith
         if mpiutil.rank0:
-            with h5py.File(output_dir + 'data_phs2zen.hdf5', 'w') as f:
+            with h5py.File(output_file, 'w') as f:
                 f.create_dataset('time', data=ts)
                 f.create_dataset('data_int_time', data=data_int_time)
                 dset = f.create_dataset('data', data=data_phs2zen)
                 # copy metadata from input file
-                with h5py.File(data_files[0], 'r') as fin:
+                with h5py.File(input_file[0], 'r') as fin:
                     for attrs_name, attrs_value in fin['data'].attrs.iteritems():
                         dset.attrs[attrs_name] = attrs_value
                 # update some attrs
