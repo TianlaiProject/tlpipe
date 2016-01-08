@@ -6,6 +6,7 @@ except ImportError:
     import pickle
 
 import os
+from time import sleep
 import numpy as np
 from scipy.optimize import curve_fit
 # from scipy.interpolate import UnivariateSpline
@@ -58,6 +59,10 @@ class Phs2zen(object):
         assert nfiles > 0, 'No input data file'
 
         # read in ants, freq, time info from data files
+        cnt = 1
+        while(cnt < 6 and not os.path.exists(input_file[0])):
+            sleep(cnt)
+            cnt +=1
         with h5py.File(input_file[0], 'r') as f:
             dataset = f['data']
             data_shp = dataset.shape
