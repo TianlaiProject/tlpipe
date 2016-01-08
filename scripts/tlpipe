@@ -68,7 +68,7 @@ def execute(pipe_file_or_dict, feedback=2) :
             pars = module_params
         if feedback > 1 :
             if mpiutil.rank0:
-                 print 'Excuting analysis module: ' + str(mod)
+                 print '\nExcuting analysis module: ' + str(mod)
 
         # sync here before execute next module
         mpiutil.barrier()
