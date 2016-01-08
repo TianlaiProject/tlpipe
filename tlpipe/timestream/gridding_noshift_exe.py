@@ -10,8 +10,8 @@ import numpy as np
 import aipy as a
 import h5py
 
-from tlpipe.kiyopy import parse_ini
 from tlpipe.utils import mpiutil
+from tlpipe.core.base_exe import Base
 from tlpipe.core import tldishes
 from tlpipe.utils.path_util import input_path, output_path
 
@@ -48,31 +48,12 @@ def conv_gauss(arr, c, vp, up, sigma, val=1.0, pix=1, npix=4):
 
 
 
-class Gridding(object):
+class Gridding(Base):
     """Gridding with no shift term in the convolution kernel."""
 
     def __init__(self, parameter_file_or_dict=None, feedback=2):
 
-        # Read in the parameters.
-        self.params = parse_ini.parse(parameter_file_or_dict, params_init,
-                                 prefix=prefix, feedback=feedback)
-        self.feedback = feedback
-        nprocs = min(self.params['nprocs'], mpiutil.size)
-        procs = set(range(mpiutil.size))
-        aprocs = set(self.params['aprocs']) & procs
-        self.aprocs = (list(aprocs) + list(set(range(nprocs)) - aprocs))[:nprocs]
-        assert 0 in self.aprocs, 'Process 0 must be active'
-        self.comm = mpiutil.active_comm(self.aprocs) # communicator consists of active processes
-
-    @property
-    def history(self):
-        """History that will be added to the output file."""
-
-        hist = 'Execute %s.%s with %s.\n' % (__name__, self.__class__.__name__, self.params)
-        if self.params['extra_history'] != '':
-            hist = self.params['extra_history'] + ' ' + hist
-
-        return hist
+        super(Gridding, self).__init__(parameter_file_or_dict, params_init, prefix, feedback)
 
     def execute(self):
 

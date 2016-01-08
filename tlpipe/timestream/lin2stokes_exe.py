@@ -9,8 +9,8 @@ import os
 import numpy as np
 import h5py
 
-from tlpipe.kiyopy import parse_ini
 from tlpipe.utils import mpiutil
+from tlpipe.core.base_exe import Base
 from tlpipe.utils.path_util import input_path, output_path
 
 
@@ -29,31 +29,12 @@ prefix = 'st_'
 pol_dict = {'I': 0, 'Q': 1, 'U': 2, 'V': 3}
 
 
-class Lin2stokes(object):
+class Lin2stokes(Base):
     """Linear to Stokes conversion."""
 
     def __init__(self, parameter_file_or_dict=None, feedback=2):
 
-        # Read in the parameters.
-        self.params = parse_ini.parse(parameter_file_or_dict, params_init,
-                                 prefix=prefix, feedback=feedback)
-        self.feedback = feedback
-        nprocs = min(self.params['nprocs'], mpiutil.size)
-        procs = set(range(mpiutil.size))
-        aprocs = set(self.params['aprocs']) & procs
-        self.aprocs = (list(aprocs) + list(set(range(nprocs)) - aprocs))[:nprocs]
-        assert 0 in self.aprocs, 'Process 0 must be active'
-        self.comm = mpiutil.active_comm(self.aprocs) # communicator consists of active processes
-
-    @property
-    def history(self):
-        """History that will be added to the output file."""
-
-        hist = 'Execute %s.%s with %s.\n' % (__name__, self.__class__.__name__, self.params)
-        if self.params['extra_history'] != '':
-            hist = self.params['extra_history'] + ' ' + hist
-
-        return hist
+        super(Lin2stokes, self).__init__(parameter_file_or_dict, params_init, prefix, feedback)
 
     def execute(self):
 
