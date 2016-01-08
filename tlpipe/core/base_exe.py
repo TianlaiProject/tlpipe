@@ -41,7 +41,7 @@ class Base(object):
         """History that will be added to the output file."""
 
         hist = 'Execute %s.%s with %s.\n' % (__name__, self.__class__.__name__, self.params)
-        if self.params['extra_history'] != '':
+        if self.params.get('extra_history', '') != '':
             hist = self.params['extra_history'] + ' ' + hist
 
         return hist
