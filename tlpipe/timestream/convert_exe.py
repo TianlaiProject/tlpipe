@@ -24,7 +24,8 @@ params_init = {
                'aprocs': range(mpiutil.size), # list of active process rank no.
                'input_file': ['cut_before_transit.hdf5', 'cut_after_transit.hdf5'],
                'output_file': ['cut_before_transit_conv.hdf5', 'cut_after_transit_conv.hdf5'],
-               'exclude_ant': [15], # a list of ants to exclude
+               'exclude_ant': [], # a list of ants to exclude
+               'extra_history': '',
               }
 prefix = 'cv_'
 
@@ -45,6 +46,16 @@ class Convert(object):
         self.aprocs = (list(aprocs) + list(set(range(nprocs)) - aprocs))[:nprocs]
         assert 0 in self.aprocs, 'Process 0 must be active'
         self.comm = mpiutil.active_comm(self.aprocs) # communicator consists of active processes
+
+    @property
+    def history(self):
+        """History that will be added to the output file."""
+
+        hist = 'Execute %s.%s with %s.\n' % (__name__, self.__class__.__name__, self.params)
+        if self.params['extra_history'] != '':
+            hist = self.params['extra_history'] + ' ' + hist
+
+        return hist
 
     def execute(self):
 
@@ -123,5 +134,5 @@ class Convert(object):
                 fout.create_dataset('time', data=time_juldate)
                 data.attrs['axes'] = ['time', 'bls', 'pol', 'freq']
                 data.attrs['pol'] = ['xx', 'yy', 'xy', 'yx']
-                data.attrs['history'] = 'Data conversion from (time, freq, chpairs) to (time, bls, pol, freq) with parameters %s.\n' % self.params
+                data.attrs['history'] = self.history
                 del data.attrs['bl_dict']

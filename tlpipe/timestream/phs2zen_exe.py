@@ -24,6 +24,7 @@ params_init = {
                'aprocs': range(mpiutil.size), # list of active process rank no.
                'input_file': ['cut_before_transit_conv.hdf5', 'cut_after_transit_conv.hdf5'],
                'output_file': 'data_phs2zen.hdf5',
+               'extra_history': '',
               }
 prefix = 'ph_'
 
@@ -49,6 +50,16 @@ class Phs2zen(object):
         self.aprocs = (list(aprocs) + list(set(range(nprocs)) - aprocs))[:nprocs]
         assert 0 in self.aprocs, 'Process 0 must be active'
         self.comm = mpiutil.active_comm(self.aprocs) # communicator consists of active processes
+
+    @property
+    def history(self):
+        """History that will be added to the output file."""
+
+        hist = 'Execute %s.%s with %s.\n' % (__name__, self.__class__.__name__, self.params)
+        if self.params['extra_history'] != '':
+            hist = self.params['extra_history'] + ' ' + hist
+
+        return hist
 
     def execute(self):
 
@@ -240,4 +251,4 @@ class Phs2zen(object):
                     for attrs_name, attrs_value in fin['data'].attrs.iteritems():
                         dset.attrs[attrs_name] = attrs_value
                 # update some attrs
-                dset.attrs['history'] = dset.attrs['history'] + 'Phased data to zenith with parameters %s.\n' % self.params
+                dset.attrs['history'] = dset.attrs['history'] + self.history

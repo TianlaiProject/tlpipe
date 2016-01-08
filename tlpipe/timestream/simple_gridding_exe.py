@@ -28,6 +28,7 @@ params_init = {
                'res': 1.0, # resolution, unit: wavelength
                'max_wl': 200.0, # max wavelength
                'sigma': 0.07,
+               'extra_history': '',
               }
 prefix = 'sgr_'
 
@@ -50,6 +51,16 @@ class Gridding(object):
         self.aprocs = (list(aprocs) + list(set(range(nprocs)) - aprocs))[:nprocs]
         assert 0 in self.aprocs, 'Process 0 must be active'
         self.comm = mpiutil.active_comm(self.aprocs) # communicator consists of active processes
+
+    @property
+    def history(self):
+        """History that will be added to the output file."""
+
+        hist = 'Execute %s.%s with %s.\n' % (__name__, self.__class__.__name__, self.params)
+        if self.params['extra_history'] != '':
+            hist = self.params['extra_history'] + ' ' + hist
+
+        return hist
 
     def execute(self):
 

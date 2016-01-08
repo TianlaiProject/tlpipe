@@ -21,6 +21,7 @@ params_init = {
                'aprocs': range(mpiutil.size), # list of active process rank no.
                'input_file': 'data_cal.hdf5',
                'output_file': 'data_cal_stokes.hdf5',
+               'extra_history': '',
               }
 prefix = 'st_'
 
@@ -43,6 +44,16 @@ class Lin2stokes(object):
         self.aprocs = (list(aprocs) + list(set(range(nprocs)) - aprocs))[:nprocs]
         assert 0 in self.aprocs, 'Process 0 must be active'
         self.comm = mpiutil.active_comm(self.aprocs) # communicator consists of active processes
+
+    @property
+    def history(self):
+        """History that will be added to the output file."""
+
+        hist = 'Execute %s.%s with %s.\n' % (__name__, self.__class__.__name__, self.params)
+        if self.params['extra_history'] != '':
+            hist = self.params['extra_history'] + ' ' + hist
+
+        return hist
 
     def execute(self):
 
@@ -67,4 +78,4 @@ class Lin2stokes(object):
                 for attrs_name, attrs_value in fin['data'].attrs.iteritems():
                     out_dset.attrs[attrs_name] = attrs_value
                 # update some attrs
-                out_dset.attrs['history'] = out_dset.attrs['history'] + 'Convert data to Stokes visibilities with parameters %s.\n' % self.params
+                out_dset.attrs['history'] = out_dset.attrs['history'] + self.history

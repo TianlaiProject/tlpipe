@@ -24,6 +24,7 @@ params_init = {
                'output_file': 'data_cal.hdf5',
                'eigval_file': 'eigval.hdf5',
                'gain_file': 'gain.hdf5',
+               'extra_history': '',
               }
 prefix = 'sc_'
 
@@ -46,6 +47,16 @@ class SVDCal(object):
         self.aprocs = (list(aprocs) + list(set(range(nprocs)) - aprocs))[:nprocs]
         assert 0 in self.aprocs, 'Process 0 must be active'
         self.comm = mpiutil.active_comm(self.aprocs) # communicator consists of active processes
+
+    @property
+    def history(self):
+        """History that will be added to the output file."""
+
+        hist = 'Execute %s.%s with %s.\n' % (__name__, self.__class__.__name__, self.params)
+        if self.params['extra_history'] != '':
+            hist = self.params['extra_history'] + ' ' + hist
+
+        return hist
 
     def execute(self):
 
@@ -176,4 +187,4 @@ class SVDCal(object):
                     for attrs_name, attrs_value in fin['data'].attrs.iteritems():
                         dset.attrs[attrs_name] = attrs_value
                 # update some attrs
-                dset.attrs['history'] = dset.attrs['history'] + 'SVD calibration with parameters %s.\n' % self.params
+                dset.attrs['history'] = dset.attrs['history'] + self.history
