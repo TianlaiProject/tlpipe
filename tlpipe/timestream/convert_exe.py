@@ -78,9 +78,9 @@ class Convert(object):
                 # remove excluded ants
                 for ant in self.params['exclude_ant']:
                     ant_ind = valid_ants.index(ant)
-                    valid_ants.remove(valid_ants[ind15])
-                    valid_xchans.remove(valid_xchans[ind15])
-                    valid_ychans.remove(valid_ychans[ind15])
+                    valid_ants.remove(valid_ants[ant_ind])
+                    valid_xchans.remove(valid_xchans[ant_ind])
+                    valid_ychans.remove(valid_ychans[ant_ind])
 
                 nant = len(valid_ants)
                 xx_pair = [(valid_xchans[i], valid_xchans[j]) for i in range(nant) for j in range(i, nant)]
