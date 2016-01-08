@@ -23,6 +23,7 @@ params_init = {
                'aprocs': range(mpiutil.size), # list of active process rank no.
                'input_file': 'data_cal_stokes.hdf5',
                'output_file': 'uv_imag_noconv.hdf5',
+               'cut': [None, None],
                'pol': 'I',
                'res': 1.0, # resolution, unit: wavelength
                'max_wl': 200.0, # max wavelength
@@ -54,6 +55,7 @@ class Gridding(object):
 
         input_file = input_path(self.params['input_file'])
         output_file = output_path(self.params['output_file'])
+        cut = self.params['cut']
 
         with h5py.File(input_file, 'r') as f:
             dset = f['data']
@@ -63,6 +65,18 @@ class Gridding(object):
             freq = dset.attrs['freq']
             # az = np.radians(dset.attrs['az_alt'][0][0])
             # alt = np.radians(dset.attrs['az_alt'][0][1])
+
+            # cut head and tail
+            nt_origin = len(ts)
+            if cut[0] is not None and cut[1] is not None:
+                ts = np.concatenate((ts[:int(cut[0] * nt_origin)], ts[-int(cut[1] * nt_origin):]))
+                dset = np.concatenate((dset[:int(cut[0] * nt_origin)], dset[-int(cut[1] * nt_origin):]))
+            elif cut[0] is not None:
+                ts = ts[:int(cut[0] * nt_origin)]
+                dset = dset[:int(cut[0] * nt_origin)]
+            elif cut[1] is not None:
+                ts = ts[-int(cut[1] * nt_origin):]
+                dset = dset[-int(cut[1] * nt_origin):]
 
             npol = dset.shape[2]
             nt = len(ts)
