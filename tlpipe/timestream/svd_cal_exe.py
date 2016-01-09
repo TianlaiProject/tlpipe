@@ -21,8 +21,8 @@ params_init = {
                'nprocs': mpiutil.size, # number of processes to run this module
                'aprocs': range(mpiutil.size), # list of active process rank no.
                'input_file': 'data_phs2zen.hdf5',
-               'output_file': 'data_cal.hdf5',
-               'eigval_file': 'eigval.hdf5',
+               'output_file': 'data_svdcal.hdf5',
+               'eigval_file': 'singval.hdf5',
                'gain_file': 'gain.hdf5',
                'extra_history': '',
               }
@@ -69,16 +69,16 @@ class SVDCal(Base):
             # save data after cal
             if mpiutil.rank0:
                 data_cal = np.zeros_like(dset)
-                eigval = np.zeros((nfreq, 2*nants), dtype=np.float64)
+                singval = np.zeros((nfreq, 2*nants), dtype=np.float64)
                 gain = np.zeros((nfreq, 2*nants, 2), dtype=np.complex128)
             else:
                 data_cal = None
-                eigval = None
+                singval = None
                 gain = None
 
             # local data_cal section corresponding to local freq
             local_data_cal = np.zeros_like(dset[:, :, :, sfreq:efreq])
-            local_eigval = np.zeros((lfreq, 2*nants), dtype=np.float64)
+            local_singval = np.zeros((lfreq, 2*nants), dtype=np.float64)
             local_gain = np.zeros((lfreq, 2*nants, 2), dtype=np.complex128)
 
             # construct visibility matrix for a single freq
@@ -100,7 +100,7 @@ class SVDCal(Base):
                             Vmat[2*i+1, 2*j] = data_int_time[ind, 3, freq_ind].conj() # yx
                 # Eigen decomposition
                 s, U = eigh(Vmat)
-                local_eigval[fi] = s[::-1] # descending order
+                local_singval[fi] = s[::-1] # descending order
                 # the gain matrix for this freq
                 Gmat = U[:, -2:] * np.sqrt(s[-2:]) # only the 2 maximum eigen-vals
                 local_gain[fi] = Gmat
@@ -146,16 +146,16 @@ class SVDCal(Base):
         # Gather data in separate processes
         if self.comm is not None and self.comm.size > 1: # Reduce only when there are multiple processes
             mpiutil.gather_local(data_cal, local_data_cal, (0, 0, 0, sfreq), root=0, comm=self.comm)
-            mpiutil.gather_local(eigval, local_eigval, (sfreq, 0), root=0, comm=self.comm)
+            mpiutil.gather_local(singval, local_singval, (sfreq, 0), root=0, comm=self.comm)
             mpiutil.gather_local(gain, local_gain, (sfreq, 0, 0), root=0, comm=self.comm)
 
         # save data after cal
         if mpiutil.rank0:
-            # save eigval
+            # save singval
             with h5py.File(eigval_file, 'w') as f:
-                dset = f.create_dataset('eigval', data=eigval)
+                dset = f.create_dataset('singval', data=singval)
                 dset.attrs['ants'] = ants
-            # save eigval
+            # save gain
             with h5py.File(gain_file, 'w') as f:
                 dset = f.create_dataset('gain', data=gain)
                 dset.attrs['ants'] = ants
