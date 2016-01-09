@@ -1,0 +1,110 @@
+# -*- mode: python; -*-
+
+# input file for pipeline manager
+# execute this pipeline by either command of the following two:
+# tlpipe dir/to/A-projection.pipe
+# mpiexec -n N tlpipe dir/to/A-projection.pipe
+
+
+pipe_modules = []
+data_dir = '/home/zuoshifan/programming/python/21cmcosmology/dishary/example_cal/tldishes/Cas_20151227/'
+pipe_output_dir = data_dir + 'output/'
+
+# from tlpipe.timestream import cut_data_another_exe
+# pipe_modules.append(cut_data_another_exe.Cut)
+# ### parameters for cut_data_exe
+# cuta_input_file = [data_dir + '20151227174402_CassiopeiaA.hdf5', data_dir + '20151227204402_CassiopeiaA.hdf5']
+# cuta_output_file = ['cut_before.hdf5', 'cut_after.hdf5']
+
+from tlpipe.timestream import cut_data_exe
+pipe_modules.append(cut_data_exe.Cut)
+### parameters for cut_data_exe
+cut_input_file = data_dir + '20151227174402_CassiopeiaA.hdf5'
+cut_output_file = ['cut_before_transit.hdf5', 'cut_after_transit.hdf5']
+
+from tlpipe.timestream import convert_exe
+pipe_modules.append(convert_exe.Convert)
+### parameters for convert_exe
+cv_input_file = cut_output_file
+cv_output_file = ['cut_before_transit_conv.hdf5', 'cut_after_transit_conv.hdf5']
+cv_exclude_ant = [15] # x/y not correct
+
+from tlpipe.timestream import phs2zen_exe
+pipe_modules.append(phs2zen_exe.Phs2zen)
+### parameters for phs2zen_exe
+ph_input_file = cv_output_file
+ph_output_file = 'data_phs2zen.hdf5'
+
+
+# ###### do the cal
+from tlpipe.timestream import eigen_cal_exe
+pipe_modules.append(eigen_cal_exe.EigCal)
+### parameters for svd_cal_exe
+ec_input_file = ph_output_file
+ec_output_file = 'data_eigcal.hdf5'
+
+from tlpipe.timestream import lin2stokes_exe
+pipe_modules.append(lin2stokes_exe.Lin2stokes)
+### parameters for lin2stokes_exe
+st_input_file = ec_output_file
+st_output_file = 'data_cal_stokes.hdf5'
+
+
+from tlpipe.timestream import simple_gridding_exe
+pipe_modules.append(simple_gridding_exe.Gridding)
+### parameters for simple_gridding_exe
+sgr_input_file = st_output_file
+sgr_output_file = 'uv_imag_noconv.hdf5'
+
+
+from tlpipe.timestream import gridding_noshift_exe
+pipe_modules.append(gridding_noshift_exe.Gridding)
+### parameters for gridding_noshift_exe
+ngr_input_file = st_output_file
+ngr_output_file = 'uv_imag_noshift.hdf5'
+
+
+from tlpipe.timestream import gridding_exe
+pipe_modules.append(gridding_exe.Gridding)
+### parameters for gridding_exe
+gr_input_file = st_output_file
+gr_output_file = 'uv_imag_conv.hdf5'
+
+
+# ###### not do the cal
+from tlpipe.timestream import lin2stokes_exe
+pipe_modules.append((lin2stokes_exe.Lin2stokes, ('st1_', 'st_')))
+### parameters for lin2stokes_exe
+st1_input_file = ph_output_file
+st1_output_file = 'data_nocal_stokes.hdf5'
+
+
+from tlpipe.timestream import simple_gridding_exe
+pipe_modules.append((simple_gridding_exe.Gridding, ('sgr1_', 'sgr_')))
+### parameters for simple_gridding_exe
+sgr1_input_file = st1_output_file
+sgr1_output_file = 'uv_imag_nocal_noconv.hdf5'
+
+
+from tlpipe.timestream import gridding_noshift_exe
+pipe_modules.append((gridding_noshift_exe.Gridding, ('ngr1_', 'ngr_')))
+### parameters for gridding_noshift_exe
+ngr1_input_file = st1_output_file
+ngr1_output_file = 'uv_imag_nocal_noshift.hdf5'
+
+
+from tlpipe.timestream import gridding_exe
+pipe_modules.append((gridding_exe.Gridding, ('gr1_', 'gr_')))
+### parameters for gridding_exe
+gr1_input_file = st1_output_file
+gr1_output_file = 'uv_imag_nocal_conv.hdf5'
+
+
+##### plot images
+from tlpipe.plot import plot_image_exe
+pipe_modules.append(plot_image_exe.Plot)
+### parameters for lin2stokes_exe
+plti_input_file = [sgr_output_file, ngr_output_file, gr_output_file, sgr1_output_file, ngr1_output_file, gr1_output_file]
+plti_output_file = None
+
+
