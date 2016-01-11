@@ -102,17 +102,14 @@ class Gridding(Base):
             az = np.radians(dset.attrs['az_alt'][0][0])
             alt = np.radians(dset.attrs['az_alt'][0][1])
 
-            # cut head and tail
-            nt_origin = len(ts)
+            nt = len(ts)
+            t_inds = range(nt)
             if cut[0] is not None and cut[1] is not None:
-                ts = np.concatenate((ts[:int(cut[0] * nt_origin)], ts[-int(cut[1] * nt_origin):]))
-                dset = np.concatenate((dset[:int(cut[0] * nt_origin)], dset[-int(cut[1] * nt_origin):]))
+                t_inds = t_inds[:int(cut[0] * nt)] + t_inds[-int(cut[1] * nt):]
             elif cut[0] is not None:
-                ts = ts[:int(cut[0] * nt_origin)]
-                dset = dset[:int(cut[0] * nt_origin)]
+                t_inds = t_inds[:int(cut[0] * nt)]
             elif cut[1] is not None:
-                ts = ts[-int(cut[1] * nt_origin):]
-                dset = dset[-int(cut[1] * nt_origin):]
+                t_inds[-int(cut[1] * nt):]
 
             npol = dset.shape[2]
             nt = len(ts)
@@ -121,9 +118,8 @@ class Gridding(Base):
             bls = [(ants[i], ants[j]) for i in range(nants) for j in range(i, nants)] # start from 1
             nbls = len(bls)
 
-            lt, st, et = mpiutil.split_local(nt)
-            local_data = dset[st:et] # data section used only in this process
-
+            lt_inds = mpiutil.mpilist(t_inds)
+            local_data = dset[lt_inds, :, :, :] # data section used only in this process
 
         res = self.params['res']
         max_wl = self.params['max_wl']
@@ -154,7 +150,7 @@ class Gridding(Base):
 
         # array
         aa = tldishes.get_aa(1.0e-3 * freq) # use GHz
-        for ti, t_ind in enumerate(range(st, et)): # mpi among time
+        for ti, t_ind in enumerate(lt_inds): # mpi among time
             t = ts[t_ind]
             aa.set_jultime(t)
             s.compute(aa)
