@@ -123,7 +123,8 @@ class Phs2zen(Base):
 
                 ########################
                 # find max in time fft
-                max_row_ind = np.argmax(np.abs(data_slice_fft_time), axis=0)
+                # max_row_ind = np.argmax(np.abs(data_slice_fft_time), axis=0)
+                max_row_ind = np.argmax(data_slice_fft_time.real, axis=0) # NOTE real here
                 data_slice_fft_time_max = np.zeros_like(data_slice_fft_time)
                 for ci in range(nfreq):
                     data_slice_fft_time_max[max_row_ind[ci], ci] = data_slice_fft_time[max_row_ind[ci], ci]
