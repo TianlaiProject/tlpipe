@@ -22,6 +22,7 @@ params_init = {
                'input_file': 'data_phs2zen.hdf5',
                'output_file': 'data_filtering.hdf5',
                'threshold': 0.01, # filtering threshold
+               'low_pass': True, # True to filter out components above threshold, else below
                'extra_history': '',
               }
 prefix = 'fl_'
@@ -42,6 +43,7 @@ class Filtering(Base):
         input_file = input_path(self.params['input_file'])
         output_file = output_path(self.params['output_file'])
         threshold = self.params['threshold']
+        low_pass = self.params['low_pass']
 
         # read in ants, freq, time info from data files
         with h5py.File(input_file, 'r') as f:
@@ -87,7 +89,10 @@ class Filtering(Base):
 
                 # filtering out the strongest source
                 max_fft2 = np.max(np.abs(data_slice_fft2))
-                data_slice_fft2 = np.where(np.abs(data_slice_fft2)>threshold*max_fft2, 0, data_slice_fft2)
+                if low_pass:
+                    data_slice_fft2 = np.where(np.abs(data_slice_fft2)>threshold*max_fft2, 0, data_slice_fft2)
+                else:
+                    data_slice_fft2 = np.where(np.abs(data_slice_fft2)<=threshold*max_fft2, 0, data_slice_fft2)
 
                 # inverse fft2
                 local_data[:, bi, pol_ind, :] = np.fft.ifft2(np.fft.ifftshift(data_slice_fft2))
