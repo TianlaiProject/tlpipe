@@ -55,6 +55,9 @@ class SolveGain(Base):
             data_type = dset.dtype
             ants = dset.attrs['ants']
             freq = dset.attrs['freq']
+            az, alt = get_value(dset.attrs['az_alt'])[0]
+            az = np.radians(az)
+            alt = np.radians(alt)
             npol = dset.shape[2]
             nfreq = len(freq)
             nants = len(ants)
@@ -122,6 +125,9 @@ class SolveGain(Base):
 
         # array
         aa = tldishes.get_aa(1.0e-3 * freq) # use GHz
+        # make all antennas point to the pointing direction
+        for ai in aa:
+            ai.set_pointing(az=az, alt=alt, twist=0)
 
         # construct visibility matrix for a single time, pol, freq
         Vmat = np.zeros((nants, nants), dtype=data_type)
