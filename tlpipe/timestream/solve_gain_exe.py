@@ -148,10 +148,12 @@ class SolveGain(Base):
                             bmij = aa.bm_response(ai-1, aj-1).squeeze()
                             try:
                                 ind = bls.index((ai, aj))
-                                Vmat[i, j] = local_data[ti, ind, pol, fi] / (Sc[freq_ind] * bmij[freq_ind] * np.exp(-2.0J * np.pi * np.dot(s_top, uij[:, freq_ind]))) # xx, yy
+                                # Vmat[i, j] = local_data[ti, ind, pol, fi] / (Sc[freq_ind] * bmij[freq_ind] * np.exp(-2.0J * np.pi * np.dot(s_top, uij[:, freq_ind]))) # xx, yy
+                                Vmat[i, j] = local_data[ti, ind, pol, fi] / (Sc[freq_ind] * bmij[freq_ind] * np.exp(2.0J * np.pi * np.dot(s_top, uij[:, freq_ind]))) # xx, yy
                             except ValueError:
                                 ind = bls.index((aj, ai))
-                                Vmat[i, j] = np.conj(local_data[ti, ind, pol, fi] / (Sc[freq_ind] * bmij[freq_ind] * np.exp(-2.0J * np.pi * np.dot(s_top, uij[:, freq_ind])))) # xx, yy
+                                # Vmat[i, j] = np.conj(local_data[ti, ind, pol, fi] / (Sc[freq_ind] * bmij[freq_ind] * np.exp(-2.0J * np.pi * np.dot(s_top, uij[:, freq_ind])))) # xx, yy
+                                Vmat[i, j] = np.conj(local_data[ti, ind, pol, fi] / (Sc[freq_ind] * bmij[freq_ind] * np.exp(2.0J * np.pi * np.dot(s_top, uij[:, freq_ind])))) # xx, yy
 
                     # Eigen decomposition
                     e, U = eigh(Vmat)
