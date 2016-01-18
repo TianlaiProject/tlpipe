@@ -69,12 +69,14 @@ def get_uvvec(s0_top, n_top):
 
 
 def conv_kernal(u, v, sigma, l0=0, m0=0):
-    return np.exp(-2.0J * np.pi * (u * l0 + v * m0)) * np.exp(-0.5 * (2 * np.pi * sigma)**2 * (u**2 + v**2))
+    # return np.exp(-2.0J * np.pi * (u * l0 + v * m0)) * np.exp(-0.5 * (2 * np.pi * sigma)**2 * (u**2 + v**2))
+    return np.exp(2 * (l0**2 + m0**2) / sigma**2) * np.exp(2.0J * np.pi * (u * l0 + v * m0)) * np.exp(-(2 * np.pi * sigma)**2 * (u**2 + v**2))
 
 def conv_gauss(arr, c, vp, up, sigma, val=1.0, l0=0, m0=0, pix=1, npix=4):
     for ri in range(-npix, npix):
         for ci in range(-npix, npix):
             tmp = val * conv_kernal(ri*pix, ci*pix, sigma, l0, m0)
+            # tmp = val * conv_kernal((vp+ri)*pix, (up+ci)*pix, sigma, l0, m0)
             arr[c+(vp+ri), c+(up+ci)] += tmp
             arr[c-(vp+ri), c-(up+ci)] += np.conj(tmp) # append conjugate
 
