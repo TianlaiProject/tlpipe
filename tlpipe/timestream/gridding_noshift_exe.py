@@ -41,8 +41,8 @@ def conv_kernal(u, v, sigma):
     return np.exp(-(2 * np.pi * sigma)**2 * (u**2 + v**2))
 
 def conv_gauss(arr, c, vp, up, sigma, val=1.0, pix=1, npix=4):
-    for ri in range(-npix, npix):
-        for ci in range(-npix, npix):
+    for ri in range(-npix, npix+1): # plus 1 make it symmetric
+        for ci in range(-npix, npix+1):
             tmp = val * conv_kernal(ri*pix, ci*pix, sigma)
             # tmp = val * conv_kernal((vp+ri)*pix, (up+ci)*pix, sigma)
             arr[c+(vp+ri), c+(up+ci)] += tmp
