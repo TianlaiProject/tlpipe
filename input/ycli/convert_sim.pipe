@@ -1,0 +1,19 @@
+# -*- mode: python; -*-
+
+# input file for pipeline manager
+# execute this pipeline by either command of the following two:
+# tlpipe dir/to/A-projection.pipe
+# mpiexec -n N tlpipe dir/to/A-projection.pipe
+
+
+pipe_modules = []
+data_dir = '/home/zhangjiao/visib/'
+pipe_output_dir = '/project/ycli/data/tianlai/Jsim/'
+
+from tlpipe.timestream import convert_Jsim
+pipe_modules.append(convert_Jsim.Convert_Sim)
+### parameters for convert_Jsim
+cvsim_temp_file = '/home/zuoshifan/programming/python/21cmcosmology/dishary/example_cal/tldishes/Cas_20151227/output/cut_after_transit.hdf5'
+cvsim_input_file = [data_dir + 'visib_freq',] # without _real/_imag.fits.
+cvsim_output_file = ['sim_CasA_Transit_pm3600s.hdf5',]
+cvsim_exclude_ant = [] # x/y not correct
