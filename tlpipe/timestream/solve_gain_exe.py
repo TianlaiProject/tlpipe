@@ -78,6 +78,10 @@ class SolveGain(Base):
             transit_time = get_ephdate(transit_time_lst[0], time_zone) # utc
             new_start_utc_time = transit_time - span * ephem.second # uct
             new_end_utc_time = transit_time + span * ephem.second # utc
+            if new_end_utc_time > end_time:
+                need_second_file = True
+            else:
+                need_second_file = False
             tz = int(time_zone[3:])
             new_start_time = str(ephem.Date(new_start_utc_time + tz * ephem.hour))
             # print 'new_start_time:', new_start_time
@@ -99,8 +103,15 @@ class SolveGain(Base):
 
             # get data to the local process
             local_data = dset[start_ind:end_ind, :, :, sfreq:efreq]
-            local_eigval = np.zeros((nt, nants, 2, lfreq), dtype=np.float64)
-            local_gain = np.zeros((nt, nants, 2, lfreq), dtype=np.complex128)
+
+        if need_second_file == True:
+            with h5py.File(input_file[1], 'r') as f:
+                local_data = np.concatenate((local_data, f['data'][:nt-local_data.shape[0], :, :, sfreq:efreq]))
+
+        assert nt == local_data.shape[0], 'Incorrect data shape'
+
+        local_eigval = np.zeros((nt, nants, 2, lfreq), dtype=np.float64)
+        local_gain = np.zeros((nt, nants, 2, lfreq), dtype=np.complex128)
 
         # global array to save eigval, gain
         if mpiutil.rank0:
