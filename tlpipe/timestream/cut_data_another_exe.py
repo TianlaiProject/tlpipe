@@ -53,7 +53,7 @@ class Cut(Base):
 
                 start_time = get_ephdate(start_time, time_zone) # utc
                 end_time = get_ephdate(end_time, time_zone) # utc
-                transit_time = get_ephdate(transit_time_lst[0], time_zone) # utc
+                # transit_time = get_ephdate(transit_time_lst[0], time_zone) # utc
                 tz = int(time_zone[3:])
                 new_start_time = str(ephem.Date(end_time + tz * ephem.hour - span * ephem.second))
                 print 'new_start_time:', new_start_time
@@ -82,7 +82,7 @@ class Cut(Base):
 
                 start_time = get_ephdate(start_time, time_zone) # utc
                 end_time = get_ephdate(end_time, time_zone) # utc
-                transit_time = get_ephdate(transit_time_lst[0], time_zone) # utc
+                # transit_time = get_ephdate(transit_time_lst[0], time_zone) # utc
                 tz = int(time_zone[3:])
                 new_end_time = str(ephem.Date(start_time + tz * ephem.hour + span * ephem.second))
                 print 'new_end_time:', new_end_time
