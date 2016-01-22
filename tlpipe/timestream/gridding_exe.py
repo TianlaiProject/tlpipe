@@ -68,6 +68,10 @@ def get_uvvec(s0_top, n_top):
     return uvec, vvec
 
 
+def conv_factor(u, v, ui, vi, sigma, l0=0, m0=0):
+    return np.exp(2 * (l0**2 + m0**2) / sigma**2) * np.exp(2.0J * np.pi * ((u - ui) * l0 + (v - vi) * m0)) * np.exp(-(2 * np.pi * sigma)**2 * ((u - ui)**2 + (v - vi)**2))
+
+
 def conv_kernal(u, v, sigma, l0=0, m0=0):
     # return np.exp(-2.0J * np.pi * (u * l0 + v * m0)) * np.exp(-0.5 * (2 * np.pi * sigma)**2 * (u**2 + v**2))
     return np.exp(2 * (l0**2 + m0**2) / sigma**2) * np.exp(2.0J * np.pi * (u * l0 + v * m0)) * np.exp(-(2 * np.pi * sigma)**2 * (u**2 + v**2))
@@ -130,6 +134,10 @@ class Gridding(Base):
         center = np.int(max_wl / res) # the central pixel
         sigma = self.params['sigma']
 
+        u_axis = np.linspace(-max_wl, max_wl, size)
+        v_axis = np.linspace(-max_wl, max_wl, size)
+        u_axis, v_axis = np.meshgrid(u_axis, v_axis, sparse=True)
+
         uv = np.zeros((size, size), dtype=np.complex128)
         uv_cov = np.zeros((size, size), dtype=np.complex128)
 
@@ -182,12 +190,19 @@ class Gridding(Base):
                     if np.isfinite(val):
                         up = np.int(u / res)
                         vp = np.int(v / res)
-                        # uv_cov[center+vp, center+up] += 1.0
-                        # uv_cov[center-vp, center-up] += 1.0 # append conjugate
-                        # uv[center+vp, center+up] += val
-                        # uv[center-vp, center-up] += np.conj(val)# append conjugate
-                        conv_gauss(uv_cov, center, vp, up, sigma, 1.0, l0, m0, res)
-                        conv_gauss(uv, center, vp, up, sigma, val, l0, m0, res)
+                        # # uv_cov[center+vp, center+up] += 1.0
+                        # # uv_cov[center-vp, center-up] += 1.0 # append conjugate
+                        # # uv[center+vp, center+up] += val
+                        # # uv[center-vp, center-up] += np.conj(val)# append conjugate
+                        # conv_gauss(uv_cov, center, vp, up, sigma, 1.0, l0, m0, res)
+                        # conv_gauss(uv, center, vp, up, sigma, val, l0, m0, res)
+
+                        tmp1 = conv_factor(u_axis, v_axis, up, vp, sigma, l0, m0)
+                        tmp2 = conv_factor(u_axis, v_axis, -up, -vp, sigma, l0, m0)
+                        uv_cov += 1.0 * tmp1
+                        uv_cov += 1.0 * tmp2
+                        uv += val * tmp1
+                        uv += np.conj(val) * tmp2
 
 
         # Reduce data in separate processes
