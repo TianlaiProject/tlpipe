@@ -69,7 +69,8 @@ def get_uvvec(s0_top, n_top):
 
 
 def conv_factor(u, v, ui, vi, sigma, l0=0, m0=0):
-    return np.exp(2 * (l0**2 + m0**2) / sigma**2) * np.exp(2.0J * np.pi * ((u - ui) * l0 + (v - vi) * m0)) * np.exp(-(2 * np.pi * sigma)**2 * ((u - ui)**2 + (v - vi)**2))
+    # return np.exp(2 * (l0**2 + m0**2) / sigma**2) * np.exp(2.0J * np.pi * ((u - ui) * l0 + (v - vi) * m0)) * np.exp(-(2 * np.pi * sigma)**2 * ((u - ui)**2 + (v - vi)**2))
+    return np.exp(-( (2 * np.pi * sigma * (u - ui) - 0.5J * l0 / sigma)**2 + (2 * np.pi * sigma * (v - vi) - 0.5J * m0 / sigma)**2 ))
 
 
 def conv_kernal(u, v, sigma, l0=0, m0=0):
@@ -180,6 +181,8 @@ class Gridding(Base):
             l0 = np.dot(pt_top, uvec)
             m0 = np.dot(pt_top, vvec)
 
+            efactor = np.exp(7 * (l0**2 + m0**2) / (4 * sigma**2))
+
             for bl_ind in range(nbls):
                 i, j = bls[bl_ind]
                 if i == j:
@@ -197,8 +200,8 @@ class Gridding(Base):
                         # conv_gauss(uv_cov, center, vp, up, sigma, 1.0, l0, m0, res)
                         # conv_gauss(uv, center, vp, up, sigma, val, l0, m0, res)
 
-                        tmp1 = conv_factor(u_axis, v_axis, up, vp, sigma, l0, m0)
-                        tmp2 = conv_factor(u_axis, v_axis, -up, -vp, sigma, l0, m0)
+                        tmp1 = efactor * conv_factor(u_axis, v_axis, up, vp, sigma, l0, m0)
+                        tmp2 = efactor * conv_factor(u_axis, v_axis, -up, -vp, sigma, l0, m0)
                         uv_cov += 1.0 * tmp1
                         uv_cov += 1.0 * tmp2
                         uv += val * tmp1
