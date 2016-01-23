@@ -34,7 +34,9 @@ class CleanData(Base):
     def execute(self):
         if mpiutil.rank==0:
             input=params_init['input_file']
+            input_dir=params_init['input_dir']
             output=params_init['output_file']
+            output_dir=params_init['output_dir']
             sigma = params_init['sigma']
             time= params_init['time']
             Plot_test= params_init['Plot_test']
