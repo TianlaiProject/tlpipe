@@ -26,9 +26,6 @@ params_init = {
 prefix = 'st_'
 
 
-pol_dict = {'I': 0, 'Q': 1, 'U': 2, 'V': 3}
-
-
 class Lin2stokes(Base):
     """Linear to Stokes conversion."""
 
@@ -59,4 +56,5 @@ class Lin2stokes(Base):
                 for attrs_name, attrs_value in fin['data'].attrs.iteritems():
                     out_dset.attrs[attrs_name] = attrs_value
                 # update some attrs
+                out_dset.attrs['pol'] = ['I', 'Q', 'U', 'V']
                 out_dset.attrs['history'] = out_dset.attrs['history'] + self.history

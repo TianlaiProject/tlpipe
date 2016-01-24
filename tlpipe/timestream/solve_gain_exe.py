@@ -37,9 +37,6 @@ params_init = {
 prefix = 'sg_'
 
 
-pol_dict = {0: 'xx', 1: 'yy', 2: 'xy', 3: 'yx'}
-
-
 class SolveGain(Base):
     """Module to solve antenna gain."""
 
@@ -63,6 +60,7 @@ class SolveGain(Base):
             data_type = dset.dtype
             ants = dset.attrs['ants']
             freq = dset.attrs['freq']
+            pols = dset.attrs['pol']
             az, alt = get_value(dset.attrs['az_alt'])[0]
             az = np.radians(az)
             alt = np.radians(alt)
@@ -159,8 +157,8 @@ class SolveGain(Base):
             # get the topocentric coordinate of the calibrator at the current time
             s_top = s.get_crds('top', ncrd=3)
             aa.sim_cache(cat.get_crds('eq', ncrd=3)) # for compute bm_response and sim
-            for pol in [0, 1]: # xx, yy
-                aa.set_active_pol(pol_dict[pol])
+            for pol in [pols.index('xx'), pols.index('yy')]: # xx, yy
+                aa.set_active_pol(pols[pol])
                 for fi, freq_ind in enumerate(local_freq): # mpi among freq
                     for i, ai in enumerate(ants):
                         for j, aj in enumerate(ants):

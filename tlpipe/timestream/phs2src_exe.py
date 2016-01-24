@@ -34,9 +34,6 @@ params_init = {
 prefix = 'p2s_'
 
 
-pol_dict = {0: 'xx', 1: 'yy', 2: 'xy', 3: 'yx'}
-
-
 class Phs2src(Base):
     """Phase visibility data to a source."""
 

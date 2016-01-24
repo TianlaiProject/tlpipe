@@ -30,9 +30,6 @@ params_init = {
 prefix = 'ag_'
 
 
-pol_dict = {0: 'xx', 1: 'yy', 2: 'xy', 3: 'yx'}
-
-
 class ApplyGain(Base):
     """Applying gain to the visibility data."""
 
@@ -57,6 +54,7 @@ class ApplyGain(Base):
             data_type = dataset.dtype
             ants = dataset.attrs['ants']
             freq = dataset.attrs['freq']
+            pol = dataset.attrs['pol']
 
         npol = data_shp[2]
         nfreq = len(freq)
@@ -81,7 +79,7 @@ class ApplyGain(Base):
         else:
             data_cal = None
 
-        for pol_ind in [0, 1]: # only xx, yy
+        for pol_ind in [pol.index('xx'), pol.index('yy')]: # only xx, yy
             for bi, bl_ind in enumerate(local_bls): # mpi among bls
                 data_slice = local_data[:, bi, pol_ind, :].copy() # will use local_data to save data_slice_dphs in-place, so here use copy
                 ai, aj = bls[bl_ind]
