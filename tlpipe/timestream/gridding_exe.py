@@ -35,8 +35,6 @@ params_init = {
 prefix = 'gr_'
 
 
-pol_dict = {'I': 0, 'Q': 1, 'U': 2, 'V': 3}
-
 def get_uvvec(s0_top, n_top):
     """Compute unit vector in u,v direction relative to `s0_top` in topocentric coordinate.
 
@@ -101,6 +99,9 @@ class Gridding(Base):
         input_file = input_path(self.params['input_file'])
         output_file = output_path(self.params['output_file'])
         cut = self.params['cut']
+        pol = self.params['pol']
+        phase_center = self.params['phase_center']
+        catalog = self.params['catalog']
 
         with h5py.File(input_file, 'r') as f:
             dset = f['data']
@@ -108,6 +109,8 @@ class Gridding(Base):
             ants = dset.attrs['ants']
             ts = f['time'][...]
             freq = dset.attrs['freq']
+            pols = dset.attrs['pol'].tolist()
+            assert pol in pols, 'Required pol %s is not in this data set with pols %s' % (pol, pols)
             az = np.radians(dset.attrs['az_alt'][0][0])
             alt = np.radians(dset.attrs['az_alt'][0][1])
 
@@ -144,19 +147,13 @@ class Gridding(Base):
         uv = np.zeros((size, size), dtype=np.complex128)
         uv_cov = np.zeros((size, size), dtype=np.complex128)
 
-        src = 'cas'
-        cat = 'misc'
-        # calibrator
-        srclist, cutoff, catalogs = a.scripting.parse_srcs(src, cat)
+        # phase center
+        srclist, cutoff, catalogs = a.scripting.parse_srcs(phase_center, catalog)
         cat = a.src.get_catalog(srclist, cutoff, catalogs)
-        assert(len(cat) == 1), 'Allow only one calibrator'
+        assert(len(cat) == 1), 'Allow only one phase center'
         s = cat.values()[0]
         if mpiutil.rank0:
-            print 'Calibrating for source with',
-            print 'strength', s._jys,
-            print 'measured at', s.mfreq, 'GHz',
-            print 'with index', s.index
-
+            print 'Imaging relative to phase center %s.' % phase_center
 
         # pointting vector in topocentric coord
         pt_top = a.coord.azalt2top((az, alt))
@@ -194,7 +191,7 @@ class Gridding(Base):
                     continue
                 us, vs, ws = aa.gen_uvw(i-1, j-1, src=s) # NOTE start from 0
                 for fi, (u, v) in enumerate(zip(us.flat, vs.flat)):
-                    val = local_data[ti, bl_ind, 0, fi] # only I here
+                    val = local_data[ti, bl_ind, pols.index(pol), fi]
                     if np.isfinite(val):
                         # up = np.int(u / res)
                         # vp = np.int(v / res)
@@ -242,5 +239,6 @@ class Gridding(Base):
                 f.create_dataset('uv_cov_fft', data=uv_cov_fft)
                 f.create_dataset('uv_fft', data=uv_fft)
                 f.create_dataset('uv_imag_fft', data=uv_imag_fft)
+                f.attrs['pol'] = pol
                 f.attrs['max_wl'] = max_wl
                 f.attrs['max_lm'] = max_lm
