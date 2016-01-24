@@ -27,6 +27,10 @@ params_init = {
                'aprocs': range(mpiutil.size), # list of active process rank no.
                'input_file': ['data1_conv.hdf5', 'data2_conv.hdf5'],
                'output_file': 'gain.hdf5',
+               'calibrator': 'cas',
+               'catalog': 'misc,helm,nvss',
+               'local_transit_time': None, # if None, use transit time in the input_file
+               'local_time_zone': 'UTC+08', # time zone of local_transit_time
                'span': 60, # second
                'extra_history': '',
               }
@@ -47,6 +51,10 @@ class SolveGain(Base):
 
         input_file = input_path(self.params['input_file'])
         output_file = output_path(self.params['output_file'])
+        calibrator = self.params['calibrator']
+        catalog = self.params['catalog']
+        local_transit_time = self.params['local_transit_time']
+        local_time_zone = self.params['local_time_zone']
         span = self.params['span']
 
         with h5py.File(input_file[0], 'r') as f:
@@ -75,7 +83,10 @@ class SolveGain(Base):
 
             start_time = get_ephdate(start_time, time_zone) # utc
             end_time = get_ephdate(end_time, time_zone) # utc
-            transit_time = get_ephdate(transit_time_lst[0], time_zone) # utc
+            if local_transit_time is not None:
+                transit_time = get_ephdate(local_transit_time, local_time_zone) # utc
+            else:
+                transit_time = get_ephdate(transit_time_lst[0], time_zone) # utc
             new_start_utc_time = transit_time - span * ephem.second # uct
             new_end_utc_time = transit_time + span * ephem.second # utc
             if new_end_utc_time > end_time:
@@ -121,15 +132,13 @@ class SolveGain(Base):
             eigval = None
             gain = None
 
-        src = 'cas'
-        cat = 'misc'
         # calibrator
-        srclist, cutoff, catalogs = a.scripting.parse_srcs(src, cat)
+        srclist, cutoff, catalogs = a.scripting.parse_srcs(calibrator, catalog)
         cat = a.src.get_catalog(srclist, cutoff, catalogs)
         assert(len(cat) == 1), 'Allow only one calibrator'
         s = cat.values()[0]
         if mpiutil.rank0:
-            print 'Calibrating for source with',
+            print 'Calibrating for source %s with' % calibrator,
             print 'strength', s._jys,
             print 'measured at', s.mfreq, 'GHz',
             print 'with index', s.index
