@@ -27,6 +27,8 @@ params_init = {
                'aprocs': range(mpiutil.size), # list of active process rank no.
                'input_file': 'data_cal.hdf5',
                'output_file': 'data_phs2src.hdf5',
+               'source': 'cas',
+               'catalog': 'misc,helm,nvss',
                'extra_history': '',
               }
 prefix = 'p2s_'
@@ -46,6 +48,8 @@ class Phs2src(Base):
 
         input_file = input_path(self.params['input_file'])
         output_file = output_path(self.params['output_file'])
+        source = self.params['source']
+        catalog = self.params['catalog']
 
         with h5py.File(input_file, 'r') as f:
             dset = f['data']
@@ -75,18 +79,13 @@ class Phs2src(Base):
             data_phs2src = None
 
 
-        src = 'cas'
-        cat = 'misc'
-        # calibrator
-        srclist, cutoff, catalogs = a.scripting.parse_srcs(src, cat)
+        # source
+        srclist, cutoff, catalogs = a.scripting.parse_srcs(source, catalog)
         cat = a.src.get_catalog(srclist, cutoff, catalogs)
-        assert(len(cat) == 1), 'Allow only one calibrator'
+        assert(len(cat) == 1), 'Allow only one source'
         s = cat.values()[0]
         if mpiutil.rank0:
-            print 'Calibrating for source with',
-            print 'strength', s._jys,
-            print 'measured at', s.mfreq, 'GHz',
-            print 'with index', s.index
+            print 'Phase to source %s.' % source
 
         # array
         aa = tldishes.get_aa(1.0e-3 * freq) # use GHz
