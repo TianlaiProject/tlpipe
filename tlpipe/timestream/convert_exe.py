@@ -25,6 +25,7 @@ params_init = {
                'input_file': ['cut_before_transit.hdf5', 'cut_after_transit.hdf5'],
                'output_file': ['cut_before_transit_conv.hdf5', 'cut_after_transit_conv.hdf5'],
                'exclude_ant': [], # a list of ants to exclude
+               'exclude_freq_index': range(62) + range(473, 512), # make freq between 700-800 MHz
                'extra_history': '',
               }
 prefix = 'cv_'
@@ -42,6 +43,7 @@ class Convert(Base):
 
         input_file = input_path(self.params['input_file'])
         output_file = output_path(self.params['output_file'])
+        exclude_freq_index = self.params['exclude_freq_index']
 
         nfiles = len(input_file)
         assert nfiles > 0, 'No input data file'
@@ -88,19 +90,24 @@ class Convert(Base):
                 nbls = nant * (nant + 1) / 2
                 npol = 4
                 nfreq = vis_dataset.shape[1]
+                freq_indices = list(set(range(nfreq)) - set(exclude_freq_index))
+                freq = vis_dataset.attrs['freq'][freq_indices] # the included freq
+                nfreq = len(freq)
 
                 output_vis = np.zeros((nt, nbls, npol, nfreq), dtype=vis_dataset.dtype)
 
-                output_vis[:, :, 0, :] = vis_dataset[:, :, xx_inds].swapaxes(1, 2) # xx
-                output_vis[:, :, 1, :] = vis_dataset[:, :, yy_inds].swapaxes(1, 2) # yy
-                output_vis[:, :, 2, :] = vis_dataset[:, :, xy_inds].swapaxes(1, 2) # xy
+                # output_vis[:, :, 0, :] = vis_dataset[:, freq_indices, xx_inds].swapaxes(1, 2) # xx
+                ### Only one indexing vector or array is currently allowed for advanced selection in h5py, so
+                output_vis[:, :, 0, :] = vis_dataset[:, :, xx_inds][:, freq_indices, :].swapaxes(1, 2) # xx
+                output_vis[:, :, 1, :] = vis_dataset[:, :, yy_inds][:, freq_indices, :].swapaxes(1, 2) # yy
+                output_vis[:, :, 2, :] = vis_dataset[:, :, xy_inds][:, freq_indices, :].swapaxes(1, 2) # xy
                 for bi, (yi, xj) in enumerate(yx_pair):
                     try:
                         ind = bl_dict['%d_%d' % (yi, xj)]
-                        output_vis[:, bi, 3, :] = vis_dataset[:, :, ind]
+                        output_vis[:, bi, 3, :] = vis_dataset[:, :, ind][:, freq_indices]
                     except KeyError:
                         ind = bl_dict['%d_%d' % (xj, yi)]
-                        output_vis[:, bi, 3, :] = vis_dataset[:, :, ind].conj()
+                        output_vis[:, bi, 3, :] = vis_dataset[:, :, ind][:, freq_indices].conj()
 
                 # save data converted
                 data = fout.create_dataset('data', data=output_vis)
@@ -111,6 +118,7 @@ class Convert(Base):
                 data.attrs['ants'] = valid_ants
                 data.attrs['xchans'] = valid_xchans
                 data.attrs['ychans'] = valid_ychans
+                data.attrs['freq'] = freq
                 # data.attrs['time'] = time_juldate # could not save into attributes
                 fout.create_dataset('time', data=time_juldate)
                 data.attrs['axes'] = ['time', 'bls', 'pol', 'freq']
