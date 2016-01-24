@@ -16,7 +16,7 @@ from tlpipe.utils.path_util import input_path, output_path
 params_init = {
                'nprocs': mpiutil.size, # number of processes to run this module
                'aprocs': range(mpiutil.size), # list of active process rank no.
-               'input_file': 'gain.hdf5', # str or a list of str
+               'input_file': 'gain.hdf5',
                'output_file': None, # None, str or a list of str
                'plot_type': 'amp_phs' # or 'real_imag' or 'amp_phs,real_imag'
               }

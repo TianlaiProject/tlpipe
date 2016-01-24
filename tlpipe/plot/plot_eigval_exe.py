@@ -17,7 +17,7 @@ from tlpipe.utils.path_util import input_path, output_path
 params_init = {
                'nprocs': mpiutil.size, # number of processes to run this module
                'aprocs': range(mpiutil.size), # list of active process rank no.
-               'input_file': 'gain.hdf5', # str or a list of str
+               'input_file': 'gain.hdf5',
                'output_file': None, # None, str or a list of str
                'time_index': [0],
                'freq_index': [255],
