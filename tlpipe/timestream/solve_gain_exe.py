@@ -60,7 +60,7 @@ class SolveGain(Base):
             data_type = dset.dtype
             ants = dset.attrs['ants']
             freq = dset.attrs['freq']
-            pols = dset.attrs['pol']
+            pols = dset.attrs['pol'].tolist()
             az, alt = get_value(dset.attrs['az_alt'])[0]
             az = np.radians(az)
             alt = np.radians(alt)

@@ -54,7 +54,7 @@ class ApplyGain(Base):
             data_type = dataset.dtype
             ants = dataset.attrs['ants']
             freq = dataset.attrs['freq']
-            pol = dataset.attrs['pol']
+            pol = dataset.attrs['pol'].tolist()
 
         npol = data_shp[2]
         nfreq = len(freq)
