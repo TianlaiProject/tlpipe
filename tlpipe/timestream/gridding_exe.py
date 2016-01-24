@@ -15,6 +15,8 @@ from tlpipe.core.base_exe import Base
 from tlpipe.core import tldishes
 from tlpipe.utils.path_util import input_path, output_path
 
+from conv_ker import conv_kernal
+
 
 # Define a dictionary with keys the names of parameters to be read from
 # file and values the defaults.
@@ -73,17 +75,17 @@ def conv_factor(u, v, ui, vi, sigma, l0=0, m0=0):
     return np.exp(-( (2 * np.pi * sigma * (u - ui) - 0.5J * l0 / sigma)**2 + (2 * np.pi * sigma * (v - vi) - 0.5J * m0 / sigma)**2 ))
 
 
-def conv_kernal(u, v, sigma, l0=0, m0=0):
-    # return np.exp(-2.0J * np.pi * (u * l0 + v * m0)) * np.exp(-0.5 * (2 * np.pi * sigma)**2 * (u**2 + v**2))
-    return np.exp(2 * (l0**2 + m0**2) / sigma**2) * np.exp(2.0J * np.pi * (u * l0 + v * m0)) * np.exp(-(2 * np.pi * sigma)**2 * (u**2 + v**2))
+# def conv_kernal(u, v, sigma, l0=0, m0=0):
+#     # return np.exp(-2.0J * np.pi * (u * l0 + v * m0)) * np.exp(-0.5 * (2 * np.pi * sigma)**2 * (u**2 + v**2))
+#     return np.exp(2 * (l0**2 + m0**2) / sigma**2) * np.exp(2.0J * np.pi * (u * l0 + v * m0)) * np.exp(-(2 * np.pi * sigma)**2 * (u**2 + v**2))
 
-def conv_gauss(arr, c, vp, up, sigma, val=1.0, l0=0, m0=0, pix=1, npix=4):
-    for ri in range(-npix, npix+1): # plus 1 make it symmetric
-        for ci in range(-npix, npix+1):
-            tmp = val * conv_kernal(ri*pix, ci*pix, sigma, l0, m0)
-            # tmp = val * conv_kernal((vp+ri)*pix, (up+ci)*pix, sigma, l0, m0)
-            arr[c+(vp+ri), c+(up+ci)] += tmp
-            arr[c-(vp+ri), c-(up+ci)] += np.conj(tmp) # append conjugate
+# def conv_gauss(arr, c, vp, up, sigma, val=1.0, l0=0, m0=0, pix=1, npix=4):
+#     for ri in range(-npix, npix+1): # plus 1 make it symmetric
+#         for ci in range(-npix, npix+1):
+#             tmp = val * conv_kernal(ri*pix, ci*pix, sigma, l0, m0)
+#             # tmp = val * conv_kernal((vp+ri)*pix, (up+ci)*pix, sigma, l0, m0)
+#             arr[c+(vp+ri), c+(up+ci)] += tmp
+#             arr[c-(vp+ri), c-(up+ci)] += np.conj(tmp) # append conjugate
 
 
 
@@ -137,7 +139,7 @@ class Gridding(Base):
 
         u_axis = np.linspace(-max_wl, max_wl, size)
         v_axis = np.linspace(-max_wl, max_wl, size)
-        u_axis, v_axis = np.meshgrid(u_axis, v_axis, sparse=True)
+        # u_axis, v_axis = np.meshgrid(u_axis, v_axis, sparse=True)
 
         uv = np.zeros((size, size), dtype=np.complex128)
         uv_cov = np.zeros((size, size), dtype=np.complex128)
@@ -161,7 +163,10 @@ class Gridding(Base):
 
         # array
         aa = tldishes.get_aa(1.0e-3 * freq) # use GHz
+        nlt = len(lt_inds)
         for ti, t_ind in enumerate(lt_inds): # mpi among time
+            if mpiutil.rank0:
+                print '%d of %d...' % (ti, nlt)
             t = ts[t_ind]
             aa.set_jultime(t)
             s.compute(aa)
@@ -191,8 +196,8 @@ class Gridding(Base):
                 for fi, (u, v) in enumerate(zip(us.flat, vs.flat)):
                     val = local_data[ti, bl_ind, 0, fi] # only I here
                     if np.isfinite(val):
-                        up = np.int(u / res)
-                        vp = np.int(v / res)
+                        # up = np.int(u / res)
+                        # vp = np.int(v / res)
                         # # uv_cov[center+vp, center+up] += 1.0
                         # # uv_cov[center-vp, center-up] += 1.0 # append conjugate
                         # # uv[center+vp, center+up] += val
@@ -200,8 +205,10 @@ class Gridding(Base):
                         # conv_gauss(uv_cov, center, vp, up, sigma, 1.0, l0, m0, res)
                         # conv_gauss(uv, center, vp, up, sigma, val, l0, m0, res)
 
-                        tmp1 = efactor * conv_factor(u_axis, v_axis, up, vp, sigma, l0, m0)
-                        tmp2 = efactor * conv_factor(u_axis, v_axis, -up, -vp, sigma, l0, m0)
+                        # tmp1 = efactor * conv_factor(u_axis, v_axis, up, vp, sigma, l0, m0)
+                        # tmp2 = efactor * conv_factor(u_axis, v_axis, -up, -vp, sigma, l0, m0)
+                        tmp1 = efactor * conv_kernal(u_axis, v_axis, u, v, sigma, l0, m0)
+                        tmp2 = efactor * conv_kernal(u_axis, v_axis, -u, -v, sigma, l0, m0)
                         uv_cov += 1.0 * tmp1
                         uv_cov += 1.0 * tmp2
                         uv += val * tmp1
