@@ -30,6 +30,9 @@ params_init = {
                'res': 1.0, # resolution, unit: wavelength
                'max_wl': 200.0, # max wavelength
                'sigma': 0.07,
+               'conv_pixel': 10,
+               'phase_center': 'cas',
+               'catalog': 'misc,helm,nvss',
                'extra_history': '',
               }
 prefix = 'gr_'
@@ -121,7 +124,7 @@ class Gridding(Base):
             elif cut[0] is not None:
                 t_inds = t_inds[:int(cut[0] * nt)]
             elif cut[1] is not None:
-                t_inds[-int(cut[1] * nt):]
+                t_inds = t_inds[-int(cut[1] * nt):]
 
             npol = dset.shape[2]
             nt = len(ts)
@@ -139,6 +142,7 @@ class Gridding(Base):
         size = np.int(2 * max_wl / res) + 1
         center = np.int(max_wl / res) # the central pixel
         sigma = self.params['sigma']
+        conv_pixel = self.params['conv_pixel']
 
         u_axis = np.linspace(-max_wl, max_wl, size)
         v_axis = np.linspace(-max_wl, max_wl, size)
@@ -195,6 +199,13 @@ class Gridding(Base):
                     if np.isfinite(val):
                         # up = np.int(u / res)
                         # vp = np.int(v / res)
+                        # uc, vc = center + up, center + vp
+                        # ulb, uub = uc - conv_pixel, uc + conv_pixel + 1
+                        # vlb, vub = vc - conv_pixel, vc + conv_pixel + 1
+                        # uc1, vc1 = center - up, center - vp
+                        # ulb1, uub1 = uc1 - conv_pixel, uc1 + conv_pixel + 1
+                        # vlb1, vub1 = vc1 - conv_pixel, vc1 + conv_pixel + 1
+
                         # # uv_cov[center+vp, center+up] += 1.0
                         # # uv_cov[center-vp, center-up] += 1.0 # append conjugate
                         # # uv[center+vp, center+up] += val
@@ -210,6 +221,13 @@ class Gridding(Base):
                         uv_cov += 1.0 * tmp2
                         uv += val * tmp1
                         uv += np.conj(val) * tmp2
+
+                        # tmp1 = efactor * conv_kernal(u_axis[ulb:uub], v_axis[vlb:vub], u, v, sigma, l0, m0)
+                        # tmp2 = efactor * conv_kernal(u_axis[ulb1:uub1], v_axis[vlb1:vub1], -u, -v, sigma, l0, m0)
+                        # uv_cov[vlb:vub, ulb:uub] += 1.0 * tmp1
+                        # uv_cov[vlb1:vub1, ulb1:uub1] += 1.0 * tmp2
+                        # uv[vlb:vub, ulb:uub] += val * tmp1
+                        # uv[vlb1:vub1, ulb1:uub1] += np.conj(val) * tmp2
 
 
         # Reduce data in separate processes
