@@ -70,7 +70,7 @@ class Gridding(Base):
             elif cut[0] is not None:
                 t_inds = t_inds[:int(cut[0] * nt)]
             elif cut[1] is not None:
-                t_inds[-int(cut[1] * nt):]
+                t_inds = t_inds[-int(cut[1] * nt):]
 
             npol = dset.shape[2]
             nt = len(ts)
