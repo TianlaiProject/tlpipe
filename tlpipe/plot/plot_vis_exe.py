@@ -22,6 +22,7 @@ params_init = {
                'output_file': None, # None, str or a list of str
                'bl_index': None, # None or list, None for all baselines
                'pol_index': [0, 1, 2, 3],
+               'cut': [None, None],
                'vmin': None,
                'vmax': None,
               }
@@ -42,6 +43,7 @@ class Plot(Base):
         output_file = self.params['output_file']
         bl_index = self.params['bl_index']
         pol_index = self.params['pol_index']
+        cut = self.params['cut']
         vmin = self.params['vmin']
         vmax = self.params['vmax']
 
@@ -53,10 +55,16 @@ class Plot(Base):
 
         with h5py.File(input_file, 'r') as f:
             dset = f['data']
+            nt = dset.shape[0]
             ants = get_value(dset.attrs['ants'])
             nant = len(ants)
             bls = [(ants[i], ants[j]) for i in range(nant) for j in range(i, nant)]
             nbl  = len(bls)
+            st = int(cut[0] * nt) if cut[0] is not None else None
+            et = int(cut[1] * nt) if cut[1] is not None else None
+            ts = f['time'][st:et]
+            freq = dset.attrs['freq']
+            extent = [freq[0], freq[-1], ts[0], ts[-1]]
             if bl_index is None:
                 bl_index = range(nbl)
             lst = list(itertools.product(bl_index, pol_index))
@@ -65,9 +73,9 @@ class Plot(Base):
                 plt_data = dset[:, bi, pi, :]
                 plt.figure(figsize=(13, 8))
                 plt.subplot(121)
-                plt.imshow(plt_data.real, origin='lower', aspect='auto', vmin=vmin, vmax=vmax)
+                plt.imshow(plt_data.real, origin='lower', aspect='auto', extent=extent, vmin=vmin, vmax=vmax)
                 plt.colorbar()
                 plt.subplot(122)
-                plt.imshow(plt_data.imag, origin='lower', aspect='auto', vmin=vmin, vmax=vmax)
+                plt.imshow(plt_data.imag, origin='lower', aspect='auto', extent=extent, vmin=vmin, vmax=vmax)
                 plt.colorbar()
                 plt.savefig(outfile % (bls[bi][0], bls[bi][1], pi))
