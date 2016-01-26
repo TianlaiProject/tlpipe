@@ -70,8 +70,8 @@ class Plot(Base):
 
         plt.figure(figsize=(8, 6))
         map = Basemap(projection='ortho', lon_0=ra, lat_0=dec, rsphere=1, llcrnrx=dx1, llcrnry=dy1, urcrnrx=dx2, urcrnry=dy2)
-        map.drawmeridians(np.arange(0, 360, 2), latmax=90.0, labels=[1, 1, 1, 1])
-        map.drawparallels(np.arange(-90, 90, 2), labels=[1, 1, 1, 1])
+        map.drawmeridians(np.arange(0, 360, 2), latmax=90.0, labels=[0, 0, 0, 1])
+        map.drawparallels(np.arange(-90, 90, 2), labels=[1, 0, 0, 0])
         map.drawmapboundary()
         map.imshow(img.real, vmin=vmin, vmax=vmax, cmap=cmap, interpolation='nearest')
         plt.colorbar()
