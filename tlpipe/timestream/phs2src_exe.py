@@ -94,6 +94,8 @@ class Phs2src(Base):
         for ti, t in enumerate(local_ts): # mpi among time
             aa.set_jultime(t)
             s.compute(aa)
+            #print "Source RA, Dec", s.ra, s.dec
+            #print "Source Az, Alt", s.az, s.alt
             # get fluxes vs. freq of the calibrator
             # Sc = s.get_jys()
             # get the topocentric coordinate of the calibrator at the current time

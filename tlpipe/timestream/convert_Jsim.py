@@ -10,6 +10,7 @@ import numpy as np
 import h5py
 import ephem
 import pyfits
+import aipy
 
 from tlpipe.utils import mpiutil
 from tlpipe.core.base_exe import Base
@@ -32,9 +33,11 @@ params_init = {
 
                'freq0' : 685.,            # freq of bin 0, in MHz
                'freq_delta': 0.2441,      # freq delta
-               'ra_center': 350.8583,     # target ra, will roll to center
+               'ra_center': 351.0497083,  # target ra, will roll to center
                'duration' : 60*60.,       # obervation time
-               'source'   : ['23:23:26.0000', '58:48:0.0000']
+               #'source'   : ['23:23:26.0000', '58:48:0.0000'],
+               'source'   : ['23:24:11.93', '58:54:16.7'],
+               'phs_ref'  : ['0:0:0.0', '64:54:16.7']
               }
 prefix = 'cvsim_'
 
@@ -50,6 +53,8 @@ class Convert_Sim(Base):
 
     def execute(self):
 
+        print '-'*10
+
         temp_file = input_path(self.params['temp_file'])
         input_file = input_path(self.params['input_file'])
         output_file = output_path(self.params['output_file'])
@@ -60,24 +65,34 @@ class Convert_Sim(Base):
         # load the temp file
         print "Load the temp file", temp_file
         tmp = h5py.File(temp_file, 'r')
-        self.valid_ants = tmp['vis'].attrs['ants']
+        self.valid_ants = tmp['vis'].attrs['ants'][:3]
         print "Antenna used: ", self.valid_ants
 
         # load transit time
-        transit_time = tmp['vis'].attrs["transit_time"]
-        # load pointing direction
-        pointing_az, pointing_alt = tmp['vis'].attrs["az_alt"][0]
+        transit_time = get_ephdate(tmp['vis'].attrs["transit_time"][0], tzone='UTC+00')
+
+        ## load pointing direction
+        #pointing_az, pointing_alt = tmp['vis'].attrs["az_alt"][0]
         # load cite information
         tl = ephem.Observer()
         tl.lon, tl.lat, tl.elev =  tldishes.lon, tldishes.lat, tldishes.elev
         tl.pressure = 0
-        tl.date = transit_time[0]
+        tl.date = transit_time
         obj = ephem.readdb("Obj,f|J," + self.params['source'][0] + 
-                ',' + self.params['source'][1] + "100,2000")
+                ',' + self.params['source'][1] + "0,2000")
+        #obj_radec = "%s_%s"%tuple(self.params['source'])
+        #srclist, cutoff, catalogs = aipy.scripting.parse_srcs(obj_radec, 'misc')
+        #obj = aipy.src.get_catalog(srclist, cutoff, catalogs).values()[0]
         obj.compute(tl)
+        #print obj.ra, obj.dec
+        #print obj.a_ra, obj.a_dec
         #print transit_time
         time_center = tl.previous_transit(obj)
         print "Centre time: ", time_center
+        tl.date = time_center
+        obj.compute(tl)
+        pointing_az, pointing_alt = obj.az, obj.alt
+        print "Pointing at: ",pointing_az, pointing_alt
         #time_center = ephem.julian_date(time_center) 
 
         for infile, outfile in zip(mpiutil.mpilist(input_file), 
@@ -87,21 +102,115 @@ class Convert_Sim(Base):
                     pyfits.open(infile + '_imag.fits', memmap=False) as fin_imag,\
                     h5py.File(outfile, 'w') as fout:
 
-                sim_data, time_axis = self.read_simfits(fin_real, fin_imag)
-                #print sim_data[0, :5, 0, :]
-                data = fout.create_dataset('data', data=sim_data)
-                data.attrs['axes'] = ['time', 'bls', 'pol', 'freq']
-                data.attrs['pol'] = ['I',]
-                data.attrs['ants'] = self.valid_ants
-                data.attrs['history'] = self.history
+                sim_data, time_axis, freq_axis = self.read_simfits(fin_real,fin_imag)
+                #print time_axis[len(time_axis)//2]
+                #print time_axis
 
+                # phs to center pix
+                #src_phs = np.angle(sim_data[len(time_axis)//2, ...])
+                #sim_data *= np.exp(-1.J*src_phs)[None, ...]
+
+                sim_data = sim_data[:, :, None, :] \
+                        * np.array([1,1,0,0])[None, None, :, None]
+                
                 time_axis = [time_center + ti*ephem.second for ti in time_axis]
                 time_axis = np.array([ephem.julian_date(te) for te in time_axis])
                 fout.create_dataset('time', data=time_axis)
 
+                print "Save data ... ",
+                data = fout.create_dataset('data', data=sim_data)
+                data.attrs['axes'] = ['time', 'bls', 'pol', 'freq']
+                data.attrs['pol'] = ['I',]
+                data.attrs['ants'] = self.valid_ants
+                data.attrs['freq'] = freq_axis
+                data.attrs['history'] = self.history
+                data.attrs['transit_time'] = time_center
+                data.attrs['az_alt'] = [[pointing_az, pointing_alt],]
+                data.attrs['int_time'] = time_axis[1] - time_axis[0]
+
+                #check_rawfits(data.value[:,:,0,:].real, data.value[:,:,0,:].imag, 
+                #        output_file=output_file[0].replace('.hdf5', ''))
+                #self.phs2zenith(self.params['phs_ref'], fout)
+                self.phs2zenith_flat(self.params['phs_ref'], fout)
+                #check_rawfits(data.value[:,:,0,:].real, data.value[:,:,0,:].imag, 
+                #        output_file=output_file[0].replace('.hdf5', '') + '_re_ref')
+
                 fout.close()
+                print "Done"
                 fin_real.close()
                 fin_imag.close()
+
+    def phs2zenith_flat(self, phs_ref, data):
+
+        phs_ref = phs_ref[0] + '_' + phs_ref[1]
+        srclist, cutoff, catalogs = aipy.scripting.parse_srcs(phs_ref, 'misc')
+        phs_ref = aipy.src.get_catalog(srclist, cutoff, catalogs).values()[0]
+
+        # get the tl array configuration
+        aa = tldishes.get_aa(data['data'].attrs['freq']*1.e-3)
+
+        aa.set_jultime(data['time'].value[0])
+        phs_ref.compute(aa)
+        print "The phase originly references to: ", phs_ref.ra, phs_ref.dec
+        print "Change reference to Zenith ..."
+
+        for ti, t in enumerate(data['time'].value):
+            aa.set_jultime(t)
+            phs_ref.compute(aa)
+            delta_ra  = phs_ref.ra - aa.sidereal_time()
+            #if delta_ra > np.pi: delta_ra -= 2*np.pi
+            #if delta_ra < -np.pi: delta_ra += 2*np.pi
+            delta_dec = phs_ref.dec - aa.lat 
+            #phs_ref_top = phs_ref.get_crds('top', ncrd=3)
+            phs_ref_top = np.array([delta_ra, delta_dec, 0])
+
+            bi = 0
+            for i in data['data'].attrs['ants']:
+                for j in data['data'].attrs['ants']:
+
+                    if i > j: continue
+
+                    print np.angle(data['data'][ti, bi, 0, :], True)
+                    
+                    uij = aa.gen_uvw(i-1, j-1, src='z').squeeze()
+                    data['data'][ti, bi, :, :] /= \
+                            np.exp(-2.0J * np.pi * np.dot(np.sin(phs_ref_top), uij))
+
+                    bi += 1
+        return data
+
+    def phs2zenith(self, phs_ref, data):
+
+        phs_ref = phs_ref[0] + '_' + phs_ref[1]
+        srclist, cutoff, catalogs = aipy.scripting.parse_srcs(phs_ref, 'misc')
+        phs_ref = aipy.src.get_catalog(srclist, cutoff, catalogs).values()[0]
+
+        # get the tl array configuration
+        aa = tldishes.get_aa(data['data'].attrs['freq']*1.e-3)
+
+        aa.set_jultime(data['time'].value[0])
+        phs_ref.compute(aa)
+        print "The phase originly references to: ", phs_ref.ra, phs_ref.dec
+        print "Change reference to Zenith ..."
+
+        for ti, t in enumerate(data['time'].value):
+            aa.set_jultime(t)
+            phs_ref.compute(aa)
+            phs_ref_top = phs_ref.get_crds('top', ncrd=3)
+            print phs_ref_top
+
+            bi = 0
+            for i in data['data'].attrs['ants']:
+                for j in data['data'].attrs['ants']:
+
+                    if i > j: continue
+                    
+                    uij = aa.gen_uvw(i-1, j-1, src='z').squeeze()
+                    data['data'][ti, bi, :, :] *= \
+                            np.exp(-2.0J * np.pi * np.dot(phs_ref_top, uij))
+
+                    bi += 1
+        return data
 
     def read_simfits(self, real_list, imag_list):
 
@@ -110,15 +219,25 @@ class Convert_Sim(Base):
 
         print "freqN, base_lineN, time_stepN", freq_binsN, base_lineN, time_stepN
 
-        data_real = np.zeros((time_stepN, base_lineN, 1, freq_binsN))
-        data_imag = np.zeros((time_stepN, base_lineN, 1, freq_binsN))
+        data_real = np.zeros((time_stepN, base_lineN, freq_binsN))
+        data_imag = np.zeros((time_stepN, base_lineN, freq_binsN))
 
-        print "Loading data from fits...",
+        print "Loading data from fits ... ",
         for real, imag, i in zip(real_list, imag_list, range(freq_binsN)):
-
-            data_real[:, :, 0, i] = real.data.T
-            data_imag[:, :, 0, i] = imag.data.T
+            data_real[:, :, i] = 0.5 * real.data.T
+            data_imag[:, :, i] = 0.5 * imag.data.T
         print "Done"
+
+        #output_file = output_path(self.params['output_file'])[0]
+        #output_file = output_file.replace('.hdf5', '')
+        #check_rawfits(data_real, data_imag, output_file=output_file)
+
+        # add noise
+        #print "Add noise ...",
+        #data_real += np.random.randn(time_stepN, base_lineN, freq_binsN)
+        #data_imag += np.random.randn(time_stepN, base_lineN, freq_binsN)
+        #data_imag[:,0,:] = 0
+        #print "Done"
 
         baseline_index = get_baseline(valid_ants=self.valid_ants)
         data_real = np.take(data_real, baseline_index, axis=1)
@@ -134,13 +253,13 @@ class Convert_Sim(Base):
         u_vect[u_vect==0] = 1
         u_vect /= np.abs(u_vect)
 
-        data_imag *= u_vect[None, :, None, None]
-
+        #print np.unique(u_vect)
+        data_imag *= u_vect[None, :, None]
 
         # rotate the target to the center
         pix_center = time_stepN//2
         pix_target = np.digitize([self.params['ra_center'], ], 
-                np.linspace(0, 360, time_stepN + 1)) + 1
+                np.linspace(0, 360, time_stepN + 1)) - 1
         data_real = np.roll(data_real, pix_center-pix_target, axis=0)
         data_imag = np.roll(data_imag, pix_center-pix_target, axis=0)
 
@@ -152,7 +271,10 @@ class Convert_Sim(Base):
         time_axis  = np.arange(data_real.shape[0]) - time_range
         time_axis *= (86400. / float(time_stepN))
 
-        return data_real + 1.J*data_imag, time_axis
+        freq_axis  = np.arange(freq_binsN) * self.params['freq_delta']
+        freq_axis += self.params['freq0']
+
+        return data_real + 1.J*data_imag, time_axis, freq_axis
 
 def get_baseline(outroot = './data/baseline_index.dat', valid_ants=None):
 
@@ -216,91 +338,38 @@ def get_baseline(outroot = './data/baseline_index.dat', valid_ants=None):
     #print index_list
     return index_list
 
-
-
-            #with h5py.File(infile, 'r') as fin, h5py.File(outfile, 'w') as fout:
-            #    vis_dataset = fin['vis']
-            #    time_zone = get_value(vis_dataset.attrs['timezone'])
-            #    start_time = get_value(vis_dataset.attrs['start_time'])
-            #    int_time = get_value(vis_dataset.attrs['int_time'])
-            #    ants = get_value(vis_dataset.attrs['ants'])
-            #    xchans = get_value(vis_dataset.attrs['xchans'])
-            #    ychans = get_value(vis_dataset.attrs['ychans'])
-            #    bl_dict = get_value(vis_dataset.attrs['bl_dict'])
-
-            #    # convert time to Julian date
-            #    stime_ephdate = get_ephdate(start_time, tzone=time_zone)
-            #    nt = vis_dataset.shape[0]
-            #    time_ephdate = [stime_ephdate + ti*int_time*ephem.second for ti in range(nt)]
-            #    time_juldate = np.array([ephem.julian_date(te) for te in time_ephdate])
-            #    # select valid antennas (have both x and y)
-            #    valid_ants = [ants[i] for i in range(len(ants)) if xchans[i] is not None and ychans[i] is not None]
-            #    valid_xchans = [xchans[i] for i in range(len(ants)) if xchans[i] is not None and ychans[i] is not None]
-            #    valid_ychans = [ychans[i] for i in range(len(ants)) if xchans[i] is not None and ychans[i] is not None]
-
-            #    # remove excluded ants
-            #    for ant in self.params['exclude_ant']:
-            #        ant_ind = valid_ants.index(ant)
-            #        valid_ants.remove(valid_ants[ant_ind])
-            #        valid_xchans.remove(valid_xchans[ant_ind])
-            #        valid_ychans.remove(valid_ychans[ant_ind])
-
-            #    nant = len(valid_ants)
-            #    xx_pair = [(valid_xchans[i], valid_xchans[j]) for i in range(nant) for j in range(i, nant)]
-            #    yy_pair = [(valid_ychans[i], valid_ychans[j]) for i in range(nant) for j in range(i, nant)]
-            #    xy_pair = [(valid_xchans[i], valid_ychans[j]) for i in range(nant) for j in range(i, nant)]
-            #    yx_pair = [(valid_ychans[i], valid_xchans[j]) for i in range(nant) for j in range(i, nant)]
-
-            #    xx_inds = [bl_dict['%d_%d' % (xi, xj)] for (xi, xj) in xx_pair]
-            #    yy_inds = [bl_dict['%d_%d' % (yi, yj)] for (yi, yj) in yy_pair]
-            #    xy_inds = [bl_dict['%d_%d' % (xi, yj)] for (xi, yj) in xy_pair]
-            #    # yx needs special processing
-
-            #    nbls = nant * (nant + 1) / 2
-            #    npol = 4
-            #    nfreq = vis_dataset.shape[1]
-
-            #    output_vis = np.zeros((nt, nbls, npol, nfreq), dtype=vis_dataset.dtype)
-
-            #    output_vis[:, :, 0, :] = vis_dataset[:, :, xx_inds].swapaxes(1, 2) # xx
-            #    output_vis[:, :, 1, :] = vis_dataset[:, :, yy_inds].swapaxes(1, 2) # yy
-            #    output_vis[:, :, 2, :] = vis_dataset[:, :, xy_inds].swapaxes(1, 2) # xy
-            #    for bi, (yi, xj) in enumerate(yx_pair):
-            #        try:
-            #            ind = bl_dict['%d_%d' % (yi, xj)]
-            #            output_vis[:, bi, 3, :] = vis_dataset[:, :, ind]
-            #        except KeyError:
-            #            ind = bl_dict['%d_%d' % (xj, yi)]
-            #            output_vis[:, bi, 3, :] = vis_dataset[:, :, ind].conj()
-
-            #    # save data converted
-            #    data = fout.create_dataset('data', data=output_vis)
-            #    # copy metadata from input file
-            #    for attrs_name, attrs_value in vis_dataset.attrs.iteritems():
-            #        data.attrs[attrs_name] = attrs_value
-            #    # update some attrs
-            #    data.attrs['ants'] = valid_ants
-            #    data.attrs['xchans'] = valid_xchans
-            #    data.attrs['ychans'] = valid_ychans
-            #    # data.attrs['time'] = time_juldate # could not save into attributes
-            #    fout.create_dataset('time', data=time_juldate)
-            #    data.attrs['axes'] = ['time', 'bls', 'pol', 'freq']
-            #    data.attrs['pol'] = ['xx', 'yy', 'xy', 'yx']
-            #    data.attrs['history'] = self.history
-            #    del data.attrs['bl_dict']
-
-
-def check_plot(file_root):
+def check_rawfits(data_real, data_imag, output_file='./out'):
 
     import matplotlib.pyplot as plt
 
-    data = h5py.File(file_root, 'r')
+    x = np.arange(data_real.shape[0])
 
-    vis = data['data']
-    print vis.shape
+    fig = plt.figure(figsize=(7, 5))
+    ax1 = fig.add_axes([0.12, 0.53, 0.78, 0.40])
+    ax2 = fig.add_axes([0.12, 0.10, 0.78, 0.40])
 
-    plt.pcolormesh(vis[:,3,0,:].real.T)
-    plt.show()
+
+    for i in range(data_real.shape[1]):
+
+        ax1.plot(x, np.mean(data_real[:,i,:], axis=-1))
+        ax2.plot(x, np.mean(data_imag[:,i,:], axis=-1))
+
+    ax1.set_xticklabels([])
+    ax1.minorticks_on()
+    ax1.set_xlim(xmin=x.min(), xmax=x.max())
+    #ax1.set_xlim(xmin=8300, xmax=8550)
+    ax1.tick_params(length=4, width=1., direction='out')
+    ax1.tick_params(which='minor', length=2, width=1., direction='out')
+
+    ax2.set_xlabel('Time Index')
+    ax2.minorticks_on()
+    ax2.set_xlim(xmin=x.min(), xmax=x.max())
+    #ax2.set_xlim(xmin=8300, xmax=8550)
+    ax2.tick_params(length=4, width=1., direction='out')
+    ax2.tick_params(which='minor', length=2, width=1., direction='out')
+
+    plt.savefig(output_file + '_1d.png', format='png')
+    #plt.show()
 
 
 if __name__=="__main__":
@@ -319,5 +388,6 @@ if __name__=="__main__":
     #for key in fits_hdulist[0].header.keys():
     #    print key, fits_hdulist[0].header[key]
 
-    file_root = "/project/ycli/data/tianlai/Jsim/sim_CasA_Transit_pm3600s.hdf5"
+    file_root = "/project/ycli/data/tianlai/Jsim/sim_CasA_Transit_pm600s.hdf5"
+    #file_root = "/project/ycli/data/tianlai/Jsim/sim_CasA_Transit_pm600s_phs2src.hdf5"
     check_plot(file_root)

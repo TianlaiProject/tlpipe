@@ -37,6 +37,8 @@ def latlong_conv(lat):
 # lon = '91:48:23.00'
 lat = '44:9:8.439'
 lon = '91:48:20.177'
+#lat = '64:54:16.7' # test for Jsim, move tl to lat=58, make CasA cross Z
+#lon = '91:48:20.177'
 elev = 1504.3 # m
 
 # (+E, +N) coordinates of each antenna in unit m

@@ -44,7 +44,12 @@ def _single_output_path(path):
 
     path = os.environ['TL_OUTPUT'] + path
 
-    return os.path.abspath(os.path.normpath(os.path.expanduser(path)))
+    o_path = os.path.abspath(os.path.normpath(os.path.expanduser(path)))
+
+    if not os.path.exists(os.path.dirname(o_path)):
+        os.makedirs(os.path.dirname(o_path))
+
+    return o_path
 
 
 def output_path(path):
