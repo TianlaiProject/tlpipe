@@ -1,0 +1,54 @@
+# -*- mode: python; -*-
+
+# input file for pipeline manager
+# execute this pipeline by either command of the following two:
+# tlpipe dir/to/A-projection.pipe
+# mpiexec -n N tlpipe dir/to/A-projection.pipe
+#
+
+pipe_modules = []
+pipe_output_dir = '/project/ycli/data/tianlai/sim/'
+
+#from tlpipe.timestream import sim_fringe
+#pipe_modules.append(sim_fringe.Sim)
+simf_temp_file = '/home/zuoshifan/programming/python/21cmcosmology/dishary/example_cal/tldishes/Cas_20151227/output/data_phs2zen.hdf5'
+simf_output_file = 'sim/sim_CasA.hdf5'
+simf_exclude_ant = [] # x/y not correct
+simf_source = [
+    ['cas', 3000],
+    ['23:44:11.93', '58:54:16.7', 1000], # ra + 5 degree
+    ['23:28:11.93', '57:54:16.7', 0.1], # dec - 1 degree
+    ]
+
+#from tlpipe.plot import plot_fringe
+#pipe_modules.append((plot_fringe.Plot, ('pltf1_', 'pltf_')))
+pltf1_input_file = simf_output_file
+pltf1_output_file = 'plot/sim_CasA'
+
+#from tlpipe.timestream import phs2src_exe
+#pipe_modules.append(phs2src_exe.Phs2src)
+p2s_input_file = simf_output_file
+p2s_output_file = 'p2s/sim_CasA_phs2src.hdf5'
+
+#from tlpipe.plot import plot_fringe
+#pipe_modules.append((plot_fringe.Plot, ('pltf2_', 'pltf_')))
+pltf2_input_file = p2s_output_file
+pltf2_output_file = 'plot/sim_CasA_phs2src'
+
+#from tlpipe.timestream import lin2stokes_exe
+#pipe_modules.append((lin2stokes_exe.Lin2stokes, ('st1_', 'st_')))
+st1_input_file = p2s_output_file
+st1_output_file = 'lin2stokes/data_nocal_stokes.hdf5'
+
+#from tlpipe.timestream import simple_gridding_exe
+#pipe_modules.append((simple_gridding_exe.Gridding, ('sgr1_', 'sgr_')))
+sgr1_input_file = st1_output_file
+sgr1_output_file = 'image/uv_imag_nocal_noconv.hdf5'
+
+from tlpipe.plot import plot_image_exe
+pipe_modules.append(plot_image_exe.Plot)
+plti_input_file = [sgr1_output_file, ]
+plti_scale = 3
+plti_output_file = 'plot/uv_image_nocal_noconv.png'
+
+
