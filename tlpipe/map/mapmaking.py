@@ -1,7 +1,7 @@
 """Module to do the map-making."""
 
-from tlpipe.kiyopy import parse_ini
 from tlpipe.utils import mpiutil
+from tlpipe.core.base_exe import Base
 
 
 # Define a dictionary with keys the names of parameters to be read from
@@ -12,25 +12,16 @@ params_init = {
               }
 prefix = 'mp_'
 
-class MapMaking(object):
+class MapMaking(Base):
     """Class to do the map-making."""
 
     def __init__(self, parameter_file_or_dict=None, feedback=2):
 
-        # Read in the parameters.
-        self.params = parse_ini.parse(parameter_file_or_dict, params_init,
-                                 prefix=prefix, feedback=feedback)
-        self.feedback = feedback
-        nprocs = min(self.params['nprocs'], mpiutil.size)
-        procs = set(range(mpiutil.size))
-        aprocs = set(self.params['aprocs']) & procs
-        self.aprocs = (list(aprocs) + list(set(range(nprocs)) - aprocs))[:nprocs]
-        assert 0 in self.aprocs, 'Process 0 must be active'
-        self.comm = mpiutil.active_comm(self.aprocs) # communicator consists of active processes
+        super(MapMaking, self).__init__(parameter_file_or_dict, params_init, prefix, feedback)
 
     def execute(self):
 
         print 'rank %d executing...' % mpiutil.rank
 
         if mpiutil.rank0:
-            print 'Map-making comes soon...'
+            print self.history
