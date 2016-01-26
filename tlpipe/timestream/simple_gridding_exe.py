@@ -7,6 +7,7 @@ except ImportError:
 
 import os
 import numpy as np
+import ephem
 import aipy as a
 import h5py
 
@@ -61,6 +62,8 @@ class Gridding(Base):
             assert pol in pols, 'Required pol %s is not in this data set with pols %s' % (pol, pols)
             # az = np.radians(dset.attrs['az_alt'][0][0])
             # alt = np.radians(dset.attrs['az_alt'][0][1])
+            start_time = dset.attrs['start_time']
+            history = dset.attrs['history']
 
             # cut head and tail
             nt = len(ts)
@@ -143,6 +146,17 @@ class Gridding(Base):
             uv_imag_fft = np.fft.ifft2(np.fft.ifftshift(1.0J * uv.imag))
             uv_imag_fft = np.fft.ifftshift(uv_imag_fft)
 
+            cen = ephem.Equatorial(s.ra, s.dec, epoch=aa.epoch)
+            # We precess the coordinates of the center of the image here to
+            # J2000, just to have a well-defined epoch for them.  For image coords to
+            # be accurately reconstructed, precession needs to be applied per pixel
+            # and not just per phase-center because ra/dec axes aren't necessarily
+            # aligned between epochs.  When reading these images, to be 100% accurate,
+            # one should precess the ra/dec coordinates back to the date of the
+            # observation, infer the coordinates of all the pixels, and then
+            # precess the coordinates for each pixel independently.
+            cen = ephem.Equatorial(cen, epoch=ephem.J2000)
+
             # save data
             with h5py.File(output_file, 'w') as f:
                 f.create_dataset('uv_cov', data=uv_cov)
@@ -153,3 +167,12 @@ class Gridding(Base):
                 f.attrs['pol'] = pol
                 f.attrs['max_wl'] = max_wl
                 f.attrs['max_lm'] = max_lm
+                f.attrs['src_name'] = s.src_name
+                f.attrs['obs_date'] = start_time
+                f.attrs['ra'] = np.degrees(cen.ra)
+                f.attrs['dec'] = np.degrees(cen.dec)
+                f.attrs['epoch'] = 'J2000'
+                f.attrs['d_ra'] = np.degrees(2.0 * max_lm / size)
+                f.attrs['d_dec'] = np.degrees(2.0 * max_lm / size)
+                f.attrs['freq'] = freq[nfreq/2]
+                f.attrs['history'] = history + self.history
