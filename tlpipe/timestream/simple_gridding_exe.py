@@ -31,6 +31,7 @@ params_init = {
                'sigma': 0.07,
                'phase_center': 'cas',
                'catalog': 'misc,helm,nvss',
+               'bl_range': [None, None], # use baseline length in this range only, in unit lambda
                'extra_history': '',
               }
 prefix = 'sgr_'
@@ -51,6 +52,9 @@ class Gridding(Base):
         pol = self.params['pol']
         phase_center = self.params['phase_center']
         catalog = self.params['catalog']
+        min_bl, max_bl = self.params['bl_range']
+        min_bl = min_bl if min_bl is not None else -np.Inf
+        max_bl = max_bl if max_bl is not None else np.Inf
 
         with h5py.File(input_file, 'r') as f:
             dset = f['data']
@@ -116,6 +120,9 @@ class Gridding(Base):
                     continue
                 us, vs, ws = aa.gen_uvw(i-1, j-1, src=s) # NOTE start from 0
                 for fi, (u, v) in enumerate(zip(us.flat, vs.flat)):
+                    bl_len = np.sqrt(u**2 + v**2)
+                    if not (bl_len >= min_bl and bl_len <= max_bl):
+                        continue
                     val = local_data[ti, bl_ind, pols.index(pol), fi]
                     if np.isfinite(val):
                         up = np.int(u / res)
