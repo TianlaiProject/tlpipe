@@ -23,7 +23,7 @@ params_init = {
                'nprocs': mpiutil.size, # number of processes to run this module
                'aprocs': range(mpiutil.size), # list of active process rank no.
                'input_file': 'data_cal_stokes.hdf5',
-               'output_file': 'uv_imag_noshift.hdf5',
+               'output_file': 'uv_noshift.hdf5',
                'cut': [None, None],
                'pol': 'I',
                'res': 1.0, # resolution, unit: wavelength
@@ -108,7 +108,7 @@ class Gridding(Base):
 
         res = self.params['res']
         max_wl = self.params['max_wl']
-        max_lm = 0.5 * 1.0 / res
+        # max_lm = 0.5 * 1.0 / res
         size = np.int(2 * max_wl / res) + 1
         center = np.int(max_wl / res) # the central pixel
         sigma = self.params['sigma']
@@ -161,12 +161,6 @@ class Gridding(Base):
 
 
         if mpiutil.rank0:
-            uv_cov_fft = np.fft.ifft2(np.fft.ifftshift(uv_cov))
-            uv_cov_fft = np.fft.ifftshift(uv_cov_fft)
-            uv_fft = np.fft.ifft2(np.fft.ifftshift(uv))
-            uv_fft = np.fft.ifftshift(uv_fft)
-            uv_imag_fft = np.fft.ifft2(np.fft.ifftshift(1.0J * uv.imag))
-            uv_imag_fft = np.fft.ifftshift(uv_imag_fft)
 
             cen = ephem.Equatorial(s.ra, s.dec, epoch=aa.epoch)
             # We precess the coordinates of the center of the image here to
@@ -183,18 +177,13 @@ class Gridding(Base):
             with h5py.File(output_file, 'w') as f:
                 f.create_dataset('uv_cov', data=uv_cov)
                 f.create_dataset('uv', data=uv)
-                f.create_dataset('uv_cov_fft', data=uv_cov_fft)
-                f.create_dataset('uv_fft', data=uv_fft)
-                f.create_dataset('uv_imag_fft', data=uv_imag_fft)
                 f.attrs['pol'] = pol
+                f.attrs['res'] = res
                 f.attrs['max_wl'] = max_wl
-                f.attrs['max_lm'] = max_lm
                 f.attrs['src_name'] = s.src_name
                 f.attrs['obs_date'] = start_time
                 f.attrs['ra'] = np.degrees(cen.ra)
                 f.attrs['dec'] = np.degrees(cen.dec)
                 f.attrs['epoch'] = 'J2000'
-                f.attrs['d_ra'] = np.degrees(2.0 * max_lm / size)
-                f.attrs['d_dec'] = np.degrees(2.0 * max_lm / size)
                 f.attrs['freq'] = freq[nfreq/2]
                 f.attrs['history'] = history + self.history
