@@ -61,6 +61,7 @@ class SolveGain(Base):
             ants = dset.attrs['ants']
             freq = dset.attrs['freq']
             pols = dset.attrs['pol'].tolist()
+            history = dset.attrs['history']
             az, alt = get_value(dset.attrs['az_alt'])[0]
             az = np.radians(az)
             alt = np.radians(alt)
@@ -196,4 +197,4 @@ class SolveGain(Base):
                 dset.attrs['ants'] = ants
                 dset.attrs['pol'] = ['xx', 'yy']
                 dset.attrs['freq'] = freq
-                dset.attrs['history'] = self.history
+                dset.attrs['history'] = history + self.history
