@@ -16,7 +16,7 @@ from tlpipe.utils.path_util import input_path, output_path
 params_init = {
                'nprocs': mpiutil.size, # number of processes to run this module
                'aprocs': range(mpiutil.size), # list of active process rank no.
-               'input_file': ['uv_image.hdf5'], # str or a list of str
+               'input_file': [('uv.hdf5', 'image.hdf5')], # str or a list of str
                'output_file': None, # None, str or a list of str
                'scale': 2,
                'plot_sqrt': False,
@@ -34,34 +34,40 @@ class Plot(Base):
 
     def execute(self):
 
-        input_file = input_path(self.params['input_file'])
+        input_file = self.params['input_file']
+        # input_file = input_path(self.params['input_file'])
         output_file = self.params['output_file']
         if output_file is not None:
             output_file = output_path(output_file)
         scale = self.params['scale']
         plot_sqrt = self.params['plot_sqrt']
 
-        if type(input_file) is str:
+        if type(input_file) is not list:
             input_file = [input_file]
         else:
             input_file = list(input_file)
 
         if output_file is None:
-            output_file = [infile.replace('.hdf5', '.png') for infile in input_file]
+            output_file = [infile[1].replace('.hdf5', '.png') for infile in input_file]
         elif type(output_file) is str:
             output_file = [output_file]
         else:
             output_file = list(output_file)
 
         for infile, outfile in zip(mpiutil.mpilist(input_file), mpiutil.mpilist(output_file)):
-            with h5py.File(infile, 'r') as f:
-                uv_cov = f['uv_cov'][...]
-                uv = f['uv'][...]
-                uv_cov_fft = f['uv_cov_fft'][...]
-                uv_fft = f['uv_fft'][...]
-                uv_imag_fft = f['uv_imag_fft'][...]
-                max_wl = f.attrs['max_wl']
-                max_lm = f.attrs['max_lm']
+            uv_file, im_file = infile
+            uv_file = input_path(uv_file)
+            im_file = input_path(im_file)
+            outfile = output_path(outfile)
+            with h5py.File(uv_file, 'r') as fuv, h5py.File(im_file) as fim:
+                uv_cov = fuv['uv_cov'][...]
+                uv = fuv['uv'][...]
+                max_wl = fuv.attrs['max_wl']
+
+                uv_cov_fft = fim['uv_cov_fft'][...]
+                uv_fft = fim['uv_fft'][...]
+                uv_imag_fft = fim['uv_imag_fft'][...]
+                max_lm = fim.attrs['max_lm']
 
 
             plt.figure(figsize=(13, 8))
