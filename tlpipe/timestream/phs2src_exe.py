@@ -27,7 +27,7 @@ params_init = {
                'aprocs': range(mpiutil.size), # list of active process rank no.
                'input_file': 'data_cal.hdf5',
                'output_file': 'data_phs2src.hdf5',
-               'source': 'cas',
+               'source': 'cas', # <src_name> or <ra XX[:XX:xx]>_<dec XX[:XX:xx]> or <time y/m/d h:m:s> (array pointing of this local time)
                'catalog': 'misc,helm,nvss',
                'extra_history': '',
               }
@@ -57,6 +57,7 @@ class Phs2src(Base):
             freq = dset.attrs['freq']
             az = np.radians(dset.attrs['az_alt'][0][0])
             alt = np.radians(dset.attrs['az_alt'][0][1])
+            time_zone = dset.attrs['timezone']
 
             npol = dset.shape[2]
             nt = len(ts)
@@ -76,6 +77,24 @@ class Phs2src(Base):
             data_phs2src = None
 
 
+        # array
+        aa = tldishes.get_aa(1.0e-3 * freq) # use GHz
+        # make all antennas point to the pointing direction
+        for ai in aa:
+            ai.set_pointing(az=az, alt=alt, twist=0)
+
+        try:
+            # convert an observing time to the ra_dec of the array pointing of that time
+            src_time = get_ephdate(source, tzone=time_zone) # utc time
+            aa.date = str(ephem.Date(src_time)) # utc time
+            # print 'date:', aa.date
+            az, alt = ephem.degrees(np.radians(az)), ephem.degrees(np.radians(alt))
+            src_ra, src_dec = aa.radec_of(az, alt)
+            source = '%s_%s' % (src_ra, src_dec)
+            # print 'source:', source
+        except ValueError:
+            pass
+
         # source
         srclist, cutoff, catalogs = a.scripting.parse_srcs(source, catalog)
         cat = a.src.get_catalog(srclist, cutoff, catalogs)
@@ -83,12 +102,6 @@ class Phs2src(Base):
         s = cat.values()[0]
         if mpiutil.rank0:
             print 'Phase to source %s.' % source
-
-        # array
-        aa = tldishes.get_aa(1.0e-3 * freq) # use GHz
-        # make all antennas point to the pointing direction
-        for ai in aa:
-            ai.set_pointing(az=az, alt=alt, twist=0)
 
 
         for ti, t in enumerate(local_ts): # mpi among time
