@@ -128,7 +128,7 @@ class Gridding(Base):
             # convert an observing time to the ra_dec of the array pointing of that time
             src_time = get_ephdate(phase_center, tzone=time_zone) # utc time
             aa.date = str(ephem.Date(src_time)) # utc time
-            az, alt = ephem.degrees(np.radians(az)), ephem.degrees(np.radians(alt))
+            az, alt = ephem.degrees(az), ephem.degrees(alt)
             src_ra, src_dec = aa.radec_of(az, alt)
             phase_center = '%s_%s' % (src_ra, src_dec)
         except ValueError:

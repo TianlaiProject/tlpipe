@@ -88,7 +88,7 @@ class Phs2src(Base):
             src_time = get_ephdate(source, tzone=time_zone) # utc time
             aa.date = str(ephem.Date(src_time)) # utc time
             # print 'date:', aa.date
-            az, alt = ephem.degrees(np.radians(az)), ephem.degrees(np.radians(alt))
+            az, alt = ephem.degrees(az), ephem.degrees(alt)
             src_ra, src_dec = aa.radec_of(az, alt)
             source = '%s_%s' % (src_ra, src_dec)
             # print 'source:', source
