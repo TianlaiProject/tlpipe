@@ -14,6 +14,7 @@ import h5py
 from tlpipe.utils import mpiutil
 from tlpipe.core.base_exe import Base
 from tlpipe.core import tldishes
+from tlpipe.utils.date_util import get_ephdate
 from tlpipe.utils.path_util import input_path, output_path
 
 from conv_ker import conv_kernal
@@ -32,7 +33,7 @@ params_init = {
                'max_wl': 200.0, # max wavelength
                'sigma': 0.07,
                'conv_pixel': 10,
-               'phase_center': 'cas',
+               'phase_center': 'cas', # <src_name> or <ra XX[:XX:xx]>_<dec XX[:XX:xx]> or <time y/m/d h:m:s> (array pointing of this local time)
                'catalog': 'misc,helm,nvss',
                'bl_range': [None, None], # use baseline length in this range only, in unit lambda
                'extra_history': '',
@@ -122,6 +123,7 @@ class Gridding(Base):
             az = np.radians(dset.attrs['az_alt'][0][0])
             alt = np.radians(dset.attrs['az_alt'][0][1])
             start_time = dset.attrs['start_time']
+            time_zone = dset.attrs['timezone']
             history = dset.attrs['history']
 
             nt = len(ts)
@@ -158,6 +160,22 @@ class Gridding(Base):
         uv = np.zeros((size, size), dtype=np.complex128)
         uv_cov = np.zeros((size, size), dtype=np.complex128)
 
+        # array
+        aa = tldishes.get_aa(1.0e-3 * freq) # use GHz
+        # make all antennas point to the pointing direction
+        for ai in aa:
+            ai.set_pointing(az=az, alt=alt, twist=0)
+
+        try:
+            # convert an observing time to the ra_dec of the array pointing of that time
+            src_time = get_ephdate(phase_center, tzone=time_zone) # utc time
+            aa.date = str(ephem.Date(src_time)) # utc time
+            az, alt = ephem.degrees(np.radians(az)), ephem.degrees(np.radians(alt))
+            src_ra, src_dec = aa.radec_of(az, alt)
+            phase_center = '%s_%s' % (src_ra, src_dec)
+        except ValueError:
+            pass
+
         # phase center
         srclist, cutoff, catalogs = a.scripting.parse_srcs(phase_center, catalog)
         cat = a.src.get_catalog(srclist, cutoff, catalogs)
@@ -169,8 +187,6 @@ class Gridding(Base):
         # pointting vector in topocentric coord
         pt_top = a.coord.azalt2top((az, alt))
 
-        # array
-        aa = tldishes.get_aa(1.0e-3 * freq) # use GHz
         nlt = len(lt_inds)
         for ti, t_ind in enumerate(lt_inds): # mpi among time
             if mpiutil.rank0:
