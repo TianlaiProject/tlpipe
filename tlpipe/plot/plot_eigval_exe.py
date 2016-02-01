@@ -3,8 +3,6 @@
 import itertools
 import numpy as np
 import h5py
-import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 from tlpipe.utils import mpiutil
