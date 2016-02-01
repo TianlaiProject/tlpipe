@@ -24,6 +24,7 @@ params_init = {
                'aprocs': range(mpiutil.size), # list of active process rank no.
                'input_file': ['cut_before_transit_conv.hdf5', 'cut_after_transit_conv.hdf5'],
                'output_file': 'data_phs2zen.hdf5',
+               'save_slice': False, # also save data slice used in the computing if True
                'extra_history': '',
               }
 prefix = 'ph_'
@@ -46,6 +47,7 @@ class Phs2zen(Base):
 
         input_file = input_path(self.params['input_file'])
         output_file = output_path(self.params['output_file'])
+        save_slice = self.params['save_slice']
 
         nfiles = len(input_file)
         assert nfiles > 0, 'No input data file'
@@ -65,12 +67,6 @@ class Phs2zen(Base):
 
         npol = data_shp[2]
         nfreq = len(freq)
-        # cut central 80% of the data
-        # data[np.int(0.1*nt):np.int(0.9*nt)] = 0
-        # only early 10%
-        # data[np.int(0.1*nt):] = 0
-        # only late 10%
-        # data[:np.int(0.9*nt)] = 0
 
         nants = len(ants)
         bls = [(ants[i], ants[j]) for i in range(nants) for j in range(i, nants)]
@@ -111,15 +107,16 @@ class Phs2zen(Base):
                 # subtract the mean
                 # data -= np.mean(data, axis=1)
 
-                # freq fft
-                data_slice_fft_freq = np.fft.fft(data_slice, axis=1)
-                data_slice_fft_freq = np.fft.fftshift(data_slice_fft_freq, axes=1)
                 # time fft
                 data_slice_fft_time = np.fft.fft(data_slice, axis=0)
                 data_slice_fft_time = np.fft.fftshift(data_slice_fft_time, axes=0)
-                # freq and time fft
-                data_slice_fft2 = np.fft.fft2(data_slice)
-                data_slice_fft2 = np.fft.fftshift(data_slice_fft2)
+                if save_slice:
+                    # freq fft
+                    data_slice_fft_freq = np.fft.fft(data_slice, axis=1)
+                    data_slice_fft_freq = np.fft.fftshift(data_slice_fft_freq, axes=1)
+                    # freq and time fft
+                    data_slice_fft2 = np.fft.fft2(data_slice)
+                    data_slice_fft2 = np.fft.fftshift(data_slice_fft2)
 
                 ########################
                 # find max in time fft
@@ -132,15 +129,16 @@ class Phs2zen(Base):
                 # ifft for time
                 data_slice_new = np.fft.ifft(np.fft.ifftshift(data_slice_fft_time_max, axes=0), axis=0)
 
-                # freq fft
-                data_slice_new_fft_freq = np.fft.fft(data_slice_new, axis=1)
-                data_slice_new_fft_freq = np.fft.fftshift(data_slice_new_fft_freq, axes=1)
-                # time fft
-                data_slice_new_fft_time = np.fft.fft(data_slice_new, axis=0)
-                data_slice_new_fft_time = np.fft.fftshift(data_slice_new_fft_time, axes=0)
-                # freq and time fft
-                data_slice_new_fft2 = np.fft.fft2(data_slice_new)
-                data_slice_new_fft2 = np.fft.fftshift(data_slice_new_fft2)
+                if save_slice:
+                    # freq fft
+                    data_slice_new_fft_freq = np.fft.fft(data_slice_new, axis=1)
+                    data_slice_new_fft_freq = np.fft.fftshift(data_slice_new_fft_freq, axes=1)
+                    # time fft
+                    data_slice_new_fft_time = np.fft.fft(data_slice_new, axis=0)
+                    data_slice_new_fft_time = np.fft.fftshift(data_slice_new_fft_time, axes=0)
+                    # freq and time fft
+                    data_slice_new_fft2 = np.fft.fft2(data_slice_new)
+                    data_slice_new_fft2 = np.fft.fftshift(data_slice_new_fft2)
 
 
                 # divide phase
@@ -151,15 +149,16 @@ class Phs2zen(Base):
                 # data_phs2zen[:, bl_ind, pol_ind, :] = data_slice_dphs
                 local_data[:, bi, pol_ind, :] = data_slice_dphs # change local_data to save memory
 
-                # freq fft
-                data_slice_dphs_fft_freq = np.fft.fft(data_slice_dphs, axis=1)
-                data_slice_dphs_fft_freq = np.fft.fftshift(data_slice_dphs_fft_freq, axes=1)
-                # time fft
-                data_slice_dphs_fft_time = np.fft.fft(data_slice_dphs, axis=0)
-                data_slice_dphs_fft_time = np.fft.fftshift(data_slice_dphs_fft_time, axes=0)
-                # freq and time fft
-                data_slice_dphs_fft2 = np.fft.fft2(data_slice_dphs)
-                data_slice_dphs_fft2 = np.fft.fftshift(data_slice_dphs_fft2)
+                if save_slice:
+                    # freq fft
+                    data_slice_dphs_fft_freq = np.fft.fft(data_slice_dphs, axis=1)
+                    data_slice_dphs_fft_freq = np.fft.fftshift(data_slice_dphs_fft_freq, axes=1)
+                    # time fft
+                    data_slice_dphs_fft_time = np.fft.fft(data_slice_dphs, axis=0)
+                    data_slice_dphs_fft_time = np.fft.fftshift(data_slice_dphs_fft_time, axes=0)
+                    # freq and time fft
+                    data_slice_dphs_fft2 = np.fft.fft2(data_slice_dphs)
+                    data_slice_dphs_fft2 = np.fft.fftshift(data_slice_dphs_fft2)
 
                 # # Fit a Gaussian function to data_slice_dphs
                 # data_slice_dphs_gauss_fit = np.zeros_like(data_slice_dphs)
@@ -195,25 +194,26 @@ class Phs2zen(Base):
                 data_slice_int_time = np.sum(data_slice_dphs, axis=0)
                 local_int_time[bi, pol_ind, :] = data_slice_int_time
 
-                # save data to file
-                filename = output_path('data_slice_%d_%d_%s.hdf5' % (bls[bl_ind][0], bls[bl_ind][1], pol_dict[pol_ind]))
-                with h5py.File(filename, 'w') as f:
-                    f.create_dataset('data_slice', data=data_slice)
-                    f.create_dataset('data_slice_fft_freq', data=data_slice_fft_freq)
-                    f.create_dataset('data_slice_fft_time', data=data_slice_fft_time)
-                    f.create_dataset('data_slice_fft2', data=data_slice_fft2)
-                    f.create_dataset('data_slice_fft_time_max', data=data_slice_fft_time_max)
-                    f.create_dataset('data_slice_new', data=data_slice_new)
-                    f.create_dataset('data_slice_new_fft_freq', data=data_slice_new_fft_freq)
-                    f.create_dataset('data_slice_new_fft_time', data=data_slice_new_fft_time)
-                    f.create_dataset('data_slice_new_fft2', data=data_slice_new_fft2)
-                    f.create_dataset('data_slice_dphs', data=data_slice_dphs)
-                    f.create_dataset('data_slice_dphs_fft_freq', data=data_slice_dphs_fft_freq)
-                    f.create_dataset('data_slice_dphs_fft_time', data=data_slice_dphs_fft_time)
-                    f.create_dataset('data_slice_dphs_fft2', data=data_slice_dphs_fft2)
-                    # f.create_dataset('data_slice_dphs_gauss_fit', data=data_slice_dphs_gauss_fit)
-                    # f.create_dataset('data_slice_dphs_xgauss', data=data_slice_dphs_xgauss)
-                    f.create_dataset('data_slice_int_time', data=data_slice_int_time)
+                if save_slice:
+                    # save data to file
+                    filename = output_path('data_slice_%d_%d_%s.hdf5' % (bls[bl_ind][0], bls[bl_ind][1], pol_dict[pol_ind]))
+                    with h5py.File(filename, 'w') as f:
+                        f.create_dataset('data_slice', data=data_slice)
+                        f.create_dataset('data_slice_fft_freq', data=data_slice_fft_freq)
+                        f.create_dataset('data_slice_fft_time', data=data_slice_fft_time)
+                        f.create_dataset('data_slice_fft2', data=data_slice_fft2)
+                        f.create_dataset('data_slice_fft_time_max', data=data_slice_fft_time_max)
+                        f.create_dataset('data_slice_new', data=data_slice_new)
+                        f.create_dataset('data_slice_new_fft_freq', data=data_slice_new_fft_freq)
+                        f.create_dataset('data_slice_new_fft_time', data=data_slice_new_fft_time)
+                        f.create_dataset('data_slice_new_fft2', data=data_slice_new_fft2)
+                        f.create_dataset('data_slice_dphs', data=data_slice_dphs)
+                        f.create_dataset('data_slice_dphs_fft_freq', data=data_slice_dphs_fft_freq)
+                        f.create_dataset('data_slice_dphs_fft_time', data=data_slice_dphs_fft_time)
+                        f.create_dataset('data_slice_dphs_fft2', data=data_slice_dphs_fft2)
+                        # f.create_dataset('data_slice_dphs_gauss_fit', data=data_slice_dphs_gauss_fit)
+                        # f.create_dataset('data_slice_dphs_xgauss', data=data_slice_dphs_xgauss)
+                        f.create_dataset('data_slice_int_time', data=data_slice_int_time)
 
 
         # Gather data in separate processes
