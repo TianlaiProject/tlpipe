@@ -71,11 +71,12 @@ class RfiFlag(Base):
             for bi, bl_ind in enumerate(local_bls): # mpi among bls
 
                 data_slice = local_data[:, bi, pol_ind, :].copy()
+                data_slice = np.where(np.isnan(data_slice), 0, data_slice)
                 mean = np.mean(data_slice)
                 data_sub_mean = data_slice - mean
                 sigma = np.std(np.abs(data_sub_mean))
                 # rfi flagging
-                local_data[:, bi, pol_ind, :] = np.where(np.abs(data_sub_mean) > threshold * sigma, np.inf, local_data[:, bi, pol_ind, :])
+                local_data[:, bi, pol_ind, :] = np.where(np.abs(data_sub_mean) > threshold * sigma, complex(np.nan, np.nan), local_data[:, bi, pol_ind, :])
 
 
         # Gather data in separate processes
