@@ -56,10 +56,11 @@ class RfiFlag(Base):
                     out_data[:, :, pi, :] = np.dot(U[:, nsvd:] * s[nsvd:], Vh[nsvd:, :]).reshape((nt, nbls, nfreq))
 
                 out_dset = fout.create_dataset('data', data=out_data)
-                if save_svdmode:
-                    fout.create_dataset('s', data = s[:nsvd])
-                    fout.create_dataset('U', data = U[:, :nsvd])
-                    fout.create_dataset('Vh', data = Vh[:nsvd, :])
+                ### shold save all 4 pol s, U, Vh
+                # if save_svdmode:
+                #     fout.create_dataset('s', data = s[:nsvd])
+                #     fout.create_dataset('U', data = U[:, :nsvd])
+                #     fout.create_dataset('Vh', data = Vh[:nsvd, :])
 
                 fout.create_dataset('time', data=fin['time'])
                 for attrs_name, attrs_value in in_dset.attrs.iteritems():
