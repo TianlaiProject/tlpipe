@@ -1,4 +1,4 @@
-"""Simple RFI flagging by throughing out values exceed the given threshold."""
+"""Simple RFI flagging by throwing out values exceed the given threshold."""
 
 try:
     import cPickle as pickle
@@ -21,6 +21,7 @@ params_init = {
                'input_file': 'data_cal.hdf5',
                'output_file': 'data_simple_rfi.hdf5',
                'threshold': 3.0, # how much sigma
+               'fill0': False, # fill 0 for rfi value, else fill nan
                'extra_history': '',
               }
 prefix = 'sr_'
@@ -39,6 +40,7 @@ class RfiFlag(Base):
         input_file = input_path(self.params['input_file'])
         output_file = output_path(self.params['output_file'])
         threshold = self.params['threshold']
+        fill0 = self.params['fill0']
 
         with h5py.File(input_file, 'r') as f:
             dset = f['data']
@@ -76,7 +78,10 @@ class RfiFlag(Base):
                 data_sub_mean = data_slice - mean
                 sigma = np.std(np.abs(data_sub_mean))
                 # rfi flagging
-                local_data[:, bi, pol_ind, :] = np.where(np.abs(data_sub_mean) > threshold * sigma, complex(np.nan, np.nan), local_data[:, bi, pol_ind, :])
+                if fill0:
+                    local_data[:, bi, pol_ind, :] = np.where(np.abs(data_sub_mean) > threshold * sigma, 0, local_data[:, bi, pol_ind, :])
+                else:
+                    local_data[:, bi, pol_ind, :] = np.where(np.abs(data_sub_mean) > threshold * sigma, complex(np.nan, np.nan), local_data[:, bi, pol_ind, :])
 
 
         # Gather data in separate processes

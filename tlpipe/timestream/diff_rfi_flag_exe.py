@@ -1,4 +1,4 @@
-"""Difference RFI flagging by throughing out values exceed the given threshold."""
+"""Difference RFI flagging by throwing out values exceed the given threshold."""
 
 try:
     import cPickle as pickle
@@ -21,6 +21,7 @@ params_init = {
                'input_file': 'data_cal.hdf5',
                'output_file': 'data_diff_rfi.hdf5',
                'threshold': 3.0, # how much sigma
+               'fill0': False, # fill 0 for rfi value, else fill nan
                'extra_history': '',
               }
 prefix = 'dr_'
@@ -39,6 +40,7 @@ class RfiFlag(Base):
         input_file = input_path(self.params['input_file'])
         output_file = output_path(self.params['output_file'])
         threshold = self.params['threshold']
+        fill0 = self.params['fill0']
 
         with h5py.File(input_file, 'r') as f:
             dset = f['data']
@@ -86,7 +88,10 @@ class RfiFlag(Base):
 
                 # rfi flag
                 for i in range(len(inds)/2):
-                    local_data[:, bi, pol_ind, inds[i]:inds[i+1]] = complex(np.nan, np.nan)
+                    if fill0:
+                        local_data[:, bi, pol_ind, inds[i]:inds[i+1]] = 0
+                    else:
+                        local_data[:, bi, pol_ind, inds[i]:inds[i+1]] = complex(np.nan, np.nan)
 
 
         # Gather data in separate processes
