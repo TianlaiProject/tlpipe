@@ -61,6 +61,8 @@ class RfiCut(Base):
             # data of bl local to this process
             local_data = dset[:, sbl:ebl, :, :]
 
+            local_data = np.where(np.isnan(local_data), 0, local_data)
+
         if mpiutil.rank0:
             data_rfi_cut = np.zeros(data_shp, dtype=data_type) # save data phased to src
         else:
