@@ -20,6 +20,7 @@ params_init = {
                'aprocs': range(mpiutil.size), # list of active process rank no.
                'input_file': 'data_cal.hdf5',
                'output_file': 'data_simple_rfi.hdf5',
+               'imaginary_only': True, # rfi flag in imaginary part
                'threshold': 3.0, # how much sigma
                'fill0': False, # fill 0 for rfi value, else fill nan
                'extra_history': '',
@@ -29,7 +30,7 @@ prefix = 'sr_'
 
 
 class RfiFlag(Base):
-    """Simple RFI flagging by throughing out values exceed the given threshold."""
+    """Simple RFI flagging by throwing out values exceed the given threshold."""
 
     def __init__(self, parameter_file_or_dict=None, feedback=2):
 
@@ -39,6 +40,7 @@ class RfiFlag(Base):
 
         input_file = input_path(self.params['input_file'])
         output_file = output_path(self.params['output_file'])
+        imaginary_only = self.params['imaginary_only']
         threshold = self.params['threshold']
         fill0 = self.params['fill0']
 
@@ -74,9 +76,16 @@ class RfiFlag(Base):
 
                 data_slice = local_data[:, bi, pol_ind, :].copy()
                 data_slice = np.where(np.isnan(data_slice), 0, data_slice)
-                mean = np.mean(data_slice)
-                data_sub_mean = data_slice - mean
-                sigma = np.std(np.abs(data_sub_mean))
+                if imaginary_only:
+                    # rfi flag in imaginary part only
+                    mean = np.mean(data_slice.imag)
+                    data_sub_mean = data_slice.imag - mean
+                    sigma = np.std(data_sub_mean)
+                else:
+                    # rfi flag in real and imaginary part
+                    mean = np.mean(data_slice)
+                    data_sub_mean = data_slice - mean
+                    sigma = np.std(np.abs(data_sub_mean))
                 # rfi flagging
                 if fill0:
                     local_data[:, bi, pol_ind, :] = np.where(np.abs(data_sub_mean) > threshold * sigma, 0, local_data[:, bi, pol_ind, :])
