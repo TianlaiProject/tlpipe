@@ -18,8 +18,9 @@ from tlpipe.utils.path_util import input_path, output_path
 params_init = {
                'nprocs': mpiutil.size, # number of processes to run this module
                'aprocs': range(mpiutil.size), # list of active process rank no.
-               'input_file': 'data_cal.hdf5',
+               'input_file': 'data_phs2src.hdf5',
                'output_file': 'data_diff_rfi.hdf5',
+               'imaginary_only': True, # rfi flag in imaginary part
                'threshold': 3.0, # how much sigma
                'fill0': False, # fill 0 for rfi value, else fill nan
                'extra_history': '',
@@ -29,7 +30,7 @@ prefix = 'dr_'
 
 
 class RfiFlag(Base):
-    """Difference RFI flagging by throughing out values exceed the given threshold."""
+    """Difference RFI flagging by throwing out values exceed the given threshold."""
 
     def __init__(self, parameter_file_or_dict=None, feedback=2):
 
@@ -39,6 +40,7 @@ class RfiFlag(Base):
 
         input_file = input_path(self.params['input_file'])
         output_file = output_path(self.params['output_file'])
+        imaginary_only = self.params['imaginary_only']
         threshold = self.params['threshold']
         fill0 = self.params['fill0']
 
@@ -73,25 +75,49 @@ class RfiFlag(Base):
             for bi, bl_ind in enumerate(local_bls): # mpi among bls
 
                 data_slice = local_data[:, bi, pol_ind, :].copy()
-                tm = np.mean(data_slice, axis=0) # time mean
-                tm_diff = np.diff(tm)
-                tm_diff_mean = np.mean(tm_diff)
-                tm_diff_sub_mean = tm_diff - tm_diff_mean
-                sigma = np.std(np.abs(tm_diff_sub_mean))
-                inds = np.where(np.abs(tm_diff_sub_mean) > threshold * sigma)[0]
-                inds = (inds + 1).tolist()
-                tm_abs_diff = np.diff(np.abs(tm))
-                if tm_abs_diff[inds[0]-1] < 0:
-                    inds = [0] + inds
-                if len(inds) % 2 == 1:
-                    inds = inds + [len(tm)]
+                if imaginary_only:
+                    # rfi flag in imaginary part only
+                    tm = np.mean(data_slice.imag, axis=0) # time mean
+                    tm_diff = np.diff(tm)
+                    tm_diff_mean = np.mean(tm_diff)
+                    tm_diff_sub_mean = tm_diff - tm_diff_mean
+                    sigma = np.std(tm_diff_sub_mean)
+                    inds = np.where(np.abs(tm_diff_sub_mean) > threshold * sigma)[0]
+                    inds = (inds + 1).tolist()
+                    tm_abs_diff = np.diff(np.abs(tm))
+                    # tm_abs_diff = np.abs(tm_diff)
+                    if len(inds) > 0 and tm_abs_diff[inds[0]-1] < 0:
+                        inds = [0] + inds
+                    if len(inds) % 2 == 1:
+                        inds = inds + [len(tm)]
 
-                # rfi flag
-                for i in range(len(inds)/2):
-                    if fill0:
-                        local_data[:, bi, pol_ind, inds[i]:inds[i+1]] = 0
-                    else:
-                        local_data[:, bi, pol_ind, inds[i]:inds[i+1]] = complex(np.nan, np.nan)
+                    # rfi flag
+                    for i in range(len(inds)/2):
+                        if fill0:
+                            local_data[:, bi, pol_ind, inds[i]:inds[i+1]] = 0
+                        else:
+                            local_data[:, bi, pol_ind, inds[i]:inds[i+1]] = complex(np.nan, np.nan)
+                else:
+                    # rfi flag in real and imaginary part
+                    tm = np.mean(data_slice, axis=0) # time mean
+                    tm_diff = np.diff(tm)
+                    tm_diff_mean = np.mean(tm_diff)
+                    tm_diff_sub_mean = tm_diff - tm_diff_mean
+                    sigma = np.std(np.abs(tm_diff_sub_mean))
+                    inds = np.where(np.abs(tm_diff_sub_mean) > threshold * sigma)[0]
+                    inds = (inds + 1).tolist()
+                    tm_abs_diff = np.diff(np.abs(tm))
+                    if len(inds) > 0 and tm_abs_diff[inds[0]-1] < 0:
+                        inds = [0] + inds
+                    if len(inds) % 2 == 1:
+                        inds = inds + [len(tm)]
+
+                    # rfi flag
+                    for i in range(len(inds)/2):
+                        if fill0:
+                            local_data[:, bi, pol_ind, inds[i]:inds[i+1]] = 0
+                        else:
+                            local_data[:, bi, pol_ind, inds[i]:inds[i+1]] = complex(np.nan, np.nan)
 
 
         # Gather data in separate processes
