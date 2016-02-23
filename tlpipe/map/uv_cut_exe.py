@@ -26,6 +26,7 @@ params_init = {
                # 'pol': 'I',
                'bl_range': [None, None], # use baseline length in this range only, in unit lambda
                'cut_threshold': 0.1, # cut 10% largest values
+               'imaginary_only': False, # rfi flag in imaginary part if True
                'extra_history': '',
               }
 prefix = 'uc_'
@@ -46,6 +47,7 @@ class UVCut(Base):
         min_bl = min_bl if min_bl is not None else -np.Inf
         max_bl = max_bl if max_bl is not None else np.Inf
         cut_threshold = self.params['cut_threshold']
+        imaginary_only = self.params['imaginary_only']
 
         if mpiutil.rank0:
             with h5py.File(input_file, 'r') as f:
@@ -65,12 +67,21 @@ class UVCut(Base):
                             uv_cov[vi, ui] = 0
 
                 # cut data larger than threshold
-                uv_imag = uv.imag
-                uv_imag_sort = np.sort(np.abs(uv_imag).reshape(-1))
-                uv_imag_sort = uv_imag_sort[uv_imag_sort > 0]
-                val = uv_imag_sort[int((1 - cut_threshold) * len(uv_imag_sort))]
-                uv = np.where(np.abs(uv_imag)>val, 0, uv)
-                uv_cov = np.where(np.abs(uv_imag)>val, 0, uv_cov)
+                if cut_threshold > 0.0 and cut_threshold <= 1.0:
+                    if imaginary_only:
+                        uv_imag = uv.imag
+                        uv_imag_sort = np.sort(np.abs(uv_imag).reshape(-1))
+                        uv_imag_sort = uv_imag_sort[uv_imag_sort > 0]
+                        val = uv_imag_sort[int((1 - cut_threshold) * len(uv_imag_sort))]
+                        uv = np.where(np.abs(uv_imag)>val, 0, uv)
+                        uv_cov = np.where(np.abs(uv_imag)>val, 0, uv_cov)
+                    else:
+                        uv_abs = np.abs(uv)
+                        uv_abs_sort = np.sort(uv_abs.reshape(-1))
+                        uv_abs_sort = uv_abs_sort[uv_abs_sort > 0]
+                        val = uv_abs_sort[int((1 - cut_threshold) * len(uv_abs_sort))]
+                        uv = np.where(uv_abs>val, 0, uv)
+                        uv_cov = np.where(uv_abs>val, 0, uv_cov)
 
                 # save data
                 with h5py.File(output_file, 'w') as fout:
