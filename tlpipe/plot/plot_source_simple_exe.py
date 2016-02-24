@@ -16,7 +16,7 @@ params_init = {
                'nprocs': mpiutil.size, # number of processes to run this module
                'aprocs': range(mpiutil.size), # list of active process rank no.
                'output_file': 'nvss_sources.png',
-               'phase_center': 'cas', # <src_name> or <ra XX[:XX:xx]>_<dec XX[:XX:xx]> or <time y/m/d h:m:s> (array pointing of this local time)
+               'phase_center': 'cas', # <src_name> or <ra XX[:XX:xx]>_<dec XX[:XX:xx]>
                'catalog': 'nvss',
                'flux': 1.0, # Jy
                'frequency': 750, # MHz
@@ -64,6 +64,11 @@ class Plot(Base):
             decs = [cat.values()[i]._dec for i in range(nsrc)]
             jys = [cat.values()[i].get_jys() for i in range(nsrc)]
 
+            # regular 2 pi periodicity
+            if pc_ra < np.pi:
+                ras = [ (ra - 2 * np.pi) if ra > pc_ra + np.pi else ra for ra in ras ]
+            else:
+                ras = [ (ra + 2 * np.pi) if ra <= pc_ra - np.pi else ra for ra in ras ]
             ls = [ -np.sin(ra - pc_ra) for ra in ras]
             ms = [ np.sin(dec - pc_dec) for dec in decs]
 
