@@ -24,14 +24,14 @@ cvsim_duration = duration
 from tlpipe.plot import plot_fringe
 pipe_modules.append((plot_fringe.Plot, ('pltf1_', 'pltf_')))
 pltf1_input_file = cvsim_output_file[0]
-pltf1_output_file = 'plot/sim_CasA_Transit_pm%ds_phs2zenith'%duration
+pltf1_output_file = 'plot/sim_CasA_Transit_pm%ds_raw'%duration
 
-from tlpipe.timestream import phs2src_exe
-pipe_modules.append(phs2src_exe.Phs2src)
-p2s_input_file = cvsim_output_file[0]
-p2s_output_file = 'p2s/sim_CasA_Transit_pm%ds_phs2src.hdf5'%duration
-
-from tlpipe.plot import plot_fringe
-pipe_modules.append((plot_fringe.Plot, ('pltf2_', 'pltf_')))
-pltf2_input_file = p2s_output_file
-pltf2_output_file = 'plot/sim_CasA_Transit_pm%ds_phs2src'%duration
+#from tlpipe.timestream import phs2src_exe
+#pipe_modules.append(phs2src_exe.Phs2src)
+#p2s_input_file = cvsim_output_file[0]
+#p2s_output_file = 'p2s/sim_CasA_Transit_pm%ds_phs2src.hdf5'%duration
+#
+#from tlpipe.plot import plot_fringe
+#pipe_modules.append((plot_fringe.Plot, ('pltf2_', 'pltf_')))
+#pltf2_input_file = p2s_output_file
+#pltf2_output_file = 'plot/sim_CasA_Transit_pm%ds_phs2src'%duration

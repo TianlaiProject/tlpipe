@@ -5,20 +5,28 @@
 # tlpipe dir/to/A-projection.pipe
 # mpiexec -n N tlpipe dir/to/A-projection.pipe
 #
+import numpy as np
 
 pipe_modules = []
-pipe_output_dir = '/project/ycli/data/tianlai/sim/'
+pipe_output_dir = '/project/ycli/data/tianlai/sim_20160103_flxcut1Jys_5hr/'
 
 #from tlpipe.timestream import sim_fringe
 #pipe_modules.append(sim_fringe.Sim)
-simf_temp_file = '/home/zuoshifan/programming/python/21cmcosmology/dishary/example_cal/tldishes/Cas_20151227/output/data_phs2zen.hdf5'
+simf_temp_file = '/home/zuoshifan/programming/python/21cmcosmology/dishary/example_cal/tldishes/Cas_20160103/output/data_phs2zen.hdf5'
 simf_output_file = 'sim/sim_CasA.hdf5'
 simf_exclude_ant = [] # x/y not correct
-simf_source = [
-    ['cas', 3000],
-    ['23:44:11.93', '58:54:16.7', 1000], # ra + 5 degree
-    ['23:28:11.93', '57:54:16.7', 0.1], # dec - 1 degree
-    ]
+simf_duration    = 5*60*60.
+simf_flux_cut    = 1.
+#simf_source      = '232325+585021'
+simf_ra_range    = [340*np.pi/180., 360*np.pi/180.]
+simf_dec_range   = [50*np.pi/180., 65*np.pi/180.]
+
+#from tlpipe.plot import plot_catalog
+#pipe_modules.append(plot_catalog.Plot_Catalog)
+pltcat_ra_range = [343, 359]
+pltcat_dec_range = [54, 62]
+pltcat_input_file = simf_output_file
+pltcat_output_file = 'plot/sim_CasA'
 
 #from tlpipe.plot import plot_fringe
 #pipe_modules.append((plot_fringe.Plot, ('pltf1_', 'pltf_')))
@@ -44,11 +52,53 @@ st1_output_file = 'lin2stokes/data_nocal_stokes.hdf5'
 #pipe_modules.append((simple_gridding_exe.Gridding, ('sgr1_', 'sgr_')))
 sgr1_input_file = st1_output_file
 sgr1_output_file = 'image/uv_imag_nocal_noconv.hdf5'
+sgr1_catalog = 'misc'
 
-from tlpipe.plot import plot_image_exe
-pipe_modules.append(plot_image_exe.Plot)
+#from tlpipe.timestream import clean_exe
+#pipe_modules.append(clean_exe.Clean)
+cl_input_file = sgr1_output_file
+cl_tol = 1.0e-6
+cl_verbose = True
+
+#from tlpipe.plot import plot_clean_image_exe
+#pipe_modules.append(plot_clean_image_exe.Plot)
+pltc_input_file = 'clean_image_cln.hdf5'
+pltc_output_file = None
+pltc_fov = 10
+pltc_vmin = 0
+pltc_vmax = None
+
+#from tlpipe.plot import plot_image_exe
+#pipe_modules.append(plot_image_exe.Plot)
 plti_input_file = [sgr1_output_file, ]
 plti_scale = 3
 plti_output_file = 'plot/uv_image_nocal_noconv.png'
 
+# test for cut
 
+#from tlpipe.timestream import simple_gridding_exe
+#pipe_modules.append((simple_gridding_exe.Gridding, ('sgr2_', 'sgr_')))
+sgr2_input_file = st1_output_file
+sgr2_output_file = 'image/uv_imag_nocal_noconv_timecut.hdf5'
+sgr2_catalog = 'misc'
+sgr2_cut     = [0.1, 0.1]
+
+#from tlpipe.timestream import clean_exe
+#pipe_modules.append(clean_exe.Clean)
+cl_input_file = sgr2_output_file
+cl_tol = 1.0e-6
+cl_verbose = True
+
+from tlpipe.plot import plot_clean_image_exe
+pipe_modules.append(plot_clean_image_exe.Plot)
+pltc_input_file = 'clean_image_cln.hdf5'
+pltc_output_file = 'plot/clean_image_timecut.png'
+pltc_fov = 10
+pltc_vmin = None
+pltc_vmax = None
+
+#from tlpipe.plot import plot_image_exe
+#pipe_modules.append((plot_image_exe.Plot, ('plti2_', 'plti_')))
+plti2_input_file = [sgr2_output_file, ]
+plti2_scale = 3
+plti2_output_file = 'plot/uv_image_nocal_noconv_timecut.png'

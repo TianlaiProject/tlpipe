@@ -62,7 +62,7 @@ class Gridding(Base):
             assert pol in pols, 'Required pol %s is not in this data set with pols %s' % (pol, pols)
             # az = np.radians(dset.attrs['az_alt'][0][0])
             # alt = np.radians(dset.attrs['az_alt'][0][1])
-            start_time = dset.attrs['start_time']
+            #start_time = dset.attrs['start_time']
             history = dset.attrs['history']
 
             # cut head and tail
@@ -168,7 +168,7 @@ class Gridding(Base):
                 f.attrs['max_wl'] = max_wl
                 f.attrs['max_lm'] = max_lm
                 f.attrs['src_name'] = s.src_name
-                f.attrs['obs_date'] = start_time
+                #f.attrs['obs_date'] = start_time
                 f.attrs['ra'] = np.degrees(cen.ra)
                 f.attrs['dec'] = np.degrees(cen.dec)
                 f.attrs['epoch'] = 'J2000'

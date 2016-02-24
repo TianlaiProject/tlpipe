@@ -1,0 +1,79 @@
+# -*- mode: python; -*-
+
+# input file for pipeline manager
+# execute this pipeline by either command of the following two:
+# tlpipe dir/to/A-projection.pipe
+# mpiexec -n N tlpipe dir/to/A-projection.pipe
+
+import numpy as np
+
+pipe_modules = []
+pipe_output_dir = '/project/ycli/data/tianlai/sim_20160122_Orion_flxcut10Jys/'
+
+#from tlpipe.timestream import sim_fringe
+#pipe_modules.append(sim_fringe.Sim)
+simf_temp_file = '/home/zuoshifan/programming/python/21cmcosmology/dishary/example_cal/tldishes/3src_20160122/output/data_phs2src.hdf5'
+simf_output_file = 'sim/sim_Orion.hdf5'
+simf_exclude_ant = [] # x/y not correct
+simf_duration    = 5*60*60.
+simf_flux_cut    = 1.
+#simf_source      = '053517-052243'      # if source == None, use all
+simf_transit_time= '2016/1/22 23:23:11' # UTC+08
+simf_ra_range    = [70*np.pi/180., 100*np.pi/180.]
+simf_dec_range   = [-10*np.pi/180., 10*np.pi/180.]
+
+#from tlpipe.plot import plot_catalog
+#pipe_modules.append(plot_catalog.Plot_Catalog)
+pltcat_ra_range = [70, 100]
+pltcat_dec_range = [-8, 0]
+pltcat_input_file = simf_output_file
+pltcat_output_file = 'plot/sim_Orion'
+
+#from tlpipe.plot import plot_fringe
+#pipe_modules.append((plot_fringe.Plot, ('pltf1_', 'pltf_')))
+pltf1_input_file = simf_output_file
+pltf1_output_file = 'plot/sim_Orion'
+
+#from tlpipe.timestream import phs2src_exe
+#pipe_modules.append(phs2src_exe.Phs2src)
+p2s_input_file = simf_output_file
+p2s_source =  '053517-052243'
+p2s_output_file = 'p2s/sim_Orion_phs2src.hdf5'
+
+#from tlpipe.plot import plot_fringe
+#pipe_modules.append((plot_fringe.Plot, ('pltf2_', 'pltf_')))
+pltf2_input_file = p2s_output_file
+pltf2_output_file = 'plot/sim_Orion_phs2src'
+
+#from tlpipe.timestream import lin2stokes_exe
+#pipe_modules.append((lin2stokes_exe.Lin2stokes, ('st1_', 'st_')))
+st1_input_file = p2s_output_file
+st1_output_file = 'lin2stokes/data_nocal_stokes.hdf5'
+
+#from tlpipe.timestream import simple_gridding_exe
+#pipe_modules.append((simple_gridding_exe.Gridding, ('sgr1_', 'sgr_')))
+sgr1_input_file = st1_output_file
+sgr1_output_file = 'image/uv_imag_nocal_noconv.hdf5'
+#sgr1_catalog = 'misc'
+sgr1_catalog = 'nvss'
+sgr1_phase_center = '053517-052243'
+
+from tlpipe.timestream import clean_exe
+pipe_modules.append(clean_exe.Clean)
+cl_input_file = sgr1_output_file
+cl_tol = 1.0e-10
+cl_verbose = True
+
+from tlpipe.plot import plot_clean_image_exe
+pipe_modules.append(plot_clean_image_exe.Plot)
+pltc_input_file = 'clean_image_cln.hdf5'
+pltc_output_file = None
+pltc_fov = 30
+pltc_vmin = None
+pltc_vmax = 0.1
+
+from tlpipe.plot import plot_image_exe
+pipe_modules.append(plot_image_exe.Plot)
+plti_input_file = [sgr1_output_file, ]
+plti_scale = 3
+plti_output_file = 'plot/uv_image_nocal_noconv.png'

@@ -103,6 +103,9 @@ class Convert_Sim(Base):
                     h5py.File(outfile, 'w') as fout:
 
                 sim_data, time_axis, freq_axis = self.read_simfits(fin_real,fin_imag)
+
+                sim_data = sim_data.conj()
+
                 #print time_axis[len(time_axis)//2]
                 #print time_axis
 
@@ -131,7 +134,7 @@ class Convert_Sim(Base):
                 #check_rawfits(data.value[:,:,0,:].real, data.value[:,:,0,:].imag, 
                 #        output_file=output_file[0].replace('.hdf5', ''))
                 #self.phs2zenith(self.params['phs_ref'], fout)
-                self.phs2zenith_flat(self.params['phs_ref'], fout)
+                #self.phs2zenith_flat(self.params['phs_ref'], fout)
                 #check_rawfits(data.value[:,:,0,:].real, data.value[:,:,0,:].imag, 
                 #        output_file=output_file[0].replace('.hdf5', '') + '_re_ref')
 
@@ -160,7 +163,7 @@ class Convert_Sim(Base):
             delta_ra  = phs_ref.ra - aa.sidereal_time()
             #if delta_ra > np.pi: delta_ra -= 2*np.pi
             #if delta_ra < -np.pi: delta_ra += 2*np.pi
-            delta_dec = phs_ref.dec - aa.lat 
+            delta_dec = - phs_ref.dec + aa.lat 
             #phs_ref_top = phs_ref.get_crds('top', ncrd=3)
             phs_ref_top = np.array([delta_ra, delta_dec, 0])
 
@@ -170,10 +173,8 @@ class Convert_Sim(Base):
 
                     if i > j: continue
 
-                    print np.angle(data['data'][ti, bi, 0, :], True)
-                    
                     uij = aa.gen_uvw(i-1, j-1, src='z').squeeze()
-                    data['data'][ti, bi, :, :] /= \
+                    data['data'][ti, bi, :, :] *= \
                             np.exp(-2.0J * np.pi * np.dot(np.sin(phs_ref_top), uij))
 
                     bi += 1
@@ -197,7 +198,6 @@ class Convert_Sim(Base):
             aa.set_jultime(t)
             phs_ref.compute(aa)
             phs_ref_top = phs_ref.get_crds('top', ncrd=3)
-            print phs_ref_top
 
             bi = 0
             for i in data['data'].attrs['ants']:

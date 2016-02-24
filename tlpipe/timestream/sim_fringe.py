@@ -33,7 +33,14 @@ params_init = {
                'extra_history': '',
                'duration' : 2*60*60.,       # obervation time
                'int_time' : 10.,            # integration time
-               'source'   : [['23:24:11.93', '58:54:16.7', 100], ],
+               'source'   : None,
+               'flux_cut' : 10.,  # Jys
+
+               'transit_time' : None, # UTC+00
+               'pointing' : None,
+
+               'ra_range'     : None,
+               'dec_range'    : None,
 
                #'freq0' : 685.,            # freq of bin 0, in MHz
                #'freq_delta': 0.2441,      # freq delta
@@ -70,16 +77,24 @@ class Sim(Base):
         pols_list  = tmp['data'].attrs['pol']
 
         # load transit time
-        transit_time = tmp['data'].attrs["transit_time"][0]
-        transit_time = get_ephdate(transit_time, tzone='UTC+00')
+        if self.params['transit_time'] == None:
+            transit_time = tmp['data'].attrs["transit_time"][0]
+            transit_time = get_ephdate(transit_time, tzone='UTC+08')
+        else:
+            transit_time = self.params['transit_time']
+            transit_time = get_ephdate(transit_time, tzone='UTC+08')
         t_n = int(self.params['duration'] / self.params['int_time'])
         time_axis  = np.arange(t_n).astype('float') - t_n//2
         time_axis *= self.params['int_time'] * ephem.second
         time_axis += transit_time
-        time_axis  = np.array([get_juldate(x) for x in time_axis])
+        time_axis  = np.array([ephem.julian_date(x) for x in time_axis])
 
         # load pointing direction
-        pointing = tmp['data'].attrs["az_alt"][0]
+        if self.params['pointing'] == None:
+            pointing = tmp['data'].attrs["az_alt"][0]
+        else:
+            pointing = np.array(self.params['pointing'])
+        print "Pointing at: ", pointing
         # load cite information
 
         tl = tldishes.get_aa(freq_axis*1.e-3)
@@ -91,22 +106,45 @@ class Sim(Base):
         b_n = a_n * (a_n + 1) / 2
         data_sim = np.zeros([t_n, b_n, f_n]) + 1.J * np.zeros([t_n, b_n, f_n])
 
-        for src_crd in self.params['source']:
+        print "Loading NVSS Catalog with Flux > %f Jys"%self.params['flux_cut']
+        srclist, cutoff, catalogs = \
+                aipy.scripting.parse_srcs('%d/0.8'%self.params['flux_cut'], 'nvss')
+        obj_dick = aipy.src.get_catalog(srclist, cutoff, catalogs)
 
-            if len(src_crd) == 3:
-                data = src_crd[2]*np.ones([t_n, b_n, f_n]) + 1.J*np.zeros([t_n, b_n, f_n])
-                src_crd = src_crd[0] + '_' + src_crd[1]
-                srclist, cutoff, catalogs = aipy.scripting.parse_srcs(src_crd, 'misc')
-                obj = aipy.src.get_catalog(srclist, cutoff, catalogs).values()[0]
-            elif len(src_crd) == 2:
-                data = src_crd[1]*np.ones([t_n, b_n, f_n]) + 1.J*np.zeros([t_n, b_n, f_n])
-                srclist, cutoff, catalogs = aipy.scripting.parse_srcs(src_crd[0], 'misc')
-                obj = aipy.src.get_catalog(srclist, cutoff, catalogs).values()[0]
+        if self.params['source'] != None:
+            print "Loading NVSS source: ", self.params['source']
+            obj_list = [obj_dick[self.params['source']], ]
+        else:
+            obj_list = obj_dick.values()
+        print "%d Object are loaded"%len(obj_list)
 
+        obj_used = []
+        for obj in obj_list:
+            tl.set_jultime(time_axis[0])
+            obj.compute(tl)
+            if self.params['ra_range'] != None:
+                if obj.ra > self.params['ra_range'][1] or\
+                        obj.ra < self.params['ra_range'][0]: 
+                            #obj_list.remove(obj)
+                            continue
+            if self.params['dec_range'] != None:
+                if obj.dec > self.params['dec_range'][1]  or\
+                        obj.dec < self.params['dec_range'][0]: 
+                            #obj_list.remove(obj)
+                            continue
+            obj_used += [obj,]
+
+            data = obj.jys[0] * np.ones([t_n, b_n, f_n])\
+                    + 1.J*np.zeros([t_n, b_n, f_n])
 
             for ti, t in enumerate(time_axis):
                 tl.set_jultime(t)
                 obj.compute(tl)
+
+                if obj.alt <= 0: 
+                    #print 'Source %s below horizon'%obj.name
+                    data[ti, ...] = 0.
+                    continue
                 gain = self.get_gain(
                         pointing*np.pi/180., obj.az, obj.alt, freq_axis*1.e-3)
                 bi = 0
@@ -120,7 +158,10 @@ class Sim(Base):
             data_sim += data
 
         data = data_sim[:, :, None, :] * np.array([1,1,0,0])[None, None, :, None]
-        #print data.real.max(), data.real.min()
+
+        print "%d Object are used"%len(obj_used)
+        #obj_list = np.array([[x.ra, x.dec, x.jys[0]] for x in obj_list])
+        obj_list = np.array([[x.ra, x.dec, x.jys[0]] for x in obj_used])
 
         fout = h5py.File(output_file, 'w')
         fout.create_dataset('time', data=time_axis)
@@ -133,6 +174,7 @@ class Sim(Base):
         data.attrs['transit_time'] = transit_time 
         data.attrs['az_alt'] = [pointing,]
         data.attrs['int_time'] = time_axis[1] - time_axis[0]
+        data.attrs['obj_list'] = obj_list
 
         fout.close()
 
