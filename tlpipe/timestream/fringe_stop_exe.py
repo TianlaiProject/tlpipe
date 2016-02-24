@@ -1,4 +1,4 @@
-"""Module to phase data to zenith."""
+"""Module to do fringe-stopping relative to the strongest source."""
 
 try:
     import cPickle as pickle
@@ -23,11 +23,11 @@ params_init = {
                'nprocs': mpiutil.size, # number of processes to run this module
                'aprocs': range(mpiutil.size), # list of active process rank no.
                'input_file': ['cut_before_transit_conv.hdf5', 'cut_after_transit_conv.hdf5'],
-               'output_file': 'data_phs2zen.hdf5',
+               'output_file': 'data_fringestop.hdf5',
                'save_slice': False, # also save data slice used in the computing if True
                'extra_history': '',
               }
-prefix = 'ph_'
+prefix = 'fs_'
 
 
 pol_dict = {0: 'xx', 1: 'yy', 2: 'xy', 3: 'yx'}
@@ -36,12 +36,12 @@ def gauss(x, a, x0, sigma, b):
     return a * np.exp(-(x-x0)**2 / (2 * sigma**2)) + b
 
 
-class Phs2zen(Base):
-    """Phase the data to zenith."""
+class FringeStop(Base):
+    """Module to do fringe-stopping relative to the strongest source."""
 
     def __init__(self, parameter_file_or_dict=None, feedback=2):
 
-        super(Phs2zen, self).__init__(parameter_file_or_dict, params_init, prefix, feedback)
+        super(FringeStop, self).__init__(parameter_file_or_dict, params_init, prefix, feedback)
 
     def execute(self):
 
