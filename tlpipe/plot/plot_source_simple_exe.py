@@ -64,11 +64,17 @@ class Plot(Base):
             decs = [cat.values()[i]._dec for i in range(nsrc)]
             jys = [cat.values()[i].get_jys() for i in range(nsrc)]
 
-            # regular 2 pi periodicity
+            # regular 2 pi periodicity in RA direction
             if pc_ra < np.pi:
                 ras = [ (ra - 2 * np.pi) if ra > pc_ra + np.pi else ra for ra in ras ]
             else:
                 ras = [ (ra + 2 * np.pi) if ra <= pc_ra - np.pi else ra for ra in ras ]
+            # regular pi periodicity in DEC direction
+            if pc_dec < 0:
+                decs = [ (dec - np.pi) if dec > pc_dec + 0.5 * np.pi else dec for dec in decs ]
+            else:
+                decs = [ (dec + np.pi) if dec <= pc_dec - 0.5 * np.pi else dec for dec in decs ]
+
             ls = [ -np.sin(ra - pc_ra) for ra in ras]
             ms = [ np.sin(dec - pc_dec) for dec in decs]
 
