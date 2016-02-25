@@ -26,6 +26,9 @@ params_init = {
                'flux': 1.0, # Jy
                'frequency': 750, # MHz
                'lm_range': [-0.5, 0.5],
+               'plot_fov': True, # plot field of view in the figure
+               'fov': 4.0, # field of view, degree
+               'plot_central_line': True,
               }
 prefix = 'plts_'
 
@@ -52,6 +55,9 @@ class Plot(Base):
         flux = self.params['flux']
         frequency = self.params['frequency']
         lm_range = self.params['lm_range']
+        plot_fov = self.params['plot_fov']
+        fov = self.params['fov']
+        plot_central_line = self.params['plot_central_line']
 
         if mpiutil.rank0:
             # array
@@ -72,6 +78,8 @@ class Plot(Base):
             pc.compute(aa)
             # get the topocentric coordinate of the phase center at the current time
             pc_top = pc.get_crds('top', ncrd=3)
+            if plot_fov:
+                pc_ra, pc_dec = pc._ra, pc._dec # in radians
 
             src = '%f/%f' % (flux, frequency / 1.0e3)
             srclist, cutoff, catalogs = a.scripting.parse_srcs(src, catalog)
@@ -99,9 +107,44 @@ class Plot(Base):
             # flux of each src in cat
             jys = [ s.get_jys() for s in srcs ]
 
+            if plot_fov:
+                fov = np.radians(fov)
+                npt = 200
+                ras = np.linspace(0, 2*np.pi, npt)
+                # dec = pc_dec
+                same_decs = [ a.phs.RadioFixedBody(ra, pc_dec, name='%f_%f' % (ra, pc_dec), epoch=str(aa.epoch)) for ra in ras ]
+                gt_decs = [ a.phs.RadioFixedBody(ra, pc_dec+0.5*fov, name='%f_%f' % (ra, pc_dec+0.5*fov), epoch=str(aa.epoch)) for ra in ras ]
+                lt_decs = [ a.phs.RadioFixedBody(ra, pc_dec-0.5*fov, name='%f_%f' % (ra, pc_dec-0.5*fov), epoch=str(aa.epoch)) for ra in ras ]
+
+                for i in range(npt):
+                    same_decs[i].compute(aa)
+                    gt_decs[i].compute(aa)
+                    lt_decs[i].compute(aa)
+                # get the topocentric coordinate of each src in cat at the current time
+                same_top = [ s.get_crds('top', ncrd=3) for s in same_decs ]
+                gt_top = [ s.get_crds('top', ncrd=3) for s in gt_decs ]
+                lt_top = [ s.get_crds('top', ncrd=3) for s in lt_decs ]
+
+                # l,m of srcs in cat relative to phase center
+                same_ls = [ np.dot(src_top, uvec) for src_top in same_top ]
+                gt_ls = [ np.dot(src_top, uvec) for src_top in gt_top ]
+                lt_ls = [ np.dot(src_top, uvec) for src_top in lt_top ]
+                same_ms = [ np.dot(src_top, vvec) for src_top in same_top ]
+                gt_ms = [ np.dot(src_top, vvec) for src_top in gt_top ]
+                lt_ms = [ np.dot(src_top, vvec) for src_top in lt_top ]
+
+
             # plot
-            plt.figure()
+            plt.figure(figsize=(6, 6))
+            plt.axis('equal')
             plt.scatter(ls, ms, s=jys, c=jys, alpha=0.5)
+            if plot_fov:
+                plt.plot(same_ls, same_ms, 'k', linewidth=0.5)
+                plt.plot(gt_ls, gt_ms, 'k--', linewidth=0.5)
+                plt.plot(lt_ls, lt_ms, 'k--', linewidth=0.5)
+            if plot_central_line:
+                plt.axhline(0, color='k', linestyle='--', linewidth=0.5)
+                plt.axvline(0, color='k', linestyle='--', linewidth=0.5)
             plt.xlabel(r'$l$')
             plt.ylabel(r'$m$')
             plt.xlim(lm_range)
