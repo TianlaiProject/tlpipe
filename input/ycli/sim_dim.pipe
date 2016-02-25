@@ -16,7 +16,7 @@ simf_temp_file = '/home/zuoshifan/programming/python/21cmcosmology/dishary/examp
 simf_output_file = 'sim/sim_dim.hdf5'
 simf_exclude_ant = [] # x/y not correct
 simf_duration    = 4*60*60.
-simf_flux_cut    = 5.
+simf_flux_cut    = 1.
 #simf_source      = '053517-052243'      # if source == None, use all
 simf_transit_time= '2016/2/24 12:07:07' # UTC+08
 simf_ra_range    = [305*np.pi/180., 359*np.pi/180.]

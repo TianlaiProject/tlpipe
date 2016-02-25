@@ -38,6 +38,7 @@ params_init = {
 
                'transit_time' : None, # UTC+00
                'pointing' : None,
+               'timezone' : 'UTC+08',
 
                'ra_range'     : None,
                'dec_range'    : None,
@@ -65,6 +66,7 @@ class Sim(Base):
 
         temp_file = input_path(self.params['temp_file'])
         output_file = output_path(self.params['output_file'])
+        tzone = self.params['timezone']
 
         # load the temp file
         print "Load the temp file", temp_file
@@ -79,15 +81,18 @@ class Sim(Base):
         # load transit time
         if self.params['transit_time'] == None:
             transit_time = tmp['data'].attrs["transit_time"][0]
-            transit_time = get_ephdate(transit_time, tzone='UTC+08')
+            transit_time = get_ephdate(transit_time, tzone=tzone)
         else:
             transit_time = self.params['transit_time']
-            transit_time = get_ephdate(transit_time, tzone='UTC+08')
+            transit_time = get_ephdate(transit_time, tzone=tzone)
         t_n = int(self.params['duration'] / self.params['int_time'])
         time_axis  = np.arange(t_n).astype('float') - t_n//2
         time_axis *= self.params['int_time'] * ephem.second
         time_axis += transit_time
+        start_time = ephem.Date(time_axis[0] + ephem.hour * int(tzone[3:]))
+        print "Start time: ",start_time
         time_axis  = np.array([ephem.julian_date(x) for x in time_axis])
+
 
         # load pointing direction
         if self.params['pointing'] == None:
@@ -175,6 +180,8 @@ class Sim(Base):
         data.attrs['az_alt'] = [pointing,]
         data.attrs['int_time'] = time_axis[1] - time_axis[0]
         data.attrs['obj_list'] = obj_list
+        data.attrs['timezone'] = tzone
+        data.attrs['start_time'] = start_time
 
         fout.close()
 
