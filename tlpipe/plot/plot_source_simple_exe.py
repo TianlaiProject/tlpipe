@@ -15,7 +15,7 @@ from tlpipe.utils.path_util import input_path, output_path
 params_init = {
                'nprocs': mpiutil.size, # number of processes to run this module
                'aprocs': range(mpiutil.size), # list of active process rank no.
-               'output_file': 'nvss_sources.png',
+               'output_file': 'nvss_sources_simple.png',
                'phase_center': 'cas', # <src_name> or <ra XX[:XX:xx]>_<dec XX[:XX:xx]>
                'catalog': 'nvss',
                'flux': 1.0, # Jy
@@ -75,7 +75,9 @@ class Plot(Base):
             else:
                 decs = [ (dec + np.pi) if dec <= pc_dec - 0.5 * np.pi else dec for dec in decs ]
 
-            ls = [ -np.sin(ra - pc_ra) for ra in ras]
+            # ls = [ -np.sin(ra - pc_ra) for ra in ras]
+            ### NOTE: on the sky, directions are top: north, bottom: south, left: east, right: west
+            ls = [ np.sin(ra - pc_ra) for ra in ras]
             ms = [ np.sin(dec - pc_dec) for dec in decs]
 
             # plot
