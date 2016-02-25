@@ -21,6 +21,7 @@ params_init = {
                'flux': 1.0, # Jy
                'frequency': 750, # MHz
                'lm_range': [-0.5, 0.5],
+               'plot_central_line': True,
               }
 prefix = 'pltss_'
 
@@ -45,6 +46,7 @@ class Plot(Base):
         flux = self.params['flux']
         frequency = self.params['frequency']
         lm_range = self.params['lm_range']
+        plot_central_line = self.params['plot_central_line']
 
         if mpiutil.rank0:
             # phase center
@@ -81,8 +83,12 @@ class Plot(Base):
             ms = [ np.sin(dec - pc_dec) for dec in decs]
 
             # plot
-            plt.figure()
+            plt.figure(figsize=(6, 6))
+            plt.axis('equal')
             plt.scatter(ls, ms, s=jys, c=jys, alpha=0.5)
+            if plot_central_line:
+                plt.axhline(0, color='k', linestyle='--', linewidth=0.5)
+                plt.axvline(0, color='k', linestyle='--', linewidth=0.5)
             plt.xlabel(r'$l$')
             plt.ylabel(r'$m$')
             plt.xlim(lm_range)
