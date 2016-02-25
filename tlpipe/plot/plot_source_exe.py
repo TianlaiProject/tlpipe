@@ -92,18 +92,8 @@ class Plot(Base):
             # unit vector in u,v direction in topocentric coordinate at current time relative to the phase center
             uvec, vvec = get_uvvec(pc_top, n_top)
 
-            # print pc_top
-            # print n_top
-            # print uvec
-            # print vvec
-            # print np.dot(uvec, pc_top)
-            # print np.dot(uvec, n_top)
-            # print np.dot(uvec, vvec)
-            # print np.cross(vvec, pc_top)
-
             # l,m of srcs in cat relative to phase center
             ls = [ np.dot(src_top, uvec) for src_top in srcs_top ]
-            # ls = [ -np.dot(src_top, uvec) for src_top in srcs_top ] # ???
             ms = [ np.dot(src_top, vvec) for src_top in srcs_top ]
 
             # flux of each src in cat
