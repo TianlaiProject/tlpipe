@@ -35,8 +35,8 @@ class Plot(Base):
         input_file = self.params['input_file']
         # input_file = input_path(self.params['input_file'])
         output_file = self.params['output_file']
-        if output_file is not None:
-            output_file = output_path(output_file)
+        # if output_file is not None:
+        #     output_file = output_path(output_file)
         scale = self.params['scale']
         plot_sqrt = self.params['plot_sqrt']
 
@@ -117,6 +117,7 @@ class Plot(Base):
                 plt.imshow(plt_data/np.sqrt(np.abs(plt_data)), origin='lower', aspect='auto', extent=extent, interpolation='nearest')
             else:
                 plt.imshow(plt_data, origin='lower', aspect='auto', extent=extent, interpolation='nearest')
+                # plt.imshow(plt_data, origin='lower', aspect='auto', extent=extent, interpolation='nearest', vmin=None, vmax=40)
             plt.xlabel(r'$l$')
             plt.ylabel(r'$m$')
             plt.colorbar()
