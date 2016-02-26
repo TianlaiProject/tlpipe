@@ -23,12 +23,12 @@ params_init = {
                'aprocs': range(mpiutil.size), # list of active process rank no.
                'input_file': 'dirty_image.hdf5',
                'output_file': 'clean_image.hdf5',
-               'method': ['cln'],
+               'method': 'cln', # or 'mem', or 'lsq', or 'ann'
                'model': None, # the model image
                'pol': 'I',
                'gain': 0.1,
                'maxiter': 10000,
-               'tol': 1.0e-3,
+               'tol': 1.0e-6,
                'pos_def': False,
                'verbose': False,
                'extra_history': '',
@@ -69,42 +69,43 @@ class Clean(Base):
         bm_gain = a.img.beam_gain(dbm)
         if mpiutil.rank0:
             print 'Gain of dirty beam:', bm_gain
-        for md in mpiutil.mpilist(method):
-            if md == 'cln':
-                cim, info = a.deconv.clean(dim, dbm, mdl=model, gain=gain, maxiter=maxiter, stop_if_div=True, verbose=verbose, tol=tol, pos_def=pos_def)
-            elif md == 'mem':
-                cim, info = a.deconv.maxent_findvar(dim, dbm, mdl=model, f_var0=0.6, maxiter=maxiter, verbose=verbose, tol=tol, maxiterok=True)
-            elif md == 'lsq':
-                cim, info = a.deconv.lsq(dim, dbm, mdl=model, maxiter=maxiter, verbose=verbose, tol=tol)
-            elif md == 'ann':
-                cim, info = a.deconv.anneal(dim, dbm, mdl=model, maxiter=maxiter, cooling=lambda i,x: tol*(1-np.cos(i/50.0))*(x**2), verbose=verbose)
 
-            # Fit a 2d Gaussian to the dirty beam and convolve that with the clean components.
-            dbm_fit = np.fft.fftshift(dbm)
-            DIM = dbm.shape[0]
-            lo, hi = (DIM - 30)/2, (DIM + 30)/2
-            dbm_fit = dbm_fit[lo:hi, lo:hi]
+        if method == 'cln':
+            cim, info = a.deconv.clean(dim, dbm, mdl=model, gain=gain, maxiter=maxiter, stop_if_div=True, verbose=verbose, tol=tol, pos_def=pos_def)
+        elif method == 'mem':
+            cim, info = a.deconv.maxent_findvar(dim, dbm, mdl=model, f_var0=0.6, maxiter=maxiter, verbose=verbose, tol=tol, maxiterok=True)
+        elif method == 'lsq':
+            cim, info = a.deconv.lsq(dim, dbm, mdl=model, maxiter=maxiter, verbose=verbose, tol=tol)
+        elif method == 'ann':
+            cim, info = a.deconv.anneal(dim, dbm, mdl=model, maxiter=maxiter, cooling=lambda i,x: tol*(1-np.cos(i/50.0))*(x**2), verbose=verbose)
+        else:
+            raise ValueError('Unknown deconvolution method %s' % method)
 
-            cbm = a.twodgauss.twodgaussian(a.twodgauss.moments(dbm_fit), shape=dbm.shape)
-            cbm = a.img.recenter(cbm, (np.ceil((DIM+dbm_fit.shape[0])/2), np.ceil((DIM+dbm_fit.shape[0])/2)))
-            cbm /= np.sum(cbm)
+        # Fit a 2d Gaussian to the dirty beam and convolve that with the clean components.
+        dbm_fit = np.fft.fftshift(dbm)
+        DIM = dbm.shape[0]
+        lo, hi = (DIM - 30)/2, (DIM + 30)/2
+        dbm_fit = dbm_fit[lo:hi, lo:hi]
 
-            cimc = np.fft.fftshift(np.fft.ifft2(np.fft.fft2(cim)*np.fft.fft2(cbm))).real
+        cbm = a.twodgauss.twodgaussian(a.twodgauss.moments(dbm_fit), shape=dbm.shape)
+        cbm = a.img.recenter(cbm, (np.ceil((DIM+dbm_fit.shape[0])/2), np.ceil((DIM+dbm_fit.shape[0])/2)))
+        cbm /= np.sum(cbm)
 
-            rim = info['res']
+        cimc = np.fft.fftshift(np.fft.ifft2(np.fft.fft2(cim)*np.fft.fft2(cbm))).real
 
-            bim = rim / bm_gain + cimc
+        rim = info['res']
 
-            # save clean image
-            output_file = output_file.replace('.hdf5', '_%s.hdf5' % md)
-            with h5py.File(output_file, 'w') as f:
-                f.create_dataset('bim', data=bim)
-                f.create_dataset('cim', data=cim)
-                f.create_dataset('cimc', data=cimc)
-                f.create_dataset('rim', data=rim)
-                # copy metadata from input file
-                with h5py.File(input_file, 'r') as fin:
-                    for attrs_name, attrs_value in fin.attrs.iteritems():
-                        f.attrs[attrs_name] = attrs_value
-                    # update some attrs
-                    f.attrs['history'] = fin.attrs['history'] + self.history
+        bim = rim / bm_gain + cimc
+
+        # save clean image
+        with h5py.File(output_file, 'w') as f:
+            f.create_dataset('bim', data=bim)
+            f.create_dataset('cim', data=cim)
+            f.create_dataset('cimc', data=cimc)
+            f.create_dataset('rim', data=rim)
+            # copy metadata from input file
+            with h5py.File(input_file, 'r') as fin:
+                for attrs_name, attrs_value in fin.attrs.iteritems():
+                    f.attrs[attrs_name] = attrs_value
+                # update some attrs
+                f.attrs['history'] = fin.attrs['history'] + self.history
