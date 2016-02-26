@@ -59,11 +59,17 @@ class Imaging(Base):
                 uv_imag_fft = np.fft.ifft2(np.fft.ifftshift(1.0J * uv.imag))
                 uv_imag_fft = np.fft.ifftshift(uv_imag_fft)
 
+                # imaginary part should be 0
+                assert(np.allclose(uv_cov_fft.imag, 0))
+                assert(np.allclose(uv_fft.imag, 0))
+                assert(np.allclose(uv_imag_fft.imag, 0))
+
                 # save data
                 with h5py.File(output_file, 'w') as fout:
-                    fout.create_dataset('uv_cov_fft', data=uv_cov_fft)
-                    fout.create_dataset('uv_fft', data=uv_fft)
-                    fout.create_dataset('uv_imag_fft', data=uv_imag_fft)
+                    # save only real part
+                    fout.create_dataset('uv_cov_fft', data=uv_cov_fft.real)
+                    fout.create_dataset('uv_fft', data=uv_fft.real)
+                    fout.create_dataset('uv_imag_fft', data=uv_imag_fft.real)
                     # copy meta data from input file
                     for attrs_name, attrs_value in f.attrs.iteritems():
                         fout.attrs[attrs_name] = attrs_value
