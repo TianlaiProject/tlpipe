@@ -78,6 +78,7 @@ class RfiFlag(Base):
                 if imaginary_only:
                     # rfi flag in imaginary part only
                     tm = np.mean(data_slice.imag, axis=0) # time mean
+                    # tm = np.mean(np.abs(np.concatenate((data_slice[:10], data_slice[-10:])).imag), axis=0) # time mean
                     tm_diff = np.diff(tm)
                     tm_diff_mean = np.mean(tm_diff)
                     tm_diff_sub_mean = tm_diff - tm_diff_mean
