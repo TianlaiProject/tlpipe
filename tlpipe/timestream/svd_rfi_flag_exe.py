@@ -43,27 +43,46 @@ class RfiFlag(Base):
         nsvd = self.params['nsvd']
         save_svdmode = self.params['save_svdmode']
 
+        with h5py.File(input_file, 'r') as f:
+            dset = f['data']
+            data_type = dset.dtype
+            nt, nbls, npol, nfreq = dset.shape
+
+            lpol, spol, epol = mpiutil.split_local(npol)
+            local_pols = range(spol, epol)
+
+            local_data = dset[:, :, spol:epol, :]
+
         if mpiutil.rank0:
-            with h5py.File(input_file, 'r') as fin, h5py.File(output_file, 'w') as fout:
-                in_dset = fin['data']
-                nt, nbls, npol, nfreq = in_dset.shape
-                out_data = np.empty_like(in_dset)
-                for pi in range(npol):
-                    data = in_dset[:, :, pi, :].reshape(nt, -1)
-                    data = np.where(np.isnan(data), 0, data)
-                    U, s, Vh = linalg.svd(data, full_matrices=False, overwrite_a=True)
+            data_rfi_flag = np.zeros((nt, nbls, npol, nfreq), dtype=data_type) # save data that have rfi flagged
+        else:
+            data_rfi_flag= None
 
-                    out_data[:, :, pi, :] = np.dot(U[:, nsvd:] * s[nsvd:], Vh[nsvd:, :]).reshape((nt, nbls, nfreq))
+        for pi, pol_ind in enumerate(local_pols): # mpi among pols
+            data_slice = local_data[:, :, pi, :].reshape(nt, -1)
+            data_slice = np.where(np.isnan(data_slice), 0, data_slice)
+            U, s, Vh = linalg.svd(data_slice, full_matrices=False, overwrite_a=True)
 
-                out_dset = fout.create_dataset('data', data=out_data)
+            local_data[:, :, pi, :] = np.dot(U[:, nsvd:] * s[nsvd:], Vh[nsvd:, :]).reshape((nt, nbls, nfreq))
+
+
+        # Gather data in separate processes
+        mpiutil.gather_local(data_rfi_flag, local_data, (0, 0, spol, 0), root=0, comm=self.comm)
+
+        # save data rfi flagged
+        if mpiutil.rank0:
+            with h5py.File(output_file, 'w') as f:
+                dset = f.create_dataset('data', data=data_rfi_flag)
                 ### shold save all 4 pol s, U, Vh
                 # if save_svdmode:
-                #     fout.create_dataset('s', data = s[:nsvd])
-                #     fout.create_dataset('U', data = U[:, :nsvd])
-                #     fout.create_dataset('Vh', data = Vh[:nsvd, :])
+                #     f.create_dataset('s', data = s[:nsvd])
+                #     f.create_dataset('U', data = U[:, :nsvd])
+                #     f.create_dataset('Vh', data = Vh[:nsvd, :])
 
-                fout.create_dataset('time', data=fin['time'])
-                for attrs_name, attrs_value in in_dset.attrs.iteritems():
-                    out_dset.attrs[attrs_name] = attrs_value
+                # copy metadata from input file
+                with h5py.File(input_file, 'r') as fin:
+                    f.create_dataset('time', data=fin['time'])
+                    for attrs_name, attrs_value in fin['data'].attrs.iteritems():
+                        dset.attrs[attrs_name] = attrs_value
                 # update some attrs
-                out_dset.attrs['history'] = out_dset.attrs['history'] + self.history
+                dset.attrs['history'] = dset.attrs['history'] + self.history
