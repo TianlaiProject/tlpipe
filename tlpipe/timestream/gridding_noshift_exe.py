@@ -14,6 +14,7 @@ import h5py
 from tlpipe.utils import mpiutil
 from tlpipe.core.base_exe import Base
 from tlpipe.core import tldishes
+from tlpipe.utils.date_util import get_ephdate
 from tlpipe.utils.path_util import input_path, output_path
 
 
@@ -23,14 +24,15 @@ params_init = {
                'nprocs': mpiutil.size, # number of processes to run this module
                'aprocs': range(mpiutil.size), # list of active process rank no.
                'input_file': 'data_cal_stokes.hdf5',
-               'output_file': 'uv_imag_noshift.hdf5',
+               'output_file': 'uv_noshift.hdf5',
                'cut': [None, None],
                'pol': 'I',
                'res': 1.0, # resolution, unit: wavelength
                'max_wl': 200.0, # max wavelength
                'sigma': 0.07,
-               'phase_center': 'cas',
+               'phase_center': 'cas', # <src_name> or <ra XX[:XX:xx]>_<dec XX[:XX:xx]> or <time y/m/d h:m:s> (array pointing of this local time)
                'catalog': 'misc,helm,nvss',
+               'bl_range': [None, None], # use baseline length in this range only, in unit lambda
                'extra_history': '',
               }
 prefix = 'ngr_'
@@ -68,6 +70,9 @@ class Gridding(Base):
         pol = self.params['pol']
         phase_center = self.params['phase_center']
         catalog = self.params['catalog']
+        min_bl, max_bl = self.params['bl_range']
+        min_bl = min_bl if min_bl is not None else -np.Inf
+        max_bl = max_bl if max_bl is not None else np.Inf
 
         with h5py.File(input_file, 'r') as f:
             dset = f['data']
@@ -77,9 +82,10 @@ class Gridding(Base):
             freq = dset.attrs['freq']
             pols = dset.attrs['pol'].tolist()
             assert pol in pols, 'Required pol %s is not in this data set with pols %s' % (pol, pols)
-            # az = np.radians(dset.attrs['az_alt'][0][0])
-            # alt = np.radians(dset.attrs['az_alt'][0][1])
+            az = np.radians(dset.attrs['az_alt'][0][0])
+            alt = np.radians(dset.attrs['az_alt'][0][1])
             start_time = dset.attrs['start_time']
+            time_zone = dset.attrs['timezone']
             history = dset.attrs['history']
 
             # cut head and tail
@@ -104,13 +110,29 @@ class Gridding(Base):
 
         res = self.params['res']
         max_wl = self.params['max_wl']
-        max_lm = 0.5 * 1.0 / res
+        # max_lm = 0.5 * 1.0 / res
         size = np.int(2 * max_wl / res) + 1
         center = np.int(max_wl / res) # the central pixel
         sigma = self.params['sigma']
 
         uv = np.zeros((size, size), dtype=np.complex128)
         uv_cov = np.zeros((size, size), dtype=np.complex128)
+
+        # array
+        aa = tldishes.get_aa(1.0e-3 * freq) # use GHz
+        # make all antennas point to the pointing direction
+        for ai in aa:
+            ai.set_pointing(az=az, alt=alt, twist=0)
+
+        try:
+            # convert an observing time to the ra_dec of the array pointing of that time
+            src_time = get_ephdate(phase_center, tzone=time_zone) # utc time
+            aa.date = str(ephem.Date(src_time)) # utc time
+            az, alt = ephem.degrees(az), ephem.degrees(alt)
+            src_ra, src_dec = aa.radec_of(az, alt)
+            phase_center = '%s_%s' % (src_ra, src_dec)
+        except ValueError:
+            pass
 
         # phase center
         srclist, cutoff, catalogs = a.scripting.parse_srcs(phase_center, catalog)
@@ -120,8 +142,6 @@ class Gridding(Base):
         if mpiutil.rank0:
             print 'Imaging relative to phase center %s.' % phase_center
 
-        # array
-        aa = tldishes.get_aa(1.0e-3 * freq) # use GHz
         for ti, t_ind in enumerate(lt_inds): # mpi among time
             t = ts[t_ind]
             aa.set_jultime(t)
@@ -133,6 +153,9 @@ class Gridding(Base):
                     continue
                 us, vs, ws = aa.gen_uvw(i-1, j-1, src=s) # NOTE start from 0
                 for fi, (u, v) in enumerate(zip(us.flat, vs.flat)):
+                    bl_len = np.sqrt(u**2 + v**2)
+                    if not (bl_len >= min_bl and bl_len <= max_bl):
+                        continue
                     val = local_data[ti, bl_ind, pols.index(pol), fi]
                     if np.isfinite(val):
                         up = np.int(u / res)
@@ -154,12 +177,6 @@ class Gridding(Base):
 
 
         if mpiutil.rank0:
-            uv_cov_fft = np.fft.ifft2(np.fft.ifftshift(uv_cov))
-            uv_cov_fft = np.fft.ifftshift(uv_cov_fft)
-            uv_fft = np.fft.ifft2(np.fft.ifftshift(uv))
-            uv_fft = np.fft.ifftshift(uv_fft)
-            uv_imag_fft = np.fft.ifft2(np.fft.ifftshift(1.0J * uv.imag))
-            uv_imag_fft = np.fft.ifftshift(uv_imag_fft)
 
             cen = ephem.Equatorial(s.ra, s.dec, epoch=aa.epoch)
             # We precess the coordinates of the center of the image here to
@@ -176,18 +193,13 @@ class Gridding(Base):
             with h5py.File(output_file, 'w') as f:
                 f.create_dataset('uv_cov', data=uv_cov)
                 f.create_dataset('uv', data=uv)
-                f.create_dataset('uv_cov_fft', data=uv_cov_fft)
-                f.create_dataset('uv_fft', data=uv_fft)
-                f.create_dataset('uv_imag_fft', data=uv_imag_fft)
                 f.attrs['pol'] = pol
+                f.attrs['res'] = res
                 f.attrs['max_wl'] = max_wl
-                f.attrs['max_lm'] = max_lm
                 f.attrs['src_name'] = s.src_name
                 f.attrs['obs_date'] = start_time
                 f.attrs['ra'] = np.degrees(cen.ra)
                 f.attrs['dec'] = np.degrees(cen.dec)
                 f.attrs['epoch'] = 'J2000'
-                f.attrs['d_ra'] = np.degrees(2.0 * max_lm / size)
-                f.attrs['d_dec'] = np.degrees(2.0 * max_lm / size)
                 f.attrs['freq'] = freq[nfreq/2]
                 f.attrs['history'] = history + self.history

@@ -77,7 +77,7 @@ class Clean(Base):
             elif md == 'lsq':
                 cim, info = a.deconv.lsq(dim, dbm, mdl=model, maxiter=maxiter, verbose=verbose, tol=tol)
             elif md == 'ann':
-                cim, info = a.deconv.anneal(dim, dbm, mdl=model, maxiter=maxiter, cooling=lambda i,x: opts.tol*(1-n.cos(i/50.))*(x**2), verbose=verbose)
+                cim, info = a.deconv.anneal(dim, dbm, mdl=model, maxiter=maxiter, cooling=lambda i,x: tol*(1-np.cos(i/50.0))*(x**2), verbose=verbose)
 
             # Fit a 2d Gaussian to the dirty beam and convolve that with the clean components.
             dbm_fit = np.fft.fftshift(dbm)
