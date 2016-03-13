@@ -45,7 +45,7 @@ class _close_message(object):
 
 
 def active_comm(aprocs):
-    """Return a communicator consists of processes in `aprocs`."""
+    """Return a communicator consists of a list of processes in `aprocs`."""
     if _comm is None:
         return None
     else:
@@ -55,7 +55,7 @@ def active_comm(aprocs):
 
 
 def active(aprocs):
-    """Make processes in `aprocs` active, while others wait."""
+    """Make a list of processes in `aprocs` active, while others wait."""
     if _comm is None:
         return None
     else:
@@ -84,14 +84,28 @@ def close(aprocs):
             _comm.isend(_close_message(), dest=i)
 
 
-def partition_list_alternate(full_list, i, n):
+def partition_list(full_list, i, n, method='con'):
     """Partition a list into `n` pieces. Return the `i`th partition."""
-    return full_list[i::n]
+    if method == 'con':
+        return np.array_split(full_list, n)[i].tolist()
+    elif method == 'alt':
+        return full_list[i::n]
+    elif method == 'rand':
+        return np.array_split(numpy.random.shuffle(full_list), n)[i].tolist()
+    else:
+        raise ValueError('Unknown partition method %s' % method)
 
 
-def partition_list_mpi(full_list):
+def partition_list_mpi(full_list, method='con', comm=_comm):
     """Return the partition of a list specific to the current MPI process."""
-    return partition_list_alternate(full_list, rank, size)
+    if comm is not None:
+        rank = comm.rank
+        size = comm.size
+
+    return partition_list(full_list, rank, size, method=method)
+
+# alias mpilist for partition_list_mpi for convenience
+mpilist = partition_list_mpi
 
 
 def mpirange(*args, **kargs):
@@ -99,41 +113,38 @@ def mpirange(*args, **kargs):
     """
     full_list = range(*args)
 
-    if kargs.get('alt', False):
-        return partition_list_alternate(full_list, rank, size)
-    else:
-        return np.array_split(full_list, size)[rank]
+    method = kargs.get('method', 'con')
+    comm = kargs.get('comm', _comm)
+
+    return partition_list_mpi(full_list, method=method, comm=comm)
 
 
-def mpilist(lst, alt=False):
-    """A sub list from the input `lst` for this process.
-
-       The sub list is a continuous section of `lst` if `alt` is false,
-       else it consists of alternate elements of `lst`.
-    """
-
-    lst1 = mpirange(len(lst), alt=alt)
-    return [ lst[i] for i in lst1 ]
+def barrier(comm=_comm):
+    if comm is not None and comm.size > 1:
+        comm.Barrier()
 
 
-def barrier():
-    if size > 1:
-        _comm.Barrier()
+def bcast(data, root=0, comm=_comm):
+    if comm is not None and comm.size > 1:
+        return comm.bcast(data, root=root)
 
 
-def bcast(data, root=0):
-    if size > 1:
-        return _comm.bcast(data, root=root)
+# def Gatherv(sendbuf, recvbuf, root=0, comm=_comm):
+#     if comm is not None and comm.size > 1:
+#         comm.Gatherv(sendbuf, recvbuf, root=root)
+#     else:
+#         # if they are just numpy data buffer
+#         recvbuf = sendbuf.copy()
+#         # TODO, other cases
 
 
-def Gatherv(sendbuf, recvbuf, root=0):
-    if size > 1:
-        return _comm.Gatherv(sendbuf, recvbuf, root=root)
-
-
-def Allgatherv(sendbuf, recvbuf):
-    if size > 1:
-        return _comm.Allgatherv(sendbuf, recvbuf)
+# def Allgatherv(sendbuf, recvbuf, comm=_comm):
+#     if comm is not None and comm.size > 1:
+#         return _comm.Allgatherv(sendbuf, recvbuf)
+#     else:
+#         # if they are just numpy data buffer
+#         recvbuf = sendbuf.copy()
+#         # TODO, other cases
 
 
 def typemap(dtype):
@@ -186,7 +197,7 @@ def split_m(n, m):
     return np.array([part, bound[:m], bound[1:(m + 1)]])
 
 
-def split_all(n, comm=None):
+def split_all(n, comm=_comm):
     """
     Split a range (0, n-1) into sub-ranges for each MPI Process.
 
@@ -215,7 +226,7 @@ def split_all(n, comm=None):
     return split_m(n, m)
 
 
-def split_local(n, comm=None):
+def split_local(n, comm=_comm):
     """
     Split a range (0, n-1) into sub-ranges for each MPI Process. This returns
     the parameters only for the current rank.
@@ -298,7 +309,7 @@ def gather_local(global_array, local_array, local_start, root=0, comm=_comm):
             sreq.Wait()
 
 
-def transpose_blocks(row_array, shape, comm=None):
+def transpose_blocks(row_array, shape, comm=_comm):
     """
     Take a 2D matrix which is split between processes row-wise and split it
     column wise between processes.
