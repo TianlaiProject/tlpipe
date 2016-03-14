@@ -17,7 +17,7 @@ params_init = {
                'nprocs': mpiutil.size, # number of processes to run this module
                'aprocs': range(mpiutil.size), # list of active process rank no.
                'input_file': 'data.hdf5',
-               'output_file': None, # None, str or a list of str
+               'output_file': None, # None ork str
                'bl_index': None, # None or list, None for all baselines
                'pol_index': [0, 1, 2, 3],
                'cut': [None, None],
@@ -68,12 +68,16 @@ class Plot(Base):
             lst = list(itertools.product(bl_index, pol_index))
             for (bi, pi) in mpiutil.mpilist(lst):
                 outfile = output_file.replace('.'+suffix, '_%d_%d_%d.'+suffix)
-                plt_data = dset[:, bi, pi, :]
+                plt_data = dset[st:et, bi, pi, :]
                 plt.figure(figsize=(13, 8))
                 plt.subplot(121)
                 plt.imshow(plt_data.real, origin='lower', aspect='auto', extent=extent, vmin=vmin, vmax=vmax)
+                plt.xlabel(r'$\nu$ / MHz')
+                plt.ylabel(r'$t$ / Julian Date')
                 plt.colorbar()
                 plt.subplot(122)
                 plt.imshow(plt_data.imag, origin='lower', aspect='auto', extent=extent, vmin=vmin, vmax=vmax)
+                plt.xlabel(r'$\nu$ / MHz')
+                plt.ylabel(r'$t$ / Julian Date')
                 plt.colorbar()
                 plt.savefig(outfile % (bls[bi][0], bls[bi][1], pi))
