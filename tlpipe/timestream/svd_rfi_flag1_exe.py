@@ -45,28 +45,24 @@ class RfiFlag(Base):
             data_type = dset.dtype
             nt, nbls, npol, nfreq = dset.shape
 
-            lpol, spol, epol = mpiutil.split_local(npol, comm=self.comm)
-            local_pols = range(spol, epol)
+            if mpiutil.rank0:
+                with h5py.File(output_file, 'w') as fout:
+                    nK = min(nt, nbls*nfreq)
+                    out_dset = fout.create_dataset('U', (npol, nt, nK), dtype=data_type)
+                    fout.create_dataset('s', (npol, nK,), dtype=np.float64)
+                    fout.create_dataset('Vh', (npol, nK, nbls*nfreq), dtype=data_type)
+                    # copy metadata from input file
+                    fout.create_dataset('time', data=f['time'])
+                    for attrs_name, attrs_value in dset.attrs.iteritems():
+                        out_dset.attrs[attrs_name] = attrs_value
+                    # update some attrs
+                    out_dset.attrs['history'] = out_dset.attrs['history'] + self.history
 
-            # local_data = dset[:, :, spol:epol, :]
-
-            with h5py.File(output_file, 'w', driver='mpio', comm=self.comm) as fout:
-                nK = min(nt, nbls*nfreq)
-                out_dset = fout.create_dataset('U', (npol, nt, nK), dtype=data_type)
-                fout.create_dataset('s', (npol, nK,), dtype=np.float64)
-                fout.create_dataset('Vh', (npol, nK, nbls*nfreq), dtype=data_type)
-                # copy metadata from input file
-                fout.create_dataset('time', data=f['time'])
-                for attrs_name, attrs_value in dset.attrs.iteritems():
-                    out_dset.attrs[attrs_name] = attrs_value
-                # update some attrs
-                out_dset.attrs['history'] = out_dset.attrs['history'] + self.history
+            mpiutil.barrier(comm=self.comm)
 
             # parallel hdf5 can not write data > 2GB now, so...
             with h5py.File(output_file, 'r+') as fout:
-                # for pi, pol_ind in enumerate(local_pols): # mpi among pols
-                for pol_ind in local_pols: # mpi among pols
-                    # data_slice = local_data[:, :, pi, :].reshape(nt, -1)
+                for pol_ind in mpiutil.mpirange(npol, comm=self.comm): # mpi among pols
                     data_slice = dset[:, :, pol_ind, :].reshape(nt, -1)
                     data_slice = np.where(np.isnan(data_slice), 0, data_slice)
                     U, s, Vh = linalg.svd(data_slice, full_matrices=False, overwrite_a=True)
@@ -74,4 +70,6 @@ class RfiFlag(Base):
                     fout['U'][pol_ind, :, :] = U
                     fout['s'][pol_ind, :] = s
                     fout['Vh'][pol_ind, :, :] = Vh
+
+                mpiutil.barrier(comm=self.comm)
 
