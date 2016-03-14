@@ -56,6 +56,8 @@ class RfiFlag(Base):
             if mpiutil.rank0:
                 with h5py.File(output_file, 'w') as fout:
                     out_dset = fout.create_dataset('data', (nt, nbl, npol, nfreq), dtype=data_type)
+                    # if not filled with data first, subsequent parallel data writing gets wrong sometimes
+                    out_dset[:] = np.array(0.0).astype(data_type)
                     # copy metadata from input file
                     fout.create_dataset('time', data=f['time'])
                     for attrs_name, attrs_value in dset.attrs.iteritems():
@@ -73,4 +75,3 @@ class RfiFlag(Base):
                         fout['data'][:, :, pol_ind, :] = np.dot(f['U'][pol_ind, :, nsvd:] * f['s'][pol_ind, nsvd:], f['Vh'][pol_ind, nsvd:, :]).reshape((nt, nbl, nfreq))
 
                 mpiutil.barrier(comm=self.comm)
-
