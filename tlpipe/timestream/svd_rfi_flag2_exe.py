@@ -8,6 +8,7 @@ except ImportError:
 import numpy as np
 from scipy import linalg
 import h5py
+from caput.mpiarray import MPIArray
 
 from tlpipe.utils import mpiutil
 from tlpipe.core.base_exe import Base
@@ -53,25 +54,27 @@ class RfiFlag(Base):
             bls = [(ants[i], ants[j]) for i in range(nant) for j in range(i, nant)]
             nbl  = len(bls)
 
+            lp, sp, ep = mpiutil.split_local(npol, comm=self.comm)
+            ldata = np.empty((nt, nbl, lp, nfreq), dtype=data_type)
+
+            for pi, pol_ind in enumerate(range(sp, ep)): # mpi among pols
+                if include:
+                    ldata[:, :, pi, :] = np.dot(f['U'][pol_ind, :, :nsvd] * f['s'][pol_ind, :nsvd], f['Vh'][pol_ind, :nsvd, :]).reshape((nt, nbl, nfreq))
+                else:
+                    ldata[:, :, pi, :] = np.dot(f['U'][pol_ind, :, nsvd:] * f['s'][pol_ind, nsvd:], f['Vh'][pol_ind, nsvd:, :]).reshape((nt, nbl, nfreq))
+
+            mpiutil.barrier(comm=self.comm)
+
+            data = MPIArray.wrap(ldata, axis=2, comm=self.comm)
+            data.to_hdf5(output_file, 'data', create=True)
+
             if mpiutil.rank0:
-                with h5py.File(output_file, 'w') as fout:
-                    out_dset = fout.create_dataset('data', (nt, nbl, npol, nfreq), dtype=data_type)
-                    # if not filled with data first, subsequent parallel data writing gets wrong sometimes
-                    out_dset[:] = np.array(0.0).astype(data_type)
+                with h5py.File(output_file, 'r+') as fout:
+                    # out_dset = fout.create_dataset('data', (nt, nbl, npol, nfreq), dtype=data_type)
+                    out_dset = fout['data']
                     # copy metadata from input file
                     fout.create_dataset('time', data=f['time'])
                     for attrs_name, attrs_value in dset.attrs.iteritems():
                         out_dset.attrs[attrs_name] = attrs_value
                     # update some attrs
                     out_dset.attrs['history'] = out_dset.attrs['history'] + self.history
-
-            mpiutil.barrier(comm=self.comm)
-
-            with h5py.File(output_file, 'r+') as fout:
-                for pol_ind in mpiutil.mpirange(npol, comm=self.comm): # mpi among pols
-                    if include:
-                        fout['data'][:, :, pol_ind, :] = np.dot(f['U'][pol_ind, :, :nsvd] * f['s'][pol_ind, :nsvd], f['Vh'][pol_ind, :nsvd, :]).reshape((nt, nbl, nfreq))
-                    else:
-                        fout['data'][:, :, pol_ind, :] = np.dot(f['U'][pol_ind, :, nsvd:] * f['s'][pol_ind, nsvd:], f['Vh'][pol_ind, nsvd:, :]).reshape((nt, nbl, nfreq))
-
-                mpiutil.barrier(comm=self.comm)
