@@ -149,6 +149,75 @@ def bcast(data, root=0, comm=_comm):
 #         # TODO, other cases
 
 
+def parallel_map(func, glist, root=None, method='con', comm=_comm):
+    """Apply a parallel map using MPI.
+
+    Should be called collectively on the same list. All ranks return the full
+    set of results.
+
+    Parameters
+    ----------
+    func : function
+        Function to apply.
+    glist : list
+        List of map over. Must be globally defined.
+    root : None or Integer
+        Which process should gather the results, all processes will gather the results if None.
+    method: str
+        How to split `glist` to each process, can be 'con': continuously, 'alt': alternatively, 'rand': randomly. Default is 'con'.
+    comm : MPI communicator
+        MPI communicator that array is distributed over. Default is the gobal _comm.
+
+    Returns
+    -------
+    results : list
+        Global list of results.
+    """
+
+    # Synchronize
+    barrier(comm=comm)
+
+    # If we're only on a single node, then just perform without MPI
+    if comm is None or comm.size == 1:
+        return [func(item) for item in glist]
+
+    # Pair up each list item with its position.
+    zlist = list(enumerate(glist))
+
+    # Partition list based on MPI rank
+    llist = partition_list_mpi(zlist, method=method, comm=comm)
+
+    # Operate on sublist
+    flist = [(ind, func(item)) for ind, item in llist]
+
+    barrier(comm=comm)
+
+    rlist = None
+    if root is None:
+        # Gather all results onto all ranks
+        rlist = comm.allgather(flist)
+    else:
+        # Gather all results onto the specified rank
+        rlist = comm.gather(flist, root=root)
+
+    if rlist is not None:
+        # Flatten the list of results
+        flatlist = [item for sublist in rlist for item in sublist]
+
+        # Sort into original order
+        sortlist = sorted(flatlist, key=(lambda item: item[0]))
+
+        # Synchronize
+        # barrier(comm=comm)
+
+        # Zip to remove indices and extract the return values into a list
+        return list(zip(*sortlist)[1])
+    else:
+        return None
+
+
+
+
 def typemap(dtype):
     """Map a numpy dtype into an MPI_Datatype.
 
