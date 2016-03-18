@@ -127,6 +127,8 @@ def barrier(comm=_comm):
 def bcast(data, root=0, comm=_comm):
     if comm is not None and comm.size > 1:
         return comm.bcast(data, root=root)
+    else:
+        return data
 
 
 # def Gatherv(sendbuf, recvbuf, root=0, comm=_comm):
@@ -329,18 +331,16 @@ def transpose_blocks(row_array, shape, comm=_comm):
         Local section of the global array (split column wise).
     """
 
-    if not comm:
-        try:
-            comm=MPI.COMM_WORLD
-        except NameError:
-            if row_array.shape[:-1] == shape[:-1]:
-                # We are working on a single node and being asked to do the
-                # a trivial transpose.
-                # Note that to mimic the mpi behaviour we have to allow the
-                # last index to be trimmed.
-                return row_array[...,:shape[-1]].copy()
-            else:
-                raise
+    if comm is None or comm.size == 1:
+        # only one process
+        if row_array.shape[:-1] == shape[:-1]:
+            # We are working on a single node and being asked to do
+            # a trivial transpose.
+            # Note that to mimic the mpi behaviour we have to allow the
+            # last index to be trimmed.
+            return row_array[..., :shape[-1]].copy()
+        else:
+            raise ValueError('Shape %s is incompatible with `row_array`s shape %s' % (shape, row_array.shape))
 
     nr = shape[0]
     nc = shape[-1]
@@ -435,7 +435,7 @@ def transpose_blocks(row_array, shape, comm=_comm):
     return recv_buffer.reshape(shape[:-1] + (pc,))
 
 
-def allocate_hdf5_dataset(fname, dsetname, shape, dtype, comm=None):
+def allocate_hdf5_dataset(fname, dsetname, shape, dtype, comm=_comm):
     """Create a hdf5 dataset and return its offset and size.
 
     The dataset will be created contiguously and immediately allocated,
@@ -465,12 +465,9 @@ def allocate_hdf5_dataset(fname, dsetname, shape, dtype, comm=None):
 
     import h5py
 
-    if not comm:
-        comm=MPI.COMM_WORLD
-
     state = None
 
-    if comm.rank == 0:
+    if comm is None or comm.rank == 0:
 
         # Create/open file
         f = h5py.File(fname, 'a')
@@ -493,7 +490,8 @@ def allocate_hdf5_dataset(fname, dsetname, shape, dtype, comm=None):
 
         f.close()
 
-    state = comm.bcast(state, root=0)
+    # state = comm.bcast(state, root=0)
+    state = bcast(state, root=0, comm=comm)
 
     return state
 
@@ -535,13 +533,10 @@ def lock_and_write_buffer(obj, fname, offset, size):
     os.close(fd)
 
 
-def parallel_rows_write_hdf5(fname, dsetname, local_data, shape, comm=None):
+def parallel_rows_write_hdf5(fname, dsetname, local_data, shape, comm=_comm):
     """Write out array (distributed across processes row wise) into a HDF5 in parallel.
 
     """
-
-    if not comm:
-        comm=MPI.COMM_WORLD
 
     offset, size = allocate_hdf5_dataset(fname, dsetname, shape, local_data.dtype, comm=comm)
 
@@ -568,7 +563,7 @@ class SelfWrapper(ModuleType):
             return MPI.__dict__[name]
 
     def __call__(self, **kwargs):
-        print 'here'
+        # print 'here'
         return SelfWrapper(self.self_module, kwargs)
 
 
