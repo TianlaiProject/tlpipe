@@ -1,0 +1,197 @@
+# -*- mode: python; -*-
+
+# input file for pipeline manager
+# execute this pipeline by either command of the following two:
+# tlpipe dir/to/cas5h.pipe
+# mpiexec -n N tlpipe dir/to/cas5h.pipe
+
+
+pipe_modules = []
+data_dir = '/home/zuoshifan/programming/python/21cmcosmology/dishary/example_cal/tldishes/Cas_20160103/'
+pipe_output_dir = data_dir + 'output_5hrfi1/'
+
+
+from tlpipe.timestream import convert_exe
+# pipe_modules.append(convert_exe.Convert)
+### parameters for convert_exe
+cv_input_file = [data_dir + '20160103193253_CassiopeiaA.hdf5', data_dir + '20160103223253_CassiopeiaA.hdf5']
+cv_output_file = ['data_early_conv.hdf5', 'data_late_conv.hdf5']
+cv_exclude_ant = [15] # x/y not correct
+
+
+from tlpipe.timestream import solve_gain_exe
+# pipe_modules.append(solve_gain_exe.SolveGain)
+### parameters for solve_gain_exe
+sg_input_file = cv_output_file
+sg_output_file = 'gain.hdf5'
+
+
+from tlpipe.timestream import apply_gain_exe
+# pipe_modules.append(apply_gain_exe.ApplyGain)
+### parameters for apply_gain_exe
+ag_input_file = cv_output_file
+ag_output_file = 'data_cal.hdf5'
+ag_gain_file = sg_output_file
+
+
+from tlpipe.timestream import phs2src_exe
+# pipe_modules.append(phs2src_exe.Phs2src)
+### parameters for phs2src
+p2s_input_file = ag_output_file
+p2s_output_file = 'data_phs2src.hdf5'
+p2s_source = 'cas'
+p2s_catalog = 'misc'
+
+
+from tlpipe.timestream import line_rfi_flag_exe
+# pipe_modules.append(line_rfi_flag_exe.RfiFlag)
+### parameters for line_rfi_flag_exe
+lr_input_file = p2s_output_file
+lr_output_file = 'data_line_rfi.hdf5'
+lr_threshold = 0.1
+
+
+# from tlpipe.timestream import diff_rfi_flag_exe
+# # pipe_modules.append(diff_rfi_flag_exe.RfiFlag)
+# ### parameters for diff_rfi_flag_exe
+# dr_input_file = p2s_output_file
+# dr_output_file = 'data_diff_rfi.hdf5'
+# # dr_threshold = 2.0
+# dr_threshold = 0.1
+
+
+from tlpipe.timestream import simple_rfi_flag_exe
+# pipe_modules.append(simple_rfi_flag_exe.RfiFlag)
+### parameters for simple_rfi_flag_exe
+sr_input_file = lr_output_file
+sr_output_file = 'data_simple_rfi.hdf5'
+sr_threshold = 5.0
+
+
+# from tlpipe.timestream import svd_rfi_flag_exe
+# # pipe_modules.append(svd_rfi_flag_exe.RfiFlag)
+# ### parameters for svd_rfi_flag_exe
+# svr_input_file = sr_output_file
+# svr_output_file = 'data_svd_rfi.hdf5'
+# svr_nprocs = 4
+# svr_aprocs = [0, 10, 20, 30]
+# svr_nsvd = 100
+# svr_save_svdmode = True
+
+
+from tlpipe.timestream import rfi_cut_exe
+# pipe_modules.append(rfi_cut_exe.RfiCut)
+### parameters for rfi_cut_exe
+rc_input_file = sr_output_file
+rc_output_file = 'data_rfi_cut.hdf5'
+rc_threshold = 0.01
+
+
+
+##### plot visibility
+from tlpipe.plot import plot_vis_exe
+# pipe_modules.append(plot_vis_exe.Plot)
+### parameters for plot_vis_exe
+# pltv_input_file = lr_output_file
+# pltv_output_file = 'vis_line.png'
+# pltv_input_file = dr_output_file
+# pltv_output_file = 'vis_diff.png'
+# pltv_input_file = sr_output_file
+# pltv_output_file = 'vis_simple.png'
+# pltv_input_file = svr_output_file
+# pltv_output_file = 'vis_svd.png'
+pltv_input_file = rc_output_file
+pltv_output_file = 'vis_rfi.png'
+pltv_bl_index = range(10)
+pltv_pol_index = range(4)
+# pltv_vmin = -3000
+# pltv_vmax = 3000
+
+
+
+from tlpipe.timestream import simple_gridding_exe
+# pipe_modules.append(simple_gridding_exe.Gridding)
+### parameters for simple_gridding_exe
+sgr_input_file = rc_output_file
+# sgr_output_file = 'uv_imag_noconv_c0.hdf5'
+# sgr_output_file = 'uv_imag_noconv_early.hdf5'
+sgr_output_file = 'uv_imag_noconv_late.hdf5'
+sgr_res = 0.5
+sgr_max_wl = 300.0
+# sgr_cut = [0.35, 0.35]
+# sgr_cut = [0.35, None]
+sgr_cut = [None, 0.35]
+sgr_pol = 'yy'
+sgr_phase_center = p2s_source
+sgr_catalog = p2s_catalog
+# sgr_bl_range = [60, None]
+
+
+# # from tlpipe.timestream import gridding_exe
+# # # pipe_modules.append(gridding_exe.Gridding)
+# # ### parameters for gridding_exe
+# # gr_input_file = rc_output_file
+# # # gr_output_file = 'uv_imag_conv.hdf5'
+# # gr_output_file = 'uv_imag_conv_cut_10c0.hdf5'
+# # gr_cut = [0.1, 0.1]
+# # gr_pol = 'xx'
+# # gr_phase_center = 'cas'
+# # gr_catalog = 'misc'
+
+
+from tlpipe.map import uv_cut_exe
+pipe_modules.append(uv_cut_exe.UVCut)
+### parameters for uv_cut_exe
+uc_input_file = sgr_output_file
+# uc_output_file = 'uv_cut_noconv_cutuv60_c0.hdf5'
+# uc_output_file = 'uv_cut_noconv_cutuv60_cut20_c0.hdf5'
+# uc_output_file = 'uv_cut_noconv_cutuv60_cut20_early.hdf5'
+# uc_output_file = 'uv_cut_noconv_cutuv60_cut20_late.hdf5'
+uc_output_file = 'uv_cut_noconv_cutuv60_late.hdf5'
+uc_bl_range = [60, None]
+# uc_cut_threshold = 0.2
+uc_cut_threshold = 0.0
+
+
+from tlpipe.map import fourier_imaging_exe
+pipe_modules.append(fourier_imaging_exe.Imaging)
+### parameters for fourier_imaging_exe
+im_input_file = uc_output_file
+# im_input_file = sgr_output_file
+# im_output_file = 'image_noconv_cut20_c0.hdf5'
+# im_output_file = 'image_noconv_cutuv60_cut20_c0.hdf5'
+# im_output_file = 'image_noconv_cutuv60_cut20_early.hdf5'
+# im_output_file = 'image_noconv_cutuv60_cut20_late.hdf5'
+im_output_file = 'image_noconv_cutuv60_late.hdf5'
+
+
+from tlpipe.timestream import clean_exe
+pipe_modules.append(clean_exe.Clean)
+### parameters for clean_exe
+cl_input_file = im_output_file
+cl_gain = 0.1
+cl_tol = 1.0e-6
+cl_verbose = True
+
+
+from tlpipe.plot import plot_clean_image_exe
+pipe_modules.append(plot_clean_image_exe.Plot)
+### parameters for plot_clean_image_exe
+pltc_input_file = 'clean_image_cln.hdf5'
+pltc_output_file = None
+pltc_fov = 30
+pltc_vmin = 0
+pltc_vmax = 0.05
+
+
+
+##### plot images
+from tlpipe.plot import plot_image_exe
+pipe_modules.append(plot_image_exe.Plot)
+### parameters for plot_image_exe
+# plti_input_file = [(sgr_output_file, im_output_file)]
+plti_input_file = [(uc_output_file, im_output_file)]
+plti_output_file = None
+# plti_plot_sqrt = True
+plti_scale = 2
+# plti_scale = 4
