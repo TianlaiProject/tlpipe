@@ -1,0 +1,54 @@
+# -*- mode: python; -*-
+
+# input file for pipeline manager
+# execute this pipeline by either command of the following two:
+# tlpipe dir/to/cas5h.pipe
+# mpiexec -n N tlpipe dir/to/cas5h.pipe
+
+# 
+import matplotlib
+matplotlib.use('Agg')
+
+
+pipe_modules = []
+data_dir = '/project/lijixia/formal_obsdata/'
+pipe_output_dir = '/project/ycli/data/tianlai/cal_test/'
+
+average_size = 1
+
+# first test
+#data_file = '20160405173017' 
+
+# pointing to West (270, 44.18), before sunset (268, 12,5)
+#data_file = '20160408191201' 
+#suffix = '_pWsW'
+
+# pointing to West (270, 44.18), after sunset
+#data_file = '20160408230541'
+#suffix = '_pWsS'
+
+# pointing to West (270, 44.18), after sunrise (106.03, 26.50)
+#data_file = '20160409095346'
+#suffix = '_pWsE'
+
+# pointing to East (90, 44.18), after sunrise (109.99, 29.82)
+data_file = '20160409101311'
+suffix = '_pEsE'
+
+from tlpipe.timestream import convert_exe
+#pipe_modules.append(convert_exe.Convert)
+### parameters for convert_exe
+cv_input_file = [data_dir + data_file + '_None.hdf5', ]
+cv_output_file = ['raw/' + data_file + '_None.hdf5',]
+#cv_exclude_ant = [15] # x/y not correct
+
+from tlpipe.timestream import noise_cal
+pipe_modules.append(noise_cal.NoiseCal)
+nc_input_file = 'raw/' + data_file + '_None.hdf5'
+#nc_output_file = 'plot_avg%d%s/'%(average_size, suffix)+data_file+'_CalTest.hdf5'
+nc_output_file = 'plot_%s_avg%d%s/'%(data_file, average_size, suffix)+'CalTest.hdf5'
+nc_average_size = average_size
+nc_cal_phase = None # set None, find the phase autumatically
+nc_cal_on_time = 1
+nc_cal_off_time = 4
+nc_cal_percent = [95, 60]
