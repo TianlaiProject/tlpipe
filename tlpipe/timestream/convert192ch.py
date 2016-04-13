@@ -28,7 +28,8 @@ params_init = {
         
         'input_file' : '',
         'output_file' : '',
-        'antenna_num' : 96,
+        #'antenna_num' : 96,
+        'antenna_list' : [],
         'int_time' : 4,
         'obs_starttime': '',
         'tzone' : 'UTC+08',
@@ -100,8 +101,10 @@ class Convert(Base):
             if mpiutil.rank0:
                 print "Data shape: ", data_shape
 
-            ant_num = self.params['antenna_num']
-            ant_list = np.arange(ant_num)
+            #ant_num = self.params['antenna_num']
+            #ant_list = np.arange(ant_num)
+            ant_list = self.params['antenna_list']
+            ant_num  = len(ant_list)
             #bl_num =  np.sum(range(ant_num+1))
             #new_data_shape = (data_shape[0], bl_num, 4, data_shape[1])
 
@@ -118,7 +121,8 @@ class Convert(Base):
 
                 new_data = np.zeros(new_data_shape, dtype=np.complex64)
 
-                for a1 in range(ant_num):
+                #for a1 in range(ant_num):
+                for a1 in ant_list:
                     a2 = a1
 
                     #new_index = bl_num - np.sum(range(ant_num-a1+1)) + (a2-a1)
@@ -148,10 +152,14 @@ class Convert(Base):
 
                 new_data = np.zeros(new_data_shape, dtype=np.complex64)
 
-                for a1 in range(ant_num):
-                    for a2 in range(a1, ant_num):
+                for ai in range(ant_num):
+                    for aj in range(ai, ant_num):
 
-                        new_index = bl_num - np.sum(range(ant_num-a1+1)) + (a2-a1)
+                        a1 = ant_list[ai]
+                        a2 = ant_list[aj]
+                        if mpiutil.rank0: print " %02d x %02d"%(a1, a2)
+
+                        new_index = bl_num - np.sum(range(ant_num-ai+1)) + (aj-ai)
 
                         index, flag = BLindex([2*a1+1, 2*a2+1])
                         new_data[:, new_index, 0, :] = data['vis'][:,:,index]
@@ -191,7 +199,6 @@ class Convert(Base):
             hdata.attrs['start_time'] = obs_starttime
 
             #obs_starttime = time_axis[-1] + self.params['int_time'] * ephem.second
-
 
             fout.close()
             data.close()
@@ -270,6 +277,4 @@ if __name__=="__main__":
 
     print bl_list[bl_list[:,0]==90,:]
     print np.all((bl_list[:,1] - bl_list[:,0]) >= 0)
-
-
 

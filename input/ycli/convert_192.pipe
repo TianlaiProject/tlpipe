@@ -11,12 +11,17 @@ pipe_modules = []
 pipe_output_dir = '/project/ycli/data/tianlai/cyl192ch_test/'
 
 input_file_temp = '/project/lijixia/192chn_obsdata/20160127114202/lz1_%05d.hdf5'
-output_file_temp = 'raw/20160127114202_lz1_%05d.hdf5'
+#output_file_temp = 'raw/20160127114202_lz1_%05d.hdf5'
+output_file_temp = 'raw_cross2/20160127114202_lz1_%05d.hdf5'
 
 from tlpipe.timestream import convert192ch
 pipe_modules.append(convert192ch.Convert)
 cv192_input_file = input_file_temp
 cv192_output_file = output_file_temp
 cv192_obs_starttime = '2016/1/27 11:42:02' # UTC+08
-cv192_auto_only = True
+cv192_auto_only = False
+#cv192_antenna_list = [1, 2, 95]
+cv192_antenna_list = [29, 72, 87]
+#cv192_auto_only = True
+#cv192_antenna_list = range(96)
 cv192_time_range = ['2016/1/27 13:00:00', '2016/1/27 14:30:00']
