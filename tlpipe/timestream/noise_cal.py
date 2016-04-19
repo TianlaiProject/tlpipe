@@ -53,7 +53,9 @@ class NoiseCal(Base):
     def execute(self):
 
         input_file = input_path(self.params['input_file'])
-        output_file = output_path(self.params['output_file'])
+        output_root = output_path(self.params['output_file']%'')
+        output_root_auto = output_path(self.params['output_file']%'auto')
+        output_root_cros = output_path(self.params['output_file']%'cros')
 
         params = self.params
 
@@ -144,21 +146,19 @@ class NoiseCal(Base):
                 ts_calon  = ts_calon.flatten()
                 ts_caloff = ts_caloff.flatten()
 
-                output_root = output_file.replace('.hdf5', '') 
-
                 if a1 == a2:
-                    #plot_amp(dset_calon, dset_caloff, 
-                    #        ts_calon, ts_caloff, a1, output_root, tzone=tzone)
+                    plot_amp(dset_calon, dset_caloff, ts_calon, ts_caloff, a1, 
+                            output_root_auto, tzone=tzone)
                     pass
                 else:
-                    #plot_phase(dset_calon, ts_calon, freq, a1, a2, 
-                    #        output_root, suffix='_calon', tzone=tzone)
-                    #plot_phase(dset_caloff, ts_caloff, freq, a1, a2, 
-                    #        output_root, suffix='_caloff', tzone=tzone)
-                    #plot_phase(dset_diff, ts_diff, freq, a1, a2, 
-                    #        output_root, suffix='_diff', tzone=tzone)
+                    plot_phase(dset_calon, ts_calon, freq, a1, a2, 
+                            output_root_cros, suffix='_calon', tzone=tzone)
+                    plot_phase(dset_caloff, ts_caloff, freq, a1, a2, 
+                            output_root_cros, suffix='_caloff', tzone=tzone)
                     plot_phase(dset_diff, ts_diff, freq, a1, a2, 
-                            output_root, suffix='_diff', tzone=tzone, residue=True)
+                            output_root_cros, suffix='_diff', tzone=tzone)
+                    plot_phase(dset_diff, ts_diff, freq, a1, a2, 
+                            output_root_cros, suffix='_diff', tzone=tzone, residue=True)
 
 def sep_cal(data_tmp, perc):
 

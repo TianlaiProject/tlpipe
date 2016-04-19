@@ -54,6 +54,11 @@ class Convert(Base):
         if mpiutil.rank0:
             print '-'*50
 
+            input_file_temp = input_path(self.params['input_file'])
+            output_file_temp = output_path(self.params['output_file'])
+
+        mpiutil.barrier()
+
         input_file_temp = input_path(self.params['input_file'])
         output_file_temp = output_path(self.params['output_file'])
 
@@ -202,6 +207,8 @@ class Convert(Base):
 
             fout.close()
             data.close()
+
+        mpiutil.barrier()
 
 
 

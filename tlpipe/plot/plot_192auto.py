@@ -1,17 +1,97 @@
+import os
 import matplotlib
 #matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import h5py
 import numpy as np
+import ephem
 from tlpipe.utils.date_util import get_ephdate
+from tlpipe.kiyopy import parse_ini
+from tlpipe.utils import mpiutil
+from tlpipe.core.base_exe import Base
+from tlpipe.utils.path_util import input_path, output_path
 
-def plot_cros_wf(ant_list=None):
+params_init = {
+               'nprocs': mpiutil.size, # number of processes to run this module
+               'aprocs': range(mpiutil.size), # list of active process rank no.
+               'input_file': 'uv_image.hdf5',  # str or a list of str
+               'output_file': '', # None, str or a list of str
+               'auto' : True,
+               'cros' : False,
+               'antenna_list' : [],
+               'int_time' : 4,
+               'obs_starttime': '',
+               'tzone' : 'UTC+08',
+               'time_range': [],
+               'source_cat': {},
+              }
+prefix = 'plt192_'
 
-    file_root = '/project/ycli/data/tianlai/cyl192ch_test/raw_cross/'
-    file_name = '20160127114202_lz1_%05d.hdf5'
-    
-    output_root = '/project/ycli/data/tianlai/cyl192ch_test/plot/'
-    
+class Plot_192(Base):
+    """Plot image."""
+
+    def __init__(self, parameter_file_or_dict=None, feedback=2):
+
+        super(Plot_192, self).__init__(parameter_file_or_dict, params_init, prefix, feedback)
+
+    def execute(self):
+
+        if mpiutil.rank0:
+            input_file = input_path(self.params['input_file'])
+            output_root = output_path(self.params['output_file'])
+            if not os.path.exists(output_root):
+                os.makedirs(output_root)
+
+            # open one file, get data shape
+            input_base = os.path.split(input_file)[0]
+            data = h5py.File(os.path.join(input_base,os.listdir(input_base)[0]), 'r')
+            data_shape = data['data'].shape
+            data.close()
+
+            tzone = self.params['tzone']
+            obs_starttime = get_ephdate(self.params['obs_starttime'], tzone=tzone)
+
+            time_axis  = np.arange(data_shape[0]).astype('float')
+            time_axis *= self.params['int_time'] * ephem.second
+            time_axis += obs_starttime 
+
+            st_ind  = get_ephdate(self.params['time_range'][0], tzone=tzone)
+            ed_ind  = get_ephdate(self.params['time_range'][1], tzone=tzone)
+
+            st_ind -= obs_starttime 
+            ed_ind -= obs_starttime
+
+            st_ind /= data_shape[0] * self.params['int_time'] * ephem.second
+            ed_ind /= data_shape[0] * self.params['int_time'] * ephem.second
+
+            st_ind  = int(st_ind)
+            ed_ind  = int(ed_ind)
+
+            input_file_list = []
+            for i in range(st_ind, ed_ind + 1):
+                input_file_list.append(input_file%i)
+
+            if self.params['cros']:
+                plot_cros_wf(
+                        input_file_list=input_file_list, 
+                        output_root=output_root, 
+                        ant_list=self.params['antenna_list'], 
+                        source_cat=self.params['source_cat'])
+            if self.params['auto']:
+                plot_auto_sp(
+                        input_file_list=input_file_list, 
+                        output_root=output_root, 
+                        ant_list=self.params['antenna_list'], 
+                        source_cat=self.params['source_cat'])
+                plot_auto_wf(
+                        input_file_list=input_file_list, 
+                        output_root=output_root, 
+                        ant_list=self.params['antenna_list'], 
+                        source_cat=self.params['source_cat'])
+        mpiutil.barrier()
+
+def plot_cros_wf(input_file_list, output_root, ant_list=None, source_cat={}):
+
     if ant_list == None:
         ant_list = range(96)
     color_list = ['r', 'k', 'b', 'g', 'c', 'm']
@@ -40,9 +120,11 @@ def plot_cros_wf(ant_list=None):
             time0 = None
             mean = None
             std  = None
-            for i in range(13, 26):
+            #for i in range(13, 26):
+            for input_file in input_file_list:
             
-                f = h5py.File(file_root + file_name%i, 'r')
+                #f = h5py.File(file_root + file_name%i, 'r')
+                f = h5py.File(input_file, 'r')
             
                 vis = np.ma.array(f['data'].value)
                 time = f['time'].value
@@ -97,57 +179,22 @@ def plot_cros_wf(ant_list=None):
             ax1.set_xlim(xmin=xmin, xmax=xmax)
             ax2.set_xlim(xmin=xmin, xmax=xmax)
     
-            ax1.vlines( get_ephdate('2016/1/27 13:29:15', tzone='UCT+8') - time0, 
-                    ymax=ymax, ymin=ymin, label='CygA', colors='g')
-            ax2.vlines( get_ephdate('2016/1/27 13:29:15', tzone='UCT+8') - time0, 
-                    ymax=ymax, ymin=ymin, label='CygA', colors='g')
-            ax1.vlines( get_ephdate('2016/1/27 14:05:36', tzone='UCT+8') - time0, 
-                    ymax=ymax, ymin=ymin, label='Sun', colors='r')
-            ax2.vlines( get_ephdate('2016/1/27 14:05:36', tzone='UCT+8') - time0, 
-                    ymax=ymax, ymin=ymin, label='Sun', colors='r')
+            for j in range(len(source_cat.keys())):
+                source = source_cat.keys()[j]
+                ax1.vlines( get_ephdate(source_cat[source], tzone='UCT+8') - time0, 
+                        ymax=ymax, ymin=ymin, label=source, colors=color_list[j])
+                ax2.vlines( get_ephdate(source_cat[source], tzone='UCT+8') - time0, 
+                        ymax=ymax, ymin=ymin, label=source, colors=color_list[j])
     
-            #ax1.legend(frameon=False)
-    
-            plt.savefig(output_root + 'cros_ant%02dx%02d_wf.png'%(a1, a2))
+            plt.savefig(os.path.join(output_root, 'cros_ant%02dx%02d_wf.png'%(a1, a2)))
             
             plt.show()
     
-            plt.clf()
+            plt.close()
+            #plt.clf()
 
+def plot_auto_wf(input_file_list, output_root, ant_list=None, source_cat={}):
 
-
-def plot_all():
-
-    file_root = '/project/ycli/data/tianlai/cyl192ch_test/raw/'
-    file_name = '20160127114202_lz1_%05d.hdf5'
-    
-    output_root = '/project/ycli/data/tianlai/cyl192ch_test/plot/'
-    
-    #ant_list = range(96)
-
-    fig = plt.figure(figsize=(10, 10))
-
-    l = 0.01
-    b = 0.01
-    h = 0.03
-    w = 0.3
-
-    for i in range(33):
-
-        hs = ((1 - l - b) - 33 * h ) / 32
-        ax = fig.add_axes([l, b+(33-i-1)*(hs+h), w, h])
-
-        ax.set_xticklabels([])
-        ax.set_yticklabels([])
-
-    plt.show()
-
-def plot_wf(ant_list=None):
-    file_root = '/project/ycli/data/tianlai/cyl192ch_test/raw/'
-    file_name = '20160127114202_lz1_%05d.hdf5'
-    
-    output_root = '/project/ycli/data/tianlai/cyl192ch_test/plot/'
-    
     if ant_list == None:
         ant_list = range(96)
     color_list = ['r', 'k', 'b', 'g', 'c', 'm']
@@ -161,7 +208,6 @@ def plot_wf(ant_list=None):
         cax1 = fig.add_axes([0.91, 0.52, 0.01, 0.38])
         cax2 = fig.add_axes([0.91, 0.10, 0.01, 0.38])
 
-    
         ymin = 1.e99
         ymax = -1.e99
         xmin = 1.e99
@@ -169,9 +215,9 @@ def plot_wf(ant_list=None):
         time0 = None
         mean = None
         std  = None
-        for i in range(13, 26):
+        for input_file in input_file_list:
         
-            f = h5py.File(file_root + file_name%i, 'r')
+            f = h5py.File(input_file, 'r')
         
             vis = np.ma.array(f['data'].value)
             time = f['time'].value
@@ -223,32 +269,29 @@ def plot_wf(ant_list=None):
         ax1.set_xlim(xmin=xmin, xmax=xmax)
         ax2.set_xlim(xmin=xmin, xmax=xmax)
     
-        ax1.vlines( get_ephdate('2016/1/27 13:29:15', tzone='UCT+8') - time0, 
-                ymax=ymax, ymin=ymin, label='CygA', colors='g')
-        ax2.vlines( get_ephdate('2016/1/27 13:29:15', tzone='UCT+8') - time0, 
-                ymax=ymax, ymin=ymin, label='CygA', colors='g')
-        ax1.vlines( get_ephdate('2016/1/27 14:05:36', tzone='UCT+8') - time0, 
-                ymax=ymax, ymin=ymin, label='Sun', colors='r')
-        ax2.vlines( get_ephdate('2016/1/27 14:05:36', tzone='UCT+8') - time0, 
-                ymax=ymax, ymin=ymin, label='Sun', colors='r')
-    
-        #ax1.legend(frameon=False)
-    
-        plt.savefig(output_root + 'auto_ant%02d_wf.png'%ant)
+        for j in range(len(source_cat.keys())):
+            source = source_cat.keys()[j]
+            ax1.vlines( get_ephdate(source_cat[source], tzone='UCT+8') - time0, 
+                    ymax=ymax, ymin=ymin, label=source, colors=color_list[j])
+            ax2.vlines( get_ephdate(source_cat[source], tzone='UCT+8') - time0, 
+                    ymax=ymax, ymin=ymin, label=source, colors=color_list[j])
+
+        plt.savefig(os.path.join(output_root, 'auto_ant%02d_wf.png'%ant))
         
         plt.show()
     
-        plt.clf()
+        plt.close()
 
 
-def plot_each():
+def plot_auto_sp(input_file_list, output_root, ant_list=None, source_cat={}):
 
-    file_root = '/project/ycli/data/tianlai/cyl192ch_test/raw/'
-    file_name = '20160127114202_lz1_%05d.hdf5'
+    #file_root = '/project/ycli/data/tianlai/cyl192ch_test/raw/'
+    #file_name = '20160127114202_lz1_%05d.hdf5'
+    #
+    #output_root = '/project/ycli/data/tianlai/cyl192ch_test/plot/'
     
-    output_root = '/project/ycli/data/tianlai/cyl192ch_test/plot/'
-    
-    ant_list = range(96)
+    if ant_list == None:
+        ant_list = range(96)
     color_list = ['r', 'k', 'b', 'g', 'c', 'm']
     
     
@@ -262,9 +305,9 @@ def plot_each():
         ymin = 1.e99
         ymax = -1.e99
         time0 = None
-        for i in range(13, 26):
+        for input_file in input_file_list:
         
-            f = h5py.File(file_root + file_name%i, 'r')
+            f = h5py.File(input_file, 'r')
         
             vis = f['data'].value
             time = f['time'].value
@@ -309,26 +352,23 @@ def plot_each():
         ax1.set_ylim(ymin=ymin, ymax=ymax)
         ax2.set_ylim(ymin=ymin, ymax=ymax)
     
-        ax1.vlines( get_ephdate('2016/1/27 13:29:15', tzone='UCT+8') - time0, 
-                ymax=ymax, ymin=ymin, label='CygA', colors='g')
-        ax2.vlines( get_ephdate('2016/1/27 13:29:15', tzone='UCT+8') - time0, 
-                ymax=ymax, ymin=ymin, label='CygA', colors='g')
-        ax1.vlines( get_ephdate('2016/1/27 14:05:36', tzone='UCT+8') - time0, 
-                ymax=ymax, ymin=ymin, label='Sun', colors='r')
-        ax2.vlines( get_ephdate('2016/1/27 14:05:36', tzone='UCT+8') - time0, 
-                ymax=ymax, ymin=ymin, label='Sun', colors='r')
-    
+        for j in range(len(source_cat.keys())):
+            source = source_cat.keys()[j]
+            ax1.vlines( get_ephdate(source_cat[source], tzone='UCT+8') - time0, 
+                    ymax=ymax, ymin=ymin, label=source, colors=color_list[j])
+            ax2.vlines( get_ephdate(source_cat[source], tzone='UCT+8') - time0, 
+                    ymax=ymax, ymin=ymin, label=source, colors=color_list[j])
+
         ax1.legend(frameon=False)
     
-    
-        plt.savefig(output_root + 'auto_ant%02d.png'%ant)
+        plt.savefig(os.path.join(output_root, 'auto_ant%02d_sp.png'%ant))
         
         plt.show()
     
-        plt.clf()
+        #plt.clf()
+        plt.close()
 
 
 if __name__=="__main__":
 
-    #plot_wf([1, 2, 95])
-    plot_cros_wf([1, 2, 95])
+    pass
