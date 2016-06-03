@@ -28,18 +28,15 @@ def ensure_file_list(files):
 
 
 class BasicTod(memh5.MemDiskGroup):
-    """Basic data container.
+    """Basic time ordered data container.
 
     Inherits from :class:`MemDiskGroup`.
 
-    Basic one-level data container that allows any number of datasets in the
-    root group but no nesting. Data history tracking (in
-    :attr:`BasicCont.history`) and array axis interpretation (in
-    :attr:`BasicCont.index_map`) is also provided.
+    Basic one-level time ordered data container that allows any number of
+    datasets in the root group but no nesting.
 
-    This container is intended to be an example of how a high level container,
-    with a strictly controlled data layout can be implemented by subclassing
-    :class:`MemDiskGroup`.
+    This container is intended to be an base class for other concreate data
+    classes, so only basic input/output and a limited operations are provided.
 
     Parameters
     ----------
@@ -60,6 +57,20 @@ class BasicTod(memh5.MemDiskGroup):
     redistribute
 
     """
+
+    def __init__(self, files=None, comm=None):
+
+        super(BasicTod, self).__init__(data_group=None, distributed=True, comm=comm)
+
+        self.infiles = ensure_file_list(files)
+        self.num_infiles = len(self.infiles)
+
+        self.nproc = 1 if self.comm is None else self.comm.size
+        self.rank = 0 if self.comm is None else self.comm.rank
+        self.rank0 = True if self.rank == 0 else False
+
+        self.main_data_shape, self.main_data_type, self.infiles_map = self._get_tod_info(self.main_data)
+
 
     def _get_tod_info(self, dset_name):
         ### get data shape and type and infile_map of time ordered datasets
@@ -115,69 +126,6 @@ class BasicTod(memh5.MemDiskGroup):
 
         return dset_shape, dset_type, infiles_map
 
-    def __init__(self, files=None, comm=None):
-        super(BasicTod, self).__init__(data_group=None, distributed=True, comm=comm)
-        self.infiles = ensure_file_list(files)
-        self.num_infiles = len(self.infiles)
-        self.nproc = 1 if self.comm is None else self.comm.size
-        self.rank = 0 if self.comm is None else self.comm.rank
-        self.rank0 = True if self.rank == 0 else False
-        # self.main_data_shape = None
-        # self.main_data_type = None
-
-        # tmp_shape = None
-        # num_ts = []
-        # lf, sf, ef = mpiutil.split_local(self.num_infiles, comm=self.comm)
-        # file_indices = range(sf, ef) # file indices owned by this proc
-        # for fi in file_indices:
-        #     with h5py.File(self.infiles[fi], 'r') as f:
-        #         num_ts.append(f[self.main_data].shape[0])
-        #         if fi == 0:
-        #             # get shape and type info from the first file
-        #             tmp_shape = f[self.main_data].shape
-        #             self.main_data_type= f[self.main_data].dtype
-
-        # self.main_data_type = mpiutil.bcast(self.main_data_type, comm=self.comm)
-        # if self.comm is not None:
-        #     num_ts = list(itertools.chain(*self.comm.allgather(num_ts)))
-        # nt = sum(num_ts) # total length of the first axis along different files
-        # if tmp_shape is not None:
-        #     tmp_shape = (nt,) + tmp_shape[1:]
-        # self.main_data_shape = mpiutil.bcast(tmp_shape, comm=self.comm)
-
-        # lt, st, et = mpiutil.split_local(nt, comm=self.comm) # total length distributed among different procs
-        # if self.comm is not None:
-        #     lts = self.comm.allgather(lt)
-        # else:
-        #     lts = [ lt ]
-        # cum_lts = np.cumsum(lts).tolist() # cumsum of lengths by all procs
-        # cum_num_ts = np.cumsum(num_ts).tolist() # cumsum of lengths of all files
-
-        # tmp_cum_lts = [0] + cum_lts
-        # tmp_cum_num_ts = [0] + cum_num_ts
-        # # start and stop (included) file indices owned by this proc
-        # sf, ef = np.searchsorted(cum_num_ts, tmp_cum_lts[self.rank], side='right'), np.searchsorted(cum_num_ts, tmp_cum_lts[self.rank+1], side='left')
-        # lf_indices = range(sf, ef+1) # file indices owned by this proc
-        # # allocation interval by all procs
-        # intervals = sorted(list(set([0] + cum_lts + cum_num_ts)))
-        # intervals = [ (intervals[i], intervals[i+1]) for i in range(len(intervals)-1) ]
-        # if self.comm is not None:
-        #     num_lf_ind = self.comm.allgather(len(lf_indices))
-        # else:
-        #     num_lf_ind = [ len(lf_indices) ]
-        # cum_num_lf_ind = np.cumsum([0] +num_lf_ind)
-        # # local intervals owned by this proc
-        # lits = intervals[cum_num_lf_ind[self.rank]: cum_num_lf_ind[self.rank+1]]
-        # # infiles_map: a list of (file_idx, start, stop)
-        # self.infiles_map = []
-        # for idx, fi in enumerate(lf_indices):
-        #     self.infiles_map.append((fi, lits[idx][0]-tmp_cum_num_ts[fi], lits[idx][1]-tmp_cum_num_ts[fi]))
-
-        self.main_data_shape, self.main_data_type, self.infiles_map = self._get_tod_info(self.main_data)
-
-        print 'proc %d has %s' % (mpiutil.rank, self.infiles_map)
-
-
 
     @property
     def main_data(self):
@@ -197,20 +145,6 @@ class BasicTod(memh5.MemDiskGroup):
     def time_ordered_attrs(self):
         return ()
 
-    def _load_main_data(self):
-        ### load main data from all files
-        # md = mpiarray.MPIArray(self.main_data_type, axis=0, comm=self.comm, dtype=self.main_data_type)
-        # st = 0
-        # for fi, start, stop in self.infiles_map:
-        #     et = st + (stop - start)
-        #     with h5py.File(self.infiles[fi], 'r') as f:
-        #         md[st:et] = f[self.main_data][start:stop]
-        #         st = et
-        # self.create_dataset(self.main_data, shape=self.main_data_shape, dtype=self.main_data_type, data=md, distributed=True, distributed_axis=0)
-
-        self._load_tod(self.main_data, self.main_data_shape, self.main_data_type, self.infiles_map)
-
-
     def _load_tod(self, dset_name, dset_shape, dset_type, infiles_map):
         ### load a time ordered dataset form all files
         md = mpiarray.MPIArray(dset_shape, axis=0, comm=self.comm, dtype=dset_type)
@@ -221,55 +155,6 @@ class BasicTod(memh5.MemDiskGroup):
                 md[st:et] = f[dset_name][start:stop]
                 st = et
         self.create_dataset(dset_name, shape=dset_shape, dtype=dset_type, data=md, distributed=True, distributed_axis=0)
-
-    def _load_time_ordered(self):
-        ### load time ordered attributes and datasets from all files
-        lf, sf, ef = mpiutil.split_local(self.num_infiles, comm=self.comm)
-        for ta in self.time_ordered_attrs:
-            self.attrs[ta] = []
-        # tod = {}
-        # for td in self.time_ordered_datasets:
-        #     if td != self.main_data:
-        #         tod[td] = []
-        for fi in range(sf, ef):
-            with h5py.File(self.infiles[fi], 'r') as f:
-                # time ordered attrs
-                for ta in self.time_ordered_attrs:
-                    self.attrs[ta].append(f.attrs[ta])
-                # # time ordered dsets
-                # for td in self.time_ordered_datasets:
-                #     if td != self.main_data:
-                #         tod[td].append(f[td][:])
-        # gather data from different procs and redistribute if necessary
-        # gather time ordered attrs
-        for ta in self.time_ordered_attrs:
-            if self.comm is not None:
-                self.attrs[ta] = list(itertools.chain(*self.comm.allgather(self.attrs[ta])))
-        # # gather time ordered datasets and redistribute them
-        # for td in tod.keys():
-        #     tod[td] = np.concatenate(tod[td]) # concatenate along first axis
-        #     if self.comm is not None:
-        #         num_ts = self.comm.allgather(tod[td].shape[0], root=0)
-        #     else:
-        #         num_ts = [ tod[td].shape[0] ]
-
-        #     nt = sum(num_ts)
-        #     cum_num_ts = [0] + np.cumsum(num_ts).tolist()
-        #     if self.rank0:
-        #         garray = np.zeros((nt,)+tod[td].shape[1:], dtype=tod[td].dtype)
-        #     else:
-        #         garray = None
-        #     mpiutil.gather_local(garray, tod[td], (cum_num_ts[self.rank],)+tod[td].shape[1:])
-
-        for td in self.time_ordered_datasets:
-            # # first load main data
-            # self._load_main_data()
-            if td != self.main_data:
-                dset_shape, dset_type, infiles_map = self._get_tod_info(td)
-                self._load_tod(td, dset_shape, dset_type, infiles_map)
-
-
-
 
     def _load_common(self):
         ### load common attributes and datasets from the first file
@@ -287,10 +172,33 @@ class BasicTod(memh5.MemDiskGroup):
                     # copy attrs of this dset
                     memh5.copyattrs(dset.attrs, self.attrs)
 
+    def _load_main_data(self):
+        ### load main data from all files
+        self._load_tod(self.main_data, self.main_data_shape, self.main_data_type, self.infiles_map)
 
+    def _load_time_ordered(self):
+        ### load time ordered attributes and datasets from all files
+        lf, sf, ef = mpiutil.split_local(self.num_infiles, comm=self.comm)
+        for ta in self.time_ordered_attrs:
+            self.attrs[ta] = []
+        for fi in range(sf, ef):
+            with h5py.File(self.infiles[fi], 'r') as f:
+                # time ordered attrs
+                for ta in self.time_ordered_attrs:
+                    self.attrs[ta].append(f.attrs[ta])
 
-    _outfiles = None
-    _outfiles_map = None
+        # gather time ordered attrs
+        for ta in self.time_ordered_attrs:
+            if self.comm is not None:
+                self.attrs[ta] = list(itertools.chain(*self.comm.allgather(self.attrs[ta])))
+
+        # load time ordered datasets
+        for td in self.time_ordered_datasets:
+            # # first load main data
+            # self._load_main_data()
+            if td != self.main_data:
+                dset_shape, dset_type, infiles_map = self._get_tod_info(td)
+                self._load_tod(td, dset_shape, dset_type, infiles_map)
 
     @property
     def history(self):
@@ -362,3 +270,22 @@ class BasicTod(memh5.MemDiskGroup):
             self.main_data.redistribute(axis)
         else:
             warnings.warn('Cannot not redistributed data to axis %d >= %d' % (axis, naxis))
+
+
+    # _outfiles = None
+    # _outfiles_map = None
+
+    # def _gen_outfiles(self, suffix='_new'):
+    #     ### generate output file names from input files
+    #     outfiles = []
+    #     for file_name in self.infiles:
+    #         outfiles.append(file_name.replace('.hdf5', '%s.hdf5' % suffix))
+
+    #     return outfiles
+
+    # @property
+    # def outfiles(self):
+    #     if self._outfiles is None:
+    #         self._outfiles = self.infiles
+
+    #     return self._outfiles
