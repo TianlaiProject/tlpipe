@@ -149,12 +149,17 @@ class BasicTod(memh5.MemDiskGroup):
         ### load a time ordered dataset form all files
         md = mpiarray.MPIArray(dset_shape, axis=0, comm=self.comm, dtype=dset_type)
         st = 0
+        attrs_dict = {}
         for fi, start, stop in infiles_map:
             et = st + (stop - start)
             with h5py.File(self.infiles[fi], 'r') as f:
                 md[st:et] = f[dset_name][start:stop]
+                memh5.copyattrs(f[dset_name].attrs, attrs_dict)
                 st = et
         self.create_dataset(dset_name, shape=dset_shape, dtype=dset_type, data=md, distributed=True, distributed_axis=0)
+        attrs_dict = mpiutil.bcast(attrs_dict, comm=self.comm)
+        # copy attrs of this dset
+        memh5.copyattrs(attrs_dict, self[dset_name].attrs)
 
     def _load_common(self):
         ### load common attributes and datasets from the first file
@@ -170,7 +175,7 @@ class BasicTod(memh5.MemDiskGroup):
                 if dset_name not in self.time_ordered_datasets:
                     self.create_dataset(dset_name, data=dset, shape=dset.shape, dtype=dset.dtype)
                     # copy attrs of this dset
-                    memh5.copyattrs(dset.attrs, self.attrs)
+                    memh5.copyattrs(dset.attrs, self[dset_name].attrs)
 
     def _load_main_data(self):
         ### load main data from all files
@@ -272,20 +277,89 @@ class BasicTod(memh5.MemDiskGroup):
             warnings.warn('Cannot not redistributed data to axis %d >= %d' % (axis, naxis))
 
 
-    # _outfiles = None
-    # _outfiles_map = None
+    def _get_output_info(self, dset_name, num_outfiles):
+        ### get data shape and type and infile_map of time ordered datasets
 
-    # def _gen_outfiles(self, suffix='_new'):
-    #     ### generate output file names from input files
-    #     outfiles = []
-    #     for file_name in self.infiles:
-    #         outfiles.append(file_name.replace('.hdf5', '%s.hdf5' % suffix))
+        dset_shape = self[dset_name].shape
+        dset_type = self[dset_name].dtype
 
-    #     return outfiles
+        nt = self[dset_name].shape[0]
+        lt, st, et = mpiutil.split_local(nt, comm=self.comm) # total length distributed among different procs
+        if self.comm is not None:
+            lts = self.comm.allgather(lt)
+        else:
+            lts = [ lt ]
+        cum_lts = np.cumsum(lts).tolist() # cumsum of lengths by all procs
 
-    # @property
-    # def outfiles(self):
-    #     if self._outfiles is None:
-    #         self._outfiles = self.infiles
+        # allocate nt to the given number of files
+        num_ts, num_s, num_e = mpiutil.split_m(nt, num_outfiles)
+        cum_num_ts = np.cumsum(num_ts).tolist() # cumsum of lengths of all files
 
-    #     return self._outfiles
+        tmp_cum_lts = [0] + cum_lts
+        tmp_cum_num_ts = [0] + cum_num_ts
+        # start and stop (included) file indices owned by this proc
+        sf, ef = np.searchsorted(cum_num_ts, tmp_cum_lts[self.rank], side='right'), np.searchsorted(cum_num_ts, tmp_cum_lts[self.rank+1], side='left')
+        lf_indices = range(sf, ef+1) # file indices owned by this proc
+        # allocation interval by all procs
+        intervals = sorted(list(set([0] + cum_lts + cum_num_ts)))
+        intervals = [ (intervals[i], intervals[i+1]) for i in range(len(intervals)-1) ]
+        if self.comm is not None:
+            num_lf_ind = self.comm.allgather(len(lf_indices))
+        else:
+            num_lf_ind = [ len(lf_indices) ]
+        cum_num_lf_ind = np.cumsum([0] +num_lf_ind)
+        # local intervals owned by this proc
+        lits = intervals[cum_num_lf_ind[self.rank]: cum_num_lf_ind[self.rank+1]]
+        # infiles_map: a list of (file_idx, start, stop)
+        outfiles_map = []
+        for idx, fi in enumerate(lf_indices):
+            outfiles_map.append((fi, lits[idx][0]-tmp_cum_num_ts[fi], lits[idx][1]-tmp_cum_num_ts[fi]))
+
+        return dset_shape, dset_type, outfiles_map
+
+
+    def to_files(self, outfiles):
+        """Save the data hold in this container to files."""
+        outfiles = ensure_file_list(outfiles)
+        num_outfiles = len(outfiles)
+        if num_outfiles > self.num_infiles:
+            warnings.warn('Number of output files %d exceed number of input files %d may have some problem' % (num_outfiles, self.num_infiles))
+
+        # split output files among procs
+        lf, sf, ef = mpiutil.split_local(num_outfiles, comm=self.comm)
+        for fi in range(sf, ef):
+            # first write top level common attrs and datasets to file
+            with h5py.File(outfiles[fi], 'w') as f:
+                # write top level common attrs
+                for attrs_name, attrs_value in self.attrs.iteritems():
+                    if attrs_name not in self.time_ordered_attrs:
+                        f.attrs[attrs_name] = self.attrs[attrs_name]
+                # write top level common datasets
+                for dset_name, dset in self.iteritems():
+                    if dset_name not in self.time_ordered_datasets:
+                        f.create_dataset(dset_name, data=dset, shape=dset.shape, dtype=dset.dtype)
+                        # copy attrs of this dset
+                        memh5.copyattrs(dset.attrs, f[dset_name].attrs)
+                # initialize time ordered datasets
+                for td in self.time_ordered_datasets:
+                    # if td == self.main_data:
+                    #     continue
+                    # get local data shape for this file
+                    nt = self[td].global_shape[0]
+                    lt, et,st = mpiutil.split_m(nt, num_outfiles)
+                    lshape = (lt[fi],) + self[td].global_shape[1:]
+                    f.create_dataset(td, lshape, dtype=self[td].dtype)
+                    # copy attrs of this dset
+                    memh5.copyattrs(self[td].attrs, f[td].attrs)
+
+        # then write time ordered datasets
+        for td in self.time_ordered_datasets:
+            # if td == self.main_data:
+            #     continue
+            dset_shape, dset_type, outfiles_map = self._get_output_info(td, num_outfiles)
+            st = 0
+            for fi, start, stop in outfiles_map:
+                et = st + (stop - start)
+                with h5py.File(outfiles[fi], 'r+') as f:
+                    f[td][start:stop] = self[td]._data.view(np.ndarray)[st:et]
+                    st = et
