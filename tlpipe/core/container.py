@@ -11,7 +11,7 @@ from caput import mpiutil
 def ensure_file_list(files):
     """Tries to interpret the input as a sequence of files
 
-    Expands filename wildcards ("globs") and casts sequeces to a list.
+    Expands filename wildcards ("globs") and casts sequences to a list.
 
     """
 
@@ -69,32 +69,15 @@ class BasicTod(memh5.MemDiskGroup):
         self.rank = 0 if self.comm is None else self.comm.rank
         self.rank0 = True if self.rank == 0 else False
 
-        self.main_data_shape, self.main_data_type, self.infiles_map = self._get_tod_info(self.main_data)
+        self.main_data_shape, self.main_data_type, self.infiles_map = self._get_input_info(self.main_data)
 
 
-    def _get_tod_info(self, dset_name):
-        ### get data shape and type and infile_map of time ordered datasets
-        dset_type = None
-        dset_shape = None
-        tmp_shape = None
-        num_ts = []
-        lf, sf, ef = mpiutil.split_local(self.num_infiles, comm=self.comm)
-        file_indices = range(sf, ef) # file indices owned by this proc
-        for fi in file_indices:
-            with h5py.File(self.infiles[fi], 'r') as f:
-                num_ts.append(f[dset_name].shape[0])
-                if fi == 0:
-                    # get shape and type info from the first file
-                    tmp_shape = f[dset_name].shape
-                    dset_type= f[dset_name].dtype
+    def _gen_files_map(self, nt, num_ts):
+        ### generate files map, i.e., a list of (file_idx, start, stop)
+        ### nt: total number of time points
+        ### num_ts: a list of number of time points allocated to each file
 
-        dset_type = mpiutil.bcast(dset_type, comm=self.comm)
-        if self.comm is not None:
-            num_ts = list(itertools.chain(*self.comm.allgather(num_ts)))
-        nt = sum(num_ts) # total length of the first axis along different files
-        if tmp_shape is not None:
-            tmp_shape = (nt,) + tmp_shape[1:]
-        dset_shape = mpiutil.bcast(tmp_shape, comm=self.comm)
+        assert nt == np.sum(num_ts), 'Error: number of time points allocated to files are not correct'
 
         lt, st, et = mpiutil.split_local(nt, comm=self.comm) # total length distributed among different procs
         if self.comm is not None:
@@ -120,9 +103,66 @@ class BasicTod(memh5.MemDiskGroup):
         # local intervals owned by this proc
         lits = intervals[cum_num_lf_ind[self.rank]: cum_num_lf_ind[self.rank+1]]
         # infiles_map: a list of (file_idx, start, stop)
-        infiles_map = []
+        files_map = []
         for idx, fi in enumerate(lf_indices):
-            infiles_map.append((fi, lits[idx][0]-tmp_cum_num_ts[fi], lits[idx][1]-tmp_cum_num_ts[fi]))
+            files_map.append((fi, lits[idx][0]-tmp_cum_num_ts[fi], lits[idx][1]-tmp_cum_num_ts[fi]))
+
+        return files_map
+
+
+    def _get_input_info(self, dset_name):
+        ### get data shape and type and infile_map of time ordered datasets
+        dset_type = None
+        dset_shape = None
+        tmp_shape = None
+        num_ts = []
+        lf, sf, ef = mpiutil.split_local(self.num_infiles, comm=self.comm)
+        file_indices = range(sf, ef) # file indices owned by this proc
+        for fi in file_indices:
+            with h5py.File(self.infiles[fi], 'r') as f:
+                num_ts.append(f[dset_name].shape[0])
+                if fi == 0:
+                    # get shape and type info from the first file
+                    tmp_shape = f[dset_name].shape
+                    dset_type= f[dset_name].dtype
+
+        dset_type = mpiutil.bcast(dset_type, comm=self.comm)
+        if self.comm is not None:
+            num_ts = list(itertools.chain(*self.comm.allgather(num_ts)))
+        nt = sum(num_ts) # total length of the first axis along different files
+        if tmp_shape is not None:
+            tmp_shape = (nt,) + tmp_shape[1:]
+        dset_shape = mpiutil.bcast(tmp_shape, comm=self.comm)
+
+        # lt, st, et = mpiutil.split_local(nt, comm=self.comm) # total length distributed among different procs
+        # if self.comm is not None:
+        #     lts = self.comm.allgather(lt)
+        # else:
+        #     lts = [ lt ]
+        # cum_lts = np.cumsum(lts).tolist() # cumsum of lengths by all procs
+        # cum_num_ts = np.cumsum(num_ts).tolist() # cumsum of lengths of all files
+
+        # tmp_cum_lts = [0] + cum_lts
+        # tmp_cum_num_ts = [0] + cum_num_ts
+        # # start and stop (included) file indices owned by this proc
+        # sf, ef = np.searchsorted(cum_num_ts, tmp_cum_lts[self.rank], side='right'), np.searchsorted(cum_num_ts, tmp_cum_lts[self.rank+1], side='left')
+        # lf_indices = range(sf, ef+1) # file indices owned by this proc
+        # # allocation interval by all procs
+        # intervals = sorted(list(set([0] + cum_lts + cum_num_ts)))
+        # intervals = [ (intervals[i], intervals[i+1]) for i in range(len(intervals)-1) ]
+        # if self.comm is not None:
+        #     num_lf_ind = self.comm.allgather(len(lf_indices))
+        # else:
+        #     num_lf_ind = [ len(lf_indices) ]
+        # cum_num_lf_ind = np.cumsum([0] +num_lf_ind)
+        # # local intervals owned by this proc
+        # lits = intervals[cum_num_lf_ind[self.rank]: cum_num_lf_ind[self.rank+1]]
+        # # infiles_map: a list of (file_idx, start, stop)
+        # infiles_map = []
+        # for idx, fi in enumerate(lf_indices):
+        #     infiles_map.append((fi, lits[idx][0]-tmp_cum_num_ts[fi], lits[idx][1]-tmp_cum_num_ts[fi]))
+
+        infiles_map = self._gen_files_map(nt, num_ts)
 
         return dset_shape, dset_type, infiles_map
 
@@ -163,8 +203,7 @@ class BasicTod(memh5.MemDiskGroup):
 
     def _load_common(self):
         ### load common attributes and datasets from the first file
-        ### this supposes that all common data are the same as the in the first file
-
+        ### this supposes that all common data are the same as that in the first file
         with h5py.File(self.infiles[0], 'r') as f:
             # read in top level common attrs
             for attrs_name, attrs_value in f.attrs.iteritems():
@@ -202,7 +241,7 @@ class BasicTod(memh5.MemDiskGroup):
             # # first load main data
             # self._load_main_data()
             if td != self.main_data:
-                dset_shape, dset_type, infiles_map = self._get_tod_info(td)
+                dset_shape, dset_type, infiles_map = self._get_input_info(td)
                 self._load_tod(td, dset_shape, dset_type, infiles_map)
 
     @property
@@ -284,36 +323,38 @@ class BasicTod(memh5.MemDiskGroup):
         dset_type = self[dset_name].dtype
 
         nt = self[dset_name].shape[0]
-        lt, st, et = mpiutil.split_local(nt, comm=self.comm) # total length distributed among different procs
-        if self.comm is not None:
-            lts = self.comm.allgather(lt)
-        else:
-            lts = [ lt ]
-        cum_lts = np.cumsum(lts).tolist() # cumsum of lengths by all procs
-
         # allocate nt to the given number of files
         num_ts, num_s, num_e = mpiutil.split_m(nt, num_outfiles)
-        cum_num_ts = np.cumsum(num_ts).tolist() # cumsum of lengths of all files
 
-        tmp_cum_lts = [0] + cum_lts
-        tmp_cum_num_ts = [0] + cum_num_ts
-        # start and stop (included) file indices owned by this proc
-        sf, ef = np.searchsorted(cum_num_ts, tmp_cum_lts[self.rank], side='right'), np.searchsorted(cum_num_ts, tmp_cum_lts[self.rank+1], side='left')
-        lf_indices = range(sf, ef+1) # file indices owned by this proc
-        # allocation interval by all procs
-        intervals = sorted(list(set([0] + cum_lts + cum_num_ts)))
-        intervals = [ (intervals[i], intervals[i+1]) for i in range(len(intervals)-1) ]
-        if self.comm is not None:
-            num_lf_ind = self.comm.allgather(len(lf_indices))
-        else:
-            num_lf_ind = [ len(lf_indices) ]
-        cum_num_lf_ind = np.cumsum([0] +num_lf_ind)
-        # local intervals owned by this proc
-        lits = intervals[cum_num_lf_ind[self.rank]: cum_num_lf_ind[self.rank+1]]
-        # infiles_map: a list of (file_idx, start, stop)
-        outfiles_map = []
-        for idx, fi in enumerate(lf_indices):
-            outfiles_map.append((fi, lits[idx][0]-tmp_cum_num_ts[fi], lits[idx][1]-tmp_cum_num_ts[fi]))
+        # lt, st, et = mpiutil.split_local(nt, comm=self.comm) # total length distributed among different procs
+        # if self.comm is not None:
+        #     lts = self.comm.allgather(lt)
+        # else:
+        #     lts = [ lt ]
+        # cum_lts = np.cumsum(lts).tolist() # cumsum of lengths by all procs
+        # cum_num_ts = np.cumsum(num_ts).tolist() # cumsum of lengths of all files
+
+        # tmp_cum_lts = [0] + cum_lts
+        # tmp_cum_num_ts = [0] + cum_num_ts
+        # # start and stop (included) file indices owned by this proc
+        # sf, ef = np.searchsorted(cum_num_ts, tmp_cum_lts[self.rank], side='right'), np.searchsorted(cum_num_ts, tmp_cum_lts[self.rank+1], side='left')
+        # lf_indices = range(sf, ef+1) # file indices owned by this proc
+        # # allocation interval by all procs
+        # intervals = sorted(list(set([0] + cum_lts + cum_num_ts)))
+        # intervals = [ (intervals[i], intervals[i+1]) for i in range(len(intervals)-1) ]
+        # if self.comm is not None:
+        #     num_lf_ind = self.comm.allgather(len(lf_indices))
+        # else:
+        #     num_lf_ind = [ len(lf_indices) ]
+        # cum_num_lf_ind = np.cumsum([0] +num_lf_ind)
+        # # local intervals owned by this proc
+        # lits = intervals[cum_num_lf_ind[self.rank]: cum_num_lf_ind[self.rank+1]]
+        # # infiles_map: a list of (file_idx, start, stop)
+        # outfiles_map = []
+        # for idx, fi in enumerate(lf_indices):
+        #     outfiles_map.append((fi, lits[idx][0]-tmp_cum_num_ts[fi], lits[idx][1]-tmp_cum_num_ts[fi]))
+
+        outfiles_map = self._gen_files_map(nt, num_ts)
 
         return dset_shape, dset_type, outfiles_map
 
@@ -349,6 +390,7 @@ class BasicTod(memh5.MemDiskGroup):
                     lt, et,st = mpiutil.split_m(nt, num_outfiles)
                     lshape = (lt[fi],) + self[td].global_shape[1:]
                     f.create_dataset(td, lshape, dtype=self[td].dtype)
+                    # f[td][:] = np.array(0.0).astype(self[td].dtype)
                     # copy attrs of this dset
                     memh5.copyattrs(self[td].attrs, f[td].attrs)
 
