@@ -134,34 +134,6 @@ class BasicTod(memh5.MemDiskGroup):
             tmp_shape = (nt,) + tmp_shape[1:]
         dset_shape = mpiutil.bcast(tmp_shape, comm=self.comm)
 
-        # lt, st, et = mpiutil.split_local(nt, comm=self.comm) # total length distributed among different procs
-        # if self.comm is not None:
-        #     lts = self.comm.allgather(lt)
-        # else:
-        #     lts = [ lt ]
-        # cum_lts = np.cumsum(lts).tolist() # cumsum of lengths by all procs
-        # cum_num_ts = np.cumsum(num_ts).tolist() # cumsum of lengths of all files
-
-        # tmp_cum_lts = [0] + cum_lts
-        # tmp_cum_num_ts = [0] + cum_num_ts
-        # # start and stop (included) file indices owned by this proc
-        # sf, ef = np.searchsorted(cum_num_ts, tmp_cum_lts[self.rank], side='right'), np.searchsorted(cum_num_ts, tmp_cum_lts[self.rank+1], side='left')
-        # lf_indices = range(sf, ef+1) # file indices owned by this proc
-        # # allocation interval by all procs
-        # intervals = sorted(list(set([0] + cum_lts + cum_num_ts)))
-        # intervals = [ (intervals[i], intervals[i+1]) for i in range(len(intervals)-1) ]
-        # if self.comm is not None:
-        #     num_lf_ind = self.comm.allgather(len(lf_indices))
-        # else:
-        #     num_lf_ind = [ len(lf_indices) ]
-        # cum_num_lf_ind = np.cumsum([0] +num_lf_ind)
-        # # local intervals owned by this proc
-        # lits = intervals[cum_num_lf_ind[self.rank]: cum_num_lf_ind[self.rank+1]]
-        # # infiles_map: a list of (file_idx, start, stop)
-        # infiles_map = []
-        # for idx, fi in enumerate(lf_indices):
-        #     infiles_map.append((fi, lits[idx][0]-tmp_cum_num_ts[fi], lits[idx][1]-tmp_cum_num_ts[fi]))
-
         infiles_map = self._gen_files_map(nt, num_ts)
 
         return dset_shape, dset_type, infiles_map
@@ -325,34 +297,6 @@ class BasicTod(memh5.MemDiskGroup):
         nt = self[dset_name].shape[0]
         # allocate nt to the given number of files
         num_ts, num_s, num_e = mpiutil.split_m(nt, num_outfiles)
-
-        # lt, st, et = mpiutil.split_local(nt, comm=self.comm) # total length distributed among different procs
-        # if self.comm is not None:
-        #     lts = self.comm.allgather(lt)
-        # else:
-        #     lts = [ lt ]
-        # cum_lts = np.cumsum(lts).tolist() # cumsum of lengths by all procs
-        # cum_num_ts = np.cumsum(num_ts).tolist() # cumsum of lengths of all files
-
-        # tmp_cum_lts = [0] + cum_lts
-        # tmp_cum_num_ts = [0] + cum_num_ts
-        # # start and stop (included) file indices owned by this proc
-        # sf, ef = np.searchsorted(cum_num_ts, tmp_cum_lts[self.rank], side='right'), np.searchsorted(cum_num_ts, tmp_cum_lts[self.rank+1], side='left')
-        # lf_indices = range(sf, ef+1) # file indices owned by this proc
-        # # allocation interval by all procs
-        # intervals = sorted(list(set([0] + cum_lts + cum_num_ts)))
-        # intervals = [ (intervals[i], intervals[i+1]) for i in range(len(intervals)-1) ]
-        # if self.comm is not None:
-        #     num_lf_ind = self.comm.allgather(len(lf_indices))
-        # else:
-        #     num_lf_ind = [ len(lf_indices) ]
-        # cum_num_lf_ind = np.cumsum([0] +num_lf_ind)
-        # # local intervals owned by this proc
-        # lits = intervals[cum_num_lf_ind[self.rank]: cum_num_lf_ind[self.rank+1]]
-        # # infiles_map: a list of (file_idx, start, stop)
-        # outfiles_map = []
-        # for idx, fi in enumerate(lf_indices):
-        #     outfiles_map.append((fi, lits[idx][0]-tmp_cum_num_ts[fi], lits[idx][1]-tmp_cum_num_ts[fi]))
 
         outfiles_map = self._gen_files_map(nt, num_ts)
 
