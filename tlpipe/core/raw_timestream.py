@@ -3,28 +3,14 @@ import container
 
 
 class RawTimestream(container.BasicTod):
+    """Container class for the raw timestream data.
 
-    @property
-    def main_data(self):
-        """Main data in the data container."""
-        return 'vis'
+    The raw timestream data are raw visibilities (the main data) and other data
+    and meta data saved in HDF5 files which are recorded from the correlator.
+    """
 
-    @property
-    def main_data_axes(self):
-        """Axies of the main data."""
-        return ('time', 'frequency', 'channelpair')
-
-    @property
-    def main_time_ordered_datasets(self):
-        """Datasets that have same time points as the main data."""
-        return ('vis',)
-
-    @property
-    def time_ordered_datasets(self):
-        """Time ordered datasets."""
-        return ('vis', 'weather')
-
-    @property
-    def time_ordered_attrs(self):
-        """Attributes that are different in different files."""
-        return ('obstime', 'sec1970')
+    _main_data = 'vis'
+    _main_data_axes = ('time', 'frequency', 'channelpair')
+    _main_time_ordered_datasets = ('vis',)
+    _time_ordered_datasets = ('vis', 'weather')
+    _time_ordered_attrs = ('obstime', 'sec1970')

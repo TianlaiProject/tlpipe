@@ -197,30 +197,95 @@ class BasicTod(memh5.MemDiskGroup):
         return dset_shape, dset_type, infiles_map
 
 
+    _main_data = None
+
     @property
     def main_data(self):
         """Main data in the data container."""
-        return None
+        return self._main_data
+
+    @main_data.setter
+    def main_data(self, value):
+        if isinstance(value, basestring):
+            self._main_data = value
+        else:
+            raise ValueError('Attribute main_data must be a string')
+
+    _main_data_axes = ()
 
     @property
     def main_data_axes(self):
         """Axies of the main data."""
-        return ()
+        return self._main_data_axes
+
+    @main_data_axes.setter
+    def main_data_axes(self, value):
+        if isinstance(value, basestring):
+            self._main_data_axes = (value,)
+        elif hasattr(value, '__iter__'):
+            for val in value:
+                if not isinstance(val, basestring):
+                    raise ValueError('Attribute main_data_axes must be a tuple of strings')
+            self._main_data_axes = tuple(value)
+        else:
+            raise ValueError('Attribute main_data_axes must be a tuple of strings')
+
+    _main_time_ordered_datasets = (_main_data,)
 
     @property
     def main_time_ordered_datasets(self):
         """Datasets that have same time points as the main data."""
-        return (self.main_data,)
+        return self._main_time_ordered_datasets
+
+    @main_time_ordered_datasets.setter
+    def main_time_ordered_datasets(self, value):
+        if isinstance(value, basestring):
+            self._main_time_ordered_datasets = (value,)
+        elif hasattr(value, '__iter__'):
+            for val in value:
+                if not isinstance(val, basestring):
+                    raise ValueError('Attribute main_time_ordered_datasets must be a tuple of strings')
+            self._main_time_ordered_datasets = tuple(value)
+        else:
+            raise ValueError('Attribute main_time_ordered_datasets must be a tuple of strings')
+
+    _time_ordered_datasets = (_main_data,)
 
     @property
     def time_ordered_datasets(self):
         """Time ordered datasets."""
-        return (self.main_data,)
+        return self._time_ordered_datasets
+
+    @time_ordered_datasets.setter
+    def time_ordered_datasets(self, value):
+        if isinstance(value, basestring):
+            self._time_ordered_datasets = (value,)
+        elif hasattr(value, '__iter__'):
+            for val in value:
+                if not isinstance(val, basestring):
+                    raise ValueError('Attribute time_ordered_datasets must be a tuple of strings')
+            self._time_ordered_datasets = tuple(value)
+        else:
+            raise ValueError('Attribute time_ordered_datasets must be a tuple of strings')
+
+    _time_ordered_attrs = ()
 
     @property
     def time_ordered_attrs(self):
         """Attributes that are different in different files."""
-        return ()
+        return self._time_ordered_attrs
+
+    @time_ordered_attrs.setter
+    def time_ordered_attrs(self, value):
+        if isinstance(value, basestring):
+            self._time_ordered_attrs = (value,)
+        elif hasattr(value, '__iter__'):
+            for val in value:
+                if not isinstance(val, basestring):
+                    raise ValueError('Attribute time_ordered_attrs must be a tuple of strings')
+            self._time_ordered_attrs = tuple(value)
+        else:
+            raise ValueError('Attribute time_ordered_attrs must be a tuple of strings')
 
     def _load_tod(self, dset_name, dset_shape, dset_type, infiles_map):
         ### load a time ordered dataset form all files

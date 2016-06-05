@@ -3,28 +3,14 @@ import container
 
 
 class RawTimestream(container.BasicTod):
+    """Container class for the timestream data.
 
-    @property
-    def main_data(self):
-        """Main data in the data container."""
-        return 'vis'
+    This timestream data container is to hold time stream data that has polarization
+    and baseline separated from the channelpair in the raw timestream.
+    """
 
-    @property
-    def main_data_axes(self):
-        """Axies of the main data."""
-        return ('time', 'frequency', 'polarization', 'baseline')
-
-    @property
-    def main_time_ordered_datasets(self):
-        """Datasets that have same time points as the main data."""
-        return ('vis',)
-
-    @property
-    def time_ordered_datasets(self):
-        """Time ordered datasets."""
-        return ('vis', 'weather')
-
-    @property
-    def time_ordered_attrs(self):
-        """Attributes that are different in different files."""
-        return ()
+    _main_data = 'vis'
+    _main_data_axes = ('time', 'frequency', 'polarization', 'baseline')
+    _main_time_ordered_datasets = ('vis',)
+    _time_ordered_datasets = ('vis', 'weather')
+    _time_ordered_attrs = ()
