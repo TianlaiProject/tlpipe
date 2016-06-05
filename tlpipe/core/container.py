@@ -40,60 +40,115 @@ class BasicTod(memh5.MemDiskGroup):
 
     Parameters
     ----------
-    Parameters are passed through to the base class constructor.
+    files : string or list of strings
+        File name or a list of file names that data will be loaded from.
+    start : integer, optional
+        Starting time point to load. Non-negative integer is relative to the first
+        time point of the first file, negative integer is relative to the last time
+        point of the last file. Default 0 is from the start of the first file.
+    stop : None or integer, optional
+        Stopping time point to load. Non-negative integer is relative to the first
+        time point of the first file, negative integer is relative to the last time
+        point of the last file. Default None is to the end of the last file.
+    comm : None or MPI.Comm, optional
+        MPI Communicator to distributed over. Default None to use mpiutil._comm.
 
     Attributes
     ----------
-    index_map
+    main_data
+    main_data_axes
+    main_time_ordered_datasets
+    time_ordered_datasets
+    time_ordered_attrs
     history
 
     Methods
     -------
     group_name_allowed
     dataset_name_allowed
-    create_index_map
-    del_index_map
+    attrs_name_allowed
     add_history
     redistribute
+    to_files
 
     """
 
-    def __init__(self, files=None, comm=None):
+    def __init__(self, files, start=0, stop=None, comm=None):
 
         super(BasicTod, self).__init__(data_group=None, distributed=True, comm=comm)
 
-        self.infiles = ensure_file_list(files)
+        self.infiles, self.main_data_start, self.main_data_stop = self._select_files(files, self.main_data, start, stop)
         self.num_infiles = len(self.infiles)
 
         self.nproc = 1 if self.comm is None else self.comm.size
         self.rank = 0 if self.comm is None else self.comm.rank
         self.rank0 = True if self.rank == 0 else False
 
-        self.main_data_shape, self.main_data_type, self.infiles_map = self._get_input_info(self.main_data)
+        self.main_data_shape, self.main_data_type, self.infiles_map = self._get_input_info(self.main_data, self.main_data_start, self.main_data_stop)
 
 
-    def _gen_files_map(self, nt, num_ts):
+    def _select_files(self, files, dset_name, start=0, stop=None):
+        ### select the needed files from `files` which contain time ordered data from `start` to `stop`
+        assert dset_name in self.time_ordered_datasets, '%s is not a time ordered dataset' % dset_name
+
+        files = ensure_file_list(files)
+        num_ts = []
+        for fl in mpiutil.mpilist(files, method='con', comm=self.comm):
+            with h5py.File(fl, 'r') as f:
+                num_ts.append(f[dset_name].shape[0])
+
+        if self.comm is not None:
+            num_ts = list(itertools.chain(*self.comm.allgather(num_ts)))
+        nt = sum(num_ts) # total length of the first axis along different files
+
+        tmp_start = start if start >=0 else start + nt
+        if tmp_start >= 0 and tmp_start < nt:
+            start = tmp_start
+        else:
+            raise ValueError('Invalid start %d for nt = %d' % (start, nt))
+        stop = nt if stop is None else stop
+        tmp_stop = stop if stop >=0 else stop + nt
+        if tmp_stop >= 0 and tmp_stop <= nt:
+            stop = tmp_stop
+        else:
+            raise ValueError('Invalid stop %d for nt = %d' % (stop, nt))
+        if start > stop:
+            raise ValueError('Invalid start %d and stop %d for nt = %d' % (start, stop, nt))
+
+        cum_num_ts = np.cumsum(num_ts)
+        sf = np.searchsorted(cum_num_ts, start, side='right') # start file index
+        new_start = start if sf == 0 else start - cum_num_ts[sf-1] # start relative the selected first file
+        ef = np.searchsorted(cum_num_ts, stop, side='left') # stop file index, included
+        new_stop = stop if sf == 0 else stop - cum_num_ts[sf-1] # stop relative the selected first file
+
+        return files[sf:ef+1], new_start, new_stop
+
+    def _gen_files_map(self, num_ts, start=0, stop=None):
         ### generate files map, i.e., a list of (file_idx, start, stop)
-        ### nt: total number of time points
         ### num_ts: a list of number of time points allocated to each file
+        ### start, stop are all relative to the first file
 
-        assert nt == np.sum(num_ts), 'Error: number of time points allocated to files are not correct'
+        nt = np.sum(num_ts) # total number of time points
+        stop = nt if stop is None else stop
+        assert (start <= stop and stop - start <= nt), 'Invalid start %d and stop %d' % (start, stop)
 
-        lt, st, et = mpiutil.split_local(nt, comm=self.comm) # total length distributed among different procs
+        lt, st, et = mpiutil.split_local(stop-start, comm=self.comm) # selected total length distributed among different procs
         if self.comm is not None:
             lts = self.comm.allgather(lt)
         else:
             lts = [ lt ]
-        cum_lts = np.cumsum(lts).tolist() # cumsum of lengths by all procs
+        cum_lts = np.cumsum(lts) # cumsum of lengths by all procs
+        cum_lts = (cum_lts + start).tolist()
+        tmp_cum_lts = [start] + cum_lts
         cum_num_ts = np.cumsum(num_ts).tolist() # cumsum of lengths of all files
-
-        tmp_cum_lts = [0] + cum_lts
         tmp_cum_num_ts = [0] + cum_num_ts
+
         # start and stop (included) file indices owned by this proc
         sf, ef = np.searchsorted(cum_num_ts, tmp_cum_lts[self.rank], side='right'), np.searchsorted(cum_num_ts, tmp_cum_lts[self.rank+1], side='left')
         lf_indices = range(sf, ef+1) # file indices owned by this proc
+
         # allocation interval by all procs
-        intervals = sorted(list(set([0] + cum_lts + cum_num_ts)))
+        intervals = sorted(list(set([start] + cum_lts + cum_num_ts[:-1] + [stop])))
         intervals = [ (intervals[i], intervals[i+1]) for i in range(len(intervals)-1) ]
         if self.comm is not None:
             num_lf_ind = self.comm.allgather(len(lf_indices))
@@ -110,8 +165,9 @@ class BasicTod(memh5.MemDiskGroup):
         return files_map
 
 
-    def _get_input_info(self, dset_name):
+    def _get_input_info(self, dset_name, start=0, stop=None):
         ### get data shape and type and infile_map of time ordered datasets
+        ### start, stop are all relative to the first file
         dset_type = None
         dset_shape = None
         tmp_shape = None
@@ -129,12 +185,14 @@ class BasicTod(memh5.MemDiskGroup):
         dset_type = mpiutil.bcast(dset_type, comm=self.comm)
         if self.comm is not None:
             num_ts = list(itertools.chain(*self.comm.allgather(num_ts)))
-        nt = sum(num_ts) # total length of the first axis along different files
+        if stop is None:
+            stop = sum(num_ts) # total length of the first axis along different files
         if tmp_shape is not None:
-            tmp_shape = (nt,) + tmp_shape[1:]
+            # tmp_shape = (nt,) + tmp_shape[1:]
+            tmp_shape = ((stop-start),) + tmp_shape[1:]
         dset_shape = mpiutil.bcast(tmp_shape, comm=self.comm)
 
-        infiles_map = self._gen_files_map(nt, num_ts)
+        infiles_map = self._gen_files_map(num_ts, start, stop)
 
         return dset_shape, dset_type, infiles_map
 
@@ -150,11 +208,18 @@ class BasicTod(memh5.MemDiskGroup):
         return ()
 
     @property
+    def main_time_ordered_datasets(self):
+        """Datasets that have same time points as the main data."""
+        return (self.main_data,)
+
+    @property
     def time_ordered_datasets(self):
+        """Time ordered datasets."""
         return (self.main_data,)
 
     @property
     def time_ordered_attrs(self):
+        """Attributes that are different in different files."""
         return ()
 
     def _load_tod(self, dset_name, dset_shape, dset_type, infiles_map):
@@ -213,23 +278,11 @@ class BasicTod(memh5.MemDiskGroup):
             # # first load main data
             # self._load_main_data()
             if td != self.main_data:
-                dset_shape, dset_type, infiles_map = self._get_input_info(td)
+                if td in self.main_time_ordered_datasets:
+                    dset_shape, dset_type, infiles_map = self._get_input_info(td, self.main_data_start, self.main_data_stop)
+                else:
+                    dset_shape, dset_type, infiles_map = self._get_input_info(td, 0, None)
                 self._load_tod(td, dset_shape, dset_type, infiles_map)
-
-    @property
-    def history(self):
-        """The analysis history for this data.
-
-        Do not try to add a new entry by assigning to an element of this
-        property. Use :meth:`~BasicCont.add_history` instead.
-
-        Returns
-        -------
-        history : string
-
-        """
-
-        return self.attrs['history']
 
     def group_name_allowed(self, name):
         """No groups are exposed to the user. Returns ``False``."""
@@ -248,6 +301,21 @@ class BasicTod(memh5.MemDiskGroup):
     def attrs_name_allowed(self, name):
         """Whether to allow the access of the given root level attribute."""
         return True if name not in self.time_ordered_attrs else False
+
+    @property
+    def history(self):
+        """The analysis history for this data.
+
+        Do not try to add a new entry by assigning to an element of this
+        property. Use :meth:`~BasicCont.add_history` instead.
+
+        Returns
+        -------
+        history : string
+
+        """
+
+        return self.attrs['history']
 
     def add_history(self, history=''):
         """Create a new history entry."""
@@ -298,7 +366,7 @@ class BasicTod(memh5.MemDiskGroup):
         # allocate nt to the given number of files
         num_ts, num_s, num_e = mpiutil.split_m(nt, num_outfiles)
 
-        outfiles_map = self._gen_files_map(nt, num_ts)
+        outfiles_map = self._gen_files_map(num_ts, start=0, stop=None)
 
         return dset_shape, dset_type, outfiles_map
 
