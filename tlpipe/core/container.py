@@ -77,7 +77,7 @@ class BasicTod(memh5.MemDiskGroup):
 
         super(BasicTod, self).__init__(data_group=None, distributed=True, comm=comm)
 
-        # self.infiles will be a list of opened hdf5 file handler
+        # self.infiles will be a list of opened hdf5 file handlers
         self.infiles, self.main_data_start, self.main_data_stop = self._select_files(files, self.main_data, start, stop)
         self.num_infiles = len(self.infiles)
 
@@ -185,15 +185,6 @@ class BasicTod(memh5.MemDiskGroup):
             if fh is self.infiles[0]:
                 tmp_shape = fh[dset_name].shape
                 dset_type= fh[dset_name].dtype
-        # lf, sf, ef = mpiutil.split_local(self.num_infiles, comm=self.comm)
-        # file_indices = range(sf, ef) # file indices owned by this proc
-        # for fi in file_indices:
-        #     with h5py.File(self.infiles[fi], 'r') as f:
-        #         num_ts.append(f[dset_name].shape[0])
-        #         if fi == 0:
-        #             # get shape and type info from the first file
-        #             tmp_shape = f[dset_name].shape
-        #             dset_type= f[dset_name].dtype
 
         dset_type = mpiutil.bcast(dset_type, comm=self.comm)
         if self.comm is not None:
@@ -201,7 +192,6 @@ class BasicTod(memh5.MemDiskGroup):
         if stop is None:
             stop = sum(num_ts) # total length of the first axis along different files
         if tmp_shape is not None:
-            # tmp_shape = (nt,) + tmp_shape[1:]
             tmp_shape = ((stop-start),) + tmp_shape[1:]
         dset_shape = mpiutil.bcast(tmp_shape, comm=self.comm)
 
@@ -311,10 +301,6 @@ class BasicTod(memh5.MemDiskGroup):
             md[st:et] = fh[dset_name][start:stop]
             memh5.copyattrs(fh[dset_name].attrs, attrs_dict)
             st = et
-            # with h5py.File(self.infiles[fi], 'r') as f:
-            #     md[st:et] = f[dset_name][start:stop]
-            #     memh5.copyattrs(f[dset_name].attrs, attrs_dict)
-            #     st = et
         self.create_dataset(dset_name, shape=dset_shape, dtype=dset_type, data=md, distributed=True, distributed_axis=0)
         attrs_dict = mpiutil.bcast(attrs_dict, comm=self.comm)
         # copy attrs of this dset
@@ -334,17 +320,6 @@ class BasicTod(memh5.MemDiskGroup):
                 self.create_dataset(dset_name, data=dset, shape=dset.shape, dtype=dset.dtype)
                 # copy attrs of this dset
                 memh5.copyattrs(dset.attrs, self[dset_name].attrs)
-        # with h5py.File(self.infiles[0], 'r') as f:
-        #     # read in top level common attrs
-        #     for attrs_name, attrs_value in f.attrs.iteritems():
-        #         if attrs_name not in self.time_ordered_attrs:
-        #             self.attrs[attrs_name] = attrs_value
-        #     # read in top level common datasets
-        #     for dset_name, dset in f.iteritems():
-        #         if dset_name not in self.time_ordered_datasets:
-        #             self.create_dataset(dset_name, data=dset, shape=dset.shape, dtype=dset.dtype)
-        #             # copy attrs of this dset
-        #             memh5.copyattrs(dset.attrs, self[dset_name].attrs)
 
     def _load_main_data(self):
         ### load main data from all files
@@ -352,7 +327,6 @@ class BasicTod(memh5.MemDiskGroup):
 
     def _load_time_ordered(self):
         ### load time ordered attributes and datasets from all files
-        # lf, sf, ef = mpiutil.split_local(self.num_infiles, comm=self.comm)
         for ta in self.time_ordered_attrs:
             self.attrs[ta] = []
             for fh in mpiutil.mpilist(self.infiles, method='con', comm=self.comm):
@@ -361,17 +335,6 @@ class BasicTod(memh5.MemDiskGroup):
             # gather time ordered attrs
             if self.comm is not None:
                 self.attrs[ta] = list(itertools.chain(*self.comm.allgather(self.attrs[ta])))
-
-        # for fi in range(sf, ef):
-        #     with h5py.File(self.infiles[fi], 'r') as f:
-        #         # time ordered attrs
-        #         for ta in self.time_ordered_attrs:
-        #             self.attrs[ta].append(f.attrs[ta])
-
-        # # gather time ordered attrs
-        # for ta in self.time_ordered_attrs:
-        #     if self.comm is not None:
-        #         self.attrs[ta] = list(itertools.chain(*self.comm.allgather(self.attrs[ta])))
 
         # load time ordered datasets
         for td in self.time_ordered_datasets:
