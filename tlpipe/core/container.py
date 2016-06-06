@@ -80,6 +80,8 @@ class BasicTod(memh5.MemDiskGroup):
     ----------
     files : string or list of strings
         File name or a list of file names that data will be loaded from.
+    mode : string, optional
+        In which mode to open the input files. Default 'r' to open files read only.
     start : integer, optional
         Starting time point to load. Non-negative integer is relative to the first
         time point of the first file, negative integer is relative to the last time
@@ -88,7 +90,7 @@ class BasicTod(memh5.MemDiskGroup):
         Stopping time point to load. Non-negative integer is relative to the first
         time point of the first file, negative integer is relative to the last time
         point of the last file. Default None is to the end of the last file.
-    dist_axis : string or integer
+    dist_axis : string or integer, optional
         Axis along which the main data is distributed.
     comm : None or MPI.Comm, optional
         MPI Communicator to distributed over. Default None to use mpiutil._comm.
@@ -119,10 +121,11 @@ class BasicTod(memh5.MemDiskGroup):
 
     """
 
-    def __init__(self, files, start=0, stop=None, dist_axis=0, comm=None):
+    def __init__(self, files, mode='r', start=0, stop=None, dist_axis=0, comm=None):
 
         super(BasicTod, self).__init__(data_group=None, distributed=True, comm=comm)
 
+        self.infiles_mode = mode
         # self.infiles will be a list of opened hdf5 file handlers
         self.infiles, self.main_data_start, self.main_data_stop = self._select_files(files, self.main_data_name, start, stop)
         self.num_infiles = len(self.infiles)
@@ -174,7 +177,7 @@ class BasicTod(memh5.MemDiskGroup):
         new_stop = stop if sf == 0 else stop - cum_num_ts[sf-1] # stop relative the selected first file
 
         # open all selected files
-        files = [ h5py.File(fh, 'r') for fh in files[sf:ef+1] ]
+        files = [ h5py.File(fh, self.infiles_mode) for fh in files[sf:ef+1] ]
 
         return files, new_start, new_stop
 
