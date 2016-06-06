@@ -1,4 +1,4 @@
-"""Phase visibility data to a source."""
+"""Phase the zenith-phased visibility data to a source."""
 
 try:
     import cPickle as pickle
@@ -35,7 +35,7 @@ prefix = 'p2s_'
 
 
 class Phs2src(Base):
-    """Phase visibility data to a source."""
+    """Phase the zenith-phased visibility data to a source."""
 
     def __init__(self, parameter_file_or_dict=None, feedback=2):
 

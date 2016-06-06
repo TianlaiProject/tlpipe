@@ -23,20 +23,18 @@ params_init = {
                'aprocs': range(mpiutil.size), # list of active process rank no.
                'input_file': 'dirty_image.hdf5',
                'output_file': 'clean_image.hdf5',
-               'method': ['cln'],
+               'method': 'cln', # or 'mem', or 'lsq', or 'ann'
                'model': None, # the model image
                'pol': 'I',
                'gain': 0.1,
                'maxiter': 10000,
-               'tol': 1.0e-3,
+               'tol': 1.0e-6,
                'pos_def': False,
                'verbose': False,
                'extra_history': '',
               }
 prefix = 'cl_'
 
-
-pol_dict = {'I': 0, 'Q': 1, 'U': 2, 'V': 3}
 
 
 class Clean(Base):
@@ -58,26 +56,28 @@ class Clean(Base):
         pos_def = self.params['pos_def']
         verbose = self.params['verbose']
 
-        with h5py.File(input_file, 'r') as f:
-            dim = f['uv_fft'][...]
-            dbm = f['uv_cov_fft'][...]
-            # max_wl = f.attrs['max_wl']
-            # max_lm = f.attrs['max_lm']
-
-        DIM = dim.shape[0]
-        dbm = a.img.recenter(dbm, (DIM/2,DIM/2))
-        bm_gain = a.img.beam_gain(dbm)
         if mpiutil.rank0:
+            with h5py.File(input_file, 'r') as f:
+                dim = f['uv_fft'][...]
+                dbm = f['uv_cov_fft'][...]
+                # max_wl = f.attrs['max_wl']
+                # max_lm = f.attrs['max_lm']
+
+            DIM = dim.shape[0]
+            dbm = a.img.recenter(dbm, (DIM/2,DIM/2))
+            bm_gain = a.img.beam_gain(dbm)
             print 'Gain of dirty beam:', bm_gain
-        for md in mpiutil.mpilist(method):
-            if md == 'cln':
+
+            if method == 'cln':
                 cim, info = a.deconv.clean(dim, dbm, mdl=model, gain=gain, maxiter=maxiter, stop_if_div=True, verbose=verbose, tol=tol, pos_def=pos_def)
-            elif md == 'mem':
+            elif method == 'mem':
                 cim, info = a.deconv.maxent_findvar(dim, dbm, mdl=model, f_var0=0.6, maxiter=maxiter, verbose=verbose, tol=tol, maxiterok=True)
-            elif md == 'lsq':
+            elif method == 'lsq':
                 cim, info = a.deconv.lsq(dim, dbm, mdl=model, maxiter=maxiter, verbose=verbose, tol=tol)
-            elif md == 'ann':
+            elif method == 'ann':
                 cim, info = a.deconv.anneal(dim, dbm, mdl=model, maxiter=maxiter, cooling=lambda i,x: tol*(1-np.cos(i/50.0))*(x**2), verbose=verbose)
+            else:
+                raise ValueError('Unknown deconvolution method %s' % method)
 
             # Fit a 2d Gaussian to the dirty beam and convolve that with the clean components.
             dbm_fit = np.fft.fftshift(dbm)
@@ -96,7 +96,6 @@ class Clean(Base):
             bim = rim / bm_gain + cimc
 
             # save clean image
-            output_file = output_file.replace('.hdf5', '_%s.hdf5' % md)
             with h5py.File(output_file, 'w') as f:
                 f.create_dataset('bim', data=bim)
                 f.create_dataset('cim', data=cim)

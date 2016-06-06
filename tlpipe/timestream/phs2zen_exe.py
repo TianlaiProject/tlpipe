@@ -1,4 +1,4 @@
-"""Module to phase data to zenith."""
+"""Phase the source-phased visibility data to the zenith, this is just the inverse operation of phs2src_exe.py."""
 
 try:
     import cPickle as pickle
@@ -6,14 +6,17 @@ except ImportError:
     import pickle
 
 import os
-from time import sleep
 import numpy as np
-from scipy.optimize import curve_fit
-# from scipy.interpolate import UnivariateSpline
+from scipy.linalg import eigh
 import h5py
+import ephem
+import aipy as a
 
 from tlpipe.utils import mpiutil
 from tlpipe.core.base_exe import Base
+from tlpipe.core import tldishes
+from tlpipe.utils.pickle_util import get_value
+from tlpipe.utils.date_util import get_ephdate
 from tlpipe.utils.path_util import input_path, output_path
 
 
@@ -22,22 +25,17 @@ from tlpipe.utils.path_util import input_path, output_path
 params_init = {
                'nprocs': mpiutil.size, # number of processes to run this module
                'aprocs': range(mpiutil.size), # list of active process rank no.
-               'input_file': ['cut_before_transit_conv.hdf5', 'cut_after_transit_conv.hdf5'],
+               'input_file': 'data_phs2src.hdf5',
                'output_file': 'data_phs2zen.hdf5',
-               'save_slice': False, # also save data slice used in the computing if True
+               'source': 'cas', # <src_name> or <ra XX[:XX:xx]>_<dec XX[:XX:xx]> or <time y/m/d h:m:s> (array pointing of this local time)
+               'catalog': 'misc,helm,nvss',
                'extra_history': '',
               }
-prefix = 'ph_'
-
-
-pol_dict = {0: 'xx', 1: 'yy', 2: 'xy', 3: 'yx'}
-
-def gauss(x, a, x0, sigma, b):
-    return a * np.exp(-(x-x0)**2 / (2 * sigma**2)) + b
+prefix = 'p2z_'
 
 
 class Phs2zen(Base):
-    """Phase the data to zenith."""
+    """Phase the source-phased visibility data to the zenith, this is just the inverse operation of phs2src_exe.py."""
 
     def __init__(self, parameter_file_or_dict=None, feedback=2):
 
@@ -47,189 +45,89 @@ class Phs2zen(Base):
 
         input_file = input_path(self.params['input_file'])
         output_file = output_path(self.params['output_file'])
-        save_slice = self.params['save_slice']
+        source = self.params['source']
+        catalog = self.params['catalog']
 
-        nfiles = len(input_file)
-        assert nfiles > 0, 'No input data file'
+        with h5py.File(input_file, 'r') as f:
+            dset = f['data']
+            data_shp = dset.shape
+            data_type = dset.dtype
+            ants = dset.attrs['ants']
+            ts = f['time']
+            freq = dset.attrs['freq']
+            az = np.radians(dset.attrs['az_alt'][0][0])
+            alt = np.radians(dset.attrs['az_alt'][0][1])
+            time_zone = dset.attrs['timezone']
 
-        # read in ants, freq, time info from data files
-        cnt = 1
-        while(cnt < 6 and not os.path.exists(input_file[0])):
-            sleep(cnt)
-            cnt +=1
-        with h5py.File(input_file[0], 'r') as f:
-            dataset = f['data']
-            data_shp = dataset.shape
-            data_type = dataset.dtype
-            ants = dataset.attrs['ants']
-            freq = dataset.attrs['freq']
-            # ts = f['time'] # Julian date for data in this file only
+            npol = dset.shape[2]
+            nt = len(ts)
+            nfreq = len(freq)
+            nants = len(ants)
+            bls = [(ants[i], ants[j]) for i in range(nants) for j in range(i, nants)] # start from 1
+            nbls = len(bls)
 
-        npol = data_shp[2]
-        nfreq = len(freq)
+            lt, st, et = mpiutil.split_local(nt)
+            # data an time local to this process
+            local_data = dset[st:et]
+            local_ts = ts[st:et]
 
-        nants = len(ants)
-        bls = [(ants[i], ants[j]) for i in range(nants) for j in range(i, nants)]
-        nbls = len(bls)
-
-        lbls, sbl, ebl = mpiutil.split_local(nbls)
-        local_bls = range(sbl, ebl)
-        # local data section corresponding to local bls
-        local_data = np.array([], dtype=data_type).reshape((0, lbls, npol, nfreq))
-        ts = np.array([], dtype=np.float64)
-        for ind, data_file in enumerate(input_file):
-            with h5py.File(data_file, 'r') as f:
-                local_data = np.concatenate((local_data, f['data'][:, sbl:ebl, :, :]), axis=0)
-                ts = np.concatenate((ts, f['time'][...])) # Julian date
-        local_int_time = np.zeros(local_data.shape[1:], dtype=local_data.dtype)
-
-        nt = len(ts)
-        if mpiutil.size == 1:
-            data_phs2zen = local_data.view()
-            data_int_time = local_int_time.view()
+        if mpiutil.rank0:
+            data_phs2zen = np.zeros(data_shp, dtype=data_type) # save data phased to src
         else:
-            if mpiutil.rank0:
-                data_phs2zen = np.zeros((nt,) + data_shp[1:], dtype=data_type) # save data that phased to zenith
-                data_int_time = np.zeros(data_phs2zen.shape[1:], dtype=data_type) # save data integrate over time
-            else:
-                data_phs2zen = None
-                data_int_time = None
-
-        for pol_ind in range(npol):
-            for bi, bl_ind in enumerate(local_bls): # mpi among bls
-                # # ignore auto-correlation
-                # bl = bls[bl_ind]
-                # if bl[0] == bl[1]:
-                #     continue
-
-                data_slice = local_data[:, bi, pol_ind, :].copy() # will use local_data to save data_slice_dphs in-place, so here use copy
-
-                # subtract the mean
-                # data -= np.mean(data, axis=1)
-
-                # time fft
-                data_slice_fft_time = np.fft.fft(data_slice, axis=0)
-                data_slice_fft_time = np.fft.fftshift(data_slice_fft_time, axes=0)
-                if save_slice:
-                    # freq fft
-                    data_slice_fft_freq = np.fft.fft(data_slice, axis=1)
-                    data_slice_fft_freq = np.fft.fftshift(data_slice_fft_freq, axes=1)
-                    # freq and time fft
-                    data_slice_fft2 = np.fft.fft2(data_slice)
-                    data_slice_fft2 = np.fft.fftshift(data_slice_fft2)
-
-                ########################
-                # find max in time fft
-                # max_row_ind = np.argmax(np.abs(data_slice_fft_time), axis=0)
-                max_row_ind = np.argmax(data_slice_fft_time.real, axis=0) # NOTE real here
-                data_slice_fft_time_max = np.zeros_like(data_slice_fft_time)
-                for ci in range(nfreq):
-                    data_slice_fft_time_max[max_row_ind[ci], ci] = data_slice_fft_time[max_row_ind[ci], ci]
-
-                # ifft for time
-                data_slice_new = np.fft.ifft(np.fft.ifftshift(data_slice_fft_time_max, axes=0), axis=0)
-
-                if save_slice:
-                    # freq fft
-                    data_slice_new_fft_freq = np.fft.fft(data_slice_new, axis=1)
-                    data_slice_new_fft_freq = np.fft.fftshift(data_slice_new_fft_freq, axes=1)
-                    # time fft
-                    data_slice_new_fft_time = np.fft.fft(data_slice_new, axis=0)
-                    data_slice_new_fft_time = np.fft.fftshift(data_slice_new_fft_time, axes=0)
-                    # freq and time fft
-                    data_slice_new_fft2 = np.fft.fft2(data_slice_new)
-                    data_slice_new_fft2 = np.fft.fftshift(data_slice_new_fft2)
+            data_phs2zen = None
 
 
-                # divide phase
-                data_slice_dphs = data_slice / (data_slice_new / np.abs(data_slice_new))
-                # fill invalid values (divide 0 or something else) by 0.0
-                data_slice_dphs[np.logical_not(np.isfinite(data_slice_dphs))] = 0.0
-                # save data after phas2 to zenith
-                # data_phs2zen[:, bl_ind, pol_ind, :] = data_slice_dphs
-                local_data[:, bi, pol_ind, :] = data_slice_dphs # change local_data to save memory
+        # array
+        aa = tldishes.get_aa(1.0e-3 * freq) # use GHz
+        # make all antennas point to the pointing direction
+        for ai in aa:
+            ai.set_pointing(az=az, alt=alt, twist=0)
 
-                if save_slice:
-                    # freq fft
-                    data_slice_dphs_fft_freq = np.fft.fft(data_slice_dphs, axis=1)
-                    data_slice_dphs_fft_freq = np.fft.fftshift(data_slice_dphs_fft_freq, axes=1)
-                    # time fft
-                    data_slice_dphs_fft_time = np.fft.fft(data_slice_dphs, axis=0)
-                    data_slice_dphs_fft_time = np.fft.fftshift(data_slice_dphs_fft_time, axes=0)
-                    # freq and time fft
-                    data_slice_dphs_fft2 = np.fft.fft2(data_slice_dphs)
-                    data_slice_dphs_fft2 = np.fft.fftshift(data_slice_dphs_fft2)
+        try:
+            # convert an observing time to the ra_dec of the array pointing of that time
+            src_time = get_ephdate(source, tzone=time_zone) # utc time
+            aa.date = str(ephem.Date(src_time)) # utc time
+            # print 'date:', aa.date
+            az, alt = ephem.degrees(az), ephem.degrees(alt)
+            src_ra, src_dec = aa.radec_of(az, alt)
+            source = '%s_%s' % (src_ra, src_dec)
+            # print 'source:', source
+        except ValueError:
+            pass
 
-                # # Fit a Gaussian function to data_slice_dphs
-                # data_slice_dphs_gauss_fit = np.zeros_like(data_slice_dphs)
-                # data_slice_dphs_xgauss = np.zeros_like(data_slice_dphs)
-                # for fi in range(nfreq):
-                #     try:
-                #         # data_slice_dphs_smooth = UnivariateSpline(ts, data_slice_dphs[:, fi].real, s=1)(ts)
-                #         data_slice_dphs_smooth = data_slice_dphs[:, fi].real # maybe should try some smooth
-                #         max_val = np.max(data_slice_dphs_smooth)
-                #         max_ind = np.argmax(data_slice_dphs_smooth)
-                #         # sigma = np.sum(np.sqrt((ts-ts[max_ind])**2 / (2 * np.log(np.abs(max_val / (data_slice_dphs[:, fi].real - 0.0)))))) / nt
-                #         sigma = 1.0
-                #         popt,pcov = curve_fit(gauss, ts, data_slice_dphs_smooth, p0=[max_val, ts[max_ind], sigma, 0.0]) # now only fit real part
-                #         data_slice_dphs_gauss_fit[:, fi] = gauss(ts, *popt)
-                #     except RuntimeError:
-                #         print 'Error occured while fitting pol: %s, bl: (%d, %d), fi: %d' % (pol_dict[pol_ind], bls[bl_ind][0], bls[bl_ind][1], fi)
-                #         # print data_slice_dphs[:, fi].real
-                #         plt.figure()
-                #         plt.plot(ts, data_slice_dphs[:, fi].real)
-                #         plt.plot(ts, data_slice_dphs_smooth)
-                #         plt.xlabel('t')
-                #         figname = output_dir + 'data_slice_%d_%d_%s_%d.png' % (bls[bl_ind][0], bls[bl_ind][1], pol_dict[pol_ind], fi)
-                #         plt.savefig(figname)
-                #         # data_slice_dphs_gauss_fit[:, fi] = data_slice_dphs[:, fi].real
-                #         data_slice_dphs_gauss_fit[:, fi] = data_slice_dphs_smooth
-                # data_slice_dphs_xgauss = data_slice_dphs * data_slice_dphs_gauss_fit # assume int_time = 1 here
+        # source
+        srclist, cutoff, catalogs = a.scripting.parse_srcs(source, catalog)
+        cat = a.src.get_catalog(srclist, cutoff, catalogs)
+        assert(len(cat) == 1), 'Allow only one source'
+        s = cat.values()[0]
+        if mpiutil.rank0:
+            print 'Undo the source-phase %s to phase to the zenith.' % source
 
-                # # integrate over time
-                # data_slice_int_time = np.sum(data_slice_dphs_xgauss, axis=0)
-                # data_int_time[bl_ind, pol_ind, :] = data_slice_int_time
 
-                # integrate over time
-                data_slice_int_time = np.sum(data_slice_dphs, axis=0)
-                local_int_time[bi, pol_ind, :] = data_slice_int_time
-
-                if save_slice:
-                    # save data to file
-                    filename = output_path('data_slice_%d_%d_%s.hdf5' % (bls[bl_ind][0], bls[bl_ind][1], pol_dict[pol_ind]))
-                    with h5py.File(filename, 'w') as f:
-                        f.create_dataset('data_slice', data=data_slice)
-                        f.create_dataset('data_slice_fft_freq', data=data_slice_fft_freq)
-                        f.create_dataset('data_slice_fft_time', data=data_slice_fft_time)
-                        f.create_dataset('data_slice_fft2', data=data_slice_fft2)
-                        f.create_dataset('data_slice_fft_time_max', data=data_slice_fft_time_max)
-                        f.create_dataset('data_slice_new', data=data_slice_new)
-                        f.create_dataset('data_slice_new_fft_freq', data=data_slice_new_fft_freq)
-                        f.create_dataset('data_slice_new_fft_time', data=data_slice_new_fft_time)
-                        f.create_dataset('data_slice_new_fft2', data=data_slice_new_fft2)
-                        f.create_dataset('data_slice_dphs', data=data_slice_dphs)
-                        f.create_dataset('data_slice_dphs_fft_freq', data=data_slice_dphs_fft_freq)
-                        f.create_dataset('data_slice_dphs_fft_time', data=data_slice_dphs_fft_time)
-                        f.create_dataset('data_slice_dphs_fft2', data=data_slice_dphs_fft2)
-                        # f.create_dataset('data_slice_dphs_gauss_fit', data=data_slice_dphs_gauss_fit)
-                        # f.create_dataset('data_slice_dphs_xgauss', data=data_slice_dphs_xgauss)
-                        f.create_dataset('data_slice_int_time', data=data_slice_int_time)
-
+        for ti, t in enumerate(local_ts): # mpi among time
+            aa.set_jultime(t)
+            s.compute(aa)
+            # get fluxes vs. freq of the calibrator
+            # Sc = s.get_jys()
+            # get the topocentric coordinate of the calibrator at the current time
+            s_top = s.get_crds('top', ncrd=3)
+            # aa.sim_cache(cat.get_crds('eq', ncrd=3)) # for compute bm_response and sim
+            for bi, (ai, aj) in enumerate(bls):
+                uij = aa.gen_uvw(ai-1, aj-1, src='z').squeeze() # (rj - ri)/lambda
+                # phase the data to src
+                local_data[ti, bi, :, :] *= np.exp(-2.0J * np.pi * np.dot(s_top, uij))
+                # local_data[ti, bi, :, :] *= np.exp(2.0J * np.pi * np.dot(s_top, uij))
 
         # Gather data in separate processes
-        if self.comm is not None and self.comm.size > 1: # Reduce only when there are multiple processes
-            mpiutil.gather_local(data_phs2zen, local_data, (0, sbl, 0, 0), root=0, comm=self.comm)
-            mpiutil.gather_local(data_int_time, local_int_time, (sbl, 0, 0), root=0, comm=self.comm)
+        mpiutil.gather_local(data_phs2zen, local_data, (st, 0, 0, 0), root=0, comm=self.comm)
 
-
-        # save data phased to zenith
+        # save data after phased to src
         if mpiutil.rank0:
             with h5py.File(output_file, 'w') as f:
-                f.create_dataset('time', data=ts)
-                f.create_dataset('data_int_time', data=data_int_time)
                 dset = f.create_dataset('data', data=data_phs2zen)
                 # copy metadata from input file
-                with h5py.File(input_file[0], 'r') as fin:
+                with h5py.File(input_file, 'r') as fin:
+                    f.create_dataset('time', data=fin['time'])
                     for attrs_name, attrs_value in fin['data'].attrs.iteritems():
                         dset.attrs[attrs_name] = attrs_value
                 # update some attrs

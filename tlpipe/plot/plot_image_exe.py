@@ -35,8 +35,8 @@ class Plot(Base):
         input_file = self.params['input_file']
         # input_file = input_path(self.params['input_file'])
         output_file = self.params['output_file']
-        #if output_file is not None:
-        #    output_file = output_path(output_file)
+        # if output_file is not None:
+        #     output_file = output_path(output_file)
         scale = self.params['scale']
         plot_sqrt = self.params['plot_sqrt']
 
@@ -103,7 +103,7 @@ class Plot(Base):
             shp = uv.shape
             assert shp[0] == shp[1]
             ct = shp[0]/2
-            plt_data = uv_cov_fft.real[ct-ct/scale:ct+ct/scale, ct-ct/scale:ct+ct/scale]
+            plt_data = uv_cov_fft[ct-ct/scale:ct+ct/scale, ct-ct/scale:ct+ct/scale]
             if plot_sqrt:
                 plt.imshow(plt_data/np.sqrt(np.abs(plt_data)), origin='lower', aspect='auto', extent=extent, interpolation='nearest')
             else:
@@ -112,23 +112,17 @@ class Plot(Base):
             plt.ylabel(r'$m$')
             plt.colorbar()
             plt.subplot(235)
-            plt_data = uv_fft.real[ct-ct/scale:ct+ct/scale, ct-ct/scale:ct+ct/scale]
+            plt_data = uv_fft[ct-ct/scale:ct+ct/scale, ct-ct/scale:ct+ct/scale]
             if plot_sqrt:
                 plt.imshow(plt_data/np.sqrt(np.abs(plt_data)), origin='lower', aspect='auto', extent=extent, interpolation='nearest')
             else:
                 plt.imshow(plt_data, origin='lower', aspect='auto', extent=extent, interpolation='nearest')
+                # plt.imshow(plt_data, origin='lower', aspect='auto', extent=extent, interpolation='nearest', vmin=None, vmax=40)
             plt.xlabel(r'$l$')
             plt.ylabel(r'$m$')
             plt.colorbar()
-            # plt.subplot(236)
-            # plt_data = uv_fft.imag[ct-ct/scale:ct+ct/scale, ct-ct/scale:ct+ct/scale] # should be 0
-            # plt.imshow(plt_data/np.sqrt(np.abs(plt_data)), origin='lower', aspect='auto', extent=extent, interpolation='nearest')
-            # # plt.imshow(plt_data, origin='lower', aspect='auto', extent=extent, interpolation='nearest')
-            # plt.xlabel(r'$l$')
-            # plt.ylabel(r'$m$')
-            # plt.colorbar()
             plt.subplot(236)
-            plt_data = uv_imag_fft.real[ct-ct/scale:ct+ct/scale, ct-ct/scale:ct+ct/scale]
+            plt_data = uv_imag_fft[ct-ct/scale:ct+ct/scale, ct-ct/scale:ct+ct/scale]
             if plot_sqrt:
                 plt.imshow(plt_data/np.sqrt(np.abs(plt_data)), origin='lower', aspect='auto', extent=extent, interpolation='nearest')
             else:

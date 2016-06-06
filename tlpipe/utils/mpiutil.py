@@ -45,7 +45,7 @@ class _close_message(object):
 
 
 def active_comm(aprocs):
-    """Return a communicator consists of processes in `aprocs`."""
+    """Return a communicator consists of a list of processes in `aprocs`."""
     if _comm is None:
         return None
     else:
@@ -55,7 +55,7 @@ def active_comm(aprocs):
 
 
 def active(aprocs):
-    """Make processes in `aprocs` active, while others wait."""
+    """Make a list of processes in `aprocs` active, while others wait."""
     if _comm is None:
         return None
     else:
@@ -84,14 +84,28 @@ def close(aprocs):
             _comm.isend(_close_message(), dest=i)
 
 
-def partition_list_alternate(full_list, i, n):
+def partition_list(full_list, i, n, method='con'):
     """Partition a list into `n` pieces. Return the `i`th partition."""
-    return full_list[i::n]
+    if method == 'con':
+        return np.array_split(full_list, n)[i].tolist()
+    elif method == 'alt':
+        return full_list[i::n]
+    elif method == 'rand':
+        return np.array_split(numpy.random.shuffle(full_list), n)[i].tolist()
+    else:
+        raise ValueError('Unknown partition method %s' % method)
 
 
-def partition_list_mpi(full_list):
+def partition_list_mpi(full_list, method='con', comm=_comm):
     """Return the partition of a list specific to the current MPI process."""
-    return partition_list_alternate(full_list, rank, size)
+    if comm is not None:
+        rank = comm.rank
+        size = comm.size
+
+    return partition_list(full_list, rank, size, method=method)
+
+# alias mpilist for partition_list_mpi for convenience
+mpilist = partition_list_mpi
 
 
 def mpirange(*args, **kargs):
@@ -99,41 +113,109 @@ def mpirange(*args, **kargs):
     """
     full_list = range(*args)
 
-    if kargs.get('alt', False):
-        return partition_list_alternate(full_list, rank, size)
+    method = kargs.get('method', 'con')
+    comm = kargs.get('comm', _comm)
+
+    return partition_list_mpi(full_list, method=method, comm=comm)
+
+
+def barrier(comm=_comm):
+    if comm is not None and comm.size > 1:
+        comm.Barrier()
+
+
+def bcast(data, root=0, comm=_comm):
+    if comm is not None and comm.size > 1:
+        return comm.bcast(data, root=root)
     else:
-        return np.array_split(full_list, size)[rank]
+        return data
 
 
-def mpilist(lst, alt=False):
-    """A sub list from the input `lst` for this process.
+# def Gatherv(sendbuf, recvbuf, root=0, comm=_comm):
+#     if comm is not None and comm.size > 1:
+#         comm.Gatherv(sendbuf, recvbuf, root=root)
+#     else:
+#         # if they are just numpy data buffer
+#         recvbuf = sendbuf.copy()
+#         # TODO, other cases
 
-       The sub list is a continuous section of `lst` if `alt` is false,
-       else it consists of alternate elements of `lst`.
+
+# def Allgatherv(sendbuf, recvbuf, comm=_comm):
+#     if comm is not None and comm.size > 1:
+#         return _comm.Allgatherv(sendbuf, recvbuf)
+#     else:
+#         # if they are just numpy data buffer
+#         recvbuf = sendbuf.copy()
+#         # TODO, other cases
+
+
+def parallel_map(func, glist, root=None, method='con', comm=_comm):
+    """Apply a parallel map using MPI.
+
+    Should be called collectively on the same list. All ranks return the full
+    set of results.
+
+    Parameters
+    ----------
+    func : function
+        Function to apply.
+    glist : list
+        List of map over. Must be globally defined.
+    root : None or Integer
+        Which process should gather the results, all processes will gather the results if None.
+    method: str
+        How to split `glist` to each process, can be 'con': continuously, 'alt': alternatively, 'rand': randomly. Default is 'con'.
+    comm : MPI communicator
+        MPI communicator that array is distributed over. Default is the gobal _comm.
+
+    Returns
+    -------
+    results : list
+        Global list of results.
     """
 
-    lst1 = mpirange(len(lst), alt=alt)
-    return [ lst[i] for i in lst1 ]
+    # Synchronize
+    barrier(comm=comm)
+
+    # If we're only on a single node, then just perform without MPI
+    if comm is None or comm.size == 1:
+        return [func(item) for item in glist]
+
+    # Pair up each list item with its position.
+    zlist = list(enumerate(glist))
+
+    # Partition list based on MPI rank
+    llist = partition_list_mpi(zlist, method=method, comm=comm)
+
+    # Operate on sublist
+    flist = [(ind, func(item)) for ind, item in llist]
+
+    barrier(comm=comm)
+
+    rlist = None
+    if root is None:
+        # Gather all results onto all ranks
+        rlist = comm.allgather(flist)
+    else:
+        # Gather all results onto the specified rank
+        rlist = comm.gather(flist, root=root)
+
+    if rlist is not None:
+        # Flatten the list of results
+        flatlist = [item for sublist in rlist for item in sublist]
+
+        # Sort into original order
+        sortlist = sorted(flatlist, key=(lambda item: item[0]))
+
+        # Synchronize
+        # barrier(comm=comm)
+
+        # Zip to remove indices and extract the return values into a list
+        return list(zip(*sortlist)[1])
+    else:
+        return None
 
 
-def barrier():
-    if size > 1:
-        _comm.Barrier()
-
-
-def bcast(data, root=0):
-    if size > 1:
-        return _comm.bcast(data, root=root)
-
-
-def Gatherv(sendbuf, recvbuf, root=0):
-    if size > 1:
-        return _comm.Gatherv(sendbuf, recvbuf, root=root)
-
-
-def Allgatherv(sendbuf, recvbuf):
-    if size > 1:
-        return _comm.Allgatherv(sendbuf, recvbuf)
 
 
 def typemap(dtype):
@@ -186,7 +268,7 @@ def split_m(n, m):
     return np.array([part, bound[:m], bound[1:(m + 1)]])
 
 
-def split_all(n, comm=None):
+def split_all(n, comm=_comm):
     """
     Split a range (0, n-1) into sub-ranges for each MPI Process.
 
@@ -215,7 +297,7 @@ def split_all(n, comm=None):
     return split_m(n, m)
 
 
-def split_local(n, comm=None):
+def split_local(n, comm=_comm):
     """
     Split a range (0, n-1) into sub-ranges for each MPI Process. This returns
     the parameters only for the current rank.
@@ -298,7 +380,7 @@ def gather_local(global_array, local_array, local_start, root=0, comm=_comm):
             sreq.Wait()
 
 
-def transpose_blocks(row_array, shape, comm=None):
+def transpose_blocks(row_array, shape, comm=_comm):
     """
     Take a 2D matrix which is split between processes row-wise and split it
     column wise between processes.
@@ -318,18 +400,16 @@ def transpose_blocks(row_array, shape, comm=None):
         Local section of the global array (split column wise).
     """
 
-    if not comm:
-        try:
-            comm=MPI.COMM_WORLD
-        except NameError:
-            if row_array.shape[:-1] == shape[:-1]:
-                # We are working on a single node and being asked to do the
-                # a trivial transpose.
-                # Note that to mimic the mpi behaviour we have to allow the
-                # last index to be trimmed.
-                return row_array[...,:shape[-1]].copy()
-            else:
-                raise
+    if comm is None or comm.size == 1:
+        # only one process
+        if row_array.shape[:-1] == shape[:-1]:
+            # We are working on a single node and being asked to do
+            # a trivial transpose.
+            # Note that to mimic the mpi behaviour we have to allow the
+            # last index to be trimmed.
+            return row_array[..., :shape[-1]].copy()
+        else:
+            raise ValueError('Shape %s is incompatible with `row_array`s shape %s' % (shape, row_array.shape))
 
     nr = shape[0]
     nc = shape[-1]
@@ -424,7 +504,7 @@ def transpose_blocks(row_array, shape, comm=None):
     return recv_buffer.reshape(shape[:-1] + (pc,))
 
 
-def allocate_hdf5_dataset(fname, dsetname, shape, dtype, comm=None):
+def allocate_hdf5_dataset(fname, dsetname, shape, dtype, comm=_comm):
     """Create a hdf5 dataset and return its offset and size.
 
     The dataset will be created contiguously and immediately allocated,
@@ -454,12 +534,9 @@ def allocate_hdf5_dataset(fname, dsetname, shape, dtype, comm=None):
 
     import h5py
 
-    if not comm:
-        comm=MPI.COMM_WORLD
-
     state = None
 
-    if comm.rank == 0:
+    if comm is None or comm.rank == 0:
 
         # Create/open file
         f = h5py.File(fname, 'a')
@@ -482,7 +559,8 @@ def allocate_hdf5_dataset(fname, dsetname, shape, dtype, comm=None):
 
         f.close()
 
-    state = comm.bcast(state, root=0)
+    # state = comm.bcast(state, root=0)
+    state = bcast(state, root=0, comm=comm)
 
     return state
 
@@ -524,13 +602,10 @@ def lock_and_write_buffer(obj, fname, offset, size):
     os.close(fd)
 
 
-def parallel_rows_write_hdf5(fname, dsetname, local_data, shape, comm=None):
+def parallel_rows_write_hdf5(fname, dsetname, local_data, shape, comm=_comm):
     """Write out array (distributed across processes row wise) into a HDF5 in parallel.
 
     """
-
-    if not comm:
-        comm=MPI.COMM_WORLD
 
     offset, size = allocate_hdf5_dataset(fname, dsetname, shape, local_data.dtype, comm=comm)
 
@@ -557,7 +632,7 @@ class SelfWrapper(ModuleType):
             return MPI.__dict__[name]
 
     def __call__(self, **kwargs):
-        print 'here'
+        # print 'here'
         return SelfWrapper(self.self_module, kwargs)
 
 
