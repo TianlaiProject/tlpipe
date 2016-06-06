@@ -9,7 +9,7 @@ class RawTimestream(container.BasicTod):
     and meta data saved in HDF5 files which are recorded from the correlator.
     """
 
-    _main_data = 'vis'
+    _main_data_name = 'vis'
     _main_data_axes = ('time', 'frequency', 'channelpair')
     _main_time_ordered_datasets = ('vis',)
     _time_ordered_datasets = ('vis', 'weather')

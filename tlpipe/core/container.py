@@ -95,6 +95,7 @@ class BasicTod(memh5.MemDiskGroup):
     Attributes
     ----------
     main_data
+    main_data_name
     main_data_axes
     main_time_ordered_datasets
     time_ordered_datasets
@@ -122,7 +123,7 @@ class BasicTod(memh5.MemDiskGroup):
         super(BasicTod, self).__init__(data_group=None, distributed=True, comm=comm)
 
         # self.infiles will be a list of opened hdf5 file handlers
-        self.infiles, self.main_data_start, self.main_data_stop = self._select_files(files, self.main_data, start, stop)
+        self.infiles, self.main_data_start, self.main_data_stop = self._select_files(files, self.main_data_name, start, stop)
         self.num_infiles = len(self.infiles)
         self.main_data_dist_axis = check_dist_axis(dist_axis, self.main_data_axes)
 
@@ -130,7 +131,7 @@ class BasicTod(memh5.MemDiskGroup):
         self.rank = 0 if self.comm is None else self.comm.rank
         self.rank0 = True if self.rank == 0 else False
 
-        self.main_data_shape, self.main_data_type, self.infiles_map = self._get_input_info(self.main_data, self.main_data_start, self.main_data_stop)
+        self.main_data_shape, self.main_data_type, self.infiles_map = self._get_input_info(self.main_data_name, self.main_data_start, self.main_data_stop)
 
     def __del__(self):
         """Closes the opened file handlers."""
@@ -240,19 +241,27 @@ class BasicTod(memh5.MemDiskGroup):
         return dset_shape, dset_type, infiles_map
 
 
-    _main_data = None
-
     @property
     def main_data(self):
-        """Main data in the data container."""
-        return self._main_data
+        """The main data in the container which is a convenience for self[self.main_data_name]."""
+        try:
+            return self[self.main_data_name]
+        except KeyError:
+            raise KeyError('Main data %s does not exist, try to load the main data first' % self.main_data_name)
 
-    @main_data.setter
-    def main_data(self, value):
+    _main_data_name = None
+
+    @property
+    def main_data_name(self):
+        """Main data in the data container."""
+        return self._main_data_name
+
+    @main_data_name.setter
+    def main_data_name(self, value):
         if isinstance(value, basestring):
-            self._main_data = value
+            self._main_data_name = value
         else:
-            raise ValueError('Attribute main_data must be a string')
+            raise ValueError('Attribute main_data_name must be a string')
 
     _main_data_axes = ()
 
@@ -273,7 +282,7 @@ class BasicTod(memh5.MemDiskGroup):
         else:
             raise ValueError('Attribute main_data_axes must be a tuple of strings')
 
-    _main_time_ordered_datasets = (_main_data,)
+    _main_time_ordered_datasets = (_main_data_name,)
 
     @property
     def main_time_ordered_datasets(self):
@@ -292,7 +301,7 @@ class BasicTod(memh5.MemDiskGroup):
         else:
             raise ValueError('Attribute main_time_ordered_datasets must be a tuple of strings')
 
-    _time_ordered_datasets = (_main_data,)
+    _time_ordered_datasets = (_main_data_name,)
 
     @property
     def time_ordered_datasets(self):
@@ -373,7 +382,7 @@ class BasicTod(memh5.MemDiskGroup):
             first_start = mpiutil.bcast(infiles_map[0][1], root=0, comm=self.comm) # start form the first file
             last_stop = mpiutil.bcast(infiles_map[-1][2], root=self.nproc-1, comm=self.comm) # stop from the last file
             # for main data
-            if name == self.main_data:
+            if name == self.main_data_name:
                 dist_len = dset_shape[self.main_data_dist_axis]
                 ln, sn, en = mpiutil.split_local(dist_len, comm=self.comm)
                 md = mpiarray.MPIArray(dset_shape, axis=self.main_data_dist_axis, comm=self.comm, dtype=dset_type)
@@ -450,7 +459,7 @@ class BasicTod(memh5.MemDiskGroup):
 
     def load_main_data(self):
         """Load main data from all files."""
-        self._load_a_tod_dataset(self.main_data)
+        self._load_a_tod_dataset(self.main_data_name)
 
     def load_tod_excl_main_data(self):
         """Load time ordered attributes and datasets (exclude the main data) from all files."""
@@ -460,7 +469,7 @@ class BasicTod(memh5.MemDiskGroup):
 
         # load time ordered datasets
         for td in self.time_ordered_datasets:
-            if td != self.main_data:
+            if td != self.main_data_name:
                 self._load_a_tod_dataset(td)
 
     def load_time_ordered(self):
@@ -536,11 +545,11 @@ class BasicTod(memh5.MemDiskGroup):
             return
         else:
             # redistribute main data
-            self[self.main_data].redistribute(axis)
+            self.main_data.redistribute(axis)
             self.main_data_dist_axis = axis
             # redistribute other main_time_ordered_datasets
             for dset_name in self.main_time_ordered_datasets:
-                if dset_name != self.main_data:
+                if dset_name != self.main_data_name:
                     dset_type = self[dset_name].dtype
                     dset_shape = self[dset_name].shape
                     if axis == 0:
@@ -600,7 +609,7 @@ class BasicTod(memh5.MemDiskGroup):
                         memh5.copyattrs(dset.attrs, f[dset_name].attrs)
                 # initialize time ordered datasets
                 for td in self.time_ordered_datasets:
-                    # if td == self.main_data:
+                    # if td == self.main_data_name:
                     #     continue
                     # get local data shape for this file
                     nt = self[td].global_shape[0]
@@ -613,7 +622,7 @@ class BasicTod(memh5.MemDiskGroup):
 
         # then write time ordered datasets
         for td in self.time_ordered_datasets:
-            # if td == self.main_data:
+            # if td == self.main_data_name:
             #     continue
 
             # first redistribute main_time_ordered_datasets to the first axis
