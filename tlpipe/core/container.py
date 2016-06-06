@@ -116,6 +116,7 @@ class BasicTod(memh5.MemDiskGroup):
     dataset_name_allowed
     attrs_name_allowed
     add_history
+    info
     redistribute
     to_files
 
@@ -524,6 +525,26 @@ class BasicTod(memh5.MemDiskGroup):
 
         if history is not '':
             self.attrs['history'] += '\n' + history
+
+    def info(self):
+        """List basic information of the data hold by this container."""
+        if self.rank0:
+            # list the opened files
+            print 'Input files:'
+            for fh in self.infiles:
+                print '  ', fh.filename
+            print
+            # list all top level attributes
+            for attr_name, attr_val in self.attrs.iteritems():
+                print '%s:' % attr_name, attr_val
+            # list all top level datasets
+            for dset_name, dset in self.iteritems():
+                print dset_name, '  shape = ', dset.shape
+                # list its attributes
+                for attr_name, attr_val in dset.attrs.iteritems():
+                    print '  %s:' % attr_name, attr_val
+
+        mpiutil.barrier(comm=self.comm)
 
     def redistribute(self, dist_axis):
         """Redistribute the main time ordered dataset along a specified axis.
