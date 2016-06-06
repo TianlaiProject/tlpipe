@@ -27,6 +27,43 @@ def ensure_file_list(files):
     return files
 
 
+def check_dist_axis(dist_axis, axes):
+    """Check a given distribute axis is valid.
+
+    Parameters
+    ----------
+    dist_axis : string or integer
+        The distribute axis.
+    axes : tuple of strings
+        A tuple of axis names.
+
+    Returns
+    -------
+    axis : interger
+        A valid axis.
+
+    """
+    naxis = len(axes)
+    # Process if dist_axis is a string
+    if isinstance(dist_axis, basestring):
+        try:
+            axis = axes.index(dist_axis)
+        except ValueError:
+            raise ValueError('Can not redistribute data along an un-existed axis: %s' % dist_axis)
+    # Process if axis is an integer
+    elif isinstance(dist_axis, int):
+        # Deal with negative axis index
+        if dist_axis < 0:
+            axis = naxis + dist_axis
+        else:
+            axis = dist_axis
+
+    if 0 <= axis and axis < naxis:
+        return axis
+    else:
+        raise ValueError('Invalid distribute axis %d' % dist_axis)
+
+
 class BasicTod(memh5.MemDiskGroup):
     """Basic time ordered data container.
 
@@ -50,6 +87,8 @@ class BasicTod(memh5.MemDiskGroup):
         Stopping time point to load. Non-negative integer is relative to the first
         time point of the first file, negative integer is relative to the last time
         point of the last file. Default None is to the end of the last file.
+    dist_axis : string or integer
+        Axis along which the main data is distributed.
     comm : None or MPI.Comm, optional
         MPI Communicator to distributed over. Default None to use mpiutil._comm.
 
@@ -78,13 +117,14 @@ class BasicTod(memh5.MemDiskGroup):
 
     """
 
-    def __init__(self, files, start=0, stop=None, comm=None):
+    def __init__(self, files, start=0, stop=None, dist_axis=0, comm=None):
 
         super(BasicTod, self).__init__(data_group=None, distributed=True, comm=comm)
 
         # self.infiles will be a list of opened hdf5 file handlers
         self.infiles, self.main_data_start, self.main_data_stop = self._select_files(files, self.main_data, start, stop)
         self.num_infiles = len(self.infiles)
+        self.main_data_dist_axis = check_dist_axis(dist_axis, self.main_data_axes)
 
         self.nproc = 1 if self.comm is None else self.comm.size
         self.rank = 0 if self.comm is None else self.comm.rank
@@ -180,27 +220,22 @@ class BasicTod(memh5.MemDiskGroup):
     def _get_input_info(self, dset_name, start=0, stop=None):
         ### get data shape and type and infile_map of time ordered datasets
         ### start, stop are all relative to the first file
-        dset_type = None
-        dset_shape = None
-        tmp_shape = None
+        ### shape and type are get from the first file and suppose they are the same in all self.infiles
+
         num_ts = []
         for fh in mpiutil.mpilist(self.infiles, method='con', comm=self.comm):
             num_ts.append(fh[dset_name].shape[0])
-            # get shape and type info from the first file
-            if fh is self.infiles[0]:
-                tmp_shape = fh[dset_name].shape
-                dset_type= fh[dset_name].dtype
 
-        dset_type = mpiutil.bcast(dset_type, comm=self.comm)
         if self.comm is not None:
             num_ts = list(itertools.chain(*self.comm.allgather(num_ts)))
         if stop is None:
             stop = sum(num_ts) # total length of the first axis along different files
-        if tmp_shape is not None:
-            tmp_shape = ((stop-start),) + tmp_shape[1:]
-        dset_shape = mpiutil.bcast(tmp_shape, comm=self.comm)
-
         infiles_map = self._gen_files_map(num_ts, start, stop)
+
+        # get shape and type info from the first file
+        tmp_shape = self.infiles[0][dset_name].shape
+        dset_shape = ((stop-start),) + tmp_shape[1:]
+        dset_type= self.infiles[0][dset_name].dtype
 
         return dset_shape, dset_type, infiles_map
 
@@ -327,25 +362,68 @@ class BasicTod(memh5.MemDiskGroup):
         memh5.copyattrs(dset.attrs, self[name].attrs)
 
     def _load_a_tod_dataset(self, name):
-        ### load a time ordered dataset from all the file
+        ### load a time ordered dataset from all the file, distributed along the first axis
         if name in self.main_time_ordered_datasets:
             dset_shape, dset_type, infiles_map = self._get_input_info(name, self.main_data_start, self.main_data_stop)
         else:
             dset_shape, dset_type, infiles_map = self._get_input_info(name, 0, None)
 
-        md = mpiarray.MPIArray(dset_shape, axis=0, comm=self.comm, dtype=dset_type)
-        st = 0
-        attrs_dict = {}
-        for fi, start, stop in infiles_map:
-            et = st + (stop - start)
-            fh = self.infiles[fi]
-            md[st:et] = fh[name][start:stop]
-            memh5.copyattrs(fh[name].attrs, attrs_dict)
-            st = et
-        self.create_dataset(name, shape=dset_shape, dtype=dset_type, data=md, distributed=True, distributed_axis=0)
-        attrs_dict = mpiutil.bcast(attrs_dict, comm=self.comm)
-        # copy attrs of this dset
-        memh5.copyattrs(attrs_dict, self[name].attrs)
+        if name in self.main_time_ordered_datasets and self.main_data_dist_axis != 0:
+            # need to take special care when dist_axi != 0
+            first_start = mpiutil.bcast(infiles_map[0][1], root=0, comm=self.comm) # start form the first file
+            last_stop = mpiutil.bcast(infiles_map[-1][2], root=self.nproc-1, comm=self.comm) # stop from the last file
+            # for main data
+            if name == self.main_data:
+                dist_len = dset_shape[self.main_data_dist_axis]
+                ln, sn, en = mpiutil.split_local(dist_len, comm=self.comm)
+                md = mpiarray.MPIArray(dset_shape, axis=self.main_data_dist_axis, comm=self.comm, dtype=dset_type)
+                naxis = len(dset_shape) # number of axis
+                st = 0
+                for fi, fh in enumerate(self.infiles):
+                    num_ts = fh[name].shape[0]
+                    slc = naxis * [ slice(0, None) ]
+                    if fi == 0:
+                        et = st + (num_ts - first_start)
+                        slc[0] = slice(first_start, None)
+                    elif fi == self.num_infiles-1:
+                        et = st + last_stop
+                        slc[0] = slice(0, last_stop)
+                    else:
+                        et = st + num_ts
+                    slc[self.main_data_dist_axis] = slice(sn, en)
+
+                    md.local_array[st:et] = fh[name][tuple(slc)] # h5py need the explicit tuple conversion
+                    st = et
+                self.create_dataset(name, shape=dset_shape, dtype=dset_type, data=md, distributed=True, distributed_axis=self.main_data_dist_axis)
+                # copy attrs of this dset
+                memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
+            # for other main_time_ordered_datasets
+            else:
+                self.create_dataset(name, shape=dset_shape, dtype=dset_type)
+                # copy attrs of this dset
+                memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
+                st = 0
+                for fi, fh in enumerate(self.infiles):
+                    num_ts = fh[name].shape[0]
+                    if fi == 0:
+                        et = st + (num_ts - first_start)
+                    elif fi == self.num_infiles-1:
+                        et = st + last_stop
+                    else:
+                        et = st + num_ts
+                    self[name][st:et] = fh[name][:]
+                    st = et
+        else:
+            md = mpiarray.MPIArray(dset_shape, axis=0, comm=self.comm, dtype=dset_type)
+            st = 0
+            for fi, start, stop in infiles_map:
+                et = st + (stop - start)
+                fh = self.infiles[fi]
+                md[st:et] = fh[name][start:stop]
+                st = et
+            self.create_dataset(name, shape=dset_shape, dtype=dset_type, data=md, distributed=True, distributed_axis=0)
+            # copy attrs of this dset
+            memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
 
     def _load_a_dataset(self, name):
         ### load a dataset (either a commmon or a time ordered)
@@ -435,7 +513,12 @@ class BasicTod(memh5.MemDiskGroup):
             self.attrs['history'] += '\n' + history
 
     def redistribute(self, dist_axis):
-        """Redistribute the main dataset along a specified axis.
+        """Redistribute the main time ordered dataset along a specified axis.
+
+        This will redistribute the main_data along the specified axis `dis_axis`,
+        and also distribute other main_time_ordered_datasets along the first axis
+        if `dis_axis` is the first axis, else concatenate all those data along the
+        first axis.
 
         Parameters
         ----------
@@ -446,25 +529,36 @@ class BasicTod(memh5.MemDiskGroup):
 
         """
 
-        naxis = len(self.main_data_axes)
-        # Process if axis is a string
-        if isinstance(dist_axis, basestring):
-            try:
-                axis = self.main_data_axes.index(dist_axis)
-            except ValueError:
-                raise ValueError('Can not redistribute data along an un-existed axis: %s' % dist_axis)
-        # Process if axis is an integer
-        elif isinstance(dist_axis, int):
+        axis = check_dist_axis(dist_axis, self.main_data_axes)
 
-            # Deal with negative axis index
-            if dist_axis < 0:
-                axis = naxis + dist_axis
-
-        # Check axis is within bounds
-        if axis < naxis:
-            self.main_data.redistribute(axis)
+        if axis == self.main_data_dist_axis:
+            # already the distributed axis, nothing to do
+            return
         else:
-            warnings.warn('Cannot not redistributed data to axis %d >= %d' % (axis, naxis))
+            # redistribute main data
+            self[self.main_data].redistribute(axis)
+            self.main_data_dist_axis = axis
+            # redistribute other main_time_ordered_datasets
+            for dset_name in self.main_time_ordered_datasets:
+                if dset_name != self.main_data:
+                    dset_type = self[dset_name].dtype
+                    dset_shape = self[dset_name].shape
+                    if axis == 0:
+                        nt = dset_shape[0]
+                        lt, st, et = mpiutil.split_local(nt, comm=self.comm)
+                        local_shape= (lt,) + dset_shape[1:]
+                        md = mpiarray.MPIArray(dset_shape, axis=0, comm=self.comm, dtype=dset_type)
+                        md.local_array[:] = self[dset_name][st:et].copy()
+                        del self[dset_name]
+                        self.create_dataset(dest_name, shape=dset_shape, dtype=dset_type, data=md, distributed=True, distributed_axis=0)
+                    else:
+                        # gather local data to all procs
+                        global_array = np.zeros(dset_shape, dtype=dset_type)
+                        local_start = self[dset_name]._data.local_offset
+                        for rank in range(self.nproc):
+                            mpiutil.gather_local(global_array, self[dset_name]._data.local_array, local_offset, root=rank, comm=self.comm)
+                        del self[dset_name]
+                        self.create_dataset(dest_name, data=global_array, shape=dset_shape, dtype=dset_type)
 
 
     def _get_output_info(self, dset_name, num_outfiles):
@@ -506,8 +600,8 @@ class BasicTod(memh5.MemDiskGroup):
                         memh5.copyattrs(dset.attrs, f[dset_name].attrs)
                 # initialize time ordered datasets
                 for td in self.time_ordered_datasets:
-                    if td == self.main_data:
-                        continue
+                    # if td == self.main_data:
+                    #     continue
                     # get local data shape for this file
                     nt = self[td].global_shape[0]
                     lt, et,st = mpiutil.split_m(nt, num_outfiles)
@@ -519,8 +613,13 @@ class BasicTod(memh5.MemDiskGroup):
 
         # then write time ordered datasets
         for td in self.time_ordered_datasets:
-            if td == self.main_data:
-                continue
+            # if td == self.main_data:
+            #     continue
+
+            # first redistribute main_time_ordered_datasets to the first axis
+            if self.main_data_dist_axis != 0:
+                self.redistribute(0)
+
             dset_shape, dset_type, outfiles_map = self._get_output_info(td, num_outfiles)
             st = 0
             for fi, start, stop in outfiles_map:
