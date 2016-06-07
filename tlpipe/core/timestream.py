@@ -9,7 +9,7 @@ class RawTimestream(container.BasicTod):
     and baseline separated from the channelpair in the raw timestream.
     """
 
-    _main_data = 'vis'
+    _main_data_name = 'vis'
     _main_data_axes = ('time', 'frequency', 'polarization', 'baseline')
     _main_time_ordered_datasets = ('vis',)
     _time_ordered_datasets = ('vis', 'weather')
