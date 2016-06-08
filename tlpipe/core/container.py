@@ -30,41 +30,41 @@ def ensure_file_list(files):
     return files
 
 
-def check_dist_axis(dist_axis, axes):
-    """Check a given distribute axis is valid.
+def check_axis(axis, axes):
+    """Check a given axis is valid.
 
     Parameters
     ----------
-    dist_axis : string or integer
-        The distribute axis.
+    axis : string or integer
+        The axis to be ckecked.
     axes : tuple of strings
         A tuple of axis names.
 
     Returns
     -------
-    axis : interger
+    valid_axis : interger
         A valid axis.
 
     """
     naxis = len(axes)
-    # Process if dist_axis is a string
-    if isinstance(dist_axis, basestring):
+    # Process if axis is a string
+    if isinstance(axis, basestring):
         try:
-            axis = axes.index(dist_axis)
+            valid_axis = axes.index(axis)
         except ValueError:
-            raise ValueError('Can not redistribute data along an un-existed axis: %s' % dist_axis)
+            raise ValueError('Axis %s does not exist' % axis)
     # Process if axis is an integer
-    elif isinstance(dist_axis, int):
+    elif isinstance(axis, int):
         # Deal with negative axis index
-        if dist_axis < 0:
-            axis = naxis + dist_axis
+        if axis < 0:
+            valid_axis = naxis + axis
         else:
-            axis = dist_axis
+            valid_axis = axis
 
-    if 0 <= axis and axis < naxis:
-        return axis
+    if 0 <= valid_axis and valid_axis < naxis:
+        return valid_axis
     else:
-        raise ValueError('Invalid distribute axis %d' % dist_axis)
+        raise ValueError('Invalid axis %d' % axis)
 
 
 class BasicTod(memh5.MemDiskGroup):
@@ -133,7 +133,7 @@ class BasicTod(memh5.MemDiskGroup):
         # self.infiles will be a list of opened hdf5 file handlers
         self.infiles, self.main_data_start, self.main_data_stop = self._select_files(files, self.main_data_name, start, stop)
         self.num_infiles = len(self.infiles)
-        self.main_data_dist_axis = check_dist_axis(dist_axis, self.main_data_axes)
+        self.main_data_dist_axis = check_axis(dist_axis, self.main_data_axes)
 
         self.nproc = 1 if self.comm is None else self.comm.size
         self.rank = 0 if self.comm is None else self.comm.rank
@@ -369,7 +369,7 @@ class BasicTod(memh5.MemDiskGroup):
             these positions will be selected.
 
         """
-        axis = check_dist_axis(axis, self.main_data_axes)
+        axis = check_axis(axis, self.main_data_axes)
         if axis == 0:
             raise NotImplementedError('Select data to be loaded along the first axis is not implemented yet')
         if isinstance(value, tuple):
@@ -635,7 +635,7 @@ class BasicTod(memh5.MemDiskGroup):
 
         """
 
-        axis = check_dist_axis(dist_axis, self.main_data_axes)
+        axis = check_axis(dist_axis, self.main_data_axes)
 
         if axis == self.main_data_dist_axis:
             # already the distributed axis, nothing to do
