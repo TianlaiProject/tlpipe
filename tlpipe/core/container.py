@@ -377,6 +377,8 @@ class BasicTod(memh5.MemDiskGroup):
         elif isinstance(value, list):
             if sorted(value) != value:
                 raise TypeError("Indexing elements must be in increasing order")
+            if value[0] < 0:
+                raise TypeError("Indexing elements must be non-negative integers")
             self._main_data_select[axis] = value
         else:
             raise ValueError('Unsupported data selection %s' % value)
@@ -430,7 +432,7 @@ class BasicTod(memh5.MemDiskGroup):
                 sel = tmp[main_data_select[axis]]
                 new_dset_shape += (len(sel),)
                 if axis == self.main_data_dist_axis:
-                    main_data_select[axis] = mpiutil.mpilist(sel, method='con', comm=self.comm)
+                    main_data_select[axis] = mpiutil.mpilist(sel, method='con', comm=self.comm).tolist() # must have tolist as a single number numpy array index will reduce one axis in h5py slice
 
             self.create_dataset(name, shape=new_dset_shape, dtype=dset_type, distributed=True, distributed_axis=self.main_data_dist_axis)
             # copy attrs of this dset
@@ -442,7 +444,9 @@ class BasicTod(memh5.MemDiskGroup):
                     main_data_select[0] = slice(start, stop)
                     et = st + (stop - start)
                     fh = self.infiles[fi]
-                    self[name].local_data[st:et] = fh[name][tuple(main_data_select)]
+                    if np.prod(self[name].local_data[st:et].shape) > 0:
+                        # only read in data if non-empty, may get error otherwise
+                        self[name].local_data[st:et] = fh[name][tuple(main_data_select)]
                     st = et
             # need to take special care when dist_axis != 0
             else:
@@ -459,7 +463,9 @@ class BasicTod(memh5.MemDiskGroup):
                     else:
                         et = st + num_ts
 
-                    self[name].local_data[st:et] = fh[name][tuple(main_data_select)] # h5py need the explicit tuple conversion
+                    if np.prod(self[name].local_data[st:et].shape) > 0:
+                        # only read in data if non-empty, may get error otherwise
+                        self[name].local_data[st:et] = fh[name][tuple(main_data_select)] # h5py need the explicit tuple conversion
                     st = et
 
         # for other main_time_ordered_datasets
