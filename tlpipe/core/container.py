@@ -704,7 +704,7 @@ class BasicTod(memh5.MemDiskGroup):
         # split output files among procs
         for fi, outfile in enumerate(mpiutil.mpilist(outfiles, method='con', comm=self.comm)):
             # first write top level common attrs and datasets to file
-            with h5py.File(outfile, 'w') as f:
+            with h5py.File(outfile, 'w', libver='latest') as f:
 
                 # write top level common attrs
                 for attrs_name, attrs_value in self.attrs.iteritems():
@@ -729,7 +729,7 @@ class BasicTod(memh5.MemDiskGroup):
         mpiutil.barrier(comm=self.comm)
 
         # open all output files for more efficient latter operations
-        outfiles = [ h5py.File(fl, 'r+') for fl in outfiles ]
+        outfiles = [ h5py.File(fl, 'r+', libver='latest') for fl in outfiles ]
 
         # then write time ordered datasets
         for dset_name, dset in self.iteritems():
