@@ -705,6 +705,7 @@ class BasicTod(memh5.MemDiskGroup):
         for fi, outfile in enumerate(mpiutil.mpilist(outfiles, method='con', comm=self.comm)):
             # first write top level common attrs and datasets to file
             with h5py.File(outfile, 'w') as f:
+
                 # write top level common attrs
                 for attrs_name, attrs_value in self.attrs.iteritems():
                     if attrs_name not in self.time_ordered_attrs:
@@ -727,6 +728,9 @@ class BasicTod(memh5.MemDiskGroup):
 
         mpiutil.barrier(comm=self.comm)
 
+        # open all output files for more efficient latter operations
+        outfiles = [ h5py.File(fl, 'r+') for fl in outfiles ]
+
         # then write time ordered datasets
         for dset_name, dset in self.iteritems():
             if dset_name in self.time_ordered_datasets:
@@ -739,11 +743,12 @@ class BasicTod(memh5.MemDiskGroup):
                 st = 0
                 for fi, start, stop in outfiles_map:
 
-                    # wait until each process see files it will write to
-                    while not os.path.exists(outfiles[fi]):
-                        time.sleep(1)
-
                     et = st + (stop - start)
-                    with h5py.File(outfiles[fi], 'r+') as f:
-                        f[dset_name][start:stop] = self[dset_name].local_data[st:et]
-                        st = et
+                    outfiles[fi][dset_name][start:stop] = self[dset_name].local_data[st:et]
+                    st = et
+
+                mpiutil.barrier(comm=self.comm)
+
+        # close all output files
+        for fh in outfiles:
+            fh.close()
