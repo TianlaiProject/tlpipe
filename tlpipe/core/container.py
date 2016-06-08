@@ -722,15 +722,29 @@ class BasicTod(memh5.MemDiskGroup):
         return dset_shape, dset_type, outfiles_map
 
 
-    def to_files(self, outfiles):
-        """Save the data hold in this container to files."""
+    def to_files(self, outfiles, exclude=[], check_status=True):
+        """Save the data hold in this container to files.
+
+        Parameters
+        ----------
+        outfiles : string or list of strings
+             File name or a list of file names that data will be saved into.
+        exclude : list of strings, optional
+            Attributes and datasets in this list will be excluded when save to
+            files. Default is an empty list, so all data will be saved.
+        check_status : bool, optional
+            Whether to check data consistency before save to files. Default True.
+
+        """
+
         outfiles = ensure_file_list(outfiles)
         num_outfiles = len(outfiles)
         if num_outfiles > self.num_infiles:
             warnings.warn('Number of output files %d exceed number of input files %d may have some problem' % (num_outfiles, self.num_infiles))
 
         # check data is consistent before save
-        self.check_status()
+        if check_status:
+            self.check_status()
 
         # split output files among procs
         for fi, outfile in enumerate(mpiutil.mpilist(outfiles, method='con', comm=self.comm)):
@@ -739,11 +753,15 @@ class BasicTod(memh5.MemDiskGroup):
 
                 # write top level common attrs
                 for attrs_name, attrs_value in self.attrs.iteritems():
+                    if attrs_name in exclude:
+                        continue
                     if attrs_name not in self.time_ordered_attrs:
                         f.attrs[attrs_name] = self.attrs[attrs_name]
 
                 for dset_name, dset in self.iteritems():
                     # write top level common datasets
+                    if dset_name in exclude:
+                        continue
                     if dset_name not in self.time_ordered_datasets:
                         f.create_dataset(dset_name, data=dset, shape=dset.shape, dtype=dset.dtype)
                     # initialize time ordered datasets
@@ -764,6 +782,8 @@ class BasicTod(memh5.MemDiskGroup):
 
         # then write time ordered datasets
         for dset_name, dset in self.iteritems():
+            if dset_name in exclude:
+                continue
             if dset_name in self.time_ordered_datasets:
 
                 # first redistribute main_time_ordered_datasets to the first axis
