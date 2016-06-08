@@ -115,12 +115,18 @@ class BasicTod(memh5.MemDiskGroup):
     load_tod_excl_main_data
     load_time_ordered
     load_all
+    reload_common
+    reload_main_data
+    reload_tod_excl_main_data
+    reload_time_ordered
+    reload_all
     group_name_allowed
     dataset_name_allowed
     attrs_name_allowed
     add_history
     info
     redistribute
+    check_status
     to_files
 
     """
@@ -425,7 +431,7 @@ class BasicTod(memh5.MemDiskGroup):
 
         # for main data
         if name == self.main_data_name:
-            main_data_select = self._main_data_select
+            main_data_select = self._main_data_select[:] # copy here to not change self._main_data_select
             new_dset_shape = (dset_shape[0],)
             for axis in range(1, len(dset_shape)): # exclude the first axis
                 tmp = np.arange(dset_shape[axis])
@@ -566,6 +572,105 @@ class BasicTod(memh5.MemDiskGroup):
         """Load all attributes and datasets from files."""
         self.load_common()
         self.load_time_ordered()
+
+
+    def _reload_a_common_attribute(self, name):
+        ### reload a common attribute from the first file
+        try:
+            del self.attrs[name]
+        except KeyError:
+            pass
+
+        self._load_a_common_attribute(name)
+
+    def _reload_a_tod_attribute(self, name):
+        ### reload a time ordered attribute from all the file
+        try:
+            del self.attrs[name]
+        except KeyError:
+            pass
+
+        self._load_a_tod_attribute(name)
+
+    def _reload_an_attribute(self, name):
+        ### reload an attribute (either a commmon or a time ordered)
+        try:
+            del self.attrs[name]
+        except KeyError:
+            pass
+
+        self._load_an_attribute(name)
+
+    def _reload_a_common_dataset(self, name):
+        ### reload a common dataset from the first file
+        try:
+            del self[name]
+        except KeyError:
+            pass
+
+        self._load_a_common_dataset(name)
+
+    def _reload_a_tod_dataset(self, name):
+        ### reload a time ordered dataset from all files, distributed along the first axis
+        try:
+            del self[name]
+        except KeyError:
+            pass
+
+        self._load_a_tod_dataset(name)
+
+    def _reload_a_dataset(self, name):
+        ### reload a dataset (either a commmon or a time ordered)
+        try:
+            del self[name]
+        except KeyError:
+            pass
+
+        self._load_a_dataset(name)
+
+
+    def reload_common(self):
+        """Reload common attributes and datasets from the first file.
+
+        This supposes that all common data are the same as that in the first file.
+        """
+        fh = self.infiles[0]
+        # read in top level common attrs
+        for attr_name in fh.attrs.iterkeys():
+            if attr_name not in self.time_ordered_attrs:
+                self._reload_a_common_attribute(attr_name)
+        # read in top level common datasets
+        for dset_name in fh.iterkeys():
+            if dset_name not in self.time_ordered_datasets:
+                self._reload_a_common_dataset(dset_name)
+
+    def reload_main_data(self):
+        """Reload main data from all files."""
+        self._reload_a_tod_dataset(self.main_data_name)
+
+    def reload_tod_excl_main_data(self):
+        """Reload time ordered attributes and datasets (exclude the main data) from all files."""
+        # load time ordered attributes
+        fh = self.infiles[0]
+        for attr_name in fh.attrs.iterkeys():
+            if attr_name in self.time_ordered_attrs:
+                self._reload_a_tod_attribute(attr_name)
+
+        # load time ordered datasets
+        for dset_name in fh.iterkeys():
+            if dset_name in self.time_ordered_datasets and dset_name != self.main_data_name:
+                self._reload_a_tod_dataset(dset_name)
+
+    def reload_time_ordered(self):
+        """Reload time ordered attributes and datasets from all files."""
+        self.reload_main_data()
+        self.reload_tod_excl_main_data()
+
+    def reload_all(self):
+        """Reload all attributes and datasets from files."""
+        self.reload_common()
+        self.reload_time_ordered()
+
 
     def group_name_allowed(self, name):
         """No groups are exposed to the user. Returns ``False``."""
