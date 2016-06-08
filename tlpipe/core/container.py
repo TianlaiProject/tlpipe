@@ -257,7 +257,7 @@ class BasicTod(memh5.MemDiskGroup):
         try:
             return self[self.main_data_name]
         except KeyError:
-            raise KeyError('Main data %s does not exist, try to load the main data first' % self.mapn_data_name)
+            raise KeyError('Main data %s does not exist, try to load the main data first' % self.main_data_name)
 
     _main_data_name = None
 
@@ -547,13 +547,15 @@ class BasicTod(memh5.MemDiskGroup):
     def load_tod_excl_main_data(self):
         """Load time ordered attributes and datasets (exclude the main data) from all files."""
         # load time ordered attributes
-        for ta in self.time_ordered_attrs:
-            self._load_a_tod_attribute(ta)
+        fh = self.infiles[0]
+        for attr_name in fh.attrs.iterkeys():
+            if attr_name in self.time_ordered_attrs:
+                self._load_a_tod_attribute(attr_name)
 
         # load time ordered datasets
-        for td in self.time_ordered_datasets:
-            if td != self.main_data_name:
-                self._load_a_tod_dataset(td)
+        for dset_name in fh.iterkeys():
+            if dset_name in self.time_ordered_datasets and dset_name != self.main_data_name:
+                self._load_a_tod_dataset(dset_name)
 
     def load_time_ordered(self):
         """Load time ordered attributes and datasets from all files."""
@@ -561,7 +563,7 @@ class BasicTod(memh5.MemDiskGroup):
         self.load_tod_excl_main_data()
 
     def load_all(self):
-        """Load all attribures and datasets form files."""
+        """Load all attributes and datasets from files."""
         self.load_common()
         self.load_time_ordered()
 
@@ -587,22 +589,24 @@ class BasicTod(memh5.MemDiskGroup):
     def history(self):
         """The analysis history for this data.
 
-        Do not try to add a new entry by assigning to an element of this
-        property. Use :meth:`~BasicCont.add_history` instead.
+        Do not try to add a new history entry by assigning to this property.
+        Use :meth:`~BasicTod.add_history` instead.
 
         Returns
         -------
         history : string
 
         """
-
-        return self.attrs['history']
+        try:
+            return self.attrs['history']
+        except KeyError:
+            raise KeyError('History does not exist, try to load it first')
 
     def add_history(self, history=''):
         """Create a new history entry."""
 
-        if history is not '':
-            self.attrs['history'] += '\n' + history
+        if self.history and history is not '':
+            self.attrs['history'] += ('\n' + history)
 
     def info(self):
         """List basic information of the data hold by this container."""
@@ -647,12 +651,15 @@ class BasicTod(memh5.MemDiskGroup):
             # already the distributed axis, nothing to do
             return
         else:
-            # redistribute main data
-            self.main_data.redistribute(axis)
+            # redistribute main data if it exists
+            try:
+                self.main_data.redistribute(axis)
+            except KeyError:
+                pass
             self.main_data_dist_axis = axis
             # redistribute other main_time_ordered_datasets
-            for dset_name in self.main_time_ordered_datasets:
-                if dset_name != self.main_data_name:
+            for dset_name in self.iterkeys():
+                if dset_name in self.main_time_ordered_datasets and dset_name != self.main_data_name:
                     dset_type = self[dset_name].dtype
                     dset_shape = self[dset_name].shape
                     if axis == 0:
@@ -678,6 +685,27 @@ class BasicTod(memh5.MemDiskGroup):
                         self.create_dataset(dest_name, data=global_array, shape=dset_shape, dtype=dset_type)
                         memh5.copyattrs(attr_dict, self[dset_name].attrs)
 
+    def check_status(self):
+        """Check that data hold in this container is consistent.
+
+        One can do any check in this method for a concrete subclass, but very basic
+        check has done here in this basic container.
+        """
+
+        nts = [] # to save the number of time points
+        for dset_name, dset in self.iteritems():
+            if dset_name == self.main_data_name:
+                if len(dset.shape) != len(self.main_data_axes):
+                    raise RuntimeError('Main data %s does not has the same axes as main_data_axes' % dset_name)
+                nts.append(dset.shape[0])
+            elif dset_name in self.main_time_ordered_datasets:
+                nts.append(dset.shape[0])
+
+        # check that all main_time_ordered_datasets have the same number of points
+        num = len(set(nts))
+        if num != 0 and num != 1:
+            raise RuntimeError('Not all main_time_ordered_datasets have the same number of time points')
+
 
     def _get_output_info(self, dset_name, num_outfiles):
         ### get data shape and type and infile_map of time ordered datasets
@@ -700,6 +728,9 @@ class BasicTod(memh5.MemDiskGroup):
         num_outfiles = len(outfiles)
         if num_outfiles > self.num_infiles:
             warnings.warn('Number of output files %d exceed number of input files %d may have some problem' % (num_outfiles, self.num_infiles))
+
+        # check data is consistent before save
+        self.check_status()
 
         # split output files among procs
         for fi, outfile in enumerate(mpiutil.mpilist(outfiles, method='con', comm=self.comm)):
