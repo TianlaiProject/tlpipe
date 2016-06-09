@@ -827,7 +827,7 @@ class BasicTod(memh5.MemDiskGroup):
         return dset_shape, dset_type, outfiles_map
 
 
-    def to_files(self, outfiles, exclude=[], check_status=True):
+    def to_files(self, outfiles, exclude=[], check_status=True, libver='latest'):
         """Save the data hold in this container to files.
 
         Parameters
@@ -839,6 +839,12 @@ class BasicTod(memh5.MemDiskGroup):
             files. Default is an empty list, so all data will be saved.
         check_status : bool, optional
             Whether to check data consistency before save to files. Default True.
+        libver : 'latest' or 'earliest', optional
+            HDF5 library version settings. “latest” means that HDF5 will always use
+            the newest version of these structures without particular concern for
+            backwards compatibility, can be performance advantages. The “earliest”
+            option means that HDF5 will make a best effort to be backwards
+            compatible. Default is 'latest'.
 
         """
 
@@ -854,7 +860,7 @@ class BasicTod(memh5.MemDiskGroup):
         # split output files among procs
         for fi, outfile in enumerate(mpiutil.mpilist(outfiles, method='con', comm=self.comm)):
             # first write top level common attrs and datasets to file
-            with h5py.File(outfile, 'w', libver='latest') as f:
+            with h5py.File(outfile, 'w', libver=libver) as f:
 
                 # write top level common attrs
                 for attrs_name, attrs_value in self.attrs.iteritems():
@@ -883,7 +889,7 @@ class BasicTod(memh5.MemDiskGroup):
         mpiutil.barrier(comm=self.comm)
 
         # open all output files for more efficient latter operations
-        outfiles = [ h5py.File(fl, 'r+', libver='latest') for fl in outfiles ]
+        outfiles = [ h5py.File(fl, 'r+', libver=libver) for fl in outfiles ]
 
         # then write time ordered datasets
         for dset_name, dset in self.iteritems():
