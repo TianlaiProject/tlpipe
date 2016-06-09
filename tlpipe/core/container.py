@@ -115,12 +115,18 @@ class BasicTod(memh5.MemDiskGroup):
     load_tod_excl_main_data
     load_time_ordered
     load_all
+    reload_common
+    reload_main_data
+    reload_tod_excl_main_data
+    reload_time_ordered
+    reload_all
     group_name_allowed
     dataset_name_allowed
     attrs_name_allowed
     add_history
     info
     redistribute
+    check_status
     to_files
 
     """
@@ -257,7 +263,7 @@ class BasicTod(memh5.MemDiskGroup):
         try:
             return self[self.main_data_name]
         except KeyError:
-            raise KeyError('Main data %s does not exist, try to load the main data first' % self.mapn_data_name)
+            raise KeyError('Main data %s does not exist, try to load the main data first' % self.main_data_name)
 
     _main_data_name = None
 
@@ -425,7 +431,7 @@ class BasicTod(memh5.MemDiskGroup):
 
         # for main data
         if name == self.main_data_name:
-            main_data_select = self._main_data_select
+            main_data_select = self._main_data_select[:] # copy here to not change self._main_data_select
             new_dset_shape = (dset_shape[0],)
             for axis in range(1, len(dset_shape)): # exclude the first axis
                 tmp = np.arange(dset_shape[axis])
@@ -547,13 +553,15 @@ class BasicTod(memh5.MemDiskGroup):
     def load_tod_excl_main_data(self):
         """Load time ordered attributes and datasets (exclude the main data) from all files."""
         # load time ordered attributes
-        for ta in self.time_ordered_attrs:
-            self._load_a_tod_attribute(ta)
+        fh = self.infiles[0]
+        for attr_name in fh.attrs.iterkeys():
+            if attr_name in self.time_ordered_attrs:
+                self._load_a_tod_attribute(attr_name)
 
         # load time ordered datasets
-        for td in self.time_ordered_datasets:
-            if td != self.main_data_name:
-                self._load_a_tod_dataset(td)
+        for dset_name in fh.iterkeys():
+            if dset_name in self.time_ordered_datasets and dset_name != self.main_data_name:
+                self._load_a_tod_dataset(dset_name)
 
     def load_time_ordered(self):
         """Load time ordered attributes and datasets from all files."""
@@ -561,9 +569,108 @@ class BasicTod(memh5.MemDiskGroup):
         self.load_tod_excl_main_data()
 
     def load_all(self):
-        """Load all attribures and datasets form files."""
+        """Load all attributes and datasets from files."""
         self.load_common()
         self.load_time_ordered()
+
+
+    def _reload_a_common_attribute(self, name):
+        ### reload a common attribute from the first file
+        try:
+            del self.attrs[name]
+        except KeyError:
+            pass
+
+        self._load_a_common_attribute(name)
+
+    def _reload_a_tod_attribute(self, name):
+        ### reload a time ordered attribute from all the file
+        try:
+            del self.attrs[name]
+        except KeyError:
+            pass
+
+        self._load_a_tod_attribute(name)
+
+    def _reload_an_attribute(self, name):
+        ### reload an attribute (either a commmon or a time ordered)
+        try:
+            del self.attrs[name]
+        except KeyError:
+            pass
+
+        self._load_an_attribute(name)
+
+    def _reload_a_common_dataset(self, name):
+        ### reload a common dataset from the first file
+        try:
+            del self[name]
+        except KeyError:
+            pass
+
+        self._load_a_common_dataset(name)
+
+    def _reload_a_tod_dataset(self, name):
+        ### reload a time ordered dataset from all files, distributed along the first axis
+        try:
+            del self[name]
+        except KeyError:
+            pass
+
+        self._load_a_tod_dataset(name)
+
+    def _reload_a_dataset(self, name):
+        ### reload a dataset (either a commmon or a time ordered)
+        try:
+            del self[name]
+        except KeyError:
+            pass
+
+        self._load_a_dataset(name)
+
+
+    def reload_common(self):
+        """Reload common attributes and datasets from the first file.
+
+        This supposes that all common data are the same as that in the first file.
+        """
+        fh = self.infiles[0]
+        # read in top level common attrs
+        for attr_name in fh.attrs.iterkeys():
+            if attr_name not in self.time_ordered_attrs:
+                self._reload_a_common_attribute(attr_name)
+        # read in top level common datasets
+        for dset_name in fh.iterkeys():
+            if dset_name not in self.time_ordered_datasets:
+                self._reload_a_common_dataset(dset_name)
+
+    def reload_main_data(self):
+        """Reload main data from all files."""
+        self._reload_a_tod_dataset(self.main_data_name)
+
+    def reload_tod_excl_main_data(self):
+        """Reload time ordered attributes and datasets (exclude the main data) from all files."""
+        # load time ordered attributes
+        fh = self.infiles[0]
+        for attr_name in fh.attrs.iterkeys():
+            if attr_name in self.time_ordered_attrs:
+                self._reload_a_tod_attribute(attr_name)
+
+        # load time ordered datasets
+        for dset_name in fh.iterkeys():
+            if dset_name in self.time_ordered_datasets and dset_name != self.main_data_name:
+                self._reload_a_tod_dataset(dset_name)
+
+    def reload_time_ordered(self):
+        """Reload time ordered attributes and datasets from all files."""
+        self.reload_main_data()
+        self.reload_tod_excl_main_data()
+
+    def reload_all(self):
+        """Reload all attributes and datasets from files."""
+        self.reload_common()
+        self.reload_time_ordered()
+
 
     def group_name_allowed(self, name):
         """No groups are exposed to the user. Returns ``False``."""
@@ -587,22 +694,24 @@ class BasicTod(memh5.MemDiskGroup):
     def history(self):
         """The analysis history for this data.
 
-        Do not try to add a new entry by assigning to an element of this
-        property. Use :meth:`~BasicCont.add_history` instead.
+        Do not try to add a new history entry by assigning to this property.
+        Use :meth:`~BasicTod.add_history` instead.
 
         Returns
         -------
         history : string
 
         """
-
-        return self.attrs['history']
+        try:
+            return self.attrs['history']
+        except KeyError:
+            raise KeyError('History does not exist, try to load it first')
 
     def add_history(self, history=''):
         """Create a new history entry."""
 
-        if history is not '':
-            self.attrs['history'] += '\n' + history
+        if self.history and history is not '':
+            self.attrs['history'] += ('\n' + history)
 
     def info(self):
         """List basic information of the data hold by this container."""
@@ -647,12 +756,15 @@ class BasicTod(memh5.MemDiskGroup):
             # already the distributed axis, nothing to do
             return
         else:
-            # redistribute main data
-            self.main_data.redistribute(axis)
+            # redistribute main data if it exists
+            try:
+                self.main_data.redistribute(axis)
+            except KeyError:
+                pass
             self.main_data_dist_axis = axis
             # redistribute other main_time_ordered_datasets
-            for dset_name in self.main_time_ordered_datasets:
-                if dset_name != self.main_data_name:
+            for dset_name in self.iterkeys():
+                if dset_name in self.main_time_ordered_datasets and dset_name != self.main_data_name:
                     dset_type = self[dset_name].dtype
                     dset_shape = self[dset_name].shape
                     if axis == 0:
@@ -678,6 +790,27 @@ class BasicTod(memh5.MemDiskGroup):
                         self.create_dataset(dest_name, data=global_array, shape=dset_shape, dtype=dset_type)
                         memh5.copyattrs(attr_dict, self[dset_name].attrs)
 
+    def check_status(self):
+        """Check that data hold in this container is consistent.
+
+        One can do any check in this method for a concrete subclass, but very basic
+        check has done here in this basic container.
+        """
+
+        nts = [] # to save the number of time points
+        for dset_name, dset in self.iteritems():
+            if dset_name == self.main_data_name:
+                if len(dset.shape) != len(self.main_data_axes):
+                    raise RuntimeError('Main data %s does not has the same axes as main_data_axes' % dset_name)
+                nts.append(dset.shape[0])
+            elif dset_name in self.main_time_ordered_datasets:
+                nts.append(dset.shape[0])
+
+        # check that all main_time_ordered_datasets have the same number of points
+        num = len(set(nts))
+        if num != 0 and num != 1:
+            raise RuntimeError('Not all main_time_ordered_datasets have the same number of time points')
+
 
     def _get_output_info(self, dset_name, num_outfiles):
         ### get data shape and type and infile_map of time ordered datasets
@@ -694,25 +827,52 @@ class BasicTod(memh5.MemDiskGroup):
         return dset_shape, dset_type, outfiles_map
 
 
-    def to_files(self, outfiles):
-        """Save the data hold in this container to files."""
+    def to_files(self, outfiles, exclude=[], check_status=True, libver='latest'):
+        """Save the data hold in this container to files.
+
+        Parameters
+        ----------
+        outfiles : string or list of strings
+             File name or a list of file names that data will be saved into.
+        exclude : list of strings, optional
+            Attributes and datasets in this list will be excluded when save to
+            files. Default is an empty list, so all data will be saved.
+        check_status : bool, optional
+            Whether to check data consistency before save to files. Default True.
+        libver : 'latest' or 'earliest', optional
+            HDF5 library version settings. 'latest' means that HDF5 will always use
+            the newest version of these structures without particular concern for
+            backwards compatibility, can be performance advantages. The 'earliest'
+            option means that HDF5 will make a best effort to be backwards
+            compatible. Default is 'latest'.
+
+        """
+
         outfiles = ensure_file_list(outfiles)
         num_outfiles = len(outfiles)
         if num_outfiles > self.num_infiles:
             warnings.warn('Number of output files %d exceed number of input files %d may have some problem' % (num_outfiles, self.num_infiles))
 
+        # check data is consistent before save
+        if check_status:
+            self.check_status()
+
         # split output files among procs
         for fi, outfile in enumerate(mpiutil.mpilist(outfiles, method='con', comm=self.comm)):
             # first write top level common attrs and datasets to file
-            with h5py.File(outfile, 'w') as f:
+            with h5py.File(outfile, 'w', libver=libver) as f:
 
                 # write top level common attrs
                 for attrs_name, attrs_value in self.attrs.iteritems():
+                    if attrs_name in exclude:
+                        continue
                     if attrs_name not in self.time_ordered_attrs:
                         f.attrs[attrs_name] = self.attrs[attrs_name]
 
                 for dset_name, dset in self.iteritems():
                     # write top level common datasets
+                    if dset_name in exclude:
+                        continue
                     if dset_name not in self.time_ordered_datasets:
                         f.create_dataset(dset_name, data=dset, shape=dset.shape, dtype=dset.dtype)
                     # initialize time ordered datasets
@@ -729,10 +889,12 @@ class BasicTod(memh5.MemDiskGroup):
         mpiutil.barrier(comm=self.comm)
 
         # open all output files for more efficient latter operations
-        outfiles = [ h5py.File(fl, 'r+') for fl in outfiles ]
+        outfiles = [ h5py.File(fl, 'r+', libver=libver) for fl in outfiles ]
 
         # then write time ordered datasets
         for dset_name, dset in self.iteritems():
+            if dset_name in exclude:
+                continue
             if dset_name in self.time_ordered_datasets:
 
                 # first redistribute main_time_ordered_datasets to the first axis
