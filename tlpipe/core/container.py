@@ -840,9 +840,9 @@ class BasicTod(memh5.MemDiskGroup):
         check_status : bool, optional
             Whether to check data consistency before save to files. Default True.
         libver : 'latest' or 'earliest', optional
-            HDF5 library version settings. “latest” means that HDF5 will always use
+            HDF5 library version settings. 'latest' means that HDF5 will always use
             the newest version of these structures without particular concern for
-            backwards compatibility, can be performance advantages. The “earliest”
+            backwards compatibility, can be performance advantages. The 'earliest'
             option means that HDF5 will make a best effort to be backwards
             compatible. Default is 'latest'.
 
