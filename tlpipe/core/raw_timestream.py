@@ -17,8 +17,8 @@ class RawTimestream(container.BasicTod):
 
     _main_data_name = 'vis'
     _main_data_axes = ('time', 'frequency', 'channelpair')
-    _main_time_ordered_datasets = ('vis',)
-    _time_ordered_datasets = ('vis', 'weather')
+    _main_time_ordered_datasets = ('vis', 'sec1970', 'jul_date')
+    _time_ordered_datasets = _main_time_ordered_datasets + ('weather',)
     _time_ordered_attrs = ('obstime', 'sec1970')
 
 
@@ -215,6 +215,11 @@ class RawTimestream(container.BasicTod):
             self.create_dataset('freq', data=sel_freqs)
         # create attrs of this dset
         self['freq'].attrs["unit"] = 'MHz'
+
+    def load_tod_excl_main_data(self):
+        """Load time ordered attributes and datasets (exclude the main data) from all files."""
+
+        super(RawTimestream, self).load_tod_excl_main_data()
 
         # generate sec1970
         sec1970_first = self.infiles[0].attrs['sec1970']

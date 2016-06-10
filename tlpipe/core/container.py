@@ -593,58 +593,48 @@ class BasicTod(memh5.MemDiskGroup):
         self.load_time_ordered()
 
 
-    def _reload_a_common_attribute(self, name):
-        ### reload a common attribute from the first file
+    def _del_an_attribute(self, name):
+        ### delete an attribute
         try:
             del self.attrs[name]
         except KeyError:
             pass
 
+    def _del_a_dataset(self, name):
+        ### delete a dataset
+        try:
+            del self[name]
+        except KeyError:
+            pass
+
+    def _reload_a_common_attribute(self, name):
+        ### reload a common attribute from the first file
+        self._del_an_attribute(name)
         self._load_a_common_attribute(name)
 
     def _reload_a_tod_attribute(self, name):
         ### reload a time ordered attribute from all the file
-        try:
-            del self.attrs[name]
-        except KeyError:
-            pass
-
+        self._del_an_attribute(name)
         self._load_a_tod_attribute(name)
 
     def _reload_an_attribute(self, name):
         ### reload an attribute (either a commmon or a time ordered)
-        try:
-            del self.attrs[name]
-        except KeyError:
-            pass
-
+        self._del_an_attribute(name)
         self._load_an_attribute(name)
 
     def _reload_a_common_dataset(self, name):
         ### reload a common dataset from the first file
-        try:
-            del self[name]
-        except KeyError:
-            pass
-
+        self._del_a_dataset(name)
         self._load_a_common_dataset(name)
 
     def _reload_a_tod_dataset(self, name):
         ### reload a time ordered dataset from all files, distributed along the first axis
-        try:
-            del self[name]
-        except KeyError:
-            pass
-
+        self._del_a_dataset(name)
         self._load_a_tod_dataset(name)
 
     def _reload_a_dataset(self, name):
         ### reload a dataset (either a commmon or a time ordered)
-        try:
-            del self[name]
-        except KeyError:
-            pass
-
+        self._del_a_dataset(name)
         self._load_a_dataset(name)
 
 
@@ -653,32 +643,41 @@ class BasicTod(memh5.MemDiskGroup):
 
         This supposes that all common data are the same as that in the first file.
         """
-        fh = self.infiles[0]
-        # read in top level common attrs
-        for attr_name in fh.attrs.iterkeys():
+        # delete top level common attrs
+        attrs_keys = list(self.attrs.iterkeys()) # copy dict as it will change during iteration
+        for attr_name in attrs_keys:
             if attr_name not in self.time_ordered_attrs:
-                self._reload_a_common_attribute(attr_name)
-        # read in top level common datasets
-        for dset_name in fh.iterkeys():
+                self._del_an_attribute(attr_name)
+
+        # delete top level common datasets
+        dset_keys = list(self.iterkeys())
+        for dset_name in dset_keys:
             if dset_name not in self.time_ordered_datasets:
-                self._reload_a_common_dataset(dset_name)
+                self._del_a_dataset(dset_name)
+
+        self.load_common()
+
 
     def reload_main_data(self):
         """Reload main data from all files."""
-        self._reload_a_tod_dataset(self.main_data_name)
+        self._del_a_dataset(self.main_data_name)
+        self.load_main_data()
 
     def reload_tod_excl_main_data(self):
         """Reload time ordered attributes and datasets (exclude the main data) from all files."""
         # load time ordered attributes
-        fh = self.infiles[0]
-        for attr_name in fh.attrs.iterkeys():
+        attrs_keys = list(self.attrs.iterkeys())
+        for attr_name in attrs_keys:
             if attr_name in self.time_ordered_attrs:
-                self._reload_a_tod_attribute(attr_name)
+                self._del_an_attribute(attr_name)
 
         # load time ordered datasets
-        for dset_name in fh.iterkeys():
+        dset_keys = list(self.iterkeys())
+        for dset_name in dset_keys:
             if dset_name in self.time_ordered_datasets and dset_name != self.main_data_name:
-                self._reload_a_tod_dataset(dset_name)
+                self._del_a_dataset(dset_name)
+
+        self.load_tod_excl_main_data()
 
     def reload_time_ordered(self):
         """Reload time ordered attributes and datasets from all files."""
