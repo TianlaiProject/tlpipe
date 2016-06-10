@@ -454,6 +454,9 @@ class BasicTod(memh5.MemDiskGroup):
                 if axis == self.main_data_dist_axis:
                     main_data_select[axis] = mpiutil.mpilist(sel, method='con', comm=self.comm).tolist() # must have tolist as a single number numpy array index will reduce one axis in h5py slice
 
+                # convert list to slice object if possible
+                main_data_select = [  ( _to_slice_obj(lst) if isinstance(lst, list) else lst ) for lst in main_data_select ]
+
             self.create_dataset(name, shape=new_dset_shape, dtype=dset_type, distributed=True, distributed_axis=self.main_data_dist_axis)
             # copy attrs of this dset
             memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
@@ -466,7 +469,7 @@ class BasicTod(memh5.MemDiskGroup):
                     fh = self.infiles[fi]
                     if np.prod(self[name].local_data[st:et].shape) > 0:
                         # only read in data if non-empty, may get error otherwise
-                        main_data_select = [  ( _to_slice_obj(lst) if isinstance(lst, list) else lst ) for lst in main_data_select ]
+                        # main_data_select = [  ( _to_slice_obj(lst) if isinstance(lst, list) else lst ) for lst in main_data_select ]
                         self[name].local_data[st:et] = fh[name][tuple(main_data_select)]
                     st = et
             # need to take special care when dist_axis != 0
@@ -486,7 +489,7 @@ class BasicTod(memh5.MemDiskGroup):
 
                     if np.prod(self[name].local_data[st:et].shape) > 0:
                         # only read in data if non-empty, may get error otherwise
-                        main_data_select = [  ( _to_slice_obj(lst) if isinstance(lst, list) else lst ) for lst in main_data_select ]
+                        # main_data_select = [  ( _to_slice_obj(lst) if isinstance(lst, list) else lst ) for lst in main_data_select ]
                         self[name].local_data[st:et] = fh[name][tuple(main_data_select)] # h5py need the explicit tuple conversion
                     st = et
 
