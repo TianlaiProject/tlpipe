@@ -1,8 +1,11 @@
 import itertools
 import numpy as np
+from datetime import datetime
+import ephem
 import container
 from caput import memh5
 from caput import mpiutil
+from tlpipe.utils import date_util
 
 
 class RawTimestream(container.BasicTod):
@@ -172,11 +175,11 @@ class RawTimestream(container.BasicTod):
             bl_axis = self.main_data_axes.index('channelpair')
             # bl_select = self._main_data_select[bl_axis]
             tmp = np.arange(bl_dset.shape[0]) # number of channel pairs
-            sel = tmp[self._main_data_select[bl_axis]]
+            sel = tmp[self._main_data_select[bl_axis]].tolist()
             shp = (len(sel),) + bl_dset.shape[1:]
             # if channelpair is just the distributed axis, load blorder distributed
             if bl_axis == self.main_data_dist_axis:
-                sel = mpiutil.mpilist(sel, method='con', comm=self.comm).tolist() # must have tolist as a single number numpy array index will reduce one axis in h5py slice
+                sel = mpiutil.mpilist(sel, method='con', comm=self.comm)
                 self.create_dataset(name, shape=shp, dtype=bl_dset.dtype, distributed=True, distributed_axis=0)
                 self[name].local_data[:] = bl_dset[sel]
             else:
@@ -185,3 +188,60 @@ class RawTimestream(container.BasicTod):
             memh5.copyattrs(bl_dset.attrs, self[name].attrs)
         else:
             super(RawTimestream, self)._load_a_common_dataset(name)
+
+
+    def load_common(self):
+        """Load common attributes and datasets from the first file.
+
+        This supposes that all common data are the same as that in the first file.
+        """
+
+        super(RawTimestream, self).load_common()
+
+        # generate frequency points
+        freq_start = self.attrs['freqstart']
+        freq_step = self.attrs['freqstep']
+        nfreq = self.attrs['nfreq']
+        freqs = np.array([ freq_start + i*freq_step for i in range(nfreq)], dtype=np.float32)
+        freq_axis = self.main_data_axes.index('frequency')
+        sel_freqs = freqs[self._main_data_select[freq_axis]]
+        shp = sel_freqs.shape
+        # if frequency is just the distributed axis, load freqs distributed
+        if freq_axis == self.main_data_dist_axis:
+            sel_freqs = mpiutil.mpilist(sel_freqs, method='con', comm=self.comm)
+            self.create_dataset('freq', shape=shp, dtype=sel_freqs.dtype, distributed=True, distributed_axis=0)
+            self['freq'].local_data[:] = sel_freqs
+        else:
+            self.create_dataset('freq', data=sel_freqs)
+        # create attrs of this dset
+        self['freq'].attrs["unit"] = 'MHz'
+
+        # generate sec1970
+        sec1970_first = self.infiles[0].attrs['sec1970']
+        int_time = self.attrs['inttime']
+        sec1970_start = sec1970_first + int_time * self.main_data_start
+        num_sec1970 = self.main_data_stop - self.main_data_start
+        sec1970 = np.array([ sec1970_start + i*int_time for i in range(num_sec1970)], dtype=np.float32)
+        time_axis = self.main_data_axes.index('time')
+        sel_sec1970 = sec1970[self._main_data_select[time_axis]]
+        shp = sel_sec1970.shape
+        # if time is just the distributed axis, load sec1970 distributed
+        if time_axis == self.main_data_dist_axis:
+            sel_sec1970 = mpiutil.mpilist(sel_sec1970, method='con', comm=self.comm)
+            self.create_dataset('sec1970', shape=shp, dtype=sel_sec1970.dtype, distributed=True, distributed_axis=0)
+            self['sec1970'].local_data[:] = sel_sec1970
+        else:
+            self.create_dataset('sec1970', data=sel_sec1970)
+        # create attrs of this dset
+        self['sec1970'].attrs["unit"] = 'second'
+
+        # generate julian date
+        jul_date = np.array([ date_util.get_juldate(datetime.fromtimestamp(s), tzone=self.attrs['timezone']) for s in self['sec1970'].local_data[:] ], dtype=np.float32)
+        # if time is just the distributed axis, load jul_date distributed
+        if time_axis == self.main_data_dist_axis:
+            self.create_dataset('jul_date', shape=shp, dtype=jul_date.dtype, distributed=True, distributed_axis=0)
+            self['jul_date'].local_data[:] = jul_date
+        else:
+            self.create_dataset('jul_date', data=jul_date)
+        # create attrs of this dset
+        self['jul_date'].attrs["unit"] = 'day'
