@@ -422,6 +422,20 @@ class BasicTod(memh5.MemDiskGroup):
 
     def _load_a_tod_dataset(self, name):
         ### load a time ordered dataset from all files, distributed along the first axis
+
+        def _to_slice_obj(lst):
+            ### convert a list to a slice object if possible
+            if len(lst) == 0:
+                return slice(0, 0)
+            elif len(lst) == 1:
+                return slice(lst[0], lst[0]+1)
+            else:
+                d = np.diff(lst)
+                if np.all(d == d[0]):
+                    return slice(lst[0], lst[-1]+d[0], d[0])
+                else:
+                    return lst
+
         if name in self.main_time_ordered_datasets:
             dset_shape, dset_type, infiles_map = self._get_input_info(name, self.main_data_start, self.main_data_stop)
             first_start = mpiutil.bcast(infiles_map[0][1], root=0, comm=self.comm) # start form the first file
@@ -452,6 +466,7 @@ class BasicTod(memh5.MemDiskGroup):
                     fh = self.infiles[fi]
                     if np.prod(self[name].local_data[st:et].shape) > 0:
                         # only read in data if non-empty, may get error otherwise
+                        main_data_select = [  ( _to_slice_obj(lst) if isinstance(lst, list) else lst ) for lst in main_data_select ]
                         self[name].local_data[st:et] = fh[name][tuple(main_data_select)]
                     st = et
             # need to take special care when dist_axis != 0
@@ -471,6 +486,7 @@ class BasicTod(memh5.MemDiskGroup):
 
                     if np.prod(self[name].local_data[st:et].shape) > 0:
                         # only read in data if non-empty, may get error otherwise
+                        main_data_select = [  ( _to_slice_obj(lst) if isinstance(lst, list) else lst ) for lst in main_data_select ]
                         self[name].local_data[st:et] = fh[name][tuple(main_data_select)] # h5py need the explicit tuple conversion
                     st = et
 
