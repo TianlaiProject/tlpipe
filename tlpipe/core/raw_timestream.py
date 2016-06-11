@@ -50,65 +50,68 @@ class RawTimestream(container.BasicTod):
         """
         self.data_select('frequency', value)
 
-    def channelpair_select(self, value):
-        """Select data to be loaded from input files along the channelpair axis.
+    _feed_select = None
+    _channel_select = None
 
-        Parameters
-        ----------
-        value : tuple or list
-            If a tuple, which will be created as a slice(start, stop, step) object,
-            so it can have one to three elements (integers or None); if a list, its
-            elements must be strictly increasing non-negative integers, data in
-            these positions will be selected.
+    # def channelpair_select(self, value):
+    #     """Select data to be loaded from input files along the channelpair axis.
 
-        """
-        self.data_select('channelpair', value)
+    #     Parameters
+    #     ----------
+    #     value : tuple or list
+    #         If a tuple, which will be created as a slice(start, stop, step) object,
+    #         so it can have one to three elements (integers or None); if a list, its
+    #         elements must be strictly increasing non-negative integers, data in
+    #         these positions will be selected.
 
-    def channel_select(self, value=(0, None), corr='all'):
-        """Select data to be loaded from inputs files corresponding to the specified channels.
+    #     """
+    #     self.data_select('channelpair', value)
 
-        Parameters
-        ----------
-        value : tuple or list, optional
-            If a tuple, which will be created as a slice(start, stop, step) object,
-            so it can have one to three elements (integers or None); if a list,
-            channel No. in this list will be selected. Default (0, None) select all.
-        corr : 'all', 'auto' or 'cross', optional
-            Correlation type. 'auto' for auto-correlations, 'cross' for
-            cross-correlations, 'all' for all correlations. Default 'all'.
+    # def channel_select(self, value=(0, None), corr='all'):
+    #     """Select data to be loaded from inputs files corresponding to the specified channels.
 
-        """
-        # get channo info from the first input file
-        channo = self.infiles[0]['channo'][:]
-        channo1d = np.sort(channo.flatten())
+    #     Parameters
+    #     ----------
+    #     value : tuple or list, optional
+    #         If a tuple, which will be created as a slice(start, stop, step) object,
+    #         so it can have one to three elements (integers or None); if a list,
+    #         channel No. in this list will be selected. Default (0, None) select all.
+    #     corr : 'all', 'auto' or 'cross', optional
+    #         Correlation type. 'auto' for auto-correlations, 'cross' for
+    #         cross-correlations, 'all' for all correlations. Default 'all'.
 
-        if isinstance(value, tuple):
-            channels = channo1d[slice(*value)]
-        elif isinstance(value, list):
-            channels = np.intersect1d(channo1d, value)
-        else:
-            raise ValueError('Unsupported data selection %s' % value)
+    #     """
+    #     # get channo info from the first input file
+    #     channo = self.infiles[0]['channo'][:]
+    #     channo1d = np.sort(channo.flatten())
 
-        nchan = len(channels)
-        # use set for easy comparison
-        if corr == 'auto':
-            channel_pairs = [ {channels[i]} for i in range(nchan) ]
-        elif corr == 'cross':
-            channel_pairs = [ {channels[i], channels[j]} for i in range(nchan) for j in range(i+1, nchan) ]
-        elif corr == 'all':
-            channel_pairs = [ {channels[i], channels[j]} for i in range(nchan) for j in range(i, nchan) ]
-        else:
-            raise ValueError('Unknown correlation type %s' % corr)
+    #     if isinstance(value, tuple):
+    #         channels = channo1d[slice(*value)]
+    #     elif isinstance(value, list):
+    #         channels = np.intersect1d(channo1d, value)
+    #     else:
+    #         raise ValueError('Unsupported data selection %s' % value)
 
-        # get blorder info from the first input file
-        blorder = self.infiles[0]['blorder']
-        blorder = [ set(bl) for bl in blorder ]
+    #     nchan = len(channels)
+    #     # use set for easy comparison
+    #     if corr == 'auto':
+    #         channel_pairs = [ {channels[i]} for i in range(nchan) ]
+    #     elif corr == 'cross':
+    #         channel_pairs = [ {channels[i], channels[j]} for i in range(nchan) for j in range(i+1, nchan) ]
+    #     elif corr == 'all':
+    #         channel_pairs = [ {channels[i], channels[j]} for i in range(nchan) for j in range(i, nchan) ]
+    #     else:
+    #         raise ValueError('Unknown correlation type %s' % corr)
 
-        # channel pair indices
-        indices = { blorder.index(chp) for chp in channel_pairs }
-        indices = sorted(list(indices))
+    #     # get blorder info from the first input file
+    #     blorder = self.infiles[0]['blorder']
+    #     blorder = [ set(bl) for bl in blorder ]
 
-        self.data_select('channelpair', indices)
+    #     # channel pair indices
+    #     indices = { blorder.index(chp) for chp in channel_pairs }
+    #     indices = sorted(list(indices))
+
+    #     self.data_select('channelpair', indices)
 
     def feed_select(self, value=(0, None), corr='all'):
         """Select data to be loaded from inputs files corresponding to the specified feeds.
@@ -128,7 +131,7 @@ class RawTimestream(container.BasicTod):
         feedno = self.infiles[0]['feedno'][:].tolist()
 
         if isinstance(value, tuple):
-            feeds = feedno[slice(*value)]
+            feeds = np.array(feedno[slice(*value)])
         elif isinstance(value, list):
             feeds = np.intersect1d(feedno, value)
         else:
@@ -165,6 +168,9 @@ class RawTimestream(container.BasicTod):
 
         self.data_select('channelpair', indices)
 
+        self._feed_select = feeds
+        self._channel_select = np.array([ channo[feedno.index(fd)] for fd in feeds ])
+
 
     def _load_a_common_dataset(self, name):
         ### load a common dataset from the first file
@@ -184,6 +190,18 @@ class RawTimestream(container.BasicTod):
                 self.create_dataset(name, data=bl_dset[sel])
             # copy attrs of this dset
             memh5.copyattrs(bl_dset.attrs, self[name].attrs)
+        elif name == 'feedno' and not self._feed_select is None:
+            self.create_dataset(name, data=self._feed_select)
+        elif name == 'channo' and not self._channel_select is None:
+            self.create_dataset(name, data=self._channel_select)
+        elif name in ('polerr', 'feedpos', 'antpointing') and not self._feed_select is None:
+            fh = self.infiles[0]
+            feedno = fh['feedno'][:].tolist()
+            feed_inds = [ feedno.index(fd) for fd in self._feed_select ]
+            if name == 'antpointing':
+                self.create_dataset(name, data=fh[name][:, feed_inds])
+            else:
+                self.create_dataset(name, data=fh[name][feed_inds])
         else:
             super(RawTimestream, self)._load_a_common_dataset(name)
 
