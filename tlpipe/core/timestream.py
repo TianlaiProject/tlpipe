@@ -11,6 +11,6 @@ class RawTimestream(container.BasicTod):
 
     _main_data_name = 'vis'
     _main_data_axes = ('time', 'frequency', 'polarization', 'baseline')
-    _main_time_ordered_datasets = ('vis',)
-    _time_ordered_datasets = ('vis', 'weather')
+    _main_time_ordered_datasets = ('vis', 'sec1970', 'jul_date')
+    _time_ordered_datasets = _main_time_ordered_datasets + ('weather',)
     _time_ordered_attrs = ()
