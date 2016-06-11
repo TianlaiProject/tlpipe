@@ -786,27 +786,9 @@ class BasicTod(memh5.MemDiskGroup):
                     dset_type = self[dset_name].dtype
                     dset_shape = self[dset_name].shape
                     if axis == 0:
-                        # create axis 0 distributed dataset from non-distributed dataset
-                        nt = dset_shape[0]
-                        lt, st, et = mpiutil.split_local(nt, comm=self.comm)
-                        md = mpiarray.MPIArray(dset_shape, axis=0, comm=self.comm, dtype=dset_type)
-                        md.local_array[:] = self[dset_name][st:et].copy()
-                        attr_dict = {} # temporarily save attrs of this dataset
-                        memh5.copyattrs(self[dset_name].attrs, attr_dict)
-                        del self[dset_name]
-                        self.create_dataset(dset_name, shape=dset_shape, dtype=dset_type, data=md, distributed=True, distributed_axis=0)
-                        memh5.copyattrs(attr_dict, self[dset_name].attrs)
+                        self.dataset_common_to_distributed(dset_name, distributed_axis=0)
                     else:
-                        # gather local distributed dataset to a global array for all procs
-                        global_array = np.zeros(dset_shape, dtype=dset_type)
-                        local_start = self[dset_name].local_offset
-                        for rank in range(self.nproc):
-                            mpiutil.gather_local(global_array, self[dset_name].local_data, local_start, root=rank, comm=self.comm)
-                        attr_dict = {} # temporarily save attrs of this dataset
-                        memh5.copyattrs(self[dset_name].attrs, attr_dict)
-                        del self[dset_name]
-                        self.create_dataset(dset_name, data=global_array, shape=dset_shape, dtype=dset_type)
-                        memh5.copyattrs(attr_dict, self[dset_name].attrs)
+                        self.dataset_distributed_to_common(dset_name)
 
     def check_status(self):
         """Check that data hold in this container is consistent.
