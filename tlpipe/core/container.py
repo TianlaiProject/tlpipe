@@ -794,7 +794,7 @@ class BasicTod(memh5.MemDiskGroup):
                         attr_dict = {} # temporarily save attrs of this dataset
                         memh5.copyattrs(self[dset_name].attrs, attr_dict)
                         del self[dset_name]
-                        self.create_dataset(dest_name, shape=dset_shape, dtype=dset_type, data=md, distributed=True, distributed_axis=0)
+                        self.create_dataset(dset_name, shape=dset_shape, dtype=dset_type, data=md, distributed=True, distributed_axis=0)
                         memh5.copyattrs(attr_dict, self[dset_name].attrs)
                     else:
                         # gather local distributed dataset to a global array for all procs
@@ -805,7 +805,7 @@ class BasicTod(memh5.MemDiskGroup):
                         attr_dict = {} # temporarily save attrs of this dataset
                         memh5.copyattrs(self[dset_name].attrs, attr_dict)
                         del self[dset_name]
-                        self.create_dataset(dest_name, data=global_array, shape=dset_shape, dtype=dset_type)
+                        self.create_dataset(dset_name, data=global_array, shape=dset_shape, dtype=dset_type)
                         memh5.copyattrs(attr_dict, self[dset_name].attrs)
 
     def check_status(self):
@@ -871,6 +871,10 @@ class BasicTod(memh5.MemDiskGroup):
         if num_outfiles > self.num_infiles:
             warnings.warn('Number of output files %d exceed number of input files %d may have some problem' % (num_outfiles, self.num_infiles))
 
+        # first redistribute main_time_ordered_datasets to the first axis
+        if self.main_data_dist_axis != 0:
+            self.redistribute(0)
+
         # check data is consistent before save
         if check_status:
             self.check_status()
@@ -914,11 +918,6 @@ class BasicTod(memh5.MemDiskGroup):
             if dset_name in exclude:
                 continue
             if dset_name in self.time_ordered_datasets:
-
-                # first redistribute main_time_ordered_datasets to the first axis
-                if self.main_data_dist_axis != 0:
-                    self.redistribute(0)
-
                 dset_shape, dset_type, outfiles_map = self._get_output_info(dset_name, num_outfiles)
                 st = 0
                 for fi, start, stop in outfiles_map:
