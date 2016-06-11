@@ -171,9 +171,7 @@ class RawTimestream(container.BasicTod):
         # special care need take for blorder, just load the selected blorders
         if name == 'blorder':
             bl_dset = self.infiles[0][name]
-            # main_data_select = self._main_data_select[:] # copy here to not change self._main_data_select
             bl_axis = self.main_data_axes.index('channelpair')
-            # bl_select = self._main_data_select[bl_axis]
             tmp = np.arange(bl_dset.shape[0]) # number of channel pairs
             sel = tmp[self._main_data_select[bl_axis]].tolist()
             shp = (len(sel),) + bl_dset.shape[1:]
@@ -250,3 +248,78 @@ class RawTimestream(container.BasicTod):
             self.create_dataset('jul_date', data=jul_date)
         # create attrs of this dset
         self['jul_date'].attrs["unit"] = 'day'
+
+
+    @property
+    def time(self):
+        """Return the jul_date dataset for convenient use."""
+        try:
+            return self.attrs['jul_date']
+        except KeyError:
+            raise KeyError('jul_date does not exist, try to load it first')
+
+    @property
+    def freq(self):
+        """Return the freq dataset for convenient use."""
+        try:
+            return self.attrs['freq']
+        except KeyError:
+            raise KeyError('freq does not exist, try to load it first')
+
+
+    def redistribute(self, dist_axis):
+        """Redistribute the main time ordered dataset along a specified axis.
+
+        This will redistribute the main_data along the specified axis `dis_axis`,
+        and also distribute other main_time_ordered_datasets along the first axis
+        if `dis_axis` is the first axis, else concatenate all those data along the
+        first axis.
+
+        Parameters
+        ----------
+        dist_axis : int, string
+            The axis can be specified by an integer index (positive or
+            negative), or by a string label which must correspond to an entry in
+            the `main_data_axes` attribute on the dataset.
+
+        """
+
+        axis = container.check_axis(dist_axis, self.main_data_axes)
+
+        if axis == self.main_data_dist_axis:
+            # already the distributed axis, nothing to do
+            return
+        else:
+            super(RawTimestream, self).redistribute(dist_axis)
+
+            if 'time' == self.main_data_axes[axis]:
+                self.dataset_distributed_to_common('freq')
+                self.dataset_distributed_to_common('blorder')
+
+            # distribute freq
+            elif 'frequency' == self.main_data_axes[axis]:
+                self.dataset_common_to_distributed('freq', distributed_axis=0)
+                self.dataset_distributed_to_common('blorder')
+
+            # distribute blorder
+            elif 'channelpair' == self.main_data_axes[axis]:
+                self.dataset_common_to_distributed('blorder', distributed_axis=0)
+                self.dataset_distributed_to_common('freq')
+
+    def check_status(self):
+        """Check that data hold in this container is consistent. """
+
+        # basic checks
+        super(RawTimestream, self).check_status()
+
+        # additional checks
+        if 'frequency' == self.main_data_axes[self.main_data_dist_axis]:
+            if not self['freq'].distributed:
+                raise RuntimeError('Dataset freq should be distributed when frequency is the distributed axis')
+            if not self['blorder'].common:
+                raise RuntimeError('Dataset blorder should be common when frequency is the distributed axis')
+        elif 'channelpair' == self.main_data_axes[self.main_data_dist_axis]:
+            if not self['freq'].common:
+                raise RuntimeError('Dataset freq should be common when channelpair is the distributed axis')
+            if not self['blorder'].distributed:
+                raise RuntimeError('Dataset blorder should be distributed when channelpair is the distributed axis')
