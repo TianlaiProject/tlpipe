@@ -1,8 +1,9 @@
 import itertools
 import numpy as np
 from datetime import datetime
-import ephem
 import container
+import timestream
+from caput import mpiarray
 from caput import memh5
 from caput import mpiutil
 from tlpipe.utils import date_util
@@ -50,65 +51,68 @@ class RawTimestream(container.BasicTod):
         """
         self.data_select('frequency', value)
 
-    def channelpair_select(self, value):
-        """Select data to be loaded from input files along the channelpair axis.
+    _feed_select = None
+    _channel_select = None
 
-        Parameters
-        ----------
-        value : tuple or list
-            If a tuple, which will be created as a slice(start, stop, step) object,
-            so it can have one to three elements (integers or None); if a list, its
-            elements must be strictly increasing non-negative integers, data in
-            these positions will be selected.
+    # def channelpair_select(self, value):
+    #     """Select data to be loaded from input files along the channelpair axis.
 
-        """
-        self.data_select('channelpair', value)
+    #     Parameters
+    #     ----------
+    #     value : tuple or list
+    #         If a tuple, which will be created as a slice(start, stop, step) object,
+    #         so it can have one to three elements (integers or None); if a list, its
+    #         elements must be strictly increasing non-negative integers, data in
+    #         these positions will be selected.
 
-    def channel_select(self, value=(0, None), corr='all'):
-        """Select data to be loaded from inputs files corresponding to the specified channels.
+    #     """
+    #     self.data_select('channelpair', value)
 
-        Parameters
-        ----------
-        value : tuple or list, optional
-            If a tuple, which will be created as a slice(start, stop, step) object,
-            so it can have one to three elements (integers or None); if a list,
-            channel No. in this list will be selected. Default (0, None) select all.
-        corr : 'all', 'auto' or 'cross', optional
-            Correlation type. 'auto' for auto-correlations, 'cross' for
-            cross-correlations, 'all' for all correlations. Default 'all'.
+    # def channel_select(self, value=(0, None), corr='all'):
+    #     """Select data to be loaded from inputs files corresponding to the specified channels.
 
-        """
-        # get channo info from the first input file
-        channo = self.infiles[0]['channo'][:]
-        channo1d = np.sort(channo.flatten())
+    #     Parameters
+    #     ----------
+    #     value : tuple or list, optional
+    #         If a tuple, which will be created as a slice(start, stop, step) object,
+    #         so it can have one to three elements (integers or None); if a list,
+    #         channel No. in this list will be selected. Default (0, None) select all.
+    #     corr : 'all', 'auto' or 'cross', optional
+    #         Correlation type. 'auto' for auto-correlations, 'cross' for
+    #         cross-correlations, 'all' for all correlations. Default 'all'.
 
-        if isinstance(value, tuple):
-            channels = channo1d[slice(*value)]
-        elif isinstance(value, list):
-            channels = np.intersect1d(channo1d, value)
-        else:
-            raise ValueError('Unsupported data selection %s' % value)
+    #     """
+    #     # get channo info from the first input file
+    #     channo = self.infiles[0]['channo'][:]
+    #     channo1d = np.sort(channo.flatten())
 
-        nchan = len(channels)
-        # use set for easy comparison
-        if corr == 'auto':
-            channel_pairs = [ {channels[i]} for i in range(nchan) ]
-        elif corr == 'cross':
-            channel_pairs = [ {channels[i], channels[j]} for i in range(nchan) for j in range(i+1, nchan) ]
-        elif corr == 'all':
-            channel_pairs = [ {channels[i], channels[j]} for i in range(nchan) for j in range(i, nchan) ]
-        else:
-            raise ValueError('Unknown correlation type %s' % corr)
+    #     if isinstance(value, tuple):
+    #         channels = channo1d[slice(*value)]
+    #     elif isinstance(value, list):
+    #         channels = np.intersect1d(channo1d, value)
+    #     else:
+    #         raise ValueError('Unsupported data selection %s' % value)
 
-        # get blorder info from the first input file
-        blorder = self.infiles[0]['blorder']
-        blorder = [ set(bl) for bl in blorder ]
+    #     nchan = len(channels)
+    #     # use set for easy comparison
+    #     if corr == 'auto':
+    #         channel_pairs = [ {channels[i]} for i in range(nchan) ]
+    #     elif corr == 'cross':
+    #         channel_pairs = [ {channels[i], channels[j]} for i in range(nchan) for j in range(i+1, nchan) ]
+    #     elif corr == 'all':
+    #         channel_pairs = [ {channels[i], channels[j]} for i in range(nchan) for j in range(i, nchan) ]
+    #     else:
+    #         raise ValueError('Unknown correlation type %s' % corr)
 
-        # channel pair indices
-        indices = { blorder.index(chp) for chp in channel_pairs }
-        indices = sorted(list(indices))
+    #     # get blorder info from the first input file
+    #     blorder = self.infiles[0]['blorder']
+    #     blorder = [ set(bl) for bl in blorder ]
 
-        self.data_select('channelpair', indices)
+    #     # channel pair indices
+    #     indices = { blorder.index(chp) for chp in channel_pairs }
+    #     indices = sorted(list(indices))
+
+    #     self.data_select('channelpair', indices)
 
     def feed_select(self, value=(0, None), corr='all'):
         """Select data to be loaded from inputs files corresponding to the specified feeds.
@@ -128,7 +132,7 @@ class RawTimestream(container.BasicTod):
         feedno = self.infiles[0]['feedno'][:].tolist()
 
         if isinstance(value, tuple):
-            feeds = feedno[slice(*value)]
+            feeds = np.array(feedno[slice(*value)])
         elif isinstance(value, list):
             feeds = np.intersect1d(feedno, value)
         else:
@@ -165,27 +169,45 @@ class RawTimestream(container.BasicTod):
 
         self.data_select('channelpair', indices)
 
+        self._feed_select = feeds
+        self._channel_select = np.array([ channo[feedno.index(fd)] for fd in feeds ])
+
+
+    def _load_a_special_common_dataset(self, name, axis_name):
+        ### load a common dataset that need to take specail care
+        ### this dataset need to distributed along axis_name is axis_name is just the self.main_data_dist_axis
+        dset = self.infiles[0][name]
+        axis = self.main_data_axes.index(axis_name)
+        tmp = np.arange(dset.shape[0])
+        sel = tmp[self._main_data_select[axis]].tolist()
+        shp = (len(sel),) + dset.shape[1:] # the global shape
+        # if axis_name is just the distributed axis, load dataset distributed
+        if axis == self.main_data_dist_axis:
+            sel = mpiutil.mpilist(sel, method='con', comm=self.comm)
+            self.create_dataset(name, shape=shp, dtype=dset.dtype, distributed=True, distributed_axis=0)
+            self[name].local_data[:] = dset[sel]
+        else:
+            self.create_dataset(name, data=dset[sel])
+        # copy attrs of this dset
+        memh5.copyattrs(dset.attrs, self[name].attrs)
 
     def _load_a_common_dataset(self, name):
         ### load a common dataset from the first file
         # special care need take for blorder, just load the selected blorders
         if name == 'blorder':
-            bl_dset = self.infiles[0][name]
-            # main_data_select = self._main_data_select[:] # copy here to not change self._main_data_select
-            bl_axis = self.main_data_axes.index('channelpair')
-            # bl_select = self._main_data_select[bl_axis]
-            tmp = np.arange(bl_dset.shape[0]) # number of channel pairs
-            sel = tmp[self._main_data_select[bl_axis]].tolist()
-            shp = (len(sel),) + bl_dset.shape[1:]
-            # if channelpair is just the distributed axis, load blorder distributed
-            if bl_axis == self.main_data_dist_axis:
-                sel = mpiutil.mpilist(sel, method='con', comm=self.comm)
-                self.create_dataset(name, shape=shp, dtype=bl_dset.dtype, distributed=True, distributed_axis=0)
-                self[name].local_data[:] = bl_dset[sel]
+            self._load_a_special_common_dataset(name, 'channelpair')
+        elif name == 'feedno' and not self._feed_select is None:
+            self.create_dataset(name, data=self._feed_select)
+        elif name == 'channo' and not self._channel_select is None:
+            self.create_dataset(name, data=self._channel_select)
+        elif name in ('polerr', 'feedpos', 'antpointing') and not self._feed_select is None:
+            fh = self.infiles[0]
+            feedno = fh['feedno'][:].tolist()
+            feed_inds = [ feedno.index(fd) for fd in self._feed_select ]
+            if name == 'antpointing':
+                self.create_dataset(name, data=fh[name][:, feed_inds])
             else:
-                self.create_dataset(name, data=bl_dset[sel])
-            # copy attrs of this dset
-            memh5.copyattrs(bl_dset.attrs, self[name].attrs)
+                self.create_dataset(name, data=fh[name][feed_inds])
         else:
             super(RawTimestream, self)._load_a_common_dataset(name)
 
@@ -250,3 +272,174 @@ class RawTimestream(container.BasicTod):
             self.create_dataset('jul_date', data=jul_date)
         # create attrs of this dset
         self['jul_date'].attrs["unit"] = 'day'
+
+
+    @property
+    def time(self):
+        """Return the jul_date dataset for convenient use."""
+        try:
+            return self['jul_date']
+        except KeyError:
+            raise KeyError('jul_date does not exist, try to load it first')
+
+    @property
+    def freq(self):
+        """Return the freq dataset for convenient use."""
+        try:
+            return self['freq']
+        except KeyError:
+            raise KeyError('freq does not exist, try to load it first')
+
+
+    def redistribute(self, dist_axis):
+        """Redistribute the main time ordered dataset along a specified axis.
+
+        This will redistribute the main_data along the specified axis `dis_axis`,
+        and also distribute other main_time_ordered_datasets along the first axis
+        if `dis_axis` is the first axis, else concatenate all those data along the
+        first axis.
+
+        Parameters
+        ----------
+        dist_axis : int, string
+            The axis can be specified by an integer index (positive or
+            negative), or by a string label which must correspond to an entry in
+            the `main_data_axes` attribute on the dataset.
+
+        """
+
+        axis = container.check_axis(dist_axis, self.main_data_axes)
+
+        if axis == self.main_data_dist_axis:
+            # already the distributed axis, nothing to do
+            return
+        else:
+            super(RawTimestream, self).redistribute(dist_axis)
+
+            if 'time' == self.main_data_axes[axis]:
+                self.dataset_distributed_to_common('freq')
+                self.dataset_distributed_to_common('blorder')
+
+            # distribute freq
+            elif 'frequency' == self.main_data_axes[axis]:
+                self.dataset_common_to_distributed('freq', distributed_axis=0)
+                self.dataset_distributed_to_common('blorder')
+
+            # distribute blorder
+            elif 'channelpair' == self.main_data_axes[axis]:
+                self.dataset_common_to_distributed('blorder', distributed_axis=0)
+                self.dataset_distributed_to_common('freq')
+
+    def check_status(self):
+        """Check that data hold in this container is consistent. """
+
+        # basic checks
+        super(RawTimestream, self).check_status()
+
+        # additional checks
+        if 'frequency' == self.main_data_axes[self.main_data_dist_axis]:
+            if not self['freq'].distributed:
+                raise RuntimeError('Dataset freq should be distributed when frequency is the distributed axis')
+            if not self['blorder'].common:
+                raise RuntimeError('Dataset blorder should be common when frequency is the distributed axis')
+        elif 'channelpair' == self.main_data_axes[self.main_data_dist_axis]:
+            if not self['freq'].common:
+                raise RuntimeError('Dataset freq should be common when channelpair is the distributed axis')
+            if not self['blorder'].distributed:
+                raise RuntimeError('Dataset blorder should be distributed when channelpair is the distributed axis')
+
+
+    def separate_pol_and_bl(self):
+        """Separate channelpair axis to polarization and baseline.
+
+        This will create and return a Timestream container holding the polarization
+        and baseline separated data.
+        """
+
+        # create a Timestream container to hold the pol and bl separated data
+        ts = timestream.Timestream(files=[])
+
+        feedno = sorted(self['feedno'][:].tolist())
+        xchans = [ self['channo'][feedno.index(fd)][0] for fd in feedno ]
+        ychans = [ self['channo'][feedno.index(fd)][1] for fd in feedno ]
+
+        nfeed = len(feedno)
+        xx_pairs = [ (xchans[i], xchans[j]) for i in range(nfeed) for j in range(i, nfeed) ]
+        yy_pairs = [ (ychans[i], ychans[j]) for i in range(nfeed) for j in range(i, nfeed) ]
+        xy_pairs = [ (xchans[i], ychans[j]) for i in range(nfeed) for j in range(i, nfeed) ]
+        yx_pairs = [ (ychans[i], xchans[j]) for i in range(nfeed) for j in range(i, nfeed) ]
+
+        blorder = [ tuple(bl) for bl in self['blorder'] ]
+        conj_blorder = [ tuple(bl[::-1]) for bl in self['blorder'] ]
+
+        def _get_ind(chp):
+            try:
+                return False, blorder.index(chp)
+            except ValueError:
+                return True, conj_blorder.index(chp)
+        # xx
+        xx_list = [ _get_ind(chp) for chp in xx_pairs ]
+        xx_inds = [ ind for (cj, ind) in xx_list ]
+        xx_conj = [ cj for (cj, ind) in xx_list ]
+        # yy
+        yy_list = [ _get_ind(chp) for chp in yy_pairs ]
+        yy_inds = [ ind for (cj, ind) in yy_list ]
+        yy_conj = [ cj for (cj, ind) in yy_list ]
+        # xy
+        xy_list = [ _get_ind(chp) for chp in xy_pairs ]
+        xy_inds = [ ind for (cj, ind) in xy_list ]
+        xy_conj = [ cj for (cj, ind) in xy_list ]
+        # yx
+        yx_list = [ _get_ind(chp) for chp in yx_pairs ]
+        yx_inds = [ ind for (cj, ind) in yx_list ]
+        yx_conj = [ cj for (cj, ind) in yx_list ]
+
+        # if dist axis is channelpair, redistribute it along time
+        original_dist_axis = self.main_data_dist_axis
+        if 'channelpair' == self.main_data_axes[original_dist_axis]:
+            self.redistribute(0)
+
+        # create a MPIArray to hold the pol and bl separated vis
+        shp = self.main_data.shape[:2] + (4, len(xx_inds))
+        dtype = self.main_data.dtype
+        md = mpiarray.MPIArray(shp, axis=self.main_data_dist_axis, comm=self.comm, dtype=dtype)
+        # xx
+        md.local_array[:, :, 0] = self.main_data.local_data[:, :, xx_inds].copy()
+        md.local_array[:, :, 0] = np.where(xx_conj, md.local_array[:, :, 0].conj(), md.local_array[:, :, 0])
+        # yy
+        md.local_array[:, :, 1] = self.main_data.local_data[:, :, yy_inds].copy()
+        md.local_array[:, :, 1] = np.where(yy_conj, md.local_array[:, :, 1].conj(), md.local_array[:, :, 1])
+        # xy
+        md.local_array[:, :, 2] = self.main_data.local_data[:, :, xy_inds].copy()
+        md.local_array[:, :, 2] = np.where(xy_conj, md.local_array[:, :, 2].conj(), md.local_array[:, :, 2])
+        # yx
+        md.local_array[:, :, 3] = self.main_data.local_data[:, :, yx_inds].copy()
+        md.local_array[:, :, 3] = np.where(yx_conj, md.local_array[:, :, 3].conj(), md.local_array[:, :, 3])
+
+        # create main data
+        ts.create_dataset(self.main_data_name, shape=shp, dtype=dtype, data=md, distributed=True, distributed_axis=self.main_data_dist_axis)
+        # create attrs of this dataset
+        ts.main_data.attrs['dimname'] = 'Time, Frequency, Polarization, Baseline'
+
+        # create other datasets needed
+        ts.create_dataset('pol', data=np.array(['xx', 'yy', 'xy', 'yx']))
+        blorder = np.array([ [feedno[i], feedno[j]] for i in range(nfeed) for j in range(i, nfeed) ])
+        ts.create_dataset('blorder', data=blorder)
+
+        # copy other attrs
+        for attrs_name, attrs_value in self.attrs.iteritems():
+            ts.attrs[attrs_name] = attrs_value
+        # copy other datasets
+        for dset_name, dset in self.iteritems():
+            if not dset_name in (self.main_data_name, 'channo', 'blorder'):
+                if dset.common:
+                    ts.create_dataset(dset_name, data=dset)
+                else:
+                    ts.create_dataset(dset_name, data=dset, shape=dset.shape, dtype=dset.dtype, distributed=True, distributed_axis=dset.distributed_axis)
+                # copy attrs of this dset
+                memh5.copyattrs(dset.attrs, ts[dset_name].attrs)
+
+        # redistribute self to original axis
+        self.redistribute(original_dist_axis)
+
+        return ts
