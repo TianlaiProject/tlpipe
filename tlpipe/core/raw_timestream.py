@@ -337,7 +337,11 @@ class RawTimestream(container.BasicTod):
         super(RawTimestream, self).check_status()
 
         # additional checks
-        if 'frequency' == self.main_data_axes[self.main_data_dist_axis]:
+        if 'time' == self.main_data_axes[self.main_data_dist_axis]:
+            for name in ('freq', 'blorder'):
+                if not self[name].common:
+                    raise RuntimeError('Dataset %s should be common when time is the distributed axis' % name)
+        elif 'frequency' == self.main_data_axes[self.main_data_dist_axis]:
             if not self['freq'].distributed:
                 raise RuntimeError('Dataset freq should be distributed when frequency is the distributed axis')
             if not self['blorder'].common:
@@ -356,8 +360,13 @@ class RawTimestream(container.BasicTod):
         and baseline separated data.
         """
 
+        # if dist axis is channelpair, redistribute it along time
+        original_dist_axis = self.main_data_dist_axis
+        if 'channelpair' == self.main_data_axes[original_dist_axis]:
+            self.redistribute(0)
+
         # create a Timestream container to hold the pol and bl separated data
-        ts = timestream.Timestream(files=[])
+        ts = timestream.Timestream(dist_axis=self.main_data_dist_axis, comm=self.comm)
 
         feedno = sorted(self['feedno'][:].tolist())
         xchans = [ self['channo'][feedno.index(fd)][0] for fd in feedno ]
@@ -394,11 +403,6 @@ class RawTimestream(container.BasicTod):
         yx_inds = [ ind for (cj, ind) in yx_list ]
         yx_conj = [ cj for (cj, ind) in yx_list ]
 
-        # if dist axis is channelpair, redistribute it along time
-        original_dist_axis = self.main_data_dist_axis
-        if 'channelpair' == self.main_data_axes[original_dist_axis]:
-            self.redistribute(0)
-
         # create a MPIArray to hold the pol and bl separated vis
         shp = self.main_data.shape[:2] + (4, len(xx_inds))
         dtype = self.main_data.dtype
@@ -428,7 +432,8 @@ class RawTimestream(container.BasicTod):
 
         # copy other attrs
         for attrs_name, attrs_value in self.attrs.iteritems():
-            ts.attrs[attrs_name] = attrs_value
+            if attrs_name not in self.time_ordered_attrs:
+                ts.attrs[attrs_name] = attrs_value
         # copy other datasets
         for dset_name, dset in self.iteritems():
             if not dset_name in (self.main_data_name, 'channo', 'blorder'):
