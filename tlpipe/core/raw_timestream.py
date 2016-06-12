@@ -173,24 +173,29 @@ class RawTimestream(container.BasicTod):
         self._channel_select = np.array([ channo[feedno.index(fd)] for fd in feeds ])
 
 
+    def _load_a_special_common_dataset(self, name, axis_name):
+        ### load a common dataset that need to take specail care
+        ### this dataset need to distributed along axis_name is axis_name is just the self.main_data_dist_axis
+        dset = self.infiles[0][name]
+        axis = self.main_data_axes.index(axis_name)
+        tmp = np.arange(dset.shape[0])
+        sel = tmp[self._main_data_select[axis]].tolist()
+        shp = (len(sel),) + dset.shape[1:] # the global shape
+        # if axis_name is just the distributed axis, load dataset distributed
+        if axis == self.main_data_dist_axis:
+            sel = mpiutil.mpilist(sel, method='con', comm=self.comm)
+            self.create_dataset(name, shape=shp, dtype=dset.dtype, distributed=True, distributed_axis=0)
+            self[name].local_data[:] = dset[sel]
+        else:
+            self.create_dataset(name, data=dset[sel])
+        # copy attrs of this dset
+        memh5.copyattrs(dset.attrs, self[name].attrs)
+
     def _load_a_common_dataset(self, name):
         ### load a common dataset from the first file
         # special care need take for blorder, just load the selected blorders
         if name == 'blorder':
-            bl_dset = self.infiles[0][name]
-            bl_axis = self.main_data_axes.index('channelpair')
-            tmp = np.arange(bl_dset.shape[0]) # number of channel pairs
-            sel = tmp[self._main_data_select[bl_axis]].tolist()
-            shp = (len(sel),) + bl_dset.shape[1:]
-            # if channelpair is just the distributed axis, load blorder distributed
-            if bl_axis == self.main_data_dist_axis:
-                sel = mpiutil.mpilist(sel, method='con', comm=self.comm)
-                self.create_dataset(name, shape=shp, dtype=bl_dset.dtype, distributed=True, distributed_axis=0)
-                self[name].local_data[:] = bl_dset[sel]
-            else:
-                self.create_dataset(name, data=bl_dset[sel])
-            # copy attrs of this dset
-            memh5.copyattrs(bl_dset.attrs, self[name].attrs)
+            self._load_a_special_common_dataset(name, 'channelpair')
         elif name == 'feedno' and not self._feed_select is None:
             self.create_dataset(name, data=self._feed_select)
         elif name == 'channo' and not self._channel_select is None:
