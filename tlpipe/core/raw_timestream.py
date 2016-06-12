@@ -1,8 +1,9 @@
 import itertools
 import numpy as np
 from datetime import datetime
-import ephem
 import container
+import timestream
+from caput import mpiarray
 from caput import memh5
 from caput import mpiutil
 from tlpipe.utils import date_util
@@ -341,3 +342,99 @@ class RawTimestream(container.BasicTod):
                 raise RuntimeError('Dataset freq should be common when channelpair is the distributed axis')
             if not self['blorder'].distributed:
                 raise RuntimeError('Dataset blorder should be distributed when channelpair is the distributed axis')
+
+
+    def separate_pol_and_bl(self):
+        """Separate channelpair axis to polarization and baseline.
+
+        This will create and return a Timestream container holding the polarization
+        and baseline separated data.
+        """
+
+        # create a Timestream container to hold the pol and bl separated data
+        ts = timestream.Timestream(files=[])
+
+        feedno = sorted(self['feedno'][:].tolist())
+        xchans = [ self['channo'][feedno.index(fd)][0] for fd in feedno ]
+        ychans = [ self['channo'][feedno.index(fd)][1] for fd in feedno ]
+
+        nfeed = len(feedno)
+        xx_pairs = [ (xchans[i], xchans[j]) for i in range(nfeed) for j in range(i, nfeed) ]
+        yy_pairs = [ (ychans[i], ychans[j]) for i in range(nfeed) for j in range(i, nfeed) ]
+        xy_pairs = [ (xchans[i], ychans[j]) for i in range(nfeed) for j in range(i, nfeed) ]
+        yx_pairs = [ (ychans[i], xchans[j]) for i in range(nfeed) for j in range(i, nfeed) ]
+
+        blorder = [ tuple(bl) for bl in self['blorder'] ]
+        conj_blorder = [ tuple(bl[::-1]) for bl in self['blorder'] ]
+
+        def _get_ind(chp):
+            try:
+                return False, blorder.index(chp)
+            except ValueError:
+                return True, conj_blorder.index(chp)
+        # xx
+        xx_list = [ _get_ind(chp) for chp in xx_pairs ]
+        xx_inds = [ ind for (cj, ind) in xx_list ]
+        xx_conj = [ cj for (cj, ind) in xx_list ]
+        # yy
+        yy_list = [ _get_ind(chp) for chp in yy_pairs ]
+        yy_inds = [ ind for (cj, ind) in yy_list ]
+        yy_conj = [ cj for (cj, ind) in yy_list ]
+        # xy
+        xy_list = [ _get_ind(chp) for chp in xy_pairs ]
+        xy_inds = [ ind for (cj, ind) in xy_list ]
+        xy_conj = [ cj for (cj, ind) in xy_list ]
+        # yx
+        yx_list = [ _get_ind(chp) for chp in yx_pairs ]
+        yx_inds = [ ind for (cj, ind) in yx_list ]
+        yx_conj = [ cj for (cj, ind) in yx_list ]
+
+        # if dist axis is channelpair, redistribute it along time
+        original_dist_axis = self.main_data_dist_axis
+        if 'channelpair' == self.main_data_axes[original_dist_axis]:
+            self.redistribute(0)
+
+        # create a MPIArray to hold the pol and bl separated vis
+        shp = self.main_data.shape[:2] + (4, len(xx_inds))
+        dtype = self.main_data.dtype
+        md = mpiarray.MPIArray(shp, axis=self.main_data_dist_axis, comm=self.comm, dtype=dtype)
+        # xx
+        md.local_array[:, :, 0] = self.main_data.local_data[:, :, xx_inds].copy()
+        md.local_array[:, :, 0] = np.where(xx_conj, md.local_array[:, :, 0].conj(), md.local_array[:, :, 0])
+        # yy
+        md.local_array[:, :, 1] = self.main_data.local_data[:, :, yy_inds].copy()
+        md.local_array[:, :, 1] = np.where(yy_conj, md.local_array[:, :, 1].conj(), md.local_array[:, :, 1])
+        # xy
+        md.local_array[:, :, 2] = self.main_data.local_data[:, :, xy_inds].copy()
+        md.local_array[:, :, 2] = np.where(xy_conj, md.local_array[:, :, 2].conj(), md.local_array[:, :, 2])
+        # yx
+        md.local_array[:, :, 3] = self.main_data.local_data[:, :, yx_inds].copy()
+        md.local_array[:, :, 3] = np.where(yx_conj, md.local_array[:, :, 3].conj(), md.local_array[:, :, 3])
+
+        # create main data
+        ts.create_dataset(self.main_data_name, shape=shp, dtype=dtype, data=md, distributed=True, distributed_axis=self.main_data_dist_axis)
+        # create attrs of this dataset
+        ts.main_data.attrs['dimname'] = 'Time, Frequency, Polarization, Baseline'
+
+        # create other datasets needed
+        ts.create_dataset('pol', data=np.array(['xx', 'yy', 'xy', 'yx']))
+        blorder = np.array([ [feedno[i], feedno[j]] for i in range(nfeed) for j in range(i, nfeed) ])
+        ts.create_dataset('blorder', data=blorder)
+
+        # copy other attrs
+        for attrs_name, attrs_value in self.attrs.iteritems():
+            ts.attrs[attrs_name] = attrs_value
+        # copy other datasets
+        for dset_name, dset in self.iteritems():
+            if not dset_name in (self.main_data_name, 'channo', 'blorder'):
+                if dset.common:
+                    ts.create_dataset(dset_name, data=dset)
+                else:
+                    ts.create_dataset(dset_name, data=dset, shape=dset.shape, dtype=dset.dtype, distributed=True, distributed_axis=dset.distributed_axis)
+                # copy attrs of this dset
+                memh5.copyattrs(dset.attrs, ts[dset_name].attrs)
+
+        # redistribute self to original axis
+        self.redistribute(original_dist_axis)
+
+        return ts
