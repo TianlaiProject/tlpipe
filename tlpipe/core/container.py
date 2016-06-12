@@ -80,8 +80,9 @@ class BasicTod(memh5.MemDiskGroup):
 
     Parameters
     ----------
-    files : string or list of strings
-        File name or a list of file names that data will be loaded from.
+    files : None, string or list of strings
+        File name or a list of file names that data will be loaded from. No files
+        if None. Default None.
     mode : string, optional
         In which mode to open the input files. Default 'r' to open files read only.
     start : integer, optional
@@ -131,9 +132,13 @@ class BasicTod(memh5.MemDiskGroup):
 
     """
 
-    def __init__(self, files, mode='r', start=0, stop=None, dist_axis=0, comm=None):
+    def __init__(self, files=None, mode='r', start=0, stop=None, dist_axis=0, comm=None):
 
         super(BasicTod, self).__init__(data_group=None, distributed=True, comm=comm)
+
+        self.nproc = 1 if self.comm is None else self.comm.size
+        self.rank = 0 if self.comm is None else self.comm.rank
+        self.rank0 = True if self.rank == 0 else False
 
         self.infiles_mode = mode
         # self.infiles will be a list of opened hdf5 file handlers
@@ -141,11 +146,7 @@ class BasicTod(memh5.MemDiskGroup):
         self.num_infiles = len(self.infiles)
         self.main_data_dist_axis = check_axis(dist_axis, self.main_data_axes)
 
-        self.nproc = 1 if self.comm is None else self.comm.size
-        self.rank = 0 if self.comm is None else self.comm.rank
-        self.rank0 = True if self.rank == 0 else False
-
-        self.main_data_shape, self.main_data_type, self.infiles_map = self._get_input_info(self.main_data_name, self.main_data_start, self.main_data_stop)
+        # self.main_data_shape, self.main_data_type, self.infiles_map = self._get_input_info(self.main_data_name, self.main_data_start, self.main_data_stop)
 
         self._main_data_select = [ slice(0, None, None) for i in self._main_data_axes ]
 
@@ -158,7 +159,13 @@ class BasicTod(memh5.MemDiskGroup):
         ### select the needed files from `files` which contain time ordered data from `start` to `stop`
         assert dset_name in self.time_ordered_datasets, '%s is not a time ordered dataset' % dset_name
 
+        if files is None:
+            return [], 0, 0
+
         files = ensure_file_list(files)
+        if len(files) == 0:
+            return [], 0, 0
+
         num_ts = []
         for fh in mpiutil.mpilist(files, method='con', comm=self.comm):
             with h5py.File(fh, 'r') as f:
@@ -392,11 +399,19 @@ class BasicTod(memh5.MemDiskGroup):
 
     def _load_a_common_attribute(self, name):
         ### load a common attribute from the first file
+        if self.num_infiles == 0:
+            warnings.warn('No input file')
+            return
+
         fh = self.infiles[0]
         self.attrs[name] = fh.attrs[name]
 
     def _load_a_tod_attribute(self, name):
         ### load a time ordered attribute from all the file
+        if self.num_infiles == 0:
+            warnings.warn('No input file')
+            return
+
         self.attrs[name] = []
         for fh in mpiutil.mpilist(self.infiles, method='con', comm=self.comm):
             self.attrs[name].append(fh.attrs[name])
@@ -407,6 +422,10 @@ class BasicTod(memh5.MemDiskGroup):
 
     def _load_an_attribute(self, name):
         ### load an attribute (either a commmon or a time ordered)
+        if self.num_infiles == 0:
+            warnings.warn('No input file')
+            return
+
         if name in self.time_ordered_attrs:
             self._load_a_tod_attribute(name)
         else:
@@ -414,6 +433,10 @@ class BasicTod(memh5.MemDiskGroup):
 
     def _load_a_common_dataset(self, name):
         ### load a common dataset from the first file
+        if self.num_infiles == 0:
+            warnings.warn('No input file')
+            return
+
         fh = self.infiles[0]
         dset = fh[name]
         self.create_dataset(name, data=dset, shape=dset.shape, dtype=dset.dtype)
@@ -422,6 +445,9 @@ class BasicTod(memh5.MemDiskGroup):
 
     def _load_a_tod_dataset(self, name):
         ### load a time ordered dataset from all files, distributed along the first axis
+        if self.num_infiles == 0:
+            warnings.warn('No input file')
+            return
 
         def _to_slice_obj(lst):
             ### convert a list to a slice object if possible
@@ -544,6 +570,10 @@ class BasicTod(memh5.MemDiskGroup):
 
     def _load_a_dataset(self, name):
         ### load a dataset (either a commmon or a time ordered)
+        if self.num_infiles == 0:
+            warnings.warn('No input file')
+            return
+
         if name in self.time_ordered_datasets:
             self._load_a_tod_dataset(name)
         else:
@@ -555,6 +585,10 @@ class BasicTod(memh5.MemDiskGroup):
 
         This supposes that all common data are the same as that in the first file.
         """
+        if self.num_infiles == 0:
+            warnings.warn('No input file')
+            return
+
         fh = self.infiles[0]
         # read in top level common attrs
         for attr_name in fh.attrs.iterkeys():
@@ -567,10 +601,18 @@ class BasicTod(memh5.MemDiskGroup):
 
     def load_main_data(self):
         """Load main data from all files."""
+        if self.num_infiles == 0:
+            warnings.warn('No input file')
+            return
+
         self._load_a_tod_dataset(self.main_data_name)
 
     def load_tod_excl_main_data(self):
         """Load time ordered attributes and datasets (exclude the main data) from all files."""
+        if self.num_infiles == 0:
+            warnings.warn('No input file')
+            return
+
         # load time ordered attributes
         fh = self.infiles[0]
         for attr_name in fh.attrs.iterkeys():
@@ -584,11 +626,19 @@ class BasicTod(memh5.MemDiskGroup):
 
     def load_time_ordered(self):
         """Load time ordered attributes and datasets from all files."""
+        if self.num_infiles == 0:
+            warnings.warn('No input file')
+            return
+
         self.load_main_data()
         self.load_tod_excl_main_data()
 
     def load_all(self):
         """Load all attributes and datasets from files."""
+        if self.num_infiles == 0:
+            warnings.warn('No input file')
+            return
+
         self.load_common()
         self.load_time_ordered()
 
