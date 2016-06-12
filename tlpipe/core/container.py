@@ -1,12 +1,9 @@
-import os
-import time
 import glob
 import posixpath
 import itertools
 import warnings
 import numpy as np
 import h5py
-from caput import mpiarray
 from caput import memh5
 from caput import mpiutil
 
