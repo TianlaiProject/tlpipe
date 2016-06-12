@@ -278,7 +278,7 @@ class RawTimestream(container.BasicTod):
     def time(self):
         """Return the jul_date dataset for convenient use."""
         try:
-            return self.attrs['jul_date']
+            return self['jul_date']
         except KeyError:
             raise KeyError('jul_date does not exist, try to load it first')
 
@@ -286,7 +286,7 @@ class RawTimestream(container.BasicTod):
     def freq(self):
         """Return the freq dataset for convenient use."""
         try:
-            return self.attrs['freq']
+            return self['freq']
         except KeyError:
             raise KeyError('freq does not exist, try to load it first')
 
