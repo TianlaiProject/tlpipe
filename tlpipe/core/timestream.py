@@ -63,19 +63,19 @@ class Timestream(container.BasicTod):
 
     _feed_select = None
 
-    def baseline_select(self, value):
-        """Select data to be loaded from input files along the baseline axis.
+    # def baseline_select(self, value):
+    #     """Select data to be loaded from input files along the baseline axis.
 
-        Parameters
-        ----------
-        value : tuple or list
-            If a tuple, which will be created as a slice(start, stop, step) object,
-            so it can have one to three elements (integers or None); if a list, its
-            elements must be strictly increasing non-negative integers, data in
-            these positions will be selected.
+    #     Parameters
+    #     ----------
+    #     value : tuple or list
+    #         If a tuple, which will be created as a slice(start, stop, step) object,
+    #         so it can have one to three elements (integers or None); if a list, its
+    #         elements must be strictly increasing non-negative integers, data in
+    #         these positions will be selected.
 
-        """
-        self.data_select('baseline', value)
+    #     """
+    #     self.data_select('baseline', value)
 
     def feed_select(self, value=(0, None), corr='all'):
         """Select data to be loaded from inputs files corresponding to the specified feeds.
