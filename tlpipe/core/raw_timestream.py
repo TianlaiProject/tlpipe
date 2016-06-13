@@ -245,10 +245,10 @@ class RawTimestream(container.BasicTod):
 
         # generate sec1970
         sec1970_first = self.infiles[0].attrs['sec1970']
-        int_time = self.attrs['inttime']
+        int_time = self.infiles[0].attrs['inttime']
         sec1970_start = sec1970_first + int_time * self.main_data_start
         num_sec1970 = self.main_data_stop - self.main_data_start
-        sec1970 = np.array([ sec1970_start + i*int_time for i in range(num_sec1970)], dtype=np.float32)
+        sec1970 = np.array([ sec1970_start + i*int_time for i in range(num_sec1970)], dtype=np.float64) # precision float32 is not enough
         time_axis = self.main_data_axes.index('time')
         sel_sec1970 = sec1970[self._main_data_select[time_axis]]
         shp = sel_sec1970.shape
@@ -263,7 +263,7 @@ class RawTimestream(container.BasicTod):
         self['sec1970'].attrs["unit"] = 'second'
 
         # generate julian date
-        jul_date = np.array([ date_util.get_juldate(datetime.fromtimestamp(s), tzone=self.attrs['timezone']) for s in self['sec1970'].local_data[:] ], dtype=np.float32)
+        jul_date = np.array([ date_util.get_juldate(datetime.fromtimestamp(s), tzone=self.infiles[0].attrs['timezone']) for s in sel_sec1970 ], dtype=np.float64) # precision float32 is not enough
         # if time is just the distributed axis, load jul_date distributed
         if time_axis == self.main_data_dist_axis:
             self.create_dataset('jul_date', shape=shp, dtype=jul_date.dtype, distributed=True, distributed_axis=0)
