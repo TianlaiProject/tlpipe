@@ -14,6 +14,27 @@ class RawTimestream(container.BasicTod):
 
     The raw timestream data are raw visibilities (the main data) and other data
     and meta data saved in HDF5 files which are recorded from the correlator.
+
+    Parameters
+    ----------
+    Same as :class:`container.BasicTod`.
+
+    Attributes
+    ----------
+    time
+    freq
+
+    Methods
+    -------
+    time_select
+    frequency_select
+    feed_select
+    load_common
+    load_tod_excl_main_data
+    redistribute
+    check_status
+    separate_pol_and_bl
+
     """
 
     _main_data_name = 'vis'

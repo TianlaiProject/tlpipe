@@ -12,6 +12,28 @@ class Timestream(container.BasicTod):
 
     This timestream data container is to hold time stream data that has polarization
     and baseline separated from the channelpair in the raw timestream.
+
+    Parameters
+    ----------
+    Same as :class:`container.BasicTod`.
+
+    Attributes
+    ----------
+    time
+    freq
+    pol
+
+    Methods
+    -------
+    time_select
+    frequency_select
+    polarization_select
+    feed_select
+    redistribute
+    check_status
+    lin2stokes
+    stokes2lin
+
     """
 
     _main_data_name = 'vis'
