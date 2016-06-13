@@ -830,8 +830,6 @@ class BasicTod(memh5.MemDiskGroup):
             # redistribute other main_time_ordered_datasets
             for dset_name in self.iterkeys():
                 if dset_name in self.main_time_ordered_datasets and dset_name != self.main_data_name:
-                    dset_type = self[dset_name].dtype
-                    dset_shape = self[dset_name].shape
                     if axis == 0:
                         self.dataset_common_to_distributed(dset_name, distributed_axis=0)
                     else:
@@ -857,6 +855,14 @@ class BasicTod(memh5.MemDiskGroup):
         num = len(set(nts))
         if num != 0 and num != 1:
             raise RuntimeError('Not all main_time_ordered_datasets have the same number of time points')
+
+        # check time ordered datasets
+        for dset_name, dset in self.iteritems():
+            if dset_name in self.time_ordered_datasets:
+                if self.main_data_dist_axis == 0 and not dset.distributed:
+                    raise RuntimeError('Dataset %s should be distributed when %s is the distributed axis' % (dset_name, self.main_data_axes[self.main_data_dist_axis]))
+                if self.main_data_dist_axis != 0 and not dset.common:
+                    raise RuntimeError('Dataset %s should be common when %s is the distributed axis' % (dset_name, self.main_data_axes[self.main_data_dist_axis]))
 
 
     def _get_output_info(self, dset_name, num_outfiles):
