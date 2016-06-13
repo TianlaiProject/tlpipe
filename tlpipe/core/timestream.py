@@ -93,6 +93,11 @@ class Timestream(container.BasicTod):
             cross-correlations, 'all' for all correlations. Default 'all'.
 
         """
+
+        if value == (0, None) and corr == 'all':
+            # select all, no need to do anything
+            return
+
         # get feed info from the first input file
         feedno = self.infiles[0]['feedno'][:].tolist()
 
