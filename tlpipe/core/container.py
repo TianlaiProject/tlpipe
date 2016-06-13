@@ -903,8 +903,6 @@ class BasicTod(memh5.MemDiskGroup):
 
         outfiles = ensure_file_list(outfiles)
         num_outfiles = len(outfiles)
-        if num_outfiles > self.num_infiles:
-            warnings.warn('Number of output files %d exceed number of input files %d may have some problem' % (num_outfiles, self.num_infiles))
 
         # first redistribute main_time_ordered_datasets to the first axis
         if self.main_data_dist_axis != 0:
