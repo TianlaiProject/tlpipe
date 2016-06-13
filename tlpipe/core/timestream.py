@@ -150,7 +150,7 @@ class Timestream(container.BasicTod):
         elif name == 'pol':
             self._load_a_special_common_dataset(name, 'polarization')
         elif name == 'blorder':
-            self._load_a_special_common_dataset(name, 'channelpair')
+            self._load_a_special_common_dataset(name, 'baseline')
         elif name == 'feedno' and not self._feed_select is None:
             self.create_dataset(name, data=self._feed_select)
         elif name in ('polerr', 'feedpos', 'antpointing') and not self._feed_select is None:
