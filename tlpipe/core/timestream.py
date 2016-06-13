@@ -1,6 +1,8 @@
 import itertools
+import warnings
 import numpy as np
 import container
+from caput import mpiarray
 from caput import memh5
 from caput import mpiutil
 
@@ -271,3 +273,92 @@ class Timestream(container.BasicTod):
                 raise RuntimeError('Dataset pol should be common when baseline is the distributed axis')
             if not self['blorder'].distributed:
                 raise RuntimeError('Dataset blorder should be distributed when baseline is the distributed axis')
+
+
+    def lin2stokes(self):
+        """Convert the linear polarized data to Stokes polarization."""
+        try:
+            pol = self.pol
+        except KeyError:
+            raise RuntimeError('Polarization of the data is unknown, can not convert')
+
+        if pol.attrs['pol_type'] == 'stokes' and pol.shape[0] == 4:
+            warning.warn('Data is already Stokes polarization, no need to convert')
+            return
+
+        if pol.attrs['pol_type'] == 'linear' and pol.shape[0] == 4:
+            pol = pol[:].tolist()
+
+            # redistribute to 0 axis if polarization is the distributed axis
+            original_dist_axis = self.main_data_dist_axis
+            if 'polarization' == self.main_data_axes[self.main_data_dist_axis]:
+                self.redistribute(0)
+
+            # create a new MPIArray to hold the new data
+            md = mpiarray.MPIArray(self.main_data.shape, axis=self.main_data_dist_axis, comm=self.comm, dtype=self.main_data.dtype)
+            # convert to Stokes I, Q, U, V
+            md.local_array[:, :, 0] = 0.5 * (self.main_data.local_data[:, :, pol.index('xx')] + self.main_data.local_data[:, :, pol.index('yy')]) # I
+            md.local_array[:, :, 1] = 0.5 * (self.main_data.local_data[:, :, pol.index('xx')] - self.main_data.local_data[:, :, pol.index('yy')]) # Q
+            md.local_array[:, :, 2] = 0.5 * (self.main_data.local_data[:, :, pol.index('xy')] + self.main_data.local_data[:, :, pol.index('yx')]) # U
+            md.local_array[:, :, 3] = -0.5J * (self.main_data.local_data[:, :, pol.index('xy')] - self.main_data.local_data[:, :, pol.index('yx')]) # V
+
+            attr_dict = {} # temporarily save attrs of this dataset
+            memh5.copyattrs(self.main_data.attrs, attr_dict)
+            del self[self.main_data_name]
+            # create main data
+            self.create_dataset(self.main_data_name, shape=md.shape, dtype=md.dtype, data=md, distributed=True, distributed_axis=self.main_data_dist_axis)
+            memh5.copyattrs(attr_dict, self.main_data.attrs)
+
+            del self['pol']
+            self.create_dataset('pol', data=np.array(['I', 'Q', 'U', 'V']))
+            self['pol'].attrs['pol_type'] = 'stokes'
+
+            # redistribute self to original axis
+            self.redistribute(original_dist_axis)
+
+        else:
+            raise RuntimeError('Can not conver to Stokes polarization')
+
+    def stokes2lin(self):
+        """Convert the Stokes polarized data to linear polarization."""
+        try:
+            pol = self.pol
+        except KeyError:
+            raise RuntimeError('Polarization of the data is unknown, can not convert')
+
+        if pol.attrs['pol_type'] == 'linear' and pol.shape[0] == 4:
+            warning.warn('Data is already linear polarization, no need to convert')
+            return
+
+        if pol.attrs['pol_type'] == 'stokes' and pol.shape[0] == 4:
+            pol = pol[:].tolist()
+
+            # redistribute to 0 axis if polarization is the distributed axis
+            original_dist_axis = self.main_data_dist_axis
+            if 'polarization' == self.main_data_axes[self.main_data_dist_axis]:
+                self.redistribute(0)
+
+            # create a new MPIArray to hold the new data
+            md = mpiarray.MPIArray(self.main_data.shape, axis=self.main_data_dist_axis, comm=self.comm, dtype=self.main_data.dtype)
+            # convert to linear xx, yy, xy, yx
+            md.local_array[:, :, 0] = self.main_data.local_data[:, :, pol.index('I')] + self.main_data.local_data[:, :, pol.index('Q')] # xx
+            md.local_array[:, :, 1] = self.main_data.local_data[:, :, pol.index('I')] - self.main_data.local_data[:, :, pol.index('Q')] # yy
+            md.local_array[:, :, 2] = self.main_data.local_data[:, :, pol.index('U')] + 1.0J * self.main_data.local_data[:, :, pol.index('V')] # xy
+            md.local_array[:, :, 3] = self.main_data.local_data[:, :, pol.index('U')] - 1.0J * self.main_data.local_data[:, :, pol.index('V')] # yx
+
+            attr_dict = {} # temporarily save attrs of this dataset
+            memh5.copyattrs(self.main_data.attrs, attr_dict)
+            del self[self.main_data_name]
+            # create main data
+            self.create_dataset(self.main_data_name, shape=md.shape, dtype=md.dtype, data=md, distributed=True, distributed_axis=self.main_data_dist_axis)
+            memh5.copyattrs(attr_dict, self.main_data.attrs)
+
+            del self['pol']
+            self.create_dataset('pol', data=np.array(['xx', 'yy', 'xy', 'yx']))
+            self['pol'].attrs['pol_type'] = 'linear'
+
+            # redistribute self to original axis
+            self.redistribute(original_dist_axis)
+
+        else:
+            raise RuntimeError('Can not conver to linear polarization')

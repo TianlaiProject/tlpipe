@@ -427,6 +427,7 @@ class RawTimestream(container.BasicTod):
 
         # create other datasets needed
         ts.create_dataset('pol', data=np.array(['xx', 'yy', 'xy', 'yx']))
+        ts['pol'].attrs['pol_type'] = 'linear'
         blorder = np.array([ [feedno[i], feedno[j]] for i in range(nfeed) for j in range(i, nfeed) ])
         ts.create_dataset('blorder', data=blorder)
 
