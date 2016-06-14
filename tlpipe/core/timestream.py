@@ -1,6 +1,8 @@
 import itertools
+import warnings
 import numpy as np
 import container
+from caput import mpiarray
 from caput import memh5
 from caput import mpiutil
 
@@ -10,6 +12,28 @@ class Timestream(container.BasicTod):
 
     This timestream data container is to hold time stream data that has polarization
     and baseline separated from the channelpair in the raw timestream.
+
+    Parameters
+    ----------
+    Same as :class:`container.BasicTod`.
+
+    Attributes
+    ----------
+    time
+    freq
+    pol
+
+    Methods
+    -------
+    time_select
+    frequency_select
+    polarization_select
+    feed_select
+    redistribute
+    check_status
+    lin2stokes
+    stokes2lin
+
     """
 
     _main_data_name = 'vis'
@@ -63,19 +87,19 @@ class Timestream(container.BasicTod):
 
     _feed_select = None
 
-    def baseline_select(self, value):
-        """Select data to be loaded from input files along the baseline axis.
+    # def baseline_select(self, value):
+    #     """Select data to be loaded from input files along the baseline axis.
 
-        Parameters
-        ----------
-        value : tuple or list
-            If a tuple, which will be created as a slice(start, stop, step) object,
-            so it can have one to three elements (integers or None); if a list, its
-            elements must be strictly increasing non-negative integers, data in
-            these positions will be selected.
+    #     Parameters
+    #     ----------
+    #     value : tuple or list
+    #         If a tuple, which will be created as a slice(start, stop, step) object,
+    #         so it can have one to three elements (integers or None); if a list, its
+    #         elements must be strictly increasing non-negative integers, data in
+    #         these positions will be selected.
 
-        """
-        self.data_select('baseline', value)
+    #     """
+    #     self.data_select('baseline', value)
 
     def feed_select(self, value=(0, None), corr='all'):
         """Select data to be loaded from inputs files corresponding to the specified feeds.
@@ -91,6 +115,11 @@ class Timestream(container.BasicTod):
             cross-correlations, 'all' for all correlations. Default 'all'.
 
         """
+
+        if value == (0, None) and corr == 'all':
+            # select all, no need to do anything
+            return
+
         # get feed info from the first input file
         feedno = self.infiles[0]['feedno'][:].tolist()
 
@@ -150,7 +179,7 @@ class Timestream(container.BasicTod):
         elif name == 'pol':
             self._load_a_special_common_dataset(name, 'polarization')
         elif name == 'blorder':
-            self._load_a_special_common_dataset(name, 'channelpair')
+            self._load_a_special_common_dataset(name, 'baseline')
         elif name == 'feedno' and not self._feed_select is None:
             self.create_dataset(name, data=self._feed_select)
         elif name in ('polerr', 'feedpos', 'antpointing') and not self._feed_select is None:
@@ -271,3 +300,92 @@ class Timestream(container.BasicTod):
                 raise RuntimeError('Dataset pol should be common when baseline is the distributed axis')
             if not self['blorder'].distributed:
                 raise RuntimeError('Dataset blorder should be distributed when baseline is the distributed axis')
+
+
+    def lin2stokes(self):
+        """Convert the linear polarized data to Stokes polarization."""
+        try:
+            pol = self.pol
+        except KeyError:
+            raise RuntimeError('Polarization of the data is unknown, can not convert')
+
+        if pol.attrs['pol_type'] == 'stokes' and pol.shape[0] == 4:
+            warning.warn('Data is already Stokes polarization, no need to convert')
+            return
+
+        if pol.attrs['pol_type'] == 'linear' and pol.shape[0] == 4:
+            pol = pol[:].tolist()
+
+            # redistribute to 0 axis if polarization is the distributed axis
+            original_dist_axis = self.main_data_dist_axis
+            if 'polarization' == self.main_data_axes[self.main_data_dist_axis]:
+                self.redistribute(0)
+
+            # create a new MPIArray to hold the new data
+            md = mpiarray.MPIArray(self.main_data.shape, axis=self.main_data_dist_axis, comm=self.comm, dtype=self.main_data.dtype)
+            # convert to Stokes I, Q, U, V
+            md.local_array[:, :, 0] = 0.5 * (self.main_data.local_data[:, :, pol.index('xx')] + self.main_data.local_data[:, :, pol.index('yy')]) # I
+            md.local_array[:, :, 1] = 0.5 * (self.main_data.local_data[:, :, pol.index('xx')] - self.main_data.local_data[:, :, pol.index('yy')]) # Q
+            md.local_array[:, :, 2] = 0.5 * (self.main_data.local_data[:, :, pol.index('xy')] + self.main_data.local_data[:, :, pol.index('yx')]) # U
+            md.local_array[:, :, 3] = -0.5J * (self.main_data.local_data[:, :, pol.index('xy')] - self.main_data.local_data[:, :, pol.index('yx')]) # V
+
+            attr_dict = {} # temporarily save attrs of this dataset
+            memh5.copyattrs(self.main_data.attrs, attr_dict)
+            del self[self.main_data_name]
+            # create main data
+            self.create_dataset(self.main_data_name, shape=md.shape, dtype=md.dtype, data=md, distributed=True, distributed_axis=self.main_data_dist_axis)
+            memh5.copyattrs(attr_dict, self.main_data.attrs)
+
+            del self['pol']
+            self.create_dataset('pol', data=np.array(['I', 'Q', 'U', 'V']))
+            self['pol'].attrs['pol_type'] = 'stokes'
+
+            # redistribute self to original axis
+            self.redistribute(original_dist_axis)
+
+        else:
+            raise RuntimeError('Can not conver to Stokes polarization')
+
+    def stokes2lin(self):
+        """Convert the Stokes polarized data to linear polarization."""
+        try:
+            pol = self.pol
+        except KeyError:
+            raise RuntimeError('Polarization of the data is unknown, can not convert')
+
+        if pol.attrs['pol_type'] == 'linear' and pol.shape[0] == 4:
+            warning.warn('Data is already linear polarization, no need to convert')
+            return
+
+        if pol.attrs['pol_type'] == 'stokes' and pol.shape[0] == 4:
+            pol = pol[:].tolist()
+
+            # redistribute to 0 axis if polarization is the distributed axis
+            original_dist_axis = self.main_data_dist_axis
+            if 'polarization' == self.main_data_axes[self.main_data_dist_axis]:
+                self.redistribute(0)
+
+            # create a new MPIArray to hold the new data
+            md = mpiarray.MPIArray(self.main_data.shape, axis=self.main_data_dist_axis, comm=self.comm, dtype=self.main_data.dtype)
+            # convert to linear xx, yy, xy, yx
+            md.local_array[:, :, 0] = self.main_data.local_data[:, :, pol.index('I')] + self.main_data.local_data[:, :, pol.index('Q')] # xx
+            md.local_array[:, :, 1] = self.main_data.local_data[:, :, pol.index('I')] - self.main_data.local_data[:, :, pol.index('Q')] # yy
+            md.local_array[:, :, 2] = self.main_data.local_data[:, :, pol.index('U')] + 1.0J * self.main_data.local_data[:, :, pol.index('V')] # xy
+            md.local_array[:, :, 3] = self.main_data.local_data[:, :, pol.index('U')] - 1.0J * self.main_data.local_data[:, :, pol.index('V')] # yx
+
+            attr_dict = {} # temporarily save attrs of this dataset
+            memh5.copyattrs(self.main_data.attrs, attr_dict)
+            del self[self.main_data_name]
+            # create main data
+            self.create_dataset(self.main_data_name, shape=md.shape, dtype=md.dtype, data=md, distributed=True, distributed_axis=self.main_data_dist_axis)
+            memh5.copyattrs(attr_dict, self.main_data.attrs)
+
+            del self['pol']
+            self.create_dataset('pol', data=np.array(['xx', 'yy', 'xy', 'yx']))
+            self['pol'].attrs['pol_type'] = 'linear'
+
+            # redistribute self to original axis
+            self.redistribute(original_dist_axis)
+
+        else:
+            raise RuntimeError('Can not conver to linear polarization')

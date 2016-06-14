@@ -14,6 +14,27 @@ class RawTimestream(container.BasicTod):
 
     The raw timestream data are raw visibilities (the main data) and other data
     and meta data saved in HDF5 files which are recorded from the correlator.
+
+    Parameters
+    ----------
+    Same as :class:`container.BasicTod`.
+
+    Attributes
+    ----------
+    time
+    freq
+
+    Methods
+    -------
+    time_select
+    frequency_select
+    feed_select
+    load_common
+    load_tod_excl_main_data
+    redistribute
+    check_status
+    separate_pol_and_bl
+
     """
 
     _main_data_name = 'vis'
@@ -128,6 +149,11 @@ class RawTimestream(container.BasicTod):
             cross-correlations, 'all' for all correlations. Default 'all'.
 
         """
+
+        if value == (0, None) and corr == 'all':
+            # select all, no need to do anything
+            return
+
         # get feed info from the first input file
         feedno = self.infiles[0]['feedno'][:].tolist()
 
@@ -194,7 +220,9 @@ class RawTimestream(container.BasicTod):
     def _load_a_common_dataset(self, name):
         ### load a common dataset from the first file
         # special care need take for blorder, just load the selected blorders
-        if name == 'blorder':
+        if name == 'freq':
+            self._load_a_special_common_dataset(name, 'frequency')
+        elif name == 'blorder':
             self._load_a_special_common_dataset(name, 'channelpair')
         elif name == 'feedno' and not self._feed_select is None:
             self.create_dataset(name, data=self._feed_select)
@@ -220,58 +248,60 @@ class RawTimestream(container.BasicTod):
 
         super(RawTimestream, self).load_common()
 
-        # generate frequency points
-        freq_start = self.attrs['freqstart']
-        freq_step = self.attrs['freqstep']
-        nfreq = self.attrs['nfreq']
-        freqs = np.array([ freq_start + i*freq_step for i in range(nfreq)], dtype=np.float32)
-        freq_axis = self.main_data_axes.index('frequency')
-        sel_freqs = freqs[self._main_data_select[freq_axis]]
-        shp = sel_freqs.shape
-        # if frequency is just the distributed axis, load freqs distributed
-        if freq_axis == self.main_data_dist_axis:
-            sel_freqs = mpiutil.mpilist(sel_freqs, method='con', comm=self.comm)
-            self.create_dataset('freq', shape=shp, dtype=sel_freqs.dtype, distributed=True, distributed_axis=0)
-            self['freq'].local_data[:] = sel_freqs
-        else:
-            self.create_dataset('freq', data=sel_freqs)
-        # create attrs of this dset
-        self['freq'].attrs["unit"] = 'MHz'
+        if 'freq' not in self.iterkeys():
+            # generate frequency points
+            freq_start = self.attrs['freqstart']
+            freq_step = self.attrs['freqstep']
+            nfreq = self.attrs['nfreq']
+            freqs = np.array([ freq_start + i*freq_step for i in range(nfreq)], dtype=np.float32)
+            freq_axis = self.main_data_axes.index('frequency')
+            sel_freqs = freqs[self._main_data_select[freq_axis]]
+            shp = sel_freqs.shape
+            # if frequency is just the distributed axis, load freqs distributed
+            if freq_axis == self.main_data_dist_axis:
+                sel_freqs = mpiutil.mpilist(sel_freqs, method='con', comm=self.comm)
+                self.create_dataset('freq', shape=shp, dtype=sel_freqs.dtype, distributed=True, distributed_axis=0)
+                self['freq'].local_data[:] = sel_freqs
+            else:
+                self.create_dataset('freq', data=sel_freqs)
+            # create attrs of this dset
+            self['freq'].attrs["unit"] = 'MHz'
 
     def load_tod_excl_main_data(self):
         """Load time ordered attributes and datasets (exclude the main data) from all files."""
 
         super(RawTimestream, self).load_tod_excl_main_data()
 
-        # generate sec1970
-        sec1970_first = self.infiles[0].attrs['sec1970']
-        int_time = self.attrs['inttime']
-        sec1970_start = sec1970_first + int_time * self.main_data_start
-        num_sec1970 = self.main_data_stop - self.main_data_start
-        sec1970 = np.array([ sec1970_start + i*int_time for i in range(num_sec1970)], dtype=np.float32)
-        time_axis = self.main_data_axes.index('time')
-        sel_sec1970 = sec1970[self._main_data_select[time_axis]]
-        shp = sel_sec1970.shape
-        # if time is just the distributed axis, load sec1970 distributed
-        if time_axis == self.main_data_dist_axis:
-            sel_sec1970 = mpiutil.mpilist(sel_sec1970, method='con', comm=self.comm)
-            self.create_dataset('sec1970', shape=shp, dtype=sel_sec1970.dtype, distributed=True, distributed_axis=0)
-            self['sec1970'].local_data[:] = sel_sec1970
-        else:
-            self.create_dataset('sec1970', data=sel_sec1970)
-        # create attrs of this dset
-        self['sec1970'].attrs["unit"] = 'second'
+        if 'sec1970' not in self.iterkeys():
+            # generate sec1970
+            sec1970_first = self.infiles[0].attrs['sec1970']
+            int_time = self.infiles[0].attrs['inttime']
+            sec1970_start = sec1970_first + int_time * self.main_data_start
+            num_sec1970 = self.main_data_stop - self.main_data_start
+            sec1970 = np.array([ sec1970_start + i*int_time for i in range(num_sec1970)], dtype=np.float64) # precision float32 is not enough
+            time_axis = self.main_data_axes.index('time')
+            sel_sec1970 = sec1970[self._main_data_select[time_axis]]
+            shp = sel_sec1970.shape
+            # if time is just the distributed axis, load sec1970 distributed
+            if time_axis == self.main_data_dist_axis:
+                sel_sec1970 = mpiutil.mpilist(sel_sec1970, method='con', comm=self.comm)
+                self.create_dataset('sec1970', shape=shp, dtype=sel_sec1970.dtype, distributed=True, distributed_axis=0)
+                self['sec1970'].local_data[:] = sel_sec1970
+            else:
+                self.create_dataset('sec1970', data=sel_sec1970)
+            # create attrs of this dset
+            self['sec1970'].attrs["unit"] = 'second'
 
-        # generate julian date
-        jul_date = np.array([ date_util.get_juldate(datetime.fromtimestamp(s), tzone=self.attrs['timezone']) for s in self['sec1970'].local_data[:] ], dtype=np.float32)
-        # if time is just the distributed axis, load jul_date distributed
-        if time_axis == self.main_data_dist_axis:
-            self.create_dataset('jul_date', shape=shp, dtype=jul_date.dtype, distributed=True, distributed_axis=0)
-            self['jul_date'].local_data[:] = jul_date
-        else:
-            self.create_dataset('jul_date', data=jul_date)
-        # create attrs of this dset
-        self['jul_date'].attrs["unit"] = 'day'
+            # generate julian date
+            jul_date = np.array([ date_util.get_juldate(datetime.fromtimestamp(s), tzone=self.infiles[0].attrs['timezone']) for s in sel_sec1970 ], dtype=np.float64) # precision float32 is not enough
+            # if time is just the distributed axis, load jul_date distributed
+            if time_axis == self.main_data_dist_axis:
+                self.create_dataset('jul_date', shape=shp, dtype=jul_date.dtype, distributed=True, distributed_axis=0)
+                self['jul_date'].local_data[:] = jul_date
+            else:
+                self.create_dataset('jul_date', data=jul_date)
+            # create attrs of this dset
+            self['jul_date'].attrs["unit"] = 'day'
 
 
     @property
@@ -427,6 +457,7 @@ class RawTimestream(container.BasicTod):
 
         # create other datasets needed
         ts.create_dataset('pol', data=np.array(['xx', 'yy', 'xy', 'yx']))
+        ts['pol'].attrs['pol_type'] = 'linear'
         blorder = np.array([ [feedno[i], feedno[j]] for i in range(nfeed) for j in range(i, nfeed) ])
         ts.create_dataset('blorder', data=blorder)
 
