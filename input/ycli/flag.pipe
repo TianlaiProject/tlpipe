@@ -1,0 +1,55 @@
+# -*- mode: python; -*-
+
+# input file for pipeline manager
+# execute this pipeline by either command of the following two:
+# tlpipe dir/to/A-projection.pipe
+# mpiexec -n N tlpipe dir/to/A-projection.pipe
+
+import numpy as np
+
+import matplotlib
+matplotlib.use('Agg')
+
+
+pipe_modules = []
+pipe_output_dir = '/project/ycli/data/tianlai/sunNP_32chtest_output/'
+
+# ----------------------------------------- #
+
+data_file = '20160530191127'
+data_root = '/project/ycli/data/tianlai/sunNP_32chtest/'
+data_name = ['sunNP_20160530201127_20160530211127.hdf5', 
+             'sunNP_20160530191127_20160530201127.hdf5']
+
+# ========================================= #
+#from tlpipe.timestream import noise_cal
+#pipe_modules.append(noise_cal.NoiseCal)
+nc_input_file = [data_root + x for x in data_name]
+nc_output_file = ['ncal/' + x for x in data_name]
+nc_bl_set = "all"
+nc_cal_on_time = 20.
+nc_cal_off_time = 4 * 60. - nc_cal_on_time
+nc_cal_percent = [60, 50]
+nc_raw_tod = True
+
+#from tlpipe.plot import plot_192wf
+#pipe_modules.append(plot_192wf.Plot_192WF)
+p192wf_input_file = nc_output_file
+p192wf_output_file = None #['plot/' + x for x in data_name]
+p192wf_output_plot = 'plot/'
+p192wf_bl_set = "auto"
+p192wf_time_distributed_dset = [] # ['vis',]
+
+from tlpipe.plot import plot_192wf
+pipe_modules.append(plot_192wf.Plot_192NC)
+p192nc_input_file = nc_output_file
+p192nc_output_file = None #['plot/' + x for x in data_name]
+p192nc_output_plot = 'ncal_plot/'
+p192nc_bl_set = "all"
+p192nc_amp_phs = True
+
+#from tlpipe.timestream import flag
+#pipe_modules.append(flag.Flag)
+fg_input_file = [data_root + x for x in data_name]
+fg_output_file = ['flag/' + x for x in data_name]
+fg_bl_set = "auto"
