@@ -33,6 +33,11 @@ class Timestream(container.BasicTod):
     check_status
     lin2stokes
     stokes2lin
+    all_data_operate
+    time_data_operate
+    freq_data_operate
+    pol_data_operate
+    bl_data_operate
 
     """
 
@@ -219,6 +224,14 @@ class Timestream(container.BasicTod):
         except KeyError:
             raise KeyError('pol does not exist, try to load it first')
 
+    @property
+    def bl(self):
+        """Return the blorder dataset for convenient use."""
+        try:
+            return self['blorder']
+        except KeyError:
+            raise KeyError('blorder does not exist, try to load it first')
+
 
     def redistribute(self, dist_axis):
         """Redistribute the main time ordered dataset along a specified axis.
@@ -389,3 +402,111 @@ class Timestream(container.BasicTod):
 
         else:
             raise RuntimeError('Can not conver to linear polarization')
+
+
+    def all_data_operate(self, func, **kwargs):
+        """Operation to the whole main data.
+
+        Note since the main data is distributed on different processes, `func`
+        should not have operations that depend on elements not held in the local
+        array of each process
+
+        Parameters
+        ----------
+        func : function object
+            The opertation function object. It is of type func(array, **kwargs),
+            which will operate on the array and return an new array with the same
+            shape and dtype.
+        **kwargs : any other arguments
+            Any other arguments that will passed to `func`.
+
+        """
+        self.data_operate(func, op_axis=None, axis_vals=0, full_data=False, keep_dist_axis=False, **kwargs)
+
+    def time_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
+        """Data operation along the time axis.
+
+        Parameters
+        ----------
+        func : function object
+            The opertation function object. It is of type func(array,
+            local_index=None, global_index=None, jul_date=None, **kwargs), which
+            will be called in a loop along the time axis.
+        full_data : bool, optional
+            Whether the operations of `func` will need the full data section
+            corresponding to the axis index, if True, the main data will first
+            redistributed along the time axis. Default False.
+        keep_dist_axis : bool, optional
+            Whether to redistribute main data to time axis if the dist axis has
+            changed during the operation. Default False.
+        **kwargs : any other arguments
+            Any other arguments that will passed to `func`.
+
+        """
+        self.data_operate(func, op_axis='time', axis_vals=self.time.local_data[:], full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+
+    def freq_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
+        """Data operation along the frequency axis.
+
+        Parameters
+        ----------
+        func : function object
+            The opertation function object. It is of type func(array,
+            local_index=None, global_index=None, freq=None, **kwargs), which
+            will be called in a loop along the frequency axis.
+        full_data : bool, optional
+            Whether the operations of `func` will need the full data section
+            corresponding to the axis index, if True, the main data will first
+            redistributed along frequency time axis. Default False.
+        keep_dist_axis : bool, optional
+            Whether to redistribute main data to frequency axis if the dist axis has
+            changed during the operation. Default False.
+        **kwargs : any other arguments
+            Any other arguments that will passed to `func`.
+
+        """
+        self.data_operate(func, op_axis='frequency', axis_vals=self.freq.local_data[:], full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+
+    def pol_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
+        """Data operation along the polarization axis.
+
+        Parameters
+        ----------
+        func : function object
+            The opertation function object. It is of type func(array,
+            local_index=None, global_index=None, pol=None, **kwargs), which
+            will be called in a loop along the polarization axis.
+        full_data : bool, optional
+            Whether the operations of `func` will need the full data section
+            corresponding to the axis index, if True, the main data will first
+            redistributed along polarization time axis. Default False.
+        keep_dist_axis : bool, optional
+            Whether to redistribute main data to polarization axis if the dist
+            axis has changed during the operation. Default False.
+        **kwargs : any other arguments
+            Any other arguments that will passed to `func`.
+
+        """
+        self.data_operate(func, op_axis='polarization', axis_vals=self.pol.local_data[:], full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+
+    def bl_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
+        """Data operation along the baseline axis.
+
+        Parameters
+        ----------
+        func : function object
+            The opertation function object. It is of type func(array,
+            local_index=None, global_index=None, bl=None, **kwargs), which
+            will be called in a loop along the baseline axis.
+        full_data : bool, optional
+            Whether the operations of `func` will need the full data section
+            corresponding to the axis index, if True, the main data will first
+            redistributed along baseline time axis. Default False.
+        keep_dist_axis : bool, optional
+            Whether to redistribute main data to baseline axis if the dist axis
+            has changed during the operation. Default False.
+        **kwargs : any other arguments
+            Any other arguments that will passed to `func`.
+
+        """
+        self.data_operate(func, op_axis='baseline', axis_vals=self.bl.local_data[:], full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)

@@ -125,6 +125,7 @@ class BasicTod(memh5.MemDiskGroup):
     info
     redistribute
     check_status
+    data_operate
     to_files
 
     """
@@ -964,3 +965,58 @@ class BasicTod(memh5.MemDiskGroup):
         # close all output files
         for fh in outfiles:
             fh.close()
+
+
+    def data_operate(self, func, op_axis=None, axis_vals=0, full_data=False, keep_dist_axis=False, **kwargs):
+        """A basic data operation interface.
+
+        You can use this method to do some constrained options to the main data
+        hold in this container, i.e., the main data will not change its shape and
+        dtype before and after the option.
+
+        Parameters
+        ----------
+        func : function object
+            The opertation function object. It is of type func(array, **kwargs) if
+            `op_axis=None`, func(array, local_index=None, global_index=None,
+            axis_val=None, **kwargs) else.
+        op_axis : None, string or integer, optional
+            Axis along which `func` will opterate. If None, `func` will operate on
+            the whole main dataset (but note: since the main data is distributed
+            on different processes, `func` should not have operations that depend
+            on elements not held in the local array of each process), else `func`
+            will opterate along the specified axis, that is, it will loop the
+            specified axis and call `func` on data section corresponding to the
+            axis index.
+        axis_vals : numerical or array, optional
+            Axis value corresponding to the local section along the `op_axis` that
+            will be passed to `func` if `op_axis` is not None. Default 0.
+        full_data : bool, optional
+            Whether the operations of `func` will need the full data section
+            corresponding to the axis index, if True, the main data will first
+            redistributed along the `op_axis`. Default False.
+        keep_dist_axis : bool, optional
+            Whether to redistribute main data to the original dist axis if the
+            dist axis has changed during the operation. Default False.
+        **kwargs : any other arguments
+            Any other arguments that will passed to `func`.
+
+        """
+
+        if op_axis is None:
+            self.main_data.local_data[:] = func(self.main_data.local_data[:], **kwargs)
+        else:
+            axis = check_axis(op_axis, self.main_data_axes)
+            data_sel = [ slice(0, None) ] * len(self.main_data_axes)
+            if full_data:
+                original_dist_axis = self.main_data_dist_axis
+                self.redistribute(axis)
+            for lind, gind in self.main_data.data.enumerate(axis):
+                data_sel[axis] = lind
+                if hasattr(axis_vals, '__iter__'):
+                    axis_val = axis_vals[lind]
+                else:
+                    axis_val = axis_vals
+                self.main_data.local_data[data_sel] = func(self.main_data.local_data[data_sel], lind, gind, axis_val, **kwargs)
+            if full_data and keep_dist_axis:
+                self.redistribute(original_dist_axis)
