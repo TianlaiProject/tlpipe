@@ -787,6 +787,8 @@ class BasicTod(memh5.MemDiskGroup):
             for fh in self.infiles:
                 print '  ', fh.filename
             print
+            print '%s distribution axis: (%d, %s)' % (self.main_data_name, self.main_data_dist_axis, self.main_data_axes[self.main_data_dist_axis])
+            print
             # list all top level attributes
             for attr_name, attr_val in self.attrs.iteritems():
                 print '%s:' % attr_name, attr_val
