@@ -502,14 +502,18 @@ class BasicTod(memh5.MemDiskGroup):
                 # every proc has to read from all files
                 for fi, fh in enumerate(self.infiles):
                     num_ts = fh[name].shape[0]
-                    if fi == 0:
-                        et = st + (num_ts - first_start)
-                        main_data_select[0] = slice(first_start, None)
-                    elif fi == self.num_infiles-1:
-                        et = st + last_stop
-                        main_data_select[0] = slice(0, last_stop)
-                    else:
-                        et = st + num_ts
+                    if self.num_infiles == 1:
+                        et = st + last_stop - first_start
+                        main_data_select[0] = slice(first_start, last_stop)
+                    elif self.num_infiles > 1:
+                        if fi == 0:
+                            et = st + (num_ts - first_start)
+                            main_data_select[0] = slice(first_start, None)
+                        elif fi == self.num_infiles-1:
+                            et = st + last_stop
+                            main_data_select[0] = slice(0, last_stop)
+                        else:
+                            et = st + num_ts
 
                     if np.prod(self[name].local_data[st:et].shape) > 0:
                         # only read in data if non-empty, may get error otherwise
@@ -528,7 +532,8 @@ class BasicTod(memh5.MemDiskGroup):
                 for fi, start, stop in infiles_map:
                     et = st + (stop - start)
                     fh = self.infiles[fi]
-                    self[name].local_data[st:et] = fh[name][start:stop]
+                    if np.prod(self[name].local_data[st:et].shape) > 0:
+                        self[name].local_data[st:et] = fh[name][start:stop]
                     st = et
             else:
                 # as the distributed axis of the main data is not the time axis,
@@ -540,16 +545,22 @@ class BasicTod(memh5.MemDiskGroup):
                 st = 0
                 for fi, fh in enumerate(self.infiles):
                     num_ts = fh[name].shape[0]
-                    if fi == 0:
-                        et = st + (num_ts - first_start)
-                        sel = slice(fist_start, None)
-                    elif fi == self.num_infiles-1:
-                        et = st + last_stop
-                        sel = slice(0, last_stop)
-                    else:
-                        et = st + num_ts
-                        sel = slice(0, None)
-                    self[name][st:et] = fh[name][sel] # not a distributed dataset
+                    if self.num_infiles == 1:
+                        et = st + last_stop - first_start
+                        main_data_select[0] = slice(first_start, last_stop)
+                    elif self.num_infiles > 1:
+                        if fi == 0:
+                            et = st + (num_ts - first_start)
+                            sel = slice(fist_start, None)
+                        elif fi == self.num_infiles-1:
+                            et = st + last_stop
+                            sel = slice(0, last_stop)
+                        else:
+                            et = st + num_ts
+                            sel = slice(0, None)
+
+                    if np.prod(self[name][st:et].shape) > 0:
+                        self[name][st:et] = fh[name][sel] # not a distributed dataset
                     st = et
 
         # for non main_time_ordered_datasets
@@ -563,7 +574,8 @@ class BasicTod(memh5.MemDiskGroup):
             for fi, start, stop in infiles_map:
                 et = st + (stop - start)
                 fh = self.infiles[fi]
-                self[name].local_data[st:et] = fh[name][start:stop]
+                if np.prod(self[name].local_data[st:et].shape) > 0:
+                    self[name].local_data[st:et] = fh[name][start:stop]
                 st = et
 
     def _load_a_dataset(self, name):
