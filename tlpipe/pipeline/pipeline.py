@@ -317,7 +317,9 @@ import os
 from os import path
 import warnings
 
+from caput import mpiutil
 from tlpipe.kiyopy import parse_ini
+from tlpipe.utils.path_util import input_path, output_path
 
 
 
@@ -388,9 +390,10 @@ class Manager(object):
     # Define a dictionary with keys the names of parameters to be read from
     # pipeline file and values the defaults.
     params = {
-                   'logging': 'info', # logging level
-                   'modules': [], # a list of tasks to be executed
-                  }
+               'logging': 'info', # logging level
+               'modules': [], # a list of tasks to be executed
+               'output_dir': 'output/', # output directory of pipeline data, default in current-dir/output/
+             }
 
     prefix = 'pipe_'
 
@@ -400,6 +403,9 @@ class Manager(object):
         # Read in the parameters.
         self.params, self.task_params = parse_ini.parse(parameter_file_or_dict, self.params, prefix=self.prefix, return_undeclared=True, feedback=feedback)
         self.tasks = self.params['modules']
+
+        # set environment var
+        os.environ['TL_OUTPUT'] = self.params['output_dir'] + '/'
 
 
     def run(self):
@@ -428,7 +434,8 @@ class Manager(object):
                 # This preserves the traceback.
                 raise new_e.__class__, new_e, sys.exc_info()[2]
             pipeline_tasks.append(task)
-            logger.debug("Added %s to task list." % task.__class__.__name__)
+            if mpiutil.rank0:
+                logger.debug("Added %s to task list." % task.__class__.__name__)
 
         # Run the pipeline.
         while pipeline_tasks:
@@ -441,7 +448,8 @@ class Manager(object):
                         msg = ("%s missing input data and is at beginning of"
                                " task list. Advancing state."
                                % task.__class__.__name__)
-                        logger.debug(msg)
+                        if mpiutil.rank0:
+                            logger.debug(msg)
                         task._pipeline_advance_state()
                     break
                 except _PipelineFinished:
@@ -463,7 +471,8 @@ class Manager(object):
                 keys = str(out_keys)
                 msg = "%s produced output data product with keys %s."
                 msg = msg % (task.__class__.__name__, keys)
-                logger.debug(msg)
+                if mpiutil.rank0:
+                    logger.debug(msg)
                 for receiving_task in pipeline_tasks:
                     receiving_task._pipeline_inspect_queue_product(out_keys, out)
 
@@ -489,7 +498,8 @@ class Manager(object):
             task = task_spec
             params = self.task_params
 
-        logger.info('\n\tInitializing task: ' + str(task))
+        if mpiutil.rank0:
+            logger.info('Initializing task: ' + str(task))
 
         task = task(params)
 
@@ -528,10 +538,9 @@ class TaskBase(object):
                'requires': None,
                'in': None,
                'out': None,
-              }
+             }
 
     prefix = 'tb_'
-
 
 
     # Overridable Attributes
@@ -710,10 +719,12 @@ class TaskBase(object):
             for in_, in_key in zip(self._in, self._in_keys):
                 if not in_.empty():
                     # XXX Clean up.
-                    print "Something left: %i" % in_.qsize()
+                    if mpiutil.rank0:
+                        print "Something left: %i" % in_.qsize()
 
                     msg = "Task finished %s iterating `next()` but input queue \'%s\' isn't empty." % (self.__class__.__name__, in_key)
-                    warnings.warn(msg)
+                    if mpiutil.rank0:
+                        warnings.warn(msg)
 
             self._in = None
             self._pipeline_state = "finish"
@@ -740,7 +751,8 @@ class TaskBase(object):
                     raise _PipelineMissingData()
             else:
                 msg = "Task %s calling 'setup()'." % self.__class__.__name__
-                logger.debug(msg)
+                if mpiutil.rank0:
+                    logger.debug(msg)
                 out = self.setup(*tuple(self._requires))
                 self._pipeline_advance_state()
                 return out
@@ -756,7 +768,8 @@ class TaskBase(object):
                     args += (in_.get(),)
                 try:
                     msg = "Task %s calling 'next()'." % self.__class__.__name__
-                    logger.debug(msg)
+                    if mpiutil.rank0:
+                        logger.debug(msg)
                     out = self.next(*args)
                     return out
                 except PipelineStopIteration:
@@ -764,7 +777,8 @@ class TaskBase(object):
                     self._pipeline_advance_state()
         elif self._pipeline_state == "finish":
             msg = "Task %s calling 'finish()'." % self.__class__.__name__
-            logger.debug(msg)
+            if mpiutil.rank0:
+                logger.debug(msg)
             out = self.finish()
             self._pipeline_advance_state()
             return out
@@ -793,7 +807,8 @@ class TaskBase(object):
                     # data product already set.
                     msg = "%s stowing data product with key %s for 'requires'."
                     msg = msg % (self.__class__.__name__, key)
-                    logger.debug(msg)
+                    if mpiutil.rank0:
+                        logger.debug(msg)
                     if self._requires is None:
                         msg = ("Tried to set 'requires' data product, but"
                                "`setup()` already run.")
@@ -808,7 +823,8 @@ class TaskBase(object):
                 if in_key == key:
                     msg = "%s queue data product with key %s for 'in'."
                     msg = msg % (self.__class__.__name__, key)
-                    logger.debug(msg)
+                    if mpiutil.rank0:
+                        logger.debug(msg)
                     # Check that task is still accepting inputs.
                     if self._in is None:
                         msg = ("Tried to queue 'requires' data product, but"
@@ -839,7 +855,7 @@ class _OneAndOne(TaskBase):
     params = {
                'input_files': None,
                'output_files': None,
-              }
+             }
 
     prefix = 'ob_'
 
@@ -848,8 +864,8 @@ class _OneAndOne(TaskBase):
 
         super(_OneAndOne, self).__init__(parameter_file_or_dict, feedback)
 
-        self.input_files = format_list(self.params['input_files'])
-        self.output_files = format_list(self.params['output_files'])
+        self.input_files = input_path(format_list(self.params['input_files']))
+        self.output_files = output_path(format_list(self.params['output_files']))
 
         # Inspect the `process` method to see how many arguments it takes.
         pro_argspec = inspect.getargspec(self.process)
@@ -886,8 +902,12 @@ class _OneAndOne(TaskBase):
         if input is None and not self._no_input:
             if len(self.input_files) == 0:
                 raise RuntimeError('No file to read from.')
-            logger.info("\n\t%s reading data from file %s." %
-                        (self.__class__.__name__, self.input_files))
+            if mpiutil.rank0:
+                msg = "%s reading data from files:" % self.__class__.__name__
+                for input_file in self.input_files:
+                    msg += '\n\t%s' % input_file
+                logger.info(msg)
+            mpiutil.barrier()
             input = self.read_input()
 
         # Analyse.
@@ -901,11 +921,20 @@ class _OneAndOne(TaskBase):
 
         # Write output if needed.
         if output is not None and len(self.output_files) != 0:
-            logger.info("\n\t%s writing data to file %s." %
-                        (self.__class__.__name__, self.output_files))
-            output_dirname = os.path.dirname(output_filename)
-            if not os.path.isdir(output_dirname):
-                os.makedirs(output_dirname)
+            if mpiutil.rank0:
+                msg = "%s writing data to files:" % self.__class__.__name__
+
+                # make output dirs
+                for output_file in self.output_files:
+                    msg += '\n\t%s' % output_file
+                    output_dir = path.dirname(output_file)
+                    if not os.path.exists(output_dir):
+                        os.mkdir(output_dir)
+
+                logger.info(msg)
+
+            mpiutil.barrier()
+
             self.write_output(output)
 
         return output
@@ -999,11 +1028,17 @@ class IterBase(_OneAndOne):
 
         self.iteration = 0
 
-        self.input_files = format_list(self.params['input_files'])
-        self.output_files = format_list(self.params['output_files'])
+        input_files = format_list(self.params['input_files'])
+        output_files = format_list(self.params['output_files'])
 
-        self.input_file = self.input_files[self.iteration]
-        self.output_file = self.output_files[self.iteration]
+        if len(input_files) == 0:
+            self.input_files = []
+        else:
+            self.input_file = input_files[self.iteration]
+        if len(output_files) == 0:
+            self.output_files = []
+        else:
+            self.output_file = output_files[self.iteration]
 
 
     def next(self, input=None):
@@ -1041,7 +1076,7 @@ class SingleTod(SingleBase):
                'exclude': [],
                'check_status': True,
                'libver': 'latest',
-              }
+             }
 
     prefix = 'stod_'
 
@@ -1069,11 +1104,6 @@ class SingleTod(SingleBase):
     def write_output(self, output):
         """Method for writing time ordered data output. """
 
-        # Ensure parent directory is present.
-        dirname = path.dirname(self.output_files)
-        if not path.isdir(dirname):
-            os.makedirs(dirname)
-
         exclude = self.params['exclude']
         check_status = self.params['check_status']
         libver = self.params['libver']
@@ -1097,7 +1127,7 @@ class SingleRawTimestream(SingleTod):
                'freq_select': (0, None),
                'feed_select': (0, None),
                'corr': 'all',
-              }
+             }
 
     prefix = 'rt_'
 
@@ -1128,7 +1158,7 @@ class SingleTimestream(SingleTod):
                'pol_select': (0, None),
                'feed_select': (0, None),
                'corr': 'all',
-              }
+             }
 
     prefix = 'ts_'
 
