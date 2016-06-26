@@ -382,7 +382,8 @@ class BasicTod(memh5.MemDiskGroup):
         """
         axis = check_axis(axis, self.main_data_axes)
         if axis == 0:
-            raise NotImplementedError('Select data to be loaded along the first axis is not implemented yet')
+            if value != (0, None):
+                raise NotImplementedError('Select data to be loaded along the first axis is not implemented yet')
         if isinstance(value, tuple):
             self._main_data_select[axis] = slice(*value)
         elif isinstance(value, list):
