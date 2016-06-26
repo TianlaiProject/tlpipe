@@ -319,9 +319,6 @@ import warnings
 
 from tlpipe.kiyopy import parse_ini
 
-# import yaml
-
-# import config
 
 
 # Set the module logger.
@@ -351,10 +348,10 @@ class PipelineRuntimeError(Exception):
 class PipelineStopIteration(Exception):
     """This stops the iteration of `next()` in pipeline tasks.
 
-    Pipeline tasks should raise this excetions in the `next()` method to stop
+    Pipeline tasks should raise this exception in the `next()` method to stop
     the iteration of the task and to proceed to `finish()`.
 
-    Note that if `next()` recieves input data as an argument, it is not
+    Note that if `next()` receives input data as an argument, it is not
     required to ever raise this exception.  The pipeline will proceed to
     `finish()` once the input data has run out.
 
@@ -383,26 +380,26 @@ class Manager(object):
 
     The manager is in charge of initializing all pipeline tasks, setting them
     up by providing the appropriate parameters, then executing the methods of
-    the each task in the appropriate order. It also handles intermediate data
+    each task in the appropriate order. It also handles intermediate data
     products and ensuring that the correct products are passed between tasks.
 
     """
 
     # Define a dictionary with keys the names of parameters to be read from
-    # file and values the defaults.
+    # pipeline file and values the defaults.
     params = {
-                   'logging': 'warning', # logging level
-                   'tasks': [], # a list of tasks to be executed
+                   'logging': 'info', # logging level
+                   'modules': [], # a list of tasks to be executed
                   }
 
-    prefix = 'mg_'
+    prefix = 'pipe_'
 
 
     def __init__(self, parameter_file_or_dict=None, feedback=2):
 
         # Read in the parameters.
         self.params, self.task_params = parse_ini.parse(parameter_file_or_dict, self.params, prefix=self.prefix, return_undeclared=True, feedback=feedback)
-        self.tasks = self.params['tasks']
+        self.tasks = self.params['modules']
 
 
     def run(self):
@@ -418,6 +415,7 @@ class Manager(object):
         if not isinstance(numeric_level, int):
             raise ValueError('Invalid logging level: %s' % self.logging)
         logging.basicConfig(level=numeric_level)
+
         # Initialize all tasks.
         pipeline_tasks = []
         for ii, task_spec in enumerate(self.tasks):
@@ -431,6 +429,7 @@ class Manager(object):
                 raise new_e.__class__, new_e, sys.exc_info()[2]
             pipeline_tasks.append(task)
             logger.debug("Added %s to task list." % task.__class__.__name__)
+
         # Run the pipeline.
         while pipeline_tasks:
             for task in list(pipeline_tasks):  # Copy list so we can alter it.
@@ -457,14 +456,6 @@ class Manager(object):
                     continue
                 elif len(out_keys) == 1:
                     out = (out,)
-                    # if type(out_keys) is tuple:
-                    #     # In config file, written as `out: out_key`. No
-                    #     # unpacking if `out` is a length 1 sequence.
-                    #     out = (out,)
-                    # else:   # `out_keys` is a list.
-                    #     # In config file, written as `out: [out_key,]`.
-                    #     # `out` must be a length 1 sequence.
-                    #     pass
                 elif len(out_keys) != len(out):
                     msg = ('Found unexpected number of outputs in %s (got %i expected %i)' %
                            (task.__class__.__name__, len(out), len(out_keys)))
@@ -498,7 +489,7 @@ class Manager(object):
             task = task_spec
             params = self.task_params
 
-        logger.info('\nSetting up task: ' + str(task))
+        logger.info('\n\tInitializing task: ' + str(task))
 
         task = task(params)
 
@@ -515,11 +506,9 @@ class TaskBase(object):
     analysis added by over-riding `__init__`, `setup`, `next` and/or
     `finish`.
 
-    In addition, input parameters may be specified by adding class attributes
-    which are instances of `config.Property`. These will then be read from the
-    pipeline yaml file when the pipeline is initialized.  The class attributes
-    will be overridden with instance attributes with the same name but with the
-    values specified in the pipeline file.
+    In addition, input parameters may be specified by adding adding entries
+    (key and default value) in the class attribute `params`, which will then
+    be updated by the corresponding parameters setttin in the input pipeline file.
 
     Attributes
     ----------
@@ -836,6 +825,15 @@ class _OneAndOne(TaskBase):
     This is not a user base class and simply holds code that is common to
     `SingleBase` and `IterBase`.
 
+    The input for the task will be preferably get from the `in` key, if no input
+    product is specified by the `in` key, then input will be get from the files
+    specified by the value of :attr:params[`input_files`] if it is anything other
+    None, otherwise an error will be raised upon initialization.
+
+    If the value of :attr:params[`output_files`] is anything other than None
+    then the output will be written (using :meth:`write_output`) to the specified
+    output files.
+
     """
 
     params = {
@@ -888,9 +886,10 @@ class _OneAndOne(TaskBase):
         if input is None and not self._no_input:
             if len(self.input_files) == 0:
                 raise RuntimeError('No file to read from.')
-            logger.info("%s reading data from file %s." %
+            logger.info("\n\t%s reading data from file %s." %
                         (self.__class__.__name__, self.input_files))
             input = self.read_input()
+
         # Analyse.
         if self._no_input:
             if not input is None:
@@ -899,9 +898,10 @@ class _OneAndOne(TaskBase):
             output = self.process()
         else:
             output = self.process(input)
+
         # Write output if needed.
         if output is not None and len(self.output_files) != 0:
-            logger.info("%s writing data to file %s." %
+            logger.info("\n\t%s writing data to file %s." %
                         (self.__class__.__name__, self.output_files))
             output_dirname = os.path.dirname(output_filename)
             if not os.path.isdir(output_dirname):
@@ -942,34 +942,7 @@ class SingleBase(_OneAndOne):
 
     Tasks inheriting from this class should override `process` and optionally
     :meth:`setup`, :meth:`finish`, :meth:`read_input`, :meth:`write_output` and
-    :meth:`cast_input`.  They should not override :meth:`next`.
-
-    If the value of :attr:`input_root` is anything other than the string "None"
-    then the input will be read (using :meth:`read_input`) from the file
-    ``self.input_root + self.input_filename``.  If the input is specified both as
-    a filename and as a product key in the pipeline configuration, an error
-    will be raised upon initialization.
-
-
-    If the value of :attr:`output_root` is anything other than the string
-    "None" then the output will be written (using :meth:`write_output`) to the
-    file ``self.output_root + self.output_filename``.
-
-    Attributes
-    ----------
-    input_root : string
-        Pipeline settable parameter giving the first part of the input path.
-        If set to 'None' no input is read. Either it is assumed that no input
-        is required or that input is recieved from the pipeline.
-    input_filename : string
-        Pipeline settable parameter giving the last part of input path. The
-        full input path is ``self.input_root + self.input_filename``.
-    output_root : strig
-        Pipeline settable parameter giving the first part of the output path.
-        If set to 'None' no output is written.
-    output_filename : string
-        Pipeline settable parameter giving the last part of output path. The
-        full output path is ``self.output_root + self.output_filename``.
+    :meth:`cast_input`. They should not override :meth:`next`.
 
     Methods
     -------
@@ -1006,38 +979,6 @@ class IterBase(_OneAndOne):
     optionally :meth:`setup`, :meth:`finish`, :meth:`read_input`,
     :meth:`write_output` and :meth:`cast_input`. They should not override
     :meth:`next`.
-
-    If the value of :attr:`input_root` is anything other than the string "None"
-    then the input will be read (using :meth:`read_input`) from the file
-    ``self.input_root + self.file_middles[i] + self.input_ext``.  If the
-    input is specified both as a filename and as a product key in the pipeline
-    configuration, an error will be raised upon initialization.
-
-    If the value of :attr:`output_root` is anything other than the string "None"
-    then the output will be written (using :meth:`write_output`) to the file
-    ``self.output_root + self.file_middles[i] + self.output_ext``.
-
-    Attributes
-    ----------
-    iteration : int
-        The current iteration of `process`/`next`.
-    file_middles : list of strings
-        The unique part of each file path.
-    input_root : string
-        Pipeline settable parameter giving the first part of the input path.
-        If set to 'None' no input is read. Either it is assumed that no input
-        is required or that input is recieved from the pipeline.
-    input_ext : string
-        Pipeline settable parameter giving the last part of input path. The
-        full input path is ``self.input_root +
-        self.file_middles[self.iteration] + self.input_ext``.
-    output_root : strig
-        Pipeline settable parameter giving the first part of the output path.
-        If set to 'None' no output is written.
-    output_ext : string
-        Pipeline settable parameter giving the last part of output path. The
-        full output path is ``self.output_root +
-        self.file_middles[self.iteration] + self.output_ext``.
 
 
     Methods
@@ -1082,15 +1023,13 @@ class IterBase(_OneAndOne):
 
 
 class SingleTod(SingleBase):
-    """Provides hdf5 IO for pipeline tasks.
-
-    As a mixin, this must be combined (using multiple inheritance) with a
-    subclass of `TaskBase`, providing the full task API.
+    """Provides time ordered data IO and data selection for pipeline tasks.
 
     Provides the methods `read_input`, `read_output` and `write_output` for
-    hdf5 data.
+    time ordered data.
 
     """
+
     from tlpipe.core.container import BasicTod
     _Tod_class = BasicTod
 
@@ -1112,7 +1051,7 @@ class SingleTod(SingleBase):
         return tod
 
     def read_input(self):
-        """Method for reading hdf5 input."""
+        """Method for reading time ordered data input."""
 
         mode = self.params['mode']
         start = self.params['start']
@@ -1128,14 +1067,7 @@ class SingleTod(SingleBase):
         return tod
 
     def write_output(self, output):
-        """Method for writing hdf5 output.
-
-        `output` to be written must be either a `memh5.MemGroup` or an
-        `h5py.Group` (which include `hdf5.File` objects). In the latter case
-        the buffer is flushed if `filename` points to the same file and a copy
-        is made otherwise.
-
-        """
+        """Method for writing time ordered data output. """
 
         # Ensure parent directory is present.
         dirname = path.dirname(self.output_files)
@@ -1146,19 +1078,17 @@ class SingleTod(SingleBase):
         check_status = self.params['check_status']
         libver = self.params['libver']
 
-        out.to_files(self.output_files, exclude, check_status, libver)
+        output.to_files(self.output_files, exclude, check_status, libver)
 
 
 class SingleRawTimestream(SingleTod):
-    """Provides hdf5 IO for pipeline tasks.
-
-    As a mixin, this must be combined (using multiple inheritance) with a
-    subclass of `TaskBase`, providing the full task API.
+    """Provides raw timestream IO and data selection for pipeline tasks.
 
     Provides the methods `read_input`, `read_output` and `write_output` for
-    hdf5 data.
+    raw timestream data.
 
     """
+
     from tlpipe.core.raw_timestream import RawTimestream
     _Tod_class = RawTimestream
 
@@ -1171,6 +1101,7 @@ class SingleRawTimestream(SingleTod):
 
     prefix = 'rt_'
 
+
     def data_select(self, tod):
         """Data select."""
         tod.time_select(self.params['time_select'])
@@ -1181,15 +1112,13 @@ class SingleRawTimestream(SingleTod):
 
 
 class SingleTimestream(SingleTod):
-    """Provides hdf5 IO for pipeline tasks.
-
-    As a mixin, this must be combined (using multiple inheritance) with a
-    subclass of `TaskBase`, providing the full task API.
+    """Provides timestream IO and data selection for pipeline tasks.
 
     Provides the methods `read_input`, `read_output` and `write_output` for
-    hdf5 data.
+    timestream data.
 
     """
+
     from tlpipe.core.timestream import Timestream
     _Tod_class = Timestream
 
@@ -1202,6 +1131,7 @@ class SingleTimestream(SingleTod):
               }
 
     prefix = 'ts_'
+
 
     def data_select(self, tod):
         """Data select."""
