@@ -1,27 +1,34 @@
 # -*- mode: python; -*-
 
 # Example input file for pipeline manager.
+# execute this pipeline by either command of the following two:
+# tlpipe dir/to/example.pipe
+# mpiexec -n N tlpipe dir/to/example.pipe
 
 # Each of these calls only uses the relevant parts of the .pipe file.
 
 pipe_modules = []
 
-from tlpipe.timestream import convert
-pipe_modules.append(convert.Conversion)
-# parameters for data conversion comes here
-
 from tlpipe.cal import cal
 pipe_modules.append(cal.Calibration)
 # parameters for calibration comes here
+cal_input_files = 'data.hdf5'
+cal_out = 'cal'
 
 from tlpipe.map import mapmaking
 pipe_modules.append(mapmaking.MapMaking)
 # parameters for map-making comes here
+mp_in = cal_out
+mp_out = 'map'
 
 from tlpipe.foreground import foreground
 pipe_modules.append(foreground.FgSub)
 # parameters for foreground subtraction comes here
+fg_in = mp_out
+fg_out = 'fg'
 
 from tlpipe.powerspectrum import ps
 pipe_modules.append(ps.Ps)
 # parameters for powerspectrum estimation comes here
+ps_in = fg_out
+ps_out = 'ps'
