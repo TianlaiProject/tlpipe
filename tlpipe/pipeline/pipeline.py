@@ -389,11 +389,11 @@ class Manager(object):
 
     # Define a dictionary with keys the names of parameters to be read from
     # pipeline file and values the defaults.
-    params = {
-               'logging': 'info', # logging level
-               'modules': [], # a list of tasks to be executed
-               'output_dir': 'output/', # output directory of pipeline data, default in current-dir/output/
-             }
+    params_init = {
+                    'logging': 'info', # logging level
+                    'modules': [], # a list of tasks to be executed
+                    'output_dir': 'output/', # output directory of pipeline data, default is current-dir/output/
+                  }
 
     prefix = 'pipe_'
 
@@ -401,7 +401,7 @@ class Manager(object):
     def __init__(self, parameter_file_or_dict=None, feedback=2):
 
         # Read in the parameters.
-        self.params, self.task_params = parse_ini.parse(parameter_file_or_dict, self.params, prefix=self.prefix, return_undeclared=True, feedback=feedback)
+        self.params, self.task_params = parse_ini.parse(parameter_file_or_dict, self.params_init, prefix=self.prefix, return_undeclared=True, feedback=feedback)
         self.tasks = self.params['modules']
 
         # set environment var
@@ -480,30 +480,38 @@ class Manager(object):
     def _setup_task(self, task_spec):
         """Set up a pipeline task from the spec given in the tasks list."""
 
-        # task_spec is either the python object that should be executed, or a
-        # tuple, with the first element being the task and the second element
-        # being a prefix replacement of the form ('p1_', 'p2_').  Before
-        # executing the task, we rename all parameters begining with 'p1_'
-        # to 'p2_'.
+        # task_spec is either the TaskBase object, or a tuple, with the first
+        # element being the TaskBase object and the second element being the
+        # new prefix to use
         if isinstance(task_spec, tuple) :
             task =  task_spec[0]
-            params = dict(self.task_params)
-            old_prefix = task_spec[1][0]
-            n = len(old_prefix)
-            new_prefix = task_spec[1][1]
-            for key, value in self.task_params.iteritems() :
-                if key[0:n] == old_prefix :
-                    params[new_prefix + key[n:]] = value
+            task.prefix = task_spec[1]
         else :
             task = task_spec
-            params = self.task_params
 
         if mpiutil.rank0:
             logger.info('Initializing task: ' + str(task))
 
-        task = task(params)
+        task = task(self.task_params)
 
         return task
+
+    def __del__(self):
+        """Finish."""
+        # remove environment var set earlier
+        del(os.environ['TL_OUTPUT'])
+
+        if mpiutil.rank0:
+            # done for the pipeline
+            print
+            print
+            print "=========================================="
+            print "=                                        ="
+            print "=        DONE FOR THE PIPELINE!!         ="
+            print "=           CONGRATULATIONS!!            ="
+            print "=                                        ="
+            print "=========================================="
+
 
 
 # Pipeline Task Base Classes
@@ -534,11 +542,11 @@ class TaskBase(object):
 
     """
 
-    params = {
-               'requires': None,
-               'in': None,
-               'out': None,
-             }
+    params_init = {
+                    'requires': None,
+                    'in': None,
+                    'out': None,
+                  }
 
     prefix = 'tb_'
 
@@ -553,14 +561,13 @@ class TaskBase(object):
         all_params = {}
         for cls in mro[-1::-1]: # reverse order
             try:
-                cls_params = cls.params
+                cls_params = cls.params_init
             except AttributeError:
                 continue
             all_params.update(cls_params)
-        self.params = all_params
 
         # Read in the parameters.
-        self.params = parse_ini.parse(parameter_file_or_dict, self.params, prefix=self.prefix, feedback=feedback)
+        self.params = parse_ini.parse(parameter_file_or_dict, all_params, prefix=self.prefix, feedback=feedback)
 
         # setup pipeline
         self._pipeline_setup()
@@ -852,10 +859,10 @@ class _OneAndOne(TaskBase):
 
     """
 
-    params = {
-               'input_files': None,
-               'output_files': None,
-             }
+    params_init = {
+                    'input_files': None,
+                    'output_files': None,
+                  }
 
     prefix = 'ob_'
 
@@ -929,7 +936,7 @@ class _OneAndOne(TaskBase):
                     msg += '\n\t%s' % output_file
                     output_dir = path.dirname(output_file)
                     if not os.path.exists(output_dir):
-                        os.mkdir(output_dir)
+                        os.makedirs(output_dir)
 
                 logger.info(msg)
 
@@ -984,7 +991,6 @@ class SingleBase(_OneAndOne):
     write_output
 
     """
-
 
     def next(self, input=None):
         """Should not need to override."""
@@ -1068,15 +1074,15 @@ class SingleTod(SingleBase):
     from tlpipe.core.container import BasicTod
     _Tod_class = BasicTod
 
-    params = {
-               'mode': 'r',
-               'start': 0,
-               'stop': None,
-               'dist_axis': 0,
-               'exclude': [],
-               'check_status': True,
-               'libver': 'latest',
-             }
+    params_init = {
+                    'mode': 'r',
+                    'start': 0,
+                    'stop': None,
+                    'dist_axis': 0,
+                    'exclude': [],
+                    'check_status': True,
+                    'libver': 'latest',
+                  }
 
     prefix = 'stod_'
 
@@ -1122,12 +1128,12 @@ class SingleRawTimestream(SingleTod):
     from tlpipe.core.raw_timestream import RawTimestream
     _Tod_class = RawTimestream
 
-    params = {
-               'time_select': (0, None),
-               'freq_select': (0, None),
-               'feed_select': (0, None),
-               'corr': 'all',
-             }
+    params_init = {
+                    'time_select': (0, None),
+                    'freq_select': (0, None),
+                    'feed_select': (0, None),
+                    'corr': 'all',
+                  }
 
     prefix = 'rt_'
 
@@ -1152,13 +1158,13 @@ class SingleTimestream(SingleTod):
     from tlpipe.core.timestream import Timestream
     _Tod_class = Timestream
 
-    params = {
-               'time_select': (0, None),
-               'freq_select': (0, None),
-               'pol_select': (0, None),
-               'feed_select': (0, None),
-               'corr': 'all',
-             }
+    params_init = {
+                    'time_select': (0, None),
+                    'freq_select': (0, None),
+                    'pol_select': (0, None),
+                    'feed_select': (0, None),
+                    'corr': 'all',
+                  }
 
     prefix = 'ts_'
 
