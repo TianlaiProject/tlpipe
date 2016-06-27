@@ -1,7 +1,7 @@
 """
 Data Analysis and Simulation Pipeline.
 
-A data analysis pipeline is completely specified by a YAML file that specifies
+A data analysis pipeline is completely specified by a pipe file that specifies
 both what tasks are to be run and the parameters that go to those tasks.
 Included in this package are base classes for simplifying the construction of
 data analysis tasks, as well as the pipeline manager which executes them.
@@ -30,10 +30,9 @@ Task base classes
    TaskBase
    SingleBase
    IterBase
-   H5IOMixin
-   BasicContMixin
-   SingleH5Base
-   IterH5Base
+   SingleTod
+   SingleRawTimestream
+   SingleTimestream
 
 Examples
 ========
@@ -46,17 +45,22 @@ modular piece analysis. The developer of the task must specify what input
 parameters the task expects as well as code to perform the actual processing
 for the task.
 
-Input parameters are specified by adding class attributes whose values are
-instances of :class:`config.Property`. For instance a task definition might begin
-with
+Input parameters are specified by adding class attributes `params_init` which is a
+dictionary whose entries are key and default value pairs. For instance a task
+definition might begin with
 
 >>> class SpamTask(TaskBase):
-...     eggs = config.Property(proptype=str)
+...     params_init = {
+...                     'eggs': [],
+...                   }
+...
+...     prefix = 'st_'
 
-This defines a new task named :class:`SpamTask` with a parameter named *eggs*, whose
-type is a string.  The class attribute :attr:`SpamTask.eggs` will replaced with an
-instance attribute when an instance of the task is initialized, with it's value
-read from the pipeline configuration YAML file (see next section).
+This defines a new task named :class:`SpamTask` with a parameter named *eggs*,
+whose default value is an empty list.  The default values in class attribute
+:attr:`SpamTask.params_init` will be updated by reading parameters with the
+specified `prefix` in the pipe file, then the updated parameter dictionary will be
+used as the input parameters for this task.
 
 The actual work for the task is specified by over-ridding any of the
 :meth:`~TaskBase.setup`, :meth:`~TaskBase.next` or
@@ -68,18 +72,26 @@ trivial but fully implemented task:
 
 >>> class PrintEggs(TaskBase):
 ...
-...     eggs = config.Property(proptype=list)
+...     params_init = {
+...                     'eggs': [],
+...                   }
 ...
-...     def __init__(self):
+...     prefix = 'pe_'
+...
+...     def __init__(self, parameter_file_or_dict=None, feedback=2):
+...
+...         # Read in the parameters.
+...         super(self.__class__, self).__init__(parameter_file_or_dict, feedback)
+...
 ...         self.i = 0
 ...
 ...     def setup(self):
 ...         print "Setting up PrintEggs."
 ...
 ...     def next(self):
-...         if self.i >= len(self.eggs):
+...         if self.i >= len(self.params['eggs']):
 ...             raise PipelineStopIteration()
-...         print "Spam and %s eggs." % self.eggs[self.i]
+...         print "Spam and %s eggs." % self.params['eggs'][self.i]
 ...         self.i += 1
 ...
 ...     def finish(self):
@@ -93,10 +105,19 @@ that are designed to operate in this manner.
 
 >>> class GetEggs(TaskBase):
 ...
-...     eggs = config.Property(proptype=list)
+...     params_init = {
+...                     'eggs': [],
+...                   }
 ...
-...     def __init__(self):
+...     prefix = 'ge_'
+...
+...     def __init__(self, parameter_file_or_dict=None, feedback=2):
+...
+...         # Read in the parameters.
+...         super(self.__class__, self).__init__(parameter_file_or_dict, feedback)
+...
 ...         self.i = 0
+...         self.eggs = self.params['eggs']
 ...
 ...     def setup(self):
 ...         print "Setting up GetEggs."
@@ -111,15 +132,20 @@ that are designed to operate in this manner.
 ...     def finish(self):
 ...         print "Finished GetEggs."
 
+
 >>> class CookEggs(TaskBase):
 ...
-...     style = config.Property(proptype=str)
+...     params_init = {
+...                     'style': 'fried',
+...                   }
+...
+...     prefix = 'ce_'
 ...
 ...     def setup(self):
 ...         print "Setting up CookEggs."
 ...
 ...     def next(self, egg):
-...         print "Cooking %s %s eggs." % (self.style, egg)
+...         print "Cooking %s %s eggs." % (self.params['style'], egg)
 ...
 ...     def finish(self):
 ...         print "Finished CookEggs."
@@ -132,46 +158,34 @@ for :meth:`next` and will stop iterating when there are none.
 Pipeline Configuration
 ----------------------
 
-To actually run a task or series of tasks, a YAML pipeline configuration is
-required.  The pipeline configuration has two main functions: to specify the
-the pipeline (which tasks are run, in which order and how to handle the inputs and
-outputs of tasks) and to provide parameters to each individual task.  Here is
-an example of a pipeline configuration:
+To actually run a task or series of tasks, a pipe pipeline configuration file
+(actually is a python script) is required.  The pipeline configuration has two main
+functions: to specify the the pipeline (which tasks are run, in which order and
+how to handle the inputs and outputs of tasks) and to provide parameters to each
+individual task.  Here is an example of a pipeline configuration:
 
->>> spam_config = '''
-... pipeline :
-...     tasks:
-...         -   type:   PrintEggs
-...             params: eggs_params
+>>> spam_pipe = '''
+... pipe_modules = []
 ...
-...         -   type:   GetEggs
-...             params: eggs_params
-...             out:    egg
+... pipe_modules.append(PrintEggs)
+... ### parameters for PrintEggs
+... pe_eggs = ['green', 'duck', 'ostrich']
 ...
-...         -   type:   CookEggs
-...             params: cook_params
-...             in:     egg
+... pipe_modules.append(GetEggs)
+... ### parameters for GetEggs
+... ge_eggs = pe_eggs
+... ge_out = 'egg'
 ...
-... eggs_params:
-...     eggs: ['green', 'duck', 'ostrich']
-...
-... cook_params:
-...     style: 'fried'
-...
+... pipe_modules.append(CookEggs)
+... ### parameters for CookEggs
+... ce_style = 'fried'
+... ce_in = ge_out
 ... '''
 
-Here the 'pipeline' section contains parameters that pertain to the pipeline as
-a whole.  The most important parameter is *tasks*, a list of tasks to be
-executed.  Each entry in this list may contain the following keys:
+Here the 'pipe_modules' is a list to hold a list of tasks to be executed.  Other
+parameters with the specified prefix are the input parameters for the corresponding
+tasks, they include three keys that all taks will have:
 
-type
-    (required) The name of the class relative to the global
-    name space. Any required imports will be performed dynamically.  Any
-    classes that are not importable (defined interactively) need to be
-    registered in the dictionary ``pipeline.local_tasks``.
-params
-    (required) Key or list of keys referring to sections of the pipeline
-    configuration holding parameters for the task.
 out
     A 'pipeline product key' or list of keys that label any return values from
     :meth:`setup`, :meth:`next` or :meth:`finish`.
@@ -182,16 +196,33 @@ in
     A 'pipeline product key' or list of keys representing values to be passed
     as arguments to :meth:`next`.
 
-The sections other than 'pipeline' in the configuration contain the parameter
-for the various tasks, as specified be the 'params' keys.
 
 Execution Order
 ---------------
 
-When the above pipeline is executed is produces the following output.
+When the above pipeline is executed it produces the following output.
 
->>> local_tasks.update(globals())  # Required for interactive sessions.
->>> Manager.from_yaml_str(spam_config).run()
+>>> exec(spam_pipe)
+>>> Manager(globals()).run()
+Reading parameters from dictionary.
+Parameters set.
+parameter: logging defaulted to value: info
+parameter: output_dir defaulted to value: output/
+Reading parameters from dictionary.
+Parameters set.
+parameter: out defaulted to value: None
+parameter: requires defaulted to value: None
+parameter: in defaulted to value: None
+Reading parameters from dictionary.
+Warning: Assigned an input parameter to the value of the wrong type. Parameter name: out
+Parameters set.
+parameter: requires defaulted to value: None
+parameter: in defaulted to value: None
+Reading parameters from dictionary.
+Warning: Assigned an input parameter to the value of the wrong type. Parameter name: in
+Parameters set.
+parameter: out defaulted to value: None
+parameter: requires defaulted to value: None
 Setting up PrintEggs.
 Setting up GetEggs.
 Setting up CookEggs.
@@ -204,6 +235,14 @@ Cooking fried ostrich eggs.
 Finished PrintEggs.
 Finished GetEggs.
 Finished CookEggs.
+<BLANKLINE>
+<BLANKLINE>
+==========================================
+=                                        =
+=        DONE FOR THE PIPELINE!!         =
+=           CONGRATULATIONS!!            =
+=                                        =
+==========================================
 
 The rules for execution order are as follows:
 
@@ -223,6 +262,8 @@ illustrates these rules in a pipeline with a slightly more non-trivial flow.
 
 >>> class DoNothing(TaskBase):
 ...
+...     prefix = 'dn_'
+...
 ...     def setup(self):
 ...         print "Setting up DoNothing."
 ...
@@ -232,35 +273,54 @@ illustrates these rules in a pipeline with a slightly more non-trivial flow.
 ...     def finish(self):
 ...         print "Finished DoNothing."
 
->>> local_tasks.update(globals())  # Required for interactive sessions only.
->>> new_spam_config = '''
-... pipeline :
-...     tasks:
-...         -   type:   GetEggs
-...             params: eggs_params
-...             out:    egg
+>>> new_spam_pipe = '''
+... pipe_modules = []
 ...
-...         -   type:   CookEggs
-...             params: cook_params
-...             in:     egg
+... pipe_modules.append(GetEggs)
+... ### parameters for GetEggs
+... ge_eggs = pe_eggs
+... ge_out = 'egg'
 ...
-...         -   type:   DoNothing
-...             params: no_params
-...             in:     non_existent_data_product
+... pipe_modules.append(CookEggs)
+... ### parameters for CookEggs
+... ce_style = 'fried'
+... ce_in = ge_out
 ...
-...         -   type:   PrintEggs
-...             params: eggs_params
+... pipe_modules.append(DoNothing)
+... ### parameters for DoNothing
+... dn_in = 'non_existent_data_product'
 ...
-... eggs_params:
-...     eggs: ['green', 'duck', 'ostrich']
-...
-... cook_params:
-...     style: 'fried'
-...
-... no_params: {}
+... pipe_modules.append(PrintEggs)
+... ### parameters for PrintEggs
+... pe_eggs = ['green', 'duck', 'ostrich']
 ... '''
 
->>> Manager.from_yaml_str(new_spam_config).run()
+>>> exec(new_spam_pipe)
+>>> Manager(globals()).run()
+Reading parameters from dictionary.
+Parameters set.
+parameter: logging defaulted to value: info
+parameter: output_dir defaulted to value: output/
+Reading parameters from dictionary.
+Warning: Assigned an input parameter to the value of the wrong type. Parameter name: out
+Parameters set.
+parameter: requires defaulted to value: None
+parameter: in defaulted to value: None
+Reading parameters from dictionary.
+Warning: Assigned an input parameter to the value of the wrong type. Parameter name: in
+Parameters set.
+parameter: out defaulted to value: None
+parameter: requires defaulted to value: None
+Reading parameters from dictionary.
+Warning: Assigned an input parameter to the value of the wrong type. Parameter name: in
+Parameters set.
+parameter: out defaulted to value: None
+parameter: requires defaulted to value: None
+Reading parameters from dictionary.
+Parameters set.
+parameter: out defaulted to value: None
+parameter: requires defaulted to value: None
+parameter: in defaulted to value: None
 Setting up GetEggs.
 Setting up CookEggs.
 Setting up DoNothing.
@@ -275,8 +335,16 @@ Spam and green eggs.
 Spam and duck eggs.
 Spam and ostrich eggs.
 Finished PrintEggs.
+<BLANKLINE>
+<BLANKLINE>
+==========================================
+=                                        =
+=        DONE FOR THE PIPELINE!!         =
+=           CONGRATULATIONS!!            =
+=                                        =
+==========================================
 
-Notice that :meth:`DoNothing.next` is nerver called, since the pipeline never
+Notice that :meth:`DoNothing.next` is never called, since the pipeline never
 generates its input, 'non_existent_data_product'.  Once everything before
 :class:`DoNothing` has been executed the pipeline notices that there is no
 opertunity for 'non_existent_data_product' to be generated and forces
@@ -286,8 +354,8 @@ allowing it to proceed normally.
 Advanced Tasks
 --------------
 
-Several subclasses of :class:`TaskBase` provide advanced functionality for tasks that
-conform to the most common patterns. This functionality includes: optionally
+Several subclasses of :class:`TaskBase` provide advanced functionality for tasks
+that conform to the most common patterns. This functionality includes: optionally
 reading inputs from disk, instead of receiving them from the pipeline;
 optionally writing outputs to disk automatically; and caching the results of a
 large computation to disk in an intelligent manner (not yet implemented).
@@ -299,10 +367,6 @@ limited to a single input ('in' key) and a single output ('out' key).  Method
 Optionally, :meth:`~SingleBase.read_input` and :meth:`~SingleBase.write_output`
 may be over-ridden for maximum functionality.  :meth:`setup` and :meth:`finish`
 may be overridden as usual.
-
-In addition :class:`SingleH5Base`, :class:`IterH5Base`, provide the
-:meth:`read_input` and :meth:`write_output` methods for the most common
-formats.
 
 See the documentation for these base classes for more details.
 
@@ -325,11 +389,6 @@ from tlpipe.utils.path_util import input_path, output_path
 
 # Set the module logger.
 logger = logging.getLogger(__name__)
-
-
-# Search this dictionary for tasks.
-# Used for interactive sessions when task can't be specified by absolute path.
-local_tasks = {}
 
 
 # Exceptions
