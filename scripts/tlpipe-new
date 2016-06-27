@@ -1,0 +1,25 @@
+#! /usr/bin/env python
+"""Executes a data analysis pipeline given a pipeline file.
+
+This script, when executed on the command line, accepts a single parameter,
+the path to a pipeline file. For an example of a pipeline file, see
+documentation for tlpipe.pipeline.pipeline.
+"""
+
+
+import argparse
+
+
+def run(pipefile):
+    from tlpipe.pipeline.pipeline import Manager
+
+    P = Manager(pipefile)
+    P.run()
+
+
+parser = argparse.ArgumentParser(description='The pipeline manager.')
+parser.add_argument('pipefile', type=str, nargs='?', help='Input parameter setting file to run the pipeline.')
+parser.set_defaults(func=run)
+
+args = parser.parse_args()
+args.func(args.pipefile)
