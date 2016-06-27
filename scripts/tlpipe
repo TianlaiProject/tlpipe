@@ -1,113 +1,25 @@
 #! /usr/bin/env python
-"""This module contains the pipeline manager.
+"""Executes a data analysis pipeline given a pipeline file.
 
-It is simply a driver for scripting together many pipeline modules.
+This script, when executed on the command line, accepts a single parameter,
+the path to a pipeline file. For an example of a pipeline file, see
+documentation for tlpipe.pipeline.pipeline.
 """
 
-import os
-import sys
-import getpass
-import time
+
 import argparse
-from tlpipe.kiyopy import parse_ini
-from tlpipe.utils import mpiutil
 
 
-params_init = {
-              # A list of modules that should be executed.  All entries of the
-              # list should contain an executable accepting only parameter file
-              # or dict.
-              'modules': [],
-              # output directory of pipeline data, default in current-dir/output/
-              'output_dir': 'output/',
-              }
+def run(pipefile):
+    from tlpipe.pipeline.pipeline import Manager
 
-
-def execute(pipe_file_or_dict, feedback=2) :
-    """Execute all the modules listed in the input file."""
-
-    if mpiutil.rank0:
-        # start a flag indicating that this pipeline is running
-        busy_filename = "/tmp/pipeline.%s.%s.busy" % (os.getpid(), getpass.getuser())
-        print "flagging running pipeline with %s" % busy_filename
-        busyfile = open(busy_filename, "w")
-        busyfile.write("%10.15f" % time.time())
-        busyfile.close()
-
-    params, module_params = parse_ini.parse(pipe_file_or_dict, params_init,
-                                       prefix='pipe_',return_undeclared=True,
-                                       feedback=feedback)
-
-    # create output directory if it does not already exist
-    output_dir = os.path.abspath(os.path.normpath(os.path.expanduser(params["output_dir"])))
-    if not os.path.exists(output_dir):
-        if mpiutil.rank0:
-            os.mkdir(output_dir)
-
-    # sync here and set environment var
-    mpiutil.barrier()
-    os.environ['TL_OUTPUT'] = output_dir + '/'
-
-    for module in params['modules'] :
-        # Module is either the python object that should be executed, or a
-        # tuple, with the first element being the module and the second element
-        # being a prefix replacement of the form ('p1_', 'p2_').  Before
-        # executing the module, we rename all parameters begining with 'p1_'
-        # to 'p2_'.
-        if isinstance(module, tuple) :
-            mod =  module[0]
-            pars = dict(module_params)
-            old_prefix = module[1][0]
-            n = len(old_prefix)
-            new_prefix = module[1][1]
-            for key, value in module_params.iteritems() :
-                if key[0:n] == old_prefix :
-                    pars[new_prefix + key[n:]] = value
-        else :
-            mod = module
-            pars = module_params
-        if feedback > 1 :
-            if mpiutil.rank0:
-                 print '\nExcuting analysis module: ' + str(mod)
-
-        # sync here before execute next module
-        mpiutil.barrier()
-
-        inst = mod(pars, feedback=feedback)
-        # only active processes execute tasks in module
-        if mpiutil.rank in inst.aprocs:
-            inst.execute()
-
-        del inst
-
-
-    # remove environment var set earlier
-    del(os.environ['TL_OUTPUT'])
-
-    if mpiutil.rank0:
-        # now remove the run indicator flag
-        # it may already removed by the os for a long time running pipeline
-        if os.path.exists(busy_filename):
-            os.remove(busy_filename)
-        # done for the pipeline
-        if feedback > 1:
-            print
-            print
-            print "=========================================="
-            print "=                                        ="
-            print "=        DONE FOR THE PIPELINE!!         ="
-            print "=           CONGRATULATIONS!!            ="
-            print "=                                        ="
-            print "=========================================="
-
-
+    P = Manager(pipefile)
+    P.run()
 
 
 parser = argparse.ArgumentParser(description='The pipeline manager.')
-parser.add_argument('pipfile', type=str, nargs='?', help='Input parameter setting file to run the pipeline.')
-parser.add_argument('-f', '--feedback', type=int, default=2, nargs='?', help='Integer 1 to 10, default 2.  Desired feedback level, controlling what to print to the standard out.')
-parser.set_defaults(func=execute)
+parser.add_argument('pipefile', type=str, nargs='?', help='Input parameter setting file to run the pipeline.')
+parser.set_defaults(func=run)
 
 args = parser.parse_args()
-args.func(args.pipfile, args.feedback)
-
+args.func(args.pipefile)
