@@ -20,7 +20,7 @@ Revision History:
 """
 
 import custom_exceptions as ce
-from tlpipe.utils import mpiutil
+from caput import mpiutil
 
 def parse(ini_data, params, return_undeclared=False, prefix='',
           feedback=2, type_check=False, checking=-1):
