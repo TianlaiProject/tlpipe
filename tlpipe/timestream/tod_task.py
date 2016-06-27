@@ -27,6 +27,12 @@ class SingleTod(SingleBase):
     prefix = 'stod_'
 
 
+    def process(self, tod):
+
+        tod.add_history(self.history)
+
+        return tod
+
     def data_select(self, tod):
         """Data select."""
         return tod
