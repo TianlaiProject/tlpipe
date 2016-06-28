@@ -995,17 +995,19 @@ class BasicTod(memh5.MemDiskGroup):
             The opertation function object. It is of type func(array, **kwargs) if
             `op_axis=None`, func(array, local_index=None, global_index=None,
             axis_val=None, **kwargs) else.
-        op_axis : None, string or integer, optional
+        op_axis : None, string or integer, tuple of string or interger, optional
             Axis along which `func` will opterate. If None, `func` will operate on
             the whole main dataset (but note: since the main data is distributed
             on different processes, `func` should not have operations that depend
-            on elements not held in the local array of each process), else `func`
-            will opterate along the specified axis, that is, it will loop the
-            specified axis and call `func` on data section corresponding to the
-            axis index.
-        axis_vals : numerical or array, optional
-            Axis value corresponding to the local section along the `op_axis` that
-            will be passed to `func` if `op_axis` is not None. Default 0.
+            on elements not held in the local array of each process), if string or
+            interger `func` will opterate along the specified axis, that is, it
+            will loop the specified axis and call `func` on data section
+            corresponding to the axis index, if tuple of string or interger,
+            `func` will operate along all these axes.
+        axis_vals : scalar or array, tuple of scalar or array, optional
+            Axis value (or tuple of axis values) corresponding to the local
+            section along the `op_axis` that will be passed to `func` if
+            `op_axis` is not None. Default 0.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
             corresponding to the axis index, if True, the main data will first
@@ -1020,7 +1022,7 @@ class BasicTod(memh5.MemDiskGroup):
 
         if op_axis is None:
             self.main_data.local_data[:] = func(self.main_data.local_data[:], **kwargs)
-        else:
+        elif isinstance(op_axis, int) or isinstance(op_axis, basestring):
             axis = check_axis(op_axis, self.main_data_axes)
             data_sel = [ slice(0, None) ] * len(self.main_data_axes)
             if full_data:
@@ -1035,3 +1037,30 @@ class BasicTod(memh5.MemDiskGroup):
                 self.main_data.local_data[data_sel] = func(self.main_data.local_data[data_sel], lind, gind, axis_val, **kwargs)
             if full_data and keep_dist_axis:
                 self.redistribute(original_dist_axis)
+        elif isinstance(op_axis, tuple):
+            axes = [ check_axis(axis, self.main_data_axes) for axis in op_axis ]
+            data_sel = [ slice(0, None) ] * len(self.main_data_axes)
+            if full_data:
+                original_dist_axis = self.main_data_dist_axis
+                if not original_dist_axis in axes:
+                    shape = self.main_data.shape
+                    axes_len = [ shape[axis] for axis in axes ]
+                    # choose the longest axis in axes as the new dist axis
+                    new_dist_axis = axes[np.argmax(axes_len)]
+                    self.redistribute(new_dist_axis)
+            linds = [ [ li for (li, gi) in self.main_data.data.enumerate(axis) ] for axis in axes ]
+            ginds = [ [ gi for (li, gi) in self.main_data.data.enumerate(axis) ] for axis in axes ]
+            n_axes = len(axes)
+            for lind, gind in zip(itertools.product(*linds), itertools.product(*ginds)):
+                axis_val = ()
+                for ai, axis in enumerate(axes):
+                    data_sel[axis] = lind[ai]
+                    if hasattr(axis_vals[ai], '__iter__'):
+                        axis_val += (axis_vals[ai][lind[ai]],)
+                    else:
+                        axis_val += (axis_vals[ai],)
+                self.main_data.local_data[data_sel] = func(self.main_data.local_data[data_sel], lind, gind, axis_val, **kwargs)
+            if full_data and keep_dist_axis:
+                self.redistribute(original_dist_axis)
+        else:
+            raise ValueError('Invalid op_axis: %s', op_axis)

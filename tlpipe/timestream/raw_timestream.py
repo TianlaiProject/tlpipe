@@ -448,7 +448,7 @@ class RawTimestream(container.BasicTod):
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
             corresponding to the axis index, if True, the main data will first
-            redistributed along frequency time axis. Default False.
+            redistributed along frequency axis. Default False.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to frequency axis if the dist axis has
             changed during the operation. Default False.
@@ -470,7 +470,7 @@ class RawTimestream(container.BasicTod):
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
             corresponding to the axis index, if True, the main data will first
-            redistributed along channelpair time axis. Default False.
+            redistributed along channelpair axis. Default False.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to channelpair axis if the dist axis
             has changed during the operation. Default False.

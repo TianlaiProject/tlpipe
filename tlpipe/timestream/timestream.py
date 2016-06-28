@@ -457,7 +457,7 @@ class Timestream(container.BasicTod):
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
             corresponding to the axis index, if True, the main data will first
-            redistributed along frequency time axis. Default False.
+            redistributed along frequency axis. Default False.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to frequency axis if the dist axis has
             changed during the operation. Default False.
@@ -479,7 +479,7 @@ class Timestream(container.BasicTod):
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
             corresponding to the axis index, if True, the main data will first
-            redistributed along polarization time axis. Default False.
+            redistributed along polarization axis. Default False.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to polarization axis if the dist
             axis has changed during the operation. Default False.
@@ -501,7 +501,7 @@ class Timestream(container.BasicTod):
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
             corresponding to the axis index, if True, the main data will first
-            redistributed along baseline time axis. Default False.
+            redistributed along baseline axis. Default False.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to baseline axis if the dist axis
             has changed during the operation. Default False.
@@ -510,3 +510,26 @@ class Timestream(container.BasicTod):
 
         """
         self.data_operate(func, op_axis='baseline', axis_vals=self.bl.local_data[:], full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+
+    def pol_and_bl_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
+        """Data operation along the polarization and baseline axis.
+
+        Parameters
+        ----------
+        func : function object
+            The opertation function object. It is of type func(array,
+            local_index=None, global_index=None, bl=None, **kwargs), which
+            will be called in a loop along the polarization and baseline axis.
+        full_data : bool, optional
+            Whether the operations of `func` will need the full data section
+            corresponding to the axis index, if True, the main data will first
+            redistributed along polarization or baseline axis which is longer.
+            Default False.
+        keep_dist_axis : bool, optional
+            Whether to redistribute main data to baseline axis if the dist axis
+            has changed during the operation. Default False.
+        **kwargs : any other arguments
+            Any other arguments that will passed to `func`.
+
+        """
+        self.data_operate(func, op_axis=('polarization', 'baseline'), axis_vals=(self.pol.local_data[:], self.bl.local_data[:]), full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
