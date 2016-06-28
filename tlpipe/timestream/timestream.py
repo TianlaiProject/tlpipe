@@ -259,27 +259,39 @@ class Timestream(container.BasicTod):
             super(Timestream, self).redistribute(dist_axis)
 
             if 'time' == self.main_data_axes[axis]:
-                self.dataset_distributed_to_common('freq')
-                self.dataset_distributed_to_common('pol')
-                self.dataset_distributed_to_common('blorder')
+                if self.freq.distributed:
+                    self.dataset_distributed_to_common('freq')
+                if self.pol.distributed:
+                    self.dataset_distributed_to_common('pol')
+                if self.bl.distributed:
+                    self.dataset_distributed_to_common('blorder')
 
             # distribute freq
             elif 'frequency' == self.main_data_axes[axis]:
-                self.dataset_common_to_distributed('freq', distributed_axis=0)
-                self.dataset_distributed_to_common('pol')
-                self.dataset_distributed_to_common('blorder')
+                if self.freq.common:
+                    self.dataset_common_to_distributed('freq', distributed_axis=0)
+                if self.pol.distributed:
+                    self.dataset_distributed_to_common('pol')
+                if self.bl.distributed:
+                    self.dataset_distributed_to_common('blorder')
 
             # distribute pol
             elif 'polarization' == self.main_data_axes[axis]:
-                self.dataset_common_to_distributed('pol', distributed_axis=0)
-                self.dataset_distributed_to_common('freq')
-                self.dataset_distributed_to_common('blorder')
+                if self.pol.common:
+                    self.dataset_common_to_distributed('pol', distributed_axis=0)
+                if self.freq.distributed:
+                    self.dataset_distributed_to_common('freq')
+                if self.bl.distributed:
+                    self.dataset_distributed_to_common('blorder')
 
             # distribute blorder
             elif 'baseline' == self.main_data_axes[axis]:
-                self.dataset_common_to_distributed('blorder', distributed_axis=0)
-                self.dataset_distributed_to_common('freq')
-                self.dataset_distributed_to_common('pol')
+                if self.bl.common:
+                    self.dataset_common_to_distributed('blorder', distributed_axis=0)
+                if self.freq.distributed:
+                    self.dataset_distributed_to_common('freq')
+                if self.pol.distributed:
+                    self.dataset_distributed_to_common('pol')
 
     def check_status(self):
         """Check that data hold in this container is consistent. """

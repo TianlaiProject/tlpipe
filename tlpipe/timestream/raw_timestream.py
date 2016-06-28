@@ -359,18 +359,24 @@ class RawTimestream(container.BasicTod):
             super(RawTimestream, self).redistribute(dist_axis)
 
             if 'time' == self.main_data_axes[axis]:
-                self.dataset_distributed_to_common('freq')
-                self.dataset_distributed_to_common('blorder')
+                if self.freq.distributed:
+                    self.dataset_distributed_to_common('freq')
+                if self.bl.distributed:
+                    self.dataset_distributed_to_common('blorder')
 
             # distribute freq
             elif 'frequency' == self.main_data_axes[axis]:
-                self.dataset_common_to_distributed('freq', distributed_axis=0)
-                self.dataset_distributed_to_common('blorder')
+                if self.freq.common:
+                    self.dataset_common_to_distributed('freq', distributed_axis=0)
+                if self.bl.distributed:
+                    self.dataset_distributed_to_common('blorder')
 
             # distribute blorder
             elif 'channelpair' == self.main_data_axes[axis]:
-                self.dataset_common_to_distributed('blorder', distributed_axis=0)
-                self.dataset_distributed_to_common('freq')
+                if self.bl.common:
+                    self.dataset_common_to_distributed('blorder', distributed_axis=0)
+                if self.freq.distributed:
+                    self.dataset_distributed_to_common('freq')
 
     def check_status(self):
         """Check that data hold in this container is consistent. """
