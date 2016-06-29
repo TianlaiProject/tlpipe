@@ -15,7 +15,7 @@ def plot(vis, li, gi, bl, **kwargs):
         bl = tuple(bl)
     bl_incl = kwargs.get('bl_incl', 'all')
     bl_excl = kwargs.get('bl_excl', [])
-    fig_name = kwargs.get('fig_name', 'vis')
+    fig_prefix = kwargs.get('fig_name', 'vis')
 
     if bl_incl != 'all':
         bl1 = set(bl)
@@ -34,9 +34,9 @@ def plot(vis, li, gi, bl, **kwargs):
     plt.imshow(vis.imag, origin='lower', aspect='auto')
     plt.colorbar()
     if pol is None:
-        fig_name += ('_%d_%d.png' % bl)
+        fig_name = '%s_%d_%d.png' % (fig_prefix, bl[0], bl[1])
     else:
-        fig_name += ('_%d_%d_%s.png' % (bl[0], bl[1], pol))
+        fig_name = '%s_%d_%d_%s.png' % (fig_prefix, bl[0], bl[1], pol)
     fig_name = output_path(fig_name)
     fig_dir = os.path.dirname(fig_name)
     try:
