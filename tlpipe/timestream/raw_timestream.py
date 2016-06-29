@@ -440,7 +440,7 @@ class RawTimestream(container.BasicTod):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis='time', axis_vals=self.time.local_data[:], full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis='time', axis_vals=self.time, full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
 
     def freq_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
         """Data operation along the frequency axis.
@@ -462,7 +462,7 @@ class RawTimestream(container.BasicTod):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis='frequency', axis_vals=self.freq.local_data[:], full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis='frequency', axis_vals=self.freq, full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
 
     def bl_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
         """Data operation along the channelpair axis.
@@ -484,7 +484,7 @@ class RawTimestream(container.BasicTod):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis='channelpair', axis_vals=self.bl.local_data[:], full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis='channelpair', axis_vals=self.bl, full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
 
 
     def separate_pol_and_bl(self, keep_dist_axis=False):
@@ -504,6 +504,7 @@ class RawTimestream(container.BasicTod):
         # if dist axis is channelpair, redistribute it along time
         original_dist_axis = self.main_data_dist_axis
         if 'channelpair' == self.main_data_axes[original_dist_axis]:
+            keep_dist_axis = False # can not keep dist axis in this case
             self.redistribute(0)
 
         # create a Timestream container to hold the pol and bl separated data

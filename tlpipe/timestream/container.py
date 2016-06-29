@@ -1030,7 +1030,10 @@ class BasicTod(memh5.MemDiskGroup):
                 self.redistribute(axis)
             for lind, gind in self.main_data.data.enumerate(axis):
                 data_sel[axis] = lind
-                if hasattr(axis_vals, '__iter__'):
+                if isinstance(axis_vals, memh5.MemDataset):
+                    # use the new dataset which may be different from axis_vals if it is redistributed
+                    axis_val = self[axis_vals.name].local_data[lind]
+                elif hasattr(axis_vals, '__iter__'):
                     axis_val = axis_vals[lind]
                 else:
                     axis_val = axis_vals
@@ -1055,7 +1058,10 @@ class BasicTod(memh5.MemDiskGroup):
                 axis_val = ()
                 for ai, axis in enumerate(axes):
                     data_sel[axis] = lind[ai]
-                    if hasattr(axis_vals[ai], '__iter__'):
+                    if isinstance(axis_vals[ai], memh5.MemDataset):
+                        # use the new dataset which may be different from axis_vals if it is redistributed
+                        axis_val += (self[axis_vals[ai].name].local_data[lind[ai]],)
+                    elif hasattr(axis_vals[ai], '__iter__'):
                         axis_val += (axis_vals[ai][lind[ai]],)
                     else:
                         axis_val += (axis_vals[ai],)

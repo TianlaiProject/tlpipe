@@ -455,7 +455,7 @@ class Timestream(container.BasicTod):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis='time', axis_vals=self.time.local_data[:], full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis='time', axis_vals=self.time, full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
 
     def freq_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
         """Data operation along the frequency axis.
@@ -477,7 +477,7 @@ class Timestream(container.BasicTod):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis='frequency', axis_vals=self.freq.local_data[:], full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis='frequency', axis_vals=self.freq, full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
 
     def pol_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
         """Data operation along the polarization axis.
@@ -499,7 +499,7 @@ class Timestream(container.BasicTod):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis='polarization', axis_vals=self.pol.local_data[:], full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis='polarization', axis_vals=self.pol, full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
 
     def bl_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
         """Data operation along the baseline axis.
@@ -521,7 +521,7 @@ class Timestream(container.BasicTod):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis='baseline', axis_vals=self.bl.local_data[:], full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis='baseline', axis_vals=self.bl, full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
 
     def pol_and_bl_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
         """Data operation along the polarization and baseline axis.
@@ -544,4 +544,4 @@ class Timestream(container.BasicTod):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=('polarization', 'baseline'), axis_vals=(self.pol.local_data[:], self.bl.local_data[:]), full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis=('polarization', 'baseline'), axis_vals=(self.pol, self.bl), full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
