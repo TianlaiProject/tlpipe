@@ -523,6 +523,29 @@ class Timestream(container.BasicTod):
         """
         self.data_operate(func, op_axis='baseline', axis_vals=self.bl, full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
 
+    def time_and_bl_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
+        """Data operation along the time and baseline axis.
+
+        Parameters
+        ----------
+        func : function object
+            The opertation function object. It is of type func(array,
+            local_index=None, global_index=None, tbl=None, **kwargs), which
+            will be called in a loop along the time and baseline axis.
+        full_data : bool, optional
+            Whether the operations of `func` will need the full data section
+            corresponding to the axis index, if True, the main data will first
+            redistributed along time or baseline axis which is longer.
+            Default False.
+        keep_dist_axis : bool, optional
+            Whether to redistribute main data to baseline axis if the dist axis
+            has changed during the operation. Default False.
+        **kwargs : any other arguments
+            Any other arguments that will passed to `func`.
+
+        """
+        self.data_operate(func, op_axis=('time', 'baseline'), axis_vals=(self.time, self.bl), full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+        
     def pol_and_bl_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
         """Data operation along the polarization and baseline axis.
 
@@ -530,7 +553,7 @@ class Timestream(container.BasicTod):
         ----------
         func : function object
             The opertation function object. It is of type func(array,
-            local_index=None, global_index=None, bl=None, **kwargs), which
+            local_index=None, global_index=None, pbl=None, **kwargs), which
             will be called in a loop along the polarization and baseline axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section

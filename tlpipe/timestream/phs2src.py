@@ -55,35 +55,6 @@ class Phs2src(tod_task.SingleTimestream):
         feedno = ts['feedno'][:].tolist()
         antpointing = ts['antpointing'][-1, :, :]
 
-        # with h5py.File(input_file, 'r') as f:
-        #     dset = f['data']
-        #     data_shp = dset.shape
-        #     data_type = dset.dtype
-        #     ants = dset.attrs['ants']
-        #     ts = f['time']
-        #     freq = dset.attrs['freq']
-        #     az = np.radians(dset.attrs['az_alt'][0][0])
-        #     alt = np.radians(dset.attrs['az_alt'][0][1])
-        #     time_zone = dset.attrs['timezone']
-
-        #     npol = dset.shape[2]
-        #     nt = len(ts)
-        #     nfreq = len(freq)
-        #     nants = len(ants)
-        #     bls = [(ants[i], ants[j]) for i in range(nants) for j in range(i, nants)] # start from 1
-        #     nbls = len(bls)
-
-        #     lt, st, et = mpiutil.split_local(nt)
-        #     # data an time local to this process
-        #     local_data = dset[st:et]
-        #     local_ts = ts[st:et]
-
-        # if mpiutil.rank0:
-        #     data_phs2src = np.zeros(data_shp, dtype=data_type) # save data phased to src
-        # else:
-        #     data_phs2src = None
-
-
         ts.redistribute(0) # make time the dist axis
 
         # array
@@ -125,37 +96,8 @@ class Phs2src(tod_task.SingleTimestream):
             print 'Phase to source %s.' % source
 
 
-        ts.data_operate(phs, op_axis=('time', 'baseline'), axis_vals=(ts.time, ts.bl), aa=aa, s=s)
+        ts.time_and_bl_data_operate(phs, aa=aa, s=s)
 
         ts.add_history(self.history)
 
         return ts
-
-        # for ti, t in enumerate(local_ts): # mpi among time
-        #     aa.set_jultime(t)
-        #     s.compute(aa)
-        #     # get fluxes vs. freq of the calibrator
-        #     # Sc = s.get_jys()
-        #     # get the topocentric coordinate of the calibrator at the current time
-        #     s_top = s.get_crds('top', ncrd=3)
-        #     # aa.sim_cache(cat.get_crds('eq', ncrd=3)) # for compute bm_response and sim
-        #     for bi, (ai, aj) in enumerate(bls):
-        #         uij = aa.gen_uvw(ai-1, aj-1, src='z').squeeze() # (rj - ri)/lambda
-        #         # phase the data to src
-        #         local_data[ti, bi, :, :] /= np.exp(-2.0J * np.pi * np.dot(s_top, uij))
-        #         # local_data[ti, bi, :, :] /= np.exp(2.0J * np.pi * np.dot(s_top, uij))
-
-        # # Gather data in separate processes
-        # mpiutil.gather_local(data_phs2src, local_data, (st, 0, 0, 0), root=0, comm=self.comm)
-
-        # # save data after phased to src
-        # if mpiutil.rank0:
-        #     with h5py.File(output_file, 'w') as f:
-        #         dset = f.create_dataset('data', data=data_phs2src)
-        #         # copy metadata from input file
-        #         with h5py.File(input_file, 'r') as fin:
-        #             f.create_dataset('time', data=fin['time'])
-        #             for attrs_name, attrs_value in fin['data'].attrs.iteritems():
-        #                 dset.attrs[attrs_name] = attrs_value
-        #         # update some attrs
-        #         dset.attrs['history'] = dset.attrs['history'] + self.history

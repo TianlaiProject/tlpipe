@@ -96,7 +96,7 @@ class Phs2zen(tod_task.SingleTimestream):
             print 'Undo the source-phase %s to phase to the zenith.' % source
 
 
-        ts.data_operate(phs, op_axis=('time', 'baseline'), axis_vals=(ts.time, ts.bl), aa=aa, s=s)
+        ts.time_and_bl_data_operate(phs, aa=aa, s=s)
 
         ts.add_history(self.history)
 
