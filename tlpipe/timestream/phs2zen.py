@@ -11,7 +11,7 @@ from tlpipe.core import tldishes
 from tlpipe.utils.date_util import get_ephdate
 
 
-def phs(vis, li, gi, tbl, **kwargs):
+def phs(vis, li, gi, tbl, st, **kwargs):
     t = tbl[0]
     ai, aj = tbl[1]
     aa = kwargs.get('aa')
