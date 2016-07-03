@@ -38,6 +38,8 @@ class Timestream(container.BasicTod):
     freq_data_operate
     pol_data_operate
     bl_data_operate
+    time_and_bl_data_operate
+    pol_and_bl_data_operate
 
     """
 
@@ -426,7 +428,7 @@ class Timestream(container.BasicTod):
         Parameters
         ----------
         func : function object
-            The opertation function object. It is of type func(array, **kwargs),
+            The opertation function object. It is of type func(array, self, **kwargs),
             which will operate on the array and return an new array with the same
             shape and dtype.
         **kwargs : any other arguments
@@ -442,7 +444,7 @@ class Timestream(container.BasicTod):
         ----------
         func : function object
             The opertation function object. It is of type func(array,
-            local_index=None, global_index=None, jul_date=None, **kwargs), which
+            local_index, global_index, jul_date, self, **kwargs), which
             will be called in a loop along the time axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
@@ -464,7 +466,7 @@ class Timestream(container.BasicTod):
         ----------
         func : function object
             The opertation function object. It is of type func(array,
-            local_index=None, global_index=None, freq=None, **kwargs), which
+            local_index, global_index, freq, self, **kwargs), which
             will be called in a loop along the frequency axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
@@ -486,7 +488,7 @@ class Timestream(container.BasicTod):
         ----------
         func : function object
             The opertation function object. It is of type func(array,
-            local_index=None, global_index=None, pol=None, **kwargs), which
+            local_index, global_index, pol, self, **kwargs), which
             will be called in a loop along the polarization axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
@@ -508,7 +510,7 @@ class Timestream(container.BasicTod):
         ----------
         func : function object
             The opertation function object. It is of type func(array,
-            local_index=None, global_index=None, bl=None, **kwargs), which
+            local_index, global_index, bl, self, **kwargs), which
             will be called in a loop along the baseline axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
@@ -530,7 +532,7 @@ class Timestream(container.BasicTod):
         ----------
         func : function object
             The opertation function object. It is of type func(array,
-            local_index=None, global_index=None, tbl=None, **kwargs), which
+            local_index, global_index, tbl, self, **kwargs), which
             will be called in a loop along the time and baseline axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
@@ -545,7 +547,7 @@ class Timestream(container.BasicTod):
 
         """
         self.data_operate(func, op_axis=('time', 'baseline'), axis_vals=(self.time, self.bl), full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
-        
+
     def pol_and_bl_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
         """Data operation along the polarization and baseline axis.
 
@@ -553,7 +555,7 @@ class Timestream(container.BasicTod):
         ----------
         func : function object
             The opertation function object. It is of type func(array,
-            local_index=None, global_index=None, pbl=None, **kwargs), which
+            local_index, global_index, pbl, self, **kwargs), which
             will be called in a loop along the polarization and baseline axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section

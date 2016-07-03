@@ -411,7 +411,7 @@ class RawTimestream(container.BasicTod):
         Parameters
         ----------
         func : function object
-            The opertation function object. It is of type func(array, **kwargs),
+            The opertation function object. It is of type func(array, self, **kwargs),
             which will operate on the array and return an new array with the same
             shape and dtype.
         **kwargs : any other arguments
@@ -427,7 +427,7 @@ class RawTimestream(container.BasicTod):
         ----------
         func : function object
             The opertation function object. It is of type func(array,
-            local_index=None, global_index=None, jul_date=None, **kwargs), which
+            local_index, global_index, jul_date, self, **kwargs), which
             will be called in a loop along the time axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
@@ -449,7 +449,7 @@ class RawTimestream(container.BasicTod):
         ----------
         func : function object
             The opertation function object. It is of type func(array,
-            local_index=None, global_index=None, freq=None, **kwargs), which
+            local_index=, global_index, freq, self, **kwargs), which
             will be called in a loop along the frequency axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
@@ -471,7 +471,7 @@ class RawTimestream(container.BasicTod):
         ----------
         func : function object
             The opertation function object. It is of type func(array,
-            local_index=None, global_index=None, chanpair=None, **kwargs), which
+            local_index, global_index, chanpair, self, **kwargs), which
             will be called in a loop along the channelpair axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section

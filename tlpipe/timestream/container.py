@@ -992,9 +992,9 @@ class BasicTod(memh5.MemDiskGroup):
         Parameters
         ----------
         func : function object
-            The opertation function object. It is of type func(array, **kwargs) if
-            `op_axis=None`, func(array, local_index=None, global_index=None,
-            axis_val=None, **kwargs) else.
+            The opertation function object. It is of type func(array, self,
+            **kwargs) if `op_axis=None`, func(array, local_index, global_index,
+            axis_val, self, **kwargs) else.
         op_axis : None, string or integer, tuple of string or interger, optional
             Axis along which `func` will opterate. If None, `func` will operate on
             the whole main dataset (but note: since the main data is distributed
@@ -1021,7 +1021,7 @@ class BasicTod(memh5.MemDiskGroup):
         """
 
         if op_axis is None:
-            self.main_data.local_data[:] = func(self.main_data.local_data[:], **kwargs)
+            self.main_data.local_data[:] = func(self.main_data.local_data[:], self, **kwargs)
         elif isinstance(op_axis, int) or isinstance(op_axis, basestring):
             axis = check_axis(op_axis, self.main_data_axes)
             data_sel = [ slice(0, None) ] * len(self.main_data_axes)
@@ -1037,7 +1037,7 @@ class BasicTod(memh5.MemDiskGroup):
                     axis_val = axis_vals[lind]
                 else:
                     axis_val = axis_vals
-                self.main_data.local_data[data_sel] = func(self.main_data.local_data[data_sel], lind, gind, axis_val, **kwargs)
+                self.main_data.local_data[data_sel] = func(self.main_data.local_data[data_sel], lind, gind, axis_val, self, **kwargs)
             if full_data and keep_dist_axis:
                 self.redistribute(original_dist_axis)
         elif isinstance(op_axis, tuple):
@@ -1065,7 +1065,7 @@ class BasicTod(memh5.MemDiskGroup):
                         axis_val += (axis_vals[ai][lind[ai]],)
                     else:
                         axis_val += (axis_vals[ai],)
-                self.main_data.local_data[data_sel] = func(self.main_data.local_data[data_sel], lind, gind, axis_val, **kwargs)
+                self.main_data.local_data[data_sel] = func(self.main_data.local_data[data_sel], lind, gind, axis_val, self, **kwargs)
             if full_data and keep_dist_axis:
                 self.redistribute(original_dist_axis)
         else:
