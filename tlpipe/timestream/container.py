@@ -327,7 +327,7 @@ class BasicTod(memh5.MemDiskGroup):
     @property
     def time_ordered_datasets(self):
         """Time ordered datasets."""
-        return self._time_ordered_datasets
+        return tuple(set(self._main_time_ordered_datasets + self._time_ordered_datasets))
 
     @time_ordered_datasets.setter
     def time_ordered_datasets(self, value):
