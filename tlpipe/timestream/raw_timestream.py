@@ -486,6 +486,29 @@ class RawTimestream(container.BasicTod):
         """
         self.data_operate(func, op_axis='channelpair', axis_vals=self.bl, full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
 
+    def freq_and_bl_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
+        """Data operation along the frequency and baseline axis.
+
+        Parameters
+        ----------
+        func : function object
+            The opertation function object. It is of type func(array,
+            local_index, global_index, fbl, self, **kwargs), which
+            will be called in a loop along the frequency and baseline axis.
+        full_data : bool, optional
+            Whether the operations of `func` will need the full data section
+            corresponding to the axis index, if True, the main data will first
+            redistributed along frequency or baseline axis which is longer.
+            Default False.
+        keep_dist_axis : bool, optional
+            Whether to redistribute main data to baseline axis if the dist axis
+            has changed during the operation. Default False.
+        **kwargs : any other arguments
+            Any other arguments that will passed to `func`.
+
+        """
+        self.data_operate(func, op_axis=('frequency', 'channelpair'), axis_vals=(self.freq, self.bl), full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+
 
     def separate_pol_and_bl(self, keep_dist_axis=False):
         """Separate channelpair axis to polarization and baseline.
