@@ -4,6 +4,7 @@ import itertools
 import warnings
 import numpy as np
 import h5py
+from caput import mpiarray
 from caput import memh5
 from caput import mpiutil
 
@@ -121,6 +122,8 @@ class BasicTod(memh5.MemDiskGroup):
     group_name_allowed
     dataset_name_allowed
     attrs_name_allowed
+    create_time_ordered_dataset
+    create_main_time_ordered_dataset
     add_history
     info
     redistribute
@@ -768,6 +771,75 @@ class BasicTod(memh5.MemDiskGroup):
     def attrs_name_allowed(self, name):
         """Whether to allow the access of the given root level attribute."""
         return True if name not in self.time_ordered_attrs else False
+
+    def create_time_ordered_dataset(self, name, data, recreate=False, copy_attrs=False):
+        """Create a time ordered dataset.
+
+        Parameters
+        ----------
+        name : string
+            Name of the dataset.
+        data : np.ndarray or MPIArray
+            The data to create a dataset.
+        recreate : bool, optional
+            If True will recreate a dataset with this name if it already exists,
+            else a RuntimeError will be rasised. Default False.
+        copy_attrs : bool, optional
+            If True, when recreate the dataset, its original attributes will be
+            copyed to the new dataset, else no copy is done. Default Fasle.
+
+        """
+
+        if not name in self.iterkeys():
+            if self.main_data_dist_axis == 0:
+                self.create_dataset(name, data=data, distributed=True, distributed_axis=0)
+            else:
+                self.create_dataset(name, data=data)
+        else:
+            if recreate:
+                if copy_attrs:
+                    attr_dict = {} # temporarily save attrs of this dataset
+                    copyattrs(self[name].attrs, attr_dict)
+                del self[name]
+                if self.main_data_dist_axis == 0:
+                    self.create_dataset(name, data=data, distributed=True, distributed_axis=0)
+                else:
+                    self.create_dataset(name, data=data)
+                if copy_attrs:
+                    copyattrs(attr_dict, self[name].attrs)
+            else:
+                raise RuntimeError('Dataset %s already exists' % name)
+
+        self.time_ordered_datasets = self.time_ordered_datasets + (name,)
+
+    def create_main_time_ordered_dataset(self, name, data, recreate=False, copy_attrs=False):
+        """Create a main type time ordered dataset.
+
+        Parameters
+        ----------
+        name : string
+            Name of the dataset.
+        data : np.ndarray or MPIArray
+            The data to create a dataset.
+        recreate : bool, optional
+            If True will recreate a dataset with this name if it already exists,
+            else a RuntimeError will be rasised. Default False.
+        copy_attrs : bool, optional
+            If True, when recreate the dataset, its original attributes will be
+            copyed to the new dataset, else no copy is done. Default Fasle.
+
+        """
+
+        if isinstance(data, mpiarray.MPIArray):
+            shape = data.global_shape
+        else:
+            shape = data.shape
+        if shape[0] != self.main_data.shape[0]:
+            raise ValueError('Time axis does not align with main data, can not create a main time ordered dataset')
+
+        self.create_time_ordered_dataset(name, data, recreate, copy_attrs)
+
+        self.main_time_ordered_datasets = self.main_time_ordered_datasets + (name,)
 
     @property
     def history(self):
