@@ -606,7 +606,12 @@ class RawTimestream(container.BasicTod):
                 if dset.common:
                     ts.create_dataset(dset_name, data=dset)
                 else:
-                    ts.create_dataset(dset_name, data=dset, shape=dset.shape, dtype=dset.dtype, distributed=True, distributed_axis=dset.distributed_axis)
+                    if dset_name in self.main_time_ordered_datasets:
+                        ts.create_main_time_ordered_dataset(dset_name, data=dset.data)
+                    elif dset_name in self.time_ordered_datasets:
+                        ts.create_time_ordered_dataset(dset_name, data=dset.data)
+                    else:
+                        ts.create_dataset(dset_name, data=dset, shape=dset.shape, dtype=dset.dtype, distributed=True, distributed_axis=dset.distributed_axis)
                 # copy attrs of this dset
                 memh5.copyattrs(dset.attrs, ts[dset_name].attrs)
 
