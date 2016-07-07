@@ -11,42 +11,58 @@ class Detect(tod_task.SingleRawTimestream):
     """Detect noise source signal."""
 
     params_init = {
-                    'bl': (1, 2), # use this bl
-                    'threshold': 1.0, # or yy
+                    'feed': 1, # use this feed
+                    'sigma': 3.0,
                   }
 
     prefix = 'dt_'
 
     def process(self, rt):
 
-        bl = self.params['bl']
-        threshold = self.params['threshold']
+        feed = self.params['feed']
+        sigma = self.params['sigma']
 
         rt.redistribute(0) # make time the dist axis
 
         bls = [ set(b) for b in rt.bl ]
-        bl_ind = bls.index(set(bl))
+        bl_ind = bls.index({feed})
 
-        t_mean = np.mean(np.abs(rt.main_data.local_data[:, :, bl_ind]), axis=-1)
-        tt_mean = mpiutil.gather_array(t_mean, root=None)
+        tt_mean = mpiutil.gather_array(np.mean(rt.main_data.local_data[:, :, bl_ind].real, axis=-1), root=None)
+        df =  np.diff(tt_mean, axis=-1)
+        pdf = np.where(df>0, df, 0)
+        pinds = np.where(pdf>pdf.mean() + sigma*pdf.std())[0]
+        pinds = pinds + 1
+        ndf = np.where(df<0, df, 0)
+        ninds = np.where(ndf<ndf.mean() - sigma*ndf.std())[0]
+        ninds = ninds + 1
+        if ninds[0] < pinds[0]:
+            pinds = np.insert(pinds, 0, 0)
+        if pinds[-1] > ninds[-1]:
+            ninds = np.insert(ninds, len(ninds), len(ninds))
+        if len(pinds) != len(ninds):
+            raise RuntimeError('Something wrong happened when detect the noise signal')
 
-        ns_on = np.where(tt_mean>threshold*tt_mean.mean(), 1, 0) # 1 for noise on
-        diff_ns = np.diff(ns_on)
-        on_inds = np.where(diff_ns==1)[0]
-        first_on = on_inds[0]
-        second_on = on_inds[1]
-        off_inds = np.where(diff_ns==-1)[0]
-        if off_inds[0] > first_on and off_inds[0] < second_on:
-            first_off = off_inds[0]
-        elif off_inds[1] > first_on and off_inds[1] < second_on:
-            first_off = off_inds[1]
-        else:
-            raise RuntimeError('Some thing wrong happend, could not determine first on/off ind')
+        period = np.sort(np.concatenate([np.diff(pinds), np.diff(ninds)]))[-1]
+        on_time = np.sort(ninds-pinds)[-1]
+        off_time = np.sort(pinds[1:] - ninds[:-1])[-1]
+        if period != on_time + off_time:
+            raise RuntimeError('period %d != on_time %d + off_time %d' % (period, on_time, off_time))
+        num_period = np.int(np.ceil(len(tt_mean) / np.float(period)))
+        tmp_ns_on = np.array(([True] * on_time + [False] * off_time) * num_period)[:len(tt_mean)]
+        for si, ei in zip(pinds[:-1], pinds[1:]):
+            if ei - si == period:
+                ns_on = np.roll(tmp_ns_on, si)
 
-        cycle = [True] * (first_off - first_on) + [False] * (second_on - first_off)
-        cycle = np.roll(np.array(cycle), first_on+1)
-        num_cycle = int(np.ceil(float(len(ns_on)) / len(cycle)))
-        ns_on = np.array(cycle.tolist() * num_cycle)[:len(ns_on)]
+        # import matplotlib
+        # matplotlib.use('Agg')
+        # import matplotlib.pyplot as plt
+        # plt.figure()
+        # plt.plot(np.where(ns_on, np.nan, tt_mean))
+        # # plt.plot(pinds, tt_mean[pinds], 'ro')
+        # # plt.plot(ninds, tt_mean[ninds], 'go')
+        # plt.savefig('df.png')
+        # err
+
         ns_on = mpiarray.MPIArray.from_numpy_array(ns_on)
 
         rt.create_main_time_ordered_dataset('ns_on', ns_on)
