@@ -921,7 +921,8 @@ class BasicTod(memh5.MemDiskGroup):
                     if axis == 0:
                         self.dataset_common_to_distributed(dset_name, distributed_axis=0)
                     else:
-                        self.dataset_distributed_to_common(dset_name)
+                        if self[dset_name].distributed:
+                            self.dataset_distributed_to_common(dset_name)
 
     def check_status(self):
         """Check that data hold in this container is consistent.
