@@ -30,18 +30,22 @@ def plot(vis, li, gi, bl, obj, **kwargs):
         vis1 = vis.copy()
         on = np.where(obj['ns_on'][:])[0]
         vis1[on] = complex(np.nan, np.nan)
-        # vis1 = np.where(obj['ns_on'][:], complex(np.nan, np.nan), vis)
     else:
         vis1 = vis
 
     import matplotlib.pyplot as plt
 
     plt.figure()
+
+    freq = obj.freq[:]
+    jul_date = obj.time[:]
+    extent = [freq[0], freq[-1], jul_date[0], jul_date[-1]]
+
     plt.subplot(121)
-    plt.imshow(vis1.real, origin='lower', aspect='auto')
+    plt.imshow(vis1.real, extent=extent, origin='lower', aspect='auto')
     plt.colorbar()
     plt.subplot(122)
-    plt.imshow(vis1.imag, origin='lower', aspect='auto')
+    plt.imshow(vis1.imag, extent=extent, origin='lower', aspect='auto')
     plt.colorbar()
     if pol is None:
         fig_name = '%s_%d_%d.png' % (fig_prefix, bl[0], bl[1])
