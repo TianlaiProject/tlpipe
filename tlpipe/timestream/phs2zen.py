@@ -34,7 +34,7 @@ class Phs2zen(tod_task.SingleTimestream):
     """Phase the source-phased visibility data to the zenith, this is just the inverse operation of phs2src.py."""
 
     params_init = {
-                    'source': 'cas', # <src_name> or <ra XX[:XX:xx]>_<dec XX[:XX:xx]> or <time y/m/d h:m:s> (array pointing of this local time)
+                    'source': 'cyg', # <src_name> or <ra XX[:XX:xx]>_<dec XX[:XX:xx]> or <time y/m/d h:m:s> (array pointing of this local time)
                     'catalog': 'misc,helm,nvss',
                   }
 
@@ -61,10 +61,10 @@ class Phs2zen(tod_task.SingleTimestream):
         if ant_type == 'dish':
             aa = tldishes.get_aa(1.0e-3 * ts.freq[:]) # use GHz
             # make all antennas point to the pointing direction
-            for ind, ai in enumerate(aa):
-                if ind in feedno:
-                    fi = feedno.index(ind)
-                    ai.set_pointing(az=antpointing[fi, 0], alt=antpointing[fi, 1], twist=0)
+            # for ind, ai in enumerate(aa):
+            #     if ind+1 in feedno:
+            #         fi = feedno.index(ind+1)
+            #         ai.set_pointing(az=antpointing[fi, 0], alt=antpointing[fi, 1], twist=0)
         else:
             raise NotImplementedError('phs2zen for cylinder array not implemented yet')
 
