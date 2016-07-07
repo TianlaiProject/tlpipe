@@ -487,7 +487,8 @@ class Manager(object):
             try:
                 task = self._setup_task(task_spec)
             except PipelineConfigError as e:
-                msg = "Setting up task %d caused an error - " % ii
+                # msg = "Setting up task %d caused an error - " % ii
+                msg = "Setting up task %d: %s caused an error - " % (ii, task_spec.__name__)
                 msg += str(e)
                 new_e = PipelineConfigError(msg)
                 # This preserves the traceback.
