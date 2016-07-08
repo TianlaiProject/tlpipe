@@ -85,11 +85,15 @@ class PsCal(tod_task.SingleTimestream):
         if ant_type == 'dish':
             aa = tldishes.get_aa(1.0e-3 * lfreq) # use GHz
             # make all antennas point to the pointing direction
-            for ind, ai in enumerate(aa):
-                if ind+1 in feedno: # feedno start from 1
-                    fi = feedno.index(ind+1)
-                    # ai.set_pointing(az=antpointing[fi, 0], alt=antpointing[fi, 1], twist=0)
-                    ai.set_pointing(az=0, alt=np.pi/2, twist=0)
+            for fd in feedno:
+                # feedno start from 1
+                # aa[fd-1].set_pointing(az=antpointing[fi, 0], alt=antpointing[fi, 1], twist=0)
+                aa[fd-1].set_pointing(az=0, alt=np.pi/2, twist=0)
+            # for ind, ai in enumerate(aa):
+            #     if ind+1 in feedno: # feedno start from 1
+            #         fi = feedno.index(ind+1)
+            #         # ai.set_pointing(az=antpointing[fi, 0], alt=antpointing[fi, 1], twist=0)
+            #         ai.set_pointing(az=0, alt=np.pi/2, twist=0)
         else:
             raise NotImplementedError('ps_cal for cylinder array not implemented yet')
 

@@ -61,6 +61,10 @@ class Phs2zen(tod_task.SingleTimestream):
         if ant_type == 'dish':
             aa = tldishes.get_aa(1.0e-3 * ts.freq[:]) # use GHz
             # make all antennas point to the pointing direction
+            for fd in feedno:
+                # feedno start from 1
+                # aa[fd-1].set_pointing(az=antpointing[fi, 0], alt=antpointing[fi, 1], twist=0)
+                aa[fd-1].set_pointing(az=0, alt=np.pi/2, twist=0)
             # for ind, ai in enumerate(aa):
             #     if ind+1 in feedno:
             #         fi = feedno.index(ind+1)
