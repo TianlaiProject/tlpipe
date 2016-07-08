@@ -1,17 +1,16 @@
 import itertools
-import warnings
 import numpy as np
 import container
+import timestream_common
 from caput import mpiarray
 from caput import memh5
-from caput import mpiutil
 
 
-class Timestream(container.BasicTod):
+class Timestream(timestream_common.TimestreamCommon):
     """Container class for the timestream data.
 
     This timestream data container is to hold time stream data that has polarization
-    and baseline separated from the channelpair in the raw timestream.
+    and baseline separated from the channel pairs in the raw timestream.
 
     Parameters
     ----------
@@ -19,64 +18,51 @@ class Timestream(container.BasicTod):
 
     Attributes
     ----------
-    time
-    freq
     pol
+    pol_ordered_datasets
 
     Methods
     -------
-    time_select
-    frequency_select
     polarization_select
     feed_select
+    create_pol_ordered_dataset
     redistribute
     check_status
     lin2stokes
     stokes2lin
-    all_data_operate
-    time_data_operate
-    freq_data_operate
     pol_data_operate
-    bl_data_operate
-    time_and_bl_data_operate
     pol_and_bl_data_operate
 
     """
 
     _main_data_name = 'vis'
     _main_data_axes = ('time', 'frequency', 'polarization', 'baseline')
-    _main_time_ordered_datasets = ('vis', 'sec1970', 'jul_date')
-    _time_ordered_datasets = _main_time_ordered_datasets + ('weather',)
-    _time_ordered_attrs = ()
+    _main_time_ordered_datasets = {'vis', 'sec1970', 'jul_date'}
+    _time_ordered_datasets = _main_time_ordered_datasets | {'weather'}
+    _time_ordered_attrs = {'obstime', 'sec1970'}
+    _freq_ordered_datasets = {'freq'}
+    _pol_ordered_datasets = {'pol'}
+    _bl_ordered_datasets = {'blorder'}
+    _feed_ordered_datasets = {'antpointing', 'feedno', 'feedpos', 'polerr'}
 
 
-    def time_select(self, value):
-        """Select data to be loaded from input files along the time axis.
+    @property
+    def pol_ordered_datasets(self):
+        """Polarization ordered datasets."""
+        return self._pol_ordered_datasets
 
-        Parameters
-        ----------
-        value : tuple or list
-            If a tuple, which will be created as a slice(start, stop, step) object,
-            so it can have one to three elements (integers or None); if a list, its
-            elements must be strictly increasing non-negative integers, data in
-            these positions will be selected.
+    @pol_ordered_datasets.setter
+    def pol_ordered_datasets(self, value):
+        if isinstance(value, basestring):
+            self._pol_ordered_datasets = {value}
+        elif hasattr(value, '__iter__'):
+            for val in value:
+                if not isinstance(val, basestring):
+                    raise ValueError('Attribute pol_ordered_datasets must be a set of strings')
+            self._pol_ordered_datasets = set(value)
+        else:
+            raise ValueError('Attribute pol_ordered_datasets must be a set of strings')
 
-        """
-        self.data_select('time', value)
-
-    def frequency_select(self, value):
-        """Select data to be loaded from input files along the frequency axis.
-
-        Parameters
-        ----------
-        value : tuple or list
-            If a tuple, which will be created as a slice(start, stop, step) object,
-            so it can have one to three elements (integers or None); if a list, its
-            elements must be strictly increasing non-negative integers, data in
-            these positions will be selected.
-
-        """
-        self.data_select('frequency', value)
 
     def polarization_select(self, value):
         """Select data to be loaded from input files along the polarization axis.
@@ -91,22 +77,6 @@ class Timestream(container.BasicTod):
 
         """
         self.data_select('polarization', value)
-
-    _feed_select = None
-
-    # def baseline_select(self, value):
-    #     """Select data to be loaded from input files along the baseline axis.
-
-    #     Parameters
-    #     ----------
-    #     value : tuple or list
-    #         If a tuple, which will be created as a slice(start, stop, step) object,
-    #         so it can have one to three elements (integers or None); if a list, its
-    #         elements must be strictly increasing non-negative integers, data in
-    #         these positions will be selected.
-
-    #     """
-    #     self.data_select('baseline', value)
 
     def feed_select(self, value=(0, None), corr='all'):
         """Select data to be loaded from inputs files corresponding to the specified feeds.
@@ -160,64 +130,6 @@ class Timestream(container.BasicTod):
         self._feed_select = feeds
 
 
-    def _load_a_special_common_dataset(self, name, axis_name):
-        ### load a common dataset that need to take specail care
-        ### this dataset need to distributed along axis_name is axis_name is just the self.main_data_dist_axis
-        dset = self.infiles[0][name]
-        axis = self.main_data_axes.index(axis_name)
-        tmp = np.arange(dset.shape[0])
-        sel = tmp[self._main_data_select[axis]].tolist()
-        shp = (len(sel),) + dset.shape[1:] # the global shape
-        # if axis_name is just the distributed axis, load dataset distributed
-        if axis == self.main_data_dist_axis:
-            sel = mpiutil.mpilist(sel, method='con', comm=self.comm)
-            self.create_dataset(name, shape=shp, dtype=dset.dtype, distributed=True, distributed_axis=0)
-            self[name].local_data[:] = dset[sel]
-        else:
-            self.create_dataset(name, data=dset[sel])
-        # copy attrs of this dset
-        memh5.copyattrs(dset.attrs, self[name].attrs)
-
-    def _load_a_common_dataset(self, name):
-        ### load a common dataset from the first file
-        # special care need take for blorder, just load the selected blorders
-        if name == 'freq':
-            self._load_a_special_common_dataset(name, 'frequency')
-        elif name == 'pol':
-            self._load_a_special_common_dataset(name, 'polarization')
-        elif name == 'blorder':
-            self._load_a_special_common_dataset(name, 'baseline')
-        elif name == 'feedno' and not self._feed_select is None:
-            self.create_dataset(name, data=self._feed_select)
-        elif name in ('polerr', 'feedpos', 'antpointing') and not self._feed_select is None:
-            fh = self.infiles[0]
-            feedno = fh['feedno'][:].tolist()
-            feed_inds = [ feedno.index(fd) for fd in self._feed_select ]
-            if name == 'antpointing':
-                self.create_dataset(name, data=fh[name][:, feed_inds])
-            else:
-                self.create_dataset(name, data=fh[name][feed_inds])
-
-        else:
-            super(Timestream, self)._load_a_common_dataset(name)
-
-
-    @property
-    def time(self):
-        """Return the jul_date dataset for convenient use."""
-        try:
-            return self['jul_date']
-        except KeyError:
-            raise KeyError('jul_date does not exist, try to load it first')
-
-    @property
-    def freq(self):
-        """Return the freq dataset for convenient use."""
-        try:
-            return self['freq']
-        except KeyError:
-            raise KeyError('freq does not exist, try to load it first')
-
     @property
     def pol(self):
         """Return the pol dataset for convenient use."""
@@ -226,13 +138,28 @@ class Timestream(container.BasicTod):
         except KeyError:
             raise KeyError('pol does not exist, try to load it first')
 
-    @property
-    def bl(self):
-        """Return the blorder dataset for convenient use."""
-        try:
-            return self['blorder']
-        except KeyError:
-            raise KeyError('blorder does not exist, try to load it first')
+
+    def create_pol_ordered_dataset(self, name, data, recreate=False, copy_attrs=False):
+        """Create a polarization ordered dataset.
+
+        Parameters
+        ----------
+        name : string
+            Name of the dataset.
+        data : np.ndarray or MPIArray
+            The data to create a dataset.
+        recreate : bool, optional
+            If True will recreate a dataset with this name if it already exists,
+            else a RuntimeError will be rasised. Default False.
+        copy_attrs : bool, optional
+            If True, when recreate the dataset, its original attributes will be
+            copyed to the new dataset, else no copy is done. Default Fasle.
+
+        """
+
+        self._create_axis_ordered_dataset('polarization', name, data, recreate, copy_attrs)
+
+        self.pol_ordered_datasets.add(name)
 
 
     def redistribute(self, dist_axis):
@@ -260,40 +187,17 @@ class Timestream(container.BasicTod):
         else:
             super(Timestream, self).redistribute(dist_axis)
 
-            if 'time' == self.main_data_axes[axis]:
-                if self.freq.distributed:
-                    self.dataset_distributed_to_common('freq')
-                if self.pol.distributed:
-                    self.dataset_distributed_to_common('pol')
-                if self.bl.distributed:
-                    self.dataset_distributed_to_common('blorder')
-
-            # distribute freq
-            elif 'frequency' == self.main_data_axes[axis]:
-                if self.freq.common:
-                    self.dataset_common_to_distributed('freq', distributed_axis=0)
-                if self.pol.distributed:
-                    self.dataset_distributed_to_common('pol')
-                if self.bl.distributed:
-                    self.dataset_distributed_to_common('blorder')
-
             # distribute pol
-            elif 'polarization' == self.main_data_axes[axis]:
-                if self.pol.common:
-                    self.dataset_common_to_distributed('pol', distributed_axis=0)
-                if self.freq.distributed:
-                    self.dataset_distributed_to_common('freq')
-                if self.bl.distributed:
-                    self.dataset_distributed_to_common('blorder')
+            if 'polarization' == self.main_data_axes[axis]:
+                for name in self.pol_ordered_datasets:
+                    if name in self.iterkeys() and self[name].common:
+                        self.dataset_common_to_distributed(name, distributed_axis=0)
 
-            # distribute blorder
-            elif 'baseline' == self.main_data_axes[axis]:
-                if self.bl.common:
-                    self.dataset_common_to_distributed('blorder', distributed_axis=0)
-                if self.freq.distributed:
-                    self.dataset_distributed_to_common('freq')
-                if self.pol.distributed:
-                    self.dataset_distributed_to_common('pol')
+            elif self.main_data_axes[axis] in ('time', 'frequency', 'baseline'):
+                for name in self.pol_ordered_datasets:
+                    if name in self.iterkeys() and self[name].distributed:
+                        self.dataset_distributed_to_common(name)
+
 
     def check_status(self):
         """Check that data hold in this container is consistent. """
@@ -302,31 +206,19 @@ class Timestream(container.BasicTod):
         super(Timestream, self).check_status()
 
         # additional checks
-        if 'time' == self.main_data_axes[self.main_data_dist_axis]:
-            for name in ('freq', 'pol', 'blorder'):
-                if not self[name].common:
-                    raise RuntimeError('Dataset %s should be common when time is the distributed axis' % name)
-        elif 'frequency' == self.main_data_axes[self.main_data_dist_axis]:
-            if not self['freq'].distributed:
-                raise RuntimeError('Dataset freq should be distributed when frequency is the distributed axis')
-            if not self['pol'].common:
-                raise RuntimeError('Dataset pol should be common when frequency is the distributed axis')
-            if not self['blorder'].common:
-                raise RuntimeError('Dataset blorder should be common when frequency is the distributed axis')
-        elif 'polarization' == self.main_data_axes[self.main_data_dist_axis]:
-            if not self['freq'].common:
-                raise RuntimeError('Dataset freq should be common when polarization is the distributed axis')
-            if not self['pol'].distributed:
-                raise RuntimeError('Dataset pol should be distributed when polarization is the distributed axis')
-            if not self['blorder'].common:
-                raise RuntimeError('Dataset blorder should be common when polarization is the distributed axis')
-        elif 'baseline' == self.main_data_axes[self.main_data_dist_axis]:
-            if not self['freq'].common:
-                raise RuntimeError('Dataset freq should be common when baseline is the distributed axis')
-            if not self['pol'].common:
-                raise RuntimeError('Dataset pol should be common when baseline is the distributed axis')
-            if not self['blorder'].distributed:
-                raise RuntimeError('Dataset blorder should be distributed when baseline is the distributed axis')
+        if 'polarization' == self.main_data_axes[self.main_data_dist_axis]:
+            for name in self.pol_ordered_datasets:
+                if name in self.iterkeys() and not self[name].distributed:
+                    raise RuntimeError('Dataset %s should be distributed when polarization is the distributed axis' % name)
+            for name in self.time_ordered_datasets | self.freq_ordered_datasets | self.bl_ordered_datasets:
+                if name in self.iterkeys() and not self[name].common:
+                    raise RuntimeError('Dataset %s should be common when polarization is the distributed axis' % name)
+
+        else:
+            axis_name = self.main_data_axes[self.main_data_dist_axis]
+            for name in self.pol_ordered_datasets:
+                if name in self.iterkeys() and not self[name].common:
+                    raise RuntimeError('Dataset %s should be common when %s is the distributed axis' % (name, axis_name))
 
 
     def lin2stokes(self):
@@ -418,69 +310,6 @@ class Timestream(container.BasicTod):
             raise RuntimeError('Can not conver to linear polarization')
 
 
-    def all_data_operate(self, func, **kwargs):
-        """Operation to the whole main data.
-
-        Note since the main data is distributed on different processes, `func`
-        should not have operations that depend on elements not held in the local
-        array of each process
-
-        Parameters
-        ----------
-        func : function object
-            The opertation function object. It is of type func(array, self, **kwargs),
-            which will operate on the array and return an new array with the same
-            shape and dtype.
-        **kwargs : any other arguments
-            Any other arguments that will passed to `func`.
-
-        """
-        self.data_operate(func, op_axis=None, axis_vals=0, full_data=False, keep_dist_axis=False, **kwargs)
-
-    def time_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
-        """Data operation along the time axis.
-
-        Parameters
-        ----------
-        func : function object
-            The opertation function object. It is of type func(array,
-            local_index, global_index, jul_date, self, **kwargs), which
-            will be called in a loop along the time axis.
-        full_data : bool, optional
-            Whether the operations of `func` will need the full data section
-            corresponding to the axis index, if True, the main data will first
-            redistributed along the time axis. Default False.
-        keep_dist_axis : bool, optional
-            Whether to redistribute main data to time axis if the dist axis has
-            changed during the operation. Default False.
-        **kwargs : any other arguments
-            Any other arguments that will passed to `func`.
-
-        """
-        self.data_operate(func, op_axis='time', axis_vals=self.time, full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
-
-    def freq_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
-        """Data operation along the frequency axis.
-
-        Parameters
-        ----------
-        func : function object
-            The opertation function object. It is of type func(array,
-            local_index, global_index, freq, self, **kwargs), which
-            will be called in a loop along the frequency axis.
-        full_data : bool, optional
-            Whether the operations of `func` will need the full data section
-            corresponding to the axis index, if True, the main data will first
-            redistributed along frequency axis. Default False.
-        keep_dist_axis : bool, optional
-            Whether to redistribute main data to frequency axis if the dist axis has
-            changed during the operation. Default False.
-        **kwargs : any other arguments
-            Any other arguments that will passed to `func`.
-
-        """
-        self.data_operate(func, op_axis='frequency', axis_vals=self.freq, full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
-
     def pol_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
         """Data operation along the polarization axis.
 
@@ -503,50 +332,6 @@ class Timestream(container.BasicTod):
         """
         self.data_operate(func, op_axis='polarization', axis_vals=self.pol, full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
 
-    def bl_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
-        """Data operation along the baseline axis.
-
-        Parameters
-        ----------
-        func : function object
-            The opertation function object. It is of type func(array,
-            local_index, global_index, bl, self, **kwargs), which
-            will be called in a loop along the baseline axis.
-        full_data : bool, optional
-            Whether the operations of `func` will need the full data section
-            corresponding to the axis index, if True, the main data will first
-            redistributed along baseline axis. Default False.
-        keep_dist_axis : bool, optional
-            Whether to redistribute main data to baseline axis if the dist axis
-            has changed during the operation. Default False.
-        **kwargs : any other arguments
-            Any other arguments that will passed to `func`.
-
-        """
-        self.data_operate(func, op_axis='baseline', axis_vals=self.bl, full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
-
-    def time_and_bl_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
-        """Data operation along the time and baseline axis.
-
-        Parameters
-        ----------
-        func : function object
-            The opertation function object. It is of type func(array,
-            local_index, global_index, tbl, self, **kwargs), which
-            will be called in a loop along the time and baseline axis.
-        full_data : bool, optional
-            Whether the operations of `func` will need the full data section
-            corresponding to the axis index, if True, the main data will first
-            redistributed along time or baseline axis which is longer.
-            Default False.
-        keep_dist_axis : bool, optional
-            Whether to redistribute main data to baseline axis if the dist axis
-            has changed during the operation. Default False.
-        **kwargs : any other arguments
-            Any other arguments that will passed to `func`.
-
-        """
-        self.data_operate(func, op_axis=('time', 'baseline'), axis_vals=(self.time, self.bl), full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
 
     def pol_and_bl_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
         """Data operation along the polarization and baseline axis.

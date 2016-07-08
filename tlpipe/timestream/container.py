@@ -75,6 +75,8 @@ class BasicTod(memh5.MemDiskGroup):
 
     This container is intended to be an base class for other concreate data
     classes, so only basic input/output and a limited operations are provided.
+    Usally you should not use this class directly, use a concreate sub-class
+    instead.
 
     Parameters
     ----------
@@ -128,10 +130,18 @@ class BasicTod(memh5.MemDiskGroup):
     info
     redistribute
     check_status
-    data_operate
     to_files
+    data_operate
+    all_data_operate
 
     """
+
+    _main_data_name = None
+    _main_data_axes = () # time shold be the first axis
+    _main_time_ordered_datasets = {_main_data_name}
+    _time_ordered_datasets = {_main_data_name}
+    _time_ordered_attrs = {}
+
 
     def __init__(self, files=None, mode='r', start=0, stop=None, dist_axis=0, comm=None):
 
@@ -149,7 +159,7 @@ class BasicTod(memh5.MemDiskGroup):
 
         # self.main_data_shape, self.main_data_type, self.infiles_map = self._get_input_info(self.main_data_name, self.main_data_start, self.main_data_stop)
 
-        self._main_data_select = [ slice(0, None, None) for i in self._main_data_axes ]
+        self.main_data_select = [ slice(0, None, None) for i in self._main_data_axes ]
 
     def __del__(self):
         """Closes the opened file handlers."""
@@ -273,8 +283,6 @@ class BasicTod(memh5.MemDiskGroup):
         except KeyError:
             raise KeyError('Main data %s does not exist, try to load the main data first' % self.main_data_name)
 
-    _main_data_name = None
-
     @property
     def main_data_name(self):
         """Main data in the data container."""
@@ -286,8 +294,6 @@ class BasicTod(memh5.MemDiskGroup):
             self._main_data_name = value
         else:
             raise ValueError('Attribute main_data_name must be a string')
-
-    _main_data_axes = ()
 
     @property
     def main_data_axes(self):
@@ -306,8 +312,6 @@ class BasicTod(memh5.MemDiskGroup):
         else:
             raise ValueError('Attribute main_data_axes must be a tuple of strings')
 
-    _main_time_ordered_datasets = (_main_data_name,)
-
     @property
     def main_time_ordered_datasets(self):
         """Datasets that have same time points as the main data."""
@@ -316,35 +320,31 @@ class BasicTod(memh5.MemDiskGroup):
     @main_time_ordered_datasets.setter
     def main_time_ordered_datasets(self, value):
         if isinstance(value, basestring):
-            self._main_time_ordered_datasets = (value,)
+            self._main_time_ordered_datasets = {value}
         elif hasattr(value, '__iter__'):
             for val in value:
                 if not isinstance(val, basestring):
-                    raise ValueError('Attribute main_time_ordered_datasets must be a tuple of strings')
-            self._main_time_ordered_datasets = tuple(value)
+                    raise ValueError('Attribute main_time_ordered_datasets must be a set of strings')
+            self._main_time_ordered_datasets = set(value)
         else:
-            raise ValueError('Attribute main_time_ordered_datasets must be a tuple of strings')
-
-    _time_ordered_datasets = (_main_data_name,)
+            raise ValueError('Attribute main_time_ordered_datasets must be a set of strings')
 
     @property
     def time_ordered_datasets(self):
         """Time ordered datasets."""
-        return tuple(set(self._main_time_ordered_datasets + self._time_ordered_datasets))
+        return self._main_time_ordered_datasets | self._time_ordered_datasets
 
     @time_ordered_datasets.setter
     def time_ordered_datasets(self, value):
         if isinstance(value, basestring):
-            self._time_ordered_datasets = (value,)
+            self._time_ordered_datasets = {value}
         elif hasattr(value, '__iter__'):
             for val in value:
                 if not isinstance(val, basestring):
-                    raise ValueError('Attribute time_ordered_datasets must be a tuple of strings')
-            self._time_ordered_datasets = tuple(value)
+                    raise ValueError('Attribute time_ordered_datasets must be a set of strings')
+            self._time_ordered_datasets = set(value)
         else:
-            raise ValueError('Attribute time_ordered_datasets must be a tuple of strings')
-
-    _time_ordered_attrs = ()
+            raise ValueError('Attribute time_ordered_datasets must be a set of strings')
 
     @property
     def time_ordered_attrs(self):
@@ -354,17 +354,15 @@ class BasicTod(memh5.MemDiskGroup):
     @time_ordered_attrs.setter
     def time_ordered_attrs(self, value):
         if isinstance(value, basestring):
-            self._time_ordered_attrs = (value,)
+            self._time_ordered_attrs = {value}
         elif hasattr(value, '__iter__'):
             for val in value:
                 if not isinstance(val, basestring):
-                    raise ValueError('Attribute time_ordered_attrs must be a tuple of strings')
-            self._time_ordered_attrs = tuple(value)
+                    raise ValueError('Attribute time_ordered_attrs must be a set of strings')
+            self._time_ordered_attrs = set(value)
         else:
-            raise ValueError('Attribute time_ordered_attrs must be a tuple of strings')
+            raise ValueError('Attribute time_ordered_attrs must be a set of strings')
 
-
-    _main_data_select = None
 
     def data_select(self, axis, value):
         """Select data to be loaded from input files along the specified axis.
@@ -388,13 +386,13 @@ class BasicTod(memh5.MemDiskGroup):
             if value != (0, None):
                 raise NotImplementedError('Select data to be loaded along the first axis is not implemented yet')
         if isinstance(value, tuple):
-            self._main_data_select[axis] = slice(*value)
+            self.main_data_select[axis] = slice(*value)
         elif isinstance(value, list):
             if sorted(value) != value:
                 raise TypeError("Indexing elements must be in increasing order")
             if value[0] < 0:
                 raise TypeError("Indexing elements must be non-negative integers")
-            self._main_data_select[axis] = value
+            self.main_data_select[axis] = value
         else:
             raise ValueError('Unsupported data selection %s' % value)
 
@@ -473,7 +471,7 @@ class BasicTod(memh5.MemDiskGroup):
 
         # for main data
         if name == self.main_data_name:
-            main_data_select = self._main_data_select[:] # copy here to not change self._main_data_select
+            main_data_select = self.main_data_select[:] # copy here to not change self.main_data_select
             new_dset_shape = (dset_shape[0],)
             for axis in range(1, len(dset_shape)): # exclude the first axis
                 tmp = np.arange(dset_shape[axis])
@@ -653,8 +651,8 @@ class BasicTod(memh5.MemDiskGroup):
             warnings.warn('No input file')
             return
 
-        self.load_common()
         self.load_time_ordered()
+        self.load_common()
 
 
     def _del_an_attribute(self, name):
@@ -720,7 +718,6 @@ class BasicTod(memh5.MemDiskGroup):
                 self._del_a_dataset(dset_name)
 
         self.load_common()
-
 
     def reload_main_data(self):
         """Reload main data from all files."""
@@ -810,7 +807,7 @@ class BasicTod(memh5.MemDiskGroup):
             else:
                 raise RuntimeError('Dataset %s already exists' % name)
 
-        self.time_ordered_datasets = self.time_ordered_datasets + (name,)
+        self.time_ordered_datasets.add(name)
 
     def create_main_time_ordered_dataset(self, name, data, recreate=False, copy_attrs=False):
         """Create a main type time ordered dataset.
@@ -835,11 +832,11 @@ class BasicTod(memh5.MemDiskGroup):
         else:
             shape = data.shape
         if shape[0] != self.main_data.shape[0]:
-            raise ValueError('Time axis does not align with main data, can not create a main time ordered dataset')
+            raise ValueError('Time axis does not align with main data, can not create a main time ordered dataset %s' % name)
 
         self.create_time_ordered_dataset(name, data, recreate, copy_attrs)
 
-        self.main_time_ordered_datasets = self.main_time_ordered_datasets + (name,)
+        self.main_time_ordered_datasets.add(name)
 
     @property
     def history(self):
@@ -1143,3 +1140,22 @@ class BasicTod(memh5.MemDiskGroup):
                 self.redistribute(original_dist_axis)
         else:
             raise ValueError('Invalid op_axis: %s', op_axis)
+
+    def all_data_operate(self, func, **kwargs):
+        """Operation to the whole main data.
+
+        Note since the main data is distributed on different processes, `func`
+        should not have operations that depend on elements not held in the local
+        array of each process
+
+        Parameters
+        ----------
+        func : function object
+            The opertation function object. It is of type func(array, self, **kwargs),
+            which will operate on the array and return an new array with the same
+            shape and dtype.
+        **kwargs : any other arguments
+            Any other arguments that will passed to `func`.
+
+        """
+        self.data_operate(func, op_axis=None, axis_vals=0, full_data=False, keep_dist_axis=False, **kwargs)
