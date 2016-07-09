@@ -35,31 +35,31 @@ class Timestream(timestream_common.TimestreamCommon):
 
     """
 
-    _main_data_name = 'vis'
-    _main_data_axes = ('time', 'frequency', 'polarization', 'baseline')
-    _main_time_ordered_datasets = {'vis', 'sec1970', 'jul_date'}
-    _time_ordered_datasets = _main_time_ordered_datasets | {'weather'}
-    _time_ordered_attrs = {'obstime', 'sec1970'}
-    _freq_ordered_datasets = {'freq'}
-    _pol_ordered_datasets = {'pol'}
-    _bl_ordered_datasets = {'blorder'}
-    _feed_ordered_datasets = {'antpointing', 'feedno', 'feedpos', 'polerr'}
+    _main_data_name_ = 'vis'
+    _main_data_axes_ = ('time', 'frequency', 'polarization', 'baseline')
+    _main_time_ordered_datasets_ = {'vis', 'sec1970', 'jul_date'}
+    _time_ordered_datasets_ = _main_time_ordered_datasets_ | {'weather'}
+    _time_ordered_attrs_ = {'obstime', 'sec1970'}
+    _freq_ordered_datasets_ = {'freq'}
+    _pol_ordered_datasets_ = {'pol'}
+    _bl_ordered_datasets_ = {'blorder'}
+    _feed_ordered_datasets_ = {'antpointing', 'feedno', 'feedpos', 'polerr'}
 
 
     @property
     def pol_ordered_datasets(self):
         """Polarization ordered datasets."""
-        return self._pol_ordered_datasets
+        return self._pol_ordered_datasets_
 
     @pol_ordered_datasets.setter
     def pol_ordered_datasets(self, value):
         if isinstance(value, basestring):
-            self._pol_ordered_datasets = {value}
+            self._pol_ordered_datasets_ = {value}
         elif hasattr(value, '__iter__'):
             for val in value:
                 if not isinstance(val, basestring):
                     raise ValueError('Attribute pol_ordered_datasets must be a set of strings')
-            self._pol_ordered_datasets = set(value)
+            self._pol_ordered_datasets_ = set(value)
         else:
             raise ValueError('Attribute pol_ordered_datasets must be a set of strings')
 

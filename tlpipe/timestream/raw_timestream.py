@@ -26,14 +26,14 @@ class RawTimestream(timestream_common.TimestreamCommon):
 
     """
 
-    _main_data_name = 'vis'
-    _main_data_axes = ('time', 'frequency', 'baseline')
-    _main_time_ordered_datasets = {'vis', 'sec1970', 'jul_date'}
-    _time_ordered_datasets = _main_time_ordered_datasets | {'weather'}
-    _time_ordered_attrs = {'obstime', 'sec1970'}
-    _freq_ordered_datasets = {'freq'}
-    _bl_ordered_datasets = {'blorder'}
-    _feed_ordered_datasets = {'antpointing', 'channo', 'feedno', 'feedpos', 'polerr'}
+    _main_data_name_ = 'vis'
+    _main_data_axes_ = ('time', 'frequency', 'baseline')
+    _main_time_ordered_datasets_ = {'vis', 'sec1970', 'jul_date'}
+    _time_ordered_datasets_ = _main_time_ordered_datasets_ | {'weather'}
+    _time_ordered_attrs_ = {'obstime', 'sec1970'}
+    _freq_ordered_datasets_ = {'freq'}
+    _bl_ordered_datasets_ = {'blorder'}
+    _feed_ordered_datasets_ = {'antpointing', 'channo', 'feedno', 'feedpos', 'polerr'}
 
 
     _channel_select = None

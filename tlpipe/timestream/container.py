@@ -1,4 +1,6 @@
+import re
 import glob
+import pickle
 import posixpath
 import itertools
 import warnings
@@ -95,6 +97,9 @@ class BasicTod(memh5.MemDiskGroup):
         point of the last file. Default None is to the end of the last file.
     dist_axis : string or integer, optional
         Axis along which the main data is distributed.
+    use_hints : bool, optional
+        If True, will try to use the hints in the first file of `files` to
+        construct this class. Default True.
     comm : None or MPI.Comm, optional
         MPI Communicator to distributed over. Default None to use mpiutil._comm.
 
@@ -136,14 +141,14 @@ class BasicTod(memh5.MemDiskGroup):
 
     """
 
-    _main_data_name = None
-    _main_data_axes = () # time shold be the first axis
-    _main_time_ordered_datasets = {_main_data_name}
-    _time_ordered_datasets = {_main_data_name}
-    _time_ordered_attrs = {}
+    _main_data_name_ = None
+    _main_data_axes_ = () # time shold be the first axis
+    _main_time_ordered_datasets_ = {_main_data_name_}
+    _time_ordered_datasets_ = {_main_data_name_}
+    _time_ordered_attrs_ = {}
 
 
-    def __init__(self, files=None, mode='r', start=0, stop=None, dist_axis=0, comm=None):
+    def __init__(self, files=None, mode='r', start=0, stop=None, dist_axis=0, use_hints=True, comm=None):
 
         super(BasicTod, self).__init__(data_group=None, distributed=True, comm=comm)
 
@@ -151,15 +156,24 @@ class BasicTod(memh5.MemDiskGroup):
         self.rank = 0 if self.comm is None else self.comm.rank
         self.rank0 = True if self.rank == 0 else False
 
+        # hints pattern to match hint class attributes defined above
+        self.hints_pattern = re.compile(r"(^_[^_]+_$)|(^_[^_]\w*[^_]_$)")
+        # read and set hints from the first file if use_hints is True
+        if files is not None and use_hints:
+            fl = ensure_file_list(files)[0]
+            with h5py.File(fl, 'r') as f:
+                if 'hints' in f.attrs.iterkeys():
+                    hints = pickle.loads(f.attrs['hints'])
+                    for key, val in hints.iteritems():
+                        setattr(self, key, val)
+
         self.infiles_mode = mode
         # self.infiles will be a list of opened hdf5 file handlers
         self.infiles, self.main_data_start, self.main_data_stop = self._select_files(files, self.main_data_name, start, stop)
         self.num_infiles = len(self.infiles)
         self.main_data_dist_axis = check_axis(dist_axis, self.main_data_axes)
 
-        # self.main_data_shape, self.main_data_type, self.infiles_map = self._get_input_info(self.main_data_name, self.main_data_start, self.main_data_stop)
-
-        self.main_data_select = [ slice(0, None, None) for i in self._main_data_axes ]
+        self.main_data_select = [ slice(0, None, None) for i in self._main_data_axes_ ]
 
     def __del__(self):
         """Closes the opened file handlers."""
@@ -286,80 +300,80 @@ class BasicTod(memh5.MemDiskGroup):
     @property
     def main_data_name(self):
         """Main data in the data container."""
-        return self._main_data_name
+        return self._main_data_name_
 
     @main_data_name.setter
     def main_data_name(self, value):
         if isinstance(value, basestring):
-            self._main_data_name = value
+            self._main_data_name_ = value
         else:
             raise ValueError('Attribute main_data_name must be a string')
 
     @property
     def main_data_axes(self):
         """Axes of the main data."""
-        return self._main_data_axes
+        return self._main_data_axes_
 
     @main_data_axes.setter
     def main_data_axes(self, value):
         if isinstance(value, basestring):
-            self._main_data_axes = (value,)
+            self._main_data_axes_ = (value,)
         elif hasattr(value, '__iter__'):
             for val in value:
                 if not isinstance(val, basestring):
                     raise ValueError('Attribute main_data_axes must be a tuple of strings')
-            self._main_data_axes = tuple(value)
+            self._main_data_axes_ = tuple(value)
         else:
             raise ValueError('Attribute main_data_axes must be a tuple of strings')
 
     @property
     def main_time_ordered_datasets(self):
         """Datasets that have same time points as the main data."""
-        return self._main_time_ordered_datasets
+        return self._main_time_ordered_datasets_
 
     @main_time_ordered_datasets.setter
     def main_time_ordered_datasets(self, value):
         if isinstance(value, basestring):
-            self._main_time_ordered_datasets = {value}
+            self._main_time_ordered_datasets_ = {value}
         elif hasattr(value, '__iter__'):
             for val in value:
                 if not isinstance(val, basestring):
                     raise ValueError('Attribute main_time_ordered_datasets must be a set of strings')
-            self._main_time_ordered_datasets = set(value)
+            self._main_time_ordered_datasets_ = set(value)
         else:
             raise ValueError('Attribute main_time_ordered_datasets must be a set of strings')
 
     @property
     def time_ordered_datasets(self):
         """Time ordered datasets."""
-        return self._main_time_ordered_datasets | self._time_ordered_datasets
+        return self._main_time_ordered_datasets_ | self._time_ordered_datasets_
 
     @time_ordered_datasets.setter
     def time_ordered_datasets(self, value):
         if isinstance(value, basestring):
-            self._time_ordered_datasets = {value}
+            self._time_ordered_datasets_ = {value}
         elif hasattr(value, '__iter__'):
             for val in value:
                 if not isinstance(val, basestring):
                     raise ValueError('Attribute time_ordered_datasets must be a set of strings')
-            self._time_ordered_datasets = set(value)
+            self._time_ordered_datasets_ = set(value)
         else:
             raise ValueError('Attribute time_ordered_datasets must be a set of strings')
 
     @property
     def time_ordered_attrs(self):
         """Attributes that are different in different files."""
-        return self._time_ordered_attrs
+        return self._time_ordered_attrs_
 
     @time_ordered_attrs.setter
     def time_ordered_attrs(self, value):
         if isinstance(value, basestring):
-            self._time_ordered_attrs = {value}
+            self._time_ordered_attrs_ = {value}
         elif hasattr(value, '__iter__'):
             for val in value:
                 if not isinstance(val, basestring):
                     raise ValueError('Attribute time_ordered_attrs must be a set of strings')
-            self._time_ordered_attrs = set(value)
+            self._time_ordered_attrs_ = set(value)
         else:
             raise ValueError('Attribute time_ordered_attrs must be a set of strings')
 
@@ -604,7 +618,7 @@ class BasicTod(memh5.MemDiskGroup):
         fh = self.infiles[0]
         # read in top level common attrs
         for attr_name in fh.attrs.iterkeys():
-            if attr_name not in self.time_ordered_attrs:
+            if attr_name not in self.time_ordered_attrs and attr_name != 'hints':
                 self._load_a_common_attribute(attr_name)
         # read in top level common datasets
         for dset_name in fh.iterkeys():
@@ -865,21 +879,32 @@ class BasicTod(memh5.MemDiskGroup):
         """List basic information of the data hold by this container."""
         if self.rank0:
             # list the opened files
+            print
             print 'Input files:'
             for fh in self.infiles:
                 print '  ', fh.filename
             print
+            # distributed axis
             print '%s distribution axis: (%d, %s)' % (self.main_data_name, self.main_data_dist_axis, self.main_data_axes[self.main_data_dist_axis])
+            print
+            # hints for this class
+            for key in self.__class__.__dict__.keys():
+                if re.match(self.hints_pattern, key):
+                    print '%s = %s' % (key, getattr(self, key))
             print
             # list all top level attributes
             for attr_name, attr_val in self.attrs.iteritems():
                 print '%s:' % attr_name, attr_val
             # list all top level datasets
             for dset_name, dset in self.iteritems():
-                print dset_name, '  shape = ', dset.shape
+                if dset.distributed:
+                    print '%s  shape = %s, dist_axis = %d' % (dset_name, dset.shape, dset.distributed_axis)
+                else:
+                    print '%s  shape = %s' % (dset_name, dset.shape)
                 # list its attributes
                 for attr_name, attr_val in dset.attrs.iteritems():
                     print '  %s:' % attr_name, attr_val
+            print
 
         mpiutil.barrier(comm=self.comm)
 
@@ -966,7 +991,7 @@ class BasicTod(memh5.MemDiskGroup):
         return dset_shape, dset_type, outfiles_map
 
 
-    def to_files(self, outfiles, exclude=[], check_status=True, libver='latest'):
+    def to_files(self, outfiles, exclude=[], check_status=True, write_hints=True, libver='latest'):
         """Save the data hold in this container to files.
 
         Parameters
@@ -978,6 +1003,10 @@ class BasicTod(memh5.MemDiskGroup):
             files. Default is an empty list, so all data will be saved.
         check_status : bool, optional
             Whether to check data consistency before save to files. Default True.
+        write_hints : bool, optional
+            If True, will write hint class attributes as a 'hints' attribute to
+            files, which will be used to re-construct this class when reading data
+            from the saved files. Default True.
         libver : 'latest' or 'earliest', optional
             HDF5 library version settings. 'latest' means that HDF5 will always use
             the newest version of these structures without particular concern for
@@ -1003,6 +1032,12 @@ class BasicTod(memh5.MemDiskGroup):
             # first write top level common attrs and datasets to file
             with h5py.File(outfile, 'w', libver=libver) as f:
 
+                # write hints if required
+                if write_hints:
+                    hint_keys = [ key for key in self.__class__.__dict__.keys() if re.match(self.hints_pattern, key) ]
+                    hint_dict = { key: getattr(self, key) for key in hint_keys }
+                    f.attrs['hints'] = pickle.dumps(hint_dict)
+
                 # write top level common attrs
                 for attrs_name, attrs_value in self.attrs.iteritems():
                     if attrs_name in exclude:
@@ -1011,9 +1046,9 @@ class BasicTod(memh5.MemDiskGroup):
                         f.attrs[attrs_name] = self.attrs[attrs_name]
 
                 for dset_name, dset in self.iteritems():
-                    # write top level common datasets
                     if dset_name in exclude:
                         continue
+                    # write top level common datasets
                     if dset_name not in self.time_ordered_datasets:
                         f.create_dataset(dset_name, data=dset, shape=dset.shape, dtype=dset.dtype)
                     # initialize time ordered datasets
