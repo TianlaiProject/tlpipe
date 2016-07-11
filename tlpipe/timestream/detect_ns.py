@@ -1,5 +1,6 @@
 """Detect noise source signal."""
 
+from collections import Counter
 import numpy as np
 import tod_task
 
@@ -32,26 +33,30 @@ class Detect(tod_task.SingleRawTimestream):
         pdf = np.where(df>0, df, 0)
         pinds = np.where(pdf>pdf.mean() + sigma*pdf.std())[0]
         pinds = pinds + 1
+        pT = Counter(np.diff(pinds)).most_common(1)[0][0] # period of pinds
         ndf = np.where(df<0, df, 0)
         ninds = np.where(ndf<ndf.mean() - sigma*ndf.std())[0]
         ninds = ninds + 1
-        if ninds[0] < pinds[0]:
-            pinds = np.insert(pinds, 0, 0)
-        if pinds[-1] > ninds[-1]:
-            ninds = np.insert(ninds, len(ninds), len(ninds))
-        if len(pinds) != len(ninds):
-            raise RuntimeError('Something wrong happened when detect the noise signal')
+        nT = Counter(np.diff(ninds)).most_common(1)[0][0] # period of pinds
+        if pT != nT:
+            raise RuntimeError('Period of pinds %d != period of ninds %d' % (pT, nT))
+        else:
+            period = pT
 
-        period = np.sort(np.concatenate([np.diff(pinds), np.diff(ninds)]))[-1]
-        on_time = np.sort(ninds-pinds)[-1]
-        off_time = np.sort(pinds[1:] - ninds[:-1])[-1]
+        ninds = ninds.reshape(-1, 1)
+        dinds = (ninds - pinds).flatten()
+        on_time = Counter(dinds[dinds>0] % period).most_common(1)[0][0]
+        off_time = Counter(-dinds[dinds<0] % period).most_common(1)[0][0]
+
         if period != on_time + off_time:
             raise RuntimeError('period %d != on_time %d + off_time %d' % (period, on_time, off_time))
+        else:
+            if mpiutil.rank0:
+                print 'Detected noise source: period = %d, on_time = %d, off_time = %d' % (period, on_time, off_time)
         num_period = np.int(np.ceil(len(tt_mean) / np.float(period)))
         tmp_ns_on = np.array(([True] * on_time + [False] * off_time) * num_period)[:len(tt_mean)]
-        for si, ei in zip(pinds[:-1], pinds[1:]):
-            if ei - si == period:
-                ns_on = np.roll(tmp_ns_on, si)
+        on_start = Counter(pinds % period).most_common(1)[0][0]
+        ns_on = np.roll(tmp_ns_on, on_start)
 
         # import matplotlib
         # matplotlib.use('Agg')
