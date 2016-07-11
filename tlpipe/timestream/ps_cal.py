@@ -133,10 +133,12 @@ class PsCal(tod_task.SingleTimestream):
                 for fi, freq in enumerate(lfreq): # mpi among freq
                     for i, ai in enumerate(feedno):
                         for j, aj in enumerate(feedno):
-                            uij = aa.gen_uvw(ai-1, aj-1, src='z').squeeze() # (rj - ri)/lambda
+                            # uij = aa.gen_uvw(ai-1, aj-1, src='z').squeeze() # (rj - ri)/lambda
+                            uij = aa.gen_uvw(ai-1, aj-1, src='z')[:, 0, :] # (rj - ri)/lambda
                             # import pdb
                             # pdb.set_trace()
-                            bmij = aa.bm_response(ai-1, aj-1).squeeze()
+                            # bmij = aa.bm_response(ai-1, aj-1).squeeze() # will get error for only one local freq
+                            bmij = aa.bm_response(ai-1, aj-1).reshape(-1)
                             try:
                                 bi = bls.index((ai, aj))
                                 # Vmat[i, j] = ts.main_data.local_data[ti, fi, pi, bi] / (Sc[fi] * bmij[fi] * np.exp(-2.0J * np.pi * np.dot(s_top, uij[:, fi]))) # xx, yy
