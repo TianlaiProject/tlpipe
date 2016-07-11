@@ -1043,7 +1043,8 @@ class _OneAndOne(TaskBase):
 
 
 class SingleBase(_OneAndOne):
-    """Base class for non-iterating tasks with at most one input and output.
+    """Base class for non-iterating ('one shot') tasks with at most one input
+    and output.
 
     Inherits from :class:`TaskBase`.
 
@@ -1099,14 +1100,76 @@ class IterBase(_OneAndOne):
 
     """
 
+    params_init = {
+                    'iter_start': 0,
+                    'iter_step': 1,
+                    'iter_num': None, # number of iterations
+                  }
+
+    prefix = 'ib_'
+
+
     def __init__(self, parameter_file_or_dict=None, feedback=2):
 
         super(IterBase, self).__init__(parameter_file_or_dict, feedback)
 
-        self.iteration = 0
+        self.iter_start = self.params['iter_start']
+        self.iter_step = self.params['iter_step']
+        self.iter_num = self.params['iter_num']
+        self.iter_cnt = 0 # iter counter
+
+    @property
+    def iteration(self):
+        """Current iteration."""
+        return self.iter_start + self.iter_step * self.iter_cnt
+
+    def next(self, input=None):
+        """Should not need to override."""
+
+        # Sort out filenames.
+        if self.iter_num is not None and self.iter_cnt >= self.iter_num:
+            # We have run the required number of iterations
+            raise PipelineStopIteration()
+
+        if input:
+            input = self.cast_input(input)
+        output = self.read_process_write(input)
+
+        self.iter_cnt += 1
+
+        return output
+
+
+class FileIterBase(IterBase):
+    """Base class for iterating tasks over input files.
+
+    Tasks inheriting from this class should override :meth:`process` and
+    optionally :meth:`setup`, :meth:`finish`, :meth:`read_input`,
+    :meth:`write_output` and :meth:`cast_input`. They should not override
+    :meth:`next`.
+
+
+    Methods
+    -------
+    next
+    setup
+    process
+    finish
+    read_input
+    cast_input
+    write_output
+
+    """
+
+    def __init__(self, parameter_file_or_dict=None, feedback=2):
+
+        super(FileIterBase, self).__init__(parameter_file_or_dict, feedback)
 
         input_files = format_list(self.params['input_files'])
         output_files = format_list(self.params['output_files'])
+
+        if self.iter_num is None:
+            self.iter_num = (len(input_files) - self.iter_start) / self.iter_step
 
         if len(input_files) == 0:
             self.input_files = []
@@ -1117,21 +1180,6 @@ class IterBase(_OneAndOne):
         else:
             self.output_file = output_files[self.iteration]
 
-
-    def next(self, input=None):
-        """Should not need to override."""
-
-        # Sort out filenames.
-        if self.iteration >= len(self.input_files):
-            # We are iterating over input files and have run out.
-            raise PipelineStopIteration()
-
-        if input:
-            input = self.cast_input(input)
-        output = self.read_process_write(input)
-        self.iteration += 1
-
-        return output
 
 
 # # Internal Functions
