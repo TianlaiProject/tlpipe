@@ -80,7 +80,7 @@ class Dispatch(tod_task.IterRawTimestream):
         bad_feed = [ feedno[np.where(channo == bc)[0][0]] for bc in badchn ]
         feed_select = self.params['feed_select']
         if isinstance(feed_select, tuple):
-            feeds = feedno[range(*feed_select)].tolist()
+            feeds = feedno[slice(*feed_select)].tolist()
         elif isinstance(feed_select, list):
             feeds = feedno[feed_select].tolist()
         # remove bad feeds from feeds
