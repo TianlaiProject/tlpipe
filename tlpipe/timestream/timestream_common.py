@@ -48,7 +48,7 @@ class TimestreamCommon(container.BasicTod):
 
     _main_data_name_ = 'vis'
     _main_data_axes_ = () # can be 'time', 'frequency', 'polarization', 'baseline'
-    _main_axes_ordered_datasets_ = { 'vis': (0,),
+    _main_axes_ordered_datasets_ = { 'vis': (0, 1, 2), # or (0, 1, 2, 3)
                                      'sec1970': (0,),
                                      'jul_date': (0,),
                                      'freq': (1,),

@@ -28,7 +28,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
 
     _main_data_name_ = 'vis'
     _main_data_axes_ = ('time', 'frequency', 'baseline')
-    _main_axes_ordered_datasets_ = { 'vis': (0,),
+    _main_axes_ordered_datasets_ = { 'vis': (0, 1, 2),
                                      'sec1970': (0,),
                                      'jul_date': (0,),
                                      'freq': (1,),
@@ -256,18 +256,19 @@ class RawTimestream(timestream_common.TimestreamCommon):
         # copy attrs of this dset
         memh5.copyattrs(self['blorder'].attrs, ts['blorder'].attrs)
         # other bl ordered dataset
-        if len(set(self.bl_ordered_datasets.keys()) - {'blorder'}) > 0:
-            old_blorder = [ set(bl) for bl in self['blorder'][:] ]
-            inds = [ old_blorder.index(set(bl)) for bl in ts['bl_order'][:] ]
-            for name in (set(self.bl_ordered_datasets.keys()) - {'blorder'}):
-                if name in self.iterkeys():
-                    axis_order = self.bl_ordered_datasets[name]
-                    bl_axis = axis_order.index(self.main_data_axes.index('baseline'))
-                    slc = [slice(0, None)] * (bl_axis + 1)
-                    slc[bl_axis] = inds
-                    ts.create_bl_ordered_dataset(name, data=self[name][tuple(slc)], axis_order=axis_order)
-                    # copy attrs of this dset
-                    memh5.copyattrs(self[name].attrs, ts[name].attrs)
+        if len(set(self.bl_ordered_datasets.keys()) - {'vis', 'blorder'}) > 0:
+            raise RuntimeError('Should not have other bl_ordered_datasets %s' % (set(self.bl_ordered_datasets.keys()) - {'vis', 'blorder'}))
+            # old_blorder = [ set(bl) for bl in self['blorder'][:] ]
+            # inds = [ old_blorder.index(set(bl)) for bl in ts['blorder'][:] ]
+            # for name in (set(self.bl_ordered_datasets.keys()) - {'blorder'}):
+            #     if name in self.iterkeys():
+            #         axis_order = self.bl_ordered_datasets[name]
+            #         bl_axis = axis_order.index(self.main_data_axes.index('baseline'))
+            #         slc = [slice(0, None)] * (bl_axis + 1)
+            #         slc[bl_axis] = inds
+            #         ts.create_bl_ordered_dataset(name, data=self[name][tuple(slc)], axis_order=axis_order)
+            #         # copy attrs of this dset
+            #         memh5.copyattrs(self[name].attrs, ts[name].attrs)
 
         # copy other attrs
         for attrs_name, attrs_value in self.attrs.iteritems():
@@ -296,8 +297,11 @@ class RawTimestream(timestream_common.TimestreamCommon):
                 axis_order = self.time_ordered_datasets[dset_name]
                 ts.create_time_ordered_dataset(dset_name, dset.data, axis_order)
             elif dset_name in self.feed_ordered_datasets.keys():
-                axis_order = self.feed_ordered_datasets[dset_name]
-                ts.create_feed_ordered_dataset(dset_name, dset.data, axis_order)
+                if dset_name == 'channo': # channo no useful for Timestream
+                    continue
+                else:
+                    axis_order = self.feed_ordered_datasets[dset_name]
+                    ts.create_feed_ordered_dataset(dset_name, dset.data, axis_order)
             else:
                 if dset.common:
                     ts.create_dataset(dset_name, data=dset)
