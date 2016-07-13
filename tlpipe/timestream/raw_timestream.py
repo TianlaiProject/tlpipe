@@ -258,17 +258,6 @@ class RawTimestream(timestream_common.TimestreamCommon):
         # other bl ordered dataset
         if len(set(self.bl_ordered_datasets.keys()) - {'vis', 'blorder'}) > 0:
             raise RuntimeError('Should not have other bl_ordered_datasets %s' % (set(self.bl_ordered_datasets.keys()) - {'vis', 'blorder'}))
-            # old_blorder = [ set(bl) for bl in self['blorder'][:] ]
-            # inds = [ old_blorder.index(set(bl)) for bl in ts['blorder'][:] ]
-            # for name in (set(self.bl_ordered_datasets.keys()) - {'blorder'}):
-            #     if name in self.iterkeys():
-            #         axis_order = self.bl_ordered_datasets[name]
-            #         bl_axis = axis_order.index(self.main_data_axes.index('baseline'))
-            #         slc = [slice(0, None)] * (bl_axis + 1)
-            #         slc[bl_axis] = inds
-            #         ts.create_bl_ordered_dataset(name, data=self[name][tuple(slc)], axis_order=axis_order)
-            #         # copy attrs of this dset
-            #         memh5.copyattrs(self[name].attrs, ts[name].attrs)
 
         # copy other attrs
         for attrs_name, attrs_value in self.attrs.iteritems():
@@ -310,31 +299,6 @@ class RawTimestream(timestream_common.TimestreamCommon):
 
             # copy attrs of this dset
             memh5.copyattrs(dset.attrs, ts[dset_name].attrs)
-
-
-
-            # elif dset_name in self.main_time_ordered_datasets:
-            #     ts.create_main_time_ordered_dataset(dset_name, data=dset.data)
-            # elif dset_name in self.time_ordered_datasets:
-            #     ts.create_time_ordered_dataset(dset_name, data=dset.data)
-            # elif dset_name in self.freq_ordered_datasets:
-            #     ts.create_freq_ordered_dataset(dset_name, data=dset.data)
-            # elif dset_name in self.bl_ordered_datasets:
-            #     # already create above
-            #     continue
-            # elif dset_name in self.feed_ordered_datasets:
-            #     if dset_name == 'channo': # channo no useful for Timestream
-            #         continue
-            #     else:
-            #         ts.create_feed_ordered_dataset(dset_name, data=dset.data)
-            # else:
-            #     if dset.common:
-            #         ts.create_dataset(dset_name, data=dset)
-            #     elif dset.distributed:
-            #         ts.create_dataset(dset_name, data=dset.data, shape=dset.shape, dtype=dset.dtype, distributed=True, distributed_axis=dset.distributed_axis)
-
-            # # copy attrs of this dset
-            # memh5.copyattrs(dset.attrs, ts[dset_name].attrs)
 
         # redistribute self to original axis
         if keep_dist_axis:

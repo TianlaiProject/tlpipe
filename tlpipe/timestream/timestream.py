@@ -44,7 +44,6 @@ class Timestream(timestream_common.TimestreamCommon):
                                      'pol': (2,),
                                      'blorder': (3,),
                                    }
-    # _main_time_ordered_datasets_ = {'vis', 'sec1970', 'jul_date'}
     _time_ordered_datasets_ = {'weather': (0,)}
     _time_ordered_attrs_ = {}
     _feed_ordered_datasets_ = { 'antpointing': (None, 0),
@@ -58,18 +57,6 @@ class Timestream(timestream_common.TimestreamCommon):
     def pol_ordered_datasets(self):
         """Polarization ordered datasets."""
         return { key: val for key, val in self._main_axes_ordered_datasets_.items() if self.main_data_axes.index('polarization') in val }
-
-    # @pol_ordered_datasets.setter
-    # def pol_ordered_datasets(self, value):
-    #     if isinstance(value, basestring):
-    #         self._pol_ordered_datasets_ = {value}
-    #     elif hasattr(value, '__iter__'):
-    #         for val in value:
-    #             if not isinstance(val, basestring):
-    #                 raise ValueError('Attribute pol_ordered_datasets must be a set of strings')
-    #         self._pol_ordered_datasets_ = set(value)
-    #     else:
-    #         raise ValueError('Attribute pol_ordered_datasets must be a set of strings')
 
 
     def polarization_select(self, value):
@@ -170,67 +157,6 @@ class Timestream(timestream_common.TimestreamCommon):
         axis_order = axis_order or (self.main_data_axes.index('polarization'),)
 
         self.create_main_axis_ordered_dataset('polarization', name, data, axis_order, recreate, copy_attrs)
-
-        # self.pol_ordered_datasets[name] = axis_order
-
-
-    # def redistribute(self, dist_axis):
-    #     """Redistribute the main time ordered dataset along a specified axis.
-
-    #     This will redistribute the main_data along the specified axis `dis_axis`,
-    #     and also distribute other main_time_ordered_datasets along the first axis
-    #     if `dis_axis` is the first axis, else concatenate all those data along the
-    #     first axis.
-
-    #     Parameters
-    #     ----------
-    #     dist_axis : int, string
-    #         The axis can be specified by an integer index (positive or
-    #         negative), or by a string label which must correspond to an entry in
-    #         the `main_data_axes` attribute on the dataset.
-
-    #     """
-
-    #     axis = container.check_axis(dist_axis, self.main_data_axes)
-
-    #     if axis == self.main_data_dist_axis:
-    #         # already the distributed axis, nothing to do
-    #         return
-    #     else:
-    #         super(Timestream, self).redistribute(dist_axis)
-
-    #         # distribute pol
-    #         if 'polarization' == self.main_data_axes[axis]:
-    #             for name in self.pol_ordered_datasets:
-    #                 if name in self.iterkeys() and self[name].common:
-    #                     self.dataset_common_to_distributed(name, distributed_axis=0)
-
-    #         elif self.main_data_axes[axis] in ('time', 'frequency', 'baseline'):
-    #             for name in self.pol_ordered_datasets:
-    #                 if name in self.iterkeys() and self[name].distributed:
-    #                     self.dataset_distributed_to_common(name)
-
-
-    # def check_status(self):
-    #     """Check that data hold in this container is consistent. """
-
-    #     # basic checks
-    #     super(Timestream, self).check_status()
-
-    #     # additional checks
-    #     if 'polarization' == self.main_data_axes[self.main_data_dist_axis]:
-    #         for name in self.pol_ordered_datasets:
-    #             if name in self.iterkeys() and not self[name].distributed:
-    #                 raise RuntimeError('Dataset %s should be distributed when polarization is the distributed axis' % name)
-    #         for name in self.time_ordered_datasets | self.freq_ordered_datasets | self.bl_ordered_datasets:
-    #             if name in self.iterkeys() and not self[name].common:
-    #                 raise RuntimeError('Dataset %s should be common when polarization is the distributed axis' % name)
-
-    #     else:
-    #         axis_name = self.main_data_axes[self.main_data_dist_axis]
-    #         for name in self.pol_ordered_datasets:
-    #             if name in self.iterkeys() and not self[name].common:
-    #                 raise RuntimeError('Dataset %s should be common when %s is the distributed axis' % (name, axis_name))
 
 
     def lin2stokes(self):

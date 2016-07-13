@@ -68,51 +68,15 @@ class TimestreamCommon(container.BasicTod):
         """Frequency ordered datasets."""
         return { key: val for key, val in self._main_axes_ordered_datasets_.items() if self.main_data_axes.index('frequency') in val }
 
-    # @freq_ordered_datasets.setter
-    # def freq_ordered_datasets(self, value):
-    #     if isinstance(value, basestring):
-    #         self._freq_ordered_datasets_ = {value}
-    #     elif hasattr(value, '__iter__'):
-    #         for val in value:
-    #             if not isinstance(val, basestring):
-    #                 raise ValueError('Attribute freq_ordered_datasets must be a set of strings')
-    #         self._freq_ordered_datasets_ = set(value)
-    #     else:
-    #         raise ValueError('Attribute freq_ordered_datasets must be a set of strings')
-
     @property
     def bl_ordered_datasets(self):
         """Baseline ordered datasets."""
         return { key: val for key, val in self._main_axes_ordered_datasets_.items() if self.main_data_axes.index('baseline') in val }
 
-    # @bl_ordered_datasets.setter
-    # def bl_ordered_datasets(self, value):
-    #     if isinstance(value, basestring):
-    #         self._bl_ordered_datasets_ = {value}
-    #     elif hasattr(value, '__iter__'):
-    #         for val in value:
-    #             if not isinstance(val, basestring):
-    #                 raise ValueError('Attribute bl_ordered_datasets must be a set of strings')
-    #         self._bl_ordered_datasets_ = set(value)
-    #     else:
-    #         raise ValueError('Attribute bl_ordered_datasets must be a set of strings')
-
     @property
     def feed_ordered_datasets(self):
         """Feed ordered datasets."""
         return self._feed_ordered_datasets_
-
-    # @feed_ordered_datasets.setter
-    # def feed_ordered_datasets(self, value):
-    #     if isinstance(value, basestring):
-    #         self._feed_ordered_datasets_ = {value}
-    #     elif hasattr(value, '__iter__'):
-    #         for val in value:
-    #             if not isinstance(val, basestring):
-    #                 raise ValueError('Attribute feed_ordered_datasets must be a set of strings')
-    #         self._feed_ordered_datasets_ = set(value)
-    #     else:
-    #         raise ValueError('Attribute feed_ordered_datasets must be a set of strings')
 
 
     def time_select(self, value):
@@ -302,62 +266,6 @@ class TimestreamCommon(container.BasicTod):
             raise KeyError('blorder does not exist, try to load it first')
 
 
-    # def _create_axis_ordered_dataset(self, axis_name, name, data, axis_order, recreate=False, copy_attrs=False):
-    #     """Create a `axis_name` ordered dataset.
-
-    #     Parameters
-    #     ----------
-    #     axis_name : string
-    #         Name of the axis.
-    #     name : string
-    #         Name of the dataset.
-    #     data : np.ndarray or MPIArray
-    #         The data to create a dataset.
-    #     axis_order : tuple
-    #         A tuple denotes the corresponding axis of the created dataset.
-    #     recreate : bool, optional
-    #         If True will recreate a dataset with this name if it already exists,
-    #         else a RuntimeError will be rasised. Default False.
-    #     copy_attrs : bool, optional
-    #         If True, when recreate the dataset, its original attributes will be
-    #         copyed to the new dataset, else no copy is done. Default Fasle.
-
-    #     """
-
-    #     if not axis_name in self.main_data_axes:
-    #         raise ValueError('Invalid axis name %s for axes %s' % (axis_name, self.main_data_axes))
-    #     if axis_name == self.main_data_axes[0]:
-    #         raise ValueError('Use create_time_ordered_dataset or create_main_time_ordered_dataset instead')
-
-    #     if isinstance(data, mpiarray.MPIArray):
-    #         shape = data.global_shape
-    #     else:
-    #         shape = data.shape
-    #     axis = axis_order.index(self.main_data_axes.index(axis_name))
-    #     if shape[axis] != self.main_data.shape[self.main_data_axes.index(axis_name)]:
-    #         raise ValueError('%s axis does not align with main data, can not create a %s ordered dataset %s' % (axis_name.capitalize(), axis_name, name))
-
-    #     if not name in self.iterkeys():
-    #         if axis_name == self.main_data_axes[self.main_data_dist_axis]:
-    #             self.create_dataset(name, data=data, distributed=True, distributed_axis=axis)
-    #         else:
-    #             self.create_dataset(name, data=data)
-    #     else:
-    #         if recreate:
-    #             if copy_attrs:
-    #                 attr_dict = {} # temporarily save attrs of this dataset
-    #                 copyattrs(self[name].attrs, attr_dict)
-    #             del self[name]
-    #             if axis_name == self.main_data_axes[self.main_data_dist_axis]:
-    #                 self.create_dataset(name, data=data, distributed=True, distributed_axis=axis)
-    #             else:
-    #                 self.create_dataset(name, data=data)
-    #             if copy_attrs:
-    #                 copyattrs(attr_dict, self[name].attrs)
-    #         else:
-    #             raise RuntimeError('Dataset %s already exists' % name)
-
-
     def create_freq_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False):
         """Create a frequency ordered dataset.
 
@@ -382,8 +290,6 @@ class TimestreamCommon(container.BasicTod):
 
         self.create_main_axis_ordered_dataset('frequency', name, data, axis_order, recreate, copy_attrs)
 
-        # self.freq_ordered_datasets[name] = axis_order
-
     def create_bl_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False):
         """Create a baseline ordered dataset.
 
@@ -407,8 +313,6 @@ class TimestreamCommon(container.BasicTod):
         axis_order = axis_order or (self.main_data_axes.index('baseline'),)
 
         self.create_main_axis_ordered_dataset('baseline', name, data, axis_order, recreate, copy_attrs)
-
-        # self.bl_ordered_datasets[name] = axis_order
 
     def create_feed_ordered_dataset(self, name, data, axis_order=(0,), recreate=False, copy_attrs=False):
         """Create a feed ordered dataset.
@@ -452,79 +356,11 @@ class TimestreamCommon(container.BasicTod):
         self.feed_ordered_datasets[name] = axis_order
 
 
-    # def redistribute(self, dist_axis):
-    #     """Redistribute the main time ordered dataset along a specified axis.
-
-    #     This will redistribute the main_data along the specified axis `dis_axis`,
-    #     and also distribute other main_time_ordered_datasets along the first axis
-    #     if `dis_axis` is the first axis, else concatenate all those data along the
-    #     first axis.
-
-    #     Parameters
-    #     ----------
-    #     dist_axis : int, string
-    #         The axis can be specified by an integer index (positive or
-    #         negative), or by a string label which must correspond to an entry in
-    #         the `main_data_axes` attribute on the dataset.
-
-    #     """
-
-    #     axis = container.check_axis(dist_axis, self.main_data_axes)
-
-    #     if axis == self.main_data_dist_axis:
-    #         # already the distributed axis, nothing to do
-    #         return
-    #     else:
-    #         super(TimestreamCommon, self).redistribute(dist_axis)
-
-    #         if 'time' == self.main_data_axes[axis]:
-    #             for name in set(self.freq_ordered_datasets.keys()) | (self.bl_ordered_datasets.keys()):
-    #                 if name in self.iterkeys() and self[name].distributed:
-    #                     self.dataset_distributed_to_common(name)
-
-    #         # distribute freq
-    #         elif 'frequency' == self.main_data_axes[axis]:
-    #             for name in self.freq_ordered_datasets.keys():
-    #                 if name in self.iterkeys() and self[name].common:
-    #                     self.dataset_common_to_distributed(name, distributed_axis=self.main_axes_ordered_datasets[name].index(self.main_data_axes.index('frequency')))
-    #             for name in self.bl_ordered_datasets.keys():
-    #                 if name in self.iterkeys() and self[name].distributed:
-    #                     self.dataset_distributed_to_common(name)
-
-    #         # distribute blorder
-    #         elif 'baseline' == self.main_data_axes[axis]:
-    #             for name in self.bl_ordered_datasets.keys():
-    #                 if name in self.iterkeys() and self[name].common:
-    #                     self.dataset_common_to_distributed(name, distributed_axis=self.main_axes_ordered_datasets[name].index(self.main_data_axes.index('baseline')))
-    #             for name in self.freq_ordered_datasets.keys():
-    #                 if name in self.iterkeys() and self[name].distributed:
-    #                     self.dataset_distributed_to_common(name)
-
     def check_status(self):
         """Check that data hold in this container is consistent. """
 
         # basic checks
         super(TimestreamCommon, self).check_status()
-
-        # additional checks
-        # if 'time' == self.main_data_axes[self.main_data_dist_axis]:
-        #     for name in set(self.freq_ordered_datasets.keys()) | set(self.bl_ordered_datasets.keys()):
-        #         if name in self.iterkeys() and not self[name].common:
-        #             raise RuntimeError('Dataset %s should be common when time is the distributed axis' % name)
-        # elif 'frequency' == self.main_data_axes[self.main_data_dist_axis]:
-        #     for name in self.freq_ordered_datasets.keys():
-        #         if name in self.iterkeys() and not self[name].distributed:
-        #             raise RuntimeError('Dataset %s should be distributed when frequency is the distributed axis' % name)
-        #     for name in set(self.time_ordered_datasets.keys()) | set(self.bl_ordered_datasets.keys()):
-        #         if name in self.iterkeys() and not self[name].common:
-        #             raise RuntimeError('Dataset %s should be common when frequency is the distributed axis' % name)
-        # elif 'baseline' == self.main_data_axes[self.main_data_dist_axis]:
-        #     for name in self.bl_ordered_datasets:
-        #         if name in self.iterkeys() and not self[name].distributed:
-        #             raise RuntimeError('Dataset %s should be distributed when baseline is the distributed axis' % name)
-        #     for name in self.time_ordered_datasets | self.freq_ordered_datasets:
-        #         if name in self.iterkeys() and not self[name].common:
-        #             raise RuntimeError('Dataset %s should be common when baseline is the distributed axis' % name)
 
         # additional checks for feed_ordered_datasets
         lens = []
