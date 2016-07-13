@@ -28,12 +28,20 @@ class RawTimestream(timestream_common.TimestreamCommon):
 
     _main_data_name_ = 'vis'
     _main_data_axes_ = ('time', 'frequency', 'baseline')
-    _main_time_ordered_datasets_ = {'vis', 'sec1970', 'jul_date'}
-    _time_ordered_datasets_ = _main_time_ordered_datasets_ | {'weather'}
+    _main_axes_ordered_datasets_ = { 'vis': (0,),
+                                     'sec1970': (0,),
+                                     'jul_date': (0,),
+                                     'freq': (1,),
+                                     'blorder': (2,),
+                                   }
+    _time_ordered_datasets_ = {'weather': (0,)}
     _time_ordered_attrs_ = {'obstime', 'sec1970'}
-    _freq_ordered_datasets_ = {'freq'}
-    _bl_ordered_datasets_ = {'blorder'}
-    _feed_ordered_datasets_ = {'antpointing', 'channo', 'feedno', 'feedpos', 'polerr'}
+    _feed_ordered_datasets_ = { 'antpointing': (None, 0),
+                                'feedno': (0,),
+                                'channo': (0,),
+                                'feedpos': (0,),
+                                'polerr': (0,),
+                              }
 
 
     _channel_select = None
@@ -248,12 +256,16 @@ class RawTimestream(timestream_common.TimestreamCommon):
         # copy attrs of this dset
         memh5.copyattrs(self['blorder'].attrs, ts['blorder'].attrs)
         # other bl ordered dataset
-        if len(self.bl_ordered_datasets - {'blorder'}) > 0:
+        if len(set(self.bl_ordered_datasets.keys()) - {'blorder'}) > 0:
             old_blorder = [ set(bl) for bl in self['blorder'][:] ]
             inds = [ old_blorder.index(set(bl)) for bl in ts['bl_order'][:] ]
-            for name in (self.bl_ordered_datasets - {'blorder'}):
+            for name in (set(self.bl_ordered_datasets.keys()) - {'blorder'}):
                 if name in self.iterkeys():
-                    ts.create_bl_ordered_dataset(name, data=self[name][inds])
+                    axis_order = self.bl_ordered_datasets[name]
+                    bl_axis = axis_order.index(self.main_data_axes.index('baseline'))
+                    slc = [slice(0, None)] * (bl_axis + 1)
+                    slc[bl_axis] = inds
+                    ts.create_bl_ordered_dataset(name, data=self[name][tuple(slc)], axis_order=axis_order)
                     # copy attrs of this dset
                     memh5.copyattrs(self[name].attrs, ts[name].attrs)
 
@@ -265,22 +277,27 @@ class RawTimestream(timestream_common.TimestreamCommon):
         # copy other datasets
         for dset_name, dset in self.iteritems():
             if dset_name == self.main_data_name:
-                # already create above
+                # already created above
                 continue
-            elif dset_name in self.main_time_ordered_datasets:
-                ts.create_main_time_ordered_dataset(dset_name, data=dset.data)
-            elif dset_name in self.time_ordered_datasets:
-                ts.create_time_ordered_dataset(dset_name, data=dset.data)
-            elif dset_name in self.freq_ordered_datasets:
-                ts.create_freq_ordered_dataset(dset_name, data=dset.data)
-            elif dset_name in self.bl_ordered_datasets:
-                # already create above
-                continue
-            elif dset_name in self.feed_ordered_datasets:
-                if dset_name == 'channo': # channo no useful for Timestream
+            elif dset_name in self.main_axes_ordered_datasets.keys():
+                if dset_name in self.bl_ordered_datasets.keys():
+                    # already created above
                     continue
                 else:
-                    ts.create_feed_ordered_dataset(dset_name, data=dset.data)
+                    axis_order = self.main_axes_ordered_datasets[dset_name]
+                    axis = None
+                    for order in axis_order:
+                        if isinstance(order, int):
+                            axis = order
+                    if axis is None:
+                        raise RuntimeError('Invalid axis order %s for dataset %s' % (axis_order, dset_name))
+                    ts.create_main_axis_ordered_dataset(axis, dset_name, dset.data, axis_order)
+            elif dset_name in self.time_ordered_datasets.keys():
+                axis_order = self.time_ordered_datasets[dset_name]
+                ts.create_time_ordered_dataset(dset_name, dset.data, axis_order)
+            elif dset_name in self.feed_ordered_datasets.keys():
+                axis_order = self.feed_ordered_datasets[dset_name]
+                ts.create_feed_ordered_dataset(dset_name, dset.data, axis_order)
             else:
                 if dset.common:
                     ts.create_dataset(dset_name, data=dset)
@@ -289,6 +306,31 @@ class RawTimestream(timestream_common.TimestreamCommon):
 
             # copy attrs of this dset
             memh5.copyattrs(dset.attrs, ts[dset_name].attrs)
+
+
+
+            # elif dset_name in self.main_time_ordered_datasets:
+            #     ts.create_main_time_ordered_dataset(dset_name, data=dset.data)
+            # elif dset_name in self.time_ordered_datasets:
+            #     ts.create_time_ordered_dataset(dset_name, data=dset.data)
+            # elif dset_name in self.freq_ordered_datasets:
+            #     ts.create_freq_ordered_dataset(dset_name, data=dset.data)
+            # elif dset_name in self.bl_ordered_datasets:
+            #     # already create above
+            #     continue
+            # elif dset_name in self.feed_ordered_datasets:
+            #     if dset_name == 'channo': # channo no useful for Timestream
+            #         continue
+            #     else:
+            #         ts.create_feed_ordered_dataset(dset_name, data=dset.data)
+            # else:
+            #     if dset.common:
+            #         ts.create_dataset(dset_name, data=dset)
+            #     elif dset.distributed:
+            #         ts.create_dataset(dset_name, data=dset.data, shape=dset.shape, dtype=dset.dtype, distributed=True, distributed_axis=dset.distributed_axis)
+
+            # # copy attrs of this dset
+            # memh5.copyattrs(dset.attrs, ts[dset_name].attrs)
 
         # redistribute self to original axis
         if keep_dist_axis:

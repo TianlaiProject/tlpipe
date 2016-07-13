@@ -143,8 +143,8 @@ class BasicTod(memh5.MemDiskGroup):
 
     _main_data_name_ = None
     _main_data_axes_ = () # time shold be the first axis
-    _main_time_ordered_datasets_ = {_main_data_name_}
-    _time_ordered_datasets_ = {_main_data_name_}
+    _main_axes_ordered_datasets_ = {_main_data_name_: (0,)}
+    _time_ordered_datasets_ = {_main_data_name_: (0,)}
     _time_ordered_attrs_ = {}
 
 
@@ -182,7 +182,7 @@ class BasicTod(memh5.MemDiskGroup):
 
     def _select_files(self, files, dset_name, start=0, stop=None):
         ### select the needed files from `files` which contain time ordered data from `start` to `stop`
-        assert dset_name in self.time_ordered_datasets, '%s is not a time ordered dataset' % dset_name
+        assert dset_name in self.time_ordered_datasets.keys(), '%s is not a time ordered dataset' % dset_name
 
         if files is None:
             return [], 0, 0
@@ -327,38 +327,57 @@ class BasicTod(memh5.MemDiskGroup):
             raise ValueError('Attribute main_data_axes must be a tuple of strings')
 
     @property
+    def main_axes_ordered_datasets(self):
+        """Datasets that have axis aligned with the main data."""
+        return self._main_axes_ordered_datasets_
+
+    # @main_time_ordered_datasets.setter
+    # def main_time_ordered_datasets(self, value):
+    #     if isinstance(value, basestring):
+    #         self._main_time_ordered_datasets_ = {value}
+    #     elif hasattr(value, '__iter__'):
+    #         for val in value:
+    #             if not isinstance(val, basestring):
+    #                 raise ValueError('Attribute main_time_ordered_datasets must be a set of strings')
+    #         self._main_time_ordered_datasets_ = set(value)
+    #     else:
+    #         raise ValueError('Attribute main_time_ordered_datasets must be a set of strings')
+
+    @property
     def main_time_ordered_datasets(self):
         """Datasets that have same time points as the main data."""
-        return self._main_time_ordered_datasets_
+        return { key: val for key, val in self.main_axes_ordered_datasets.items() if 0 in val }
 
-    @main_time_ordered_datasets.setter
-    def main_time_ordered_datasets(self, value):
-        if isinstance(value, basestring):
-            self._main_time_ordered_datasets_ = {value}
-        elif hasattr(value, '__iter__'):
-            for val in value:
-                if not isinstance(val, basestring):
-                    raise ValueError('Attribute main_time_ordered_datasets must be a set of strings')
-            self._main_time_ordered_datasets_ = set(value)
-        else:
-            raise ValueError('Attribute main_time_ordered_datasets must be a set of strings')
+    # @main_time_ordered_datasets.setter
+    # def main_time_ordered_datasets(self, value):
+    #     if isinstance(value, basestring):
+    #         self._main_time_ordered_datasets_ = {value}
+    #     elif hasattr(value, '__iter__'):
+    #         for val in value:
+    #             if not isinstance(val, basestring):
+    #                 raise ValueError('Attribute main_time_ordered_datasets must be a set of strings')
+    #         self._main_time_ordered_datasets_ = set(value)
+    #     else:
+    #         raise ValueError('Attribute main_time_ordered_datasets must be a set of strings')
 
     @property
     def time_ordered_datasets(self):
         """Time ordered datasets."""
-        return self._main_time_ordered_datasets_ | self._time_ordered_datasets_
+        self._time_ordered_datasets_.update(self.main_time_ordered_datasets)
+        return self._time_ordered_datasets_
+        # return self._main_time_ordered_datasets_ | set(self._time_ordered_datasets_.keys())
 
-    @time_ordered_datasets.setter
-    def time_ordered_datasets(self, value):
-        if isinstance(value, basestring):
-            self._time_ordered_datasets_ = {value}
-        elif hasattr(value, '__iter__'):
-            for val in value:
-                if not isinstance(val, basestring):
-                    raise ValueError('Attribute time_ordered_datasets must be a set of strings')
-            self._time_ordered_datasets_ = set(value)
-        else:
-            raise ValueError('Attribute time_ordered_datasets must be a set of strings')
+    # @time_ordered_datasets.setter
+    # def time_ordered_datasets(self, value):
+    #     if isinstance(value, basestring):
+    #         self._time_ordered_datasets_ = {value}
+    #     elif hasattr(value, '__iter__'):
+    #         for val in value:
+    #             if not isinstance(val, basestring):
+    #                 raise ValueError('Attribute time_ordered_datasets must be a set of strings')
+    #         self._time_ordered_datasets_ = set(value)
+    #     else:
+    #         raise ValueError('Attribute time_ordered_datasets must be a set of strings')
 
     @property
     def time_ordered_attrs(self):
@@ -476,7 +495,7 @@ class BasicTod(memh5.MemDiskGroup):
                 else:
                     return lst
 
-        if name in self.main_time_ordered_datasets:
+        if name in self.main_time_ordered_datasets.keys():
             dset_shape, dset_type, infiles_map = self._get_input_info(name, self.main_data_start, self.main_data_stop)
             first_start = mpiutil.bcast(infiles_map[0][1], root=0, comm=self.comm) # start form the first file
             last_stop = mpiutil.bcast(infiles_map[-1][2], root=self.nproc-1, comm=self.comm) # stop from the last file
@@ -538,10 +557,11 @@ class BasicTod(memh5.MemDiskGroup):
                     st = et
 
         # for other main_time_ordered_datasets
-        elif name in self.main_time_ordered_datasets:
+        elif name in self.main_time_ordered_datasets.keys():
+            time_axis = self.main_time_ordered_datasets[name].index(0)
             if self.main_data_dist_axis == 0:
                 # distribute it along the first axis as the main data
-                self.create_dataset(name, shape=dset_shape, dtype=dset_type, distributed=True, distributed_axis=0)
+                self.create_dataset(name, shape=dset_shape, dtype=dset_type, distributed=True, distributed_axis=time_axis)
                 # copy attrs of this dset
                 memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
                 st = 0
@@ -583,7 +603,8 @@ class BasicTod(memh5.MemDiskGroup):
         else:
             # for other time ordered data that are not main_time_ordered_datasets,
             # always distribute them along the first axis no matter what self.main_data_dist_axis is
-            self.create_dataset(name, shape=dset_shape, dtype=dset_type, distributed=True, distributed_axis=0)
+            time_axis = self.time_ordered_datasets[name].index(0)
+            self.create_dataset(name, shape=dset_shape, dtype=dset_type, distributed=True, distributed_axis=time_axis)
             # copy attrs of this dset
             memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
             st = 0
@@ -600,7 +621,7 @@ class BasicTod(memh5.MemDiskGroup):
             warnings.warn('No input file')
             return
 
-        if name in self.time_ordered_datasets:
+        if name in self.time_ordered_datasets.keys():
             self._load_a_tod_dataset(name)
         else:
             self._load_a_common_dataset(name)
@@ -622,7 +643,7 @@ class BasicTod(memh5.MemDiskGroup):
                 self._load_a_common_attribute(attr_name)
         # read in top level common datasets
         for dset_name in fh.iterkeys():
-            if dset_name not in self.time_ordered_datasets:
+            if dset_name not in self.time_ordered_datasets.keys():
                 self._load_a_common_dataset(dset_name)
 
     def load_main_data(self):
@@ -647,7 +668,7 @@ class BasicTod(memh5.MemDiskGroup):
 
         # load time ordered datasets
         for dset_name in fh.iterkeys():
-            if dset_name in self.time_ordered_datasets and dset_name != self.main_data_name:
+            if dset_name in self.time_ordered_datasets.keys() and dset_name != self.main_data_name:
                 self._load_a_tod_dataset(dset_name)
 
     def load_time_ordered(self):
@@ -728,7 +749,7 @@ class BasicTod(memh5.MemDiskGroup):
         # delete top level common datasets
         dset_keys = list(self.iterkeys())
         for dset_name in dset_keys:
-            if dset_name not in self.time_ordered_datasets:
+            if dset_name not in self.time_ordered_datasets.keys():
                 self._del_a_dataset(dset_name)
 
         self.load_common()
@@ -749,7 +770,7 @@ class BasicTod(memh5.MemDiskGroup):
         # load time ordered datasets
         dset_keys = list(self.iterkeys())
         for dset_name in dset_keys:
-            if dset_name in self.time_ordered_datasets and dset_name != self.main_data_name:
+            if dset_name in self.time_ordered_datasets.keys() and dset_name != self.main_data_name:
                 self._del_a_dataset(dset_name)
 
         self.load_tod_excl_main_data()
@@ -783,7 +804,7 @@ class BasicTod(memh5.MemDiskGroup):
         """Whether to allow the access of the given root level attribute."""
         return True if name not in self.time_ordered_attrs else False
 
-    def create_time_ordered_dataset(self, name, data, recreate=False, copy_attrs=False):
+    def create_time_ordered_dataset(self, name, data, axis_order=(0,), recreate=False, copy_attrs=False):
         """Create a time ordered dataset.
 
         Parameters
@@ -792,6 +813,8 @@ class BasicTod(memh5.MemDiskGroup):
             Name of the dataset.
         data : np.ndarray or MPIArray
             The data to create a dataset.
+        axis_order : tuple
+            A tuple with the index 0 denotes time axis of the created dataset.
         recreate : bool, optional
             If True will recreate a dataset with this name if it already exists,
             else a RuntimeError will be rasised. Default False.
@@ -801,9 +824,11 @@ class BasicTod(memh5.MemDiskGroup):
 
         """
 
+        time_axis = axis_order.index(0)
+
         if not name in self.iterkeys():
             if self.main_data_dist_axis == 0:
-                self.create_dataset(name, data=data, distributed=True, distributed_axis=0)
+                self.create_dataset(name, data=data, distributed=True, distributed_axis=time_axis)
             else:
                 self.create_dataset(name, data=data)
         else:
@@ -813,7 +838,7 @@ class BasicTod(memh5.MemDiskGroup):
                     copyattrs(self[name].attrs, attr_dict)
                 del self[name]
                 if self.main_data_dist_axis == 0:
-                    self.create_dataset(name, data=data, distributed=True, distributed_axis=0)
+                    self.create_dataset(name, data=data, distributed=True, distributed_axis=time_axis)
                 else:
                     self.create_dataset(name, data=data)
                 if copy_attrs:
@@ -821,17 +846,21 @@ class BasicTod(memh5.MemDiskGroup):
             else:
                 raise RuntimeError('Dataset %s already exists' % name)
 
-        self.time_ordered_datasets.add(name)
+        self.time_ordered_datasets[name] = axis_order
 
-    def create_main_time_ordered_dataset(self, name, data, recreate=False, copy_attrs=False):
-        """Create a main type time ordered dataset.
+    def create_main_axis_ordered_dataset(self, axis, name, data, axis_order, recreate=False, copy_attrs=False):
+        """Create a `axis_name` ordered dataset.
 
         Parameters
         ----------
+        axis : string or integer
+            The distribute axis.
         name : string
             Name of the dataset.
         data : np.ndarray or MPIArray
             The data to create a dataset.
+        axis_order : tuple
+            A tuple denotes the corresponding axis of the created dataset.
         recreate : bool, optional
             If True will recreate a dataset with this name if it already exists,
             else a RuntimeError will be rasised. Default False.
@@ -841,16 +870,80 @@ class BasicTod(memh5.MemDiskGroup):
 
         """
 
+        axis = check_axis(axis, self.main_data_axes)
+
+        # if not axis_name in self.main_data_axes:
+        #     raise ValueError('Invalid axis name %s for axes %s' % (axis_name, self.main_data_axes))
+        # if axis_name == self.main_data_axes[0]:
+        #     raise ValueError('Use create_time_ordered_dataset or create_main_time_ordered_dataset instead')
+
         if isinstance(data, mpiarray.MPIArray):
             shape = data.global_shape
         else:
             shape = data.shape
-        if shape[0] != self.main_data.shape[0]:
-            raise ValueError('Time axis does not align with main data, can not create a main time ordered dataset %s' % name)
 
-        self.create_time_ordered_dataset(name, data, recreate, copy_attrs)
+        dist_axis = axis_order.index(axis)
+        if shape[dist_axis] != self.main_data.shape[axis]:
+            axis_name = self.main_data_axes[axis]
+            raise ValueError('%s axis does not align with main data, can not create a %s ordered dataset %s' % (axis_name.capitalize(), axis_name, name))
 
-        self.main_time_ordered_datasets.add(name)
+        if not name in self.iterkeys():
+            if axis == self.main_data_dist_axis:
+                self.create_dataset(name, data=data, distributed=True, distributed_axis=dist_axis)
+            else:
+                self.create_dataset(name, data=data)
+        else:
+            if recreate:
+                if copy_attrs:
+                    attr_dict = {} # temporarily save attrs of this dataset
+                    copyattrs(self[name].attrs, attr_dict)
+                del self[name]
+                if axis == self.main_data_dist_axis:
+                    self.create_dataset(name, data=data, distributed=True, distributed_axis=dist_axis)
+                else:
+                    self.create_dataset(name, data=data)
+                if copy_attrs:
+                    copyattrs(attr_dict, self[name].attrs)
+            else:
+                raise RuntimeError('Dataset %s already exists' % name)
+
+        self.main_axes_ordered_datasets[name] = axis_order
+
+
+    def create_main_time_ordered_dataset(self, name, data, axis_order=(0,), recreate=False, copy_attrs=False):
+        """Create a main type time ordered dataset.
+
+        Parameters
+        ----------
+        name : string
+            Name of the dataset.
+        data : np.ndarray or MPIArray
+            The data to create a dataset.
+        axis_order : tuple
+            A tuple with the index of 0 denotes time axis of the created dataset.
+        recreate : bool, optional
+            If True will recreate a dataset with this name if it already exists,
+            else a RuntimeError will be rasised. Default False.
+        copy_attrs : bool, optional
+            If True, when recreate the dataset, its original attributes will be
+            copyed to the new dataset, else no copy is done. Default Fasle.
+
+        """
+
+        # time_axis = axis_order.index(0)
+
+        # if isinstance(data, mpiarray.MPIArray):
+        #     shape = data.global_shape
+        # else:
+        #     shape = data.shape
+        # if shape[time_axis] != self.main_data.shape[0]:
+        #     raise ValueError('Time axis does not align with main data, can not create a main time ordered dataset %s' % name)
+
+        # self.create_time_ordered_dataset(name, data, axis_order, recreate, copy_attrs)
+
+        self.create_main_axis_ordered_dataset(0, name, data, axis_order, recreate, copy_attrs)
+
+        # self.main_time_ordered_datasets[name] = axis_order
 
     @property
     def history(self):
@@ -937,14 +1030,35 @@ class BasicTod(memh5.MemDiskGroup):
             except KeyError:
                 pass
             self.main_data_dist_axis = axis
-            # redistribute other main_time_ordered_datasets
-            for dset_name in self.iterkeys():
-                if dset_name in self.main_time_ordered_datasets and dset_name != self.main_data_name:
-                    if axis == 0:
-                        self.dataset_common_to_distributed(dset_name, distributed_axis=0)
+
+            # redistribute other main_axes_ordered_datasets
+            for name, val in self.main_axes_ordered_datasets.items():
+                if name in self.iterkeys() and name != self.main_data_name:
+                    if axis in val:
+                        self.dataset_common_to_distributed(name, distributed_axis=val.index(axis))
                     else:
-                        if self[dset_name].distributed:
-                            self.dataset_distributed_to_common(dset_name)
+                        if self[name].distributed:
+                            self.dataset_distributed_to_common(name)
+
+            # redistribute other time_ordered_datasets
+            for name, val in self.time_ordered_datasets.items():
+                if not name in self.main_axes_ordered_datasets.keys():
+                    if axis == 0:
+                        self.dataset_common_to_distributed(name, distributed_axis=val.index(0))
+                    else:
+                        self.dataset_distributed_to_common(name)
+
+            # for dset_name in self.iterkeys():
+            #     if dset_name in self.main_axes_ordered_datasets.keys() and dset_name != self.main_data_name:
+
+            # # redistribute other main_time_ordered_datasets
+            # for dset_name in self.iterkeys():
+            #     if dset_name in self.main_time_ordered_datasets.keys() and dset_name != self.main_data_name:
+            #         if axis == 0:
+            #             self.dataset_common_to_distributed(dset_name, distributed_axis=self.main_time_ordered_datasets[name].index(0))
+            #         else:
+            #             if self[dset_name].distributed:
+            #                 self.dataset_distributed_to_common(dset_name)
 
     def check_status(self):
         """Check that data hold in this container is consistent.
@@ -953,27 +1067,87 @@ class BasicTod(memh5.MemDiskGroup):
         check has done here in this basic container.
         """
 
-        nts = [] # to save the number of time points
-        for dset_name, dset in self.iteritems():
-            if dset_name == self.main_data_name:
-                if len(dset.shape) != len(self.main_data_axes):
-                    raise RuntimeError('Main data %s does not has the same axes as main_data_axes' % dset_name)
-                nts.append(dset.shape[0])
-            elif dset_name in self.main_time_ordered_datasets:
-                nts.append(dset.shape[0])
+        for name, dset in self.iteritems():
+            # check main_axes_ordered_datasets
+            if name in self.main_axes_ordered_datasets.keys():
+                val = self.main_axes_ordered_datasets[name]
+                if self.main_data_dist_axis in val:
+                    dist_axis = val.index(self.main_data_dist_axis)
+                    if not dset.distributed or dset.distributed_axis != dist_axis:
+                        raise RuntimeError('Dataset %s should be distributed along axis %d when %s is the distributed axis' % (name, dist_axis, self.main_data_axes[self.main_data_dist_axis]))
+                else:
+                    if dset.distributed:
+                        raise RuntimeError('Dataset %s should be common when %s is the distributed axis' % (name, self.main_data_axes[self.main_data_dist_axis]))
 
-        # check that all main_time_ordered_datasets have the same number of points
-        num = len(set(nts))
-        if num != 0 and num != 1:
-            raise RuntimeError('Not all main_time_ordered_datasets have the same number of time points')
+            # check other time_ordered_datasets
+            elif name in self.time_ordered_datasets.keys():
+                val = self.time_ordered_datasets[name]
+                if self.main_data_dist_axis == 0:
+                    if not (dset.distributed and dset.distributed_axis == val.index(0)):
+                        print name, type(dset), val
+                        raise RuntimeError('Dataset %s should be distributed along axis %d when %s is the distributed axis' % (name, val.index(0), self.main_data_axes[self.main_data_dist_axis]))
+                else:
+                    if not dset.common:
+                        raise RuntimeError('Dataset %s should be common when %s is the distributed axis' % (name, self.main_data_axes[self.main_data_dist_axis]))
 
-        # check time ordered datasets
-        for dset_name, dset in self.iteritems():
-            if dset_name in self.time_ordered_datasets:
-                if self.main_data_dist_axis == 0 and not dset.distributed:
-                    raise RuntimeError('Dataset %s should be distributed when %s is the distributed axis' % (dset_name, self.main_data_axes[self.main_data_dist_axis]))
-                if self.main_data_dist_axis != 0 and not dset.common:
-                    raise RuntimeError('Dataset %s should be common when %s is the distributed axis' % (dset_name, self.main_data_axes[self.main_data_dist_axis]))
+            # check for common datasets
+            else:
+                if not dset.common:
+                    raise RuntimeError('Dataset %s should be common' % name)
+
+
+        # # check main_axes_ordered_datasets
+        # for name, val in self.main_axes_ordered_datasets.items():
+        #     if name in self.items():
+        #         dset = self[name]
+        #         if self.main_data_dist_axis in val:
+        #             dist_axis = val.index(self.main_data_dist_axis)
+        #             if not dset.distributed or dset.distributed_axis != dist_axis
+        #                 raise RuntimeError('Dataset %s should be distributed along axis %d when %s is the distributed axis' % (name, dist_axis, self.main_data_axes[self.main_data_dist_axis]))
+        #         else:
+        #             if dset.distributed:
+        #                 raise RuntimeError('Dataset %s should be common when %s is the distributed axis' % (name, self.main_data_axes[self.main_data_dist_axis]))
+
+        # check axis are aligned
+        for axis in range(len(self.main_data_axes)):
+            lens = [] # to save the length of axis
+            for name, val in self.main_axes_ordered_datasets.items():
+                if name in self.items() and axis in val:
+                    lens.append(self[name].shape[val.index(axis)])
+            num = len(set(lens))
+            if num != 0 and num != 1:
+                raise RuntimeError('Not all main_axes_ordered_datasets have an aligned %s axis' % self.main_data_axes[axis])
+
+        # # check other time_ordered_datasets
+        # for name, val in self.time_ordered_datasets.keys():
+        #     if not name in self.main_axes_ordered_datasets.keys():
+        #         dset = self[name]
+        #         if self.main_data_dist_axis = 0:
+        #             if not (dset.distributed and dset.distributed_axis != val.index(0)):
+        #            raise RuntimeError('Dataset %s should be distributed along axis %d when %s is the distributed axis' % (name, val.index(0), self.main_data_axes[self.main_data_dist_axis]))
+        #         else:
+        #             if not dset.common:
+        #                 raise RuntimeError('Dataset %s should be common when %s is the distributed axis' % (name, self.main_data_axes[self.main_data_dist_axis]))
+
+
+
+        # nts = [] # to save the number of time points
+
+        # # check time ordered datasets
+        # for dset_name, dset in self.iteritems():
+
+        #     if dset_name in self.time_ordered_datasets.keys():
+        #         if self.main_data_dist_axis == 0 and not dset.distributed:
+        #             raise RuntimeError('Dataset %s should be distributed when %s is the distributed axis' % (dset_name, self.main_data_axes[self.main_data_dist_axis]))
+        #         if self.main_data_dist_axis != 0 and not dset.common:
+        #             raise RuntimeError('Dataset %s should be common when %s is the distributed axis' % (dset_name, self.main_data_axes[self.main_data_dist_axis]))
+
+        #     if dset_name in self.main_time_ordered_datasets.keys():
+        #         nts.append(dset.shape[self.main_time_ordered_datasets[dset_name].index(0)])
+
+        # num = len(set(nts))
+        # if num != 0 and num != 1:
+        #     raise RuntimeError('Not all main_time_ordered_datasets have the same number of time points')
 
 
     def _get_output_info(self, dset_name, num_outfiles):
@@ -1049,7 +1223,7 @@ class BasicTod(memh5.MemDiskGroup):
                     if dset_name in exclude:
                         continue
                     # write top level common datasets
-                    if dset_name not in self.time_ordered_datasets:
+                    if dset_name not in self.time_ordered_datasets.keys():
                         f.create_dataset(dset_name, data=dset, shape=dset.shape, dtype=dset.dtype)
                     # initialize time ordered datasets
                     else:
@@ -1071,7 +1245,7 @@ class BasicTod(memh5.MemDiskGroup):
         for dset_name, dset in self.iteritems():
             if dset_name in exclude:
                 continue
-            if dset_name in self.time_ordered_datasets:
+            if dset_name in self.time_ordered_datasets.keys():
                 dset_shape, dset_type, outfiles_map = self._get_output_info(dset_name, num_outfiles)
                 st = 0
                 for fi, start, stop in outfiles_map:
