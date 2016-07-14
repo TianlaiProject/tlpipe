@@ -82,7 +82,7 @@ class Dispatch(tod_task.IterRawTimestream):
         if isinstance(feed_select, tuple):
             feeds = feedno[slice(*feed_select)].tolist()
         elif isinstance(feed_select, list):
-            feeds = feedno[feed_select].tolist()
+            feeds = feed_select
         # remove bad feeds from feeds
         for bf in bad_feed:
             if bf in feeds:
