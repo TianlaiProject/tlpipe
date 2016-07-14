@@ -1,6 +1,7 @@
 import numpy as np
 from datetime import datetime
 import container
+from caput import mpiutil
 from caput import mpiarray
 from caput import memh5
 from tlpipe.utils import date_util
@@ -22,6 +23,8 @@ class TimestreamCommon(container.BasicTod):
     time
     freq
     bl
+    is_dish
+    is_cylinder
     freq_ordered_datasets
     bl_ordered_datasets
     feed_ordered_datasets
@@ -215,13 +218,20 @@ class TimestreamCommon(container.BasicTod):
 
         if 'sec1970' not in self.iterkeys():
             # generate sec1970
-            sec1970_first = self.infiles[0].attrs['sec1970']
             int_time = self.infiles[0].attrs['inttime']
-            sec1970_start = sec1970_first + int_time * self.main_data_start
-            num_sec1970 = self.main_data_stop - self.main_data_start
-            sec1970 = np.array([ sec1970_start + i*int_time for i in range(num_sec1970)], dtype=np.float64) # precision float32 is not enough
-            time_axis = self.main_data_axes.index('time')
-            sec1970 = sec1970[self.main_data_select[time_axis]]
+            sec1970s = []
+            nts = []
+            for fh in mpiutil.mpilist(self.infiles, method='con', comm=self.comm):
+                sec1970s.append(fh.attrs['sec1970'])
+                nts.append(fh[self.main_data_name].shape[0])
+            sec1970 = np.zeros(sum(nts), dtype=np.float64) # precision float32 is not enough
+            cum_nts = np.cumsum([0] + nts)
+            for idx, (nt, sec) in enumerate(zip(nts, sec1970s)):
+                sec1970[cum_nts[idx]:cum_nts[idx+1]] = np.array([ sec + i*int_time for i in range(nt)], dtype=np.float64) # precision float32 is not enough
+            # gather local sec1970
+            sec1970 = mpiutil.gather_array(sec1970, root=None, comm=self.comm)
+            # select the corresponding section
+            sec1970 = sec1970[self.main_data_start:self.main_data_stop][self.main_data_select[0]]
 
             # if time is just the distributed axis, load sec1970 distributed
             if 'time' == self.main_data_axes[self.main_data_dist_axis]:
@@ -263,6 +273,22 @@ class TimestreamCommon(container.BasicTod):
             return self['blorder']
         except KeyError:
             raise KeyError('blorder does not exist, try to load it first')
+
+    @property
+    def is_dish(self):
+        """True if data is get from dish arrays."""
+        try:
+            return 'Dish' in self.attrs['telescope']
+        except KeyError:
+            raise KeyError('Attribute telescope does not exist, try to load it first')
+
+    @property
+    def is_cylinder(self):
+        """True if data is get from cylinder arrays."""
+        try:
+            return 'Cylinder' in self.attrs['telescope']
+        except KeyError:
+            raise KeyError('Attribute telescope does not exist, try to load it first')
 
 
     def create_freq_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False):
