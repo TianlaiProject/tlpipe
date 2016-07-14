@@ -36,7 +36,6 @@ class TimestreamCommon(container.BasicTod):
     create_freq_ordered_dataset
     create_bl_ordered_dataset
     create_feed_ordered_dataset
-    redistribute
     check_status
     time_data_operate
     freq_data_operate

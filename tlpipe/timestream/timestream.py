@@ -26,8 +26,6 @@ class Timestream(timestream_common.TimestreamCommon):
     polarization_select
     feed_select
     create_pol_ordered_dataset
-    redistribute
-    check_status
     lin2stokes
     stokes2lin
     pol_data_operate

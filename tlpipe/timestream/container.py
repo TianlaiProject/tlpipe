@@ -70,7 +70,7 @@ def check_axis(axis, axes):
 class BasicTod(memh5.MemDiskGroup):
     """Basic time ordered data container.
 
-    Inherits from :class:`MemDiskGroup`.
+    Inherits from :class:`memh5.MemDiskGroup`.
 
     Basic one-level time ordered data container that allows any number of
     datasets in the root group but no nesting.
@@ -108,6 +108,7 @@ class BasicTod(memh5.MemDiskGroup):
     main_data
     main_data_name
     main_data_axes
+    main_axes_ordered_datasets
     main_time_ordered_datasets
     time_ordered_datasets
     time_ordered_attrs
@@ -130,6 +131,7 @@ class BasicTod(memh5.MemDiskGroup):
     dataset_name_allowed
     attrs_name_allowed
     create_time_ordered_dataset
+    create_main_axis_ordered_dataset
     create_main_time_ordered_dataset
     add_history
     info
@@ -333,7 +335,7 @@ class BasicTod(memh5.MemDiskGroup):
 
     @property
     def main_time_ordered_datasets(self):
-        """Datasets that have same time points as the main data."""
+        """Datasets that have the first axis aligned with the main data."""
         return { key: val for key, val in self.main_axes_ordered_datasets.items() if 0 in val }
 
     @property
