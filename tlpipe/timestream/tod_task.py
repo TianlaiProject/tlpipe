@@ -121,7 +121,7 @@ class SingleTimestream(SingleTod):
         """Data select."""
         tod.time_select(self.params['time_select'])
         tod.frequency_select(self.params['freq_select'])
-        tod.pplarization_select(self.params['pol_select'])
+        tod.polarization_select(self.params['pol_select'])
         tod.feed_select(self.params['feed_select'], self.params['corr'])
 
         return tod
@@ -244,7 +244,7 @@ class IterTimestream(IterTod):
         """Data select."""
         tod.time_select(self.params['time_select'])
         tod.frequency_select(self.params['freq_select'])
-        tod.pplarization_select(self.params['pol_select'])
+        tod.polarization_select(self.params['pol_select'])
         tod.feed_select(self.params['feed_select'], self.params['corr'])
 
         return tod
