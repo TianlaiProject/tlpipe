@@ -40,6 +40,8 @@ class RunInfo(tod_task.SingleRawTimestream):
             az_alt = np.zeros((rt['sec1970'].local_data.shape[0], 2), dtype=np.float32) # radians
             az_alt[:, 0] = 0.0 # az
             az_alt[:, 1] = np.pi/2 # alt
+        else:
+            raise RuntimeError('Unknown antenna type %s' % ts.attrs['telescope'])
 
         ra_dec = np.zeros_like(az_alt) # radians
         time_zone = rt.attrs['timezone']
