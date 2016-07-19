@@ -484,11 +484,21 @@ class Manager(object):
         # Initialize all tasks.
         pipeline_tasks = []
         for ii, task_spec in enumerate(self.tasks):
+
+            # task_spec is either the TaskBase object, or a tuple, with the first
+            # element being the TaskBase object and the second element being the
+            # new prefix to use
+            if isinstance(task_spec, tuple) :
+                task =  task_spec[0]
+                task.prefix = task_spec[1]
+            else :
+                task = task_spec
+
             try:
-                task = self._setup_task(task_spec)
+                task = self._setup_task(task)
             except PipelineConfigError as e:
                 # msg = "Setting up task %d caused an error - " % ii
-                msg = "Setting up task %d: %s caused an error - " % (ii, task_spec.__name__)
+                msg = "Setting up task %d: %s caused an error - " % (ii, task.__name__)
                 msg += str(e)
                 new_e = PipelineConfigError(msg)
                 # This preserves the traceback.
@@ -537,17 +547,8 @@ class Manager(object):
                     receiving_task._pipeline_inspect_queue_product(out_keys, out)
 
 
-    def _setup_task(self, task_spec):
+    def _setup_task(self, task):
         """Set up a pipeline task from the spec given in the tasks list."""
-
-        # task_spec is either the TaskBase object, or a tuple, with the first
-        # element being the TaskBase object and the second element being the
-        # new prefix to use
-        if isinstance(task_spec, tuple) :
-            task =  task_spec[0]
-            task.prefix = task_spec[1]
-        else :
-            task = task_spec
 
         if mpiutil.rank0:
             logger.info('Initializing task: ' + str(task))
@@ -720,7 +721,6 @@ class TaskBase(object):
     # Pipeline Infrastructure
     # -----------------------
 
-    # def _pipeline_setup(self, task_spec):
     def _pipeline_setup(self):
         """Setup the 'requires', 'in' and 'out' keys for this task."""
 
