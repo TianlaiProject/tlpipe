@@ -8,6 +8,10 @@ from tlpipe.utils.path_util import output_path
 
 
 def cal(vis, li, gi, fbl, rt, **kwargs):
+
+    if np.prod(vis.shape) == 0 :
+        return vis
+
     num_mean = kwargs.get('num_mean', 5)
     plot_phs = kwargs.get('plot_phs', False)
     fig_prefix = kwargs.get('fig_name', 'phs_changke')
