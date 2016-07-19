@@ -4,6 +4,7 @@ import pickle
 import posixpath
 import itertools
 import warnings
+from copy import deepcopy
 import numpy as np
 import h5py
 from caput import mpiarray
@@ -1149,6 +1150,28 @@ class BasicTod(memh5.MemDiskGroup):
                     mpiutil.barrier(comm=self.comm)
 
                 # mpiutil.barrier(comm=self.comm)
+
+    def copy(self):
+        """Return a deep copy of this container."""
+
+        cont = self.__class__(dist_axis=self.main_data_dist_axis, comm=self.comm)
+
+        # set hints
+        hint_keys = [ key for key in self.__class__.__dict__.keys() if re.match(self.hints_pattern, key) ]
+        for key in hint_keys:
+            setattr(cont, key, getattr(self, key))
+
+        # copy attrs
+        for attrs_name, attrs_value in self.attrs.iteritems():
+            cont.attrs[attrs_name] = deepcopy(attrs_value)
+
+        # copy datasets
+        for dset_name, dset in self.iteritems():
+            cont.create_dataset(dset_name, data=dset.data.copy())
+            memh5.copyattrs(dset.attrs, cont[dset_name].attrs)
+
+        return cont
+
 
 
     def data_operate(self, func, op_axis=None, axis_vals=0, full_data=False, keep_dist_axis=False, **kwargs):
