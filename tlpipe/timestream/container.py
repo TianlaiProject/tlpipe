@@ -990,7 +990,7 @@ class BasicTod(memh5.MemDiskGroup):
 
             # redistribute other time_ordered_datasets
             for name, val in self.time_ordered_datasets.items():
-                if not name in self.main_axes_ordered_datasets.keys():
+                if name in self.iterkeys() and not name in self.main_axes_ordered_datasets.keys():
                     if axis == 0:
                         self.dataset_common_to_distributed(name, distributed_axis=val.index(0))
                     else:
@@ -1123,15 +1123,12 @@ class BasicTod(memh5.MemDiskGroup):
                         lt, et, st = mpiutil.split_m(nt, num_outfiles)
                         lshape = (lt[fi],) + dset.global_shape[1:]
                         f.create_dataset(dset_name, lshape, dtype=dset.dtype)
-                        # f[dset_name][:] = np.array(0.0).astype(dset.dtype)
+                        f[dset_name][:] = np.array(0.0).astype(dset.dtype)
 
                     # copy attrs of this dset
                     memh5.copyattrs(dset.attrs, f[dset_name].attrs)
 
         mpiutil.barrier(comm=self.comm)
-
-        # open all output files for more efficient latter operations
-        outfiles = [ h5py.File(fl, 'r+', libver=libver) for fl in outfiles ]
 
         # then write time ordered datasets
         for dset_name, dset in self.iteritems():
@@ -1139,18 +1136,19 @@ class BasicTod(memh5.MemDiskGroup):
                 continue
             if dset_name in self.time_ordered_datasets.keys():
                 dset_shape, dset_type, outfiles_map = self._get_output_info(dset_name, num_outfiles)
+
                 st = 0
-                for fi, start, stop in outfiles_map:
+                for ri in range(self.nproc):
+                    if ri == self.rank:
+                        for fi, start, stop in outfiles_map:
 
-                    et = st + (stop - start)
-                    outfiles[fi][dset_name][start:stop] = self[dset_name].local_data[st:et]
-                    st = et
+                            et = st + (stop - start)
+                            with h5py.File(outfiles[fi], 'r+', libver=libver) as f:
+                                f[dset_name][start:stop] = self[dset_name].local_data[st:et]
+                            st = et
+                    mpiutil.barrier(comm=self.comm)
 
-                mpiutil.barrier(comm=self.comm)
-
-        # close all output files
-        for fh in outfiles:
-            fh.close()
+                # mpiutil.barrier(comm=self.comm)
 
 
     def data_operate(self, func, op_axis=None, axis_vals=0, full_data=False, keep_dist_axis=False, **kwargs):
