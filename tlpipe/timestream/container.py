@@ -139,6 +139,7 @@ class BasicTod(memh5.MemDiskGroup):
     redistribute
     check_status
     to_files
+    copy
     data_operate
     all_data_operate
 
