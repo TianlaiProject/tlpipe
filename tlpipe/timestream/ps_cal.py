@@ -56,13 +56,6 @@ class PsCal(tod_task.SingleTimestream):
         save_gain = self.params['save_gain']
         gain_file = self.params['gain_file']
 
-        if 'Dish' in ts.attrs['telescope']:
-            ant_type = 'dish'
-        elif 'Cylinder' in ts.attrs['telescope']:
-            ant_type = 'cylinder'
-        else:
-            raise RuntimeError('Unknown antenna type %s' % ts.attrs['telescope'])
-
         ts.redistribute('frequency')
 
         lfreq = ts.freq.local_data[:] # local freq
@@ -80,22 +73,6 @@ class PsCal(tod_task.SingleTimestream):
         print transit_ind
         start_ind = transit_ind - np.int(span / int_time)
         end_ind = transit_ind + np.int(span / int_time)
-
-        # array
-        if ant_type == 'dish':
-            aa = tldishes.get_aa(1.0e-3 * lfreq) # use GHz
-            # make all antennas point to the pointing direction
-            for fd in feedno:
-                # feedno start from 1
-                # aa[fd-1].set_pointing(az=antpointing[fi, 0], alt=antpointing[fi, 1], twist=0)
-                aa[fd-1].set_pointing(az=0, alt=np.pi/2, twist=0)
-            # for ind, ai in enumerate(aa):
-            #     if ind+1 in feedno: # feedno start from 1
-            #         fi = feedno.index(ind+1)
-            #         # ai.set_pointing(az=antpointing[fi, 0], alt=antpointing[fi, 1], twist=0)
-            #         ai.set_pointing(az=0, alt=np.pi/2, twist=0)
-        else:
-            raise NotImplementedError('ps_cal for cylinder array not implemented yet')
 
         # calibrator
         srclist, cutoff, catalogs = a.scripting.parse_srcs(calibrator, catalog)
@@ -115,6 +92,9 @@ class PsCal(tod_task.SingleTimestream):
         gain = np.empty((nt, nfeed, 2, len(lfreq)), dtype=np.complex128)
         gain[:] = complex(np.nan, np.nan)
 
+        # array
+        aa = ts.array
+
         # construct visibility matrix for a single time, pol, freq
         Vmat = np.zeros((nfeed, nfeed), dtype=ts.main_data.dtype)
         for ind, ti in enumerate(range(start_ind, end_ind)):
@@ -133,12 +113,10 @@ class PsCal(tod_task.SingleTimestream):
                 for fi, freq in enumerate(lfreq): # mpi among freq
                     for i, ai in enumerate(feedno):
                         for j, aj in enumerate(feedno):
-                            # uij = aa.gen_uvw(ai-1, aj-1, src='z').squeeze() # (rj - ri)/lambda
-                            uij = aa.gen_uvw(ai-1, aj-1, src='z')[:, 0, :] # (rj - ri)/lambda
-                            # import pdb
-                            # pdb.set_trace()
-                            # bmij = aa.bm_response(ai-1, aj-1).squeeze() # will get error for only one local freq
-                            bmij = aa.bm_response(ai-1, aj-1).reshape(-1)
+                            # uij = aa.gen_uvw(i, j, src='z').squeeze() # (rj - ri)/lambda
+                            uij = aa.gen_uvw(i, j, src='z')[:, 0, :] # (rj - ri)/lambda
+                            # bmij = aa.bm_response(i, j).squeeze() # will get error for only one local freq
+                            bmij = aa.bm_response(i, j).reshape(-1)
                             try:
                                 bi = bls.index((ai, aj))
                                 # Vmat[i, j] = ts.main_data.local_data[ti, fi, pi, bi] / (Sc[fi] * bmij[fi] * np.exp(-2.0J * np.pi * np.dot(s_top, uij[:, fi]))) # xx, yy

@@ -11,11 +11,15 @@ from tlpipe.core import tldishes
 from tlpipe.utils.date_util import get_ephdate
 
 
-def phs(vis, li, gi, tbl, st, **kwargs):
+def phs(vis, li, gi, tbl, ts, **kwargs):
     t = tbl[0]
     ai, aj = tbl[1]
     aa = kwargs.get('aa')
     s = kwargs.get('s')
+
+    feedno = ts['feedno'][:].tolist()
+    i = feedno.index(ai)
+    j = feedno.index(aj)
 
     aa.set_jultime(t)
     s.compute(aa)
@@ -24,7 +28,7 @@ def phs(vis, li, gi, tbl, st, **kwargs):
     # get the topocentric coordinate of the calibrator at the current time
     s_top = s.get_crds('top', ncrd=3)
     # aa.sim_cache(cat.get_crds('eq', ncrd=3)) # for compute bm_response and sim
-    uij = aa.gen_uvw(ai-1, aj-1, src='z').squeeze() # (rj - ri)/lambda
+    uij = aa.gen_uvw(i, j, src='z').squeeze() # (rj - ri)/lambda
 
     return vis * np.exp(-2.0J * np.pi * np.dot(s_top, uij))[:, np.newaxis]
     # return vis * np.exp(2.0J * np.pi * np.dot(s_top, uij))[:, np.newaxis]
@@ -58,24 +62,12 @@ class Phs2zen(tod_task.SingleTimestream):
         ts.redistribute(0) # make time the dist axis
 
         # array
-        if ant_type == 'dish':
-            aa = tldishes.get_aa(1.0e-3 * ts.freq[:]) # use GHz
-            # make all antennas point to the pointing direction
-            for fd in feedno:
-                # feedno start from 1
-                # aa[fd-1].set_pointing(az=antpointing[fi, 0], alt=antpointing[fi, 1], twist=0)
-                aa[fd-1].set_pointing(az=0, alt=np.pi/2, twist=0)
-            # for ind, ai in enumerate(aa):
-            #     if ind+1 in feedno:
-            #         fi = feedno.index(ind+1)
-            #         ai.set_pointing(az=antpointing[fi, 0], alt=antpointing[fi, 1], twist=0)
-        else:
-            raise NotImplementedError('phs2zen for cylinder array not implemented yet')
+        aa = ts.array
 
         try:
             # convert an observing time to the ra_dec of the array pointing of that time
             src_time = get_ephdate(source, tzone=ts.attrs['timezone']) # utc time
-            # aa.date = str(ephem.Date(src_time)) # utc time
+            aa.date = str(ephem.Date(src_time)) # utc time
             # print 'date:', aa.date
             azs = antpointing[:, 0]
             alts = antpointing[:, 1]
