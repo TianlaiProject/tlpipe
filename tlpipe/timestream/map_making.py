@@ -10,14 +10,13 @@ import tod_task
 from caput import mpiutil
 from caput import mpiarray
 from caput import memh5
-from tlpipe.core import tldishes
 from tlpipe.utils.path_util import input_path, output_path
 from tlpipe.map.fmmode.telescope import tldish
 from tlpipe.map.fmmode.core import beamtransfer
 from tlpipe.map.fmmode.pipeline import timestream
 
 
-class Average(tod_task.SingleTimestream):
+class MapMaking(tod_task.SingleTimestream):
     """Initialize telescope array and average the timestream."""
 
     params_init = {
@@ -34,7 +33,7 @@ class Average(tod_task.SingleTimestream):
                     'ts_name': 'ts',
                   }
 
-    prefix = 'av_'
+    prefix = 'mm_'
 
     def process(self, ts):
 
@@ -73,22 +72,24 @@ class Average(tod_task.SingleTimestream):
         else:
             raise RuntimeError('Unknown array type %s' % ts.attrs['telescope'])
 
+        
+        # # reorder vis according to phi
+        # phi = ts['ra_dec'][:, 0]
+
+        # # find phi = 0 ind
+        # ind0 = np.where(np.diff([phi[-1]] + phi.tolist()) < -1.9 * np.pi)[0][0]
+        # ts['vis'].local_data[:] = np.concatenate([ ts['vis'].local_data[ind0:], ts['vis'].local_data[:ind0] ], axis=0)
+        # # ts['vis'].local_data[:] = np.concatenate([ ts['vis'].local_data[ind0:], ts['vis'].local_data[:ind0] ], axis=0)[::-1]
+        # ts['ra_dec'][:] = np.concatenate([ ts['ra_dec'][ind0:], ts['ra_dec'][:ind0] ], axis=0)
+
+        # mask noise on data
+        on = np.where(ts['ns_on'][:])[0]
+        ts['vis'].local_data[on] = complex(np.nan, np.nan)
+
         # average data
         nt = ts['sec1970'].shape[0]
         phi_size = tel.phi_size
         num, start, end = mpiutil.split_m(nt, phi_size)
-
-        on = np.where(ts['ns_on'][:])[0]
-        ts['vis'].local_data[on] = complex(np.nan, np.nan)
-
-        # reorder vis according to phi
-        phi = ts['ra_dec'][:, 0]
-
-        # find phi = 0 ind
-        ind0 = np.where(np.diff([phi[-1]] + phi.tolist()) < -1.9 * np.pi)[0][0]
-        ts['vis'].local_data[:] = np.concatenate([ ts['vis'].local_data[ind0:], ts['vis'].local_data[:ind0] ], axis=0)
-        # ts['vis'].local_data[:] = np.concatenate([ ts['vis'].local_data[ind0:], ts['vis'].local_data[:ind0] ], axis=0)[::-1]
-        ts['ra_dec'][:] = np.concatenate([ ts['ra_dec'][ind0:], ts['ra_dec'][:ind0] ], axis=0)
 
         roll_ind = int(0.5 * (start[0] + end[0]))
         ts['vis'].local_data[:] = np.roll(ts['vis'].local_data[:], roll_ind, axis=0)
@@ -101,9 +102,6 @@ class Average(tod_task.SingleTimestream):
         # plt.plot(ts['ra_dec'][:])
         # # plt.plot(ts['az_alt'][:])
         # plt.savefig('ra_dec1.png')
-
-        # err
-
 
         # averate over time
         inds = []
