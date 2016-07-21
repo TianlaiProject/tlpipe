@@ -4,6 +4,8 @@ import container
 from caput import mpiutil
 from caput import mpiarray
 from caput import memh5
+from tlpipe.core import tl_array
+from tlpipe.core import constants as const
 from tlpipe.utils import date_util
 
 
@@ -276,7 +278,7 @@ class TimestreamCommon(container.BasicTod):
 
     @property
     def is_dish(self):
-        """True if data is get from dish arrays."""
+        """True if data is get from dish array."""
         try:
             return 'Dish' in self.attrs['telescope']
         except KeyError:
@@ -284,11 +286,48 @@ class TimestreamCommon(container.BasicTod):
 
     @property
     def is_cylinder(self):
-        """True if data is get from cylinder arrays."""
+        """True if data is get from cylinder array."""
         try:
             return 'Cylinder' in self.attrs['telescope']
         except KeyError:
             raise KeyError('Attribute telescope does not exist, try to load it first')
+
+    @property
+    def array(self):
+        """Return either a dish array or a cylinder array instance."""
+        try:
+            lon = self.attrs['sitelon'] # degree
+            lat = self.attrs['sitelat'] # degree
+            elev = self.attrs['siteelev'] # m
+        except KeyError:
+            raise KeyError('Attribute sitelon, sitelat or siteelev does not exist, try to load it first')
+
+        freq = self.freq.local_data[:]
+        pos = self['feedpos'].local_data[:] # in topocentric coordinate
+        nfeed = pos.shape[0]
+        pos -= pos[-1]
+        # convert to equatorial (ns) coordinates
+        m2ns = 1.0 / const.c * 1.0e9
+        pos_ns = np.dot(tl_array.xyz2XYZ_m(np.radians(lat)), m2ns * pos.T).T
+        if self.is_dish:
+            try:
+                diameter = self.attrs['dishdiam']
+            except KeyError:
+                raise KeyError('Attribute dishdiam does not exist, try to load it first')
+            # beam = tl_array.DishBeam(freq, diameter)
+            ants = [ tl_array.DishAntenna(pi, freq, diameter) for pi in pos_ns ]
+        elif self.is_cylinder:
+            try:
+                width = self.attrs['cywid']
+                length = self.attrs['cylen']
+            except KeyError:
+                raise KeyError('Attribute dishdiam does not exist, try to load it first')
+            # beam = tl_array.CylinderBeam(freq, width, length)
+            ants = [ tl_array.CylinderBeam(pi, freq, width, length) for pi in pos_ns ]
+
+        aa = tl_array.AntennaArray((str(lat), str(lon), elev), ants)
+
+        return aa
 
 
     def create_freq_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False):
