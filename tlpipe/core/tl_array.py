@@ -6,7 +6,31 @@ import aipy as ap
 import constants as const
 
 
-class DsihBeam(ap.fit.Beam2DGaussian):
+def xyz2XYZ_m(lat):
+    """Conversion matrix through xyz to XYZ.
+
+    xyz coord: z toward zenith, x toward East, y toward North, xy in the horizon plane;
+    XYZ coord: Z toward north pole, X in the local meridian plane, Y toward East, XY plane parallel to equatorial plane.
+
+    Parameters
+    ----------
+    lat : float
+        Latitude of the observing position in radians.
+
+    """
+    sin_a, cos_a = np.sin(lat), np.cos(lat)
+    zero = np.zeros_like(lat)
+    one = np.ones_like(lat)
+    mat =  np.array([[  zero,   -sin_a,   cos_a  ],
+                     [   one,     zero,    zero  ],
+                     [  zero,    cos_a,   sin_a  ]])
+    if len(mat.shape) == 3:
+        mat = mat.transpose([2, 0, 1])
+
+    return mat
+
+
+class DishBeam(ap.fit.Beam2DGaussian):
     """Circular beam of a dish antenna."""
 
     def __init__(self, freqs, diameter=6.0):
@@ -84,6 +108,39 @@ class CylinderBeam(ap.fit.Beam):
         factor = 1.0e-60
 
         return np.sinc(self.width * nu / lmbda) * np.sinc(factor * nv / lmbda) * nz
+
+
+class Antenna(ap.pol.Antenna):
+    """Representation of an individual dish antenna or cylinder feed."""
+
+    def __init__(self, pos, beam, phsoff={'x':[0.0, 0.0], 'y':[0.0, 0.0]}, bp_r={'x': np.array([1.0]), 'y': np.array([1.0])}, bp_i={'x': np.array([0.0]), 'y': np.array([0.0])}, amp={'x': 1.0, 'y': 1.0}, pointing=(0.0, np.pi/2, 0.0), **kwargs):
+
+        x, y, z = pos
+        ap.pol.Antenna.__init__(self, x, y, z, beam, phsoff, bp_r, bp_i, amp, pointing, **kwargs)
+
+
+class DishAntenna(Antenna):
+    """Representation of an individual dish antenna."""
+
+    def __init__(self, pos, freqs, diameter=6.0, phsoff={'x':[0.0, 0.0], 'y':[0.0, 0.0]}, bp_r={'x': np.array([1.0]), 'y': np.array([1.0])}, bp_i={'x': np.array([0.0]), 'y': np.array([0.0])}, amp={'x': 1.0, 'y': 1.0}, pointing=(0.0, np.pi/2, 0.0), **kwargs):
+
+        beam = DishBeam(freqs, diameter)
+        Antenna.__init__(self, pos, beam, phsoff, bp_r, bp_i, amp, pointing, **kwargs)
+
+
+class CylinderFeed(Antenna):
+    """Representation of an individual cylinder feed."""
+
+    def __init__(self, pos, freqs, width=15.0, length=40.0, phsoff={'x':[0.0, 0.0], 'y':[0.0, 0.0]}, bp_r={'x': np.array([1.0]), 'y': np.array([1.0])}, bp_i={'x': np.array([0.0]), 'y': np.array([0.0])}, amp={'x': 1.0, 'y': 1.0}, pointing=(0.0, np.pi/2, 0.0), **kwargs):
+
+        beam = CylinderBeam(freqs, width, length)
+        Antenna.__init__(self, pos, beam, phsoff, bp_r, bp_i, amp, pointing, **kwargs)
+
+
+class AntennaArray(ap.pol.AntennaArray):
+    """Representation of an antenna array."""
+
+    pass
 
 
 
