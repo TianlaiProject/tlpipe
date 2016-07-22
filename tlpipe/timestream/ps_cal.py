@@ -4,6 +4,7 @@ import os
 import numpy as np
 from scipy.linalg import eigh
 import h5py
+import ephem
 import aipy as a
 import tod_task
 
@@ -64,15 +65,10 @@ class PsCal(tod_task.SingleTimestream):
         pol = ts['pol'][:].tolist()
         bl = ts.bl[:]
         bls = [ tuple(b) for b in bl ]
-        # antpointing = np.radians(ts['antpointing'][-1, :, :]) # radians
-        transitsource = ts['transitsource'][:]
-        transit_time = transitsource[-1, 0] # second, sec1970
-        int_time = ts.attrs['inttime'] # second
-
-        transit_ind = np.searchsorted(ts['sec1970'][:], transit_time)
-        print transit_ind
-        start_ind = transit_ind - np.int(span / int_time)
-        end_ind = transit_ind + np.int(span / int_time)
+        # # antpointing = np.radians(ts['antpointing'][-1, :, :]) # radians
+        # transitsource = ts['transitsource'][:]
+        # transit_time = transitsource[-1, 0] # second, sec1970
+        # int_time = ts.attrs['inttime'] # second
 
         # calibrator
         srclist, cutoff, catalogs = a.scripting.parse_srcs(calibrator, catalog)
@@ -84,6 +80,37 @@ class PsCal(tod_task.SingleTimestream):
             print 'strength', s._jys,
             print 'measured at', s.mfreq, 'GHz',
             print 'with index', s.index
+
+        # get transit time of calibrator
+        # array
+        aa = ts.array
+        aa.set_jultime(ts['jul_date'][0]) # the first obs time point
+        next_transit = aa.next_transit(s)
+        transit_time = a.phs.ephem2juldate(next_transit) # Julian date
+        if transit_time > ts['jul_date'][-1]:
+            local_next_transit = ephem.Date(next_transit + 8.0 * ephem.hour)
+            raise RuntimeError('Data does not contain local transit time %s of source %s' % (local_next_transit, calibrator))
+
+        # the first transit index
+        transit_inds = [ np.searchsorted(ts['jul_date'][:], transit_time) ]
+        # find all other transit indices
+        aa.set_jultime(ts['jul_date'][0] + 1.0)
+        transit_time = a.phs.ephem2juldate(aa.next_transit(s)) # Julian date
+        cnt = 2
+        while(transit_time <= ts['jul_date'][-1]):
+            transit_inds.append(np.searchsorted(ts['jul_date'][:], transit_time))
+            aa.set_jultime(ts['jul_date'][0] + 1.0*cnt)
+            transit_time = a.phs.ephem2juldate(aa.next_transit(s)) # Julian date
+            cnt += 1
+
+        print transit_inds
+
+        ### now only use the first transit point to do the cal
+        ### may need to improve in the future
+        transit_ind = transit_inds[0]
+        int_time = ts.attrs['inttime'] # second
+        start_ind = transit_ind - np.int(span / int_time)
+        end_ind = transit_ind + np.int(span / int_time)
 
         nt = end_ind - start_ind
         nfeed = len(feedno)
@@ -116,6 +143,8 @@ class PsCal(tod_task.SingleTimestream):
                             # uij = aa.gen_uvw(i, j, src='z').squeeze() # (rj - ri)/lambda
                             uij = aa.gen_uvw(i, j, src='z')[:, 0, :] # (rj - ri)/lambda
                             # bmij = aa.bm_response(i, j).squeeze() # will get error for only one local freq
+                            # import pdb
+                            # pdb.set_trace()
                             bmij = aa.bm_response(i, j).reshape(-1)
                             try:
                                 bi = bls.index((ai, aj))
