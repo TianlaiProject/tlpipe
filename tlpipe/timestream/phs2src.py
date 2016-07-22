@@ -57,7 +57,6 @@ class Phs2src(tod_task.SingleTimestream):
             raise RuntimeError('Unknown antenna type %s' % ts.attrs['telescope'])
 
         feedno = ts['feedno'][:].tolist()
-        antpointing = np.radians(ts['antpointing'][-1, :, :]) # radians
 
         ts.redistribute(0) # make time the dist axis
 
@@ -69,6 +68,7 @@ class Phs2src(tod_task.SingleTimestream):
             src_time = get_ephdate(source, tzone=ts.attrs['timezone']) # utc time
             aa.date = str(ephem.Date(src_time)) # utc time
             # print 'date:', aa.date
+            antpointing = np.radians(ts['antpointing'][-1, :, :]) # radians
             azs = antpointing[:, 0]
             alts = antpointing[:, 1]
             if np.allclose(azs, azs[0]) and np.allclose(alts, alts[0]):
