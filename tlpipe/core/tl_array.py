@@ -81,7 +81,7 @@ class CylinderBeam(ap.fit.Beam):
 
         Parameters
         ----------
-        xzy : array like
+        xyz : array like
             Unit direction vector in topocentric coordinates (x=E, y=N, z=UP).
             `xyz` may be arrays of multiple coordinates.
 
@@ -94,12 +94,12 @@ class CylinderBeam(ap.fit.Beam):
 
         vec_n = np.array(xyz)
         vec_z = np.array([0.0, 0.0, 1.0]) # unit vector pointing to the zenith
-        nz = np.dot(vec_n, vec_z)
+        nz = np.dot(vec_z, vec_n)
 
         vec_u = np.array([1.0, 0.0, 0.0]) # unit vector pointing East in the ground-plane
         vec_v = np.array([0.0, 1.0, 0.0]) # unit vector pointing North in the ground-plane
-        nu = np.dot(vec_n, vec_u)
-        nv = np.dot(vec_n, vec_v)
+        nu = np.dot(vec_u, vec_n)
+        nv = np.dot(vec_v, vec_n)
 
         lmbda = const.c / (1.0e9 * self.freqs) # in m
 
@@ -107,7 +107,10 @@ class CylinderBeam(ap.fit.Beam):
 
         factor = 1.0e-60
 
-        return np.sinc(self.width * nu / lmbda) * np.sinc(factor * nv / lmbda) * nz
+        # print (np.sinc(self.width * nu / lmbda) * np.sinc(factor * nv / lmbda)).shape
+        # print nz.shape
+
+        return np.sinc(self.width * nu / lmbda) * np.sinc(factor * nv / lmbda).T * nz
 
 
 class Antenna(ap.pol.Antenna):
@@ -131,7 +134,8 @@ class DishAntenna(Antenna):
 class CylinderFeed(Antenna):
     """Representation of an individual cylinder feed."""
 
-    def __init__(self, pos, freqs, width=15.0, length=40.0, phsoff={'x':[0.0, 0.0], 'y':[0.0, 0.0]}, bp_r={'x': np.array([1.0]), 'y': np.array([1.0])}, bp_i={'x': np.array([0.0]), 'y': np.array([0.0])}, amp={'x': 1.0, 'y': 1.0}, pointing=(0.0, np.pi/2, 0.0), **kwargs):
+    # NOTE: for cylinder, x dipole along east-west, y-dipole along north-south, so for x dipole, pointing is (np.pi/2, np.pi/2, 0.0)
+    def __init__(self, pos, freqs, width=15.0, length=40.0, phsoff={'x':[0.0, 0.0], 'y':[0.0, 0.0]}, bp_r={'x': np.array([1.0]), 'y': np.array([1.0])}, bp_i={'x': np.array([0.0]), 'y': np.array([0.0])}, amp={'x': 1.0, 'y': 1.0}, pointing=(np.pi/2, np.pi/2, 0.0), **kwargs):
 
         beam = CylinderBeam(freqs, width, length)
         Antenna.__init__(self, pos, beam, phsoff, bp_r, bp_i, amp, pointing, **kwargs)
@@ -159,8 +163,8 @@ if __name__ == '__main__':
     y_ang = np.degrees(np.arctan2(yz[:, 2], yz[:, 1]))
 
     cyl_beam = CylinderBeam([750.0], 15.0, 40.0)
-    x_resp = cyl_beam.response(xz)
-    y_resp = cyl_beam.response(yz)
+    x_resp = cyl_beam.response(xz.T)
+    y_resp = cyl_beam.response(yz.T)
 
     x_inds = np.where(x_resp>=0.5)[1]
     x_ind1, x_ind2 = x_inds[0], x_inds[-1]
