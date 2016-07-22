@@ -71,6 +71,9 @@ class Detect(tod_task.SingleRawTimestream):
         ns_on = mpiarray.MPIArray.from_numpy_array(ns_on)
 
         rt.create_main_time_ordered_dataset('ns_on', ns_on)
+        rt['ns_on'].attrs['period'] = period
+        rt['ns_on'].attrs['on_time'] = on_time
+        rt['ns_on'].attrs['off_time'] = off_time
 
         rt.add_history(self.history)
 

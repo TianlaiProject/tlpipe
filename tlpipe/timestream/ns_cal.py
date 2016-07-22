@@ -12,7 +12,11 @@ def cal(vis, li, gi, fbl, rt, **kwargs):
     if np.prod(vis.shape) == 0 :
         return vis
 
+    on_time = rt['ns_on'].attrs['off_time']
     num_mean = kwargs.get('num_mean', 5)
+    num_mean = min(num_mean, on_time-2)
+    if num_mean <= 0:
+        raise RuntimeError('Do not have enough noise on time samples to do the ns_cal')
     plot_phs = kwargs.get('plot_phs', False)
     fig_prefix = kwargs.get('fig_name', 'phs_changke')
 
