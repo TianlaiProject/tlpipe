@@ -323,7 +323,7 @@ class TimestreamCommon(container.BasicTod):
             except KeyError:
                 raise KeyError('Attribute dishdiam does not exist, try to load it first')
             # beam = tl_array.CylinderBeam(freq, width, length)
-            ants = [ tl_array.CylinderBeam(pi, freq, width, length) for pi in pos_ns ]
+            ants = [ tl_array.CylinderFeed(pi, freq, width, length) for pi in pos_ns ]
 
         aa = tl_array.AntennaArray((str(lat), str(lon), elev), ants)
 
