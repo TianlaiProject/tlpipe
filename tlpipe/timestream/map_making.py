@@ -10,6 +10,7 @@ import tod_task
 from caput import mpiutil
 from caput import mpiarray
 from caput import memh5
+from tlpipe.utils.np_util import unique
 from tlpipe.utils.path_util import input_path, output_path
 from tlpipe.map.fmmode.telescope import tldish
 from tlpipe.map.fmmode.core import beamtransfer
@@ -72,29 +73,6 @@ class MapMaking(tod_task.SingleTimestream):
         else:
             raise RuntimeError('Unknown array type %s' % ts.attrs['telescope'])
 
-        
-        # # reorder vis according to phi
-        # phi = ts['ra_dec'][:, 0]
-
-        # # find phi = 0 ind
-        # ind0 = np.where(np.diff([phi[-1]] + phi.tolist()) < -1.9 * np.pi)[0][0]
-        # ts['vis'].local_data[:] = np.concatenate([ ts['vis'].local_data[ind0:], ts['vis'].local_data[:ind0] ], axis=0)
-        # # ts['vis'].local_data[:] = np.concatenate([ ts['vis'].local_data[ind0:], ts['vis'].local_data[:ind0] ], axis=0)[::-1]
-        # ts['ra_dec'][:] = np.concatenate([ ts['ra_dec'][ind0:], ts['ra_dec'][:ind0] ], axis=0)
-
-        # mask noise on data
-        on = np.where(ts['ns_on'][:])[0]
-        ts['vis'].local_data[on] = complex(np.nan, np.nan)
-
-        # average data
-        nt = ts['sec1970'].shape[0]
-        phi_size = tel.phi_size
-        num, start, end = mpiutil.split_m(nt, phi_size)
-
-        roll_ind = int(0.5 * (start[0] + end[0]))
-        ts['vis'].local_data[:] = np.roll(ts['vis'].local_data[:], roll_ind, axis=0)
-        ts['ra_dec'][:] = np.roll(ts['ra_dec'][:], roll_ind, axis=0)
-
         # import matplotlib
         # matplotlib.use('Agg')
         # import matplotlib.pyplot as plt
@@ -103,12 +81,32 @@ class MapMaking(tod_task.SingleTimestream):
         # # plt.plot(ts['az_alt'][:])
         # plt.savefig('ra_dec1.png')
 
-        # averate over time
-        inds = []
+        # mask noise on data
+        on = np.where(ts['ns_on'][:])[0]
+        ts['vis'].local_data[on] = complex(np.nan, np.nan)
+
+        # average data
+        nt = ts['sec1970'].shape[0]
+        phi_size = tel.phi_size
+        nt_m = float(nt) / phi_size
+
+        # roll data to have phi=0 near the first
+        roll_len = np.int(np.around(0.5*nt_m))
+        ts['vis'].local_data[:] = np.roll(ts['vis'].local_data[:], roll_len, axis=0)
+        ts['ra_dec'][:] = np.roll(ts['ra_dec'][:], roll_len, axis=0)
+
+        # inds = np.arange(nt)
+        repeat_inds = np.repeat(np.arange(nt), phi_size)
+        num, start, end = mpiutil.split_m(nt*phi_size, phi_size)
+
+        # phi = np.zeros((phi_size,), dtype=ts['ra_dec'].dtype)
+        phi = np.linspace(0, 2*np.pi, phi_size, endpoint=False)
         vis = np.zeros((phi_size,)+ts['vis'].local_data.shape[1:], dtype=ts['vis'].dtype)
+        # average onver time
         for idx in range(phi_size):
-            inds.append(int(0.5 * (start[idx] + end[idx])))
-            vis[idx] = np.ma.mean(np.ma.masked_invalid(ts['vis'].local_data[start[idx]:end[idx]]), axis=0) # time mean
+            inds, weight = unique(repeat_inds[start[idx]:end[idx]], return_counts=True)
+            vis[idx] = np.ma.average(np.ma.masked_invalid(ts['vis'].local_data[inds]), axis=0, weights=weight) # time mean
+            # phi[idx] = np.average(ts['ra_dec'][:, 0][inds], axis=0, weights=weight)
 
         if pol == 'xx':
             vis = vis[:, :, 0, :]
@@ -140,8 +138,6 @@ class MapMaking(tod_task.SingleTimestream):
         for ind in range(len(redundancy)):
             vis_stream[:, :, ind] = np.sum(vis_tmp[:, :, red_bin[ind]:red_bin[ind+1]], axis=2) / redundancy[ind]
 
-        phi = (ts['ra_dec'][:, 0])[inds]
-
         vis_stream = mpiarray.MPIArray.wrap(vis_stream, axis=1)
         vis_h5 = memh5.MemGroup(distributed=True)
         vis_h5.create_dataset('/timestream', data=vis_stream)
@@ -161,8 +157,6 @@ class MapMaking(tod_task.SingleTimestream):
         # vis_h5.attrs['beamtransfer_path'] = os.path.abspath(bt.directory)
         vis_h5.attrs['ntime'] = phi_size
 
-        # vis_h5.to_hdf5('ts.hdf5')
-
         # beamtransfer
         bt = beamtransfer.BeamTransfer(beam_dir, tel, gen_inv)
         bt.generate()
@@ -180,7 +174,6 @@ class MapMaking(tod_task.SingleTimestream):
         ts.generate_mmodes()
         ts.mapmake_full(64, 'full')
 
-        
         # ts.add_history(self.history)
 
         return ts
