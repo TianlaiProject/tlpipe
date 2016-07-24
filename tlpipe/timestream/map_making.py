@@ -10,7 +10,7 @@ import tod_task
 from caput import mpiutil
 from caput import mpiarray
 from caput import memh5
-from tlpipe.utils.np_util import unique
+from tlpipe.utils.np_util import unique, average
 from tlpipe.utils.path_util import input_path, output_path
 from tlpipe.map.fmmode.telescope import tldish
 from tlpipe.map.fmmode.core import beamtransfer
@@ -105,7 +105,7 @@ class MapMaking(tod_task.SingleTimestream):
         # average onver time
         for idx in range(phi_size):
             inds, weight = unique(repeat_inds[start[idx]:end[idx]], return_counts=True)
-            vis[idx] = np.ma.average(np.ma.masked_invalid(ts['vis'].local_data[inds]), axis=0, weights=weight) # time mean
+            vis[idx] = average(np.ma.masked_invalid(ts['vis'].local_data[inds]), axis=0, weights=weight) # time mean
             # phi[idx] = np.average(ts['ra_dec'][:, 0][inds], axis=0, weights=weight)
 
         if pol == 'xx':

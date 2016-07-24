@@ -9,6 +9,9 @@ def unique(ar, return_index=False, return_inverse=False, return_counts=False):
     that give the unique values, and the indices of the unique array that
     reconstruct the input array.
 
+    Copied from newer version of numpy, as old version has no `return_counts`
+    argument.
+
     Parameters
     ----------
     ar : array_like
@@ -117,3 +120,149 @@ def unique(ar, return_index=False, return_inverse=False, return_counts=False):
             idx = np.concatenate(np.nonzero(flag) + ([ar.size],))
             ret += (np.diff(idx),)
     return ret
+
+
+def average(a, axis=None, weights=None, returned=False):
+    """
+    Return the weighted average of array over the given axis.
+
+    Copied from newer version of numpy, as old version raise "ComplexWarning:
+    Casting complex values to real discards the imaginary part".
+
+    Parameters
+    ----------
+    a : array_like
+        Data to be averaged.
+        Masked entries are not taken into account in the computation.
+    axis : int, optional
+        Axis along which the average is computed. The default is to compute
+        the average of the flattened array.
+    weights : array_like, optional
+        The importance that each element has in the computation of the average.
+        The weights array can either be 1-D (in which case its length must be
+        the size of `a` along the given axis) or of the same shape as `a`.
+        If ``weights=None``, then all data in `a` are assumed to have a
+        weight equal to one.   If `weights` is complex, the imaginary parts
+        are ignored.
+    returned : bool, optional
+        Flag indicating whether a tuple ``(result, sum of weights)``
+        should be returned as output (True), or just the result (False).
+        Default is False.
+
+    Returns
+    -------
+    average, [sum_of_weights] : (tuple of) scalar or MaskedArray
+        The average along the specified axis. When returned is `True`,
+        return a tuple with the average as the first element and the sum
+        of the weights as the second element. The return type is `np.float64`
+        if `a` is of integer type and floats smaller than `float64`, or the
+        input data-type, otherwise. If returned, `sum_of_weights` is always
+        `float64`.
+
+    Examples
+    --------
+    >>> a = np.ma.array([1., 2., 3., 4.], mask=[False, False, True, True])
+    >>> np.ma.average(a, weights=[3, 1, 0, 0])
+    1.25
+
+    >>> x = np.ma.arange(6.).reshape(3, 2)
+    >>> print x
+    [[ 0.  1.]
+     [ 2.  3.]
+     [ 4.  5.]]
+    >>> avg, sumweights = np.ma.average(x, axis=0, weights=[1, 2, 3],
+    ...                                 returned=True)
+    >>> print avg
+    [2.66666666667 3.66666666667]
+
+    """
+    a = np.ma.asarray(a)
+    mask = a.mask
+    ash = a.shape
+    if ash == ():
+        ash = (1,)
+    if axis is None:
+        if mask is np.ma.nomask:
+            if weights is None:
+                n = a.sum(axis=None)
+                d = float(a.size)
+            else:
+                w = np.ma.filled(weights, 0.0).ravel()
+                n = umath.add.reduce(a._data.ravel() * w)
+                d = umath.add.reduce(w)
+                del w
+        else:
+            if weights is None:
+                n = a.filled(0).sum(axis=None)
+                d = float(umath.add.reduce((~mask).ravel()))
+            else:
+                w = np.ma.array(np.ma.filled(weights, 0.0), float, mask=mask).ravel()
+                n = np.ma.add.reduce(a.ravel() * w)
+                d = np.ma.add.reduce(w)
+                del w
+    else:
+        if mask is np.ma.nomask:
+            if weights is None:
+                d = ash[axis] * 1.0
+                n = np.ma.add.reduce(a._data, axis)
+            else:
+                w = np.ma.filled(weights, 0.0)
+                wsh = w.shape
+                if wsh == ():
+                    wsh = (1,)
+                if wsh == ash:
+                    w = np.array(w, float, copy=0)
+                    n = np.ma.add.reduce(a * w, axis)
+                    d = np.ma.add.reduce(w, axis)
+                    del w
+                elif wsh == (ash[axis],):
+                    r = [None] * len(ash)
+                    r[axis] = slice(None, None, 1)
+                    w = eval("w[" + repr(tuple(r)) + "] * np.ma.ones(ash, float)")
+                    n = np.ma.add.reduce(a * w, axis)
+                    d = np.ma.add.reduce(w, axis, dtype=float)
+                    del w, r
+                else:
+                    raise ValueError('average: weights wrong shape.')
+        else:
+            if weights is None:
+                n = np.ma.add.reduce(a, axis)
+                d = umath.add.reduce((~mask), axis=axis, dtype=float)
+            else:
+                w = np.ma.filled(weights, 0.0)
+                w = np.ma.filled(weights, 0.0)
+                wsh = w.shape
+                if wsh == ():
+                    wsh = (1,)
+                if wsh == ash:
+                    w = array(w, dtype=float, mask=mask, copy=0)
+                    n = np.ma.add.reduce(a * w, axis)
+                    d = np.ma.add.reduce(w, axis, dtype=float)
+                elif wsh == (ash[axis],):
+                    r = [None] * len(ash)
+                    r[axis] = slice(None, None, 1)
+                    w = eval("w[" + repr(tuple(r)) +
+                             "] * np.ma.masked_array(np.ma.ones(ash, float), mask)")
+                    n = np.ma.add.reduce(a * w, axis)
+                    d = np.ma.add.reduce(w, axis, dtype=float)
+                else:
+                    raise ValueError('average: weights wrong shape.')
+                del w
+    if n is np.ma.masked or d is np.ma.masked:
+        return np.ma.masked
+    result = n / d
+    del n
+
+    if isinstance(result, np.ma.MaskedArray):
+        if ((axis is None) or (axis == 0 and a.ndim == 1)) and \
+           (result.mask is np.ma.nomask):
+            result = result._data
+        if returned:
+            if not isinstance(d, np.ma.MaskedArray):
+                d = np.ma.masked_array(d)
+            if isinstance(d, ndarray) and (not d.shape == result.shape):
+                d = np.ma.ones(result.shape, dtype=float) * d
+    if returned:
+        return result, d
+    else:
+        return result
