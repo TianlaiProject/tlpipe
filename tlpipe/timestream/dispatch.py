@@ -77,19 +77,19 @@ class Dispatch(tod_task.IterRawTimestream):
                     # no badchn
                     return tod
 
-        bad_feed = [ feedno[np.where(channo == bc)[0][0]] for bc in badchn ]
-        feed_select = self.params['feed_select']
-        if isinstance(feed_select, tuple):
-            feeds = feedno[slice(*feed_select)].tolist()
-        elif isinstance(feed_select, list):
-            feeds = feed_select
-        # remove bad feeds from feeds
-        for bf in bad_feed:
-            if bf in feeds:
-                feeds.remove(bf)
+            bad_feed = [ feedno[np.where(channo == bc)[0][0]] for bc in badchn ]
+            feed_select = self.params['feed_select']
+            if isinstance(feed_select, tuple):
+                feeds = feedno[slice(*feed_select)].tolist()
+            elif isinstance(feed_select, list):
+                feeds = feed_select
+            # remove bad feeds from feeds
+            for bf in bad_feed:
+                if bf in feeds:
+                    feeds.remove(bf)
 
-        # feed select
-        tod.feed_select(feeds, self.params['corr'])
+            # feed select
+            tod.feed_select(feeds, self.params['corr'])
 
         return tod
 
