@@ -12,7 +12,7 @@ from caput import mpiarray
 from caput import memh5
 from tlpipe.utils.np_util import unique, average
 from tlpipe.utils.path_util import input_path, output_path
-from tlpipe.map.fmmode.telescope import tldish
+from tlpipe.map.fmmode.telescope import tl_dish, tl_cylinder
 from tlpipe.map.fmmode.core import beamtransfer
 from tlpipe.map.fmmode.pipeline import timestream
 
@@ -63,13 +63,14 @@ class MapMaking(tod_task.SingleTimestream):
         az = np.degrees(az)
         alt = np.degrees(alt)
         pointing = [az, alt, 0.0]
-        dish_width = ts.attrs['dishdiam']
-
+        feedpos = ts['feedpos'][:]
 
         if ts.is_dish:
-            tel = tldish.TlUnpolarisedDishArray(lat, lon, freqs, beam_theta_range, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, feeds, pointing, dish_width)
+            dish_width = ts.attrs['dishdiam']
+            tel = tl_dish.TlUnpolarisedDishArray(lat, lon, freqs, beam_theta_range, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, dish_width, feedpos, pointing)
         elif ts.is_cylinder:
-            pass
+            cyl_width = ts.attrs['cywid']
+            tel = tl_cylinder.TlUnpolarisedCylinder(lat, lon, freqs, beam_theta_range, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, cyl_width, feedpos)
         else:
             raise RuntimeError('Unknown array type %s' % ts.attrs['telescope'])
 
