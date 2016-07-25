@@ -8,8 +8,6 @@ from caput import mpiutil
 
 from tlpipe.map.fmmode.core import visibility
 from tlpipe.map.fmmode.util import hpproj
-# from fmmode.util import config
-# from fmmode.util import typeutil
 
 
 def in_range(arr, min, max):
@@ -168,25 +166,6 @@ class TransitTelescope(object):
     """
     __metaclass__ = abc.ABCMeta  # Enforce Abstract class
 
-    # zenith = config.Property(proptype=latlon_to_sphpol, default=[45.0, 0.0])
-
-    # freq_lower = config.Property(proptype=typeutil.nonnegative_float, default=400.0)
-    # freq_upper = config.Property(proptype=typeutil.nonnegative_float, default=800.0)
-    # num_freq = config.Property(proptype=typeutil.positive_int, default=50)
-
-    # beam_theta_range = config.Property(proptype=list, default=[0.0, 180.0])
-
-    # tsys_flat = config.Property(proptype=typeutil.nonnegative_float, default=50.0, key='tsys')
-    # ndays = config.Property(proptype=typeutil.positive_int, default=733)
-
-    # accuracy_boost = config.Property(proptype=typeutil.positive_float, default=1.0)
-    # l_boost = config.Property(proptype=typeutil.positive_float, default=1.0)
-
-    # minlength = config.Property(proptype=typeutil.nonnegative_float, default=0.0)
-    # maxlength = config.Property(proptype=typeutil.nonnegative_float, default=1.0e7)
-
-    # auto_correlations = config.Property(proptype=bool, default=False)
-
 
     def __init__(self, latitude=45, longitude=0, freqs=[], beam_theta_range=[0.0, 180.0], tsys_flat=50.0, ndays=1.0, accuracy_boost=1.0, l_boost=1.0, bl_range=[0.0, 1.0e7], auto_correlations=False):
 
@@ -201,17 +180,6 @@ class TransitTelescope(object):
         self.maxlength = bl_range[1]
         self.auto_correlations = auto_correlations
 
-    # def __init__(self, latitude=45, longitude=0):
-    #     """Initialise a telescope object.
-
-    #     Parameters
-    #     ----------
-    #     latitude, longitude : scalar
-    #         Position on the Earths surface of the telescope (in degrees).
-    #     """
-
-    #     # NOTE: latlon_to_sphpol is automatically applied on assignment
-    #     self.zenith = [latitude, longitude]
 
     _pickle_keys = []
 
@@ -325,21 +293,6 @@ class TransitTelescope(object):
 
 
     #======== Properties related to frequencies ========
-
-    # _frequencies = None
-
-    # @property
-    # def frequencies(self):
-    #     """The centre of each frequency band (in MHz)."""
-    #     if self._frequencies is None:
-    #         self.calculate_frequencies()
-
-    #     return self._frequencies
-
-    # def calculate_frequencies(self):
-
-    #     #self._frequencies = np.linspace(self.freq_lower, self.freq_upper, self.num_freq)
-    #     self._frequencies = self.freq_lower + (np.arange(self.num_freq) + 0.5) * ((self.freq_upper - self.freq_lower) / self.num_freq)
 
     @property
     def wavelengths(self):

@@ -52,13 +52,6 @@ class Timestream(object):
 
     #===== Accessing the BeamTransfer and Telescope =====
 
-    # @property
-    # def beamtransfer(self):
-    #     """The BeamTransfer object corresponding to this timestream.
-    #     """
-
-    #     return self.manager.beamtransfer
-
     @property
     def telescope(self):
         """The telescope object corresponding to this timestream.

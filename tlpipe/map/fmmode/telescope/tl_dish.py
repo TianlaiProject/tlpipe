@@ -5,7 +5,6 @@ from scipy.special import jn
 
 from cora.util import coord
 from tlpipe.map.fmmode.core import telescope
-# from fmmode.util import config
 
 
 def ang_conv(ang):
