@@ -1,0 +1,125 @@
+# -*- mode: python; -*-
+
+# input file for pipeline manager
+# execute this pipeline by either command of the following two:
+# tlpipe dir/to/drift.pipe
+# mpiexec -n N tlpipe dir/to/drift.pipe
+
+
+pipe_modules = []
+pipe_logging = 'notset'
+# pipe_logging = 'info'
+
+
+import glob
+data_dir = '/data_tmp/disk6_mirror/SunCygnusA_20160603190723_20160606080722'
+files = sorted(glob.glob(data_dir+'/*.hdf5'))[1:]
+
+
+from tlpipe.timestream import dispatch
+pipe_modules.append(dispatch.Dispatch)
+### parameters for Dispatch
+dp_input_files = files
+dp_freq_select = (200, 210)
+# dp_feed_select = (0, 9)
+dp_feed_select = [1, 2, 3, 4, 6, 8, 9, 10]
+# dp_feed_select = [1, 2, 3, 4, 6, 8, 9, 10, 13, 14, 15, 16]
+dp_exclude_bad = False
+dp_iter_num = 1
+dp_out = 'dp'
+
+from tlpipe.timestream import run_info
+pipe_modules.append(run_info.RunInfo)
+### parameters for RunInfo
+ri_in = dp_out
+ri_out = 'ri'
+
+
+from tlpipe.timestream import detect_ns
+pipe_modules.append(detect_ns.Detect)
+### parameters for Detect
+dt_in = ri_out
+dt_feed = 1
+dt_out = 'dt'
+
+from tlpipe.timestream import ns_cal
+pipe_modules.append(ns_cal.NsCal)
+### parameters for NsCal
+nc_in = dt_out
+# nc_plot_phs = True
+# nc_fig_name = 'phs/phs_change'
+nc_out = 'nc'
+
+from tlpipe.plot import plot_waterfall
+pipe_modules.append(plot_waterfall.PlotRawTimestream)
+### parameters for PlotRawTimestream
+prt_in = nc_out
+# prt_in = dt_out
+prt_bl_incl = [(i, i) for i in range(1, 33)]
+prt_flag_ns = True
+prt_fig_name = 'rvis/vis'
+prt_out = 'prt'
+
+
+from tlpipe.timestream import rt2ts
+pipe_modules.append(rt2ts.Rt2ts)
+### parameters for Rt2ts
+r2t_in = nc_out
+# r2t_in = dt_out
+r2t_out = 'r2t'
+
+from tlpipe.timestream import ps_cal
+pipe_modules.append(ps_cal.PsCal)
+### parameters for PsCal
+pc_in = r2t_out
+pc_calibrator = 'cyg'
+pc_save_gain = True
+pc_gain_file = 'gain.hdf5'
+# pc_output_files = [ 'cal/ps_cal%d.hdf5' % i for i in range(1, 25) ]
+pc_out = 'pc'
+
+from tlpipe.timestream import re_order
+pipe_modules.append(re_order.ReOrder)
+### parameters for ReOrder
+ro_in = pc_out
+# ro_input_files = pc_output_files
+ro_out = 'ro'
+
+from tlpipe.timestream import map_making
+pipe_modules.append(map_making.MapMaking)
+### parameters for MapMaking
+mm_in = ro_out
+# mm_input_files = pc_output_files
+mm_pol = 'yy'
+mm_out = 'mm'
+
+
+from tlpipe.plot import plot_gain
+# pipe_modules.append(plot_gain.PlotGain)
+### parameters for PlotGain
+pg_input_files = pc_gain_file
+pg_fig_name = 'gain/gain'
+
+
+from tlpipe.timestream import phs2src
+# pipe_modules.append(phs2src.Phs2src)
+### parameters for Phs2src
+p2s_in = pc_out
+# p2s_input_files = pc_output_files
+p2s_out = 'p2s'
+
+from tlpipe.plot import plot_waterfall
+# pipe_modules.append(plot_waterfall.PlotTimestream)
+### parameters for PlotTimestream
+pts_in = p2s_out
+# pts_bl_incl = [(1, 1), (1, 2), (2, 3), (3, 5)]
+pts_flag_ns = True
+pts_fig_name = 'vis/vis'
+pts_out = 'pts'
+
+
+# from tlpipe.timestream import phs2zen
+# # pipe_modules.append(phs2zen.Phs2zen)
+# ### parameters for Phs2zen
+# p2z_in = p2s_out
+# p2z_out = 'p2z'
