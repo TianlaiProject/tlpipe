@@ -931,6 +931,7 @@ class _OneAndOne(TaskBase):
     """
 
     params_init = {
+                    'copy': False, # process a copy of the input
                     'input_files': None,
                     'output_files': None,
                   }
@@ -1022,6 +1023,12 @@ class _OneAndOne(TaskBase):
 
         raise NotImplementedError()
 
+    def copy_input(self, input):
+        """Override to return a copy of the input so that the original input would
+        not be changed by the task."""
+
+        return input
+
     def cast_input(self, input):
         """Override to support accepting pipeline inputs of variouse types."""
 
@@ -1037,7 +1044,7 @@ class _OneAndOne(TaskBase):
         raise NotImplementedError()
 
     def write_output(self, output):
-        """Override to implement reading inputs from disk."""
+        """Override to implement writing outputs to disk."""
 
         raise NotImplementedError()
 
@@ -1075,6 +1082,8 @@ class SingleBase(_OneAndOne):
             self.done = True
 
         if input:
+            if self.params['copy']:
+                input = self.copy_input(input)
             input = self.cast_input(input)
         return self.read_process_write(input)
 
@@ -1132,6 +1141,8 @@ class IterBase(_OneAndOne):
             raise PipelineStopIteration()
 
         if input:
+            if self.params['copy']:
+                input = self.copy_input(input)
             input = self.cast_input(input)
         output = self.read_process_write(input)
 

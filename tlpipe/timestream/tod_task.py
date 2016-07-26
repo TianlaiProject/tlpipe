@@ -38,6 +38,10 @@ class SingleTod(SingleBase):
         """Data select."""
         return tod
 
+    def copy_input(self, tod):
+        """Return a copy of tod, so the original tod would not be changed."""
+        return tod.copy()
+
     def read_input(self):
         """Method for reading time ordered data input."""
 
@@ -161,6 +165,10 @@ class IterTod(IterBase):
     def data_select(self, tod):
         """Data select."""
         return tod
+
+    def copy_input(self, tod):
+        """Return a copy of tod, so the original tod would not be changed."""
+        return tod.copy()
 
     def read_input(self):
         """Method for reading time ordered data input."""
