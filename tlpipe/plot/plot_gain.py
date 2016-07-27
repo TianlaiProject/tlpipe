@@ -43,11 +43,6 @@ class PlotGain(SingleBase):
 
             fig_name = '%s_%d.png' % (fig_prefix, fd)
             fig_name = output_path(fig_name)
-            fig_dir = os.path.dirname(fig_name)
-            try:
-                os.makedirs(fig_dir)
-            except OSError:
-                pass
             plt.savefig(fig_name)
 
         return mg

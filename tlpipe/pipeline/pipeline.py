@@ -944,7 +944,7 @@ class _OneAndOne(TaskBase):
         super(_OneAndOne, self).__init__(parameter_file_or_dict, feedback)
 
         self.input_files = input_path(format_list(self.params['input_files']))
-        self.output_files = output_path(format_list(self.params['output_files']))
+        self.output_files = output_path(format_list(self.params['output_files']), mkdir=False)
 
         # Inspect the `process` method to see how many arguments it takes.
         pro_argspec = inspect.getargspec(self.process)

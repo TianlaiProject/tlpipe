@@ -11,7 +11,7 @@ from caput import mpiutil
 from caput import mpiarray
 from caput import memh5
 from tlpipe.utils.np_util import unique, average
-from tlpipe.utils.path_util import input_path, output_path
+from tlpipe.utils.path_util import output_path
 from tlpipe.map.fmmode.telescope import tl_dish, tl_cylinder
 from tlpipe.map.fmmode.core import beamtransfer
 from tlpipe.map.fmmode.pipeline import timestream

@@ -12,7 +12,7 @@ from caput import mpiutil
 from caput import mpiarray
 from caput import memh5
 from tlpipe.core import tldishes
-from tlpipe.utils.path_util import input_path, output_path
+from tlpipe.utils.path_util import output_path
 
 
 def cal(vis, li, gi, pbl, ts, **kwargs):
@@ -178,11 +178,6 @@ class PsCal(tod_task.SingleTimestream):
         # save gain if required:
         if save_gain:
             gain_file = output_path(gain_file)
-            gain_dir = os.path.dirname(gain_file)
-            try:
-                os.makedirs(gain_dir)
-            except OSError:
-                pass
             eigval = mpiarray.MPIArray.wrap(eigval, axis=3)
             gain = mpiarray.MPIArray.wrap(gain, axis=3)
             mem_gain = memh5.MemGroup(distributed=True)

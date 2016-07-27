@@ -52,11 +52,6 @@ def cal(vis, li, gi, fbl, rt, **kwargs):
         plt.plot(inds, phase, 'ro')
         fig_name = '%s_%f_%d_%d.png' % (fig_prefix, fbl[0], fbl[1][0], fbl[1][1])
         fig_name = output_path(fig_name)
-        fig_dir = os.path.dirname(fig_name)
-        try:
-            os.makedirs(fig_dir)
-        except OSError:
-            pass
         plt.savefig(fig_name)
 
     vis = vis * np.exp(-1.0J * all_phase)
