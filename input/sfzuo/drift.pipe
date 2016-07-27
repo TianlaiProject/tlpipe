@@ -95,21 +95,22 @@ mm_out = 'mm'
 
 
 from tlpipe.plot import plot_gain
-# pipe_modules.append(plot_gain.PlotGain)
+pipe_modules.append(plot_gain.PlotGain)
 ### parameters for PlotGain
 pg_input_files = pc_gain_file
 pg_fig_name = 'gain/gain'
 
 
 from tlpipe.timestream import phs2src
-# pipe_modules.append(phs2src.Phs2src)
+pipe_modules.append(phs2src.Phs2src)
 ### parameters for Phs2src
-p2s_in = pc_out
+p2s_in = ro_out
+p2s_copy = True
 # p2s_input_files = pc_output_files
 p2s_out = 'p2s'
 
 from tlpipe.plot import plot_waterfall
-# pipe_modules.append(plot_waterfall.PlotTimestream)
+pipe_modules.append(plot_waterfall.PlotTimestream)
 ### parameters for PlotTimestream
 pts_in = p2s_out
 # pts_bl_incl = [(1, 1), (1, 2), (2, 3), (3, 5)]
