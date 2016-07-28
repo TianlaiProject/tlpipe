@@ -12,7 +12,7 @@ class Detect(tod_task.SingleRawTimestream):
     """Detect noise source signal."""
 
     params_init = {
-                    'feed': 1, # use this feed
+                    'feed': None, # use this feed
                     'sigma': 3.0,
                   }
 
@@ -26,7 +26,10 @@ class Detect(tod_task.SingleRawTimestream):
         rt.redistribute(0) # make time the dist axis
 
         bls = [ set(b) for b in rt.bl ]
-        bl_ind = bls.index({feed})
+        if feed is not None:
+            bl_ind = bls.index({feed})
+        else:
+            bl_ind = np.where(rt.bl[:, 0]==rt.bl[:, 1])[0][0]
 
         tt_mean = mpiutil.gather_array(np.mean(rt.main_data.local_data[:, :, bl_ind].real, axis=-1), root=None)
         df =  np.diff(tt_mean, axis=-1)
