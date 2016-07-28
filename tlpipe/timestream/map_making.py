@@ -120,6 +120,8 @@ class MapMaking(tod_task.SingleTimestream):
                 vis = vis[:, :, 1, :]
             elif pol == 'I':
                 vis = 0.5 * (vis[:, :, 0, :] + vis[:, :, 1, :])
+            elif pol == 'all':
+                vis = np.sum(vis, axis=2) # sum over all pol
             else:
                 raise ValueError('Invalid pol: %s' % pol)
 
