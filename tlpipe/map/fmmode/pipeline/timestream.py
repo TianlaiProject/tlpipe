@@ -39,8 +39,10 @@ class Timestream(object):
         ----------
         tsdir : string
             Directory to create the Timestream in.
-        prodmanager : drift.core.manager.ProductManager
-            ProductManager object containing the analysis products.
+        tsname : string
+            Name of the timestream.
+        beamtransfer : fmmode.core.beamtransfer.BeamTransfer
+            BeamTransfer object containing the analysis products.
         """
         self.directory = os.path.abspath(tsdir)
         self.output_directory = '%s/%s' % (self.directory, tsname)
@@ -364,13 +366,13 @@ class Timestream(object):
 
 
 # kwargs is to absorb any extra params
-def simulate(m, outdir, tsname, maps=[], ndays=None, resolution=0, add_noise=True, seed=None, **kwargs):
+def simulate(beamtransfer, outdir, tsname, maps=[], ndays=None, resolution=0, add_noise=True, seed=None, **kwargs):
     """Create a simulated timestream and save it to disk.
 
     Parameters
     ----------
-    m : ProductManager object
-        Products of telescope to simulate.
+    beamtransfer : fmmode.core.beamtransfer.BeamTransfer
+        BeamTransfer object containing the analysis products.
     outdir : directoryname
         Directory that we will save the timestream into.
     maps : list
@@ -391,7 +393,7 @@ def simulate(m, outdir, tsname, maps=[], ndays=None, resolution=0, add_noise=Tru
     """
 
     # Create timestream object
-    tstream = Timestream(outdir, tsname, m)
+    tstream = Timestream(outdir, tsname, beamtransfer)
 
     completed_file = tstream._tsdir + '/COMPLETED_TIMESTREAM'
     if os.path.exists(completed_file):
@@ -414,7 +416,7 @@ def simulate(m, outdir, tsname, maps=[], ndays=None, resolution=0, add_noise=Tru
         tstream.save()
 
     ## Read in telescope system
-    bt = m.beamtransfer
+    bt = beamtransfer
     tel = bt.telescope
 
     lmax = tel.lmax

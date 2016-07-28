@@ -32,6 +32,8 @@ class MapMaking(tod_task.SingleTimestream):
                     'gen_invbeam': True,
                     'ts_dir': 'map/ts',
                     'ts_name': 'ts',
+                    'simulate': False,
+                    'input_maps': [],
                   }
 
     prefix = 'mm_'
@@ -49,6 +51,8 @@ class MapMaking(tod_task.SingleTimestream):
         gen_inv = self.params['gen_invbeam']
         ts_dir = output_path(self.params['ts_dir'])
         ts_name = self.params['ts_name']
+        simulate = self.params['simulate']
+        input_maps = self.params['input_maps']
 
         ts.redistribute('frequency')
 
@@ -82,95 +86,101 @@ class MapMaking(tod_task.SingleTimestream):
         # # plt.plot(ts['az_alt'][:])
         # plt.savefig('ra_dec1.png')
 
-        # mask noise on data
-        on = np.where(ts['ns_on'][:])[0]
-        ts['vis'].local_data[on] = complex(np.nan, np.nan)
+        if not simulate:
+            # mask noise on data
+            on = np.where(ts['ns_on'][:])[0]
+            ts['vis'].local_data[on] = complex(np.nan, np.nan)
 
-        # average data
-        nt = ts['sec1970'].shape[0]
-        phi_size = tel.phi_size
-        nt_m = float(nt) / phi_size
+            # average data
+            nt = ts['sec1970'].shape[0]
+            phi_size = tel.phi_size
+            nt_m = float(nt) / phi_size
 
-        # roll data to have phi=0 near the first
-        roll_len = np.int(np.around(0.5*nt_m))
-        ts['vis'].local_data[:] = np.roll(ts['vis'].local_data[:], roll_len, axis=0)
-        ts['ra_dec'][:] = np.roll(ts['ra_dec'][:], roll_len, axis=0)
+            # roll data to have phi=0 near the first
+            roll_len = np.int(np.around(0.5*nt_m))
+            ts['vis'].local_data[:] = np.roll(ts['vis'].local_data[:], roll_len, axis=0)
+            ts['ra_dec'][:] = np.roll(ts['ra_dec'][:], roll_len, axis=0)
 
-        # inds = np.arange(nt)
-        repeat_inds = np.repeat(np.arange(nt), phi_size)
-        num, start, end = mpiutil.split_m(nt*phi_size, phi_size)
+            # inds = np.arange(nt)
+            repeat_inds = np.repeat(np.arange(nt), phi_size)
+            num, start, end = mpiutil.split_m(nt*phi_size, phi_size)
 
-        # phi = np.zeros((phi_size,), dtype=ts['ra_dec'].dtype)
-        phi = np.linspace(0, 2*np.pi, phi_size, endpoint=False)
-        vis = np.zeros((phi_size,)+ts['vis'].local_data.shape[1:], dtype=ts['vis'].dtype)
-        # average onver time
-        for idx in range(phi_size):
-            inds, weight = unique(repeat_inds[start[idx]:end[idx]], return_counts=True)
-            vis[idx] = average(np.ma.masked_invalid(ts['vis'].local_data[inds]), axis=0, weights=weight) # time mean
-            # phi[idx] = np.average(ts['ra_dec'][:, 0][inds], axis=0, weights=weight)
+            # phi = np.zeros((phi_size,), dtype=ts['ra_dec'].dtype)
+            phi = np.linspace(0, 2*np.pi, phi_size, endpoint=False)
+            vis = np.zeros((phi_size,)+ts['vis'].local_data.shape[1:], dtype=ts['vis'].dtype)
+            # average onver time
+            for idx in range(phi_size):
+                inds, weight = unique(repeat_inds[start[idx]:end[idx]], return_counts=True)
+                vis[idx] = average(np.ma.masked_invalid(ts['vis'].local_data[inds]), axis=0, weights=weight) # time mean
+                # phi[idx] = np.average(ts['ra_dec'][:, 0][inds], axis=0, weights=weight)
 
-        if pol == 'xx':
-            vis = vis[:, :, 0, :]
-        elif pol == 'yy':
-            vis = vis[:, :, 1, :]
-        elif pol == 'I':
-            vis = 0.5 * (vis[:, :, 0, :] + vis[:, :, 1, :])
-        else:
-            raise ValueError('Invalid pol: %s' % pol)
+            if pol == 'xx':
+                vis = vis[:, :, 0, :]
+            elif pol == 'yy':
+                vis = vis[:, :, 1, :]
+            elif pol == 'I':
+                vis = 0.5 * (vis[:, :, 0, :] + vis[:, :, 1, :])
+            else:
+                raise ValueError('Invalid pol: %s' % pol)
 
-        allpairs = tel.allpairs
-        redundancy = tel.redundancy
+            allpairs = tel.allpairs
+            redundancy = tel.redundancy
 
-        # reorder bls according to allpairs
-        vis_tmp = np.zeros_like(vis)
-        bls = [ tuple(bl) for bl in ts['blorder'][:] ]
-        for ind, (a1, a2) in enumerate(allpairs):
-            try:
-                b_ind = bls.index((feeds[a1], feeds[a2]))
-                vis_tmp[:, :, ind] = vis[:, :, b_ind]
-            except ValueError:
-                b_ind = bls.index((feeds[a2], feeds[a1]))
-                vis_tmp[:, :, ind] = vis[:, :, b_ind].conj()
+            # reorder bls according to allpairs
+            vis_tmp = np.zeros_like(vis)
+            bls = [ tuple(bl) for bl in ts['blorder'][:] ]
+            for ind, (a1, a2) in enumerate(allpairs):
+                try:
+                    b_ind = bls.index((feeds[a1], feeds[a2]))
+                    vis_tmp[:, :, ind] = vis[:, :, b_ind]
+                except ValueError:
+                    b_ind = bls.index((feeds[a2], feeds[a1]))
+                    vis_tmp[:, :, ind] = vis[:, :, b_ind].conj()
 
-        # average over redundancy
-        vis_stream = np.zeros(vis.shape[:-1]+(len(redundancy),), dtype=vis_tmp.dtype)
-        red_bin = np.cumsum(np.insert(redundancy, 0, 0)) # redundancy bin
-        # average over redundancy
-        for ind in range(len(redundancy)):
-            vis_stream[:, :, ind] = np.sum(vis_tmp[:, :, red_bin[ind]:red_bin[ind+1]], axis=2) / redundancy[ind]
+            # average over redundancy
+            vis_stream = np.zeros(vis.shape[:-1]+(len(redundancy),), dtype=vis_tmp.dtype)
+            red_bin = np.cumsum(np.insert(redundancy, 0, 0)) # redundancy bin
+            # average over redundancy
+            for ind in range(len(redundancy)):
+                vis_stream[:, :, ind] = np.sum(vis_tmp[:, :, red_bin[ind]:red_bin[ind+1]], axis=2) / redundancy[ind]
 
-        vis_stream = mpiarray.MPIArray.wrap(vis_stream, axis=1)
-        vis_h5 = memh5.MemGroup(distributed=True)
-        vis_h5.create_dataset('/timestream', data=vis_stream)
-        vis_h5.create_dataset('/phi', data=phi)
+            vis_stream = mpiarray.MPIArray.wrap(vis_stream, axis=1)
+            vis_h5 = memh5.MemGroup(distributed=True)
+            vis_h5.create_dataset('/timestream', data=vis_stream)
+            vis_h5.create_dataset('/phi', data=phi)
 
-        # Telescope layout data
-        vis_h5.create_dataset('/feedmap', data=tel.feedmap)
-        vis_h5.create_dataset('/feedconj', data=tel.feedconj)
-        vis_h5.create_dataset('/feedmask', data=tel.feedmask)
-        vis_h5.create_dataset('/uniquepairs', data=tel.uniquepairs)
-        vis_h5.create_dataset('/baselines', data=tel.baselines)
+            # Telescope layout data
+            vis_h5.create_dataset('/feedmap', data=tel.feedmap)
+            vis_h5.create_dataset('/feedconj', data=tel.feedconj)
+            vis_h5.create_dataset('/feedmask', data=tel.feedmask)
+            vis_h5.create_dataset('/uniquepairs', data=tel.uniquepairs)
+            vis_h5.create_dataset('/baselines', data=tel.baselines)
 
-        # Telescope frequencies
-        vis_h5.create_dataset('/frequencies', data=freqs)
+            # Telescope frequencies
+            vis_h5.create_dataset('/frequencies', data=freqs)
 
-        # Write metadata
-        # vis_h5.attrs['beamtransfer_path'] = os.path.abspath(bt.directory)
-        vis_h5.attrs['ntime'] = phi_size
+            # Write metadata
+            # vis_h5.attrs['beamtransfer_path'] = os.path.abspath(bt.directory)
+            vis_h5.attrs['ntime'] = phi_size
 
         # beamtransfer
         bt = beamtransfer.BeamTransfer(beam_dir, tel, gen_inv)
         bt.generate()
 
-        # timestream and map-making
-        ts = timestream.Timestream(ts_dir, ts_name, bt)
-        # Make directory if required
-        try:
-            os.makedirs(ts._tsdir)
-        except OSError:
-             # directory exists
-             pass
-        vis_h5.to_hdf5(ts._tsfile)
+        if simulate:
+            ndays = 733
+            print ndays
+            ts = timestream.simulate(bt, ts_dir, ts_name, input_maps, ndays)
+        else:
+            # timestream and map-making
+            ts = timestream.Timestream(ts_dir, ts_name, bt)
+            # Make directory if required
+            try:
+                os.makedirs(ts._tsdir)
+            except OSError:
+                 # directory exists
+                 pass
+            vis_h5.to_hdf5(ts._tsfile)
         # ts.generate_mmodes(vis_stream.to_numpy_array(root=None))
         ts.generate_mmodes()
         ts.mapmake_full(64, 'full')
