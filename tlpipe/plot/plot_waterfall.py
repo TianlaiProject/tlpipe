@@ -4,7 +4,7 @@ import os
 import numpy as np
 from tlpipe.timestream import tod_task
 from tlpipe.utils.path_util import output_path
-
+import matplotlib.pyplot as plt
 
 def plot(vis, li, gi, bl, obj, **kwargs):
 
@@ -17,6 +17,7 @@ def plot(vis, li, gi, bl, obj, **kwargs):
     bl_incl = kwargs.get('bl_incl', 'all')
     bl_excl = kwargs.get('bl_excl', [])
     flag_ns = kwargs.get('flag_ns', False)
+    plot_abs = kwargs.get('plot_abs', False)
     fig_prefix = kwargs.get('fig_name', 'vis')
 
     if bl_incl != 'all':
@@ -33,20 +34,27 @@ def plot(vis, li, gi, bl, obj, **kwargs):
     else:
         vis1 = vis
 
-    import matplotlib.pyplot as plt
-
-    plt.figure()
-
     freq = obj.freq[:]
     jul_date = obj.time[:]
     extent = [freq[0], freq[-1], jul_date[0], jul_date[-1]]
 
-    plt.subplot(121)
-    plt.imshow(vis1.real, extent=extent, origin='lower', aspect='auto')
-    plt.colorbar()
-    plt.subplot(122)
-    plt.imshow(vis1.imag, extent=extent, origin='lower', aspect='auto')
-    plt.colorbar()
+    plt.figure()
+    if plot_abs:
+        fig, axarr = plt.subplots(1, 3, sharey=True)
+    else:
+        fig, axarr = plt.subplots(1, 2, sharey=True)
+    im = axarr[0].imshow(vis1.real, extent=extent, origin='lower', aspect='auto')
+    axarr[0].set_xlabel(r'$\nu$ / MHz')
+    axarr[0].set_ylabel(r'$t$ / Julian Date')
+    plt.colorbar(im, ax=axarr[0])
+    im = axarr[1].imshow(vis1.imag, extent=extent, origin='lower', aspect='auto')
+    axarr[1].set_xlabel(r'$\nu$ / MHz')
+    plt.colorbar(im, ax=axarr[1])
+    if plot_abs:
+        im = axarr[2].imshow(np.abs(vis1), extent=extent, origin='lower', aspect='auto')
+        axarr[2].set_xlabel(r'$\nu$ / MHz')
+        plt.colorbar(im, ax=axarr[2])
+
     if pol is None:
         fig_name = '%s_%d_%d.png' % (fig_prefix, bl[0], bl[1])
     else:
@@ -64,6 +72,7 @@ class PlotRawTimestream(tod_task.SingleRawTimestream):
                     'bl_incl': 'all', # or a list of include (bl1, bl2)
                     'bl_excl': [],
                     'flag_ns': False,
+                    'plot_abs': False,
                     'fig_name': 'vis',
                   }
 
@@ -73,8 +82,9 @@ class PlotRawTimestream(tod_task.SingleRawTimestream):
         bl_incl = self.params['bl_incl']
         bl_excl = self.params['bl_excl']
         flag_ns = self.params['flag_ns']
+        plot_abs = self.params['plot_abs']
         fig_name = self.params['fig_name']
-        rt.bl_data_operate(plot, full_data=True, keep_dist_axis=False, bl_incl=bl_incl, bl_excl=bl_excl, fig_name=fig_name, flag_ns=flag_ns)
+        rt.bl_data_operate(plot, full_data=True, keep_dist_axis=False, bl_incl=bl_incl, bl_excl=bl_excl, fig_name=fig_name, flag_ns=flag_ns, plot_abs=plot_abs)
         rt.add_history(self.history)
 
         return rt
@@ -87,6 +97,7 @@ class PlotTimestream(tod_task.SingleTimestream):
                     'bl_incl': 'all', # or a list of include (bl1, bl2)
                     'bl_excl': [],
                     'flag_ns': False,
+                    'plot_abs': False,
                     'fig_name': 'vis',
                   }
 
@@ -96,8 +107,9 @@ class PlotTimestream(tod_task.SingleTimestream):
         bl_incl = self.params['bl_incl']
         bl_excl = self.params['bl_excl']
         flag_ns = self.params['flag_ns']
+        plot_abs = self.params['plot_abs']
         fig_name = self.params['fig_name']
-        ts.pol_and_bl_data_operate(plot, full_data=True, keep_dist_axis=False, bl_incl=bl_incl, bl_excl=bl_excl, fig_name=fig_name, flag_ns=flag_ns)
+        ts.pol_and_bl_data_operate(plot, full_data=True, keep_dist_axis=False, bl_incl=bl_incl, bl_excl=bl_excl, fig_name=fig_name, flag_ns=flag_ns, plot_abs=plot_abs)
         ts.add_history(self.history)
 
         return ts
