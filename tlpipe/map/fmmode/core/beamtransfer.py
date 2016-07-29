@@ -79,11 +79,12 @@ class BeamTransfer(object):
     """
 
 
-    def __init__(self, directory, telescope=None, gen_invbeam=True):
+    def __init__(self, directory, telescope=None, gen_invbeam=True, noise_weight=True):
 
         self.directory = directory
         self.telescope = telescope
         self.gen_invbeam = gen_invbeam
+        self.noise_weight = noise_weight
 
         # Create directory if required
         if mpiutil.rank0 and not os.path.exists(directory):
@@ -390,7 +391,7 @@ class BeamTransfer(object):
             print "=== Create beam transfer m-files took %f s ===" % (et - st)
 
 
-    noise_weight = True
+    # noise_weight = True
 
     def compute_invbeam_m(self, mi):
         """Compute the inverse beam transfer matrix for the m-mode `mi`."""

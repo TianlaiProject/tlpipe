@@ -30,10 +30,12 @@ class MapMaking(tod_task.SingleTimestream):
                     'pol': 'xx', # 'yy' or 'I'
                     'beam_dir': 'map/bt',
                     'gen_invbeam': True,
+                    'noise_weight': True,
                     'ts_dir': 'map/ts',
                     'ts_name': 'ts',
                     'simulate': False,
                     'input_maps': [],
+                    'add_noise': True,
                   }
 
     prefix = 'mm_'
@@ -49,10 +51,12 @@ class MapMaking(tod_task.SingleTimestream):
         pol = self.params['pol']
         beam_dir = output_path(self.params['beam_dir'])
         gen_inv = self.params['gen_invbeam']
+        noise_weight = self.params['noise_weight']
         ts_dir = output_path(self.params['ts_dir'])
         ts_name = self.params['ts_name']
         simulate = self.params['simulate']
         input_maps = self.params['input_maps']
+        add_noise = self.params['add_noise']
 
         ts.redistribute('frequency')
 
@@ -166,13 +170,13 @@ class MapMaking(tod_task.SingleTimestream):
             vis_h5.attrs['ntime'] = phi_size
 
         # beamtransfer
-        bt = beamtransfer.BeamTransfer(beam_dir, tel, gen_inv)
+        bt = beamtransfer.BeamTransfer(beam_dir, tel, gen_inv, noise_weight)
         bt.generate()
 
         if simulate:
             ndays = 733
             print ndays
-            ts = timestream.simulate(bt, ts_dir, ts_name, input_maps, ndays)
+            ts = timestream.simulate(bt, ts_dir, ts_name, input_maps, ndays, add_noise=add_noise)
         else:
             # timestream and map-making
             ts = timestream.Timestream(ts_dir, ts_name, bt)
