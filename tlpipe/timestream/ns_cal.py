@@ -48,8 +48,11 @@ def cal(vis, li, gi, fbl, rt, **kwargs):
         import matplotlib.pyplot as plt
 
         plt.figure()
-        plt.plot(all_phase)
-        plt.plot(inds, phase, 'ro')
+        time = rt.time[:]
+        plt.plot(time, all_phase)
+        plt.plot(time[inds], phase, 'ro')
+        plt.xlabel(r'$t$ / Julian Date')
+        plt.ylabel(r'$\Delta \phi$ / radian')
         fig_name = '%s_%f_%d_%d.png' % (fig_prefix, fbl[0], fbl[1][0], fbl[1][1])
         fig_name = output_path(fig_name)
         plt.savefig(fig_name)
