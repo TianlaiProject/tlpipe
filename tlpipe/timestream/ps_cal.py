@@ -11,7 +11,6 @@ import tod_task
 from caput import mpiutil
 from caput import mpiarray
 from caput import memh5
-from tlpipe.core import tldishes
 from tlpipe.utils.path_util import output_path
 
 

@@ -7,7 +7,6 @@ import tod_task
 import timestream
 
 from caput import mpiutil
-from tlpipe.core import tldishes
 from tlpipe.utils.date_util import get_ephdate
 
 
