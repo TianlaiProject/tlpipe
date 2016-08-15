@@ -81,7 +81,7 @@ class CylinderBeam(ap.fit.Beam):
 
         Parameters
         ----------
-        xyz : array like, of shape (..., 3)
+        xyz : array like, of shape (3, ...)
             Unit direction vector in topocentric coordinates (x=E, y=N, z=UP).
             `xyz` may be arrays of multiple coordinates.
 
@@ -92,7 +92,7 @@ class CylinderBeam(ap.fit.Beam):
 
         """
 
-        vec_n = np.array(xyz)
+        vec_n = np.array(xyz).T
         vec_z = np.array([0.0, 0.0, 1.0]) # unit vector pointing to the zenith
         nz = np.dot(vec_n, vec_z)
 
@@ -163,8 +163,8 @@ if __name__ == '__main__':
     y_ang = np.degrees(np.arctan2(yz[:, 2], yz[:, 1]))
 
     cyl_beam = CylinderBeam([750.0, 760.0], 15.0, 40.0)
-    x_resp = cyl_beam.response(xz)
-    y_resp = cyl_beam.response(yz)
+    x_resp = cyl_beam.response(xz.T)
+    y_resp = cyl_beam.response(yz.T)
 
     x_inds = np.where(x_resp>=0.5)[1]
     x_ind1, x_ind2 = x_inds[0], x_inds[-1]
@@ -195,7 +195,7 @@ if __name__ == '__main__':
     zs2 = 1.0 - xx**2 -yy**2
     zs = np.where(zs2>=0.0, zs2**0.5, np.nan)
     xyz = np.array([xx, yy, zs])
-    resp = cyl_beam.response(xyz.transpose(1, 2, 0))
+    resp = cyl_beam.response(xyz)
     print resp.shape
 
     # 2d plot
