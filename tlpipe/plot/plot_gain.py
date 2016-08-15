@@ -44,6 +44,7 @@ class PlotGain(SingleBase):
             fig_name = '%s_%d.png' % (fig_prefix, fd)
             fig_name = output_path(fig_name)
             plt.savefig(fig_name)
+            plt.clf()
 
         return mg
 

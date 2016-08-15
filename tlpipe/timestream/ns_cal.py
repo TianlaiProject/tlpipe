@@ -43,8 +43,9 @@ def cal(vis, li, gi, fbl, rt, **kwargs):
     all_phase[not_none_inds[-1]+1:] = all_phase[not_none_inds[-1]]
 
     if plot_phs:
-        import matplotlib
-        matplotlib.use('Agg')
+        # import matplotlib
+        # matplotlib.use('Agg')
+        import tlpipe.plot
         import matplotlib.pyplot as plt
 
         plt.figure()
@@ -56,6 +57,7 @@ def cal(vis, li, gi, fbl, rt, **kwargs):
         fig_name = '%s_%f_%d_%d.png' % (fig_prefix, fbl[0], fbl[1][0], fbl[1][1])
         fig_name = output_path(fig_name)
         plt.savefig(fig_name)
+        plt.clf()
 
     vis = vis * np.exp(-1.0J * all_phase)
 

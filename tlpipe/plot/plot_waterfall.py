@@ -61,6 +61,7 @@ def plot(vis, li, gi, bl, obj, **kwargs):
         fig_name = '%s_%d_%d_%s.png' % (fig_prefix, bl[0], bl[1], pol)
     fig_name = output_path(fig_name)
     plt.savefig(fig_name)
+    plt.clf()
 
     return vis
 
