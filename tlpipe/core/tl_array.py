@@ -81,27 +81,28 @@ class CylinderBeam(ap.fit.Beam):
 
         Parameters
         ----------
-        xyz : array like
+        xyz : array like, of shape (..., 3)
             Unit direction vector in topocentric coordinates (x=E, y=N, z=UP).
             `xyz` may be arrays of multiple coordinates.
 
 
         Returns
         -------
-        Returns 'x' linear polarization (rotate pi/2 for 'y').
+        Returns 'x' linear polarization (rotate pi/2 for 'y') of shape (nfreq, ...).
 
         """
 
         vec_n = np.array(xyz)
         vec_z = np.array([0.0, 0.0, 1.0]) # unit vector pointing to the zenith
-        nz = np.dot(vec_z, vec_n)
+        nz = np.dot(vec_n, vec_z)
 
         vec_u = np.array([1.0, 0.0, 0.0]) # unit vector pointing East in the ground-plane
         vec_v = np.array([0.0, 1.0, 0.0]) # unit vector pointing North in the ground-plane
-        nu = np.dot(vec_u, vec_n)
-        nv = np.dot(vec_v, vec_n)
+        nu = np.dot(vec_n, vec_u)
+        nv = np.dot(vec_n, vec_v)
 
-        lmbda = const.c / (1.0e9 * self.freqs) # in m
+        shp = tuple([-1] + [1] * len(nz.shape))
+        lmbda = const.c / (1.0e9 * self.freqs).reshape(shp) # in m
 
         nz = np.where(nz<=0.0, 0.0, nz) # mask respose under horizon
 
@@ -110,7 +111,7 @@ class CylinderBeam(ap.fit.Beam):
         # print (np.sinc(self.width * nu / lmbda) * np.sinc(factor * nv / lmbda)).shape
         # print nz.shape
 
-        return np.sinc(self.width * nu / lmbda) * np.sinc(factor * nv / lmbda).T * nz
+        return np.sinc(self.width * nu / lmbda) * np.sinc(factor * nv / lmbda) * nz
 
 
 class Antenna(ap.pol.Antenna):
@@ -153,7 +154,6 @@ if __name__ == '__main__':
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
 
-    plt.figure()
     xs = np.linspace(-1.0, 1.0, 2000)
     xz = np.array([ np.array([x, 0.0, (1.0-x**2)**0.5]) for x in xs ])
     x_ang = np.degrees(np.arctan2(xz[:, 2], xz[:, 0]))
@@ -162,9 +162,9 @@ if __name__ == '__main__':
     yz = np.array([ np.array([0.0, y, (1.0-y**2)**0.5]) for y in ys ])
     y_ang = np.degrees(np.arctan2(yz[:, 2], yz[:, 1]))
 
-    cyl_beam = CylinderBeam([750.0], 15.0, 40.0)
-    x_resp = cyl_beam.response(xz.T)
-    y_resp = cyl_beam.response(yz.T)
+    cyl_beam = CylinderBeam([750.0, 760.0], 15.0, 40.0)
+    x_resp = cyl_beam.response(xz)
+    y_resp = cyl_beam.response(yz)
 
     x_inds = np.where(x_resp>=0.5)[1]
     x_ind1, x_ind2 = x_inds[0], x_inds[-1]
@@ -176,6 +176,8 @@ if __name__ == '__main__':
     print x_ang[x_ind1], x_ang[x_ind2]
     print y_ang[y_ind1], y_ang[y_ind2]
 
+    # 1d plot
+    plt.figure()
     plt.plot(x_ang, x_resp[0], 'r', label='East-West')
     # plt.axvline(x=x_ang[x_ind1], linewidth=0.5, color='r')
     # plt.axvline(x=x_ang[x_ind2], linewidth=0.5, color='r')
@@ -184,3 +186,21 @@ if __name__ == '__main__':
     plt.axvline(x=y_ang[y_ind2], linewidth=0.5, color='g')
     plt.legend()
     plt.savefig('cy.png')
+    plt.clf()
+
+    # xs = np.linspace(-1.0, 1.0, 2000)
+    xs = np.linspace(-0.3, 0.3, 2000)
+    ys = np.linspace(-1.0, 1.0, 2000)
+    xx, yy = np.meshgrid(xs, ys)
+    zs2 = 1.0 - xx**2 -yy**2
+    zs = np.where(zs2>=0.0, zs2**0.5, np.nan)
+    xyz = np.array([xx, yy, zs])
+    resp = cyl_beam.response(xyz.transpose(1, 2, 0))
+    print resp.shape
+
+    # 2d plot
+    plt.figure()
+    plt.imshow(resp[0], origin='lower')
+    plt.colorbar()
+    plt.savefig('cy2.png')
+    plt.clf()
