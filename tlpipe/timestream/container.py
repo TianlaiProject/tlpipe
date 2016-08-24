@@ -821,7 +821,7 @@ class BasicTod(memh5.MemDiskGroup):
 
         Parameters
         ----------
-        axis : string or integer
+        axis : string or integer or tuple
             The distribute axis.
         name : string
             Name of the dataset.
@@ -838,21 +838,26 @@ class BasicTod(memh5.MemDiskGroup):
 
         """
 
-        axis = check_axis(axis, self.main_data_axes)
-
         if isinstance(data, mpiarray.MPIArray):
             shape = data.global_shape
         else:
             shape = data.shape
 
-        dist_axis = axis_order.index(axis)
-        if shape[dist_axis] != self.main_data.shape[axis]:
-            axis_name = self.main_data_axes[axis]
-            raise ValueError('%s axis does not align with main data, can not create a %s ordered dataset %s' % (axis_name.capitalize(), axis_name, name))
+        if not isinstance(axis, tuple):
+            axis = (axis,)
+        axes = ()
+        for ax in axis:
+            tmp_ax = check_axis(ax, self.main_data_axes)
+            axes = axes + (tmp_ax,)
+
+            dist_axis = axis_order.index(tmp_ax)
+            if shape[dist_axis] != self.main_data.shape[tmp_ax]:
+                axis_name = self.main_data_axes[tmp_ax]
+                raise ValueError('%s axis does not align with main data, can not create a %s ordered dataset %s' % (axis_name.capitalize(), axis_name, name))
 
         if not name in self.iterkeys():
-            if axis == self.main_data_dist_axis:
-                self.create_dataset(name, data=data, distributed=True, distributed_axis=dist_axis)
+            if self.main_data_dist_axis in axes:
+                self.create_dataset(name, data=data, distributed=True, distributed_axis=axis_order.index(self.main_data_dist_axis))
             else:
                 self.create_dataset(name, data=data)
         else:
@@ -861,8 +866,8 @@ class BasicTod(memh5.MemDiskGroup):
                     attr_dict = {} # temporarily save attrs of this dataset
                     copyattrs(self[name].attrs, attr_dict)
                 del self[name]
-                if axis == self.main_data_dist_axis:
-                    self.create_dataset(name, data=data, distributed=True, distributed_axis=dist_axis)
+                if self.main_data_dist_axis in axes:
+                    self.create_dataset(name, data=data, distributed=True, distributed_axis=axis_order.index(self.main_data_dist_axis))
                 else:
                     self.create_dataset(name, data=data)
                 if copy_attrs:

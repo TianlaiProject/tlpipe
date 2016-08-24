@@ -40,6 +40,9 @@ class TimestreamCommon(container.BasicTod):
     load_tod_excl_main_data
     create_freq_ordered_dataset
     create_bl_ordered_dataset
+    create_time_and_freq_ordered_dataset
+    create_time_and_bl_ordered_dataset
+    create_freq_and_bl_ordered_dataset
     create_feed_ordered_dataset
     check_status
     time_data_operate
@@ -377,6 +380,78 @@ class TimestreamCommon(container.BasicTod):
         axis_order = axis_order or (self.main_data_axes.index('baseline'),)
 
         self.create_main_axis_ordered_dataset('baseline', name, data, axis_order, recreate, copy_attrs)
+
+    def create_time_and_freq_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False):
+        """Create a time and frequency ordered dataset.
+
+        Parameters
+        ----------
+        name : string
+            Name of the dataset.
+        data : np.ndarray or MPIArray
+            The data to create a dataset.
+        axis_order : tuple
+            A tuple denotes time and frequency axis of the created dataset.
+        recreate : bool, optional
+            If True will recreate a dataset with this name if it already exists,
+            else a RuntimeError will be rasised. Default False.
+        copy_attrs : bool, optional
+            If True, when recreate the dataset, its original attributes will be
+            copyed to the new dataset, else no copy is done. Default Fasle.
+
+        """
+
+        axis_order = axis_order or (self.main_data_axes.index('time'), self.main_data_axes.index('frequency'))
+
+        self.create_main_axis_ordered_dataset(('time', 'frequency'), name, data, axis_order, recreate, copy_attrs)
+
+    def create_time_and_bl_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False):
+        """Create a time and baseline ordered dataset.
+
+        Parameters
+        ----------
+        name : string
+            Name of the dataset.
+        data : np.ndarray or MPIArray
+            The data to create a dataset.
+        axis_order : tuple
+            A tuple denotes time and baseline axis of the created dataset.
+        recreate : bool, optional
+            If True will recreate a dataset with this name if it already exists,
+            else a RuntimeError will be rasised. Default False.
+        copy_attrs : bool, optional
+            If True, when recreate the dataset, its original attributes will be
+            copyed to the new dataset, else no copy is done. Default Fasle.
+
+        """
+
+        axis_order = axis_order or (self.main_data_axes.index('time'), self.main_data_axes.index('baseline'))
+
+        self.create_main_axis_ordered_dataset(('time', 'baseline'), name, data, axis_order, recreate, copy_attrs)
+
+    def create_freq_and_bl_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False):
+        """Create a frequency and baseline ordered dataset.
+
+        Parameters
+        ----------
+        name : string
+            Name of the dataset.
+        data : np.ndarray or MPIArray
+            The data to create a dataset.
+        axis_order : tuple
+            A tuple denotes frequency and baseline axis of the created dataset.
+        recreate : bool, optional
+            If True will recreate a dataset with this name if it already exists,
+            else a RuntimeError will be rasised. Default False.
+        copy_attrs : bool, optional
+            If True, when recreate the dataset, its original attributes will be
+            copyed to the new dataset, else no copy is done. Default Fasle.
+
+        """
+
+        axis_order = axis_order or (self.main_data_axes.index('frequency'), self.main_data_axes.index('baseline'))
+
+        self.create_main_axis_ordered_dataset(('frequency', 'baseline'), name, data, axis_order, recreate, copy_attrs)
 
     def create_feed_ordered_dataset(self, name, data, axis_order=(0,), recreate=False, copy_attrs=False):
         """Create a feed ordered dataset.
