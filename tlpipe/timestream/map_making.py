@@ -91,9 +91,10 @@ class MapMaking(tod_task.SingleTimestream):
         # plt.savefig('ra_dec1.png')
 
         if not simulate:
-            # mask noise on data
-            # on = np.where(ts['ns_on'][:])[0]
-            # ts['vis'].local_data[on] = complex(np.nan, np.nan)
+            # mask noise on data if not masked already
+            if ts['vis'].attrs.get('masked', False):
+                on = np.where(ts['ns_on'][:])[0]
+                ts['vis'].local_data[on] = complex(np.nan, np.nan)
 
             # average data
             nt = ts['sec1970'].shape[0]

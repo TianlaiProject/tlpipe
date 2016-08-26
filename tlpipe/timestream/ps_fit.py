@@ -172,6 +172,9 @@ class PsFit(tod_task.SingleTimestream):
                     # cal for vis
                     ts['vis'].local_data[:, fi, pi, bi] = np.roll(vis[:, fi, pi, bi], -si) / gain # NOTE the use of -si
 
+        # set mask status of 'vis'
+        ts['vis'].attrs['masked'] = True
+
         ts.add_history(self.history)
 
         return ts
