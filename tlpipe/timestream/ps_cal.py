@@ -118,13 +118,10 @@ class PsCal(tod_task.SingleTimestream):
         gain = np.empty((nt, nfeed, 2, len(lfreq)), dtype=np.complex128)
         gain[:] = complex(np.nan, np.nan)
 
-        # array
-        aa = ts.array
-
         # construct visibility matrix for a single time, pol, freq
         Vmat = np.zeros((nfeed, nfeed), dtype=ts.main_data.dtype)
         for ind, ti in enumerate(range(start_ind, end_ind)):
-            # when noise no, just pass
+            # when noise on, just pass
             if ts['ns_on'][ti]:
                 continue
             aa.set_jultime(ts['jul_date'][ti])
