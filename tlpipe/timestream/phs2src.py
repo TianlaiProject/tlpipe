@@ -30,7 +30,6 @@ def phs(vis, li, gi, tbl, ts, **kwargs):
     uij = aa.gen_uvw(i, j, src='z').squeeze() # (rj - ri)/lambda
 
     return vis / np.exp(-2.0J * np.pi * np.dot(s_top, uij))[:, np.newaxis]
-    # return vis / np.exp(2.0J * np.pi * np.dot(s_top, uij))[:, np.newaxis]
 
 
 class Phs2src(tod_task.SingleTimestream):
