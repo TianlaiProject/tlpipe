@@ -95,6 +95,7 @@ class PsFit(tod_task.SingleTimestream):
 
         ts.redistribute('baseline')
 
+        feedno = ts['feedno'][:].tolist()
         nfreq = len(ts['freq'][:])
         pol = ts['pol'][:].tolist()
         bl = ts.bl.local_data[:] # local bls
@@ -159,8 +160,10 @@ class PsFit(tod_task.SingleTimestream):
             for pi in range(len(pol)):
                 aa.set_active_pol(pol[pi])
                 for bi, (i, j) in enumerate(bls):
-                    uij = aa.gen_uvw(i-1, j-1, src='z')[:, 0, :] # (rj - ri)/lambda
-                    bmij = aa.bm_response(i-1, j-1).reshape(-1)
+                    ai = feedno.index(i)
+                    aj = feedno.index(j)
+                    uij = aa.gen_uvw(ai-1, aj-1, src='z')[:, 0, :] # (rj - ri)/lambda
+                    bmij = aa.bm_response(ai-1, aj-1).reshape(-1)
                     # print uij.shape, bmij.shape
                     vis_sim[ind, :, pi, bi] = Sc * bmij * np.exp(-2.0J * np.pi * np.dot(s_top, uij))
 
