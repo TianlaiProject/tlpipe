@@ -92,7 +92,7 @@ class MapMaking(tod_task.SingleTimestream):
 
         if not simulate:
             # mask noise on data if not masked already
-            if ts['vis'].attrs.get('masked', False):
+            if not ts['vis'].attrs.get('masked', False):
                 on = np.where(ts['ns_on'][:])[0]
                 ts['vis'].local_data[on] = complex(np.nan, np.nan)
 
