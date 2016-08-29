@@ -39,8 +39,9 @@ def cal(vis, li, gi, fbl, rt, **kwargs):
     f = interpolate.interp1d(inds, phase, kind='cubic', bounds_error=False)
     all_phase = f(np.arange(vis.shape[0]))
     not_none_inds = np.where(np.logical_not(np.isnan(all_phase)))[0]
-    all_phase[:not_none_inds[0]] = all_phase[not_none_inds[0]]
-    all_phase[not_none_inds[-1]+1:] = all_phase[not_none_inds[-1]]
+    if len(not_none_inds) > 0:
+        all_phase[:not_none_inds[0]] = all_phase[not_none_inds[0]]
+        all_phase[not_none_inds[-1]+1:] = all_phase[not_none_inds[-1]]
 
     if plot_phs:
         # import matplotlib
