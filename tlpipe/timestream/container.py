@@ -132,6 +132,7 @@ class BasicTod(memh5.MemDiskGroup):
     dataset_name_allowed
     attrs_name_allowed
     create_time_ordered_dataset
+    create_main_data
     create_main_axis_ordered_dataset
     create_main_time_ordered_dataset
     add_history
@@ -803,20 +804,20 @@ class BasicTod(memh5.MemDiskGroup):
             if recreate:
                 if copy_attrs:
                     attr_dict = {} # temporarily save attrs of this dataset
-                    copyattrs(self[name].attrs, attr_dict)
+                    memh5.copyattrs(self[name].attrs, attr_dict)
                 del self[name]
                 if self.main_data_dist_axis == 0:
                     self.create_dataset(name, data=data, distributed=True, distributed_axis=time_axis)
                 else:
                     self.create_dataset(name, data=data)
                 if copy_attrs:
-                    copyattrs(attr_dict, self[name].attrs)
+                    memh5.copyattrs(attr_dict, self[name].attrs)
             else:
                 raise RuntimeError('Dataset %s already exists' % name)
 
         self.time_ordered_datasets[name] = axis_order
 
-    def create_main_axis_ordered_dataset(self, axis, name, data, axis_order, recreate=False, copy_attrs=False):
+    def create_main_axis_ordered_dataset(self, axis, name, data, axis_order, recreate=False, copy_attrs=False, check_align=True):
         """Create a `axis_name` ordered dataset.
 
         Parameters
@@ -835,6 +836,11 @@ class BasicTod(memh5.MemDiskGroup):
         copy_attrs : bool, optional
             If True, when recreate the dataset, its original attributes will be
             copyed to the new dataset, else no copy is done. Default Fasle.
+        check_align : bool, optional
+            If True, check main axis of data align with that of the main data
+            before dataset creating, otherwise create dataset without axis align
+            checking, this may cause the created dataset does not align with the
+            main data. Default True.
 
         """
 
@@ -851,7 +857,7 @@ class BasicTod(memh5.MemDiskGroup):
             axes = axes + (tmp_ax,)
 
             dist_axis = axis_order.index(tmp_ax)
-            if shape[dist_axis] != self.main_data.shape[tmp_ax]:
+            if check_align and shape[dist_axis] != self.main_data.shape[tmp_ax]:
                 axis_name = self.main_data_axes[tmp_ax]
                 raise ValueError('%s axis does not align with main data, can not create a %s ordered dataset %s' % (axis_name.capitalize(), axis_name, name))
 
@@ -864,20 +870,43 @@ class BasicTod(memh5.MemDiskGroup):
             if recreate:
                 if copy_attrs:
                     attr_dict = {} # temporarily save attrs of this dataset
-                    copyattrs(self[name].attrs, attr_dict)
+                    memh5.copyattrs(self[name].attrs, attr_dict)
                 del self[name]
                 if self.main_data_dist_axis in axes:
                     self.create_dataset(name, data=data, distributed=True, distributed_axis=axis_order.index(self.main_data_dist_axis))
                 else:
                     self.create_dataset(name, data=data)
                 if copy_attrs:
-                    copyattrs(attr_dict, self[name].attrs)
+                    memh5.copyattrs(attr_dict, self[name].attrs)
             else:
                 raise RuntimeError('Dataset %s already exists' % name)
 
         self.main_axes_ordered_datasets[name] = axis_order
 
-    def create_main_time_ordered_dataset(self, name, data, axis_order=(0,), recreate=False, copy_attrs=False):
+    def create_main_data(self, data, recreate=False, copy_attrs=False):
+        """Create or recreate a main dataset.
+
+        Parameters
+        ----------
+        data : np.ndarray or MPIArray
+            The data to create a dataset.
+        recreate : bool, optional
+            If True will recreate a dataset with this name if it already exists,
+            else a RuntimeError will be rasised. Default False.
+        copy_attrs : bool, optional
+            If True, when recreate the dataset, its original attributes will be
+            copyed to the new dataset, else no copy is done. Default Fasle.
+
+        """
+
+        axis = tuple(range(len(data.shape)))
+        name = self.main_data_name
+        axis_order = axis
+
+        self.create_main_axis_ordered_dataset(axis, name, data, axis_order, recreate, copy_attrs, False)
+
+
+    def create_main_time_ordered_dataset(self, name, data, axis_order=(0,), recreate=False, copy_attrs=False, check_align=True):
         """Create a main type time ordered dataset.
 
         Parameters
@@ -894,10 +923,15 @@ class BasicTod(memh5.MemDiskGroup):
         copy_attrs : bool, optional
             If True, when recreate the dataset, its original attributes will be
             copyed to the new dataset, else no copy is done. Default Fasle.
+        check_align : bool, optional
+            If True, check time axis of data align with that of the main data
+            before dataset creating, otherwise create dataset without axis align
+            checking, this may cause the created dataset does not align with the
+            main data. Default True.
 
         """
 
-        self.create_main_axis_ordered_dataset(0, name, data, axis_order, recreate, copy_attrs)
+        self.create_main_axis_ordered_dataset(0, name, data, axis_order, recreate, copy_attrs, check_align)
 
 
     @property

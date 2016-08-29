@@ -333,7 +333,7 @@ class TimestreamCommon(container.BasicTod):
         return aa
 
 
-    def create_freq_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False):
+    def create_freq_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False, check_align=True):
         """Create a frequency ordered dataset.
 
         Parameters
@@ -350,14 +350,19 @@ class TimestreamCommon(container.BasicTod):
         copy_attrs : bool, optional
             If True, when recreate the dataset, its original attributes will be
             copyed to the new dataset, else no copy is done. Default Fasle.
+        check_align : bool, optional
+            If True, check frequency axis of data align with that of the main data
+            before dataset creating, otherwise create dataset without axis align
+            checking, this may cause the created dataset does not align with the
+            main data. Default True.
 
         """
 
         axis_order = axis_order or (self.main_data_axes.index('frequency'),)
 
-        self.create_main_axis_ordered_dataset('frequency', name, data, axis_order, recreate, copy_attrs)
+        self.create_main_axis_ordered_dataset('frequency', name, data, axis_order, recreate, copy_attrs, check_align)
 
-    def create_bl_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False):
+    def create_bl_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False, check_align=True):
         """Create a baseline ordered dataset.
 
         Parameters
@@ -374,14 +379,19 @@ class TimestreamCommon(container.BasicTod):
         copy_attrs : bool, optional
             If True, when recreate the dataset, its original attributes will be
             copyed to the new dataset, else no copy is done. Default Fasle.
+        check_align : bool, optional
+            If True, check baseline axis of data align with that of the main data
+            before dataset creating, otherwise create dataset without axis align
+            checking, this may cause the created dataset does not align with the
+            main data. Default True.
 
         """
 
         axis_order = axis_order or (self.main_data_axes.index('baseline'),)
 
-        self.create_main_axis_ordered_dataset('baseline', name, data, axis_order, recreate, copy_attrs)
+        self.create_main_axis_ordered_dataset('baseline', name, data, axis_order, recreate, copy_attrs, check_align)
 
-    def create_time_and_freq_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False):
+    def create_time_and_freq_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False, check_align=True):
         """Create a time and frequency ordered dataset.
 
         Parameters
@@ -398,14 +408,19 @@ class TimestreamCommon(container.BasicTod):
         copy_attrs : bool, optional
             If True, when recreate the dataset, its original attributes will be
             copyed to the new dataset, else no copy is done. Default Fasle.
+        check_align : bool, optional
+            If True, check time and frequency axis of data align with that of the
+            main data before dataset creating, otherwise create dataset without
+            axis align checking, this may cause the created dataset does not align
+            with the main data. Default True.
 
         """
 
         axis_order = axis_order or (self.main_data_axes.index('time'), self.main_data_axes.index('frequency'))
 
-        self.create_main_axis_ordered_dataset(('time', 'frequency'), name, data, axis_order, recreate, copy_attrs)
+        self.create_main_axis_ordered_dataset(('time', 'frequency'), name, data, axis_order, recreate, copy_attrs, check_align)
 
-    def create_time_and_bl_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False):
+    def create_time_and_bl_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False, check_align=True):
         """Create a time and baseline ordered dataset.
 
         Parameters
@@ -422,14 +437,19 @@ class TimestreamCommon(container.BasicTod):
         copy_attrs : bool, optional
             If True, when recreate the dataset, its original attributes will be
             copyed to the new dataset, else no copy is done. Default Fasle.
+        check_align : bool, optional
+            If True, check time and baseline axis of data align with that of the
+            main data before dataset creating, otherwise create dataset without
+            axis align checking, this may cause the created dataset does not align
+            with the main data. Default True.
 
         """
 
         axis_order = axis_order or (self.main_data_axes.index('time'), self.main_data_axes.index('baseline'))
 
-        self.create_main_axis_ordered_dataset(('time', 'baseline'), name, data, axis_order, recreate, copy_attrs)
+        self.create_main_axis_ordered_dataset(('time', 'baseline'), name, data, axis_order, recreate, copy_attrs, check_align)
 
-    def create_freq_and_bl_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False):
+    def create_freq_and_bl_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False, check_align=True):
         """Create a frequency and baseline ordered dataset.
 
         Parameters
@@ -446,12 +466,17 @@ class TimestreamCommon(container.BasicTod):
         copy_attrs : bool, optional
             If True, when recreate the dataset, its original attributes will be
             copyed to the new dataset, else no copy is done. Default Fasle.
+        check_align : bool, optional
+            If True, check frequency and baseline axis of data align with that of the
+            main data before dataset creating, otherwise create dataset without
+            axis align checking, this may cause the created dataset does not align
+            with the main data. Default True.
 
         """
 
         axis_order = axis_order or (self.main_data_axes.index('frequency'), self.main_data_axes.index('baseline'))
 
-        self.create_main_axis_ordered_dataset(('frequency', 'baseline'), name, data, axis_order, recreate, copy_attrs)
+        self.create_main_axis_ordered_dataset(('frequency', 'baseline'), name, data, axis_order, recreate, copy_attrs, check_align)
 
     def create_feed_ordered_dataset(self, name, data, axis_order=(0,), recreate=False, copy_attrs=False):
         """Create a feed ordered dataset.

@@ -132,7 +132,7 @@ class Timestream(timestream_common.TimestreamCommon):
             raise KeyError('pol does not exist, try to load it first')
 
 
-    def create_pol_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False):
+    def create_pol_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False, check_align=True):
         """Create a polarization ordered dataset.
 
         Parameters
@@ -149,12 +149,17 @@ class Timestream(timestream_common.TimestreamCommon):
         copy_attrs : bool, optional
             If True, when recreate the dataset, its original attributes will be
             copyed to the new dataset, else no copy is done. Default Fasle.
+        check_align : bool, optional
+            If True, check polarization axis of data align with that of the main data
+            before dataset creating, otherwise create dataset without axis align
+            checking, this may cause the created dataset does not align with the
+            main data. Default True.
 
         """
 
         axis_order = axis_order or (self.main_data_axes.index('polarization'),)
 
-        self.create_main_axis_ordered_dataset('polarization', name, data, axis_order, recreate, copy_attrs)
+        self.create_main_axis_ordered_dataset('polarization', name, data, axis_order, recreate, copy_attrs, check_align)
 
 
     def lin2stokes(self):
