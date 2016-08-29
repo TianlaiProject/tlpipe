@@ -38,8 +38,10 @@ def fit(vis_obs, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit, fig_pref
     gain = gains[ind]
     chi2 = chi2s[ind]
     si = shifts[ind]
-    vis = vis_obs[start_ind+si:end_ind+si]
-    vis_cal = vis / gain
+    obs_data = vis_obs[start_ind:end_ind].copy()
+    factor = np.max(np.ma.abs(obs_data)) / np.max(np.abs(vis_sim))
+    obs_data /= factor # make amp close to each other
+    vis_cal = vis_obs[start_ind+si:end_ind+si].copy() / gain
     if si != 0 and mpiutil.rank0:
         print 'shift %d for %s...' % (si, idx)
 
@@ -51,14 +53,17 @@ def fit(vis_obs, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit, fig_pref
 
         plt.figure()
         plt.subplot(311)
+        plt.plot(obs_data.real, label='obs, real')
         plt.plot(vis_cal.real, label='cal, real')
         plt.plot(vis_sim.real, label='sim, real')
         plt.legend(loc='best')
         plt.subplot(312)
+        plt.plot(obs_data.imag, label='obs, imag')
         plt.plot(vis_cal.imag, label='cal, imag')
         plt.plot(vis_sim.imag, label='sim, imag')
         plt.legend(loc='best')
         plt.subplot(313)
+        plt.plot(np.abs(obs_data), label='obs, abs')
         plt.plot(np.abs(vis_cal), label='cal, abs')
         plt.plot(np.abs(vis_sim), label='sim, abs')
         plt.legend(loc='best')
