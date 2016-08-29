@@ -3,12 +3,11 @@
 import numpy as np
 import h5py
 import tod_task
+from tlpipe.core import constants as const
 
 from caput import mpiutil
 from caput import mpiarray
 
-
-sidereal_day = 86164.0905 # seconds
 
 class Dispatch(tod_task.IterRawTimestream):
     """Dispatch data."""
@@ -38,7 +37,7 @@ class Dispatch(tod_task.IterRawTimestream):
         with h5py.File(self.input_files[0], 'r') as f:
             self.int_time = f.attrs['inttime']
         if self.iter_num is None:
-            self.iter_num = np.int(np.ceil(self.int_time * (self.abs_stop - self.abs_start) / (days * sidereal_day)))
+            self.iter_num = np.int(np.ceil(self.int_time * (self.abs_stop - self.abs_start) / (days * const.sday)))
 
 
     def read_input(self):
@@ -50,7 +49,7 @@ class Dispatch(tod_task.IterRawTimestream):
         stop = self.params['stop']
         dist_axis = self.params['dist_axis']
 
-        num_int = np.int(np.ceil(days * sidereal_day / self.int_time))
+        num_int = np.int(np.ceil(days * const.sday / self.int_time))
         start = self.abs_start + self.iteration * num_int
         stop = min(self.abs_stop, self.abs_start + (self.iteration + 1) * num_int)
 
