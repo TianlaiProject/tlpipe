@@ -167,8 +167,8 @@ class PsFit(tod_task.SingleTimestream):
                 for bi, (i, j) in enumerate(bls):
                     ai = feedno.index(i)
                     aj = feedno.index(j)
-                    uij = aa.gen_uvw(ai-1, aj-1, src='z')[:, 0, :] # (rj - ri)/lambda
-                    bmij = aa.bm_response(ai-1, aj-1).reshape(-1)
+                    uij = aa.gen_uvw(ai, aj, src='z')[:, 0, :] # (rj - ri)/lambda
+                    bmij = aa.bm_response(ai, aj).reshape(-1)
                     # print uij.shape, bmij.shape
                     vis_sim[ind, :, pi, bi] = Sc * bmij * np.exp(-2.0J * np.pi * np.dot(s_top, uij))
 
