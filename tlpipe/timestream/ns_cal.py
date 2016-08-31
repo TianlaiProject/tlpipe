@@ -65,7 +65,7 @@ def cal(vis, li, gi, fbl, rt, **kwargs):
     return vis
 
 
-class NsCal(tod_task.SingleRawTimestream):
+class NsCal(tod_task.IterRawTimestream):
     """Relative phase calibration using the noise source signal."""
 
     params_init = {

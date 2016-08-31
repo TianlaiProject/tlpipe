@@ -9,7 +9,7 @@ from caput import mpiarray
 from tlpipe.utils import date_util
 
 
-class RunInfo(tod_task.SingleRawTimestream):
+class RunInfo(tod_task.IterRawTimestream):
     """Generate telescope running information."""
 
 

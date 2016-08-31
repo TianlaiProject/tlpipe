@@ -6,7 +6,7 @@ from tlpipe.core import constants as const
 from caput import mpiarray
 
 
-class ReOrder(tod_task.SingleTimestream):
+class ReOrder(tod_task.IterTimestream):
     """Re-order data to have longitude from 0 to 2pi."""
 
     prefix = 'ro_'

@@ -72,7 +72,7 @@ def plot(vis, li, gi, bl, obj, **kwargs):
     return vis
 
 
-class PlotRawTimestream(tod_task.SingleRawTimestream):
+class PlotRawTimestream(tod_task.IterRawTimestream):
     """Waterfall plot for RawTimestream."""
 
     params_init = {
@@ -100,7 +100,7 @@ class PlotRawTimestream(tod_task.SingleRawTimestream):
         return rt
 
 
-class PlotTimestream(tod_task.SingleTimestream):
+class PlotTimestream(tod_task.IterTimestream):
     """Waterfall plot for Timestream."""
 
     params_init = {

@@ -63,7 +63,7 @@ def plot(vis, li, gi, bl, obj, **kwargs):
     return vis
 
 
-class Plot(tod_task.SingleRawTimestream):
+class Plot(tod_task.IterRawTimestream):
     """Plot time or frequency integral."""
 
     params_init = {

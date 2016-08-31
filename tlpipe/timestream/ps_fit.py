@@ -75,7 +75,7 @@ def fit(vis_obs, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit, fig_pref
     return gain, si
 
 
-class PsFit(tod_task.SingleTimestream):
+class PsFit(tod_task.IterTimestream):
     """Calibration by strong point source fitting."""
 
     params_init = {

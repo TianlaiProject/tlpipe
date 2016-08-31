@@ -8,7 +8,7 @@ from caput import mpiutil
 from caput import mpiarray
 
 
-class Detect(tod_task.SingleRawTimestream):
+class Detect(tod_task.IterRawTimestream):
     """Detect noise source signal."""
 
     params_init = {

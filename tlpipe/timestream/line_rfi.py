@@ -6,7 +6,7 @@ import tod_task
 from sg_filter import savitzky_golay
 from caput import mpiarray
 
-class Flag(tod_task.SingleRawTimestream):
+class Flag(tod_task.IterRawTimestream):
     """Line RFI flagging."""
 
     params_init = {

@@ -32,7 +32,7 @@ def phs(vis, li, gi, tbl, ts, **kwargs):
     return vis * np.exp(-2.0J * np.pi * np.dot(s_top, uij))[:, np.newaxis]
 
 
-class Phs2zen(tod_task.SingleTimestream):
+class Phs2zen(tod_task.IterTimestream):
     """Phase the source-phased visibility data to the zenith, this is just the inverse operation of phs2src.py."""
 
     params_init = {

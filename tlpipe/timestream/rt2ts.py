@@ -3,7 +3,7 @@
 import tod_task
 
 
-class Rt2ts(tod_task.SingleRawTimestream):
+class Rt2ts(tod_task.IterRawTimestream):
     """Convert RawTimestream to Timestream."""
 
     params_init = {
