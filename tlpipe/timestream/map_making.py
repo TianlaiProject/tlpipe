@@ -21,6 +21,8 @@ class MapMaking(tod_task.SingleTimestream):
     """Initialize telescope array and average the timestream."""
 
     params_init = {
+                    'mask_daytime': True,
+                    'mask_time_range': [6.0, 22.0], # hour
                     'beam_theta_range': [0.0, 135.0],
                     'tsys': 50.0,
                     'accuracy_boost': 1.0,
@@ -42,6 +44,8 @@ class MapMaking(tod_task.SingleTimestream):
 
     def process(self, ts):
 
+        mask_daytime = self.params['mask_daytime']
+        mask_time_range = self.params['mask_time_range']
         beam_theta_range = self.params['beam_theta_range']
         tsys = self.params['tsys']
         accuracy_boost = self.params['accuracy_boost']
@@ -95,6 +99,10 @@ class MapMaking(tod_task.SingleTimestream):
             if not ts['vis'].attrs.get('masked', False):
                 on = np.where(ts['ns_on'][:])[0]
                 ts['vis'].local_data[on] = complex(np.nan, np.nan)
+            # mask daytime data
+            if mask_daytime:
+                day_inds = np.where(np.logical_and(ts['local_hour'][:]>=mask_time_range[0], ts['local_hour'][:]<=mask_time_range[1]))[0]
+                ts['vis'].local_data[day_inds] = complex(np.nan, np.nan)
 
             # average data
             nt = ts['sec1970'].shape[0]
