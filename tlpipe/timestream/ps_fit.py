@@ -162,7 +162,8 @@ class PsFit(tod_task.SingleTimestream):
             # get the topocentric coordinate of the calibrator at the current time
             s_top = s.get_crds('top', ncrd=3)
             aa.sim_cache(cat.get_crds('eq', ncrd=3)) # for compute bm_response and sim
-            for pi in range(len(pol)):
+            # for pi in range(len(pol)):
+            for pi in range(2): # only cal for xx, yy
                 aa.set_active_pol(pol[pi])
                 for bi, (i, j) in enumerate(bls):
                     ai = feedno.index(i)
@@ -174,7 +175,8 @@ class PsFit(tod_task.SingleTimestream):
 
         # iterate over freq
         for fi in range(nfreq):
-            for pi in range(len(pol)):
+            # for pi in range(len(pol)):
+            for pi in range(2): # only cal for xx, yy
                 for bi, (i, j) in enumerate(bls):
                     gain, si = fit(vis[:, fi, pi, bi].copy(), vis_sim[:, fi, pi, bi], start_ind, end_ind, num_shift, (fi, pi, (i, j)), plot_fit, fig_prefix)
                     # cal for vis
