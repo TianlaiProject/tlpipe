@@ -58,6 +58,7 @@ class TimestreamCommon(container.BasicTod):
     _main_axes_ordered_datasets_ = { 'vis': (0, 1, 2), # or (0, 1, 2, 3)
                                      'sec1970': (0,),
                                      'jul_date': (0,),
+                                     'local_hour': (0,),
                                      'freq': (1,),
                                      'blorder': (2,), # 2 or 3
                                    }
@@ -253,6 +254,17 @@ class TimestreamCommon(container.BasicTod):
             self.create_main_time_ordered_dataset('jul_date', data=jul_date)
             # create attrs of this dset
             self['jul_date'].attrs["unit"] = 'day'
+
+            # generate local time in hour from 0 to 24.0
+            def _hour(t):
+                return t.hour + t.minute/60.0 + t.second/3600.0 + t.microsecond/3.6e8
+            local_hour = np.array([ _hour(datetime.fromtimestamp(s).time()) for s in sec1970 ], dtype=np.float64)
+            if 'time' == self.main_data_axes[self.main_data_dist_axis]:
+                local_hour = mpiarray.MPIArray.wrap(local_hour, axis=0)
+            # if time is just the distributed axis, load local_hour distributed
+            self.create_main_time_ordered_dataset('local_hour', data=local_hour)
+            # create attrs of this dset
+            self['local_hour'].attrs["unit"] = 'hour'
 
 
     @property
