@@ -76,7 +76,7 @@ class PsCal(tod_task.IterTimestream):
         s = cat.values()[0]
         if mpiutil.rank0:
             print 'Calibrating for source %s with' % calibrator,
-            print 'strength', s._jys,
+            print 'strength', s._jys, 'Jy',
             print 'measured at', s.mfreq, 'GHz',
             print 'with index', s.index
 
