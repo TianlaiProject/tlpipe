@@ -97,12 +97,16 @@ from tlpipe.timestream import re_order
 pipe_modules.append(re_order.ReOrder)
 ### parameters for ReOrder
 ro_in = pf_out
+ro_output_files = [ 're_order/file_%d.hdf5' %i for i in range(1, 13) ]
 ro_out = 'ro'
 
 from tlpipe.timestream import map_making
 pipe_modules.append(map_making.MapMaking)
 ### parameters for MapMaking
 mm_in = ro_out
+mm_input_files = ro_output_files
+mm_mask_time_range = [6.5, 24.0]
+mm_beam_theta_range = [30.0, 60.0]
 mm_auto_correlations = False
 mm_pol = 'yy'
 mm_noise_weight = False
