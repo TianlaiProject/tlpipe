@@ -10,6 +10,7 @@ import tod_task
 from caput import mpiutil
 from caput import mpiarray
 from caput import memh5
+from cora.util import hputil
 from tlpipe.utils.np_util import unique, average
 from tlpipe.utils.path_util import output_path
 from tlpipe.map.fmmode.telescope import tl_dish, tl_cylinder
@@ -198,7 +199,8 @@ class MapMaking(tod_task.SingleTimestream):
             vis_h5.to_hdf5(ts._tsfile)
         # ts.generate_mmodes(vis_stream.to_numpy_array(root=None))
         ts.generate_mmodes()
-        ts.mapmake_full(64, 'full')
+        nside = hputil.nside_for_lmax(tel.lmax, accuracy_boost=tel.accuracy_boost)
+        ts.mapmake_full(nside, 'full')
 
         # ts.add_history(self.history)
 
