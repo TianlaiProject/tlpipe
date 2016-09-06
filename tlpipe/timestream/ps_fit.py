@@ -1,31 +1,58 @@
 """Calibration by strong point source fitting."""
 
 import os
+import itertools
 import numpy as np
 import ephem
 import aipy as a
 import tod_task
 from caput import mpiutil
 
-
 def fit(vis_obs, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit, fig_prefix):
-    vis_obs = np.ma.masked_invalid(vis_obs)
-    num_nomask = vis_obs.count()
+    vis_obs_orig = np.ma.masked_invalid(vis_obs)
+    num_nomask = vis_obs_orig.count()
     # vis_sim = np.ma.masked_invalid(vis_sim)
     fi, pi, (i, j) = idx
-    gains = []
-    chi2s = []
+
     shifts = range(-num_shift/2, num_shift/2+1)
+    # original data fit
+    gains_orig = []
+    chi2s_orig = []
     for si in shifts:
-        vis = vis_obs[start_ind+si:end_ind+si]
+        vis = vis_obs_orig[start_ind+si:end_ind+si]
         xx = np.ma.dot(vis_sim.conj(), vis_sim)
         xy = np.ma.dot(vis_sim.conj(), vis)
         gain = xy / xx
         vis_cal = gain * vis_sim
         err = vis - vis_cal
-        chi2 = np.ma.dot(err.conj(), err)
-        gains.append(gain)
-        chi2s.append(chi2/num_nomask)
+        chi2 = np.ma.dot(err.conj(), err).real
+        gains_orig.append(gain)
+        chi2s_orig.append(chi2/num_nomask)
+
+    # conj data fit
+    vis_obs_conj = np.ma.masked_invalid(vis_obs.conj())
+    gains_conj = []
+    chi2s_conj = []
+    for si in shifts:
+        vis = vis_obs_conj[start_ind+si:end_ind+si]
+        xx = np.ma.dot(vis_sim.conj(), vis_sim)
+        xy = np.ma.dot(vis_sim.conj(), vis)
+        gain = xy / xx
+        vis_cal = gain * vis_sim
+        err = vis - vis_cal
+        chi2 = np.ma.dot(err.conj(), err).real
+        gains_conj.append(gain)
+        chi2s_conj.append(chi2/num_nomask)
+
+    # compare the median of chi2s_orig and chi2s_conj
+    if np.median(chi2s_conj) < np.median(chi2s_orig):
+        conj = True
+        gains = gains_conj
+        chi2s = chi2s_conj
+    else:
+        conj = False
+        gains = gains_orig
+        chi2s = chi2s_orig
 
     chi2s = np.array(chi2s)
     if np.allclose(chi2s, np.sort(chi2s)):
@@ -34,14 +61,18 @@ def fit(vis_obs, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit, fig_pref
     if np.allclose(chi2s, np.sort(chi2s)[::-1]):
         if mpiutil.rank0:
             print 'Warn: chi2 decreasing for %s...' % (idx,)
+
     ind = np.argmin(chi2s)
     gain = gains[ind]
-    chi2 = chi2s[ind]
+    # chi2 = chi2s[ind]
     si = shifts[ind]
     obs_data = vis_obs[start_ind:end_ind].copy()
-    factor = np.max(np.ma.abs(obs_data)) / np.max(np.abs(vis_sim))
+    factor = np.max(np.ma.abs(np.ma.masked_invalid(obs_data))) / np.max(np.abs(vis_sim))
     obs_data /= factor # make amp close to each other
-    vis_cal = vis_obs[start_ind+si:end_ind+si].copy() / gain
+    if conj:
+        vis_cal = vis_obs[start_ind+si:end_ind+si].copy().conj() / gain
+    else:
+        vis_cal = vis_obs[start_ind+si:end_ind+si].copy() / gain
     if si != 0 and mpiutil.rank0:
         print 'shift %d for %s...' % (si, idx)
 
@@ -54,17 +85,20 @@ def fit(vis_obs, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit, fig_pref
         plt.figure()
         plt.subplot(311)
         plt.plot(obs_data.real, label='obs, real')
-        plt.plot(vis_cal.real, label='cal, real')
+        if not vis_cal is np.ma.masked: # in case gain is --
+            plt.plot(vis_cal.real, label='cal, real')
         plt.plot(vis_sim.real, label='sim, real')
         plt.legend(loc='best')
         plt.subplot(312)
         plt.plot(obs_data.imag, label='obs, imag')
-        plt.plot(vis_cal.imag, label='cal, imag')
+        if not vis_cal is np.ma.masked: # in case gain is --
+            plt.plot(vis_cal.imag, label='cal, imag')
         plt.plot(vis_sim.imag, label='sim, imag')
         plt.legend(loc='best')
         plt.subplot(313)
         plt.plot(np.abs(obs_data), label='obs, abs')
-        plt.plot(np.abs(vis_cal), label='cal, abs')
+        if not vis_cal is np.ma.masked: # in case gain is --
+            plt.plot(np.abs(vis_cal), label='cal, abs')
         plt.plot(np.abs(vis_sim), label='sim, abs')
         plt.legend(loc='best')
         fig_name = '%s_%d_%d_%d_%d.png' % (fig_prefix, fi, pi, i, j)
@@ -72,7 +106,7 @@ def fit(vis_obs, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit, fig_pref
         plt.savefig(fig_name)
         plt.clf()
 
-    return gain, si
+    return gain, si, conj
 
 
 class PsFit(tod_task.IterTimestream):
@@ -173,17 +207,35 @@ class PsFit(tod_task.IterTimestream):
                     # print uij.shape, bmij.shape
                     vis_sim[ind, :, pi, bi] = Sc * bmij * np.exp(-2.0J * np.pi * np.dot(s_top, uij))
 
+        conjs = []
         # iterate over freq
         for fi in range(nfreq):
             # for pi in range(len(pol)):
             for pi in range(2): # only cal for xx, yy
                 for bi, (i, j) in enumerate(bls):
-                    gain, si = fit(vis[:, fi, pi, bi].copy(), vis_sim[:, fi, pi, bi], start_ind, end_ind, num_shift, (fi, pi, (i, j)), plot_fit, fig_prefix)
+                    gain, si, conj = fit(vis[:, fi, pi, bi].copy(), vis_sim[:, fi, pi, bi], start_ind, end_ind, num_shift, (fi, pi, (i, j)), plot_fit, fig_prefix)
                     # cal for vis
-                    ts['vis'].local_data[:, fi, pi, bi] = np.roll(vis[:, fi, pi, bi], -si) / gain # NOTE the use of -si
+                    if conj:
+                        # conjs.append((i, j, pol[pi]))
+                        if pi == 0: # xx
+                            conjs.append((2*i-1, 2*j-1))
+                        elif pi == 1: # yy
+                            conjs.append((2*i, 2*j))
+                        ts['vis'].local_data[:, fi, pi, bi] = np.roll(vis[:, fi, pi, bi].conj(), -si) / gain # NOTE the use of -si
+                    else:
+                        ts['vis'].local_data[:, fi, pi, bi] = np.roll(vis[:, fi, pi, bi], -si) / gain # NOTE the use of -si
 
         # set mask status of 'vis'
         ts['vis'].attrs['masked'] = True
+
+        # gather conjs
+        comm = mpiutil.world
+        conjs = list(itertools.chain(*comm.allgather(conjs)))
+        conjs = list(set(conjs)) # unique list
+        conjs = sorted(conjs)
+        if mpiutil.rank0:
+            print conjs
+            print len(conjs)
 
         ts.add_history(self.history)
 
