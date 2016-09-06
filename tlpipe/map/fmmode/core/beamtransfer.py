@@ -33,6 +33,19 @@ from caput.mpiarray import MPIArray
 from tlpipe.map.fmmode.util import util
 
 
+def pinv_svd(M, acond=1e-4, rcond=1e-3):
+    # Generate the pseudo-inverse from an svd
+
+    u, sig, vh = la.svd(M, full_matrices=False)
+
+    rank = np.sum(np.logical_and(sig > rcond * sig.max(), sig > acond))
+
+    psigma_diag = 1.0 / sig[: rank]
+
+    B = np.transpose(np.conjugate(np.dot(u[:, : rank] * psigma_diag, vh[: rank])))
+
+    return B
+
 
 class BeamTransfer(object):
     """A class for reading and writing Beam Transfer matrices from disk.
@@ -416,8 +429,8 @@ class BeamTransfer(object):
         if self.noise_weight:
             beam *= noisew[:, np.newaxis]
         for fi in range(nfreq):
-            # inv_beam[fi] = la.pinv2(beam[fi], rcond=1.0e-6)
-            inv_beam[fi] = la.pinv2(beam[fi], rcond=1.0e-4)
+            # inv_beam[fi] = la.pinv2(beam[fi], rcond=1.0e-4)
+            inv_beam[fi] = pinv_svd(beam[fi], acond=0.01, rcond=0.02) # value from Zhang et al., 2016, MNRAS, 461, 1950
         if self.noise_weight:
             inv_beam *= noisew
 
