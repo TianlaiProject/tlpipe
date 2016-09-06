@@ -33,6 +33,25 @@ from caput.mpiarray import MPIArray
 from tlpipe.map.fmmode.util import util
 
 
+def invert_no_zero(x):
+    """Return the reciprocal, but ignoring zeros.
+
+    Where `x != 0` return 1/x, or just return 0. Importantly this routine does
+    not produce a warning about zero division.
+
+    Parameters
+    ----------
+    x : np.ndarray
+
+    Returns
+    -------
+    r : np.ndarray
+        Return the reciprocal of x.
+    """
+    with np.errstate(divide='ignore', invalid='ignore'):
+        return np.where(x == 0, 0.0, 1.0 / x)
+
+
 def pinv_svd(M, acond=1e-4, rcond=1e-3):
     # Generate the pseudo-inverse from an svd
 
@@ -240,14 +259,17 @@ class BeamTransfer(object):
                 # If fi is None, return all frequency blocks. Otherwise just the one requested.
                 if fi is None:
                     ibeam = ifile['ibeam_m'][:]
+                    W1 = ifile['W1_m'][:]
                 else:
                     ibeam = ifile['ibeam_m'][fi][:]
+                    W1 = ifile['W1_m'][fi][:]
         else:
-            ibeam = self.compute_invbeam_m(mi)
+            ibeam, W1 = self.compute_invbeam_m(mi)
             if fi is not None:
                 ibeam = ibeam[fi]
+                W1 = W1[fi]
 
-        return ibeam
+        return ibeam, W1
 
     #===================================================
 
@@ -415,26 +437,55 @@ class BeamTransfer(object):
             beam_shape = (nfreq, self.ntel/2, self.nsky)
             ibeam_shape = (nfreq, self.nsky, self.ntel/2)
             if self.noise_weight:
-                noisew = self.telescope.noisepower(np.arange(self.telescope.npairs), 0).flatten()**(-0.5)
+                noise_diag = self.telescope.noisepower(np.arange(self.telescope.npairs), 0).flatten()
+                noisew = noise_diag**(-0.5)
         else:
             beam_shape = (nfreq, self.ntel, self.nsky)
             ibeam_shape = (nfreq, self.nsky, self.ntel)
             if self.noise_weight:
-                noisew = self.telescope.noisepower(np.arange(self.telescope.npairs), 0).flatten()**(-0.5)
+                noise_diag = self.telescope.noisepower(np.arange(self.telescope.npairs), 0).flatten()
+                noisew = noise_diag**(-0.5)
+                noise_diag = np.concatenate([noise_diag, noise_diag.conj()])
                 noisew = np.concatenate([noisew, noisew.conj()])
 
         beam = self.beam_m(mi)
         beam = beam.reshape(beam_shape)
         inv_beam = np.empty(ibeam_shape, dtype=beam.dtype)
+        W1_filter = np.ones((nfreq, self.nsky), dtype=np.float64) # the W1 filter
         if self.noise_weight:
             beam *= noisew[:, np.newaxis]
         for fi in range(nfreq):
             # inv_beam[fi] = la.pinv2(beam[fi], rcond=1.0e-4)
             inv_beam[fi] = pinv_svd(beam[fi], acond=0.01, rcond=0.02) # value from Zhang et al., 2016, MNRAS, 461, 1950
+
+            # # further filter to suppre modes with large errors
+            # sigma2 = np.diag(pinv_svd(np.dot(beam[fi].T.conj(), beam[fi]).real))
+            # # print mi, fi, sigma2
+            # # err
+            # K = 50.0 # value from Zhang et al., 2016, MNRAS, 461, 1950
+            # W1_filter[fi] = np.where(sigma2<K*np.min(sigma2), 1.0, 1.0/sigma2)
+
         if self.noise_weight:
             inv_beam *= noisew
 
-        return inv_beam
+        # further filter to suppre modes with large errors
+        for fi in range(nfreq):
+            if self.noise_weight:
+                sigma2 = np.diag(np.dot(inv_beam[fi]*noise_diag, inv_beam[fi].T.conj()).real)
+            else:
+                sigma2 = np.diag(np.dot(inv_beam[fi], inv_beam[fi].T.conj()).real)
+            W1_filter[fi] = np.where(sigma2>1.0, invert_no_zero(sigma2), 1.0)
+            # print mi, fi, sigma2
+            # err
+            # K = 50.0 # value from Zhang et al., 2016, MNRAS, 461, 1950
+            # inds = np.where(np.sort(np.unique(sigma2))>0)[0]
+            # if len(inds) > 0:
+            #     ind = inds[0]
+            #     # print ind, sigma2[ind]
+            #     # err
+            #     W1_filter[fi] = np.where(sigma2<K*sigma2[ind], 1.0, 1.0/sigma2)
+
+        return inv_beam, W1_filter
 
 
     def _generate_invbeam(self, regen=False):
@@ -457,10 +508,11 @@ class BeamTransfer(object):
 
         mmax = self.telescope.mmax
         for mi in mpiutil.mpilist(range(mmax+1)):
-            inv_beam = self.compute_invbeam_m(mi)
+            inv_beam, W1 = self.compute_invbeam_m(mi)
             # save to file
             with h5py.File(self._inv_mfile(mi), 'w') as f:
                 f.create_dataset('ibeam_m', data=inv_beam)
+                f.create_dataset('W1_m', data=W1)
                 f.attrs['m'] = mi
 
         mpiutil.barrier()
@@ -540,14 +592,15 @@ class BeamTransfer(object):
         npol = tel.num_pol_sky
         ntheta = tel.theta_size
 
-        inv_beam = self.invbeam_m(mi)
+        inv_beam, W1 = self.invbeam_m(mi)
 
         Tm = np.zeros((self.nfreq, npol, ntheta), dtype=mmode.dtype)
+        W1 = W1.reshape((self.nfreq, npol, ntheta))
 
         for fi in range(self.nfreq):
             Tm[fi] = np.dot(inv_beam[fi], mmode[fi, :]).reshape((npol, ntheta))
 
-        return Tm
+        return Tm * W1 # apply the W1 filter
 
 
     project_vector_backward = project_vector_telescope_to_sky
