@@ -458,32 +458,17 @@ class BeamTransfer(object):
             # inv_beam[fi] = la.pinv2(beam[fi], rcond=1.0e-4)
             inv_beam[fi] = pinv_svd(beam[fi], acond=0.01, rcond=0.02) # value from Zhang et al., 2016, MNRAS, 461, 1950
 
-            # # further filter to suppre modes with large errors
-            # sigma2 = np.diag(pinv_svd(np.dot(beam[fi].T.conj(), beam[fi]).real))
-            # # print mi, fi, sigma2
-            # # err
-            # K = 50.0 # value from Zhang et al., 2016, MNRAS, 461, 1950
-            # W1_filter[fi] = np.where(sigma2<K*np.min(sigma2), 1.0, 1.0/sigma2)
-
         if self.noise_weight:
             inv_beam *= noisew
 
-        # further filter to suppre modes with large errors
+        # further filter to suppress modes with large errors
         for fi in range(nfreq):
             if self.noise_weight:
                 sigma2 = np.diag(np.dot(inv_beam[fi]*noise_diag, inv_beam[fi].T.conj()).real)
             else:
                 sigma2 = np.diag(np.dot(inv_beam[fi], inv_beam[fi].T.conj()).real)
-            W1_filter[fi] = np.where(sigma2>1.0, invert_no_zero(sigma2), 1.0)
-            # print mi, fi, sigma2
-            # err
-            # K = 50.0 # value from Zhang et al., 2016, MNRAS, 461, 1950
-            # inds = np.where(np.sort(np.unique(sigma2))>0)[0]
-            # if len(inds) > 0:
-            #     ind = inds[0]
-            #     # print ind, sigma2[ind]
-            #     # err
-            #     W1_filter[fi] = np.where(sigma2<K*sigma2[ind], 1.0, 1.0/sigma2)
+            K = 1.0 # empirical value
+            W1_filter[fi] = np.where(sigma2>K, invert_no_zero(sigma2), 1.0)
 
         return inv_beam, W1_filter
 
