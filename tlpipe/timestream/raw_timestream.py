@@ -29,6 +29,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
     _main_data_name_ = 'vis'
     _main_data_axes_ = ('time', 'frequency', 'baseline')
     _main_axes_ordered_datasets_ = { 'vis': (0, 1, 2),
+                                     'vis_mask': (0, 1, 2),
                                      'sec1970': (0,),
                                      'jul_date': (0,),
                                      'freq': (1,),
@@ -224,26 +225,35 @@ class RawTimestream(timestream_common.TimestreamCommon):
         yx_conj = [ cj for (cj, ind) in yx_list ]
 
         # create a MPIArray to hold the pol and bl separated vis
-        shp = self.main_data.shape[:2] + (4, len(xx_inds))
-        dtype = self.main_data.dtype
-        md = mpiarray.MPIArray(shp, axis=self.main_data_dist_axis, comm=self.comm, dtype=dtype)
-        # xx
-        md.local_array[:, :, 0] = self.main_data.local_data[:, :, xx_inds].copy()
-        md.local_array[:, :, 0] = np.where(xx_conj, md.local_array[:, :, 0].conj(), md.local_array[:, :, 0])
-        # yy
-        md.local_array[:, :, 1] = self.main_data.local_data[:, :, yy_inds].copy()
-        md.local_array[:, :, 1] = np.where(yy_conj, md.local_array[:, :, 1].conj(), md.local_array[:, :, 1])
-        # xy
-        md.local_array[:, :, 2] = self.main_data.local_data[:, :, xy_inds].copy()
-        md.local_array[:, :, 2] = np.where(xy_conj, md.local_array[:, :, 2].conj(), md.local_array[:, :, 2])
-        # yx
-        md.local_array[:, :, 3] = self.main_data.local_data[:, :, yx_inds].copy()
-        md.local_array[:, :, 3] = np.where(yx_conj, md.local_array[:, :, 3].conj(), md.local_array[:, :, 3])
+        rvis = self.main_data.local_data
+        shp = rvis.shape[:2] + (4, len(xx_inds))
+        vis = np.empty(shp, dtype=rvis.dtype)
+        vis[:, :, 0] = np.where(xx_conj, rvis[:, :, xx_inds].conj(), rvis[:, :, xx_inds]) # xx
+        vis[:, :, 1] = np.where(yy_conj, rvis[:, :, yy_inds].conj(), rvis[:, :, yy_inds]) # yy
+        vis[:, :, 2] = np.where(xy_conj, rvis[:, :, xy_inds].conj(), rvis[:, :, xy_inds]) # xy
+        vis[:, :, 3] = np.where(yx_conj, rvis[:, :, yx_inds].conj(), rvis[:, :, yx_inds]) # yx
+
+        vis = mpiarray.MPIArray.wrap(vis, axis=self.main_data_dist_axis, comm=self.comm)
 
         # create main data
-        ts.create_dataset(self.main_data_name, shape=shp, dtype=dtype, data=md, distributed=True, distributed_axis=self.main_data_dist_axis)
+        ts.create_main_data(vis)
         # create attrs of this dataset
         ts.main_data.attrs['dimname'] = 'Time, Frequency, Polarization, Baseline'
+
+        # create a MPIArray to hold the pol and bl separated vis_mask
+        rvis_mask = self['vis_mask'].local_data
+        shp = rvis_mask.shape[:2] + (4, len(xx_inds))
+        vis_mask = np.empty(shp, dtype=rvis_mask.dtype)
+        vis_mask[:, :, 0] = rvis_mask[:, :, xx_inds] # xx
+        vis_mask[:, :, 1] = rvis_mask[:, :, yy_inds] # yy
+        vis_mask[:, :, 2] = rvis_mask[:, :, xy_inds] # xy
+        vis_mask[:, :, 3] = rvis_mask[:, :, yx_inds] # yx
+
+        vis_mask = mpiarray.MPIArray.wrap(vis_mask, axis=self.main_data_dist_axis, comm=self.comm)
+
+        # create vis_mask
+        axis_order = ts.main_axes_ordered_datasets[ts.main_data_name]
+        ts.create_main_axis_ordered_dataset(axis_order, 'vis_mask', vis_mask, axis_order)
 
         # create other datasets needed
         # pol ordered dataset
@@ -256,8 +266,8 @@ class RawTimestream(timestream_common.TimestreamCommon):
         # copy attrs of this dset
         memh5.copyattrs(self['blorder'].attrs, ts['blorder'].attrs)
         # other bl ordered dataset
-        if len(set(self.bl_ordered_datasets.keys()) - {'vis', 'blorder'}) > 0:
-            raise RuntimeError('Should not have other bl_ordered_datasets %s' % (set(self.bl_ordered_datasets.keys()) - {'vis', 'blorder'}))
+        if len(set(self.bl_ordered_datasets.keys()) - {'vis', 'vis_mask', 'blorder'}) > 0:
+            raise RuntimeError('Should not have other bl_ordered_datasets %s' % (set(self.bl_ordered_datasets.keys()) - {'vis', 'vis_mask', 'blorder'}))
 
         # copy other attrs
         for attrs_name, attrs_value in self.attrs.iteritems():
@@ -266,7 +276,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
 
         # copy other datasets
         for dset_name, dset in self.iteritems():
-            if dset_name == self.main_data_name:
+            if dset_name == self.main_data_name or dset_name == 'vis_mask':
                 # already created above
                 continue
             elif dset_name in self.main_axes_ordered_datasets.keys():

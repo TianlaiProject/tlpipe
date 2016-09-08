@@ -30,6 +30,14 @@ class ReOrder(tod_task.IterTimestream):
             vis = mpiarray.MPIArray.wrap(vis, axis=ts['vis'].distributed_axis)
             ts.create_main_data(vis, recreate=True, copy_attrs=True)
 
+            # complete vis_mask
+            vis_mask = np.ones((num_int,)+ts['vis_mask'].local_shape[1:], dtype=ts['vis_mask'].dtype) # initialize as masked
+            vis_mask[:num_phi] = ts['vis_mask'].local_data[:]
+            # vis_mask[num_phi:] = True # mask the completed data
+            vis_mask = mpiarray.MPIArray.wrap(vis_mask, axis=ts['vis'].distributed_axis)
+            axis_order = ts.main_axes_ordered_datasets[ts.main_data_name]
+            ts.create_main_axis_ordered_dataset(axis_order, 'vis_mask', vis_mask, axis_order, recreate=True, copy_attrs=True)
+
             # complete ra_dec
             ra_dec = np.zeros((num_int, 2), dtype=ts['ra_dec'].dtype)
             ra_dec[:num_phi] = ts['ra_dec'][:]
@@ -41,7 +49,7 @@ class ReOrder(tod_task.IterTimestream):
 
             # complete other main_time_ordered_datasets with zeros
             for name in ts.main_time_ordered_datasets.keys():
-                if name in ts.iterkeys() and name != 'vis' and name != 'ra_dec':
+                if name in ts.iterkeys() and not name in ('vis', 'vis_mask', 'ra_dec'):
                     dset = ts[name]
                     axis_order = ts.main_axes_ordered_datasets[name]
                     axis = tuple([ ts.main_data_axes[ax] for ax in axis_order if ax is not None ])

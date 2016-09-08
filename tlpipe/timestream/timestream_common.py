@@ -37,6 +37,7 @@ class TimestreamCommon(container.BasicTod):
     frequency_select
     feed_select
     load_common
+    load_main_data
     load_tod_excl_main_data
     create_freq_ordered_dataset
     create_bl_ordered_dataset
@@ -56,6 +57,7 @@ class TimestreamCommon(container.BasicTod):
     _main_data_name_ = 'vis'
     _main_data_axes_ = () # can be 'time', 'frequency', 'polarization', 'baseline'
     _main_axes_ordered_datasets_ = { 'vis': (0, 1, 2), # or (0, 1, 2, 3)
+                                     'vis_mask': (0, 1, 2), # or (0, 1, 2, 3)
                                      'sec1970': (0,),
                                      'jul_date': (0,),
                                      'local_hour': (0,),
@@ -216,6 +218,16 @@ class TimestreamCommon(container.BasicTod):
             self.create_freq_ordered_dataset('freq', data=freq)
             # create attrs of this dset
             self['freq'].attrs["unit"] = 'MHz'
+
+    def load_main_data(self):
+        """Load main data from all files and create its mask array."""
+        super(TimestreamCommon, self).load_main_data()
+
+        # create the mask array
+        vis_mask = np.where(np.isfinite(self.main_data.local_data), False, True)
+        vis_mask = mpiarray.MPIArray.wrap(vis_mask, axis=self.main_data_dist_axis)
+        axis_order = self.main_axes_ordered_datasets[self.main_data_name]
+        vis_mask = self.create_main_axis_ordered_dataset(axis_order, 'vis_mask', vis_mask, axis_order)
 
     def load_tod_excl_main_data(self):
         """Load time ordered attributes and datasets (exclude the main data) from all files."""
