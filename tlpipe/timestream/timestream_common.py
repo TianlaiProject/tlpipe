@@ -22,6 +22,9 @@ class TimestreamCommon(container.BasicTod):
 
     Attributes
     ----------
+    vis
+    vis_mask
+    masked_vis
     time
     freq
     bl
@@ -39,6 +42,7 @@ class TimestreamCommon(container.BasicTod):
     load_common
     load_main_data
     load_tod_excl_main_data
+    apply_mask
     create_freq_ordered_dataset
     create_bl_ordered_dataset
     create_time_and_freq_ordered_dataset
@@ -277,6 +281,75 @@ class TimestreamCommon(container.BasicTod):
             self.create_main_time_ordered_dataset('local_hour', data=local_hour)
             # create attrs of this dset
             self['local_hour'].attrs["unit"] = 'hour'
+
+
+    @property
+    def vis(self):
+        """Return the main data for convenient use."""
+        return self.main_data
+
+    @property
+    def vis_mask(self):
+        """A convenience for self['vis_mask']."""
+        try:
+            return self['vis_mask']
+        except KeyError:
+            raise KeyError('vis_mask does not exist, try to load it first')
+
+    def apply_mask(self, fill_val=complex(np.nan, np.nan)):
+        """Applying `vis_mask` to `vis` with the `fill_val`.
+
+        NOTE: This is a non-invertible operation to the dataset `vis`, as its
+        values corresponding to True of `vis_mask` will be replaced by `fill_val`
+        and lost. Usually you may prefer to use :meth:`masked_vis` instead.
+        """
+        self.vis[:] = np.where(self.vis_mask[:], fill_val, self.vis[:])
+
+    @property
+    def masked_vis(self):
+        """Return a copy of the masked `vis`.
+
+        NOTE: This can only be used like self.masked_vis[slice], not
+        self.masked_vis.data[slice] and self.masked_vis.local_data[slice].
+
+        This will keep the underling `vis` dataset unchanged.
+        """
+
+        outer_self = self
+
+        class _masked_vis(outer_self.vis.__class__):
+            """This will be a subclass of ether :class:`caput.memh5.MemDatasetCommon`
+            or :class:`caput.memh5.MemDatasetDistributed` depending on the type
+            of `outer_self.vis.__class__`.
+            """
+
+            def __getitem__(self, obj):
+                vis = super(_masked_vis, self).__getitem__(obj)
+                vis_mask = outer_self.vis_mask.__getitem__(obj)
+                if vis_mask is None:
+                    return None
+                else:
+                    return np.where(vis_mask, complex(np.nan, np.nan), vis)
+
+            def __setitem__(self, obj, val):
+                raise RuntimeError("Can not set item as 'mask_vis' is not a real dataset, set 'vis' and 'vis_mask' instead")
+
+            @property
+            def data(self):
+                raise ValueError('Can not get masked_vis.data')
+
+            @property
+            def local_data(self):
+                raise ValueError('Can not get masked_vis.local_data')
+
+        if outer_self.distributed:
+            mv = _masked_vis.from_mpi_array(outer_self.vis.data)
+        else:
+            mv = _masked_vis.from_numpy_array(outer_self.vis.data)
+
+        mv._name = 'masked_vis'
+
+        return mv
 
 
     @property
