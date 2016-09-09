@@ -19,6 +19,7 @@ class Timestream(timestream_common.TimestreamCommon):
     Attributes
     ----------
     pol
+    local_pol
     pol_ordered_datasets
 
     Methods
@@ -131,6 +132,11 @@ class Timestream(timestream_common.TimestreamCommon):
             return self['pol']
         except KeyError:
             raise KeyError('pol does not exist, try to load it first')
+
+    @property
+    def local_pol(self):
+        """A convenience for pol.local_data."""
+        return self.pol.local_data
 
 
     def create_pol_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False, check_align=True):

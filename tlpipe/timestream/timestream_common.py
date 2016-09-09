@@ -23,11 +23,16 @@ class TimestreamCommon(container.BasicTod):
     Attributes
     ----------
     vis
+    local_vis
     vis_mask
+    local_vis_mask
     masked_vis
     time
+    local_time
     freq
+    local_freq
     bl
+    local_bl
     is_dish
     is_cylinder
     freq_ordered_datasets
@@ -289,12 +294,22 @@ class TimestreamCommon(container.BasicTod):
         return self.main_data
 
     @property
+    def local_vis(self):
+        """A convenience for vis.local_data."""
+        return self.main_data.local_data
+
+    @property
     def vis_mask(self):
         """A convenience for self['vis_mask']."""
         try:
             return self['vis_mask']
         except KeyError:
             raise KeyError('vis_mask does not exist, try to load it first')
+
+    @property
+    def local_vis_mask(self):
+        """A convenience for vis_mask.local_data."""
+        return self.vis_mask.local_data
 
     def apply_mask(self, fill_val=complex(np.nan, np.nan)):
         """Applying `vis_mask` to `vis` with the `fill_val`.
@@ -361,6 +376,11 @@ class TimestreamCommon(container.BasicTod):
             raise KeyError('jul_date does not exist, try to load it first')
 
     @property
+    def local_time(self):
+        """A convenience for time.local_data."""
+        return self.time.local_data
+
+    @property
     def freq(self):
         """Return the freq dataset for convenient use."""
         try:
@@ -369,12 +389,22 @@ class TimestreamCommon(container.BasicTod):
             raise KeyError('freq does not exist, try to load it first')
 
     @property
+    def local_freq(self):
+        """A convenience for freq.local_data."""
+        return self.freq.local_data
+
+    @property
     def bl(self):
         """Return the blorder dataset for convenient use."""
         try:
             return self['blorder']
         except KeyError:
             raise KeyError('blorder does not exist, try to load it first')
+
+    @property
+    def local_bl(self):
+        """A convenience for bl.local_data."""
+        return self.bl.local_data
 
     @property
     def is_dish(self):
