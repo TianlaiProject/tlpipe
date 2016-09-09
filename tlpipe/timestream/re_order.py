@@ -25,14 +25,14 @@ class ReOrder(tod_task.IterTimestream):
         if num_phi < num_int:
             # first complete main data vis
             vis = np.zeros((num_int,)+ts['vis'].local_shape[1:], dtype=ts['vis'].dtype)
-            vis[:num_phi] = ts['vis'].local_data[:]
+            vis[:num_phi] = ts.local_vis[:]
             vis[num_phi:] = complex(np.nan, np.nan) # mask the completed data
             vis = mpiarray.MPIArray.wrap(vis, axis=ts['vis'].distributed_axis)
             ts.create_main_data(vis, recreate=True, copy_attrs=True)
 
             # complete vis_mask
             vis_mask = np.ones((num_int,)+ts['vis_mask'].local_shape[1:], dtype=ts['vis_mask'].dtype) # initialize as masked
-            vis_mask[:num_phi] = ts['vis_mask'].local_data[:]
+            vis_mask[:num_phi] = ts.local_vis_mask[:]
             # vis_mask[num_phi:] = True # mask the completed data
             vis_mask = mpiarray.MPIArray.wrap(vis_mask, axis=ts['vis'].distributed_axis)
             axis_order = ts.main_axes_ordered_datasets[ts.main_data_name]

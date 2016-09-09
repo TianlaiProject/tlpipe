@@ -137,7 +137,7 @@ class PsFit(tod_task.IterTimestream):
         feedno = ts['feedno'][:].tolist()
         nfreq = len(ts['freq'][:])
         pol = ts['pol'][:].tolist()
-        bl = ts.bl.local_data[:] # local bls
+        bl = ts.local_bl[:] # local bls
         bls = [ tuple(b) for b in bl ]
 
         # calibrator
@@ -183,7 +183,7 @@ class PsFit(tod_task.IterTimestream):
         end_ind = transit_ind + np.int(span / int_time)
         num_shift = np.int(shift / int_time)
 
-        vis = ts['vis'].local_data.copy()
+        vis = ts.local_vis.copy()
         vis[ts['ns_on'][:]] = complex(np.nan, np.nan) # mask noise on
         nt = end_ind - start_ind
         vis_sim = np.zeros((nt,)+vis.shape[1:], dtype=vis.dtype) # to hold the simulated vis
@@ -221,9 +221,9 @@ class PsFit(tod_task.IterTimestream):
                             conjs.append((2*i-1, 2*j-1))
                         elif pi == 1: # yy
                             conjs.append((2*i, 2*j))
-                        ts['vis'].local_data[:, fi, pi, bi] = np.roll(vis[:, fi, pi, bi].conj(), -si) / gain # NOTE the use of -si
+                        ts.local_vis[:, fi, pi, bi] = np.roll(vis[:, fi, pi, bi].conj(), -si) / gain # NOTE the use of -si
                     else:
-                        ts['vis'].local_data[:, fi, pi, bi] = np.roll(vis[:, fi, pi, bi], -si) / gain # NOTE the use of -si
+                        ts.local_vis[:, fi, pi, bi] = np.roll(vis[:, fi, pi, bi], -si) / gain # NOTE the use of -si
 
         # set mask status of 'vis'
         ts['vis'].attrs['masked'] = True

@@ -28,12 +28,12 @@ class Flag(tod_task.IterRawTimestream):
         rt.redistribute('baseline')
 
         # time integration
-        tm_vis = np.ma.mean(np.ma.masked_invalid(rt['vis'].local_data[:]), axis=0)
+        tm_vis = np.ma.mean(np.ma.masked_invalid(rt.local_vis[:]), axis=0)
         freq_mask = np.zeros(tm_vis.shape, dtype=bool)
         # iterate over local baselines
         freq = rt.freq[:]
         nfreq = len(freq)
-        bl = rt.bl.local_data[:]
+        bl = rt.local_bl[:]
         window_size = min(nfreq/2, window_size)
         # ensure window_size is an odd number
         if window_size % 2 == 0:

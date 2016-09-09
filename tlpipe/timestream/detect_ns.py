@@ -31,7 +31,7 @@ class Detect(tod_task.IterRawTimestream):
         else:
             bl_ind = np.where(rt.bl[:, 0]==rt.bl[:, 1])[0][0]
 
-        tt_mean = mpiutil.gather_array(np.mean(rt.main_data.local_data[:, :, bl_ind].real, axis=-1), root=None)
+        tt_mean = mpiutil.gather_array(np.mean(rt.local_vis[:, :, bl_ind].real, axis=-1), root=None)
         df =  np.diff(tt_mean, axis=-1)
         pdf = np.where(df>0, df, 0)
         pinds = np.where(pdf>pdf.mean() + sigma*pdf.std())[0]
@@ -81,7 +81,5 @@ class Detect(tod_task.IterRawTimestream):
         rt.add_history(self.history)
 
         # rt.info()
-        # print rt.main_time_ordered_datasert
-        # print rt.time_ordered_datasert
 
         return rt

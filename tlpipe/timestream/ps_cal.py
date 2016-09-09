@@ -58,7 +58,7 @@ class PsCal(tod_task.IterTimestream):
 
         ts.redistribute('frequency')
 
-        lfreq = ts.freq.local_data[:] # local freq
+        lfreq = ts.local_freq[:] # local freq
 
         feedno = ts['feedno'][:].tolist()
         pol = ts['pol'][:].tolist()
@@ -144,12 +144,12 @@ class PsCal(tod_task.IterTimestream):
                             bmij = aa.bm_response(i, j).reshape(-1)
                             try:
                                 bi = bls.index((ai, aj))
-                                # Vmat[i, j] = ts.main_data.local_data[ti, fi, pi, bi] / (Sc[fi] * bmij[fi] * np.exp(-2.0J * np.pi * np.dot(s_top, uij[:, fi]))) # xx, yy
-                                Vmat[i, j] = ts.main_data.local_data[ti, fi, pi, bi] / (Sc[fi] * bmij[fi] * np.exp(2.0J * np.pi * np.dot(s_top, uij[:, fi]))) # xx, yy
+                                # Vmat[i, j] = ts.local_vis[ti, fi, pi, bi] / (Sc[fi] * bmij[fi] * np.exp(-2.0J * np.pi * np.dot(s_top, uij[:, fi]))) # xx, yy
+                                Vmat[i, j] = ts.local_vis[ti, fi, pi, bi] / (Sc[fi] * bmij[fi] * np.exp(2.0J * np.pi * np.dot(s_top, uij[:, fi]))) # xx, yy
                             except ValueError:
                                 bi = bls.index((aj, ai))
-                                # Vmat[i, j] = np.conj(ts.main_data.local_data[ti, fi, pi, bi] / (Sc[fi] * bmij[fi] * np.exp(-2.0J * np.pi * np.dot(s_top, uij[:, fi])))) # xx, yy
-                                Vmat[i, j] = np.conj(ts.main_data.local_data[ti, fi, pi, bi] / (Sc[fi] * bmij[fi] * np.exp(2.0J * np.pi * np.dot(s_top, uij[:, fi])))) # xx, yy
+                                # Vmat[i, j] = np.conj(ts.local_vis[ti, fi, pi, bi] / (Sc[fi] * bmij[fi] * np.exp(-2.0J * np.pi * np.dot(s_top, uij[:, fi])))) # xx, yy
+                                Vmat[i, j] = np.conj(ts.local_vis[ti, fi, pi, bi] / (Sc[fi] * bmij[fi] * np.exp(2.0J * np.pi * np.dot(s_top, uij[:, fi])))) # xx, yy
 
                     # Eigen decomposition
 
