@@ -229,14 +229,15 @@ class TimestreamCommon(container.BasicTod):
             self['freq'].attrs["unit"] = 'MHz'
 
     def load_main_data(self):
-        """Load main data from all files and create its mask array."""
+        """Load main data from all files and create its mask array if it does not exist."""
         super(TimestreamCommon, self).load_main_data()
 
-        # create the mask array
-        vis_mask = np.where(np.isfinite(self.main_data.local_data), False, True)
-        vis_mask = mpiarray.MPIArray.wrap(vis_mask, axis=self.main_data_dist_axis)
-        axis_order = self.main_axes_ordered_datasets[self.main_data_name]
-        vis_mask = self.create_main_axis_ordered_dataset(axis_order, 'vis_mask', vis_mask, axis_order)
+        if 'vis_mask' not in self.iterkeys():
+            # create the mask array
+            vis_mask = np.where(np.isfinite(self.main_data.local_data), False, True)
+            vis_mask = mpiarray.MPIArray.wrap(vis_mask, axis=self.main_data_dist_axis)
+            axis_order = self.main_axes_ordered_datasets[self.main_data_name]
+            vis_mask = self.create_main_axis_ordered_dataset(axis_order, 'vis_mask', vis_mask, axis_order)
 
     def load_tod_excl_main_data(self):
         """Load time ordered attributes and datasets (exclude the main data) from all files."""
