@@ -96,14 +96,15 @@ class MapMaking(tod_task.SingleTimestream):
         # plt.savefig('ra_dec1.png')
 
         if not simulate:
-            # mask noise on data if not masked already
-            if not ts['vis'].attrs.get('masked', False):
-                on = np.where(ts['ns_on'][:])[0]
-                ts['vis'].local_data[on] = complex(np.nan, np.nan)
+            # # mask noise on data if not masked already
+            # if not ts['vis'].attrs.get('masked', False):
+            #     on = np.where(ts['ns_on'][:])[0]
+            #     ts['vis'].local_data[on] = complex(np.nan, np.nan)
+
             # mask daytime data
             if mask_daytime:
                 day_inds = np.where(np.logical_and(ts['local_hour'][:]>=mask_time_range[0], ts['local_hour'][:]<=mask_time_range[1]))[0]
-                ts['vis'].local_data[day_inds] = complex(np.nan, np.nan)
+                ts.local_vis_mask[day_inds] = True # do not change vis directly
 
             # average data
             nt = ts['sec1970'].shape[0]
@@ -112,7 +113,8 @@ class MapMaking(tod_task.SingleTimestream):
 
             # roll data to have phi=0 near the first
             roll_len = np.int(np.around(0.5*nt_m))
-            ts['vis'].local_data[:] = np.roll(ts['vis'].local_data[:], roll_len, axis=0)
+            ts.local_vis[:] = np.roll(ts.local_vis[:], roll_len, axis=0)
+            ts.local_vis_mask[:] = np.roll(ts.local_vis_mask[:], roll_len, axis=0)
             ts['ra_dec'][:] = np.roll(ts['ra_dec'][:], roll_len, axis=0)
 
             # inds = np.arange(nt)
@@ -121,11 +123,11 @@ class MapMaking(tod_task.SingleTimestream):
 
             # phi = np.zeros((phi_size,), dtype=ts['ra_dec'].dtype)
             phi = np.linspace(0, 2*np.pi, phi_size, endpoint=False)
-            vis = np.zeros((phi_size,)+ts['vis'].local_data.shape[1:], dtype=ts['vis'].dtype)
-            # average onver time
+            vis = np.zeros((phi_size,)+ts.local_vis.shape[1:], dtype=ts.vis.dtype)
+            # average over time
             for idx in range(phi_size):
                 inds, weight = unique(repeat_inds[start[idx]:end[idx]], return_counts=True)
-                vis[idx] = average(np.ma.masked_invalid(ts['vis'].local_data[inds]), axis=0, weights=weight) # time mean
+                vis[idx] = average(np.ma.array(ts.local_vis[inds], mask=ts.local_vis_mask[inds]), axis=0, weights=weight) # time mean
                 # phi[idx] = np.average(ts['ra_dec'][:, 0][inds], axis=0, weights=weight)
 
             if pol == 'xx':
@@ -159,6 +161,9 @@ class MapMaking(tod_task.SingleTimestream):
             # average over redundancy
             for ind in range(len(redundancy)):
                 vis_stream[:, :, ind] = np.sum(vis_tmp[:, :, red_bin[ind]:red_bin[ind+1]], axis=2) / redundancy[ind]
+
+            del vis
+            del vis_tmp
 
             vis_stream = mpiarray.MPIArray.wrap(vis_stream, axis=1)
             vis_h5 = memh5.MemGroup(distributed=True)

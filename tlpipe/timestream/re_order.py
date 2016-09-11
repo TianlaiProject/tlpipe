@@ -26,7 +26,7 @@ class ReOrder(tod_task.IterTimestream):
             # first complete main data vis
             vis = np.zeros((num_int,)+ts['vis'].local_shape[1:], dtype=ts['vis'].dtype)
             vis[:num_phi] = ts.local_vis[:]
-            vis[num_phi:] = complex(np.nan, np.nan) # mask the completed data
+            # vis[num_phi:] = complex(np.nan, np.nan) # mask the completed data
             vis = mpiarray.MPIArray.wrap(vis, axis=ts['vis'].distributed_axis)
             ts.create_main_data(vis, recreate=True, copy_attrs=True)
 

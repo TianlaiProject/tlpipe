@@ -78,6 +78,10 @@ class Detect(tod_task.IterRawTimestream):
         rt['ns_on'].attrs['on_time'] = on_time
         rt['ns_on'].attrs['off_time'] = off_time
 
+        # set vis_mask corresponding to ns_on
+        on_inds = np.where(rt['ns_on'].local_data[:])[0]
+        rt.local_vis_mask[on_inds] = True
+
         rt.add_history(self.history)
 
         # rt.info()
