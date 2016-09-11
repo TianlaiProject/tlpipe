@@ -96,11 +96,6 @@ class MapMaking(tod_task.SingleTimestream):
         # plt.savefig('ra_dec1.png')
 
         if not simulate:
-            # # mask noise on data if not masked already
-            # if not ts['vis'].attrs.get('masked', False):
-            #     on = np.where(ts['ns_on'][:])[0]
-            #     ts['vis'].local_data[on] = complex(np.nan, np.nan)
-
             # mask daytime data
             if mask_daytime:
                 day_inds = np.where(np.logical_and(ts['local_hour'][:]>=mask_time_range[0], ts['local_hour'][:]<=mask_time_range[1]))[0]
@@ -117,7 +112,6 @@ class MapMaking(tod_task.SingleTimestream):
             ts.local_vis_mask[:] = np.roll(ts.local_vis_mask[:], roll_len, axis=0)
             ts['ra_dec'][:] = np.roll(ts['ra_dec'][:], roll_len, axis=0)
 
-            # inds = np.arange(nt)
             repeat_inds = np.repeat(np.arange(nt), phi_size)
             num, start, end = mpiutil.split_m(nt*phi_size, phi_size)
 

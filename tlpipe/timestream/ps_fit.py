@@ -9,10 +9,8 @@ import tod_task
 from caput import mpiutil
 
 def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit, fig_prefix):
-    # vis_obs_orig = np.ma.masked_invalid(vis_obs)
     vis_obs_orig = np.ma.array(vis_obs, mask=vis_mask)
     num_nomask = vis_obs_orig.count()
-    # vis_sim = np.ma.masked_invalid(vis_sim)
     fi, pi, (i, j) = idx
 
     shifts = range(-num_shift/2, num_shift/2+1)
@@ -31,7 +29,6 @@ def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit
         chi2s_orig.append(chi2/num_nomask)
 
     # conj data fit
-    # vis_obs_conj = np.ma.masked_invalid(vis_obs.conj())
     vis_obs_conj = np.ma.array(vis_obs.conj(), mask=vis_mask)
     gains_conj = []
     chi2s_conj = []
@@ -68,7 +65,6 @@ def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit
     gain = gains[ind]
     # chi2 = chi2s[ind]
     si = shifts[ind]
-    # obs_data = vis_obs[start_ind:end_ind].copy()
     obs_data = np.ma.array(vis_obs[start_ind:end_ind], mask=vis_mask[start_ind:end_ind])
     factor = np.max(np.ma.abs(obs_data)) / np.max(np.abs(vis_sim))
     obs_data = obs_data / factor # make amp close to each other
@@ -189,7 +185,6 @@ class PsFit(tod_task.IterTimestream):
         # vis = ts.local_vis.copy()
         vis = ts.local_vis
         vis_mask = ts.local_vis_mask
-        # vis[ts['ns_on'][:]] = complex(np.nan, np.nan) # mask noise on
         # vis[ts.local_vis_mask] = complex(np.nan, np.nan) # set masked vis to nan
         nt = end_ind - start_ind
         vis_sim = np.zeros((nt,)+vis.shape[1:], dtype=vis.dtype) # to hold the simulated vis
@@ -210,7 +205,6 @@ class PsFit(tod_task.IterTimestream):
                     aj = feedno.index(j)
                     uij = aa.gen_uvw(ai, aj, src='z')[:, 0, :] # (rj - ri)/lambda
                     bmij = aa.bm_response(ai, aj).reshape(-1)
-                    # print uij.shape, bmij.shape
                     vis_sim[ind, :, pi, bi] = Sc * bmij * np.exp(-2.0J * np.pi * np.dot(s_top, uij))
 
         conjs = []
@@ -222,7 +216,6 @@ class PsFit(tod_task.IterTimestream):
                     gain, si, conj = fit(vis[:, fi, pi, bi], vis_mask[:, fi, pi, bi], vis_sim[:, fi, pi, bi], start_ind, end_ind, num_shift, (fi, pi, (i, j)), plot_fit, fig_prefix)
                     # cal for vis
                     if conj:
-                        # conjs.append((i, j, pol[pi]))
                         if pi == 0: # xx
                             conjs.append((2*i-1, 2*j-1))
                         elif pi == 1: # yy
@@ -232,9 +225,6 @@ class PsFit(tod_task.IterTimestream):
                     else:
                         ts.local_vis[:, fi, pi, bi] = np.roll(vis[:, fi, pi, bi], -si) / gain # NOTE the use of -si
                         ts.local_vis_mask[:, fi, pi, bi] = np.roll(vis_mask[:, fi, pi, bi], -si) / gain # NOTE the use of -si
-
-        # # set mask status of 'vis'
-        # ts['vis'].attrs['masked'] = True
 
         # gather conjs
         comm = mpiutil.world
