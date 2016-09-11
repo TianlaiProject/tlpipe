@@ -1024,7 +1024,9 @@ class BasicTod(memh5.MemDiskGroup):
             for name, val in self.main_axes_ordered_datasets.items():
                 if name in self.iterkeys() and name != self.main_data_name:
                     if axis in val:
-                        self.dataset_common_to_distributed(name, distributed_axis=val.index(axis))
+                        with warnings.catch_warnings():
+                            warnings.simplefilter('ignore')
+                            self.dataset_common_to_distributed(name, distributed_axis=val.index(axis))
                     else:
                         if self[name].distributed:
                             self.dataset_distributed_to_common(name)
