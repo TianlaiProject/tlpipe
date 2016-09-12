@@ -7,7 +7,7 @@ import tod_task
 from tlpipe.utils.path_util import output_path
 
 
-def cal(vis, li, gi, fbl, rt, **kwargs):
+def cal(vis, vis_mask, li, gi, fbl, rt, **kwargs):
 
     if np.prod(vis.shape) == 0 :
         return vis
@@ -62,7 +62,7 @@ def cal(vis, li, gi, fbl, rt, **kwargs):
 
     vis = vis * np.exp(-1.0J * all_phase)
 
-    return vis
+    return vis, vis_mask
 
 
 class NsCal(tod_task.IterRawTimestream):

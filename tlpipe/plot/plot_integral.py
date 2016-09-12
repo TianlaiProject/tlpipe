@@ -6,7 +6,7 @@ from tlpipe.utils.path_util import output_path
 import matplotlib.pyplot as plt
 
 
-def plot(vis, li, gi, bl, obj, **kwargs):
+def plot(vis, vis_mask, li, gi, bl, obj, **kwargs):
 
     if isinstance(bl, tuple): # for Timestream
         pol = bl[0]
@@ -17,6 +17,7 @@ def plot(vis, li, gi, bl, obj, **kwargs):
     integral = kwargs.get('integral', 'time')
     bl_incl = kwargs.get('bl_incl', 'all')
     bl_excl = kwargs.get('bl_excl', [])
+    flag_mask = kwargs.get('flag_mask', False)
     flag_ns = kwargs.get('flag_ns', True)
     fig_prefix = kwargs.get('fig_name', 'int')
 
@@ -27,7 +28,9 @@ def plot(vis, li, gi, bl, obj, **kwargs):
         if (not bl1 in bl_incl) or (bl1 in bl_excl):
             return vis
 
-    if flag_ns:
+    if flag_mask:
+        vis1 = np.ma.array(vis, mask=vis_mask)
+    elif flag_ns:
         vis1 = vis.copy()
         on = np.where(obj['ns_on'][:])[0]
         vis1[on] = complex(np.nan, np.nan)
@@ -60,7 +63,7 @@ def plot(vis, li, gi, bl, obj, **kwargs):
     plt.savefig(fig_name)
     plt.clf()
 
-    return vis
+    return vis, vis_mask
 
 
 class Plot(tod_task.IterRawTimestream):
@@ -70,6 +73,7 @@ class Plot(tod_task.IterRawTimestream):
                     'integral': 'time', # or 'freq'
                     'bl_incl': 'all', # or a list of include (bl1, bl2)
                     'bl_excl': [],
+                    'flag_mask': True,
                     'flag_ns': True,
                     'fig_name': 'int',
                   }
@@ -80,10 +84,11 @@ class Plot(tod_task.IterRawTimestream):
         integral = self.params['integral']
         bl_incl = self.params['bl_incl']
         bl_excl = self.params['bl_excl']
+        flag_mask = self.params['flag_mask']
         flag_ns = self.params['flag_ns']
         fig_name = self.params['fig_name']
 
-        rt.bl_data_operate(plot, full_data=True, keep_dist_axis=False, integral=integral, bl_incl=bl_incl, bl_excl=bl_excl, fig_name=fig_name, flag_ns=flag_ns)
+        rt.bl_data_operate(plot, full_data=True, keep_dist_axis=False, integral=integral, bl_incl=bl_incl, bl_excl=bl_excl, fig_name=fig_name, flag_mask=flag_mask, flag_ns=flag_ns)
         rt.add_history(self.history)
 
         return rt

@@ -10,7 +10,7 @@ from caput import mpiutil
 from tlpipe.utils.date_util import get_ephdate
 
 
-def phs(vis, li, gi, tbl, ts, **kwargs):
+def phs(vis, vis_mask, li, gi, tbl, ts, **kwargs):
     t = tbl[0]
     ai, aj = tbl[1]
     aa = kwargs.get('aa')
@@ -29,7 +29,7 @@ def phs(vis, li, gi, tbl, ts, **kwargs):
     # aa.sim_cache(cat.get_crds('eq', ncrd=3)) # for compute bm_response and sim
     uij = aa.gen_uvw(i, j, src='z').squeeze() # (rj - ri)/lambda
 
-    return vis / np.exp(-2.0J * np.pi * np.dot(s_top, uij))[:, np.newaxis]
+    return vis / np.exp(-2.0J * np.pi * np.dot(s_top, uij))[:, np.newaxis], vis_mask
 
 
 class Phs2src(tod_task.IterTimestream):

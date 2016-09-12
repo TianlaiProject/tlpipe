@@ -14,7 +14,7 @@ from caput import memh5
 from tlpipe.utils.path_util import output_path
 
 
-def cal(vis, li, gi, pbl, ts, **kwargs):
+def cal(vis, vis_mask, li, gi, pbl, ts, **kwargs):
     tgain = kwargs.get('tgain')
     pol = pbl[0]
     ai, aj = pbl[1]
@@ -32,7 +32,7 @@ def cal(vis, li, gi, pbl, ts, **kwargs):
 
     bl_gain = tgain[i, pi, :] * tgain[j, pi, :].conj()
 
-    return vis / bl_gain
+    return vis / bl_gain, vis_mask
 
 
 class PsCal(tod_task.IterTimestream):
