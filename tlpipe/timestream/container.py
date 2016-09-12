@@ -1220,9 +1220,9 @@ class BasicTod(memh5.MemDiskGroup):
     def data_operate(self, func, op_axis=None, axis_vals=0, full_data=False, keep_dist_axis=False, **kwargs):
         """A basic data operation interface.
 
-        You can use this method to do some constrained options to the main data
+        You can use this method to do some constrained operations to the main data
         hold in this container, i.e., the main data will not change its shape and
-        dtype before and after the option.
+        dtype before and after the operation.
 
         Parameters
         ----------
@@ -1311,7 +1311,7 @@ class BasicTod(memh5.MemDiskGroup):
 
         Note since the main data is distributed on different processes, `func`
         should not have operations that depend on elements not held in the local
-        array of each process
+        array of each process.
 
         Parameters
         ----------

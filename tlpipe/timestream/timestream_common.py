@@ -1,3 +1,4 @@
+import itertools
 import numpy as np
 from datetime import datetime
 import container
@@ -55,6 +56,8 @@ class TimestreamCommon(container.BasicTod):
     create_freq_and_bl_ordered_dataset
     create_feed_ordered_dataset
     check_status
+    data_operate
+    all_data_operate
     time_data_operate
     freq_data_operate
     bl_data_operate
@@ -664,18 +667,130 @@ class TimestreamCommon(container.BasicTod):
             raise RuntimeError('Not all feed_ordered_datasets have an aligned feed axis')
 
 
+    def data_operate(self, func, op_axis=None, axis_vals=0, full_data=False, keep_dist_axis=False, **kwargs):
+        """An overload data operation interface.
+
+        This overloads the method in its super class :class:`container.BasicTod`
+        to provide basic operation interface to both `vis` (the main data) and
+        `vis_mask`.
+
+        You can use this method to do some constrained operations to `vis` and
+        `vis_mask` hold in this container, i.e., the operations will not change
+        the shape and dtype of `vis` and `vis_mask` before and after the operation.
+
+        Parameters
+        ----------
+        func : function object
+            The opertation function object. It is of type func(vis, vis_mask,
+            self, **kwargs) if `op_axis=None`, func(vis, vis_mask, local_index,
+            global_index, axis_val, self, **kwargs) else.
+        op_axis : None, string or integer, tuple of string or interger, optional
+            Axis along which `func` will opterate. If None, `func` will operate on
+            the whole main dataset (but note: since the main data is distributed
+            on different processes, `func` should not have operations that depend
+            on elements not held in the local array of each process), if string or
+            interger `func` will opterate along the specified axis, that is, it
+            will loop the specified axis and call `func` on data section
+            corresponding to the axis index, if tuple of string or interger,
+            `func` will operate along all these axes.
+        axis_vals : scalar or array, tuple of scalar or array, optional
+            Axis value (or tuple of axis values) corresponding to the local
+            section along the `op_axis` that will be passed to `func` if
+            `op_axis` is not None. Default 0.
+        full_data : bool, optional
+            Whether the operations of `func` will need the full data section
+            corresponding to the axis index, if True, the main data will first
+            redistributed along the `op_axis`. Default False.
+        keep_dist_axis : bool, optional
+            Whether to redistribute main data to the original dist axis if the
+            dist axis has changed during the operation. Default False.
+        **kwargs : any other arguments
+            Any other arguments that will passed to `func`.
+
+        """
+
+        if op_axis is None:
+            self.local_vis[:], self.local_vis_mask[:] = func(self.local_vis[:], self.local_vis_mask[:], self, **kwargs)
+        elif isinstance(op_axis, int) or isinstance(op_axis, basestring):
+            axis = container.check_axis(op_axis, self.main_data_axes)
+            data_sel = [ slice(0, None) ] * len(self.main_data_axes)
+            if full_data:
+                original_dist_axis = self.main_data_dist_axis
+                self.redistribute(axis)
+            for lind, gind in self.main_data.data.enumerate(axis):
+                data_sel[axis] = lind
+                if isinstance(axis_vals, memh5.MemDataset):
+                    # use the new dataset which may be different from axis_vals if it is redistributed
+                    axis_val = self[axis_vals.name].local_data[lind]
+                elif hasattr(axis_vals, '__iter__'):
+                    axis_val = axis_vals[lind]
+                else:
+                    axis_val = axis_vals
+                self.local_vis[data_sel], self.local_vis_mask[data_sel] = func(self.local_vis[data_sel], self.local_vis_mask[data_sel], lind, gind, axis_val, self, **kwargs)
+            if full_data and keep_dist_axis:
+                self.redistribute(original_dist_axis)
+        elif isinstance(op_axis, tuple):
+            axes = [ container.check_axis(axis, self.main_data_axes) for axis in op_axis ]
+            data_sel = [ slice(0, None) ] * len(self.main_data_axes)
+            if full_data:
+                original_dist_axis = self.main_data_dist_axis
+                if not original_dist_axis in axes:
+                    shape = self.main_data.shape
+                    axes_len = [ shape[axis] for axis in axes ]
+                    # choose the longest axis in axes as the new dist axis
+                    new_dist_axis = axes[np.argmax(axes_len)]
+                    self.redistribute(new_dist_axis)
+            linds = [ [ li for (li, gi) in self.main_data.data.enumerate(axis) ] for axis in axes ]
+            ginds = [ [ gi for (li, gi) in self.main_data.data.enumerate(axis) ] for axis in axes ]
+            n_axes = len(axes)
+            for lind, gind in zip(itertools.product(*linds), itertools.product(*ginds)):
+                axis_val = ()
+                for ai, axis in enumerate(axes):
+                    data_sel[axis] = lind[ai]
+                    if isinstance(axis_vals[ai], memh5.MemDataset):
+                        # use the new dataset which may be different from axis_vals if it is redistributed
+                        axis_val += (self[axis_vals[ai].name].local_data[lind[ai]],)
+                    elif hasattr(axis_vals[ai], '__iter__'):
+                        axis_val += (axis_vals[ai][lind[ai]],)
+                    else:
+                        axis_val += (axis_vals[ai],)
+                self.local_vis[data_sel], self.local_vis_mask[data_sel] = func(self.local_vis[data_sel], self.local_vis_mask[data_sel], lind, gind, axis_val, self, **kwargs)
+            if full_data and keep_dist_axis:
+                self.redistribute(original_dist_axis)
+        else:
+            raise ValueError('Invalid op_axis: %s', op_axis)
+
+    def all_data_operate(self, func, **kwargs):
+        """Operation to the whole `vis` and `vis_mask`.
+
+        Note since `vis` and `vis_mask` is usually distributed on different
+        processes, `func` should not have operations that depend on their
+        elements not held in their local array of each process.
+
+        Parameters
+        ----------
+        func : function object
+            The opertation function object. It is of type func(vis, vis_mask, self,
+            **kwargs), which will operate on vis, vis_mask and return two new
+            arrays with their original shape and dtype.
+        **kwargs : any other arguments
+            Any other arguments that will passed to `func`.
+
+        """
+        self.data_operate(func, op_axis=None, axis_vals=0, full_data=False, keep_dist_axis=False, **kwargs)
+
     def time_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
         """Data operation along the time axis.
 
         Parameters
         ----------
         func : function object
-            The opertation function object. It is of type func(array,
+            The opertation function object. It is of type func(vis, vis_mask,
             local_index, global_index, jul_date, self, **kwargs), which
             will be called in a loop along the time axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
-            corresponding to the axis index, if True, the main data will first
+            corresponding to the axis index, if True, data will first
             redistributed along the time axis. Default False.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to time axis if the dist axis has
@@ -692,16 +807,16 @@ class TimestreamCommon(container.BasicTod):
         Parameters
         ----------
         func : function object
-            The opertation function object. It is of type func(array,
-            local_index=, global_index, freq, self, **kwargs), which
+            The opertation function object. It is of type func(vis, vis_mask,
+            local_index, global_index, freq, self, **kwargs), which
             will be called in a loop along the frequency axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
-            corresponding to the axis index, if True, the main data will first
+            corresponding to the axis index, if True, data will first
             redistributed along frequency axis. Default False.
         keep_dist_axis : bool, optional
-            Whether to redistribute main data to frequency axis if the dist axis has
-            changed during the operation. Default False.
+            Whether to redistribute main data to frequency axis if the dist axis
+            has changed during the operation. Default False.
         **kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
@@ -714,12 +829,12 @@ class TimestreamCommon(container.BasicTod):
         Parameters
         ----------
         func : function object
-            The opertation function object. It is of type func(array,
+            The opertation function object. It is of type func(vis, vis_mask,
             local_index, global_index, chanpair, self, **kwargs), which
             will be called in a loop along the baseline axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
-            corresponding to the axis index, if True, the main data will first
+            corresponding to the axis index, if True, data will first
             redistributed along baseline axis. Default False.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to baseline axis if the dist axis
@@ -736,12 +851,12 @@ class TimestreamCommon(container.BasicTod):
         Parameters
         ----------
         func : function object
-            The opertation function object. It is of type func(array,
+            The opertation function object. It is of type func(vis, vis_mask,
             local_index, global_index, tbl, self, **kwargs), which
             will be called in a loop along the time and baseline axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
-            corresponding to the axis index, if True, the main data will first
+            corresponding to the axis index, if True, data will first
             redistributed along time or baseline axis which is longer.
             Default False.
         keep_dist_axis : bool, optional
@@ -759,12 +874,12 @@ class TimestreamCommon(container.BasicTod):
         Parameters
         ----------
         func : function object
-            The opertation function object. It is of type func(array,
+            The opertation function object. It is of type func(vis, vis_mask,
             local_index, global_index, fbl, self, **kwargs), which
             will be called in a loop along the frequency and baseline axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
-            corresponding to the axis index, if True, the main data will first
+            corresponding to the axis index, if True, data will first
             redistributed along frequency or baseline axis which is longer.
             Default False.
         keep_dist_axis : bool, optional

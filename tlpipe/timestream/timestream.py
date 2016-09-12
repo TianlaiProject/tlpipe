@@ -264,12 +264,12 @@ class Timestream(timestream_common.TimestreamCommon):
         Parameters
         ----------
         func : function object
-            The opertation function object. It is of type func(array,
+            The opertation function object. It is of type func(vis, vis_mask,
             local_index, global_index, pol, self, **kwargs), which
             will be called in a loop along the polarization axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
-            corresponding to the axis index, if True, the main data will first
+            corresponding to the axis index, if True, data will first
             redistributed along polarization axis. Default False.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to polarization axis if the dist
@@ -287,12 +287,12 @@ class Timestream(timestream_common.TimestreamCommon):
         Parameters
         ----------
         func : function object
-            The opertation function object. It is of type func(array,
+            The opertation function object. It is of type func(vis, vis_mask,
             local_index, global_index, pbl, self, **kwargs), which
             will be called in a loop along the polarization and baseline axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
-            corresponding to the axis index, if True, the main data will first
+            corresponding to the axis index, if True, data will first
             redistributed along polarization or baseline axis which is longer.
             Default False.
         keep_dist_axis : bool, optional
