@@ -1,0 +1,131 @@
+# -*- mode: python; -*-
+
+# input file for pipeline manager
+# execute this pipeline by either command of the following two:
+# tlpipe dir/to/cyl.pipe
+# mpiexec -n N tlpipe dir/to/cyl.pipe
+
+
+pipe_tasks = []
+pipe_outdir = './output/'
+pipe_logging = 'notset'
+# pipe_logging = 'info'
+
+
+import glob
+data_dir = '/disk/disk6/20160829182035_hdf5'
+# files = sorted(glob.glob(data_dir+'/*.hdf5'))[1:]
+# files = sorted(glob.glob(data_dir+'/*.hdf5'))[22:80]
+files = sorted(glob.glob(data_dir+'/*.hdf5'))[15:80]
+# files = sorted(glob.glob(data_dir+'/*.hdf5'))[15:85]
+# files = sorted(glob.glob(data_dir+'/*.hdf5'))[43:57] # cas A
+# files = sorted(glob.glob(data_dir+'/*.hdf5'))[49:51] # cas A
+
+
+from tlpipe.timestream import dispatch
+pipe_tasks.append(dispatch.Dispatch)
+### parameters for Dispatch
+dp_input_files = files
+dp_freq_select = (495, 505)
+dp_feed_select = [11, 12, 13, 14, 42, 43, 44, 45, 74, 75, 76, 77]
+dp_exclude_bad = False
+dp_iter_num = 1
+dp_out = 'dp'
+
+from tlpipe.timestream import run_info
+pipe_tasks.append(run_info.RunInfo)
+### parameters for RunInfo
+ri_in = dp_out
+ri_out = 'ri'
+
+from tlpipe.timestream import detect_ns
+pipe_tasks.append(detect_ns.Detect)
+### parameters for Detect
+dt_in = ri_out
+# dt_feed = 1
+dt_out = 'dt'
+
+from tlpipe.plot import plot_integral
+pipe_tasks.append(plot_integral.Plot)
+### parameters for Plot
+pit_in = dt_out
+pit_integral = 'freq'
+# pit_bl_incl = [(i, i) for i in range(1, 193)]
+pit_flag_mask = True
+pit_flag_ns = True
+# pit_flag_ns = False
+pit_fig_name = 'int/int'
+pit_out = 'pit'
+
+from tlpipe.timestream import line_rfi
+# pipe_tasks.append(line_rfi.Flag)
+### parameters for Flag
+lf_in = dt_out
+# lf_window_size = 21
+# lf_sigma = 3.0
+lf_out = 'lf'
+
+from tlpipe.timestream import ns_cal
+pipe_tasks.append(ns_cal.NsCal)
+### parameters for NsCal
+nc_in = dt_out
+nc_plot_phs = True
+nc_fig_name = 'phs/phs_change'
+nc_out = 'nc'
+
+from tlpipe.plot import plot_waterfall
+pipe_tasks.append(plot_waterfall.PlotRawTimestream)
+### parameters for PlotRawTimestream
+# prt_in = nc_out
+prt_in = dt_out
+# prt_bl_incl = [(i, i) for i in range(1, 33)]
+prt_flag_ns = True
+prt_fig_name = 'rvis/vis'
+prt_out = 'prt'
+
+
+from tlpipe.timestream import rt2ts
+pipe_tasks.append(rt2ts.Rt2ts)
+### parameters for Rt2ts
+r2t_in = nc_out
+# r2t_in = dt_out
+r2t_out = 'r2t'
+
+from tlpipe.timestream import ps_fit
+pipe_tasks.append(ps_fit.PsFit)
+### parameters for PsFit
+pf_in = r2t_out
+pf_calibrator = 'cas'
+pf_plot_fit = True
+pf_fig_name = 'fit/fit'
+pf_out = 'pf'
+
+from tlpipe.plot import plot_waterfall
+pipe_tasks.append(plot_waterfall.PlotTimestream)
+### parameters for PlotTimestream
+pts_in = pf_out
+pts_flag_mask = True
+pts_flag_ns = True
+pts_fig_name = 'vis/vis'
+pts_out = 'pts'
+
+from tlpipe.timestream import re_order
+pipe_tasks.append(re_order.ReOrder)
+### parameters for ReOrder
+ro_in = pf_out
+ro_output_files = [ 're_order/file_%d.hdf5' %i for i in range(1, 7) ]
+ro_out = 'ro'
+
+from tlpipe.timestream import map_making
+pipe_tasks.append(map_making.MapMaking)
+### parameters for MapMaking
+mm_in = ro_out
+mm_input_files = ro_output_files
+mm_iter_num = 1
+mm_mask_daytime = False
+# mm_mask_time_range = [6.5, 24.0]
+mm_auto_correlations = False
+mm_pol = 'I'
+mm_noise_weight = False
+# mm_noise_weight = True
+mm_out = 'mm'
