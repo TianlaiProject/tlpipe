@@ -165,24 +165,24 @@ how to handle the inputs and outputs of tasks) and to provide parameters to each
 individual task.  Here is an example of a pipeline configuration:
 
 >>> spam_pipe = '''
-... pipe_modules = []
+... pipe_tasks = []
 ...
-... pipe_modules.append(PrintEggs)
+... pipe_tasks.append(PrintEggs)
 ... ### parameters for PrintEggs
 ... pe_eggs = ['green', 'duck', 'ostrich']
 ...
-... pipe_modules.append(GetEggs)
+... pipe_tasks.append(GetEggs)
 ... ### parameters for GetEggs
 ... ge_eggs = pe_eggs
 ... ge_out = 'egg'
 ...
-... pipe_modules.append(CookEggs)
+... pipe_tasks.append(CookEggs)
 ... ### parameters for CookEggs
 ... ce_style = 'fried'
 ... ce_in = ge_out
 ... '''
 
-Here the 'pipe_modules' is a list to hold a list of tasks to be executed.  Other
+Here the 'pipe_tasks' is a list to hold a list of tasks to be executed.  Other
 parameters with the specified prefix are the input parameters for the corresponding
 tasks, they include three keys that all taks will have:
 
@@ -207,7 +207,7 @@ When the above pipeline is executed it produces the following output.
 Reading parameters from dictionary.
 Parameters set.
 parameter: logging defaulted to value: info
-parameter: output_dir defaulted to value: output/
+parameter: outdir defaulted to value: output/
 Reading parameters from dictionary.
 Parameters set.
 parameter: out defaulted to value: None
@@ -274,23 +274,23 @@ illustrates these rules in a pipeline with a slightly more non-trivial flow.
 ...         print "Finished DoNothing."
 
 >>> new_spam_pipe = '''
-... pipe_modules = []
+... pipe_tasks = []
 ...
-... pipe_modules.append(GetEggs)
+... pipe_tasks.append(GetEggs)
 ... ### parameters for GetEggs
 ... ge_eggs = pe_eggs
 ... ge_out = 'egg'
 ...
-... pipe_modules.append(CookEggs)
+... pipe_tasks.append(CookEggs)
 ... ### parameters for CookEggs
 ... ce_style = 'fried'
 ... ce_in = ge_out
 ...
-... pipe_modules.append(DoNothing)
+... pipe_tasks.append(DoNothing)
 ... ### parameters for DoNothing
 ... dn_in = 'non_existent_data_product'
 ...
-... pipe_modules.append(PrintEggs)
+... pipe_tasks.append(PrintEggs)
 ... ### parameters for PrintEggs
 ... pe_eggs = ['green', 'duck', 'ostrich']
 ... '''
@@ -300,7 +300,7 @@ illustrates these rules in a pipeline with a slightly more non-trivial flow.
 Reading parameters from dictionary.
 Parameters set.
 parameter: logging defaulted to value: info
-parameter: output_dir defaulted to value: output/
+parameter: outdir defaulted to value: output/
 Reading parameters from dictionary.
 Warning: Assigned an input parameter to the value of the wrong type. Parameter name: out
 Parameters set.
@@ -450,8 +450,8 @@ class Manager(object):
     # pipeline file and values the defaults.
     params_init = {
                     'logging': 'info', # logging level
-                    'modules': [], # a list of tasks to be executed
-                    'output_dir': 'output/', # output directory of pipeline data, default is current-dir/output/
+                    'tasks': [], # a list of tasks to be executed
+                    'outdir': 'output/', # output directory of pipeline data, default is current-dir/output/
                   }
 
     prefix = 'pipe_'
@@ -461,10 +461,10 @@ class Manager(object):
 
         # Read in the parameters.
         self.params, self.task_params = parse_ini.parse(parameter_file_or_dict, self.params_init, prefix=self.prefix, return_undeclared=True, feedback=feedback)
-        self.tasks = self.params['modules']
+        self.tasks = self.params['tasks']
 
         # set environment var
-        os.environ['TL_OUTPUT'] = self.params['output_dir'] + '/'
+        os.environ['TL_OUTPUT'] = self.params['outdir'] + '/'
 
 
     def run(self):
