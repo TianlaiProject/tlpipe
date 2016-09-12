@@ -11,6 +11,9 @@ from caput import mpiutil
 def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit, fig_prefix):
     vis_obs_orig = np.ma.array(vis_obs, mask=vis_mask)
     num_nomask = vis_obs_orig.count()
+    if num_nomask == 0: # no valid vis data
+        return 1.0, 0, False
+
     fi, pi, (i, j) = idx
 
     shifts = range(-num_shift/2, num_shift/2+1)
@@ -19,14 +22,18 @@ def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit
     chi2s_orig = []
     for si in shifts:
         vis = vis_obs_orig[start_ind+si:end_ind+si]
-        xx = np.ma.dot(vis_sim.conj(), vis_sim)
-        xy = np.ma.dot(vis_sim.conj(), vis)
-        gain = xy / xx
-        vis_cal = gain * vis_sim
-        err = vis - vis_cal
-        chi2 = np.ma.dot(err.conj(), err).real
-        gains_orig.append(gain)
-        chi2s_orig.append(chi2/num_nomask)
+        num_nomask = vis.count()
+        if num_nomask == 0: # no valid vis data
+            continue
+        else:
+            xx = np.ma.dot(vis_sim.conj(), vis_sim)
+            xy = np.ma.dot(vis_sim.conj(), vis)
+            gain = xy / xx
+            vis_cal = gain * vis_sim
+            err = vis - vis_cal
+            chi2 = np.ma.dot(err.conj(), err).real
+            gains_orig.append(gain)
+            chi2s_orig.append(chi2/num_nomask)
 
     # conj data fit
     vis_obs_conj = np.ma.array(vis_obs.conj(), mask=vis_mask)
@@ -34,14 +41,22 @@ def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit
     chi2s_conj = []
     for si in shifts:
         vis = vis_obs_conj[start_ind+si:end_ind+si]
-        xx = np.ma.dot(vis_sim.conj(), vis_sim)
-        xy = np.ma.dot(vis_sim.conj(), vis)
-        gain = xy / xx
-        vis_cal = gain * vis_sim
-        err = vis - vis_cal
-        chi2 = np.ma.dot(err.conj(), err).real
-        gains_conj.append(gain)
-        chi2s_conj.append(chi2/num_nomask)
+        num_nomask = vis.count()
+        if num_nomask == 0: # no valid vis data
+            continue
+        else:
+            xx = np.ma.dot(vis_sim.conj(), vis_sim)
+            xy = np.ma.dot(vis_sim.conj(), vis)
+            gain = xy / xx
+            vis_cal = gain * vis_sim
+            err = vis - vis_cal
+            chi2 = np.ma.dot(err.conj(), err).real
+            gains_conj.append(gain)
+            chi2s_conj.append(chi2/num_nomask)
+
+    # return when no valid data has been fit
+    if len(gains_orig) == 0 or len(gains_conj) == 0:
+        return 1.0, 0, False
 
     # compare the median of chi2s_orig and chi2s_conj
     if np.median(chi2s_conj) < np.median(chi2s_orig):
