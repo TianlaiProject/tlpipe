@@ -1,6 +1,7 @@
 """Line RFI flagging."""
 
 import os
+import warnings
 import numpy as np
 import tod_task
 from sg_filter import savitzky_golay
@@ -10,66 +11,136 @@ class Flag(tod_task.IterRawTimestream):
     """Line RFI flagging."""
 
     params_init = {
-                    'window_size': 11,
-                    'sigma': 5.0,
+                    'freq_window': 11,
+                    'time_window': 11,
+                    'freq_sigma': 3.0,
+                    'time_sigma': 5.0,
                     'plot_fit': False, # plot the smoothing fit
-                    'fig_name': 'fit',
+                    'freq_fig_name': 'rfi_freq',
+                    'time_fig_name': 'rfi_time',
                   }
 
     prefix = 'lf_'
 
     def process(self, rt):
 
-        window_size = self.params['window_size']
-        sigma = self.params['sigma']
+        freq_window = self.params['freq_window']
+        time_window = self.params['time_window']
+        freq_sigma = self.params['freq_sigma']
+        time_sigma = self.params['time_sigma']
         plot_fit = self.params['plot_fit']
-        fig_prefix = self.params['fig_name']
+        freq_fig_prefix = self.params['freq_fig_name']
+        time_fig_prefix = self.params['time_fig_name']
 
         rt.redistribute('baseline')
 
-        # time integration
-        tm_vis = np.ma.mean(np.ma.masked_invalid(rt.local_vis[:]), axis=0)
-        freq_mask = np.zeros(tm_vis.shape, dtype=bool)
-        # iterate over local baselines
+        time = rt.time[:]
+        nt = len(time)
         freq = rt.freq[:]
         nfreq = len(freq)
         bl = rt.local_bl[:]
-        window_size = min(nfreq/2, window_size)
+
+        # time integration
+        tm_vis = np.ma.mean(np.ma.array(rt.local_vis, mask=rt.local_vis_mask), axis=0)
+        freq_window = min(nfreq/2, freq_window)
         # ensure window_size is an odd number
-        if window_size % 2 == 0:
-            window_size += 1
-        for lbi in range(tm_vis.shape[-1]):
-            abs_vis = np.abs(tm_vis[:, lbi])
-            smooth = savitzky_golay(abs_vis, window_size, 3)
+        if freq_window % 2 == 0:
+            freq_window += 1
+        if nfreq < 2*freq_window:
+            warnings.warn('Not enough frequency points to do the smoothing')
+        else:
+            # iterate over local baselines
+            for lbi in range(len(bl)):
+                abs_vis = np.abs(tm_vis[:, lbi])
 
-            # flage RFI
-            diff = abs_vis - smooth
-            mean = np.mean(diff)
-            std = np.std(diff)
-            inds = np.where(np.abs(diff - mean) > sigma*std)[0]
-            freq_mask[inds, lbi] = True
+                for cnt in range(10):
+                    abs_vis1 = abs_vis.copy()
+                    if cnt != 0:
+                        abs_vis1[inds] = smooth[inds]
+                    smooth = savitzky_golay(abs_vis1, freq_window, 3)
 
-            if plot_fit:
-                import tlpipe.plot
-                import matplotlib.pyplot as plt
-                from tlpipe.utils.path_util import output_path
+                    # flage RFI
+                    diff = abs_vis1 - smooth
+                    mean = np.mean(diff)
+                    std = np.std(diff)
+                    inds = np.where(np.abs(diff - mean) > freq_sigma*std)[0]
+                    if len(inds) == 0:
+                        break
 
-                plt.figure()
-                abs_vis1 = np.where(freq_mask[:, lbi], np.nan, abs_vis)
-                plt.plot(freq, abs_vis1)
-                plt.plot(freq, smooth)
-                plt.xlabel(r'$\nu$ / MHz')
-                fig_name = '%s_%d_%d.png' % (fig_prefix, bl[lbi][0], bl[lbi][1])
-                fig_name = output_path(fig_name)
-                plt.savefig(fig_name)
-                plt.clf()
+                diff = abs_vis - smooth
+                mean = np.mean(diff)
+                std = np.std(diff)
+                inds = np.where(np.abs(diff - mean) > freq_sigma*std)[0] # masked inds
+                rt.local_vis_mask[:, inds, lbi] = True # set mask
 
-        # create a dataset for freq_mask
-        freq_mask = mpiarray.MPIArray.wrap(freq_mask, axis=1)
-        rt.create_freq_and_bl_ordered_dataset('freq_mask', freq_mask)
+                if plot_fit:
+                    import tlpipe.plot
+                    import matplotlib.pyplot as plt
+                    from tlpipe.utils.path_util import output_path
 
-        # rt.info()
+                    plt.figure()
+                    plt.plot(freq, abs_vis, label='data')
+                    plt.plot(freq[inds], abs_vis[inds], 'ro', label='flag')
+                    plt.plot(freq, smooth, label='smooth')
+                    plt.xlabel(r'$\nu$ / MHz')
+                    plt.legend(loc='best')
+                    fig_name = '%s_%d_%d.png' % (freq_fig_prefix, bl[lbi][0], bl[lbi][1])
+                    fig_name = output_path(fig_name)
+                    plt.savefig(fig_name)
+                    plt.clf()
+
+        # freq integration
+        fm_vis = np.ma.mean(np.ma.array(rt.local_vis, mask=rt.local_vis_mask), axis=1)
+        time_window = min(nt/2, time_window)
+        # ensure window_size is an odd number
+        if time_window % 2 == 0:
+            time_window += 1
+        if nt < 2*time_window:
+            warnings.warn('Not enough time points to do the smoothing')
+        else:
+            # iterate over local baselines
+            for lbi in range(len(bl)):
+                abs_vis = np.abs(fm_vis[:, lbi])
+
+                for cnt in range(10):
+                    abs_vis1 = abs_vis.copy()
+                    if cnt != 0:
+                        abs_vis1[inds] = smooth[inds]
+                    smooth = savitzky_golay(abs_vis1, time_window, 3)
+
+                    # flage RFI
+                    diff = abs_vis1 - smooth
+                    mean = np.mean(diff)
+                    std = np.std(diff)
+                    inds = np.where(np.abs(diff - mean) > time_sigma*std)[0]
+                    if len(inds) == 0:
+                        break
+
+                diff = abs_vis - smooth
+                mean = np.mean(diff)
+                std = np.std(diff)
+                inds = np.where(np.abs(diff - mean) > time_sigma*std)[0] # masked inds
+                rt.local_vis_mask[inds, :, lbi] = True # set mask
+
+                if plot_fit:
+                    import tlpipe.plot
+                    import matplotlib.pyplot as plt
+                    from tlpipe.utils.path_util import output_path
+
+                    plt.figure()
+                    plt.plot(time, abs_vis, label='data')
+                    plt.plot(time[inds], abs_vis[inds], 'ro', label='flag')
+                    plt.plot(time, smooth, label='smooth')
+                    plt.xlabel(r'$t$ / Julian Date')
+                    plt.legend(loc='best')
+                    fig_name = '%s_%d_%d.png' % (time_fig_prefix, bl[lbi][0], bl[lbi][1])
+                    fig_name = output_path(fig_name)
+                    plt.savefig(fig_name)
+                    plt.clf()
+
 
         rt.add_history(self.history)
+
+        # rt.info()
 
         return rt
