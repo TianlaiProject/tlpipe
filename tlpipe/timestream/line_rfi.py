@@ -3,6 +3,7 @@
 import os
 import warnings
 import numpy as np
+from scipy.interpolate import InterpolatedUnivariateSpline
 import tod_task
 from sg_filter import savitzky_golay
 from caput import mpiarray
@@ -11,10 +12,10 @@ class Flag(tod_task.IterRawTimestream):
     """Line RFI flagging."""
 
     params_init = {
-                    'freq_window': 11,
-                    'time_window': 11,
-                    'freq_sigma': 3.0,
-                    'time_sigma': 5.0,
+                    'freq_window': 15,
+                    'time_window': 15,
+                    'freq_sigma': 2.0,
+                    'time_sigma': 7.0,
                     'plot_fit': False, # plot the smoothing fit
                     'freq_fig_name': 'rfi_freq',
                     'time_fig_name': 'rfi_time',
@@ -52,9 +53,10 @@ class Flag(tod_task.IterRawTimestream):
             # iterate over local baselines
             for lbi in range(len(bl)):
                 abs_vis = np.abs(tm_vis[:, lbi])
+                abs_vis1 = abs_vis.copy()
 
                 for cnt in range(10):
-                    abs_vis1 = abs_vis.copy()
+                    # abs_vis1 = abs_vis.copy()
                     if cnt != 0:
                         abs_vis1[inds] = smooth[inds]
                     smooth = savitzky_golay(abs_vis1, freq_window, 3)
@@ -101,9 +103,14 @@ class Flag(tod_task.IterRawTimestream):
             # iterate over local baselines
             for lbi in range(len(bl)):
                 abs_vis = np.abs(fm_vis[:, lbi])
+                abs_vis_valid = abs_vis[~abs_vis.mask]
+                inds_valid = np.arange(nt)[~abs_vis.mask]
+                itp = InterpolatedUnivariateSpline(inds_valid, abs_vis_valid)
+                abs_vis_itp = itp(np.arange(nt))
+                abs_vis1 = abs_vis_itp.copy()
 
                 for cnt in range(10):
-                    abs_vis1 = abs_vis.copy()
+                    # abs_vis1 = abs_vis_itp.copy()
                     if cnt != 0:
                         abs_vis1[inds] = smooth[inds]
                     smooth = savitzky_golay(abs_vis1, time_window, 3)
