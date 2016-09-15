@@ -12,6 +12,7 @@ def cal(vis, vis_mask, li, gi, fbl, rt, **kwargs):
     if np.prod(vis.shape) == 0 :
         return vis
 
+    nt = vis.shape[0]
     on_time = rt['ns_on'].attrs['on_time']
     num_mean = kwargs.get('num_mean', 5)
     num_mean = min(num_mean, on_time-2)
@@ -24,23 +25,33 @@ def cal(vis, vis_mask, li, gi, fbl, rt, **kwargs):
     ns_on = np.where(ns_on, 1, 0)
     diff_ns = np.diff(ns_on)
     inds = np.where(diff_ns==1)[0]
-    if inds[0]-num_mean < 0:
+    # if inds[0]-num_mean < 0:
+    if inds[0]-1 < 0: # no off data in the beginning to use
         inds = inds[1:]
-    if inds[-1]+num_mean+1 > len(ns_on)-1:
+    # if inds[-1]+num_mean+1 > len(ns_on)-1:
+    if inds[-1]+2 > nt-1: # no on data in the end to use
         inds = inds[:-1]
 
     valid_inds = []
     phase = []
     for ind in inds:
-        off_sec = np.ma.array(vis[ind-num_mean:ind], mask=vis_mask[ind-num_mean:ind])
+        if ind == inds[0]: # the first ind
+            lower = max(0, ind-num_mean)
+        else:
+            lower = ind - num_mean
+        off_sec = np.ma.array(vis[lower:ind], mask=vis_mask[lower:ind])
         if off_sec.count() > 0: # not all data in this section are masked
             valid_inds.append(ind)
-            phase.append( np.angle(np.mean(vis[ind+2:ind+2+num_mean]) - np.ma.mean(off_sec)) ) # in radians
+            if ind == inds[-1]: # the last ind
+                upper = min(nt, ind+2+num_mean)
+            else:
+                upper = ind + 2 + num_mean
+            phase.append( np.angle(np.mean(vis[ind+2:upper]) - np.ma.mean(off_sec)) ) # in radians
 
     phase = np.unwrap(phase) # unwrap 2pi discontinuity
 
     f = InterpolatedUnivariateSpline(valid_inds, phase)
-    all_phase = f(np.arange(vis.shape[0]))
+    all_phase = f(np.arange(nt))
 
     if plot_phs:
         import tlpipe.plot
