@@ -2,7 +2,7 @@
 
 import os
 import numpy as np
-from scipy import interpolate
+from scipy.interpolate import InterpolatedUnivariateSpline
 import tod_task
 from tlpipe.utils.path_util import output_path
 
@@ -12,7 +12,7 @@ def cal(vis, vis_mask, li, gi, fbl, rt, **kwargs):
     if np.prod(vis.shape) == 0 :
         return vis
 
-    on_time = rt['ns_on'].attrs['off_time']
+    on_time = rt['ns_on'].attrs['on_time']
     num_mean = kwargs.get('num_mean', 5)
     num_mean = min(num_mean, on_time-2)
     if num_mean <= 0:
@@ -26,33 +26,30 @@ def cal(vis, vis_mask, li, gi, fbl, rt, **kwargs):
     inds = np.where(diff_ns==1)[0]
     if inds[0]-num_mean < 0:
         inds = inds[1:]
-    if inds[1]+num_mean+1 > len(ns_on)-1:
+    if inds[-1]+num_mean+1 > len(ns_on)-1:
         inds = inds[:-1]
 
+    valid_inds = []
     phase = []
     for ind in inds:
-        phase.append( np.angle(np.mean(vis[ind+2:ind+2+num_mean]) - np.mean(vis[ind-num_mean:ind])) ) # in radians
+        off_sec = np.ma.array(vis[ind-num_mean:ind], mask=vis_mask[ind-num_mean:ind])
+        if off_sec.count() > 0: # not all data in this section are masked
+            valid_inds.append(ind)
+            phase.append( np.angle(np.mean(vis[ind+2:ind+2+num_mean]) - np.ma.mean(off_sec)) ) # in radians
 
     phase = np.unwrap(phase) # unwrap 2pi discontinuity
 
-    # f = interpolate.interp1d(inds, phase, kind='cubic', bounds_error=False, assume_sorted=True) # no assume_sorted in older version
-    f = interpolate.interp1d(inds, phase, kind='cubic', bounds_error=False)
+    f = InterpolatedUnivariateSpline(valid_inds, phase)
     all_phase = f(np.arange(vis.shape[0]))
-    not_none_inds = np.where(np.logical_not(np.isnan(all_phase)))[0]
-    if len(not_none_inds) > 0:
-        all_phase[:not_none_inds[0]] = all_phase[not_none_inds[0]]
-        all_phase[not_none_inds[-1]+1:] = all_phase[not_none_inds[-1]]
 
     if plot_phs:
-        # import matplotlib
-        # matplotlib.use('Agg')
         import tlpipe.plot
         import matplotlib.pyplot as plt
 
         plt.figure()
         time = rt.time[:]
         plt.plot(time, all_phase)
-        plt.plot(time[inds], phase, 'ro')
+        plt.plot(time[valid_inds], phase, 'ro')
         plt.xlabel(r'$t$ / Julian Date')
         plt.ylabel(r'$\Delta \phi$ / radian')
         fig_name = '%s_%f_%d_%d.png' % (fig_prefix, fbl[0], fbl[1][0], fbl[1][1])
