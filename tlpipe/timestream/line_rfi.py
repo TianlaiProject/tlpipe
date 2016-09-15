@@ -15,7 +15,7 @@ class Flag(tod_task.IterRawTimestream):
                     'freq_window': 15,
                     'time_window': 15,
                     'freq_sigma': 2.0,
-                    'time_sigma': 7.0,
+                    'time_sigma': 5.0,
                     'plot_fit': False, # plot the smoothing fit
                     'freq_fig_name': 'rfi_freq',
                     'time_fig_name': 'rfi_time',
@@ -127,6 +127,9 @@ class Flag(tod_task.IterRawTimestream):
                 mean = np.mean(diff)
                 std = np.std(diff)
                 inds = np.where(np.abs(diff - mean) > time_sigma*std)[0] # masked inds
+                # Addtional threshold
+                # inds1 = np.where(np.abs(diff[inds]) > 1.0e-2*np.abs(smooth[inds]))[0]
+                # inds = inds[inds1]
                 rt.local_vis_mask[inds, :, lbi] = True # set mask
 
                 if plot_fit:
