@@ -178,7 +178,7 @@ class PsFit(tod_task.IterTimestream):
         # the first transit index
         transit_inds = [ np.searchsorted(ts['jul_date'][:], transit_time) ]
         # find all other transit indices
-        aa.set_jultime(ts['jul_date'][0] + 1.0)
+        aa.set_jultime(ts['jul_date'][0] + 1.0) # maybe should use a sidereal day which is a litter shorter than 1.0 ???
         transit_time = a.phs.ephem2juldate(aa.next_transit(s)) # Julian date
         cnt = 2
         while(transit_time <= ts['jul_date'][-1]):
@@ -193,9 +193,10 @@ class PsFit(tod_task.IterTimestream):
         ### may need to improve in the future
         transit_ind = transit_inds[0]
         int_time = ts.attrs['inttime'] # second
-        start_ind = transit_ind - np.int(span / int_time)
-        end_ind = transit_ind + np.int(span / int_time)
+        start_ind = max(0, transit_ind - np.int(span / int_time))
+        end_ind = min(len(ts.local_time), transit_ind + np.int(span / int_time))
         num_shift = np.int(shift / int_time)
+        num_shift = min(num_shift, end_ind - start_ind)
 
         # vis = ts.local_vis.copy()
         vis = ts.local_vis
@@ -239,7 +240,7 @@ class PsFit(tod_task.IterTimestream):
                         ts.local_vis_mask[:, fi, pi, bi] = np.roll(vis_mask[:, fi, pi, bi].conj(), -si) / gain # NOTE the use of -si
                     else:
                         ts.local_vis[:, fi, pi, bi] = np.roll(vis[:, fi, pi, bi], -si) / gain # NOTE the use of -si
-                        ts.local_vis_mask[:, fi, pi, bi] = np.roll(vis_mask[:, fi, pi, bi], -si) / gain # NOTE the use of -si
+                        ts.local_vis_mask[:, fi, pi, bi] = np.roll(vis_mask[:, fi, pi, bi], -si) # NOTE the use of -si
 
         # gather conjs
         comm = mpiutil.world
