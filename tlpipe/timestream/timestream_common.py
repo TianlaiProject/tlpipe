@@ -36,6 +36,7 @@ class TimestreamCommon(container.BasicTod):
     local_bl
     is_dish
     is_cylinder
+    array
     freq_ordered_datasets
     bl_ordered_datasets
     feed_ordered_datasets
@@ -452,7 +453,7 @@ class TimestreamCommon(container.BasicTod):
             ants = [ tl_array.DishAntenna(pi, freq, diameter) for pi in pos_ns ]
         elif self.is_cylinder:
             try:
-                width = self.attrs['cywid']
+                width = 0.78 * self.attrs['cywid'] # suppose an illumination efficiency of 0.78
                 length = self.attrs['cylen']
             except KeyError:
                 raise KeyError('Attribute dishdiam does not exist, try to load it first')
