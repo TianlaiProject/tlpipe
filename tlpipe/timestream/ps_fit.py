@@ -198,7 +198,11 @@ class PsFit(tod_task.IterTimestream):
         num_shift = np.int(shift / int_time)
         num_shift = min(num_shift, end_ind - start_ind)
 
-        # vis = ts.local_vis.copy()
+        ############################################
+        if ts.is_cylinder:
+            ts.local_vis[:] = ts.local_vis.conj() # now for cylinder array
+        ############################################
+
         vis = ts.local_vis
         vis_mask = ts.local_vis_mask
         # vis[ts.local_vis_mask] = complex(np.nan, np.nan) # set masked vis to nan
@@ -224,6 +228,8 @@ class PsFit(tod_task.IterTimestream):
                     vis_sim[ind, :, pi, bi] = Sc * bmij * np.exp(-2.0J * np.pi * np.dot(s_top, uij))
 
         conjs = []
+        xconjs = []
+        yconjs = []
         # iterate over freq
         for fi in range(nfreq):
             # for pi in range(len(pol)):
@@ -234,10 +240,12 @@ class PsFit(tod_task.IterTimestream):
                     if conj:
                         if pi == 0: # xx
                             conjs.append((2*i-1, 2*j-1))
+                            xconjs.append((i, j))
                         elif pi == 1: # yy
                             conjs.append((2*i, 2*j))
+                            yconjs.append((i, j))
                         ts.local_vis[:, fi, pi, bi] = np.roll(vis[:, fi, pi, bi].conj(), -si) / gain # NOTE the use of -si
-                        ts.local_vis_mask[:, fi, pi, bi] = np.roll(vis_mask[:, fi, pi, bi].conj(), -si) / gain # NOTE the use of -si
+                        ts.local_vis_mask[:, fi, pi, bi] = np.roll(vis_mask[:, fi, pi, bi], -si) / gain # NOTE the use of -si
                     else:
                         ts.local_vis[:, fi, pi, bi] = np.roll(vis[:, fi, pi, bi], -si) / gain # NOTE the use of -si
                         ts.local_vis_mask[:, fi, pi, bi] = np.roll(vis_mask[:, fi, pi, bi], -si) # NOTE the use of -si
@@ -247,9 +255,17 @@ class PsFit(tod_task.IterTimestream):
         conjs = list(itertools.chain(*comm.allgather(conjs)))
         conjs = list(set(conjs)) # unique list
         conjs = sorted(conjs)
+        xconjs = list(itertools.chain(*comm.allgather(xconjs)))
+        xconjs = list(set(xconjs)) # unique list
+        xconjs = sorted(xconjs)
+        yconjs = list(itertools.chain(*comm.allgather(yconjs)))
+        yconjs = list(set(yconjs)) # unique list
+        yconjs = sorted(yconjs)
         if mpiutil.rank0:
-            print conjs
-            print len(conjs)
+            print 'conjs:', conjs
+            print 'xconjs:', xconjs
+            print 'yconjs:', yconjs
+            print len(conjs), len(xconjs), len(yconjs)
 
         ts.add_history(self.history)
 
