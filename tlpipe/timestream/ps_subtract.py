@@ -45,15 +45,18 @@ class PsSub(tod_task.IterTimestream):
         # point sources
         srclist, cutoff, catalogs = a.scripting.parse_srcs(ps, catalog)
         cat = a.src.get_catalog(srclist, cutoff, catalogs)
-        nps = len(cat) # number of point sources
+        # nps = len(cat) # number of point sources
         if mpiutil.rank0:
             print 'Subtracting point sources %s...' % ps
 
         # get transit time of the point sources
         # array
         aa = ts.array
-        aa.set_jultime(ts['jul_date'][0]) # the first obs time point
+        # aa.set_jultime(ts['jul_date'][0]) # the first obs time point
+
         for s in cat.values():
+            # reset time of the array here
+            aa.set_jultime(ts['jul_date'][0]) # the first obs time point
             next_transit = aa.next_transit(s)
             transit_time = a.phs.ephem2juldate(next_transit) # Julian date
             # if tranisit time is in the duration of the data
