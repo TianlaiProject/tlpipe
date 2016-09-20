@@ -13,7 +13,7 @@ pipe_logging = 'notset'
 
 
 import glob
-data_dir = '/disk/disk6/20160829182035_hdf5'
+data_dir = '/tianlai/data/20160829182035_hdf5'
 # files = sorted(glob.glob(data_dir+'/*.hdf5'))[1:]
 # files = sorted(glob.glob(data_dir+'/*.hdf5'))[22:80]
 files = sorted(glob.glob(data_dir+'/*.hdf5'))[15:80]
@@ -26,8 +26,8 @@ from tlpipe.timestream import dispatch
 pipe_tasks.append(dispatch.Dispatch)
 ### parameters for Dispatch
 dp_input_files = files
-dp_freq_select = (495, 505)
-dp_feed_select = [11, 12, 13, 14, 42, 43, 44, 45, 74, 75, 76, 77]
+dp_freq_select = (505, 505)
+dp_feed_select = [11, 12, 13, 14, 42, 43, 44, 45, 74, 75, 76, 78]
 dp_exclude_bad = False
 dp_iter_num = 1
 dp_out = 'dp'
@@ -58,17 +58,24 @@ pit_fig_name = 'int/int'
 pit_out = 'pit'
 
 from tlpipe.timestream import line_rfi
-# pipe_tasks.append(line_rfi.Flag)
+pipe_tasks.append(line_rfi.Flag)
 ### parameters for Flag
 lf_in = dt_out
-# lf_window_size = 21
-# lf_sigma = 3.0
+lf_freq_window = 15
+lf_freq_sigma = 2.0
+lf_time_window = 15
+lf_time_sigma = 5.0
+lf_plot_fit = True
+# lf_plot_fit = False
+lf_freq_fig_name = 'rfi_freq/rfi'
+lf_time_fig_name = 'rfi_time/rfi'
 lf_out = 'lf'
 
 from tlpipe.timestream import ns_cal
 pipe_tasks.append(ns_cal.NsCal)
 ### parameters for NsCal
-nc_in = dt_out
+# nc_in = dt_out
+nc_in = lf_out
 nc_plot_phs = True
 nc_fig_name = 'phs/phs_change'
 nc_out = 'nc'
@@ -76,8 +83,8 @@ nc_out = 'nc'
 from tlpipe.plot import plot_waterfall
 pipe_tasks.append(plot_waterfall.PlotRawTimestream)
 ### parameters for PlotRawTimestream
-# prt_in = nc_out
-prt_in = dt_out
+prt_in = nc_out
+# prt_in = dt_out
 # prt_bl_incl = [(i, i) for i in range(1, 33)]
 prt_flag_ns = True
 prt_fig_name = 'rvis/vis'
@@ -98,6 +105,7 @@ pf_in = r2t_out
 pf_calibrator = 'cas'
 pf_plot_fit = True
 pf_fig_name = 'fit/fit'
+pf_output_files = [ 'ps_fit/file_%d.hdf5' %i for i in range(1, 7) ]
 pf_out = 'pf'
 
 from tlpipe.plot import plot_waterfall
@@ -109,10 +117,30 @@ pts_flag_ns = True
 pts_fig_name = 'vis/vis'
 pts_out = 'pts'
 
+from tlpipe.timestream import ps_subtract
+# pipe_tasks.append(ps_subtract.PsSub)
+### parameters for PsSub
+ps_in = pf_out
+ps_input_files = pf_output_files
+# ps_ps = 'cas'
+ps_iter_num = 1
+ps_out = 'ps'
+
+from tlpipe.plot import plot_waterfall
+# pipe_tasks.append((plot_waterfall.PlotTimestream, 'pts1_'))
+### parameters for PlotTimestream
+pts1_in = ps_out
+pts1_flag_mask = True
+pts1_flag_ns = True
+pts1_fig_name = 'vis1/vis'
+pts1_out = 'pts1'
+
+
 from tlpipe.timestream import re_order
 pipe_tasks.append(re_order.ReOrder)
 ### parameters for ReOrder
 ro_in = pf_out
+# ro_in = ps_out
 ro_output_files = [ 're_order/file_%d.hdf5' %i for i in range(1, 7) ]
 ro_out = 'ro'
 
@@ -124,6 +152,7 @@ mm_input_files = ro_output_files
 mm_iter_num = 1
 mm_mask_daytime = False
 # mm_mask_time_range = [6.5, 24.0]
+mm_bl_range = [14.0, 1.0e7] # use long baselines only
 mm_auto_correlations = False
 mm_pol = 'I'
 mm_noise_weight = False
