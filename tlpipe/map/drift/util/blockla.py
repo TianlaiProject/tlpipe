@@ -155,3 +155,34 @@ def pinv_dm(matrix, *args, **kwargs):
 
     return pinv_matrix
 
+def diag_dm(matrix, k=0):
+    """Extract a diagonal or construct a diagonal array for each of the block of the input array.
+
+    Parameters
+    ----------
+    matrix : (nblocks, n, m) np.ndarray
+        An array containing `nblocks` diagonal blocks of size (`n`, `m`).
+    k : int, optional
+        Diagonal in question. The default is 0. Use k>0 for diagonals above
+        the main diagonal, and k<0 for diagonals below the main diagonal.
+
+    Returns
+    -------
+    diag_matrix : np.ndarray
+         The extracted diagonal or constructed diagonal array.
+    """
+
+    if matrix.ndim == 3:
+        nblocks, n, m = matrix.shape
+        diag_matrix = np.empty((nblocks, n-abs(k)), dtype=matrix.dtype)
+    elif matrix.ndim == 2:
+        nblocks, n = matrix.shape
+        diag_matrix = np.empty((nblocks, n+abs(k), n+abs(k)), dtype=matrix.dtype)
+    else:
+        raise ValueError('Input must be 2- or 3-d')
+
+    for i in range(nblocks):
+        diag_matrix[i] = np.diag(matrix[i], k)
+
+    return diag_matrix
+
