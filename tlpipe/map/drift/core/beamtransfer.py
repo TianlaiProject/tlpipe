@@ -403,7 +403,7 @@ class BeamTransfer(object):
 
     #====== Pseudo-inverse beams =======================
 
-    @util.cache_last
+    # @util.cache_last
     def invbeam_m(self, mi):
         """Pseudo-inverse of the beam (for a given m).
 
@@ -430,16 +430,19 @@ class BeamTransfer(object):
         beam = beam.reshape((self.nfreq, self.ntel, self.nsky))
 
         ibeam = blockla.pinv_dm(beam, rcond=1e-6)
+        # sigma2 = blockla.diag_dm(blockla.multiply_dm_dm(ibeam, ibeam.transpose(0, 2, 1).conj()).real) # sigma_I^2(l, m) = Cov_m(l, l), of shape (nfreq, nsky)
+        # K = 1.0 # empirical value
+        # W1_filter = np.where(sigma2>K, invert_no_zero(sigma2), 1.0)
+        W1_filter = np.ones((self.nfreq, self.nsky))
 
         if self.noise_weight:
             # Reshape to make it easy to multiply baselines by noise level
             ibeam = ibeam.reshape((-1, self.telescope.npairs))
             ibeam = ibeam * noisew
 
-        shape = (self.nfreq, self.telescope.num_pol_sky,
-                 self.telescope.lmax + 1, self.ntel)
+        shape = (self.nfreq, self.nsky, self.ntel)
 
-        return ibeam.reshape(shape)
+        return ibeam, W1_filter
 
     #===================================================
 
@@ -1035,16 +1038,16 @@ class BeamTransfer(object):
             Sky vector to return.
         """
 
-        ibeam = self.invbeam_m(mi).reshape((self.nfreq, self.nsky, self.ntel))
+        ibeam, W1 = self.invbeam_m(mi)
 
-        vecb = np.zeros((self.nfreq, self.nsky), dtype=np.complex128)
+        vecb = np.zeros((self.nfreq, self.telescope.num_pol_sky,
+                         self.telescope.lmax + 1), dtype=np.complex128)
         vec = vec.reshape((self.nfreq, self.ntel))
 
         for fi in range(self.nfreq):
-            vecb[fi] = np.dot(ibeam[fi], vec[fi, :].reshape(self.ntel))
+            vecb[fi] = np.dot(ibeam[fi], vec[fi]).reshape(self.telescope.num_pol_sky, self.telescope.lmax + 1)
 
-        return vecb.reshape((self.nfreq, self.telescope.num_pol_sky,
-                             self.telescope.lmax + 1))
+        return vecb * W1.reshape(vecb.shape) # apply the W1 filter
 
     project_vector_backward = project_vector_telescope_to_sky
 
