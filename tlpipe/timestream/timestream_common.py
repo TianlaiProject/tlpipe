@@ -169,53 +169,17 @@ class TimestreamCommon(container.BasicTod):
         ### load a common dataset that need to take specail care
         ### this dataset need to be distributed along axis_name if axis_name
         ### is just self.main_data_dist_axis
-        if name == 'blorder':
-            N = 192
-            bl = np.empty((N*(N+1)/2, 2), int) # 18528
-            order = 0
-
-            for i in xrange(0, N-1, 2):
-                for j in xrange(i+2, i+95, 2):
-                    j = j % N
-                    bl[order  ] = i, j
-                    bl[order+1] = i+1, j+1
-                    bl[order+2] = i, j+1
-                    bl[order+3] = i+1, j
-                    order += 4
-
-            for i in xrange(0, N/2-1, 2):
-                bl[order  ] = i, i+96
-                bl[order+1] = i+1, i+97
-                bl[order+2] = i, i+97
-                bl[order+3] = i+1, i+96
-                order += 4
-
-            for i in xrange(0, N-1, 2):
-                bl[order  ] = i, i
-                bl[order+1] = i+1, i+1
-                bl[order+2] = i+1, i
-                order += 3
-
-            axis = self.main_data_axes.index(axis_name)
-            tmp = np.arange(bl.shape[0])
-            sel = tmp[self.main_data_select[axis]].tolist()
-            data = bl[sel] + 1 # make No. starts from 1
-            # if axis_name is just the distributed axis, load dataset distributed
-            if axis == self.main_data_dist_axis:
-                data  = mpiarray.MPIArray.from_numpy_array(data, axis=self.main_axes_ordered_datasets[name].index(axis))
-            self.create_dataset(name, data=data)
-        else:
-            dset = self.infiles[0][name]
-            axis = self.main_data_axes.index(axis_name)
-            tmp = np.arange(dset.shape[0])
-            sel = tmp[self.main_data_select[axis]].tolist()
-            data = dset[sel]
-            # if axis_name is just the distributed axis, load dataset distributed
-            if axis == self.main_data_dist_axis:
-                data  = mpiarray.MPIArray.from_numpy_array(data, axis=self.main_axes_ordered_datasets[name].index(axis))
-            self.create_dataset(name, data=data)
-            # copy attrs of this dset
-            memh5.copyattrs(dset.attrs, self[name].attrs)
+        dset = self.infiles[0][name]
+        axis = self.main_data_axes.index(axis_name)
+        tmp = np.arange(dset.shape[0])
+        sel = tmp[self.main_data_select[axis]].tolist()
+        data = dset[sel]
+        # if axis_name is just the distributed axis, load dataset distributed
+        if axis == self.main_data_dist_axis:
+            data  = mpiarray.MPIArray.from_numpy_array(data, axis=self.main_axes_ordered_datasets[name].index(axis))
+        self.create_dataset(name, data=data)
+        # copy attrs of this dset
+        memh5.copyattrs(dset.attrs, self[name].attrs)
 
     def _load_a_common_dataset(self, name):
         ### load a common dataset from the first file
