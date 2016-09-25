@@ -439,8 +439,7 @@ class BeamTransfer(object):
             # Reshape to make it easy to multiply baselines by noise level
             ibeam = ibeam.reshape((-1, self.telescope.npairs))
             ibeam = ibeam * noisew
-
-        shape = (self.nfreq, self.nsky, self.ntel)
+            ibeam = ibeam.reshape((self.nfreq, self.nsky, self.ntel))
 
         return ibeam, W1_filter
 
