@@ -1,4 +1,4 @@
-"""Initialize telescope array and average the timestream."""
+"""Initialize telescope array, average the timestream and do the map-making."""
 
 import os
 import numpy as np
@@ -19,7 +19,7 @@ from tlpipe.map.fmmode.pipeline import timestream
 
 
 class MapMaking(tod_task.SingleTimestream):
-    """Initialize telescope array and average the timestream."""
+    """Initialize telescope array, average the timestream and do the map-making."""
 
     params_init = {
                     'mask_daytime': True,
