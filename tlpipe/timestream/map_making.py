@@ -13,9 +13,9 @@ from caput import memh5
 from cora.util import hputil
 from tlpipe.utils.np_util import unique, average
 from tlpipe.utils.path_util import output_path
-from tlpipe.map.fmmode.telescope import tl_dish, tl_cylinder
-from tlpipe.map.fmmode.core import beamtransfer
-from tlpipe.map.fmmode.pipeline import timestream
+from tlpipe.map.drift.telescope import tl_dish, tl_cylinder
+from tlpipe.map.drift.core import beamtransfer
+from tlpipe.map.drift.pipeline import timestream
 
 
 class MapMaking(tod_task.SingleTimestream):
@@ -69,6 +69,8 @@ class MapMaking(tod_task.SingleTimestream):
         # lon = ts.attrs['sitelon']
         lon = 0.0
         # lon = np.degrees(ts['ra_dec'][0, 0]) # the first ra
+        local_origin = False
+        freq = ts.freq
         freqs = ts.freq.data.to_numpy_array(root=None)
         ndays = 1
         feeds = ts['feedno'][:]
@@ -80,20 +82,12 @@ class MapMaking(tod_task.SingleTimestream):
 
         if ts.is_dish:
             dish_width = ts.attrs['dishdiam']
-            tel = tl_dish.TlUnpolarisedDishArray(lat, lon, freqs, beam_theta_range, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, dish_width, feedpos, pointing)
+            tel = tl_dish.TlUnpolarisedDishArray(lat, lon, freqs, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin, dish_width, feedpos, pointing)
         elif ts.is_cylinder:
             cyl_width = ts.attrs['cywid']
-            tel = tl_cylinder.TlUnpolarisedCylinder(lat, lon, freqs, beam_theta_range, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, cyl_width, feedpos)
+            tel = tl_cylinder.TlUnpolarisedCylinder(lat, lon, freqs, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin, cyl_width, feedpos)
         else:
             raise RuntimeError('Unknown array type %s' % ts.attrs['telescope'])
-
-        # import matplotlib
-        # matplotlib.use('Agg')
-        # import matplotlib.pyplot as plt
-        # plt.figure()
-        # plt.plot(ts['ra_dec'][:])
-        # # plt.plot(ts['az_alt'][:])
-        # plt.savefig('ra_dec1.png')
 
         if not simulate:
             # mask daytime data
@@ -103,7 +97,7 @@ class MapMaking(tod_task.SingleTimestream):
 
             # average data
             nt = ts['sec1970'].shape[0]
-            phi_size = tel.phi_size
+            phi_size = 2*tel.mmax + 1
             nt_m = float(nt) / phi_size
 
             # roll data to have phi=0 near the first
@@ -159,48 +153,49 @@ class MapMaking(tod_task.SingleTimestream):
             del vis
             del vis_tmp
 
-            vis_stream = mpiarray.MPIArray.wrap(vis_stream, axis=1)
-            vis_h5 = memh5.MemGroup(distributed=True)
-            vis_h5.create_dataset('/timestream', data=vis_stream)
-            vis_h5.create_dataset('/phi', data=phi)
-
-            # Telescope layout data
-            vis_h5.create_dataset('/feedmap', data=tel.feedmap)
-            vis_h5.create_dataset('/feedconj', data=tel.feedconj)
-            vis_h5.create_dataset('/feedmask', data=tel.feedmask)
-            vis_h5.create_dataset('/uniquepairs', data=tel.uniquepairs)
-            vis_h5.create_dataset('/baselines', data=tel.baselines)
-
-            # Telescope frequencies
-            vis_h5.create_dataset('/frequencies', data=freqs)
-
-            # Write metadata
-            # vis_h5.attrs['beamtransfer_path'] = os.path.abspath(bt.directory)
-            vis_h5.attrs['ntime'] = phi_size
-
         # beamtransfer
-        bt = beamtransfer.BeamTransfer(beam_dir, tel, gen_inv, noise_weight)
+        bt = beamtransfer.BeamTransfer(beam_dir, tel, noise_weight, True)
         bt.generate()
 
         if simulate:
             ndays = 733
             print ndays
-            ts = timestream.simulate(bt, ts_dir, ts_name, input_maps, ndays, add_noise=add_noise)
+            tstream = timestream.simulate(bt, ts_dir, ts_name, input_maps, ndays, add_noise=add_noise)
         else:
             # timestream and map-making
-            ts = timestream.Timestream(ts_dir, ts_name, bt)
-            # Make directory if required
-            try:
-                os.makedirs(ts._tsdir)
-            except OSError:
-                 # directory exists
-                 pass
-            vis_h5.to_hdf5(ts._tsfile)
-        # ts.generate_mmodes(vis_stream.to_numpy_array(root=None))
-        ts.generate_mmodes()
+            tstream = timestream.Timestream(ts_dir, ts_name, bt)
+            for lfi, fi in freq.data.enumerate(axis=0):
+                # Make directory if required
+                if not os.path.exists(tstream._fdir(fi)):
+                    os.makedirs(tstream._fdir(fi))
+
+                # Write file contents
+                with h5py.File(tstream._ffile(fi), 'w') as f:
+
+                    # Timestream data
+                    f.create_dataset('/timestream', data=vis_stream[:, lfi].T)
+                    f.create_dataset('/phi', data=phi)
+
+                    # Telescope layout data
+                    f.create_dataset('/feedmap', data=tel.feedmap)
+                    f.create_dataset('/feedconj', data=tel.feedconj)
+                    f.create_dataset('/feedmask', data=tel.feedmask)
+                    f.create_dataset('/uniquepairs', data=tel.uniquepairs)
+                    f.create_dataset('/baselines', data=tel.baselines)
+
+                    # Telescope frequencies
+                    f.create_dataset('/frequencies', data=freqs)
+
+                    # Write metadata
+                    f.attrs['beamtransfer_path'] = os.path.abspath(bt.directory)
+                    f.attrs['ntime'] = phi_size
+
+            mpiutil.barrier()
+
+        tstream.generate_mmodes()
         nside = hputil.nside_for_lmax(tel.lmax, accuracy_boost=tel.accuracy_boost)
-        ts.mapmake_full(nside, 'full')
+        tstream.mapmake_full(nside, 'map_full.hdf5')
 
         # ts.add_history(self.history)
 
-        return ts
+        return tstream
