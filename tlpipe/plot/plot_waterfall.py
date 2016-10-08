@@ -2,6 +2,7 @@
 
 import os
 import numpy as np
+from scipy.interpolate import InterpolatedUnivariateSpline
 from tlpipe.timestream import tod_task
 from tlpipe.utils.path_util import output_path
 import matplotlib.pyplot as plt
@@ -18,6 +19,7 @@ def plot(vis, vis_mask, li, gi, bl, obj, **kwargs):
     bl_excl = kwargs.get('bl_excl', [])
     flag_mask = kwargs.get('flag_mask', False)
     flag_ns = kwargs.get('flag_ns', False)
+    interpolate_ns = kwargs.get('interpolate_ns', False)
     y_axis = kwargs.get('y_axis', 'jul_date')
     plot_abs = kwargs.get('plot_abs', False)
     fig_prefix = kwargs.get('fig_name', 'vis')
@@ -34,7 +36,13 @@ def plot(vis, vis_mask, li, gi, bl, obj, **kwargs):
     elif flag_ns:
         vis1 = vis.copy()
         on = np.where(obj['ns_on'][:])[0]
-        vis1[on] = complex(np.nan, np.nan)
+        if not interpolate_ns:
+            vis1[on] = complex(np.nan, np.nan)
+        else:
+            off = np.where(np.logical_not(obj['ns_on'][:]))[0]
+            for fi in range(vis1.shape[1]):
+                itp = InterpolatedUnivariateSpline(off, vis1[off, fi])
+                vis1[on, fi] = itp(on)
     else:
         vis1 = vis
 
@@ -83,6 +91,7 @@ class PlotRawTimestream(tod_task.IterRawTimestream):
                     'bl_excl': [],
                     'flag_mask': False,
                     'flag_ns': False,
+                    'interpolate_ns': False,
                     'y_axis': 'jul_date', # or 'ra'
                     'plot_abs': False,
                     'fig_name': 'vis',
@@ -95,11 +104,12 @@ class PlotRawTimestream(tod_task.IterRawTimestream):
         bl_excl = self.params['bl_excl']
         flag_mask = self.params['flag_mask']
         flag_ns = self.params['flag_ns']
+        interpolate_ns = self.params['interpolate_ns']
         y_axis = self.params['y_axis']
         plot_abs = self.params['plot_abs']
         fig_name = self.params['fig_name']
 
-        rt.bl_data_operate(plot, full_data=True, keep_dist_axis=False, bl_incl=bl_incl, bl_excl=bl_excl, fig_name=fig_name, flag_mask=flag_mask, flag_ns=flag_ns, y_axis=y_axis, plot_abs=plot_abs)
+        rt.bl_data_operate(plot, full_data=True, keep_dist_axis=False, bl_incl=bl_incl, bl_excl=bl_excl, fig_name=fig_name, flag_mask=flag_mask, flag_ns=flag_ns, interpolate_ns=interpolate_ns, y_axis=y_axis, plot_abs=plot_abs)
         rt.add_history(self.history)
 
         return rt
@@ -113,6 +123,7 @@ class PlotTimestream(tod_task.IterTimestream):
                     'bl_excl': [],
                     'flag_mask': False,
                     'flag_ns': False,
+                    'interpolate_ns': False,
                     'y_axis': 'jul_date', # or 'ra'
                     'plot_abs': False,
                     'fig_name': 'vis',
@@ -125,11 +136,12 @@ class PlotTimestream(tod_task.IterTimestream):
         bl_excl = self.params['bl_excl']
         flag_mask = self.params['flag_mask']
         flag_ns = self.params['flag_ns']
+        interpolate_ns = self.params['interpolate_ns']
         y_axis = self.params['y_axis']
         plot_abs = self.params['plot_abs']
         fig_name = self.params['fig_name']
 
-        ts.pol_and_bl_data_operate(plot, full_data=True, keep_dist_axis=False, bl_incl=bl_incl, bl_excl=bl_excl, fig_name=fig_name, flag_mask=flag_mask, flag_ns=flag_ns, y_axis=y_axis, plot_abs=plot_abs)
+        ts.pol_and_bl_data_operate(plot, full_data=True, keep_dist_axis=False, bl_incl=bl_incl, bl_excl=bl_excl, fig_name=fig_name, flag_mask=flag_mask, flag_ns=flag_ns, interpolate_ns=interpolate_ns, y_axis=y_axis, plot_abs=plot_abs)
         ts.add_history(self.history)
 
         return ts
