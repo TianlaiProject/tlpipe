@@ -10,7 +10,7 @@ from tlpipe.utils.path_util import output_path
 def cal(vis, vis_mask, li, gi, fbl, rt, **kwargs):
 
     if np.prod(vis.shape) == 0 :
-        return vis
+        return vis, vis_mask
 
     nt = vis.shape[0]
     on_time = rt['ns_on'].attrs['on_time']
@@ -47,6 +47,11 @@ def cal(vis, vis_mask, li, gi, fbl, rt, **kwargs):
             else:
                 upper = ind + 2 + num_mean
             phase.append( np.angle(np.mean(vis[ind+2:upper]) - np.ma.mean(off_sec)) ) # in radians
+
+    # not enough valid data to do the ns_cal
+    if len(phase) <= 3:
+        vis_mask[:] = True # mask the vis as no ns_cal has done
+        return vis, vis_mask
 
     phase = np.unwrap(phase) # unwrap 2pi discontinuity
 
