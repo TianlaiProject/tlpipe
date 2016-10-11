@@ -1057,6 +1057,9 @@ class BeamTransfer(object):
         dbeam = dbeam.transpose((0, 2, 1)).conj()
 
         vecb = np.zeros((self.nfreq, self.nsky), dtype=np.complex128)
+        if self.noise_weight:
+            noise_diag = self.telescope.noisepower(np.arange(self.telescope.npairs), 0).flatten()
+            vec = vec * (1.0/noise_diag)
         vec = vec.reshape((self.nfreq, self.ntel))
 
         for fi in range(self.nfreq):
