@@ -243,7 +243,7 @@ class Timestream(object):
 
     #======== Make map from uncleaned stream ============
 
-    def mapmake_full(self, nside, mapname):
+    def mapmake_full(self, nside, mapname, dirty=False):
 
 
         def _make_alm(mi):
@@ -251,7 +251,10 @@ class Timestream(object):
             print "Making %i" % mi
 
             mmode = self.mmode(mi)
-            sphmode = self.beamtransfer.project_vector_telescope_to_sky(mi, mmode)
+            if dirty:
+                sphmode = self.beamtransfer.project_vector_backward_dirty(mi, mmode)
+            else:
+                sphmode = self.beamtransfer.project_vector_telescope_to_sky(mi, mmode)
 
             return sphmode
 

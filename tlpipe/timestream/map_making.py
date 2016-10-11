@@ -39,6 +39,7 @@ class MapMaking(tod_task.SingleTimestream):
                     'simulate': False,
                     'input_maps': [],
                     'add_noise': True,
+                    'dirty_map': False,
                   }
 
     prefix = 'mm_'
@@ -62,6 +63,7 @@ class MapMaking(tod_task.SingleTimestream):
         simulate = self.params['simulate']
         input_maps = self.params['input_maps']
         add_noise = self.params['add_noise']
+        dirty_map = self.params['dirty_map']
 
         ts.redistribute('frequency')
 
@@ -194,7 +196,10 @@ class MapMaking(tod_task.SingleTimestream):
 
         tstream.generate_mmodes()
         nside = hputil.nside_for_lmax(tel.lmax, accuracy_boost=tel.accuracy_boost)
-        tstream.mapmake_full(nside, 'map_full.hdf5')
+        if dirty_map:
+            tstream.mapmake_full(nside, 'map_full_dirty.hdf5', dirty=True)
+        else:
+            tstream.mapmake_full(nside, 'map_full.hdf5', dirty=True)
 
         # ts.add_history(self.history)
 
