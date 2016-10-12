@@ -41,8 +41,9 @@ def plot(vis, vis_mask, li, gi, bl, obj, **kwargs):
         else:
             off = np.where(np.logical_not(obj['ns_on'][:]))[0]
             for fi in range(vis1.shape[1]):
-                itp = InterpolatedUnivariateSpline(off, vis1[off, fi])
-                vis1[on, fi] = itp(on)
+                itp_real = InterpolatedUnivariateSpline(off, vis1[off, fi].real)
+                itp_imag= InterpolatedUnivariateSpline(off, vis1[off, fi].imag)
+                vis1[on, fi] = itp_real(on) + 1.0J * itp_imag(on)
     else:
         vis1 = vis
 
