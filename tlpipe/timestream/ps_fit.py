@@ -1,27 +1,26 @@
 """Calibration by strong point source fitting."""
 
 import os
-import itertools
 import numpy as np
 import ephem
 import aipy as a
 import tod_task
 from caput import mpiutil
 
+
 def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit, fig_prefix):
-    vis_obs_orig = np.ma.array(vis_obs, mask=vis_mask)
-    num_nomask = vis_obs_orig.count()
+    vis_obs = np.ma.array(vis_obs, mask=vis_mask)
+    num_nomask = vis_obs.count()
     if num_nomask == 0: # no valid vis data
-        return 1.0, 0, False
+        return 1.0, 0
 
     fi, pi, (i, j) = idx
 
+    gains = []
+    chi2s = []
     shifts = range(-num_shift/2, num_shift/2+1)
-    # original data fit
-    gains_orig = []
-    chi2s_orig = []
     for si in shifts:
-        vis = vis_obs_orig[start_ind+si:end_ind+si]
+        vis = vis_obs[start_ind+si:end_ind+si]
         num_nomask = vis.count()
         if num_nomask == 0: # no valid vis data
             continue
@@ -32,41 +31,8 @@ def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit
             vis_cal = gain * vis_sim
             err = vis - vis_cal
             chi2 = np.ma.dot(err.conj(), err).real
-            gains_orig.append(gain)
-            chi2s_orig.append(chi2/num_nomask)
-
-    # conj data fit
-    vis_obs_conj = np.ma.array(vis_obs.conj(), mask=vis_mask)
-    gains_conj = []
-    chi2s_conj = []
-    for si in shifts:
-        vis = vis_obs_conj[start_ind+si:end_ind+si]
-        num_nomask = vis.count()
-        if num_nomask == 0: # no valid vis data
-            continue
-        else:
-            xx = np.ma.dot(vis_sim.conj(), vis_sim)
-            xy = np.ma.dot(vis_sim.conj(), vis)
-            gain = xy / xx
-            vis_cal = gain * vis_sim
-            err = vis - vis_cal
-            chi2 = np.ma.dot(err.conj(), err).real
-            gains_conj.append(gain)
-            chi2s_conj.append(chi2/num_nomask)
-
-    # return when no valid data has been fit
-    if len(gains_orig) == 0 or len(gains_conj) == 0:
-        return 1.0, 0, False
-
-    # compare the median of chi2s_orig and chi2s_conj
-    if np.median(chi2s_conj) < np.median(chi2s_orig):
-        conj = True
-        gains = gains_conj
-        chi2s = chi2s_conj
-    else:
-        conj = False
-        gains = gains_orig
-        chi2s = chi2s_orig
+            gains.append(gain)
+            chi2s.append(chi2/num_nomask)
 
     chi2s = np.array(chi2s)
     if np.allclose(chi2s, np.sort(chi2s)):
@@ -83,10 +49,7 @@ def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit
     obs_data = np.ma.array(vis_obs[start_ind:end_ind], mask=vis_mask[start_ind:end_ind])
     factor = np.max(np.ma.abs(obs_data)) / np.max(np.abs(vis_sim))
     obs_data = obs_data / factor # make amp close to each other
-    if conj:
-        vis_cal = np.ma.array(vis_obs[start_ind+si:end_ind+si], mask=vis_mask[start_ind+si:end_ind+si]).conj() / gain
-    else:
-        vis_cal = np.ma.array(vis_obs[start_ind+si:end_ind+si], mask=vis_mask[start_ind+si:end_ind+si]) / gain
+    vis_cal = np.ma.array(vis_obs[start_ind+si:end_ind+si], mask=vis_mask[start_ind+si:end_ind+si]) / gain
     if si != 0 and mpiutil.rank0:
         print 'shift %d for %s...' % (si, idx)
 
@@ -120,7 +83,7 @@ def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit
         plt.savefig(fig_name)
         plt.clf()
 
-    return gain, si, conj
+    return gain, si
 
 
 class PsFit(tod_task.IterTimestream):
@@ -199,8 +162,8 @@ class PsFit(tod_task.IterTimestream):
         num_shift = min(num_shift, end_ind - start_ind)
 
         ############################################
-        if ts.is_cylinder:
-            ts.local_vis[:] = ts.local_vis.conj() # now for cylinder array
+        # if ts.is_cylinder:
+        #     ts.local_vis[:] = ts.local_vis.conj() # now for cylinder array
         ############################################
 
         vis = ts.local_vis
@@ -225,47 +188,18 @@ class PsFit(tod_task.IterTimestream):
                     aj = feedno.index(j)
                     uij = aa.gen_uvw(ai, aj, src='z')[:, 0, :] # (rj - ri)/lambda
                     bmij = aa.bm_response(ai, aj).reshape(-1)
+                    # vis_sim[ind, :, pi, bi] = (const.c**2 / (2 * const.k_B * freq**2) / Omega_ij) * Sc * bmij * np.exp(-2.0J * np.pi * np.dot(s_top, uij)) # Unit: K
                     vis_sim[ind, :, pi, bi] = Sc * bmij * np.exp(-2.0J * np.pi * np.dot(s_top, uij))
 
-        conjs = []
-        xconjs = []
-        yconjs = []
         # iterate over freq
         for fi in range(nfreq):
             # for pi in range(len(pol)):
             for pi in range(2): # only cal for xx, yy
                 for bi, (i, j) in enumerate(bls):
-                    gain, si, conj = fit(vis[:, fi, pi, bi], vis_mask[:, fi, pi, bi], vis_sim[:, fi, pi, bi], start_ind, end_ind, num_shift, (fi, pi, (i, j)), plot_fit, fig_prefix)
+                    gain, si = fit(vis[:, fi, pi, bi], vis_mask[:, fi, pi, bi], vis_sim[:, fi, pi, bi], start_ind, end_ind, num_shift, (fi, pi, (i, j)), plot_fit, fig_prefix)
                     # cal for vis
-                    if conj:
-                        if pi == 0: # xx
-                            conjs.append((2*i-1, 2*j-1))
-                            xconjs.append((i, j))
-                        elif pi == 1: # yy
-                            conjs.append((2*i, 2*j))
-                            yconjs.append((i, j))
-                        ts.local_vis[:, fi, pi, bi] = np.roll(vis[:, fi, pi, bi].conj(), -si) / gain # NOTE the use of -si
-                        ts.local_vis_mask[:, fi, pi, bi] = np.roll(vis_mask[:, fi, pi, bi], -si) / gain # NOTE the use of -si
-                    else:
-                        ts.local_vis[:, fi, pi, bi] = np.roll(vis[:, fi, pi, bi], -si) / gain # NOTE the use of -si
-                        ts.local_vis_mask[:, fi, pi, bi] = np.roll(vis_mask[:, fi, pi, bi], -si) # NOTE the use of -si
-
-        # gather conjs
-        comm = mpiutil.world
-        conjs = list(itertools.chain(*comm.allgather(conjs)))
-        conjs = list(set(conjs)) # unique list
-        conjs = sorted(conjs)
-        xconjs = list(itertools.chain(*comm.allgather(xconjs)))
-        xconjs = list(set(xconjs)) # unique list
-        xconjs = sorted(xconjs)
-        yconjs = list(itertools.chain(*comm.allgather(yconjs)))
-        yconjs = list(set(yconjs)) # unique list
-        yconjs = sorted(yconjs)
-        if mpiutil.rank0:
-            print 'conjs:', conjs
-            print 'xconjs:', xconjs
-            print 'yconjs:', yconjs
-            print len(conjs), len(xconjs), len(yconjs)
+                    ts.local_vis[:, fi, pi, bi] = np.roll(vis[:, fi, pi, bi], -si) / gain # NOTE the use of -si
+                    ts.local_vis_mask[:, fi, pi, bi] = np.roll(vis_mask[:, fi, pi, bi], -si) # NOTE the use of -si
 
         ts.add_history(self.history)
 
