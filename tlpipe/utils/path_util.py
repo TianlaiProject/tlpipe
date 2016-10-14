@@ -39,11 +39,12 @@ def input_path(path):
         raise ValueError('Invalid input path %s' % path)
 
 
-def _single_output_path(path, mkdir):
+def _single_output_path(path, relative, mkdir):
     # Normalize the given output `path`.
-    # This function supposes that `path` is relative to os.environ['TL_OUTPUT'].
+    # This function supposes that `path` is relative to os.environ['TL_OUTPUT'] if `relative` is True.
 
-    path = os.environ['TL_OUTPUT'] + path
+    if relative:
+        path = os.environ['TL_OUTPUT'] + path
     abs_path = os.path.abspath(os.path.normpath(os.path.expanduser(path)))
 
     if mkdir:
@@ -56,17 +57,20 @@ def _single_output_path(path, mkdir):
     return abs_path
 
 
-def output_path(path, mkdir=True):
+def output_path(path, relative=True, mkdir=True):
     """Normalize the given output `path`.
 
-    This function supposes that `path` is relative to os.environ['TL_OUTPUT'].
+    This function supposes that `path` is relative to os.environ['TL_OUTPUT'] if
+    `relative` is True.
 
     Parameters
     ----------
     path : string or list of strings
         The output path.
+    relative : bool, optional
+        The `path` is relative to os.environ['TL_OUTPUT'] if True. Default is True.
     mkdir : bool, optional
-        Make the path dircetory if True. Default is True.
+        Make the path direcetory if True. Default is True.
 
     Returns
     -------
@@ -75,8 +79,8 @@ def output_path(path, mkdir=True):
 
     """
     if type(path) is str:
-        return _single_output_path(path, mkdir)
+        return _single_output_path(path, relative, mkdir)
     elif type(path) is list:
-        return [ _single_output_path(p, mkdir) for p in path ]
+        return [ _single_output_path(p, relative, mkdir) for p in path ]
     else:
         raise ValueError('Invalid output path %s' % path)
