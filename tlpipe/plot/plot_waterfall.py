@@ -29,7 +29,7 @@ def plot(vis, vis_mask, li, gi, bl, obj, **kwargs):
         bl_incl = [ {f1, f2} for (f1, f2) in bl_incl ]
         bl_excl = [ {f1, f2} for (f1, f2) in bl_excl ]
         if (not bl1 in bl_incl) or (bl1 in bl_excl):
-            return vis
+            return vis, vis_mask
 
     if flag_mask:
         vis1 = np.ma.array(vis, mask=vis_mask)
