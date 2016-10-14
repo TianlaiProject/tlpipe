@@ -43,7 +43,7 @@ class Flag(tod_task.IterRawTimestream):
 
         # time integration
         tm_vis = np.ma.mean(np.ma.array(rt.local_vis, mask=rt.local_vis_mask), axis=0)
-        freq_window = min(nfreq/2, freq_window)
+        # freq_window = min(nfreq/2, freq_window)
         # ensure window_size is an odd number
         if freq_window % 2 == 0:
             freq_window += 1
@@ -87,13 +87,13 @@ class Flag(tod_task.IterRawTimestream):
                     plt.xlabel(r'$\nu$ / MHz')
                     plt.legend(loc='best')
                     fig_name = '%s_%d_%d.png' % (freq_fig_prefix, bl[lbi][0], bl[lbi][1])
-                    fig_name = output_path(fig_name)
+                    fig_name = output_path(fig_name, iteration=self.iteration)
                     plt.savefig(fig_name)
                     plt.clf()
 
         # freq integration
         fm_vis = np.ma.mean(np.ma.array(rt.local_vis, mask=rt.local_vis_mask), axis=1)
-        time_window = min(nt/2, time_window)
+        # time_window = min(nt/2, time_window)
         # ensure window_size is an odd number
         if time_window % 2 == 0:
             time_window += 1
@@ -144,7 +144,7 @@ class Flag(tod_task.IterRawTimestream):
                     plt.xlabel(r'$t$ / Julian Date')
                     plt.legend(loc='best')
                     fig_name = '%s_%d_%d.png' % (time_fig_prefix, bl[lbi][0], bl[lbi][1])
-                    fig_name = output_path(fig_name)
+                    fig_name = output_path(fig_name, iteration=self.iteration)
                     plt.savefig(fig_name)
                     plt.clf()
 

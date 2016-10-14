@@ -23,6 +23,7 @@ def plot(vis, vis_mask, li, gi, bl, obj, **kwargs):
     y_axis = kwargs.get('y_axis', 'jul_date')
     plot_abs = kwargs.get('plot_abs', False)
     fig_prefix = kwargs.get('fig_name', 'vis')
+    iteration= kwargs.get('iteration', 0)
 
     if bl_incl != 'all':
         bl1 = set(bl)
@@ -77,7 +78,7 @@ def plot(vis, vis_mask, li, gi, bl, obj, **kwargs):
         fig_name = '%s_%d_%d.png' % (fig_prefix, bl[0], bl[1])
     else:
         fig_name = '%s_%d_%d_%s.png' % (fig_prefix, bl[0], bl[1], pol)
-    fig_name = output_path(fig_name)
+    fig_name = output_path(fig_name, iteration=iteration)
     plt.savefig(fig_name)
     plt.clf()
 
@@ -110,7 +111,7 @@ class PlotRawTimestream(tod_task.IterRawTimestream):
         plot_abs = self.params['plot_abs']
         fig_name = self.params['fig_name']
 
-        rt.bl_data_operate(plot, full_data=True, keep_dist_axis=False, bl_incl=bl_incl, bl_excl=bl_excl, fig_name=fig_name, flag_mask=flag_mask, flag_ns=flag_ns, interpolate_ns=interpolate_ns, y_axis=y_axis, plot_abs=plot_abs)
+        rt.bl_data_operate(plot, full_data=True, keep_dist_axis=False, bl_incl=bl_incl, bl_excl=bl_excl, fig_name=fig_name, iteration=self.iteration, flag_mask=flag_mask, flag_ns=flag_ns, interpolate_ns=interpolate_ns, y_axis=y_axis, plot_abs=plot_abs)
         rt.add_history(self.history)
 
         return rt
@@ -142,7 +143,8 @@ class PlotTimestream(tod_task.IterTimestream):
         plot_abs = self.params['plot_abs']
         fig_name = self.params['fig_name']
 
-        ts.pol_and_bl_data_operate(plot, full_data=True, keep_dist_axis=False, bl_incl=bl_incl, bl_excl=bl_excl, fig_name=fig_name, flag_mask=flag_mask, flag_ns=flag_ns, interpolate_ns=interpolate_ns, y_axis=y_axis, plot_abs=plot_abs)
+        ts.pol_and_bl_data_operate(plot, full_data=True, keep_dist_axis=False, bl_incl=bl_incl, bl_excl=bl_excl, fig_name=fig_name, iteration=self.iteration, flag_mask=flag_mask, flag_ns=flag_ns, interpolate_ns=interpolate_ns, y_axis=y_axis, plot_abs=plot_abs)
+
         ts.add_history(self.history)
 
         return ts
