@@ -1007,7 +1007,7 @@ class _OneAndOne(TaskBase):
                 for output_file in self.output_files:
                     msg += '\n\t%s' % output_file
                     output_dir = path.dirname(output_file)
-                    if not os.path.exists(output_dir):
+                    if not path.exists(output_dir):
                         os.makedirs(output_dir)
 
                 logger.info(msg)
@@ -1030,14 +1030,14 @@ class _OneAndOne(TaskBase):
         return input
 
     def cast_input(self, input):
-        """Override to support accepting pipeline inputs of variouse types."""
+        """Override to support accepting pipeline inputs of various types."""
 
         return input
 
     def read_output(self, filenames):
         """Override to implement reading outputs from disk.
 
-        Used for result cacheing.
+        Used for result caching.
 
         """
 
@@ -1135,7 +1135,6 @@ class IterBase(_OneAndOne):
     def next(self, input=None):
         """Should not need to override."""
 
-        # Sort out filenames.
         if self.iter_num is not None and self.iter_cnt >= self.iter_num:
             # We have run the required number of iterations
             raise PipelineStopIteration()
