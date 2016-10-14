@@ -3,6 +3,26 @@
 import os
 
 
+def iter_path(path, iteration):
+    """Insert current iteration flag to the file path.
+
+    Parameters
+    ----------
+    path : string
+        The output path.
+    iteration : integer
+        The iteration number.
+
+    Returns
+    -------
+    new_path : string
+        The generated new path which has the iteration been inserted.
+
+    """
+    head, tail = os.path.split(path)
+    return os.path.join(head, '%d' % iteration, tail)
+
+
 def _single_input_path(path):
     # Normalize the given input `path`.
     # This function supposes that `path` is a absolute path if it starts with /,
@@ -14,7 +34,7 @@ def _single_input_path(path):
     return os.path.abspath(os.path.normpath(os.path.expanduser(path)))
 
 
-def input_path(path):
+def input_path(path, iteration=None):
     """Normalize the given input `path`.
 
     This function supposes that `path` is a absolute path if it starts with /,
@@ -24,6 +44,9 @@ def input_path(path):
     ----------
     path : string or list of strings
         The input path.
+    iteration : None or integer, optional
+        The iteration number. If it is not None, it will be inserted into the
+        path before the path's basename. Default is None.
 
     Returns
     -------
@@ -31,10 +54,12 @@ def input_path(path):
         The normalized absolute input path.
 
     """
+    func = iter_path if iteration is not None else lambda x, y: x
+
     if type(path) is str:
-        return _single_input_path(path)
+        return _single_input_path(func(path, iteration))
     elif type(path) is list:
-        return [ _single_input_path(p) for p in path ]
+        return [ _single_input_path(func(p, iteration)) for p in path ]
     else:
         raise ValueError('Invalid input path %s' % path)
 
@@ -57,7 +82,7 @@ def _single_output_path(path, relative, mkdir):
     return abs_path
 
 
-def output_path(path, relative=True, mkdir=True):
+def output_path(path, relative=True, mkdir=True, iteration=None):
     """Normalize the given output `path`.
 
     This function supposes that `path` is relative to os.environ['TL_OUTPUT'] if
@@ -70,7 +95,10 @@ def output_path(path, relative=True, mkdir=True):
     relative : bool, optional
         The `path` is relative to os.environ['TL_OUTPUT'] if True. Default is True.
     mkdir : bool, optional
-        Make the path direcetory if True. Default is True.
+        Make the path directory if True. Default is True.
+    iteration : None or integer, optional
+        The iteration number. If it is not None, it will be inserted into the
+        path before the path's basename. Default is None.
 
     Returns
     -------
@@ -78,9 +106,11 @@ def output_path(path, relative=True, mkdir=True):
         The normalized absolute output path.
 
     """
+    func = iter_path if iteration is not None else lambda x, y: x
+
     if type(path) is str:
-        return _single_output_path(path, relative, mkdir)
+        return _single_output_path(func(path, iteration), relative, mkdir)
     elif type(path) is list:
-        return [ _single_output_path(p, relative, mkdir) for p in path ]
+        return [ _single_output_path(func(p, iteration), relative, mkdir) for p in path ]
     else:
         raise ValueError('Invalid output path %s' % path)
