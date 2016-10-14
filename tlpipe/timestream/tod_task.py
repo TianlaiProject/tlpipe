@@ -1,5 +1,6 @@
 """Base pipeline tasks for time ordered data opteration."""
 
+from tlpipe.utils.path_util import input_path, output_path
 from tlpipe.pipeline.pipeline import SingleBase, IterBase
 
 
@@ -178,7 +179,8 @@ class IterTod(IterBase):
         stop = self.params['stop']
         dist_axis = self.params['dist_axis']
 
-        tod = self._Tod_class(self.input_files, mode, start, stop, dist_axis)
+        input_files = input_path(self.input_files, iteration=self.iteration)
+        tod = self._Tod_class(input_files, mode, start, stop, dist_axis)
 
         tod = self.data_select(tod)
 
@@ -193,7 +195,8 @@ class IterTod(IterBase):
         check_status = self.params['check_status']
         libver = self.params['libver']
 
-        output.to_files(self.output_files, exclude, check_status, libver)
+        output_files = output_path(self.output_files, relative=False, iteration=self.iteration)
+        output.to_files(output_files, exclude, check_status, libver)
 
 
 class IterRawTimestream(IterTod):
