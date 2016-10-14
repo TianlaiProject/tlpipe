@@ -13,7 +13,7 @@ class Dispatch(tod_task.IterRawTimestream):
     """Dispatch data."""
 
     params_init = {
-                    'days': 1.0, # how many sidereal days
+                    'days': 1.0, # how many sidereal days in one iteration
                     'exclude_bad': True, # exclude bad channels
                   }
 
@@ -49,7 +49,7 @@ class Dispatch(tod_task.IterRawTimestream):
         stop = self.params['stop']
         dist_axis = self.params['dist_axis']
 
-        num_int = np.int(np.ceil(days * const.sday / self.int_time))
+        num_int = np.int(np.ceil(days * const.sday / self.int_time)) # number of int_time
         start = self.abs_start + self.iteration * num_int
         stop = min(self.abs_stop, self.abs_start + (self.iteration + 1) * num_int)
 
