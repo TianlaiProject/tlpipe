@@ -38,11 +38,14 @@ class Rebin(tod_task.IterTimestream):
             # average over frequency
             for idx in range(bin_number):
                 inds, weight = unique(repeat_inds[start[idx]:end[idx]], return_counts=True)
+                # rebin freq
                 freq[idx] = average(ts.freq[inds], axis=0, weights=weight)
+                # rebin vis
                 masked_vis = np.ma.array(ts.local_vis[:, inds], mask=ts.local_vis_mask[:, inds])
                 vis[:, idx] = average(masked_vis, axis=1, weights=weight) # freq mean
-                if masked_vis.count == 0:
-                    vis_mask[:, idx] = True
+                # rebin vis_mask
+                valid_cnt = np.sum(np.logical_not(ts.local_vis_mask[:, inds]).astype(int) * weight[:, np.newaxis, np.newaxis], axis=1)
+                vis_mask[:, idx] = np.where(valid_cnt==0, True, False)
 
             # create rebinned datasets
             vis = mpiarray.MPIArray.wrap(vis, axis=3)
