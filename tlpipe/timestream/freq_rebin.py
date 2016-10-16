@@ -54,8 +54,8 @@ class Rebin(tod_task.IterTimestream):
 
             # for other freq_axis datasets
             for name in ts.freq_ordered_datasets.keys():
-                if not name in ('freq', 'vis', 'vis_mask'): # exclude already rebinned datasets
-                    raise RuntimeError('Should not have other freq_ordered_datasets')
+                if name in ts.iterkeys() and not name in ('freq', 'vis', 'vis_mask'): # exclude already rebinned datasets
+                    raise RuntimeError('Should not have other freq_ordered_datasets %s' % name)
 
         ts.add_history(self.history)
 
