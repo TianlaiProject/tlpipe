@@ -913,6 +913,41 @@ class TaskBase(object):
                         self._in[jj].put(product)
 
 
+class DoNothing(TaskBase):
+    """Do nothing.
+
+    This task will actually do nothing and its :meth:`next` is never called,
+    since the pipeline never generates its input, 'non_existent_input'.
+    As this task method is missing its input, as specified by the 'requires'
+    or 'in' keys, the pipeline will restart at the beginning of the `tasks`
+    list once it get to this task. Once everything before :class:`DoNothing`
+    has been executed, the pipeline notices that there is no opertunity for
+    'non_existent_input' to be generated and forces `DoNothing` to proceed to
+    :meth:`finish`. This then unblocks its following tasks, allowing them to
+    proceed normally.
+
+    This may be useful when devise non-trivial pipeline flow.
+
+    """
+
+    params_init = {
+                    'requires': None,
+                    'in': 'non_existent_input',
+                    'out': None,
+                  }
+
+    prefix = 'dn_'
+
+    def setup(self):
+        pass
+
+    def next(self, input):
+        raise RuntimeError('Something wrong happened, DoNothing.next should never be executed')
+
+    def finish(self):
+        pass
+
+
 class _OneAndOne(TaskBase):
     """Base class for tasks that have (at most) one input and one output
 
