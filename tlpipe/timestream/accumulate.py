@@ -28,7 +28,7 @@ class Accum(tod_task.IterTimestream):
             # self.data = ts.copy()
             self.data.apply_mask(fill_val=0) # apply mask, fill 0 to masked values
             # create weight dataset
-            weight = np.logical_not(self.data.local_vis_mask).astype(int)
+            weight = np.logical_not(self.data.local_vis_mask).astype(np.int16) # use int16 to save memory
             weight = mpiarray.MPIArray.wrap(weight, axis=self.data.main_data_dist_axis)
             axis_order = self.data.main_axes_ordered_datasets[self.data.main_data_name]
             self.data.create_main_axis_ordered_dataset(axis_order, 'weight', weight, axis_order)
@@ -47,7 +47,7 @@ class Accum(tod_task.IterTimestream):
 
             ts.apply_mask(fill_val=0) # apply mask, fill 0 to masked values
             self.data.local_vis[:] += ts.local_vis # accumulate vis
-            self.data['weight'].local_data[:] += np.logical_not(ts.local_vis_mask).astype(int) # update weight
+            self.data['weight'].local_data[:] += np.logical_not(ts.local_vis_mask).astype(np.int16) # update weight
             self.data.local_vis_mask[:] = np.where(self.data['weight'].local_data != 0, False, True) # update mask
 
 
