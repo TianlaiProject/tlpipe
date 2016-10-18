@@ -304,6 +304,8 @@ class Timestream(object):
 
             with h5py.File(self.output_directory + '/' + mapname, 'w') as f:
                 f.create_dataset('/map', data=skymap)
+                f.attrs['frequency'] = self.beamtransfer.telescope.frequencies
+                f.attrs['polarization'] = np.array(['I', 'Q', 'U', 'V'])[:self.beamtransfer.telescope.num_pol_sky]
 
         mpiutil.barrier()
 
