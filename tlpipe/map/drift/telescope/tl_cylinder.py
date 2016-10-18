@@ -7,12 +7,12 @@ from ..telescope import cylinder, cylbeam
 class TlUnpolarisedCylinder(cylinder.UnpolarisedCylinderTelescope):
     """A telescope describing the Tianlai non-polarized cylinder array."""
 
-    def __init__(self, latitude=45, longitude=0, freqs=[], tsys_flat=50.0, ndays=1.0, accuracy_boost=1.0, l_boost=1.0, bl_range=[0.0, 1.0e7], auto_correlations=False, local_origin=True, cylinder_width=15.0, feedpos=np.zeros((0, 3)), in_cylinder=True, touching=True, cylspacing=0.0, non_commensurate=False, e_width=0.7, h_width=1.0):
+    def __init__(self, latitude=45, longitude=0, freqs=[], band_width=None, tsys_flat=50.0, ndays=1.0, accuracy_boost=1.0, l_boost=1.0, bl_range=[0.0, 1.0e7], auto_correlations=False, local_origin=True, cylinder_width=15.0, feedpos=np.zeros((0, 3)), in_cylinder=True, touching=True, cylspacing=0.0, non_commensurate=False, e_width=0.7, h_width=1.0):
 
         num_feeds = len(feedpos)
         self._feedpos = feedpos[:, :2] # do not care z
 
-        cylinder.UnpolarisedCylinderTelescope.__init__(self, latitude, longitude, freqs, tsys_flat, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin, 3, num_feeds, cylinder_width, 0.4, in_cylinder, touching, cylspacing, non_commensurate, e_width, h_width)
+        cylinder.UnpolarisedCylinderTelescope.__init__(self, latitude, longitude, freqs, band_width, tsys_flat, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin, 3, num_feeds, cylinder_width, 0.4, in_cylinder, touching, cylspacing, non_commensurate, e_width, h_width)
 
 
     @property

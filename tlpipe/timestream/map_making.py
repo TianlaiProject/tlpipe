@@ -73,7 +73,8 @@ class MapMaking(tod_task.SingleTimestream):
         # lon = np.degrees(ts['ra_dec'][0, 0]) # the first ra
         local_origin = False
         freq = ts.freq
-        freqs = ts.freq.data.to_numpy_array(root=None)
+        freqs = ts.freq.data.to_numpy_array(root=None) # MHz
+        band_width = ts.attrs['freqstep'] # MHz
         ndays = 1
         feeds = ts['feedno'][:]
         az, alt = ts['az_alt'][0]
@@ -84,10 +85,10 @@ class MapMaking(tod_task.SingleTimestream):
 
         if ts.is_dish:
             dish_width = ts.attrs['dishdiam']
-            tel = tl_dish.TlUnpolarisedDishArray(lat, lon, freqs, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin, dish_width, feedpos, pointing)
+            tel = tl_dish.TlUnpolarisedDishArray(lat, lon, freqs, band_width, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin, dish_width, feedpos, pointing)
         elif ts.is_cylinder:
             cyl_width = ts.attrs['cywid']
-            tel = tl_cylinder.TlUnpolarisedCylinder(lat, lon, freqs, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin, cyl_width, feedpos)
+            tel = tl_cylinder.TlUnpolarisedCylinder(lat, lon, freqs, band_width, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin, cyl_width, feedpos)
         else:
             raise RuntimeError('Unknown array type %s' % ts.attrs['telescope'])
 

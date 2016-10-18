@@ -48,9 +48,9 @@ class CylinderTelescope(telescope.TransitTelescope):
     _fwhm_e = 2.0 * np.pi / 3.0  # Factor of 0.675 from dipole model
     _fwhm_h = 2.0 * np.pi / 3.0
 
-    def __init__(self, latitude=45, longitude=0, freqs=[], tsys_flat=50.0, ndays=1.0, accuracy_boost=1.0, l_boost=1.0, bl_range=[0.0, 1.0e7], auto_correlations=False, local_origin=True, num_cylinders=3, num_feeds=96, cylinder_width=15.0, feed_spacing=0.4, in_cylinder=True, touching=True, cylspacing=0.0, non_commensurate=False, e_width=0.7, h_width=1.0):
+    def __init__(self, latitude=45, longitude=0, freqs=[], band_width=None, tsys_flat=50.0, ndays=1.0, accuracy_boost=1.0, l_boost=1.0, bl_range=[0.0, 1.0e7], auto_correlations=False, local_origin=True, num_cylinders=3, num_feeds=96, cylinder_width=15.0, feed_spacing=0.4, in_cylinder=True, touching=True, cylspacing=0.0, non_commensurate=False, e_width=0.7, h_width=1.0):
 
-        telescope.TransitTelescope.__init__(self, latitude, longitude, freqs, tsys_flat, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin)
+        telescope.TransitTelescope.__init__(self, latitude, longitude, freqs, band_width, tsys_flat, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin)
 
         self.num_cylinders= num_cylinders
         self.num_feeds = num_feeds
