@@ -1,0 +1,29 @@
+# -*- mode: python; -*-
+
+# input file for pipeline manager
+# execute this pipeline by either command of the following two:
+# tlpipe dir/to/cyl.pipe
+# mpiexec -n N tlpipe dir/to/cyl.pipe
+
+
+pipe_tasks = []
+pipe_outdir = '/data/ycli/tianlai/output/'
+pipe_logging = 'notset'
+# pipe_logging = 'info'
+
+
+#import glob
+#data_dir = '/tianlai/data/20160829182035_hdf5'
+## files = sorted(glob.glob(data_dir+'/*.hdf5'))[1:]
+## files = sorted(glob.glob(data_dir+'/*.hdf5'))[22:80]
+#files = sorted(glob.glob(data_dir+'/*.hdf5'))[15:80]
+## files = sorted(glob.glob(data_dir+'/*.hdf5'))[15:85]
+## files = sorted(glob.glob(data_dir+'/*.hdf5'))[43:57] # cas A
+## files = sorted(glob.glob(data_dir+'/*.hdf5'))[49:51] # cas A
+
+
+from tlpipe.foreground import foreground
+pipe_tasks.append(foreground.FgSub)
+fg_input_files = '/data/ycli/tianlai/map_full.hdf5'
+
+
