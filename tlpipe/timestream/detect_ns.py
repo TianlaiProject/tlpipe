@@ -14,6 +14,7 @@ class Detect(tod_task.IterRawTimestream):
     params_init = {
                     'feed': None, # use this feed
                     'sigma': 3.0,
+                    'mask_near': 1, # how many extra near ns_on int_time to be masked
                   }
 
     prefix = 'dt_'
@@ -22,6 +23,7 @@ class Detect(tod_task.IterRawTimestream):
 
         feed = self.params['feed']
         sigma = self.params['sigma']
+        mask_near = max(0, int(self.params['mask_near']))
 
         rt.redistribute(0) # make time the dist axis
 
@@ -54,6 +56,13 @@ class Detect(tod_task.IterRawTimestream):
         if period != on_time + off_time:
             raise RuntimeError('period %d != on_time %d + off_time %d' % (period, on_time, off_time))
         else:
+            if 'noisesource' in rt.iterkeys():
+                start, stop, cycle = rt['noisesource'][0, :]
+                int_time = rt.attrs['inttime']
+                true_on_time = np.round((stop - start)/int_time)
+                true_period = np.round(cycle / int_time)
+                if on_time != true_on_time and period != true_period:
+                    raise RuntimeError('Detected wrong noise source on_time %d != %d, period %d != %d' % (on_time, true_on_time, period, true_period))
             if mpiutil.rank0:
                 print 'Detected noise source: period = %d, on_time = %d, off_time = %d' % (period, on_time, off_time)
         num_period = np.int(np.ceil(len(tt_mean) / np.float(period)))
@@ -66,14 +75,14 @@ class Detect(tod_task.IterRawTimestream):
         # import matplotlib.pyplot as plt
         # plt.figure()
         # plt.plot(np.where(ns_on, np.nan, tt_mean))
-        # # plt.plot(pinds, tt_mean[pinds], 'ro')
+        # # plt.plot(pinds, tt_mean[pinds], 'RI')
         # # plt.plot(ninds, tt_mean[ninds], 'go')
         # plt.savefig('df.png')
         # err
 
-        ns_on = mpiarray.MPIArray.from_numpy_array(ns_on)
+        ns_on1 = mpiarray.MPIArray.from_numpy_array(ns_on)
 
-        rt.create_main_time_ordered_dataset('ns_on', ns_on)
+        rt.create_main_time_ordered_dataset('ns_on', ns_on1)
         rt['ns_on'].attrs['period'] = period
         rt['ns_on'].attrs['on_time'] = on_time
         rt['ns_on'].attrs['off_time'] = off_time
@@ -81,6 +90,20 @@ class Detect(tod_task.IterRawTimestream):
         # set vis_mask corresponding to ns_on
         on_inds = np.where(rt['ns_on'].local_data[:])[0]
         rt.local_vis_mask[on_inds] = True
+
+        if mask_near > 0:
+            on_inds = np.where(ns_on)[0]
+            new_on_inds = on_inds.tolist()
+            for i in range(1, mask_near+1):
+                new_on_inds = new_on_inds + (on_inds-i).tolist() + (on_inds+i).tolist()
+            new_on_inds = np.unique(new_on_inds)
+
+            start = rt.vis_mask.local_offset[0]
+            end = start + rt.vis_mask.local_shape[0]
+            global_inds = np.arange(start, end).tolist()
+            new_on_inds = np.intersect1d(new_on_inds, global_inds)
+            local_on_inds = [ global_inds.index(i) for i in new_on_inds ]
+            rt.local_vis_mask[local_on_inds] = True # set mask using global slicing
 
         rt.add_history(self.history)
 
