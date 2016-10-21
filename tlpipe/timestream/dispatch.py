@@ -14,6 +14,7 @@ class Dispatch(tod_task.IterRawTimestream):
 
     params_init = {
                     'days': 1.0, # how many sidereal days in one iteration
+                    'extra_inttime': 150, # extra int time to ensure smooth transition in the two ends
                     'exclude_bad': True, # exclude bad channels
                   }
 
@@ -25,6 +26,7 @@ class Dispatch(tod_task.IterRawTimestream):
         super(Dispatch, self).__init__(parameter_file_or_dict, feedback)
 
         days = self.params['days']
+        extra_inttime = self.params['extra_inttime']
         mode = self.params['mode']
         start = self.params['start']
         stop = self.params['stop']
@@ -37,13 +39,14 @@ class Dispatch(tod_task.IterRawTimestream):
         with h5py.File(self.input_files[0], 'r') as f:
             self.int_time = f.attrs['inttime']
         if self.iter_num is None:
-            self.iter_num = np.int(np.ceil(self.int_time * (self.abs_stop - self.abs_start) / (days * const.sday)))
+            self.iter_num = np.int(np.ceil(self.int_time * (self.abs_stop - self.abs_start - 2*extra_inttime) / (days * const.sday)))
 
 
     def read_input(self):
         """Method for reading time ordered data input."""
 
         days = self.params['days']
+        extra_inttime = self.params['extra_inttime']
         mode = self.params['mode']
         start = self.params['start']
         stop = self.params['stop']
@@ -51,13 +54,15 @@ class Dispatch(tod_task.IterRawTimestream):
 
         num_int = np.int(np.ceil(days * const.sday / self.int_time)) # number of int_time
         start = self.abs_start + self.iteration * num_int
-        stop = min(self.abs_stop, self.abs_start + (self.iteration + 1) * num_int)
+        stop = min(self.abs_stop, start + num_int + 2*extra_inttime)
 
         tod = self._Tod_class(self.input_files, mode, start, stop, dist_axis)
 
         tod = self.data_select(tod)
 
-        tod.load_all()
+        tod.load_all() # load in all data
+
+        tod.vis.attrs['extra_inttime'] = extra_inttime
 
         return tod
 
