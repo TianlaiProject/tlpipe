@@ -2,6 +2,7 @@
 
 import numpy as np
 import tod_task
+from caput import mpiutil
 from caput import mpiarray
 
 
@@ -36,8 +37,10 @@ class Accum(tod_task.IterTimestream):
             # make they are distributed along the same axis
             ts.redistribute(self.data.main_data_dist_axis)
             # check for ra, dec
-            assert np.allclose(self.data['ra_dec'].local_data[:, 0], ts['ra_dec'].local_data[:, 0], rtol=0, atol=2*np.pi/self.data['ra_dec'].shape[0]), 'Can not accumulate data, RA not align.'
-            assert np.allclose(self.data['ra_dec'].local_data[:, 1], ts['ra_dec'].local_data[:, 1]), 'Can not accumulate data with different DEC.'
+            if not np.allclose(self.data['ra_dec'].local_data[:, 0], ts['ra_dec'].local_data[:, 0], rtol=0, atol=2*np.pi/self.data['ra_dec'].shape[0]):
+                print 'RA not align within %f for rank %d, max gap %f' % (2*np.pi/self.data['ra_dec'].shape[0], mpiutil.rank, (ts['ra_dec'].local_data[:, 0] - self.data['ra_dec'].local_data[:, 0]).max())
+            # assert np.allclose(self.data['ra_dec'].local_data[:, 0], ts['ra_dec'].local_data[:, 0], rtol=0, atol=2*np.pi/self.data['ra_dec'].shape[0]), 'Can not accumulate data, RA not align.'
+            # assert np.allclose(self.data['ra_dec'].local_data[:, 1], ts['ra_dec'].local_data[:, 1]), 'Can not accumulate data with different DEC.'
             # other checks if required
             if check:
                 assert self.data.attrs['telescope'] == ts.attrs['telescope'], 'Data are observed by different telescopes %s and %s' % (self.data.attrs['telescope'], ts.attrs['telescope'])
