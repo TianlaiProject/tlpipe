@@ -237,6 +237,8 @@ class RawTimestream(timestream_common.TimestreamCommon):
 
         # create main data
         ts.create_main_data(vis)
+        # copy attrs from rt
+        memh5.copyattrs(self.main_data.attrs, ts.main_data.attrs)
         # create attrs of this dataset
         ts.main_data.attrs['dimname'] = 'Time, Frequency, Polarization, Baseline'
 
