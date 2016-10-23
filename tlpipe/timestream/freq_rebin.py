@@ -61,6 +61,9 @@ class Rebin(tod_task.IterTimestream):
                 if name in ts.iterkeys() and not name in ('freq', 'vis', 'vis_mask'): # exclude already rebinned datasets
                     raise RuntimeError('Should not have other freq_ordered_datasets %s' % name)
 
+            # update freqstep attr
+            ts.attrs['freqstep'] = nfreq * ts.attrs['freqstep'] / bin_number
+
         ts.add_history(self.history)
 
         return ts
