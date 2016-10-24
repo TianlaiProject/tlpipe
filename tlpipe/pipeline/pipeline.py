@@ -525,8 +525,7 @@ class Manager(object):
                 except _PipelineFinished:
                     pipeline_tasks.remove(task)
                     continue
-                # Now pass the output data products to any task that needs
-                # them.
+                # Now pass the output data products to any task that needs them.
                 out_keys = task._out_keys
                 if out is None:     # This iteration supplied no output.
                     continue
@@ -771,7 +770,7 @@ class TaskBase(object):
         self._requires_keys = requires
         self._requires = [None] * n_requires
         self._in_keys = in_
-        self._in = [Queue.Queue() for i in range(n_in)]
+        self._in = [Queue.Queue() for i in xrange(n_in)]
         self._out_keys = out
 
     def _pipeline_advance_state(self):
@@ -876,7 +875,7 @@ class TaskBase(object):
         """
 
         n_keys = len(keys)
-        for ii in range(n_keys):
+        for ii in xrange(n_keys):
             key = keys[ii]
             product = products[ii]
             for jj, requires_key in enumerate(self._requires_keys):

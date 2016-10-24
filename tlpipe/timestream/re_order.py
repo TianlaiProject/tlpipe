@@ -54,7 +54,7 @@ class ReOrder(tod_task.IterTimestream):
             ra_dec = np.zeros((num_int, 2), dtype=ts['ra_dec'].dtype)
             ra_dec[:nt1] = ts['ra_dec'][extra_inttime:-extra_inttime]
             dphi = 2 * np.pi * ts.attrs['inttime'] / const.sday
-            ra_dec[nt1:, 0] = np.array([ ts['ra_dec'][-1, 0] + dphi*i for i in range(num_int-nt1) ]) # for ra
+            ra_dec[nt1:, 0] = np.array([ ts['ra_dec'][-1, 0] + dphi*i for i in xrange(num_int-nt1) ]) # for ra
             ra_dec[:, 0] = np.where(ra_dec[:, 0]>2*np.pi, ra_dec[:, 0]-2*np.pi, ra_dec[:, 0])
             ra_dec[nt1:, 1] = np.mean(ts['ra_dec'][:, 1]) # for dec
             ts.create_main_axis_ordered_dataset('time', 'ra_dec', ra_dec, (0,), recreate=True, copy_attrs=True)

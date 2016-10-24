@@ -216,7 +216,7 @@ class TimestreamCommon(container.BasicTod):
             freq_start = self.attrs['freqstart']
             freq_step = self.attrs['freqstep']
             nfreq = self.attrs['nfreq']
-            freq = np.array([ freq_start + i*freq_step for i in range(nfreq)], dtype=np.float32)
+            freq = np.array([ freq_start + i*freq_step for i in xrange(nfreq)], dtype=np.float32)
             freq_axis = self.main_data_axes.index('frequency')
             freq = freq[self.main_data_select[freq_axis]]
 
@@ -254,7 +254,7 @@ class TimestreamCommon(container.BasicTod):
             sec1970 = np.zeros(sum(nts), dtype=np.float64) # precision float32 is not enough
             cum_nts = np.cumsum([0] + nts)
             for idx, (nt, sec) in enumerate(zip(nts, sec1970s)):
-                sec1970[cum_nts[idx]:cum_nts[idx+1]] = np.array([ sec + i*int_time for i in range(nt)], dtype=np.float64) # precision float32 is not enough
+                sec1970[cum_nts[idx]:cum_nts[idx+1]] = np.array([ sec + i*int_time for i in xrange(nt)], dtype=np.float64) # precision float32 is not enough
             # gather local sec1970
             sec1970 = mpiutil.gather_array(sec1970, root=None, comm=self.comm)
             # select the corresponding section

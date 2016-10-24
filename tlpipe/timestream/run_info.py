@@ -42,7 +42,7 @@ class RunInfo(tod_task.IterRawTimestream):
         # aa.horizon = 0.0 # degree, at what angle you consider an object to be rising or setting
 
         ra_dec = np.zeros_like(az_alt) # radians
-        for ti in range(az_alt.shape[0]):
+        for ti in xrange(az_alt.shape[0]):
             az, alt = az_alt[ti]
             az, alt = ephem.degrees(az), ephem.degrees(alt)
             aa.set_jultime(rt['jul_date'].local_data[ti])

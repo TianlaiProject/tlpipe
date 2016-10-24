@@ -75,11 +75,11 @@ class RawTimestream(timestream_common.TimestreamCommon):
     #     nchan = len(channels)
     #     # use set for easy comparison
     #     if corr == 'auto':
-    #         channel_pairs = [ {channels[i]} for i in range(nchan) ]
+    #         channel_pairs = [ {channels[i]} for i in xrange(nchan) ]
     #     elif corr == 'cross':
-    #         channel_pairs = [ {channels[i], channels[j]} for i in range(nchan) for j in range(i+1, nchan) ]
+    #         channel_pairs = [ {channels[i], channels[j]} for i in xrange(nchan) for j in xrange(i+1, nchan) ]
     #     elif corr == 'all':
-    #         channel_pairs = [ {channels[i], channels[j]} for i in range(nchan) for j in range(i, nchan) ]
+    #         channel_pairs = [ {channels[i], channels[j]} for i in xrange(nchan) for j in xrange(i, nchan) ]
     #     else:
     #         raise ValueError('Unknown correlation type %s' % corr)
 
@@ -194,10 +194,10 @@ class RawTimestream(timestream_common.TimestreamCommon):
         ychans = [ self['channo'][feedno.index(fd)][1] for fd in feedno ]
 
         nfeed = len(feedno)
-        xx_pairs = [ (xchans[i], xchans[j]) for i in range(nfeed) for j in range(i, nfeed) ]
-        yy_pairs = [ (ychans[i], ychans[j]) for i in range(nfeed) for j in range(i, nfeed) ]
-        xy_pairs = [ (xchans[i], ychans[j]) for i in range(nfeed) for j in range(i, nfeed) ]
-        yx_pairs = [ (ychans[i], xchans[j]) for i in range(nfeed) for j in range(i, nfeed) ]
+        xx_pairs = [ (xchans[i], xchans[j]) for i in xrange(nfeed) for j in xrange(i, nfeed) ]
+        yy_pairs = [ (ychans[i], ychans[j]) for i in xrange(nfeed) for j in xrange(i, nfeed) ]
+        xy_pairs = [ (xchans[i], ychans[j]) for i in xrange(nfeed) for j in xrange(i, nfeed) ]
+        yx_pairs = [ (ychans[i], xchans[j]) for i in xrange(nfeed) for j in xrange(i, nfeed) ]
 
         blorder = [ tuple(bl) for bl in self['blorder'] ]
         conj_blorder = [ tuple(bl[::-1]) for bl in self['blorder'] ]
@@ -263,7 +263,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
         ts['pol'].attrs['pol_type'] = 'linear'
 
         # bl ordered dataset
-        blorder = np.array([ [feedno[i], feedno[j]] for i in range(nfeed) for j in range(i, nfeed) ])
+        blorder = np.array([ [feedno[i], feedno[j]] for i in xrange(nfeed) for j in xrange(i, nfeed) ])
         ts.create_bl_ordered_dataset('blorder', data=blorder)
         # copy attrs of this dset
         memh5.copyattrs(self['blorder'].attrs, ts['blorder'].attrs)

@@ -62,7 +62,7 @@ def plot(vis, vis_mask, li, gi, bl, obj, **kwargs):
     fig_name = '%s_%s_%d_%d.png' % (fig_prefix, integral, bl[0], bl[1])
     fig_name = output_path(fig_name, iteration=iteration)
     plt.savefig(fig_name)
-    plt.clf()
+    plt.close()
 
     return vis, vis_mask
 

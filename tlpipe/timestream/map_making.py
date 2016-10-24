@@ -116,7 +116,7 @@ class MapMaking(tod_task.SingleTimestream):
             phi = np.linspace(0, 2*np.pi, phi_size, endpoint=False)
             vis = np.zeros((phi_size,)+ts.local_vis.shape[1:], dtype=ts.vis.dtype)
             # average over time
-            for idx in range(phi_size):
+            for idx in xrange(phi_size):
                 inds, weight = unique(repeat_inds[start[idx]:end[idx]], return_counts=True)
                 vis[idx] = average(np.ma.array(ts.local_vis[inds], mask=ts.local_vis_mask[inds]), axis=0, weights=weight) # time mean
                 # phi[idx] = np.average(ts['ra_dec'][:, 0][inds], axis=0, weights=weight)
@@ -150,7 +150,7 @@ class MapMaking(tod_task.SingleTimestream):
             vis_stream = np.zeros(vis.shape[:-1]+(len(redundancy),), dtype=vis_tmp.dtype)
             red_bin = np.cumsum(np.insert(redundancy, 0, 0)) # redundancy bin
             # average over redundancy
-            for ind in range(len(redundancy)):
+            for ind in xrange(len(redundancy)):
                 vis_stream[:, :, ind] = np.sum(vis_tmp[:, :, red_bin[ind]:red_bin[ind+1]], axis=2) / redundancy[ind]
 
             del vis

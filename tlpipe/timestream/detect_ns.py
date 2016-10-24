@@ -94,7 +94,7 @@ class Detect(tod_task.IterRawTimestream):
         if mask_near > 0:
             on_inds = np.where(ns_on)[0]
             new_on_inds = on_inds.tolist()
-            for i in range(1, mask_near+1):
+            for i in xrange(1, mask_near+1):
                 new_on_inds = new_on_inds + (on_inds-i).tolist() + (on_inds+i).tolist()
             new_on_inds = np.unique(new_on_inds)
 

@@ -7,6 +7,10 @@ from scipy.interpolate import InterpolatedUnivariateSpline
 import tod_task
 from sg_filter import savitzky_golay
 from caput import mpiarray
+from tlpipe.utils.path_util import output_path
+import tlpipe.plot
+import matplotlib.pyplot as plt
+
 
 class Flag(tod_task.IterRawTimestream):
     """Line RFI flagging."""
@@ -51,11 +55,11 @@ class Flag(tod_task.IterRawTimestream):
             warnings.warn('Not enough frequency points to do the smoothing')
         else:
             # iterate over local baselines
-            for lbi in range(len(bl)):
+            for lbi in xrange(len(bl)):
                 abs_vis = np.abs(tm_vis[:, lbi])
                 abs_vis1 = abs_vis.copy()
 
-                for cnt in range(10):
+                for cnt in xrange(10):
                     # abs_vis1 = abs_vis.copy()
                     if cnt != 0:
                         abs_vis1[inds] = smooth[inds]
@@ -76,10 +80,6 @@ class Flag(tod_task.IterRawTimestream):
                 rt.local_vis_mask[:, inds, lbi] = True # set mask
 
                 if plot_fit:
-                    import tlpipe.plot
-                    import matplotlib.pyplot as plt
-                    from tlpipe.utils.path_util import output_path
-
                     plt.figure()
                     plt.plot(freq, abs_vis, label='data')
                     plt.plot(freq[inds], abs_vis[inds], 'ro', label='flag')
@@ -89,7 +89,7 @@ class Flag(tod_task.IterRawTimestream):
                     fig_name = '%s_%d_%d.png' % (freq_fig_prefix, bl[lbi][0], bl[lbi][1])
                     fig_name = output_path(fig_name, iteration=self.iteration)
                     plt.savefig(fig_name)
-                    plt.clf()
+                    plt.close()
 
         # freq integration
         fm_vis = np.ma.mean(np.ma.array(rt.local_vis, mask=rt.local_vis_mask), axis=1)
@@ -101,7 +101,7 @@ class Flag(tod_task.IterRawTimestream):
             warnings.warn('Not enough time points to do the smoothing')
         else:
             # iterate over local baselines
-            for lbi in range(len(bl)):
+            for lbi in xrange(len(bl)):
                 abs_vis = np.abs(fm_vis[:, lbi])
                 abs_vis_valid = abs_vis[~abs_vis.mask]
                 inds_valid = np.arange(nt)[~abs_vis.mask]
@@ -109,7 +109,7 @@ class Flag(tod_task.IterRawTimestream):
                 abs_vis_itp = itp(np.arange(nt))
                 abs_vis1 = abs_vis_itp.copy()
 
-                for cnt in range(10):
+                for cnt in xrange(10):
                     # abs_vis1 = abs_vis_itp.copy()
                     if cnt != 0:
                         abs_vis1[inds] = smooth[inds]
@@ -133,10 +133,6 @@ class Flag(tod_task.IterRawTimestream):
                 rt.local_vis_mask[inds, :, lbi] = True # set mask
 
                 if plot_fit:
-                    import tlpipe.plot
-                    import matplotlib.pyplot as plt
-                    from tlpipe.utils.path_util import output_path
-
                     plt.figure()
                     plt.plot(time, abs_vis, label='data')
                     plt.plot(time[inds], abs_vis[inds], 'ro', label='flag')
@@ -146,7 +142,7 @@ class Flag(tod_task.IterRawTimestream):
                     fig_name = '%s_%d_%d.png' % (time_fig_prefix, bl[lbi][0], bl[lbi][1])
                     fig_name = output_path(fig_name, iteration=self.iteration)
                     plt.savefig(fig_name)
-                    plt.clf()
+                    plt.close()
 
 
         rt.add_history(self.history)

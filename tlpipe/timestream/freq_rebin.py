@@ -36,7 +36,7 @@ class Rebin(tod_task.IterTimestream):
             vis_mask= np.zeros((nt, bin_number)+ts.local_vis.shape[2:], dtype=ts.vis_mask.dtype) # all False
 
             # average over frequency
-            for idx in range(bin_number):
+            for idx in xrange(bin_number):
                 inds, weight = unique(repeat_inds[start[idx]:end[idx]], return_counts=True)
                 # rebin freq
                 freq[idx] = average(ts.freq[inds], axis=0, weights=weight)

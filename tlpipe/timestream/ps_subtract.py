@@ -77,7 +77,7 @@ class PsSub(tod_task.IterTimestream):
                 s_top = s.get_crds('top', ncrd=3)
                 aa.sim_cache(s.get_crds('eq', ncrd=3)[:, np.newaxis]) # for compute bm_response and sim
                 # for pi in range(len(pol)):
-                for pi in range(2): # only cal for xx, yy
+                for pi in xrange(2): # only cal for xx, yy
                     aa.set_active_pol(pol[pi])
                     for bi, (i, j) in enumerate(bls):
                         ai = feedno.index(i)

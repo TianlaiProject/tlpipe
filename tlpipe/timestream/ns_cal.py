@@ -5,6 +5,8 @@ import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
 import tod_task
 from tlpipe.utils.path_util import output_path
+import tlpipe.plot
+import matplotlib.pyplot as plt
 
 
 def cal(vis, vis_mask, li, gi, fbl, rt, **kwargs):
@@ -60,9 +62,6 @@ def cal(vis, vis_mask, li, gi, fbl, rt, **kwargs):
     all_phase = f(np.arange(nt))
 
     if plot_phs:
-        import tlpipe.plot
-        import matplotlib.pyplot as plt
-
         plt.figure()
         time = rt.time[:]
         plt.plot(time, all_phase)
@@ -72,7 +71,7 @@ def cal(vis, vis_mask, li, gi, fbl, rt, **kwargs):
         fig_name = '%s_%f_%d_%d.png' % (fig_prefix, fbl[0], fbl[1][0], fbl[1][1])
         fig_name = output_path(fig_name, iteration=iteration)
         plt.savefig(fig_name)
-        plt.clf()
+        plt.close()
 
     vis = vis * np.exp(-1.0J * all_phase)
 

@@ -6,6 +6,9 @@ import ephem
 import aipy as a
 import tod_task
 from caput import mpiutil
+from tlpipe.utils.path_util import output_path
+import tlpipe.plot
+import matplotlib.pyplot as plt
 
 
 def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit, fig_prefix, iteration):
@@ -18,7 +21,7 @@ def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit
 
     gains = []
     chi2s = []
-    shifts = range(-num_shift/2, num_shift/2+1)
+    shifts = xrange(-num_shift/2, num_shift/2+1)
     for si in shifts:
         vis = vis_obs[start_ind+si:end_ind+si]
         num_nomask = vis.count()
@@ -55,10 +58,6 @@ def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit
 
     if plot_fit:
         # plot the fit
-        import tlpipe.plot
-        import matplotlib.pyplot as plt
-        from tlpipe.utils.path_util import output_path
-
         plt.figure()
         plt.subplot(311)
         plt.plot(obs_data.real, label='obs, real')
@@ -81,7 +80,7 @@ def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit
         fig_name = '%s_%d_%d_%d_%d.png' % (fig_prefix, fi, pi, i, j)
         fig_name = output_path(fig_name, iteration=iteration)
         plt.savefig(fig_name)
-        plt.clf()
+        plt.close()
 
     return gain, si
 
@@ -172,7 +171,7 @@ class PsFit(tod_task.IterTimestream):
         nt = end_ind - start_ind
         vis_sim = np.zeros((nt,)+vis.shape[1:], dtype=vis.dtype) # to hold the simulated vis
 
-        for ind, ti in enumerate(range(start_ind, end_ind)):
+        for ind, ti in enumerate(xrange(start_ind, end_ind)):
             aa.set_jultime(ts['jul_date'][ti])
             s.compute(aa)
             # get fluxes vs. freq of the calibrator
@@ -181,7 +180,7 @@ class PsFit(tod_task.IterTimestream):
             s_top = s.get_crds('top', ncrd=3)
             aa.sim_cache(cat.get_crds('eq', ncrd=3)) # for compute bm_response and sim
             # for pi in range(len(pol)):
-            for pi in range(2): # only cal for xx, yy
+            for pi in xrange(2): # only cal for xx, yy
                 aa.set_active_pol(pol[pi])
                 for bi, (i, j) in enumerate(bls):
                     ai = feedno.index(i)
@@ -192,9 +191,9 @@ class PsFit(tod_task.IterTimestream):
                     vis_sim[ind, :, pi, bi] = Sc * bmij * np.exp(-2.0J * np.pi * np.dot(s_top, uij))
 
         # iterate over freq
-        for fi in range(nfreq):
-            # for pi in range(len(pol)):
-            for pi in range(2): # only cal for xx, yy
+        for fi in xrange(nfreq):
+            # for pi in xrange(len(pol)):
+            for pi in xrange(2): # only cal for xx, yy
                 for bi, (i, j) in enumerate(bls):
                     gain, si = fit(vis[:, fi, pi, bi], vis_mask[:, fi, pi, bi], vis_sim[:, fi, pi, bi], start_ind, end_ind, num_shift, (fi, pi, (i, j)), plot_fit, fig_prefix, self.iteration)
                     # cal for vis

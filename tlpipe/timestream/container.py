@@ -252,11 +252,11 @@ class BasicTod(memh5.MemDiskGroup):
 
         # start and stop (included) file indices owned by this proc
         sf, ef = np.searchsorted(cum_num_ts, tmp_cum_lts[self.rank], side='right'), np.searchsorted(cum_num_ts, tmp_cum_lts[self.rank+1], side='left')
-        lf_indices = range(sf, ef+1) # file indices owned by this proc
+        lf_indices = xrange(sf, ef+1) # file indices owned by this proc
 
         # allocation interval by all procs
         intervals = sorted(list(set([start] + cum_lts + cum_num_ts[:-1] + [stop])))
-        intervals = [ (intervals[i], intervals[i+1]) for i in range(len(intervals)-1) ]
+        intervals = [ (intervals[i], intervals[i+1]) for i in xrange(len(intervals)-1) ]
         if self.comm is not None:
             num_lf_ind = self.comm.allgather(len(lf_indices))
         else:
@@ -474,7 +474,7 @@ class BasicTod(memh5.MemDiskGroup):
         if name == self.main_data_name:
             main_data_select = self.main_data_select[:] # copy here to not change self.main_data_select
             new_dset_shape = (dset_shape[0],)
-            for axis in range(1, len(dset_shape)): # exclude the first axis
+            for axis in xrange(1, len(dset_shape)): # exclude the first axis
                 tmp = np.arange(dset_shape[axis])
                 sel = tmp[main_data_select[axis]]
                 new_dset_shape += (len(sel),)
@@ -899,7 +899,7 @@ class BasicTod(memh5.MemDiskGroup):
 
         """
 
-        axis = tuple(range(len(data.shape)))
+        axis = tuple(xrange(len(data.shape)))
         name = self.main_data_name
         axis_order = axis
 
@@ -1076,7 +1076,7 @@ class BasicTod(memh5.MemDiskGroup):
                     raise RuntimeError('Dataset %s should be common' % name)
 
         # check axis are aligned
-        for axis in range(len(self.main_data_axes)):
+        for axis in xrange(len(self.main_data_axes)):
             lens = [] # to save the length of axis
             for name, val in self.main_axes_ordered_datasets.items():
                 if name in self.items() and axis in val:
@@ -1182,7 +1182,7 @@ class BasicTod(memh5.MemDiskGroup):
                 dset_shape, dset_type, outfiles_map = self._get_output_info(dset_name, num_outfiles)
 
                 st = 0
-                for ri in range(self.nproc):
+                for ri in xrange(self.nproc):
                     if ri == self.rank:
                         for fi, start, stop in outfiles_map:
 
