@@ -183,12 +183,13 @@ class TransitTelescope(object):
     #     # Set the observers position on the Earth
     #     ctime.Observer.__init__(self, longitude, latitude, **kwargs)
 
-    def __init__(self, latitude=45, longitude=0, freqs=[], tsys_flat=50.0, ndays=1.0, accuracy_boost=1.0, l_boost=1.0, bl_range=[0.0, 1.0e7], auto_correlations=False, local_origin=True):
+    def __init__(self, latitude=45, longitude=0, freqs=[], band_width=None, tsys_flat=50.0, ndays=1.0, accuracy_boost=1.0, l_boost=1.0, bl_range=[0.0, 1.0e7], auto_correlations=False, local_origin=True):
 
         self.latitude = latitude
         self.longitude = longitude
         # self.zenith = latlon_to_sphpol([latitude, longitude])
         self.frequencies = np.array(freqs)
+        self.band_width = band_width if band_width is not None else np.abs(self.frequencies[1] - self.frequencies[0])
         self.tsys_flat = tsys_flat
         self.ndays = ndays
         self.accuracy_boost = accuracy_boost
@@ -716,7 +717,8 @@ class TransitTelescope(object):
         # Broadcast arrays against each other
         bl_indices, f_indices = np.broadcast_arrays(bl_indices, f_indices)
 
-        bw = np.abs(self.frequencies[1] - self.frequencies[0]) * 1e6
+        # bw = np.abs(self.frequencies[1] - self.frequencies[0]) * 1e6
+        bw = self.band_width * 1e6
         # bw = 1.0e6 * (self.freq_upper - self.freq_lower) / self.num_freq
         delnu = units.t_sidereal * bw / (2*np.pi)
         noisepower = self.tsys(f_indices)**2 / (2 * np.pi * delnu * ndays)
@@ -728,7 +730,8 @@ class TransitTelescope(object):
     def noisepower_feedpairs(self, fi, fj, f_indices, m, ndays=None):
         ndays = self.ndays if not ndays else ndays
 
-        bw = np.abs(self.frequencies[1] - self.frequencies[0]) * 1e6
+        # bw = np.abs(self.frequencies[1] - self.frequencies[0]) * 1e6
+        bw = self.band_width * 1e6
         delnu = units.t_sidereal * bw / (2*np.pi)
         noisepower = self.tsys(f_indices)**2 / (2 * np.pi * delnu * ndays)
 
