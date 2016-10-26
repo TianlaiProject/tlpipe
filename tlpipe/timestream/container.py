@@ -135,6 +135,8 @@ class BasicTod(memh5.MemDiskGroup):
     create_main_data
     create_main_axis_ordered_dataset
     create_main_time_ordered_dataset
+    delete_a_dataset
+    delete_an_attribute
     add_history
     info
     redistribute
@@ -932,6 +934,29 @@ class BasicTod(memh5.MemDiskGroup):
         """
 
         self.create_main_axis_ordered_dataset(0, name, data, axis_order, recreate, copy_attrs, check_align)
+
+
+    def delete_a_dataset(self, name):
+        """Delete a dataset and also remove it from the hint if it is in it."""
+        if name in self.iterkeys():
+            del self[name]
+        else:
+            warnings.warn('Dataset %s does not exist')
+
+        if name in self._main_axes_ordered_datasets_.iterkeys():
+            del self._main_axes_ordered_datasets_[name]
+        if name in self._time_ordered_datasets_.iterkeys():
+            del self._time_ordered_datasets_[name]
+
+    def delete_an_attribute(self, name):
+        """Delete an attribute and also remove it from the hint if it is in it."""
+        if name in self.attrs.iterkeys():
+            del self.attrs[name]
+        else:
+            warnings.warn('Attribute %s does not exist')
+
+        if name in self._time_ordered_attrs_.iterkeys():
+            del self._time_ordered_attrs_[name]
 
 
     @property
