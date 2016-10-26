@@ -656,8 +656,9 @@ class BasicTod(memh5.MemDiskGroup):
             warnings.warn('No input file')
             return
 
-        self.load_time_ordered()
+        self.load_main_data()
         self.load_common()
+        self.load_tod_excl_main_data()
 
 
     def _del_an_attribute(self, name):

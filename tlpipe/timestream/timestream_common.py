@@ -1,5 +1,6 @@
 import itertools
 import numpy as np
+import ephem
 from datetime import datetime
 import container
 from caput import mpiutil
@@ -37,6 +38,9 @@ class TimestreamCommon(container.BasicTod):
     is_dish
     is_cylinder
     array
+    is_continuous
+    is_same_pointing
+    is_same_dec
     freq_ordered_datasets
     bl_ordered_datasets
     feed_ordered_datasets
@@ -267,6 +271,14 @@ class TimestreamCommon(container.BasicTod):
             self.create_main_time_ordered_dataset('sec1970', data=sec1970)
             # create attrs of this dset
             self['sec1970'].attrs["unit"] = 'second'
+            # determine if it is continuous in time
+            sec_diff = np.diff(sec1970)
+            break_inds = np.where(sec_diff>1.5*int_time)[0]
+            if len(break_inds) > 0:
+                self['sec1970'].attrs["continuous"] = False
+                self['sec1970'].attrs["break_inds"] = break_inds + 1
+            else:
+                self['sec1970'].attrs["continuous"] = True
 
             # generate julian date
             jul_date = np.array([ date_util.get_juldate(datetime.fromtimestamp(s), tzone=self.infiles[0].attrs['timezone']) for s in sec1970 ], dtype=np.float64) # precision float32 is not enough
@@ -287,6 +299,50 @@ class TimestreamCommon(container.BasicTod):
             self.create_main_time_ordered_dataset('local_hour', data=local_hour)
             # create attrs of this dset
             self['local_hour'].attrs["unit"] = 'hour'
+
+            # generate az, alt
+            az_alt = np.zeros((self['sec1970'].local_data.shape[0], 2), dtype=np.float32) # radians
+            if self.is_dish:
+                # antpointing = rt['antpointing'][-1, :, :] # degree
+                # pointingtime = rt['pointingtime'][-1, :, :] # degree
+                az_alt[:, 0] = 0.0 # az
+                az_alt[:, 1] = np.pi/2 # alt
+            elif self.is_cylinder:
+                az_alt[:, 0] = np.pi/2 # az
+                az_alt[:, 1] = np.pi/2 # alt
+            else:
+                raise RuntimeError('Unknown antenna type %s' % self.attrs['telescope'])
+
+            # generate ra, dec of the antanna pointing
+            ra_dec = np.zeros_like(az_alt) # radians
+            for ti in xrange(az_alt.shape[0]):
+                az, alt = az_alt[ti]
+                az, alt = ephem.degrees(az), ephem.degrees(alt)
+                self.array.set_jultime(self['jul_date'].local_data[ti])
+                ra_dec[ti] = self.array.radec_of(az, alt) # in radians, a point in the sky above the observer
+
+            if self.main_data_dist_axis == 0:
+                az_alt = mpiarray.MPIArray.wrap(az_alt, axis=0)
+                ra_dec = mpiarray.MPIArray.wrap(ra_dec, axis=0)
+            # if time is just the distributed axis, create distributed datasets
+            self.create_main_time_ordered_dataset('az_alt', data=az_alt)
+            self['az_alt'].attrs['unit'] = 'radian'
+            self.create_main_time_ordered_dataset('ra_dec', data=ra_dec)
+            self['ra_dec'].attrs['unit'] = 'radian'
+            # determin if it is the same pointing
+            # gather local az_alt
+            az_alt = mpiutil.gather_array(az_alt, root=None, comm=self.comm)
+            if np.allclose(az_alt[:, 0], az_alt[0, 0]) and np.allclose(az_alt[:, 1], az_alt[0, 1]):
+                self['az_alt'].attrs['same_pointing'] = True
+            else:
+                self['az_alt'].attrs['same_pointing'] = False
+            # determin if it is the same dec
+            # gather local ra_dec
+            ra_dec = mpiutil.gather_array(ra_dec, root=None, comm=self.comm)
+            if np.allclose(ra_dec[:, 1], ra_dec[0, 1]):
+                self['ra_dec'].attrs['same_dec'] = True
+            else:
+                self['ra_dec'].attrs['same_dec'] = False
 
 
     @property
@@ -459,6 +515,21 @@ class TimestreamCommon(container.BasicTod):
         aa = tl_array.AntennaArray((str(lat), str(lon), elev), ants)
 
         return aa
+
+    @property
+    def is_continuous(self):
+        """Data is observed continuous in time?"""
+        return self['sec1970'].attrs["continuous"]
+
+    @property
+    def is_same_pointing(self):
+        """The antenna array is in the same pointing in az, alt?"""
+        return self['az_alt'].attrs['same_pointing']
+
+    @property
+    def is_same_dec(self):
+        """Data is observed for the same declination in the sky?"""
+        return self['ra_dec'].attrs['same_dec']
 
 
     def create_freq_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False, check_align=True):
