@@ -21,7 +21,7 @@ class Average(tod_task.SingleTimestream):
             # ts.local_vis_mask[:] = np.where(ts['weight'].local_data != 0, False, True) # already done in accumulate
 
             # del weight to save memory
-            del ts['weight']
+            ts.delete_a_dataset('weight')
 
         ts.add_history(self.history)
 
