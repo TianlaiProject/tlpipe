@@ -13,20 +13,24 @@ pipe_logging = 'notset'
 
 
 import glob
-data_dir = '/tianlai/data/20160829182035_hdf5'
-# files = sorted(glob.glob(data_dir+'/*.hdf5'))[1:]
-# files = sorted(glob.glob(data_dir+'/*.hdf5'))[22:80]
-files = sorted(glob.glob(data_dir+'/*.hdf5'))[15:80]
-# files = sorted(glob.glob(data_dir+'/*.hdf5'))[15:85]
-# files = sorted(glob.glob(data_dir+'/*.hdf5'))[43:57] # cas A
-# files = sorted(glob.glob(data_dir+'/*.hdf5'))[49:51] # cas A
+data_dir1 = '/node3_disk/disk1/20160927201537_122hrhdf5_part1'
+data_dir2 = '/node3_disk/disk2/20160927201537_122hrhdf5_part2'
+data_dir3 = '/node3_disk/disk3/20160927201537_122hrhdf5_part3'
+data_dir4 = '/node3_disk/disk4/20160927201537_122hrhdf5_part4'
+data_dir5 = '/node3_disk/disk5/20160927201537_122hrhdf5_part5'
+files1 = sorted(glob.glob(data_dir1+'/*.hdf5'))
+files2 = sorted(glob.glob(data_dir2+'/*.hdf5'))
+files3 = sorted(glob.glob(data_dir3+'/*.hdf5'))
+files4 = sorted(glob.glob(data_dir4+'/*.hdf5'))
+files5 = sorted(glob.glob(data_dir5+'/*.hdf5'))
+files = files1 + files2 + files3 + files4 + files5
 
 
 from tlpipe.timestream import dispatch
 pipe_tasks.append(dispatch.Dispatch)
 ### parameters for Dispatch
 dp_input_files = files
-dp_freq_select = (505, 505)
+dp_freq_select = (500, 505)
 dp_feed_select = [11, 12, 13, 14, 42, 43, 44, 45, 74, 75, 76, 78]
 dp_exclude_bad = False
 dp_iter_num = 1
@@ -57,6 +61,15 @@ pit_flag_ns = True
 pit_fig_name = 'int/int'
 pit_out = 'pit'
 
+from tlpipe.plot import plot_waterfall
+pipe_tasks.append(plot_waterfall.PlotRawTimestream)
+### parameters for PlotRawTimestream
+prt_in = dt_out
+# prt_bl_incl = [(i, i) for i in range(1, 33)]
+prt_flag_ns = True
+prt_fig_name = 'rvis/vis'
+prt_out = 'prt'
+
 from tlpipe.timestream import line_rfi
 pipe_tasks.append(line_rfi.Flag)
 ### parameters for Flag
@@ -80,17 +93,6 @@ nc_plot_phs = True
 nc_fig_name = 'phs/phs_change'
 nc_out = 'nc'
 
-from tlpipe.plot import plot_waterfall
-pipe_tasks.append(plot_waterfall.PlotRawTimestream)
-### parameters for PlotRawTimestream
-prt_in = nc_out
-# prt_in = dt_out
-# prt_bl_incl = [(i, i) for i in range(1, 33)]
-prt_flag_ns = True
-prt_fig_name = 'rvis/vis'
-prt_out = 'prt'
-
-
 from tlpipe.timestream import rt2ts
 pipe_tasks.append(rt2ts.Rt2ts)
 ### parameters for Rt2ts
@@ -103,19 +105,11 @@ pipe_tasks.append(ps_fit.PsFit)
 ### parameters for PsFit
 pf_in = r2t_out
 pf_calibrator = 'cas'
+pf_shift = 120
 pf_plot_fit = True
 pf_fig_name = 'fit/fit'
 pf_output_files = [ 'ps_fit/file_%d.hdf5' %i for i in range(1, 7) ]
 pf_out = 'pf'
-
-from tlpipe.plot import plot_waterfall
-pipe_tasks.append(plot_waterfall.PlotTimestream)
-### parameters for PlotTimestream
-pts_in = pf_out
-pts_flag_mask = True
-pts_flag_ns = True
-pts_fig_name = 'vis/vis'
-pts_out = 'pts'
 
 from tlpipe.timestream import ps_subtract
 # pipe_tasks.append(ps_subtract.PsSub)
@@ -126,16 +120,6 @@ ps_input_files = pf_output_files
 ps_iter_num = 1
 ps_out = 'ps'
 
-from tlpipe.plot import plot_waterfall
-# pipe_tasks.append((plot_waterfall.PlotTimestream, 'pts1_'))
-### parameters for PlotTimestream
-pts1_in = ps_out
-pts1_flag_mask = True
-pts1_flag_ns = True
-pts1_fig_name = 'vis1/vis'
-pts1_out = 'pts1'
-
-
 from tlpipe.timestream import re_order
 pipe_tasks.append(re_order.ReOrder)
 ### parameters for ReOrder
@@ -144,11 +128,50 @@ ro_in = pf_out
 ro_output_files = [ 're_order/file_%d.hdf5' %i for i in range(1, 7) ]
 ro_out = 'ro'
 
+from tlpipe.timestream import accumulate
+pipe_tasks.append(accumulate.Accum)
+### parameters for ReOrder
+ac_in = ro_out
+ac_check = False
+ac_output_files = [ 'accumulate/file_%d.hdf5' %i for i in range(1, 7) ]
+ac_out = 'ac'
+
+from tlpipe.timestream import barrier
+pipe_tasks.append(barrier.Barrier)
+### parameters for Barrier
+
+from tlpipe.timestream import average
+pipe_tasks.append(average.Average)
+### parameters for Average
+av_in = ac_out
+av_output_files = [ 'average/file_%d.hdf5' %i for i in range(1, 7) ]
+av_out = 'av'
+
+from tlpipe.plot import plot_waterfall
+pipe_tasks.append((plot_waterfall.PlotTimestream, 'pts2_'))
+### parameters for PlotTimestream
+pts2_in = av_out
+pts2_flag_mask = True
+pts2_flag_ns = True
+pts2_fig_name = 'vis_av/vis'
+pts2_out = 'pts2'
+
+from tlpipe.timestream import freq_rebin
+# pipe_tasks.append(freq_rebin.Rebin)
+### parameters for Rebin
+rb_in = av_out
+rb_input_files = av_output_files
+rb_bin_number = 1
+rb_out = 'rb'
+
+
 from tlpipe.timestream import map_making
 pipe_tasks.append(map_making.MapMaking)
 ### parameters for MapMaking
-mm_in = ro_out
-mm_input_files = ro_output_files
+# mm_in = ro_out
+# mm_in = rb_out
+mm_in = av_out
+# mm_input_files = ro_output_files
 mm_iter_num = 1
 mm_mask_daytime = False
 # mm_mask_time_range = [6.5, 24.0]
