@@ -52,9 +52,9 @@ class Dispatch(tod_task.IterRawTimestream):
         stop = self.params['stop']
         dist_axis = self.params['dist_axis']
 
-        num_int = np.int(np.ceil(days * const.sday / self.int_time)) # number of int_time
-        start = self.abs_start + self.iteration * num_int
-        stop = min(self.abs_stop, start + num_int + 2*extra_inttime)
+        # num_int = np.int(np.around(days * const.sday / self.int_time)) # number of int_time
+        start = self.abs_start + np.int(np.around(self.iteration * days * const.sday / self.int_time))
+        stop = min(self.abs_stop, np.int(np.around((self.iteration+1) * days * const.sday / self.int_time)) + 2*extra_inttime)
 
         tod = self._Tod_class(self.input_files, mode, start, stop, dist_axis)
 
@@ -62,7 +62,10 @@ class Dispatch(tod_task.IterRawTimestream):
 
         tod.load_all() # load in all data
 
-        tod.vis.attrs['extra_inttime'] = extra_inttime
+        if self.iter_cnt == 0: # the first iteration
+            ra_dec = mpiutil.gather_array(tod['ra_dec'].local_data, root=None)
+            self.start_ra = ra_dec[extra_inttime, 0]
+        tod.vis.attrs['start_ra'] = self.start_ra # used for re_order
 
         return tod
 
