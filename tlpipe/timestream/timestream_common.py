@@ -313,13 +313,14 @@ class TimestreamCommon(container.BasicTod):
             else:
                 raise RuntimeError('Unknown antenna type %s' % self.attrs['telescope'])
 
-            # generate ra, dec of the antanna pointing
+            # generate ra, dec of the antenna pointing
+            aa = self.array
             ra_dec = np.zeros_like(az_alt) # radians
             for ti in xrange(az_alt.shape[0]):
                 az, alt = az_alt[ti]
                 az, alt = ephem.degrees(az), ephem.degrees(alt)
-                self.array.set_jultime(self['jul_date'].local_data[ti])
-                ra_dec[ti] = self.array.radec_of(az, alt) # in radians, a point in the sky above the observer
+                aa.set_jultime(self['jul_date'].local_data[ti])
+                ra_dec[ti] = aa.radec_of(az, alt) # in radians, a point in the sky above the observer
 
             if self.main_data_dist_axis == 0:
                 az_alt = mpiarray.MPIArray.wrap(az_alt, axis=0)
@@ -329,7 +330,11 @@ class TimestreamCommon(container.BasicTod):
             self['az_alt'].attrs['unit'] = 'radian'
             self.create_main_time_ordered_dataset('ra_dec', data=ra_dec)
             self['ra_dec'].attrs['unit'] = 'radian'
+
             # determin if it is the same pointing
+            if self.main_data_dist_axis == 0:
+                az_alt = az_alt.local_array
+                ra_dec = ra_dec.local_array
             # gather local az_alt
             az_alt = mpiutil.gather_array(az_alt, root=None, comm=self.comm)
             if np.allclose(az_alt[:, 0], az_alt[0, 0]) and np.allclose(az_alt[:, 1], az_alt[0, 1]):
