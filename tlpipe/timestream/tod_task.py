@@ -152,6 +152,8 @@ class IterTod(IterBase):
                     'exclude': [],
                     'check_status': True,
                     'libver': 'latest',
+                    'tag_input_iter': True, # tag current iteration to input file path
+                    'tag_output_iter': True, # tag current iteration to output file path
                   }
 
     prefix = 'itod_'
@@ -178,8 +180,12 @@ class IterTod(IterBase):
         start = self.params['start']
         stop = self.params['stop']
         dist_axis = self.params['dist_axis']
+        tag_input_iter = self.params['tag_input_iter']
 
-        input_files = input_path(self.input_files, iteration=self.iteration)
+        if tag_input_iter:
+            input_files = input_path(self.input_files, iteration=self.iteration)
+        else:
+            input_files = self.input_files
         tod = self._Tod_class(input_files, mode, start, stop, dist_axis)
 
         tod = self.data_select(tod)
@@ -194,8 +200,12 @@ class IterTod(IterBase):
         exclude = self.params['exclude']
         check_status = self.params['check_status']
         libver = self.params['libver']
+        tag_output_iter = self.params['tag_output_iter']
 
-        output_files = output_path(self.output_files, relative=False, iteration=self.iteration)
+        if tag_output_iter:
+            output_files = output_path(self.output_files, relative=False, iteration=self.iteration)
+        else:
+            output_files = self.output_files
         output.to_files(output_files, exclude, check_status, libver)
 
 

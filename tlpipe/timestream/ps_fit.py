@@ -11,7 +11,7 @@ import tlpipe.plot
 import matplotlib.pyplot as plt
 
 
-def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit, fig_prefix, iteration):
+def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit, fig_prefix, iteration, tag_output_iter):
     vis_obs = np.ma.array(vis_obs, mask=vis_mask)
     num_nomask = vis_obs.count()
     if num_nomask == 0: # no valid vis data
@@ -78,7 +78,10 @@ def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit
         plt.plot(np.abs(vis_sim), label='sim, abs')
         plt.legend(loc='best')
         fig_name = '%s_%d_%d_%d_%d.png' % (fig_prefix, fi, pi, i, j)
-        fig_name = output_path(fig_name, iteration=iteration)
+        if tag_output_iter:
+            fig_name = output_path(fig_name, iteration=iteration)
+        else:
+            fig_name = output_path(fig_name)
         plt.savefig(fig_name)
         plt.close()
 
@@ -107,6 +110,7 @@ class PsFit(tod_task.IterTimestream):
         shift = self.params['shift']
         plot_fit = self.params['plot_fit']
         fig_prefix = self.params['fig_name']
+        tag_output_iter = self.params['tag_output_iter']
 
         ts.redistribute('baseline')
 
@@ -195,7 +199,7 @@ class PsFit(tod_task.IterTimestream):
             # for pi in xrange(len(pol)):
             for pi in xrange(2): # only cal for xx, yy
                 for bi, (i, j) in enumerate(bls):
-                    gain, si = fit(vis[:, fi, pi, bi], vis_mask[:, fi, pi, bi], vis_sim[:, fi, pi, bi], start_ind, end_ind, num_shift, (fi, pi, (i, j)), plot_fit, fig_prefix, self.iteration)
+                    gain, si = fit(vis[:, fi, pi, bi], vis_mask[:, fi, pi, bi], vis_sim[:, fi, pi, bi], start_ind, end_ind, num_shift, (fi, pi, (i, j)), plot_fit, fig_prefix, self.iteration, tag_output_iter)
                     # cal for vis
                     ts.local_vis[:, fi, pi, bi] = np.roll(vis[:, fi, pi, bi], -si) / gain # NOTE the use of -si
                     ts.local_vis_mask[:, fi, pi, bi] = np.roll(vis_mask[:, fi, pi, bi], -si) # NOTE the use of -si

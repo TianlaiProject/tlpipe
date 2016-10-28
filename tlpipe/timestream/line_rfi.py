@@ -36,6 +36,7 @@ class Flag(tod_task.IterRawTimestream):
         plot_fit = self.params['plot_fit']
         freq_fig_prefix = self.params['freq_fig_name']
         time_fig_prefix = self.params['time_fig_name']
+        tag_output_iter = self.params['tag_output_iter']
 
         rt.redistribute('baseline')
 
@@ -87,7 +88,10 @@ class Flag(tod_task.IterRawTimestream):
                     plt.xlabel(r'$\nu$ / MHz')
                     plt.legend(loc='best')
                     fig_name = '%s_%d_%d.png' % (freq_fig_prefix, bl[lbi][0], bl[lbi][1])
-                    fig_name = output_path(fig_name, iteration=self.iteration)
+                    if tag_output_iter:
+                        fig_name = output_path(fig_name, iteration=self.iteration)
+                    else:
+                        fig_name = output_path(fig_name)
                     plt.savefig(fig_name)
                     plt.close()
 
@@ -140,7 +144,10 @@ class Flag(tod_task.IterRawTimestream):
                     plt.xlabel(r'$t$ / Julian Date')
                     plt.legend(loc='best')
                     fig_name = '%s_%d_%d.png' % (time_fig_prefix, bl[lbi][0], bl[lbi][1])
-                    fig_name = output_path(fig_name, iteration=self.iteration)
+                    if tag_output_iter:
+                        fig_name = output_path(fig_name, iteration=self.iteration)
+                    else:
+                        fig_name = output_path(fig_name)
                     plt.savefig(fig_name)
                     plt.close()
 

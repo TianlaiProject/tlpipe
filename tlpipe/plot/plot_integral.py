@@ -20,6 +20,7 @@ def plot(vis, vis_mask, li, gi, bl, obj, **kwargs):
     flag_mask = kwargs.get('flag_mask', False)
     flag_ns = kwargs.get('flag_ns', True)
     fig_prefix = kwargs.get('fig_name', 'int')
+    tag_output_iter= kwargs.get('tag_output_iter', True)
     iteration= kwargs.get('iteration', 0)
 
     if bl_incl != 'all':
@@ -60,7 +61,10 @@ def plot(vis, vis_mask, li, gi, bl, obj, **kwargs):
     axarr[2].set_xlabel(xlabel)
 
     fig_name = '%s_%s_%d_%d.png' % (fig_prefix, integral, bl[0], bl[1])
-    fig_name = output_path(fig_name, iteration=iteration)
+    if tag_output_iter:
+        fig_name = output_path(fig_name, iteration=iteration)
+    else:
+        fig_name = output_path(fig_name)
     plt.savefig(fig_name)
     plt.close()
 
@@ -88,8 +92,9 @@ class Plot(tod_task.IterRawTimestream):
         flag_mask = self.params['flag_mask']
         flag_ns = self.params['flag_ns']
         fig_name = self.params['fig_name']
+        tag_output_iter = self.params['tag_output_iter']
 
-        rt.bl_data_operate(plot, full_data=True, keep_dist_axis=False, integral=integral, bl_incl=bl_incl, bl_excl=bl_excl, fig_name=fig_name, iteration=self.iteration, flag_mask=flag_mask, flag_ns=flag_ns)
+        rt.bl_data_operate(plot, full_data=True, keep_dist_axis=False, integral=integral, bl_incl=bl_incl, bl_excl=bl_excl, fig_name=fig_name, iteration=self.iteration, tag_output_iter=tag_output_iter, flag_mask=flag_mask, flag_ns=flag_ns)
 
         rt.add_history(self.history)
 

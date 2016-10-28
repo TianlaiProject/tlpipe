@@ -22,6 +22,7 @@ def cal(vis, vis_mask, li, gi, fbl, rt, **kwargs):
         raise RuntimeError('Do not have enough noise on time samples to do the ns_cal')
     plot_phs = kwargs.get('plot_phs', False)
     fig_prefix = kwargs.get('fig_name', 'phs_changke')
+    tag_output_iter= kwargs.get('tag_output_iter', True)
     iteration = kwargs.get('iteration', 0)
 
     ns_on = rt['ns_on'][:]
@@ -69,7 +70,10 @@ def cal(vis, vis_mask, li, gi, fbl, rt, **kwargs):
         plt.xlabel(r'$t$ / Julian Date')
         plt.ylabel(r'$\Delta \phi$ / radian')
         fig_name = '%s_%f_%d_%d.png' % (fig_prefix, fbl[0], fbl[1][0], fbl[1][1])
-        fig_name = output_path(fig_name, iteration=iteration)
+        if tag_output_iter:
+            fig_name = output_path(fig_name, iteration=iteration)
+        else:
+            fig_name = output_path(fig_name)
         plt.savefig(fig_name)
         plt.close()
 
@@ -94,11 +98,12 @@ class NsCal(tod_task.IterRawTimestream):
         num_mean = self.params['num_mean']
         plot_phs = self.params['plot_phs']
         fig_name = self.params['fig_name']
+        tag_output_iter = self.params['tag_output_iter']
 
         if not 'ns_on' in rt.iterkeys():
             raise RuntimeError('No noise source info, can not do noise source calibration')
 
-        rt.freq_and_bl_data_operate(cal, full_data=True, num_mean=num_mean, plot_phs=plot_phs, fig_name=fig_name, iteration=self.iteration)
+        rt.freq_and_bl_data_operate(cal, full_data=True, num_mean=num_mean, plot_phs=plot_phs, fig_name=fig_name, iteration=self.iteration, tag_output_iter=tag_output_iter)
 
         rt.add_history(self.history)
 
