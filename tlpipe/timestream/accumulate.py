@@ -37,8 +37,16 @@ class Accum(tod_task.IterTimestream):
             # make they are distributed along the same axis
             ts.redistribute(self.data.main_data_dist_axis)
             # check for ra, dec
-            if not np.allclose(self.data['ra_dec'].local_data[:, 0], ts['ra_dec'].local_data[:, 0], rtol=0, atol=2*np.pi/self.data['ra_dec'].shape[0]):
-                print 'RA not align within %f for rank %d, max gap %f' % (2*np.pi/self.data['ra_dec'].shape[0], mpiutil.rank, (ts['ra_dec'].local_data[:, 0] - self.data['ra_dec'].local_data[:, 0]).max())
+            ra_self = self.data['ra_dec'].local_data[:, 0]
+            if mpiutil.rank0 and ra_self[0] > ra_self[1]:
+                ra_self[0] -= 2*np.pi
+            ra_ts = ts['ra_dec'].local_data[:, 0]
+            if mpiutil.rank0 and ra_ts[0] > ra_ts[1]:
+                ra_ts[0] -= 2*np.pi
+
+            delta = 2*np.pi/self.data['ra_dec'].shape[0]
+            if not np.allclose(ra_self, ra_ts, rtol=0, atol=delta):
+                print 'RA not align within %f for rank %d, max gap %f' % (delta, mpiutil.rank, np.abs(ra_ts - ra_self).max())
             # assert np.allclose(self.data['ra_dec'].local_data[:, 0], ts['ra_dec'].local_data[:, 0], rtol=0, atol=2*np.pi/self.data['ra_dec'].shape[0]), 'Can not accumulate data, RA not align.'
             # assert np.allclose(self.data['ra_dec'].local_data[:, 1], ts['ra_dec'].local_data[:, 1]), 'Can not accumulate data with different DEC.'
             # other checks if required
