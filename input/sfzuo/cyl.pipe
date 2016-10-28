@@ -36,16 +36,10 @@ dp_exclude_bad = False
 dp_iter_num = 1
 dp_out = 'dp'
 
-from tlpipe.timestream import run_info
-pipe_tasks.append(run_info.RunInfo)
-### parameters for RunInfo
-ri_in = dp_out
-ri_out = 'ri'
-
 from tlpipe.timestream import detect_ns
 pipe_tasks.append(detect_ns.Detect)
 ### parameters for Detect
-dt_in = ri_out
+dt_in = dp_out
 # dt_feed = 1
 dt_out = 'dt'
 
@@ -151,6 +145,7 @@ from tlpipe.plot import plot_waterfall
 pipe_tasks.append((plot_waterfall.PlotTimestream, 'pts2_'))
 ### parameters for PlotTimestream
 pts2_in = av_out
+pts2_tag_output_iter = False
 pts2_flag_mask = True
 pts2_flag_ns = True
 pts2_fig_name = 'vis_av/vis'
