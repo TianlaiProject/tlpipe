@@ -42,7 +42,7 @@ def plot(vis, vis_mask, li, gi, bl, obj, **kwargs):
             vis1[on] = complex(np.nan, np.nan)
         else:
             off = np.where(np.logical_not(obj['ns_on'][:]))[0]
-            for fi in range(vis1.shape[1]):
+            for fi in xrange(vis1.shape[1]):
                 itp_real = InterpolatedUnivariateSpline(off, vis1[off, fi].real)
                 itp_imag= InterpolatedUnivariateSpline(off, vis1[off, fi].imag)
                 vis1[on, fi] = itp_real(on) + 1.0J * itp_imag(on)
