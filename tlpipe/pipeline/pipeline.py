@@ -376,6 +376,7 @@ See the documentation for these base classes for more details.
 import sys
 import inspect
 import Queue
+import collections
 import logging
 import os
 from os import path
@@ -614,11 +615,15 @@ class TaskBase(object):
     # Overridable Attributes
     # -----------------------
 
-    def __init__(self, parameter_file_or_dict=None, feedback=2):
+    @classmethod
+    def _get_params(cls):
+        ### get all params by merging params of the all super classes
 
         # merge params of the all super classes
-        mro = inspect.getmro(self.__class__)
-        all_params = {}
+        mro = inspect.getmro(cls)
+        # all_params = {}
+        # use ordered dict to keep reverse mro order
+        all_params = collections.OrderedDict()
         for cls in mro[-1::-1]: # reverse order
             try:
                 cls_params = cls.params_init
@@ -626,11 +631,34 @@ class TaskBase(object):
                 continue
             all_params.update(cls_params)
 
+        return all_params
+
+
+    def __init__(self, parameter_file_or_dict=None, feedback=2):
+
+        # get all params that has merged params of the all super classes
+        all_params = self.__class__._get_params()
+
         # Read in the parameters.
         self.params = parse_ini.parse(parameter_file_or_dict, all_params, prefix=self.prefix, feedback=feedback)
 
         # setup pipeline
         self._pipeline_setup()
+
+
+    @classmethod
+    def show_params(cls):
+        """Show all parameters that can be set and their default values of this task."""
+        if mpiutil.rank0:
+            # get all params that has merged params of the all super classes
+            all_params = cls._get_params()
+
+            print 'Parameters of task %s:' % cls.__name__
+            for key, val in all_params.items():
+                print '%s:  %s' % (key, val)
+            print
+
+        mpiutil.barrier()
 
 
     def setup(self, requires=None):
