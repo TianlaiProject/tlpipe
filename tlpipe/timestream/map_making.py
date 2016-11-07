@@ -200,7 +200,7 @@ class MapMaking(tod_task.SingleTimestream):
         if dirty_map:
             tstream.mapmake_full(nside, 'map_full_dirty.hdf5', dirty=True)
         else:
-            tstream.mapmake_full(nside, 'map_full.hdf5', dirty=True)
+            tstream.mapmake_full(nside, 'map_full.hdf5', dirty=False)
 
         # ts.add_history(self.history)
 
