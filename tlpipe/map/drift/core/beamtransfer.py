@@ -404,7 +404,7 @@ class BeamTransfer(object):
     #====== Pseudo-inverse beams =======================
 
     # @util.cache_last
-    def invbeam_m(self, mi):
+    def invbeam_m(self, mi, nbin=None):
         """Pseudo-inverse of the beam (for a given m).
 
         Uses the Moore-Penrose Pseudo-inverse as the optimal inverse for
@@ -418,10 +418,10 @@ class BeamTransfer(object):
 
         Returns
         -------
-        invbeam : np.ndarray (nfreq, npol_sky, lmax+1, 2, npairs)
+        invbeam : np.ndarray (nfreq, nsky, ntel)
         """
 
-        beam = self.beam_m(mi)
+        beam = self.beam_m(mi) # shape (nfreq, 2, npairs, npol_sky, lmax+1)
 
         if self.noise_weight:
             noisew = self.telescope.noisepower(np.arange(self.telescope.npairs), 0).flatten()**(-0.5)
@@ -429,17 +429,39 @@ class BeamTransfer(object):
 
         beam = beam.reshape((self.nfreq, self.ntel, self.nsky))
 
-        ibeam = blockla.pinv_dm(beam, rcond=1e-6)
-        # sigma2 = blockla.diag_dm(blockla.multiply_dm_dm(ibeam, ibeam.transpose(0, 2, 1).conj()).real) # sigma_I^2(l, m) = Cov_m(l, l), of shape (nfreq, nsky)
+        if nbin is not None:
+            spec_index = -2.7 # ???
+            # get center freq of each bin
+            n, s, e = mpiutil.split_m(self.nfreq, nbin)
+            cinds = [ (s[i]+e[i])/2 for i in xrange(nbin) ] # indices of cfreqs
+            freqs = self.telescope.frequencies
+            cfreqs = [ freqs[i] for i in cinds ]
+
+            beam1 = np.zeros((nbin, n[0]*self.ntel, self.nsky), dtype=beam.dtype)
+            for bi in xrange(nbin):
+                if bi == nbin - 1: # special care for last bin
+                    beam1[bi, :n[-1]*self.ntel] = (beam[s[bi]:e[bi]] * ((freqs[s[bi]:e[bi]] / cfreqs[bi])**spec_index)[:, np.newaxis, np.newaxis]).reshape(-1, self.nsky)
+                else:
+                    beam1[bi] = (beam[s[bi]:e[bi]] * ((freqs[s[bi]:e[bi]] / cfreqs[bi])**spec_index)[:, np.newaxis, np.newaxis]).reshape(-1, self.nsky)
+
+            beam = beam1
+            ibeam = np.zeros((nbin, self.nsky, n[0]*self.ntel), dtype=beam.dtype)
+            ibeam[:-1] = blockla.pinv_dm(beam[:-1], rcond=1e-6)
+            ibeam[-1, :, :n[-1]*self.ntel] = blockla.pinv_dm(beam[-1:, :n[-1]*self.ntel], rcond=1e-6) # take care of the last bin
+        else:
+            nbin = self.nfreq
+            ibeam = blockla.pinv_dm(beam, rcond=1e-6)
+
+        # sigma2 = blockla.diag_dm(blockla.multiply_dm_dm(ibeam, ibeam.transpose(0, 2, 1).conj()).real) # sigma_I^2(l, m) = Cov_m(l, l), of shape (nbin, nsky)
         # K = 1.0 # empirical value
         # W1_filter = np.where(sigma2>K, invert_no_zero(sigma2), 1.0)
-        W1_filter = np.ones((self.nfreq, self.nsky))
+        W1_filter = np.ones((nbin, self.nsky))
 
         if self.noise_weight:
             # Reshape to make it easy to multiply baselines by noise level
             ibeam = ibeam.reshape((-1, self.telescope.npairs))
             ibeam = ibeam * noisew
-            ibeam = ibeam.reshape((self.nfreq, self.nsky, self.ntel))
+            ibeam = ibeam.reshape((nbin, self.nsky, -1))
 
         return ibeam, W1_filter
 
@@ -1020,7 +1042,7 @@ class BeamTransfer(object):
     project_vector_forward = project_vector_sky_to_telescope
 
 
-    def project_vector_telescope_to_sky(self, mi, vec):
+    def project_vector_telescope_to_sky(self, mi, vec, nbin=None):
         """Invert a vector from the telescope space onto the sky. This is the
         map-making process.
 
@@ -1037,41 +1059,74 @@ class BeamTransfer(object):
             Sky vector to return.
         """
 
-        ibeam, W1 = self.invbeam_m(mi)
+        ibeam, W1 = self.invbeam_m(mi, nbin)
 
-        vecb = np.zeros((self.nfreq, self.telescope.num_pol_sky,
-                         self.telescope.lmax + 1), dtype=np.complex128)
+        nbin = self.nfreq if nbin is None else nbin
+        n, s, e = mpiutil.split_m(self.nfreq, nbin)
+
+        vecb = np.zeros((nbin, self.telescope.num_pol_sky, self.telescope.lmax + 1), dtype=np.complex128)
         vec = vec.reshape((self.nfreq, self.ntel))
 
-        for fi in range(self.nfreq):
-            vecb[fi] = np.dot(ibeam[fi], vec[fi]).reshape(self.telescope.num_pol_sky, self.telescope.lmax + 1)
+        for bi in xrange(nbin):
+            vec1 = vec[s[bi]:e[bi]].reshape(-1)
+            vecb[bi] = np.dot(ibeam[bi], vec1).reshape(self.telescope.num_pol_sky, self.telescope.lmax + 1)
+
+        # for fi in range(self.nfreq):
+        #     vecb[fi] = np.dot(ibeam[fi], vec[fi]).reshape(self.telescope.num_pol_sky, self.telescope.lmax + 1)
 
         return vecb * W1.reshape(vecb.shape) # apply the W1 filter
 
     project_vector_backward = project_vector_telescope_to_sky
 
-
-    def project_vector_backward_dirty(self, mi, vec):
+    def project_vector_backward_dirty(self, mi, vec, nbin=None):
 
         dbeam = self.beam_m(mi).reshape((self.nfreq, self.ntel, self.nsky))
-        dbeam = dbeam.transpose((0, 2, 1)).conj()
 
-        vecb = np.zeros((self.nfreq, self.nsky), dtype=np.complex128)
         if self.noise_weight:
             noise_diag = self.telescope.noisepower(np.arange(self.telescope.npairs), 0).flatten()
             vec = vec * (1.0/noise_diag)
         vec = vec.reshape((self.nfreq, self.ntel))
 
-        for fi in range(self.nfreq):
-            # norm = np.dot(dbeam[fi].T.conj(), dbeam[fi]).diagonal()
-            # norm = np.where(norm < 1e-6, 0.0, 1.0 / norm)
-            # #norm = np.dot(dbeam[fi], dbeam[fi].T.conj()).diagonal()
-            # #norm = np.where(np.logical_or(np.abs(norm) < 1e-4,
-            # #np.abs(norm) < np.abs(norm.max()*1e-2)), 0.0, 1.0 / norm)
-            # vecb[fi] = np.dot(dbeam[fi], vec[fi, :].reshape(self.ntel) * norm)
-            vecb[fi] = np.dot(dbeam[fi], vec[fi, :].reshape(self.ntel))
+        if nbin is not None:
+            spec_index = -2.7 # ???
+            # get center freq of each bin
+            n, s, e = mpiutil.split_m(self.nfreq, nbin)
+            cinds = [ (s[i]+e[i])/2 for i in xrange(nbin) ] # indices of cfreqs
+            freqs = self.telescope.frequencies
+            cfreqs = [ freqs[i] for i in cinds ]
 
-        return vecb.reshape((self.nfreq, self.telescope.num_pol_sky,
+            beam1 = np.zeros((nbin, n[0]*self.ntel, self.nsky), dtype=dbeam.dtype)
+            vec1 = np.zeros((nbin, n[0]*self.ntel), dtype=vec.dtype)
+            for bi in xrange(nbin):
+                if bi == nbin - 1: # special care for last bin
+                    beam1[bi, :n[-1]*self.ntel] = (dbeam[s[bi]:e[bi]] * ((freqs[s[bi]:e[bi]] / cfreqs[bi])**spec_index)[:, np.newaxis, np.newaxis]).reshape(-1, self.nsky)
+                    vec1[bi, :n[-1]*self.ntel] = vec[s[bi]:e[bi]].reshape(-1)
+                else:
+                    beam1[bi] = (dbeam[s[bi]:e[bi]] * ((freqs[s[bi]:e[bi]] / cfreqs[bi])**spec_index)[:, np.newaxis, np.newaxis]).reshape(-1, self.nsky)
+                    vec1[bi] = vec[s[bi]:e[bi]].reshape(-1)
+
+            dbeam = beam1.transpose((0, 2, 1)).conj()
+            vec = vec1
+        else:
+            nbin = self.nfreq
+            dbeam = dbeam.transpose((0, 2, 1)).conj()
+
+
+        vecb = np.zeros((nbin, self.nsky), dtype=np.complex128)
+
+        for bi in xrange(nbin):
+            vecb[bi] = np.dot(dbeam[bi], vec[bi])
+
+        # for fi in range(self.nfreq):
+        #     # norm = np.dot(dbeam[fi].T.conj(), dbeam[fi]).diagonal()
+        #     # norm = np.where(norm < 1e-6, 0.0, 1.0 / norm)
+        #     # #norm = np.dot(dbeam[fi], dbeam[fi].T.conj()).diagonal()
+        #     # #norm = np.where(np.logical_or(np.abs(norm) < 1e-4,
+        #     # #np.abs(norm) < np.abs(norm.max()*1e-2)), 0.0, 1.0 / norm)
+        #     # vecb[fi] = np.dot(dbeam[fi], vec[fi, :].reshape(self.ntel) * norm)
+        #     vecb[fi] = np.dot(dbeam[fi], vec[fi, :].reshape(self.ntel))
+
+        return vecb.reshape((nbin, self.telescope.num_pol_sky,
                              self.telescope.lmax + 1))
 
 

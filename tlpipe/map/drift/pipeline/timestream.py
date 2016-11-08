@@ -243,8 +243,11 @@ class Timestream(object):
 
     #======== Make map from uncleaned stream ============
 
-    def mapmake_full(self, nside, mapname, dirty=False):
+    def mapmake_full(self, nside, mapname, nbin=None, dirty=False):
 
+        nfreq = self.telescope.nfreq
+        if nbin is not None and (nbin <= 0 or nbin >= nfreq): # invalid nbin
+            nbin = None
 
         def _make_alm(mi):
 
@@ -252,9 +255,9 @@ class Timestream(object):
 
             mmode = self.mmode(mi)
             if dirty:
-                sphmode = self.beamtransfer.project_vector_backward_dirty(mi, mmode)
+                sphmode = self.beamtransfer.project_vector_backward_dirty(mi, mmode, nbin)
             else:
-                sphmode = self.beamtransfer.project_vector_telescope_to_sky(mi, mmode)
+                sphmode = self.beamtransfer.project_vector_telescope_to_sky(mi, mmode, nbin)
 
             return sphmode
 
@@ -262,7 +265,15 @@ class Timestream(object):
 
         if mpiutil.rank0:
 
-            alm = np.zeros((self.telescope.nfreq, self.telescope.num_pol_sky, self.telescope.lmax + 1,
+            # get center freq of each bin
+            if nbin is not None:
+                n, s, e = mpiutil.split_m(nfreq, nbin)
+                cfreqs = np.array([ self.beamtransfer.telescope.frequencies[(s[i]+e[i])/2] for i in range(nbin) ])
+            else:
+                nbin = nfreq
+                cfreqs = self.beamtransfer.telescope.frequencies
+
+            alm = np.zeros((nbin, self.telescope.num_pol_sky, self.telescope.lmax + 1,
                             self.telescope.lmax + 1), dtype=np.complex128)
 
             for mi in range(self.telescope.mmax + 1):
@@ -273,7 +284,7 @@ class Timestream(object):
 
             with h5py.File(self.output_directory + '/' + mapname, 'w') as f:
                 f.create_dataset('/map', data=skymap)
-                f.attrs['frequency'] = self.beamtransfer.telescope.frequencies
+                f.attrs['frequency'] = cfreqs
                 f.attrs['polarization'] = np.array(['I', 'Q', 'U', 'V'])[:self.beamtransfer.telescope.num_pol_sky]
 
         mpiutil.barrier()
