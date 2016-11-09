@@ -510,7 +510,8 @@ class TimestreamCommon(container.BasicTod):
             ants = [ tl_array.DishAntenna(pi, freq, diameter) for pi in pos_ns ]
         elif self.is_cylinder:
             try:
-                width = 0.78 * self.attrs['cywid'] # suppose an illumination efficiency of 0.78
+                factor = 1.2 # suppose an illumination efficiency
+                width = factor * self.attrs['cywid']
                 length = self.attrs['cylen']
             except KeyError:
                 raise KeyError('Attribute dishdiam does not exist, try to load it first')

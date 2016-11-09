@@ -7,6 +7,7 @@ import aipy as a
 import tod_task
 from caput import mpiutil
 from tlpipe.utils.path_util import output_path
+from tlpipe.core import constants as const
 import tlpipe.plot
 import matplotlib.pyplot as plt
 
@@ -23,7 +24,7 @@ def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit
     chi2s = []
     shifts = xrange(-num_shift/2, num_shift/2+1)
     for si in shifts:
-        vis = vis_obs[start_ind+si:end_ind+si]
+        vis = vis_obs[start_ind+si:end_ind+si].astype(np.complex128) # improve precision
         num_nomask = vis.count()
         if num_nomask == 0: # no valid vis data
             continue
@@ -115,7 +116,8 @@ class PsFit(tod_task.IterTimestream):
         ts.redistribute('baseline')
 
         feedno = ts['feedno'][:].tolist()
-        nfreq = len(ts['freq'][:])
+        freq = ts['freq'][:]
+        nfreq = len(freq)
         pol = ts['pol'][:].tolist()
         bl = ts.local_bl[:] # local bls
         bls = [ tuple(b) for b in bl ]
@@ -173,7 +175,11 @@ class PsFit(tod_task.IterTimestream):
         vis_mask = ts.local_vis_mask
         # vis[ts.local_vis_mask] = complex(np.nan, np.nan) # set masked vis to nan
         nt = end_ind - start_ind
-        vis_sim = np.zeros((nt,)+vis.shape[1:], dtype=vis.dtype) # to hold the simulated vis
+        vis_sim = np.zeros((nt,)+vis.shape[1:], dtype=np.complex128) # to hold the simulated vis, use float64 to have better precision
+
+        # get beam solid angle (suppose it is the same for all feeds)
+        Omega_ij = aa[0].beam.Omega
+        pre_factor = (const.c**2 / (2 * const.k_B * (1.0e6*freq)**2) / Omega_ij)
 
         for ind, ti in enumerate(xrange(start_ind, end_ind)):
             aa.set_jultime(ts['jul_date'][ti])
@@ -183,16 +189,25 @@ class PsFit(tod_task.IterTimestream):
             # get the topocentric coordinate of the calibrator at the current time
             s_top = s.get_crds('top', ncrd=3)
             aa.sim_cache(cat.get_crds('eq', ncrd=3)) # for compute bm_response and sim
+
             # for pi in range(len(pol)):
             for pi in xrange(2): # only cal for xx, yy
                 aa.set_active_pol(pol[pi])
+                # assume all have the same beam responce, speed the calculation
+                # resp1 = aa[0].bm_response(s_top, pol=pol[pi][0]).transpose()
+                # resp2 = aa[0].bm_response(s_top, pol=pol[pi][1]).transpose()
+                # bmij = resp1 * np.conjugate(resp2)
+                bmij = aa.bm_response(0, 0).reshape(-1)
+                factor = pre_factor * Sc * bmij
                 for bi, (i, j) in enumerate(bls):
                     ai = feedno.index(i)
                     aj = feedno.index(j)
                     uij = aa.gen_uvw(ai, aj, src='z')[:, 0, :] # (rj - ri)/lambda
-                    bmij = aa.bm_response(ai, aj).reshape(-1)
-                    # vis_sim[ind, :, pi, bi] = (const.c**2 / (2 * const.k_B * freq**2) / Omega_ij) * Sc * bmij * np.exp(-2.0J * np.pi * np.dot(s_top, uij)) # Unit: K
-                    vis_sim[ind, :, pi, bi] = Sc * bmij * np.exp(-2.0J * np.pi * np.dot(s_top, uij))
+                    # bmij = aa.bm_response(ai, aj).reshape(-1)
+                    vis_sim[ind, :, pi, bi] = factor * np.exp(-2.0J * np.pi * np.dot(s_top, uij)) # Unit: K
+                    # vis_sim[ind, :, pi, bi] = Sc * bmij * np.exp(-2.0J * np.pi * np.dot(s_top, uij))
+
+        mpiutil.barrier()
 
         # iterate over freq
         for fi in xrange(nfreq):
@@ -203,6 +218,8 @@ class PsFit(tod_task.IterTimestream):
                     # cal for vis
                     ts.local_vis[:, fi, pi, bi] = np.roll(vis[:, fi, pi, bi], -si) / gain # NOTE the use of -si
                     ts.local_vis_mask[:, fi, pi, bi] = np.roll(vis_mask[:, fi, pi, bi], -si) # NOTE the use of -si
+
+        mpiutil.barrier()
 
         ts.add_history(self.history)
 
