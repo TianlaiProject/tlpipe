@@ -768,12 +768,12 @@ class TaskBase(object):
         min_req = len(setup_argspec.args) - len_defaults - 1
         if n_requires < min_req:
             msg = ("Didn't get enough 'requires' keys. Expected at least"
-                   " %d and only got %d." % (min_req, n_requires))
+                   " %d and only got %d" % (min_req, n_requires))
             raise PipelineConfigError(msg)
         if (n_requires > len(setup_argspec.args) - 1
             and setup_argspec.varargs is None):
             msg = ("Got too many 'requires' keys. Expected at most %d and"
-                   " got %d." % (len(setup_argspec.args) - 1, n_requires))
+                   " got %d" % (len(setup_argspec.args) - 1, n_requires))
             raise PipelineConfigError(msg)
         # Inspect the `next` method to see how many arguments it takes.
         next_argspec = inspect.getargspec(self.next)
@@ -786,12 +786,12 @@ class TaskBase(object):
         min_in = len(next_argspec.args) - len_defaults - 1
         if n_in < min_in:
             msg = ("Didn't get enough 'in' keys. Expected at least"
-                   " %d and only got %d." % (min_in, n_in))
+                   " %d and only got %d" % (min_in, n_in))
             raise PipelineConfigError(msg)
         if (n_in > len(next_argspec.args) - 1
             and next_argspec.varargs is None):
             msg = ("Got too many 'in' keys. Expected at most %d and"
-                   " got %d." % (len(next_argspec.args) - 1, n_in))
+                   " got %d" % (len(next_argspec.args) - 1, n_in))
             raise PipelineConfigError(msg)
         # Now that all data product keys have been verified to be valid, store
         # them on the instance.
@@ -916,10 +916,10 @@ class TaskBase(object):
                         logger.debug(msg)
                     if self._requires is None:
                         msg = ("Tried to set 'requires' data product, but"
-                               "`setup()` already run.")
+                               "`setup()` already run")
                         raise PipelineRuntimeError(msg)
                     if not self._requires[jj] is None:
-                        msg = "'requires' data product set more than once."
+                        msg = "'requires' data product set more than once"
                         raise PipelineRuntimeError(msg)
                     else:
                         # Accept the data product and store for later use.
@@ -933,7 +933,7 @@ class TaskBase(object):
                     # Check that task is still accepting inputs.
                     if self._in is None:
                         msg = ("Tried to queue 'requires' data product, but"
-                               "`next()` iteration already completed.")
+                               "`next()` iteration already completed")
                         raise PipelineRuntimeError(msg)
                     else:
                         # Accept the data product and store for later use.
@@ -975,11 +975,8 @@ class DoNothing(TaskBase):
         pass
 
 
-class _OneAndOne(TaskBase):
+class OneAndOne(TaskBase):
     """Base class for tasks that have (at most) one input and one output
-
-    This is not a user base class and simply holds code that is common to
-    `SingleBase` and `IterBase`.
 
     The input for the task will be preferably get from the `in` key, if no input
     product is specified by the `in` key, then input will be get from the files
@@ -996,6 +993,10 @@ class _OneAndOne(TaskBase):
                     'copy': False, # process a copy of the input
                     'input_files': None,
                     'output_files': None,
+                    'iterable': False,
+                    'iter_start': 0,
+                    'iter_step': 1,
+                    'iter_num': None, # number of iterations
                   }
 
     prefix = 'ob_'
@@ -1003,21 +1004,28 @@ class _OneAndOne(TaskBase):
 
     def __init__(self, parameter_file_or_dict=None, feedback=2):
 
-        super(_OneAndOne, self).__init__(parameter_file_or_dict, feedback)
+        super(OneAndOne, self).__init__(parameter_file_or_dict, feedback)
 
         self.input_files = input_path(format_list(self.params['input_files']))
         self.output_files = output_path(format_list(self.params['output_files']), mkdir=False)
+
+        self.iterable = self.params['iterable']
+        if self.iterable:
+            self.iter_start = self.params['iter_start']
+            self.iter_step = self.params['iter_step']
+            self.iter_num = self.params['iter_num']
+        self._iter_cnt = 0 # inner iter counter
 
         # Inspect the `process` method to see how many arguments it takes.
         pro_argspec = inspect.getargspec(self.process)
         n_args = len(pro_argspec.args) - 1
         if n_args  > 1:
             msg = ("`process` method takes more than 1 argument, which is not"
-                   " allowed.")
+                   " allowed")
             raise PipelineConfigError(msg)
         if pro_argspec.varargs or pro_argspec.keywords or pro_argspec.defaults:
             msg = ("`process` method may not have variable length or optional"
-                   " arguments.")
+                   " arguments")
             raise PipelineConfigError(msg)
         if n_args == 0:
             self._no_input = True
@@ -1029,11 +1037,33 @@ class _OneAndOne(TaskBase):
                 raise PipelineConfigError(msg)
 
 
-    def process(self, input):
-        """Override this method with your data processing task.
-        """
+    @property
+    def iteration(self):
+        """Current iteration."""
+        if self.iterable:
+            return self.iter_start + self.iter_step * self._iter_cnt
+        else:
+            warnings.warn('Not iterable when iterable == False')
 
-        output = input
+    def next(self, input=None):
+        """Should not need to override."""
+
+        if self.iterable:
+            if self.iter_num is not None and self._iter_cnt >= self.iter_num:
+                # We have run the required number of iterations
+                raise PipelineStopIteration()
+        else:
+            if self._iter_cnt > 0:
+                raise PipelineStopIteration()
+
+        if input:
+            if self.params['copy']:
+                input = self.copy_input(input)
+            input = self.cast_input(input)
+        output = self.read_process_write(input)
+
+        self._iter_cnt += 1
+
         return output
 
     def read_process_write(self, input):
@@ -1042,7 +1072,7 @@ class _OneAndOne(TaskBase):
         # Read input if needed.
         if input is None and not self._no_input:
             if len(self.input_files) == 0:
-                raise RuntimeError('No file to read from.')
+                raise RuntimeError('No file to read from')
             if mpiutil.rank0:
                 msg = "%s reading data from files:" % self.__class__.__name__
                 for input_file in self.input_files:
@@ -1055,7 +1085,7 @@ class _OneAndOne(TaskBase):
         if self._no_input:
             if not input is None:
                 # This should never happen.  Just here to catch bugs.
-                raise RuntimeError("Somehow `input` was set.")
+                raise RuntimeError("Somehow `input` was set")
             output = self.process()
         else:
             output = self.process(input)
@@ -1105,53 +1135,21 @@ class _OneAndOne(TaskBase):
 
         raise NotImplementedError()
 
+    def process(self, input):
+        """Override this method with your data processing task.
+        """
+
+        output = input
+        return output
+
     def write_output(self, output):
         """Override to implement writing outputs to disk."""
 
         raise NotImplementedError()
 
 
-class SingleBase(_OneAndOne):
-    """Base class for non-iterating ('one shot') tasks with at most one input
-    and output.
-
-    Inherits from :class:`TaskBase`.
-
-    Tasks inheriting from this class should override `process` and optionally
-    :meth:`setup`, :meth:`finish`, :meth:`read_input`, :meth:`write_output` and
-    :meth:`cast_input`. They should not override :meth:`next`.
-
-    Methods
-    -------
-    next
-    setup
-    process
-    finish
-    read_input
-    cast_input
-    write_output
-
-    """
-
-    def next(self, input=None):
-        """Should not need to override."""
-
-        # This should only be called once.
-        try:
-            if self.done:
-                raise PipelineStopIteration()
-        except AttributeError:
-            self.done = True
-
-        if input:
-            if self.params['copy']:
-                input = self.copy_input(input)
-            input = self.cast_input(input)
-        return self.read_process_write(input)
-
-
-class IterBase(_OneAndOne):
-    """Base class for iterating tasks with at most one input and one output.
+class FileIterBase(OneAndOne):
+    """Base class for iterating tasks over input files.
 
     Tasks inheriting from this class should override :meth:`process` and
     optionally :meth:`setup`, :meth:`finish`, :meth:`read_input`,
@@ -1172,66 +1170,10 @@ class IterBase(_OneAndOne):
     """
 
     params_init = {
-                    'iter_start': 0,
-                    'iter_step': 1,
-                    'iter_num': None, # number of iterations
+                    'iterable': True,
                   }
 
-    prefix = 'ib_'
-
-
-    def __init__(self, parameter_file_or_dict=None, feedback=2):
-
-        super(IterBase, self).__init__(parameter_file_or_dict, feedback)
-
-        self.iter_start = self.params['iter_start']
-        self.iter_step = self.params['iter_step']
-        self.iter_num = self.params['iter_num']
-        self.iter_cnt = 0 # iter counter
-
-    @property
-    def iteration(self):
-        """Current iteration."""
-        return self.iter_start + self.iter_step * self.iter_cnt
-
-    def next(self, input=None):
-        """Should not need to override."""
-
-        if self.iter_num is not None and self.iter_cnt >= self.iter_num:
-            # We have run the required number of iterations
-            raise PipelineStopIteration()
-
-        if input:
-            if self.params['copy']:
-                input = self.copy_input(input)
-            input = self.cast_input(input)
-        output = self.read_process_write(input)
-
-        self.iter_cnt += 1
-
-        return output
-
-
-class FileIterBase(IterBase):
-    """Base class for iterating tasks over input files.
-
-    Tasks inheriting from this class should override :meth:`process` and
-    optionally :meth:`setup`, :meth:`finish`, :meth:`read_input`,
-    :meth:`write_output` and :meth:`cast_input`. They should not override
-    :meth:`next`.
-
-
-    Methods
-    -------
-    next
-    setup
-    process
-    finish
-    read_input
-    cast_input
-    write_output
-
-    """
+    prefix = 'fi_'
 
     def __init__(self, parameter_file_or_dict=None, feedback=2):
 
