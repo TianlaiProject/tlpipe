@@ -10,7 +10,7 @@ from tlpipe.core import constants as const
 from caput import mpiutil
 
 
-class PsSub(tod_task.IterTimestream):
+class PsSub(tod_task.TaskTimestream):
     """Calibration by strong point source fitting."""
 
     params_init = {

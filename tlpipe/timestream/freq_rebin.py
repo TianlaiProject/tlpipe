@@ -3,13 +3,14 @@
 import warnings
 import numpy as np
 import tod_task
+from timestream import Timestream
 
 from caput import mpiutil
 from caput import mpiarray
 from tlpipe.utils.np_util import unique, average
 
 
-class Rebin(tod_task.IterTimestream):
+class Rebin(tod_task.TaskTimestream):
     """Rebin the frequency channels."""
 
     params_init = {
@@ -19,6 +20,8 @@ class Rebin(tod_task.IterTimestream):
     prefix = 'rb_'
 
     def process(self, ts):
+
+        assert isinstance(ts, Timestream), '%s only works for Timestream object' % self.__class__.__name__
 
         bin_number = self.params['bin_number']
 

@@ -35,7 +35,7 @@ def cal(vis, vis_mask, li, gi, pbl, ts, **kwargs):
     return vis / bl_gain, vis_mask
 
 
-class PsCal(tod_task.IterTimestream):
+class PsCal(tod_task.TaskTimestream):
     """Calibration using a strong point source."""
 
     params_init = {

@@ -12,7 +12,7 @@ import tlpipe.plot
 import matplotlib.pyplot as plt
 
 
-class Flag(tod_task.IterRawTimestream):
+class Flag(tod_task.TaskTimestream):
     """Line RFI flagging."""
 
     params_init = {

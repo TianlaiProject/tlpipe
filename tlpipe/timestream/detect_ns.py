@@ -4,11 +4,12 @@ from collections import Counter
 import numpy as np
 import tod_task
 
+from raw_timestream import RawTimestream
 from caput import mpiutil
 from caput import mpiarray
 
 
-class Detect(tod_task.IterRawTimestream):
+class Detect(tod_task.TaskTimestream):
     """Detect noise source signal."""
 
     params_init = {
@@ -20,6 +21,8 @@ class Detect(tod_task.IterRawTimestream):
     prefix = 'dt_'
 
     def process(self, rt):
+
+        assert isinstance(rt, RawTimestream), '%s only works for RawTimestream object currently' % self.__class__.__name__
 
         feed = self.params['feed']
         sigma = self.params['sigma']

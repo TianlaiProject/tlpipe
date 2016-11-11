@@ -18,7 +18,7 @@ from tlpipe.map.fmmode.core import beamtransfer
 from tlpipe.map.fmmode.pipeline import timestream
 
 
-class MapMaking(tod_task.SingleTimestream):
+class MapMaking(tod_task.TaskTimestream):
     """Initialize telescope array, average the timestream and do the map-making."""
 
     params_init = {

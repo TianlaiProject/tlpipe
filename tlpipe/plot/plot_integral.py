@@ -2,6 +2,7 @@
 
 import numpy as np
 from tlpipe.timestream import tod_task
+from tlpipe.timestream.raw_timestream import RawTimestream
 from tlpipe.utils.path_util import output_path
 import matplotlib.pyplot as plt
 
@@ -71,7 +72,7 @@ def plot(vis, vis_mask, li, gi, bl, obj, **kwargs):
     return vis, vis_mask
 
 
-class Plot(tod_task.IterRawTimestream):
+class Plot(tod_task.TaskTimestream):
     """Plot time or frequency integral."""
 
     params_init = {
@@ -86,6 +87,9 @@ class Plot(tod_task.IterRawTimestream):
     prefix = 'pit_'
 
     def process(self, rt):
+
+        assert isinstance(rt, RawTimestream), '%s only works for RawTimestream object currently' % self.__class__.__name__
+
         integral = self.params['integral']
         bl_incl = self.params['bl_incl']
         bl_excl = self.params['bl_excl']

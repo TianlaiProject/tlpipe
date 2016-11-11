@@ -4,17 +4,22 @@ import os
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
 from tlpipe.timestream import tod_task
+from tlpipe.timestream.raw_timestream import RawTimestream
+from tlpipe.timestream.timestream import Timestream
 from tlpipe.utils.path_util import output_path
 import matplotlib.pyplot as plt
 
-def plot(vis, vis_mask, li, gi, bl, obj, **kwargs):
+def plot(vis, vis_mask, li, gi, bl, ts, **kwargs):
 
-    if isinstance(bl, tuple): # for Timestream
+    if isinstance(ts, Timestream): # for Timestream
         pol = bl[0]
         bl = tuple(bl[1])
-    else: # for RawTimestream
+    elif isinstance(ts, RawTimestream): # for RawTimestream
         pol = None
         bl = tuple(bl)
+    else:
+        raise ValueError('Need either a RawTimestream or Timestream')
+
     bl_incl = kwargs.get('bl_incl', 'all')
     bl_excl = kwargs.get('bl_excl', [])
     flag_mask = kwargs.get('flag_mask', False)
@@ -37,11 +42,11 @@ def plot(vis, vis_mask, li, gi, bl, obj, **kwargs):
         vis1 = np.ma.array(vis, mask=vis_mask)
     elif flag_ns:
         vis1 = vis.copy()
-        on = np.where(obj['ns_on'][:])[0]
+        on = np.where(ts['ns_on'][:])[0]
         if not interpolate_ns:
             vis1[on] = complex(np.nan, np.nan)
         else:
-            off = np.where(np.logical_not(obj['ns_on'][:]))[0]
+            off = np.where(np.logical_not(ts['ns_on'][:]))[0]
             for fi in xrange(vis1.shape[1]):
                 itp_real = InterpolatedUnivariateSpline(off, vis1[off, fi].real)
                 itp_imag= InterpolatedUnivariateSpline(off, vis1[off, fi].imag)
@@ -49,12 +54,12 @@ def plot(vis, vis_mask, li, gi, bl, obj, **kwargs):
     else:
         vis1 = vis
 
-    freq = obj.freq[:]
+    freq = ts.freq[:]
     if y_axis == 'jul_date':
-        y_aixs = obj.time[:]
+        y_aixs = ts.time[:]
         y_label = r'$t$ / Julian Date'
     elif y_axis == 'ra':
-        y_aixs = obj['ra_dec'][:, 0]
+        y_aixs = ts['ra_dec'][:, 0]
         y_label = r'RA / radian'
     extent = [freq[0], freq[-1], y_aixs[0], y_aixs[-1]]
 
@@ -89,41 +94,7 @@ def plot(vis, vis_mask, li, gi, bl, obj, **kwargs):
 
     return vis, vis_mask
 
-
-class PlotRawTimestream(tod_task.IterRawTimestream):
-    """Waterfall plot for RawTimestream."""
-
-    params_init = {
-                    'bl_incl': 'all', # or a list of include (bl1, bl2)
-                    'bl_excl': [],
-                    'flag_mask': False,
-                    'flag_ns': False,
-                    'interpolate_ns': False,
-                    'y_axis': 'jul_date', # or 'ra'
-                    'plot_abs': False,
-                    'fig_name': 'vis',
-                  }
-
-    prefix = 'prt_'
-
-    def process(self, rt):
-        bl_incl = self.params['bl_incl']
-        bl_excl = self.params['bl_excl']
-        flag_mask = self.params['flag_mask']
-        flag_ns = self.params['flag_ns']
-        interpolate_ns = self.params['interpolate_ns']
-        y_axis = self.params['y_axis']
-        plot_abs = self.params['plot_abs']
-        fig_name = self.params['fig_name']
-        tag_output_iter = self.params['tag_output_iter']
-
-        rt.bl_data_operate(plot, full_data=True, keep_dist_axis=False, bl_incl=bl_incl, bl_excl=bl_excl, fig_name=fig_name, iteration=self.iteration, tag_output_iter=tag_output_iter, flag_mask=flag_mask, flag_ns=flag_ns, interpolate_ns=interpolate_ns, y_axis=y_axis, plot_abs=plot_abs)
-        rt.add_history(self.history)
-
-        return rt
-
-
-class PlotTimestream(tod_task.IterTimestream):
+class Plot(tod_task.TaskTimestream):
     """Waterfall plot for Timestream."""
 
     params_init = {
@@ -137,7 +108,7 @@ class PlotTimestream(tod_task.IterTimestream):
                     'fig_name': 'vis',
                   }
 
-    prefix = 'pts_'
+    prefix = 'pwf_'
 
     def process(self, ts):
         bl_incl = self.params['bl_incl']
@@ -150,7 +121,11 @@ class PlotTimestream(tod_task.IterTimestream):
         fig_name = self.params['fig_name']
         tag_output_iter = self.params['tag_output_iter']
 
-        ts.pol_and_bl_data_operate(plot, full_data=True, keep_dist_axis=False, bl_incl=bl_incl, bl_excl=bl_excl, fig_name=fig_name, tag_output_iter=tag_output_iter, iteration=self.iteration, flag_mask=flag_mask, flag_ns=flag_ns, interpolate_ns=interpolate_ns, y_axis=y_axis, plot_abs=plot_abs)
+        if isinstance(ts, RawTimestream):
+            func = ts.bl_data_operate
+        elif isinstance(ts, Timestream):
+            func = ts.pol_and_bl_data_operate
+        func(plot, full_data=True, keep_dist_axis=False, bl_incl=bl_incl, bl_excl=bl_excl, fig_name=fig_name, tag_output_iter=tag_output_iter, iteration=self.iteration, flag_mask=flag_mask, flag_ns=flag_ns, interpolate_ns=interpolate_ns, y_axis=y_axis, plot_abs=plot_abs)
 
         ts.add_history(self.history)
 

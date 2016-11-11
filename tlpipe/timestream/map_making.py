@@ -6,6 +6,7 @@ from scipy.linalg import eigh
 import h5py
 import aipy as a
 import tod_task
+from timestream import Timestream
 
 from caput import mpiutil
 from caput import mpiarray
@@ -18,7 +19,7 @@ from tlpipe.map.drift.core import beamtransfer
 from tlpipe.map.drift.pipeline import timestream
 
 
-class MapMaking(tod_task.SingleTimestream):
+class MapMaking(tod_task.TaskTimestream):
     """Initialize telescope array, average the timestream and do the map-making."""
 
     params_init = {
@@ -46,6 +47,8 @@ class MapMaking(tod_task.SingleTimestream):
     prefix = 'mm_'
 
     def process(self, ts):
+
+        assert isinstance(ts, Timestream), '%s only works for Timestream object' % self.__class__.__name__
 
         mask_daytime = self.params['mask_daytime']
         mask_time_range = self.params['mask_time_range']

@@ -2,11 +2,12 @@
 
 import numpy as np
 import tod_task
+from timestream import Timestream
 from tlpipe.core import constants as const
 from caput import mpiarray
 
 
-class ReOrder(tod_task.IterTimestream):
+class ReOrder(tod_task.TaskTimestream):
     """Re-order data to have longitude from 0 to 2pi."""
 
     params_init = {
@@ -16,6 +17,8 @@ class ReOrder(tod_task.IterTimestream):
     prefix = 'ro_'
 
     def process(self, ts):
+
+        assert isinstance(ts, Timestream), '%s only works for Timestream object' % self.__class__.__name__
 
         discard_less = self.params['discard_less']
         nt = ts.vis.shape[0]

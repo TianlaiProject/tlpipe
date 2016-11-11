@@ -4,6 +4,7 @@ import os
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
 import tod_task
+from raw_timestream import RawTimestream
 from tlpipe.utils.path_util import output_path
 import tlpipe.plot
 import matplotlib.pyplot as plt
@@ -82,7 +83,7 @@ def cal(vis, vis_mask, li, gi, fbl, rt, **kwargs):
     return vis, vis_mask
 
 
-class NsCal(tod_task.IterRawTimestream):
+class NsCal(tod_task.TaskTimestream):
     """Relative phase calibration using the noise source signal."""
 
     params_init = {
@@ -94,6 +95,8 @@ class NsCal(tod_task.IterRawTimestream):
     prefix = 'nc_'
 
     def process(self, rt):
+
+        assert isinstance(rt, RawTimestream), '%s only works for RawTimestream object currently' % self.__class__.__name__
 
         num_mean = self.params['num_mean']
         plot_phs = self.params['plot_phs']

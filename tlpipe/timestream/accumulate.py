@@ -2,11 +2,12 @@
 
 import numpy as np
 import tod_task
+from timestream import Timestream
 from caput import mpiutil
 from caput import mpiarray
 
 
-class Accum(tod_task.IterTimestream):
+class Accum(tod_task.TaskTimestream):
     """Accurate data. This should be done after the data has been calibrated and re-ordered."""
 
     params_init = {
@@ -19,6 +20,8 @@ class Accum(tod_task.IterTimestream):
         self.data = None
 
     def process(self, ts):
+
+        assert isinstance(ts, Timestream), '%s only works for Timestream object' % self.__class__.__name__
 
         check = self.params['check']
 

@@ -5,11 +5,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from caput import memh5
 from caput import mpiutil
-from tlpipe.pipeline.pipeline import SingleBase
+from tlpipe.pipeline.pipeline import OneAndOne
 from tlpipe.utils.path_util import input_path, output_path
 
 
-class PlotGain(SingleBase):
+class PlotGain(OneAndOne):
     """Plot gain."""
 
     params_init = {

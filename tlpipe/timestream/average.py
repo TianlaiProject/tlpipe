@@ -5,7 +5,7 @@ import numpy as np
 import tod_task
 
 
-class Average(tod_task.SingleTimestream):
+class Average(tod_task.TaskTimestream):
     """Average the accumulated data by dividing its weight."""
 
     prefix = 'av_'
@@ -16,7 +16,7 @@ class Average(tod_task.SingleTimestream):
             warnings.warn('Can not do the averrage without the weight, do nothing...')
         else:
             # divide weight
-            ts.local_vis[:] = np.where(ts['weight'].local_data != 0, ts.local_vis / ts['weight'].local_data, 0)
+            ts.local_vis[:] = np.where(ts['weight'].local_data == 0, 0, ts.local_vis / ts['weight'].local_data)
             # set mask
             # ts.local_vis_mask[:] = np.where(ts['weight'].local_data != 0, False, True) # already done in accumulate
 

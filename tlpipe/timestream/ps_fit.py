@@ -5,6 +5,7 @@ import numpy as np
 import ephem
 import aipy as a
 import tod_task
+from timestream import Timestream
 from caput import mpiutil
 from tlpipe.utils.path_util import output_path
 from tlpipe.core import constants as const
@@ -89,7 +90,7 @@ def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit
     return gain, si
 
 
-class PsFit(tod_task.IterTimestream):
+class PsFit(tod_task.TaskTimestream):
     """Calibration by strong point source fitting."""
 
     params_init = {
@@ -104,6 +105,8 @@ class PsFit(tod_task.IterTimestream):
     prefix = 'pf_'
 
     def process(self, ts):
+
+        assert isinstance(ts, Timestream), '%s only works for Timestream object' % self.__class__.__name__
 
         calibrator = self.params['calibrator']
         catalog = self.params['catalog']
