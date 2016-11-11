@@ -41,38 +41,37 @@ class TaskTimestream(OneAndOne):
         """Reads input, executes any processing and writes output."""
 
         # determine if rt or ts from the input tod, and set the correct _Tod_class
-        # if read from files
-        if tod is None and not self._no_input:
-            if len(self.input_files) == 0:
-                raise RuntimeError('No file to read from')
-            tag_input_iter = self.params['tag_input_iter']
-            if self.iterable and tag_input_iter:
-                input_files = input_path(self.input_files, iteration=self.iteration)
-            else:
-                input_files = self.input_files
-            # see 'vis' dataset from the first input file
-            with h5py.File(input_files[0], 'r') as f:
-                vis_shp = f['vis'].shape
-            if len(vis_shp) == 3:
-                self._Tod_class = RawTimestream
-            elif len(vis_shp) == 4:
-                self._Tod_class = Timestream
-            else:
-                raise RuntimeError('Something wrong happened, dimension of vis data != 3 or 4')
-            tod = self.read_input()
-
-        # if passed from the arg
         if self._no_input:
             if not tod is None:
                 # This should never happen.  Just here to catch bugs.
                 raise RuntimeError("Somehow `input` was set.")
         else:
-            if isinstance(tod, RawTimestream):
-                self._Tod_class = RawTimestream
-            elif isinstance(tod, Timestream):
-                self._Tod_class = Timestream
+            # read from files
+            if tod is None:
+                if len(self.input_files) == 0:
+                    raise RuntimeError('No file to read from')
+                tag_input_iter = self.params['tag_input_iter']
+                if self.iterable and tag_input_iter:
+                    input_files = input_path(self.input_files, iteration=self.iteration)
+                else:
+                    input_files = self.input_files
+                # see 'vis' dataset from the first input file
+                with h5py.File(input_files[0], 'r') as f:
+                    vis_shp = f['vis'].shape
+                if len(vis_shp) == 3:
+                    self._Tod_class = RawTimestream
+                elif len(vis_shp) == 4:
+                    self._Tod_class = Timestream
+                else:
+                    raise RuntimeError('Something wrong happened, dimension of vis data != 3 or 4')
+            # from arg
             else:
-                raise ValueError('Invaid input %s, need either a RawTimestream or Timestream object' % tod)
+                if isinstance(tod, RawTimestream):
+                    self._Tod_class = RawTimestream
+                elif isinstance(tod, Timestream):
+                    self._Tod_class = Timestream
+                else:
+                    raise ValueError('Invaid input %s, need either a RawTimestream or Timestream object' % tod)
 
         return super(TaskTimestream, self).read_process_write(tod)
 
