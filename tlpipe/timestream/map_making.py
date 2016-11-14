@@ -92,7 +92,8 @@ class MapMaking(tod_task.TaskTimestream):
             dish_width = ts.attrs['dishdiam']
             tel = tl_dish.TlUnpolarisedDishArray(lat, lon, freqs, band_width, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin, dish_width, feedpos, pointing)
         elif ts.is_cylinder:
-            cyl_width = ts.attrs['cywid']
+            factor = 1.2 # suppose an illumination efficiency, keep same with that in timestream_common
+            cyl_width = factor * ts.attrs['cywid']
             tel = tl_cylinder.TlUnpolarisedCylinder(lat, lon, freqs, band_width, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin, cyl_width, feedpos)
         else:
             raise RuntimeError('Unknown array type %s' % ts.attrs['telescope'])
