@@ -28,7 +28,7 @@ def cal(vis, vis_mask, li, gi, pbl, ts, **kwargs):
     elif pol == 'yy':
         pi = 1
     else:
-        return vis
+        return vis, vis_mask
 
     bl_gain = tgain[i, pi, :] * tgain[j, pi, :].conj()
 
