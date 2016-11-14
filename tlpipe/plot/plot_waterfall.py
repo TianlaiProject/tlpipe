@@ -1,6 +1,5 @@
 """Plot waterfall images."""
 
-import os
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
 from tlpipe.timestream import tod_task
@@ -11,15 +10,6 @@ import matplotlib.pyplot as plt
 
 def plot(vis, vis_mask, li, gi, bl, ts, **kwargs):
 
-    if isinstance(ts, Timestream): # for Timestream
-        pol = bl[0]
-        bl = tuple(bl[1])
-    elif isinstance(ts, RawTimestream): # for RawTimestream
-        pol = None
-        bl = tuple(bl)
-    else:
-        raise ValueError('Need either a RawTimestream or Timestream')
-
     bl_incl = kwargs.get('bl_incl', 'all')
     bl_excl = kwargs.get('bl_excl', [])
     flag_mask = kwargs.get('flag_mask', False)
@@ -29,7 +19,16 @@ def plot(vis, vis_mask, li, gi, bl, ts, **kwargs):
     plot_abs = kwargs.get('plot_abs', False)
     fig_prefix = kwargs.get('fig_name', 'vis')
     tag_output_iter= kwargs.get('tag_output_iter', True)
-    iteration= kwargs.get('iteration', 0)
+    iteration= kwargs.get('iteration', None)
+
+    if isinstance(ts, Timestream): # for Timestream
+        pol = bl[0]
+        bl = tuple(bl[1])
+    elif isinstance(ts, RawTimestream): # for RawTimestream
+        pol = None
+        bl = tuple(bl)
+    else:
+        raise ValueError('Need either a RawTimestream or Timestream')
 
     if bl_incl != 'all':
         bl1 = set(bl)
@@ -121,10 +120,13 @@ class Plot(tod_task.TaskTimestream):
         fig_name = self.params['fig_name']
         tag_output_iter = self.params['tag_output_iter']
 
+        ts.redistribute('baseline')
+
         if isinstance(ts, RawTimestream):
             func = ts.bl_data_operate
         elif isinstance(ts, Timestream):
             func = ts.pol_and_bl_data_operate
+
         func(plot, full_data=True, keep_dist_axis=False, bl_incl=bl_incl, bl_excl=bl_excl, fig_name=fig_name, tag_output_iter=tag_output_iter, iteration=self.iteration, flag_mask=flag_mask, flag_ns=flag_ns, interpolate_ns=interpolate_ns, y_axis=y_axis, plot_abs=plot_abs)
 
         ts.add_history(self.history)
