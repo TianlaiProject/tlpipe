@@ -92,7 +92,7 @@ def plot(vis, vis_mask, li, gi, bl, ts, **kwargs):
         if plot_type == 'time':
             axarr[1].plot(ax_val, vis1[i].imag + (i - o)*shift, label='imag')
         elif plot_type == 'freq':
-            axarr[1].plot(ax_val, vis1[:, i].imag + (i - o)*shift, label='real')
+            axarr[1].plot(ax_val, vis1[:, i].imag + (i - o)*shift, label='imag')
         if i == 0:
             axarr[1].legend()
 
