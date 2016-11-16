@@ -178,7 +178,7 @@ class Flag(tod_task.TaskTimestream):
         nt = len(time)
         freq = ts.freq[:]
         nfreq = len(freq)
-        bl = ts.local_bl[:]
+        # bl = ts.local_bl[:]
 
         # freq_window = min(nfreq/2, freq_window)
         # ensure window_size is an odd number
