@@ -1,5 +1,6 @@
 """Exceptional values flagging along the frequency axis."""
 
+import warnings
 import numpy as np
 import tod_task
 from raw_timestream import RawTimestream
@@ -36,14 +37,19 @@ class Flag(tod_task.TaskTimestream):
         sigma = self.params['sigma']
         freq_points = self.params['freq_points']
 
-        ts.redistribute('time')
+        nfreq = ts.freq.shape[0] # global shape
+        if nfreq >= freq_points:
 
-        if isinstance(ts, RawTimestream):
-            func = ts.time_and_bl_data_operate
-        elif isinstance(ts, Timestream):
-            func = ts.time_pol_and_bl_data_operate
+            ts.redistribute('time')
 
-        func(flag, full_data=True, keep_dist_axis=False, sigma=sigma, freq_points=freq_points)
+            if isinstance(ts, RawTimestream):
+                func = ts.time_and_bl_data_operate
+            elif isinstance(ts, Timestream):
+                func = ts.time_pol_and_bl_data_operate
+
+            func(flag, full_data=True, keep_dist_axis=False, sigma=sigma, freq_points=freq_points)
+        else:
+            warnings.warn('Not enough frequency points to do the flag')
 
         ts.add_history(self.history)
 
