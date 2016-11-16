@@ -1,0 +1,184 @@
+"""Check the phase closure relation."""
+
+import os
+import itertools
+import numpy as np
+from scipy import optimize
+import h5py
+import aipy as a
+import tod_task
+from caput import mpiutil
+from tlpipe.utils.path_util import output_path
+import tlpipe.plot
+import matplotlib.pyplot as plt
+
+
+
+# Equation for Gaussian
+def f(x, a, b, c):
+    return a * np.exp(-(x - b)**2.0 / (2 * c**2))
+
+
+class Closure(tod_task.TaskTimestream):
+    """Check the phase closure relation."""
+
+    params_init = {
+                    'calibrator': 'cas',
+                    'catalog': 'misc,helm',
+                    'file_name': 'closure/closure',
+                    'plot_closure': True,
+                    'fig_name': 'closure/closure',
+                    'bins': 201,
+                    'gauss_fit': False,
+                  }
+
+    prefix = 'pcl_'
+
+    def process(self, ts):
+
+        calibrator = self.params['calibrator']
+        catalog = self.params['catalog']
+        file_prefix = self.params['file_name']
+        plot_closure = self.params['plot_closure']
+        fig_prefix = self.params['fig_name']
+        bins = self.params['bins']
+        gauss_fit = self.params['gauss_fit']
+        tag_output_iter = self.params['tag_output_iter']
+
+        ts.redistribute('frequency')
+
+        nfreq = len(ts.local_freq[:]) # local nfreq
+        feedno = ts['feedno'][:].tolist()
+        pol = ts['pol'][:].tolist()
+        bl = ts.local_bl[:] # local bls
+        bls = [ tuple(b) for b in bl ]
+
+        # calibrator
+        srclist, cutoff, catalogs = a.scripting.parse_srcs(calibrator, catalog)
+        cat = a.src.get_catalog(srclist, cutoff, catalogs)
+        assert(len(cat) == 1), 'Allow only one calibrator'
+        s = cat.values()[0]
+        if mpiutil.rank0:
+            print 'Calibrating for source %s with' % calibrator,
+            print 'strength', s._jys, 'Jy',
+            print 'measured at', s.mfreq, 'GHz',
+            print 'with index', s.index
+
+        ra = ts['ra_dec'][:, 0]
+        ra = np.unwrap(ra)
+        ra = ra[np.logical_not(ts['ns_on'][:])] # get only ns_off values
+        abs_diff = np.abs(np.diff(s._ra - ra))
+        ind1 = np.argmin(abs_diff)
+        print 'ind1:', ind1
+
+        for pi in [ pol.index('xx'), pol.index('yy') ]: # xx and yy
+            if nfreq > 0: # skip empty processes
+                # find the ind that not be all masked
+                for i in xrange(20):
+                    if not ts.local_vis_mask[ind1+i, :, pi].all():
+                        ind = ind1 + i
+                        break
+                    if not ts.local_vis_mask[ind1-i, :, pi].all():
+                        ind = ind1 - i
+                        break
+                else:
+                    raise RuntimeError('vis is masked during this period for pol %s' % pol[pi])
+
+                print 'ind:', ind
+
+                for fi in xrange(nfreq):
+                    gfi = fi + ts.freq.local_offset[0] # global freq index
+                    vis = ts.local_vis[ind, fi, pi, :] # only I
+                    vis_mask = ts.local_vis_mask[ind, fi, pi, :] # only I
+                    closure = []
+                    for i, j, k in itertools.combinations(feedno, 3):
+                        try:
+                            bi = bls.index((i, j))
+                            vij = vis[bi]
+                        except ValueError:
+                            bi = bls.index((j, i))
+                            vij = np.conj(vis[bi])
+                        if vis_mask[bi]:
+                            continue
+
+                        try:
+                            bi = bls.index((j, k))
+                            vjk = vis[bi]
+                        except ValueError:
+                            bi = bls.index((k, j))
+                            vjk = np.conj(vis[bi])
+                        if vis_mask[bi]:
+                            continue
+
+                        try:
+                            bi = bls.index((k, i))
+                            vki = vis[bi]
+                        except ValueError:
+                            bi = bls.index((i, k))
+                            vki = np.conj(vis[bi])
+                        if vis_mask[bi]:
+                            continue
+
+                        # closure.append(np.angle(vij, True) + np.angle(vjk, True) + np.angle(vki, True)) # in degree, have 360 deg problem
+                        c = lambda x: np.complex128(x) # complex128 to avoid overflow in the product
+                        ang = np.angle(c(vij) * c(vjk) * c(vki), True) # in degree
+                        closure.append(ang) # in degree
+
+                    # save closure phase to file
+                    file_name = '%s_%d_%s.hdf5' % (file_prefix, gfi, pol[pi])
+                    if tag_output_iter:
+                        file_name = output_path(file_name, iteration=self.iteration)
+                    else:
+                        file_name = output_path(file_name)
+                    with h5py.File(file_name, 'w') as f:
+                        f.create_dataset('closure_phase', data=np.array(closure))
+
+                    if plot_closure:
+                        # plot all closure phase
+                        plt.figure()
+                        plt.plot(closure, 'o')
+                        fig_name = '%s_all_%d_%s.png' % (fig_prefix, gfi, pol[pi])
+                        if tag_output_iter:
+                            fig_name = output_path(fig_name, iteration=self.iteration)
+                        else:
+                            fig_name = output_path(fig_name)
+                        plt.savefig(fig_name)
+                        plt.close()
+
+                        # plot histogram of closure phase
+                        # histogram
+                        plt.figure()
+                        data = plt.hist(closure, bins=bins)
+                        plt.xlabel('Closure phase / degree')
+
+                        if gauss_fit:
+                            # Generate data from bins as a set of points
+                            x = [0.5 * (data[1][i] + data[1][i+1]) for i in xrange(len(data[1])-1)]
+                            y = data[0]
+
+                            popt, pcov = optimize.curve_fit(f, x, y)
+                            A, b, c = popt
+
+                            xmax = max(abs(x[0]), abs(x[-1]))
+                            x_fit = np.linspace(-xmax, xmax, bins)
+                            y_fit = f(x_fit, *popt)
+
+                            lable = r'$a \, \exp{(- \frac{(x - \mu)^2} {2 \sigma^2})}$' + '\n\n' + r'$a = %f$' % A + '\n' + r'$\mu = %f$' % b + '\n' + r'$\sigma = %f$' % np.abs(c)
+                            plt.plot(x_fit, y_fit, lw=2, color="r", label=lable)
+                            plt.xlim(-xmax, xmax)
+                            plt.legend()
+
+                        fig_name = '%s_hist_%d_%s.png' % (fig_prefix, gfi, pol[pi])
+                        if tag_output_iter:
+                            fig_name = output_path(fig_name, iteration=self.iteration)
+                        else:
+                            fig_name = output_path(fig_name)
+                        plt.savefig(fig_name)
+                        plt.close()
+
+
+        mpiutil.barrier()
+
+        ts.add_history(self.history)
+
+        return ts
