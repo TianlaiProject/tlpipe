@@ -67,6 +67,7 @@ class TimestreamCommon(container.BasicTod):
     time_data_operate
     freq_data_operate
     bl_data_operate
+    time_and_freq_data_operate
     time_and_bl_data_operate
     freq_and_bl_data_operate
 
@@ -875,8 +876,8 @@ class TimestreamCommon(container.BasicTod):
             corresponding to the axis index, if True, data will first
             redistributed along the time axis. Default False.
         keep_dist_axis : bool, optional
-            Whether to redistribute main data to time axis if the dist axis has
-            changed during the operation. Default False.
+            Whether to redistribute main data to the original axis if the dist
+            axis has changed during the operation. Default False.
         **kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
@@ -897,8 +898,8 @@ class TimestreamCommon(container.BasicTod):
             corresponding to the axis index, if True, data will first
             redistributed along frequency axis. Default False.
         keep_dist_axis : bool, optional
-            Whether to redistribute main data to frequency axis if the dist axis
-            has changed during the operation. Default False.
+            Whether to redistribute main data to the original axis if the dist
+            axis has changed during the operation. Default False.
         **kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
@@ -919,13 +920,36 @@ class TimestreamCommon(container.BasicTod):
             corresponding to the axis index, if True, data will first
             redistributed along baseline axis. Default False.
         keep_dist_axis : bool, optional
-            Whether to redistribute main data to baseline axis if the dist axis
-            has changed during the operation. Default False.
+            Whether to redistribute main data to the original axis if the dist
+            axis has changed during the operation. Default False.
         **kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
         """
         self.data_operate(func, op_axis='baseline', axis_vals=self.bl, full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+
+    def time_and_freq_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
+        """Data operation along the time and frequency axis.
+
+        Parameters
+        ----------
+        func : function object
+            The opertation function object. It is of type func(vis, vis_mask,
+            local_index, global_index, tf, self, **kwargs), which
+            will be called in a loop along the time and frequency axis.
+        full_data : bool, optional
+            Whether the operations of `func` will need the full data section
+            corresponding to the axis index, if True, data will first
+            redistributed along time or frequency axis which is longer.
+            Default False.
+        keep_dist_axis : bool, optional
+            Whether to redistribute main data to the original axis if the dist
+            axis has changed during the operation. Default False.
+        **kwargs : any other arguments
+            Any other arguments that will passed to `func`.
+
+        """
+        self.data_operate(func, op_axis=('time', 'frequency'), axis_vals=(self.time, self.freq), full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
 
     def time_and_bl_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
         """Data operation along the time and baseline axis.
@@ -942,8 +966,8 @@ class TimestreamCommon(container.BasicTod):
             redistributed along time or baseline axis which is longer.
             Default False.
         keep_dist_axis : bool, optional
-            Whether to redistribute main data to baseline axis if the dist axis
-            has changed during the operation. Default False.
+            Whether to redistribute main data to the original axis if the dist
+            axis has changed during the operation. Default False.
         **kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
@@ -965,8 +989,8 @@ class TimestreamCommon(container.BasicTod):
             redistributed along frequency or baseline axis which is longer.
             Default False.
         keep_dist_axis : bool, optional
-            Whether to redistribute main data to baseline axis if the dist axis
-            has changed during the operation. Default False.
+            Whether to redistribute main data to the original axis if the dist
+            axis has changed during the operation. Default False.
         **kwargs : any other arguments
             Any other arguments that will passed to `func`.
 

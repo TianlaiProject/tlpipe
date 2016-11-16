@@ -30,8 +30,13 @@ class Timestream(timestream_common.TimestreamCommon):
     lin2stokes
     stokes2lin
     pol_data_operate
+    time_and_pol_data_operate
+    freq_and_pol_data_operate
     pol_and_bl_data_operate
+    time_freq_and_pol_data_operate
+    time_freq_and_bl_data_operate
     time_pol_and_bl_data_operate
+    freq_pol_and_bl_data_operate
 
     """
 
@@ -273,7 +278,7 @@ class Timestream(timestream_common.TimestreamCommon):
             corresponding to the axis index, if True, data will first
             redistributed along polarization axis. Default False.
         keep_dist_axis : bool, optional
-            Whether to redistribute main data to polarization axis if the dist
+            Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
         **kwargs : any other arguments
             Any other arguments that will passed to `func`.
@@ -281,6 +286,52 @@ class Timestream(timestream_common.TimestreamCommon):
         """
         self.data_operate(func, op_axis='polarization', axis_vals=self.pol, full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
 
+
+    def time_and_pol_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
+        """Data operation along the time and polarization axis.
+
+        Parameters
+        ----------
+        func : function object
+            The opertation function object. It is of type func(vis, vis_mask,
+            local_index, global_index, tp, self, **kwargs), which
+            will be called in a loop along the time and polarization axis.
+        full_data : bool, optional
+            Whether the operations of `func` will need the full data section
+            corresponding to the axis index, if True, data will first
+            redistributed along time or polarization axis which is longer.
+            Default False.
+        keep_dist_axis : bool, optional
+            Whether to redistribute main data to the original axis if the dist
+            axis has changed during the operation. Default False.
+        **kwargs : any other arguments
+            Any other arguments that will passed to `func`.
+
+        """
+        self.data_operate(func, op_axis=('time', 'polarization'), axis_vals=(self.time, self.pol), full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+
+    def freq_and_pol_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
+        """Data operation along the frequency and polarization axis.
+
+        Parameters
+        ----------
+        func : function object
+            The opertation function object. It is of type func(vis, vis_mask,
+            local_index, global_index, fp, self, **kwargs), which
+            will be called in a loop along the frequency and polarization axis.
+        full_data : bool, optional
+            Whether the operations of `func` will need the full data section
+            corresponding to the axis index, if True, data will first
+            redistributed along frequency or polarization axis which is longer.
+            Default False.
+        keep_dist_axis : bool, optional
+            Whether to redistribute main data to the original axis if the dist
+            axis has changed during the operation. Default False.
+        **kwargs : any other arguments
+            Any other arguments that will passed to `func`.
+
+        """
+        self.data_operate(func, op_axis=('frequency', 'polarization'), axis_vals=(self.freq, self.pol), full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
 
     def pol_and_bl_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
         """Data operation along the polarization and baseline axis.
@@ -297,13 +348,61 @@ class Timestream(timestream_common.TimestreamCommon):
             redistributed along polarization or baseline axis which is longer.
             Default False.
         keep_dist_axis : bool, optional
-            Whether to redistribute main data to baseline axis if the dist axis
-            has changed during the operation. Default False.
+            Whether to redistribute main data to the original axis if the dist
+            axis has changed during the operation. Default False.
         **kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
         """
         self.data_operate(func, op_axis=('polarization', 'baseline'), axis_vals=(self.pol, self.bl), full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+
+    def time_freq_and_pol_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
+        """Data operation along the time, frequency and polarization axis.
+
+        Parameters
+        ----------
+        func : function object
+            The opertation function object. It is of type func(vis, vis_mask,
+            local_index, global_index, tfp, self, **kwargs), which
+            will be called in a loop along the time, frequency and polarization
+            axis.
+        full_data : bool, optional
+            Whether the operations of `func` will need the full data section
+            corresponding to the axis index, if True, data will first
+            redistributed along time or frequency or polarization axis which is
+            longer. Default False.
+        keep_dist_axis : bool, optional
+            Whether to redistribute main data to the original axis if the dist
+            axis has changed during the operation. Default False.
+        **kwargs : any other arguments
+            Any other arguments that will passed to `func`.
+
+        """
+        self.data_operate(func, op_axis=('time', 'frequency', 'polarization'), axis_vals=(self.time, self.freq, self.pol), full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+
+    def time_freq_and_bl_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
+        """Data operation along the time, frequency and baseline axis.
+
+        Parameters
+        ----------
+        func : function object
+            The opertation function object. It is of type func(vis, vis_mask,
+            local_index, global_index, tfbl, self, **kwargs), which
+            will be called in a loop along the time, frequency and baseline
+            axis.
+        full_data : bool, optional
+            Whether the operations of `func` will need the full data section
+            corresponding to the axis index, if True, data will first
+            redistributed along time or frequency or baseline axis which is
+            longer. Default False.
+        keep_dist_axis : bool, optional
+            Whether to redistribute main data to the original axis if the dist
+            axis has changed during the operation. Default False.
+        **kwargs : any other arguments
+            Any other arguments that will passed to `func`.
+
+        """
+        self.data_operate(func, op_axis=('time', 'frequency', 'baseline'), axis_vals=(self.time, self.freq, self.bl), full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
 
     def time_pol_and_bl_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
         """Data operation along the time, polarization and baseline axis.
@@ -321,10 +420,34 @@ class Timestream(timestream_common.TimestreamCommon):
             redistributed along time or polarization or baseline axis which is
             longer. Default False.
         keep_dist_axis : bool, optional
-            Whether to redistribute main data to baseline axis if the dist axis
-            has changed during the operation. Default False.
+            Whether to redistribute main data to the original axis if the dist
+            axis has changed during the operation. Default False.
         **kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
         """
         self.data_operate(func, op_axis=('time', 'polarization', 'baseline'), axis_vals=(self.time, self.pol, self.bl), full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+
+    def freq_pol_and_bl_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
+        """Data operation along the frequency, polarization and baseline axis.
+
+        Parameters
+        ----------
+        func : function object
+            The opertation function object. It is of type func(vis, vis_mask,
+            local_index, global_index, fpbl, self, **kwargs), which
+            will be called in a loop along the frequency, polarization and
+            baseline axis.
+        full_data : bool, optional
+            Whether the operations of `func` will need the full data section
+            corresponding to the axis index, if True, data will first
+            redistributed along frequency or polarization or baseline axis which
+            is longer. Default False.
+        keep_dist_axis : bool, optional
+            Whether to redistribute main data to the original axis if the dist
+            axis has changed during the operation. Default False.
+        **kwargs : any other arguments
+            Any other arguments that will passed to `func`.
+
+        """
+        self.data_operate(func, op_axis=('frequency', 'polarization', 'baseline'), axis_vals=(self.freq, self.pol, self.bl), full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
