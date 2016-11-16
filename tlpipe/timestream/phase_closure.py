@@ -13,6 +13,28 @@ import tlpipe.plot
 import matplotlib.pyplot as plt
 
 
+# make cache to speed the visibility getting
+def mk_cache(cache, bl, bls, vis):
+    # if in cache, return
+    if bl in cache.iterkeys():
+        return cache[bl]
+
+    # else cache it before return
+    i, j = bl
+    try:
+        bi = bls.index((i, j))
+        conj = False
+    except ValueError:
+        bi = bls.index((j, i))
+        conj = True
+
+    vij = np.conj(vis[bi]) if conj else vis[bi]
+
+    cache[(i, j)] = (bi, vij)
+    cache[(j, i)] = (bi, np.conj(vij))
+
+    return bi, vij
+
 
 # Equation for Gaussian
 def f(x, a, b, c):
@@ -91,31 +113,17 @@ class Closure(tod_task.TaskTimestream):
                     vis = ts.local_vis[ind, fi, pi, :] # only I
                     vis_mask = ts.local_vis_mask[ind, fi, pi, :] # only I
                     closure = []
+                    cache = dict()
                     for i, j, k in itertools.combinations(feedno, 3):
-                        try:
-                            bi = bls.index((i, j))
-                            vij = vis[bi]
-                        except ValueError:
-                            bi = bls.index((j, i))
-                            vij = np.conj(vis[bi])
+                        bi, vij = mk_cache(cache, (i, j), bls, vis)
                         if vis_mask[bi]:
                             continue
 
-                        try:
-                            bi = bls.index((j, k))
-                            vjk = vis[bi]
-                        except ValueError:
-                            bi = bls.index((k, j))
-                            vjk = np.conj(vis[bi])
+                        bi, vjk = mk_cache(cache, (j, k), bls, vis)
                         if vis_mask[bi]:
                             continue
 
-                        try:
-                            bi = bls.index((k, i))
-                            vki = vis[bi]
-                        except ValueError:
-                            bi = bls.index((i, k))
-                            vki = np.conj(vis[bi])
+                        bi, vki = mk_cache(cache, (k, i), bls, vis)
                         if vis_mask[bi]:
                             continue
 
