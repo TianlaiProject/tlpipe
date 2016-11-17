@@ -430,7 +430,7 @@ class BeamTransfer(object):
         beam = beam.reshape((self.nfreq, self.ntel, self.nsky))
 
         if nbin is not None:
-            spec_index = -2.7 # ???
+            spec_index = -4.7 # ??? I ~ \nu^-2.7 => T ~ \nu^-4.7
             # get center freq of each bin
             n, s, e = mpiutil.split_m(self.nfreq, nbin)
             cinds = [ (s[i]+e[i])/2 for i in xrange(nbin) ] # indices of cfreqs
@@ -1088,7 +1088,7 @@ class BeamTransfer(object):
         vec = vec.reshape((self.nfreq, self.ntel))
 
         if nbin is not None:
-            spec_index = -2.7 # ???
+            spec_index = -4.7 # ??? I ~ \nu^-2.7 => T ~ \nu^-4.7
             # get center freq of each bin
             n, s, e = mpiutil.split_m(self.nfreq, nbin)
             cinds = [ (s[i]+e[i])/2 for i in xrange(nbin) ] # indices of cfreqs
