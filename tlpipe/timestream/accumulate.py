@@ -56,7 +56,7 @@ class Accum(tod_task.TaskTimestream):
             if check:
                 assert self.data.attrs['telescope'] == ts.attrs['telescope'], 'Data are observed by different telescopes %s and %s' % (self.data.attrs['telescope'], ts.attrs['telescope'])
                 assert np.allclose(self.data.local_freq, ts.local_freq), 'freq not align'
-                assert np.allclose(self.data.local_pol, ts.local_pol), 'pol not align'
+                assert len(self.data.local_pol) == len(ts.local_pol) and (self.data.local_pol == ts.local_pol).all(), 'pol not align'
                 assert np.allclose(self.data.local_bl, ts.local_bl), 'bl not align'
 
             ts.apply_mask(fill_val=0) # apply mask, fill 0 to masked values
