@@ -381,6 +381,8 @@ import logging
 import os
 from os import path
 import warnings
+import shutil
+import itertools
 
 from caput import mpiutil
 from tlpipe.kiyopy import parse_ini
@@ -452,20 +454,43 @@ class Manager(object):
     params_init = {
                     'logging': 'info', # logging level
                     'tasks': [], # a list of tasks to be executed
+                    'copy': True, # copy pipefile to outdir
+                    'overwrite': False, # overwrite the same name pipefile if True
                     'outdir': 'output/', # output directory of pipeline data, default is current-dir/output/
                   }
 
     prefix = 'pipe_'
 
 
-    def __init__(self, parameter_file_or_dict=None, feedback=2):
+    def __init__(self, pipefile=None, feedback=2):
 
         # Read in the parameters.
-        self.params, self.task_params = parse_ini.parse(parameter_file_or_dict, self.params_init, prefix=self.prefix, return_undeclared=True, feedback=feedback)
+        self.params, self.task_params = parse_ini.parse(pipefile, self.params_init, prefix=self.prefix, return_undeclared=True, feedback=feedback)
         self.tasks = self.params['tasks']
 
         # set environment var
         os.environ['TL_OUTPUT'] = self.params['outdir'] + '/'
+
+        # copy pipefile to outdir if required
+        if self.params['copy']:
+            base_name = path.basename(pipefile)
+            dst_file = '%s/%s' % (self.params['outdir'], base_name)
+            outdir = output_path(dst_file, relative=False, mkdir=True)
+            if mpiutil.rank0:
+                if self.params['overwrite']:
+                    shutil.copy2(pipefile, dst_file)
+                else:
+                    if not path.exists(dst_file):
+                        shutil.copy2(pipefile, dst_file)
+                    else:
+                        base, ext = path.splitext(dst_file)
+                        for cnt in itertools.count(1):
+                            dst = '%s_%d%s' % (base, cnt, ext) # add cnt to file name
+                            if not path.exists(dst):
+                                shutil.copy2(pipefile, dst)
+                                break
+
+            mpiutil.barrier()
 
 
     def run(self):
