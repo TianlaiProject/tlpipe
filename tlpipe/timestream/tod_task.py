@@ -94,6 +94,8 @@ class TaskTimestream(OneAndOne):
 
         tod.load_all()
 
+        return tod
+
     def data_select(self, tod):
         """Data select."""
         tod.time_select(self.params['time_select'])
