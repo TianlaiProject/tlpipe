@@ -42,6 +42,9 @@ class MapMaking(tod_task.TaskTimestream):
                     'add_noise': True,
                     'dirty_map': False,
                     'nbin': None, # use this if multi-freq synthisize
+                    'method': 'svd',
+                    'normalize': True, # only used for dirty map-making
+                    'threshold': 1.0e3, # only used for dirty map-making
                   }
 
     prefix = 'mm_'
@@ -69,6 +72,9 @@ class MapMaking(tod_task.TaskTimestream):
         add_noise = self.params['add_noise']
         dirty_map = self.params['dirty_map']
         nbin = self.params['nbin']
+        method = self.params['method']
+        normalize = self.params['normalize']
+        threshold = self.params['threshold']
 
         ts.redistribute('frequency')
 
@@ -204,9 +210,9 @@ class MapMaking(tod_task.TaskTimestream):
         tstream.generate_mmodes()
         nside = hputil.nside_for_lmax(tel.lmax, accuracy_boost=tel.accuracy_boost)
         if dirty_map:
-            tstream.mapmake_full(nside, 'map_full_dirty.hdf5', nbin, dirty=True)
+            tstream.mapmake_full(nside, 'map_full_dirty.hdf5', nbin, dirty=True, method=method, normalize=normalize, threshold=threshold)
         else:
-            tstream.mapmake_full(nside, 'map_full.hdf5', nbin, dirty=False)
+            tstream.mapmake_full(nside, 'map_full.hdf5', nbin, dirty=False, method=method, normalize=normalize, threshold=threshold)
 
         # ts.add_history(self.history)
 

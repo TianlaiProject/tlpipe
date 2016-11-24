@@ -243,7 +243,7 @@ class Timestream(object):
 
     #======== Make map from uncleaned stream ============
 
-    def mapmake_full(self, nside, mapname, nbin=None, dirty=False):
+    def mapmake_full(self, nside, mapname, nbin=None, dirty=False, method='svd', normalize=True, threshold=1.0e3):
 
         nfreq = self.telescope.nfreq
         if nbin is not None and (nbin <= 0 or nbin >= nfreq): # invalid nbin
@@ -255,9 +255,14 @@ class Timestream(object):
 
             mmode = self.mmode(mi)
             if dirty:
-                sphmode = self.beamtransfer.project_vector_backward_dirty(mi, mmode, nbin)
+                sphmode = self.beamtransfer.project_vector_backward_dirty(mi, mmode, nbin, normalize, threshold)
             else:
-                sphmode = self.beamtransfer.project_vector_telescope_to_sky(mi, mmode, nbin)
+                if method == 'svd':
+                    sphmode = self.beamtransfer.project_vector_telescope_to_sky(mi, mmode, nbin)
+                elif method == 'tk':
+                    sphmode = self.beamtransfer.project_vector_telescope_to_sky_tk(mi, mmode, nbin)
+                else:
+                    raise ValueError('Unknown map-making method %s' % method)
 
             return sphmode
 

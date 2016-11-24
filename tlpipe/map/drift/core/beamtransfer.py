@@ -30,7 +30,7 @@ import h5py
 
 from caput import mpiutil
 
-from ..util import util, blockla
+from ..util import util, blockla, tk
 from . import kltransform
 
 
@@ -1071,16 +1071,43 @@ class BeamTransfer(object):
             vec1 = vec[s[bi]:e[bi]].reshape(-1)
             vecb[bi] = np.dot(ibeam[bi], vec1).reshape(self.telescope.num_pol_sky, self.telescope.lmax + 1)
 
-        # for fi in range(self.nfreq):
-        #     vecb[fi] = np.dot(ibeam[fi], vec[fi]).reshape(self.telescope.num_pol_sky, self.telescope.lmax + 1)
-
         return vecb * W1.reshape(vecb.shape) # apply the W1 filter
 
     project_vector_backward = project_vector_telescope_to_sky
 
-    def project_vector_backward_dirty(self, mi, vec, nbin=None):
+    def project_vector_telescope_to_sky_tk(self, mi, vec, nbin=None):
+        """Invert a vector from the telescope space onto the sky using
+        the Tikhonov regularization method. This is the map-making process.
 
-        dbeam = self.beam_m(mi).reshape((self.nfreq, self.ntel, self.nsky))
+        Parameters
+        ----------
+        mi : integer
+            Mode index to fetch for.
+        vec : np.ndarray
+            Sky data vector packed as [freq, baseline, polarisation]
+
+        Returns
+        -------
+        tvec : np.ndarray
+            Sky vector to return.
+        """
+
+        beam = self.beam_m(mi) # shape (nfreq, 2, npairs, npol_sky, lmax+1)
+
+        nfreq = self.nfreq
+        beam = beam.reshape((nfreq, self.ntel, self.nsky))
+
+        vecb = np.zeros((nfreq, self.telescope.num_pol_sky, self.telescope.lmax + 1), dtype=np.complex128)
+        vec = vec.reshape((nfreq, self.ntel))
+
+        for fi in xrange(nfreq):
+            vecb[fi] = tk.tk(beam[fi], vec[fi], th=1.0e-1)
+
+        return vecb
+
+    def project_vector_backward_dirty(self, mi, vec, nbin=None, normalize=True, threshold=1.0e3):
+
+        beam = self.beam_m(mi).reshape((self.nfreq, self.ntel, self.nsky))
 
         if self.noise_weight:
             noise_diag = self.telescope.noisepower(np.arange(self.telescope.npairs), 0).flatten()
@@ -1095,39 +1122,36 @@ class BeamTransfer(object):
             freqs = self.telescope.frequencies
             cfreqs = [ freqs[i] for i in cinds ]
 
-            beam1 = np.zeros((nbin, n[0]*self.ntel, self.nsky), dtype=dbeam.dtype)
+            beam1 = np.zeros((nbin, n[0]*self.ntel, self.nsky), dtype=beam.dtype)
             vec1 = np.zeros((nbin, n[0]*self.ntel), dtype=vec.dtype)
             for bi in xrange(nbin):
                 if bi == nbin - 1: # special care for last bin
-                    beam1[bi, :n[-1]*self.ntel] = (dbeam[s[bi]:e[bi]] * ((freqs[s[bi]:e[bi]] / cfreqs[bi])**spec_index)[:, np.newaxis, np.newaxis]).reshape(-1, self.nsky)
+                    beam1[bi, :n[-1]*self.ntel] = (beam[s[bi]:e[bi]] * ((freqs[s[bi]:e[bi]] / cfreqs[bi])**spec_index)[:, np.newaxis, np.newaxis]).reshape(-1, self.nsky)
                     vec1[bi, :n[-1]*self.ntel] = vec[s[bi]:e[bi]].reshape(-1)
                 else:
-                    beam1[bi] = (dbeam[s[bi]:e[bi]] * ((freqs[s[bi]:e[bi]] / cfreqs[bi])**spec_index)[:, np.newaxis, np.newaxis]).reshape(-1, self.nsky)
+                    beam1[bi] = (beam[s[bi]:e[bi]] * ((freqs[s[bi]:e[bi]] / cfreqs[bi])**spec_index)[:, np.newaxis, np.newaxis]).reshape(-1, self.nsky)
                     vec1[bi] = vec[s[bi]:e[bi]].reshape(-1)
 
-            dbeam = beam1.transpose((0, 2, 1)).conj()
+            beam = beam1
             vec = vec1
         else:
             nbin = self.nfreq
-            dbeam = dbeam.transpose((0, 2, 1)).conj()
-
 
         vecb = np.zeros((nbin, self.nsky), dtype=np.complex128)
 
         for bi in xrange(nbin):
-            vecb[bi] = np.dot(dbeam[bi], vec[bi])
+            a0 = np.dot(beam[bi].T.conj(), vec[bi])
+            if normalize:
+                Ba0 = np.dot(beam[bi], a0)
+                a02 = np.dot(a0.conj(), a0).real
+                Ba02 = np.dot(Ba0.conj(), Ba0).real
+                factor = a02 / Ba02
+                factor = np.where(factor<threshold, factor, threshold)
+            else:
+                factor = 1.0
+            vecb[bi] = factor * a0
 
-        # for fi in range(self.nfreq):
-        #     # norm = np.dot(dbeam[fi].T.conj(), dbeam[fi]).diagonal()
-        #     # norm = np.where(norm < 1e-6, 0.0, 1.0 / norm)
-        #     # #norm = np.dot(dbeam[fi], dbeam[fi].T.conj()).diagonal()
-        #     # #norm = np.where(np.logical_or(np.abs(norm) < 1e-4,
-        #     # #np.abs(norm) < np.abs(norm.max()*1e-2)), 0.0, 1.0 / norm)
-        #     # vecb[fi] = np.dot(dbeam[fi], vec[fi, :].reshape(self.ntel) * norm)
-        #     vecb[fi] = np.dot(dbeam[fi], vec[fi, :].reshape(self.ntel))
-
-        return vecb.reshape((nbin, self.telescope.num_pol_sky,
-                             self.telescope.lmax + 1))
+        return vecb.reshape((nbin, self.telescope.num_pol_sky, self.telescope.lmax + 1))
 
 
     def project_matrix_sky_to_telescope(self, mi, mat):
