@@ -182,7 +182,7 @@ class PsFit(tod_task.TaskTimestream):
 
         # get beam solid angle (suppose it is the same for all feeds)
         Omega_ij = aa[0].beam.Omega
-        pre_factor = (const.c**2 / (2 * const.k_B * (1.0e6*freq)**2) / Omega_ij)
+        pre_factor = 1.0e-26 * (const.c**2 / (2 * const.k_B * (1.0e6*freq)**2) / Omega_ij) # NOTE: 1Jy = 1.0e-26 W m^-2 Hz^-1
 
         for ind, ti in enumerate(xrange(start_ind, end_ind)):
             aa.set_jultime(ts['jul_date'][ti])
