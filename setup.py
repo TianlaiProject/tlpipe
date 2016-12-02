@@ -1,8 +1,9 @@
 from setuptools import setup, find_packages
+from caput import __version__
 
 setup(
     name = 'tlpipe',
-    version = 0.1,
+    version = __version__,
 
     packages = find_packages(),
     requires = ['numpy', 'scipy', 'h5py'],

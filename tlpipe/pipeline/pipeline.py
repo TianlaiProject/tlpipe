@@ -6,33 +6,6 @@ both what tasks are to be run and the parameters that go to those tasks.
 Included in this package are base classes for simplifying the construction of
 data analysis tasks, as well as the pipeline manager which executes them.
 
-Pipelines are most easily executed using the script in ``caput_pipeline.py`,
-which ships with :mod:`caput`.
-
-Flow control classes
-====================
-
-.. autosummary::
-   :toctree: generated/
-
-   Manager
-   PipelineConfigError
-   PipelineRuntimeError
-   PipelineStopIteration
-
-
-Task base classes
-=================
-
-.. autosummary::
-    :toctree: generated/
-
-   TaskBase
-   SingleBase
-   IterBase
-   SingleTod
-   SingleRawTimestream
-   SingleTimestream
 
 Examples
 ========
@@ -182,7 +155,7 @@ individual task.  Here is an example of a pipeline configuration:
 ... ce_in = ge_out
 ... '''
 
-Here the 'pipe_tasks' is a list to hold a list of tasks to be executed.  Other
+Here the `pipe_tasks` is a list to hold a list of tasks to be executed.  Other
 parameters with the specified prefix are the input parameters for the corresponding
 tasks, they include three keys that all taks will have:
 
@@ -246,14 +219,14 @@ Finished CookEggs.
 
 The rules for execution order are as follows:
 
-1. One of the methods `setup()`, `next()` or `finish()`, as appropriate, will
-   be executed from each task, in order.
+1. One of the methods :meth:`setup()`, :meth:`next()` or :meth:`finish()`,
+   as appropriate, will be executed from each task, in order.
 2. If the task method is missing its input, as specified by the 'requires' or 'in'
    keys, restart at the beginning of the `tasks` list.
-3. If the input to `next()` is missing and the task is at the beginning of the
-   list there will be no opportunity to generate this input. Stop iterating
-   `next()` and proceed to `finish()`.
-4. Once a task has executed `finish()`, remove it from the list.
+3. If the input to :meth:`next()` is missing and the task is at the beginning
+   of the list there will be no opportunity to generate this input. Stop iterating
+   :meth:`next()` and proceed to :meth:`finish()`.
+4. Once a task has executed :meth:`finish()`, remove it from the list.
 5. Once a method from the last member of the `tasks` list is executed, restart
    at the beginning of the list.
 
@@ -360,13 +333,14 @@ reading inputs from disk, instead of receiving them from the pipeline;
 optionally writing outputs to disk automatically; and caching the results of a
 large computation to disk in an intelligent manner (not yet implemented).
 
-Base classes providing this functionality are :class:`SingleBase` for 'one
-shot' tasks and :class:`IterBase` for task that need to iterate.  There are
-limited to a single input ('in' key) and a single output ('out' key).  Method
-:meth:`~SingleBase.process` should be overwritten instead of :meth:`next`.
-Optionally, :meth:`~SingleBase.read_input` and :meth:`~SingleBase.write_output`
-may be over-ridden for maximum functionality.  :meth:`setup` and :meth:`finish`
-may be overridden as usual.
+Base classes providing this functionality are :class:`OneAndOne` for (at most)
+one input and one output.  There are limited to a single input ('in' key) and
+a single output ('out' key).  Method :meth:`~OneAndOne.process` should be
+overwritten instead of :meth:`~OneAndOne.next`.  Optionally,
+:meth:`~OneAndOne.read_input` and :meth:`~OneAndOne.write_output` may be
+over-ridden for maximum functionality.  :meth:`~OneAndOne.setup` and
+:meth:`~OneAndOne.finish` may be overridden as usual. :class:`FileIterBase`
+for iterating tasks over input files.
 
 See the documentation for these base classes for more details.
 
@@ -613,18 +587,6 @@ class TaskBase(object):
     In addition, input parameters may be specified by adding adding entries
     (key and default value) in the class attribute `params`, which will then
     be updated by the corresponding parameters setttin in the input pipeline file.
-
-    Attributes
-    ----------
-    cacheable
-    embarrassingly_parallelizable
-
-    Methods
-    -------
-    __init__
-    setup
-    next
-    finish
 
     """
 
@@ -1001,7 +963,7 @@ class DoNothing(TaskBase):
 
 
 class OneAndOne(TaskBase):
-    """Base class for tasks that have (at most) one input and one output
+    """Base class for tasks that have (at most) one input and one output.
 
     The input for the task will be preferably get from the `in` key, if no input
     product is specified by the `in` key, then input will be get from the files
@@ -1180,17 +1142,6 @@ class FileIterBase(OneAndOne):
     optionally :meth:`setup`, :meth:`finish`, :meth:`read_input`,
     :meth:`write_output` and :meth:`cast_input`. They should not override
     :meth:`next`.
-
-
-    Methods
-    -------
-    next
-    setup
-    process
-    finish
-    read_input
-    cast_input
-    write_output
 
     """
 

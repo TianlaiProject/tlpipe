@@ -16,14 +16,6 @@ class RawTimestream(timestream_common.TimestreamCommon):
     ----------
     Same as :class:`container.BasicTod`.
 
-    Attributes
-    ----------
-
-    Methods
-    -------
-    feed_select
-    separate_pol_and_bl
-
     """
 
     _main_data_name_ = 'vis'

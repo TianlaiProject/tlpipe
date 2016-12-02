@@ -16,28 +16,6 @@ class Timestream(timestream_common.TimestreamCommon):
     ----------
     Same as :class:`container.BasicTod`.
 
-    Attributes
-    ----------
-    pol
-    local_pol
-    pol_ordered_datasets
-
-    Methods
-    -------
-    polarization_select
-    feed_select
-    create_pol_ordered_dataset
-    lin2stokes
-    stokes2lin
-    pol_data_operate
-    time_and_pol_data_operate
-    freq_and_pol_data_operate
-    pol_and_bl_data_operate
-    time_freq_and_pol_data_operate
-    time_freq_and_bl_data_operate
-    time_pol_and_bl_data_operate
-    freq_pol_and_bl_data_operate
-
     """
 
     _main_data_name_ = 'vis'
@@ -271,7 +249,7 @@ class Timestream(timestream_common.TimestreamCommon):
         ----------
         func : function object
             The opertation function object. It is of type func(vis, vis_mask,
-            local_index, global_index, pol, self, **kwargs), which
+            local_index, global_index, pol, self, \*\*kwargs), which
             will be called in a loop along the polarization axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
@@ -280,7 +258,7 @@ class Timestream(timestream_common.TimestreamCommon):
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
-        **kwargs : any other arguments
+        \*\*kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
         """
@@ -294,7 +272,7 @@ class Timestream(timestream_common.TimestreamCommon):
         ----------
         func : function object
             The opertation function object. It is of type func(vis, vis_mask,
-            local_index, global_index, tp, self, **kwargs), which
+            local_index, global_index, tp, self, \*\*kwargs), which
             will be called in a loop along the time and polarization axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
@@ -304,7 +282,7 @@ class Timestream(timestream_common.TimestreamCommon):
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
-        **kwargs : any other arguments
+        \*\*kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
         """
@@ -317,7 +295,7 @@ class Timestream(timestream_common.TimestreamCommon):
         ----------
         func : function object
             The opertation function object. It is of type func(vis, vis_mask,
-            local_index, global_index, fp, self, **kwargs), which
+            local_index, global_index, fp, self, \*\*kwargs), which
             will be called in a loop along the frequency and polarization axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
@@ -327,7 +305,7 @@ class Timestream(timestream_common.TimestreamCommon):
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
-        **kwargs : any other arguments
+        \*\*kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
         """
@@ -340,7 +318,7 @@ class Timestream(timestream_common.TimestreamCommon):
         ----------
         func : function object
             The opertation function object. It is of type func(vis, vis_mask,
-            local_index, global_index, pbl, self, **kwargs), which
+            local_index, global_index, pbl, self, \*\*kwargs), which
             will be called in a loop along the polarization and baseline axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
@@ -350,7 +328,7 @@ class Timestream(timestream_common.TimestreamCommon):
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
-        **kwargs : any other arguments
+        \*\*kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
         """
@@ -363,7 +341,7 @@ class Timestream(timestream_common.TimestreamCommon):
         ----------
         func : function object
             The opertation function object. It is of type func(vis, vis_mask,
-            local_index, global_index, tfp, self, **kwargs), which
+            local_index, global_index, tfp, self, \*\*kwargs), which
             will be called in a loop along the time, frequency and polarization
             axis.
         full_data : bool, optional
@@ -374,7 +352,7 @@ class Timestream(timestream_common.TimestreamCommon):
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
-        **kwargs : any other arguments
+        \*\*kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
         """
@@ -387,7 +365,7 @@ class Timestream(timestream_common.TimestreamCommon):
         ----------
         func : function object
             The opertation function object. It is of type func(vis, vis_mask,
-            local_index, global_index, tfbl, self, **kwargs), which
+            local_index, global_index, tfbl, self, \*\*kwargs), which
             will be called in a loop along the time, frequency and baseline
             axis.
         full_data : bool, optional
@@ -398,7 +376,7 @@ class Timestream(timestream_common.TimestreamCommon):
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
-        **kwargs : any other arguments
+        \*\*kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
         """
@@ -411,7 +389,7 @@ class Timestream(timestream_common.TimestreamCommon):
         ----------
         func : function object
             The opertation function object. It is of type func(vis, vis_mask,
-            local_index, global_index, tpbl, self, **kwargs), which
+            local_index, global_index, tpbl, self, \*\*kwargs), which
             will be called in a loop along the time, polarization and baseline
             axis.
         full_data : bool, optional
@@ -422,7 +400,7 @@ class Timestream(timestream_common.TimestreamCommon):
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
-        **kwargs : any other arguments
+        \*\*kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
         """
@@ -435,7 +413,7 @@ class Timestream(timestream_common.TimestreamCommon):
         ----------
         func : function object
             The opertation function object. It is of type func(vis, vis_mask,
-            local_index, global_index, fpbl, self, **kwargs), which
+            local_index, global_index, fpbl, self, \*\*kwargs), which
             will be called in a loop along the frequency, polarization and
             baseline axis.
         full_data : bool, optional
@@ -446,7 +424,7 @@ class Timestream(timestream_common.TimestreamCommon):
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
-        **kwargs : any other arguments
+        \*\*kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
         """

@@ -15,61 +15,12 @@ class TimestreamCommon(container.BasicTod):
     """Common things for the raw timestream data and timestream data.
 
     This class hold the common data an operations for :class:`RawTimestream` and
-     :class:`Timestream`. Usally you should not directly use this class, use
+    :class:`Timestream`. Usally you should not directly use this class, use
     :class:`RawTimestream` or :class:`Timestream` instead.
 
     Parameters
     ----------
     Same as :class:`container.BasicTod`.
-
-    Attributes
-    ----------
-    vis
-    local_vis
-    vis_mask
-    local_vis_mask
-    masked_vis
-    time
-    local_time
-    freq
-    local_freq
-    bl
-    local_bl
-    is_dish
-    is_cylinder
-    array
-    is_continuous
-    is_same_pointing
-    is_same_dec
-    freq_ordered_datasets
-    bl_ordered_datasets
-    feed_ordered_datasets
-
-    Methods
-    -------
-    time_select
-    frequency_select
-    feed_select
-    load_common
-    load_main_data
-    load_tod_excl_main_data
-    apply_mask
-    create_freq_ordered_dataset
-    create_bl_ordered_dataset
-    create_time_and_freq_ordered_dataset
-    create_time_and_bl_ordered_dataset
-    create_freq_and_bl_ordered_dataset
-    create_feed_ordered_dataset
-    delete_a_dataset
-    check_status
-    data_operate
-    all_data_operate
-    time_data_operate
-    freq_data_operate
-    bl_data_operate
-    time_and_freq_data_operate
-    time_and_bl_data_operate
-    freq_and_bl_data_operate
 
     """
 
@@ -765,8 +716,8 @@ class TimestreamCommon(container.BasicTod):
         ----------
         func : function object
             The opertation function object. It is of type func(vis, vis_mask,
-            self, **kwargs) if `op_axis=None`, func(vis, vis_mask, local_index,
-            global_index, axis_val, self, **kwargs) else.
+            self, \*\*kwargs) if `op_axis=None`, func(vis, vis_mask, local_index,
+            global_index, axis_val, self, \*\*kwargs) else.
         op_axis : None, string or integer, tuple of string or interger, optional
             Axis along which `func` will opterate. If None, `func` will operate on
             the whole main dataset (but note: since the main data is distributed
@@ -787,7 +738,7 @@ class TimestreamCommon(container.BasicTod):
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original dist axis if the
             dist axis has changed during the operation. Default False.
-        **kwargs : any other arguments
+        \*\*kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
         """
@@ -854,9 +805,9 @@ class TimestreamCommon(container.BasicTod):
         ----------
         func : function object
             The opertation function object. It is of type func(vis, vis_mask, self,
-            **kwargs), which will operate on vis, vis_mask and return two new
+            \*\*kwargs), which will operate on vis, vis_mask and return two new
             arrays with their original shape and dtype.
-        **kwargs : any other arguments
+        \*\*kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
         """
@@ -869,7 +820,7 @@ class TimestreamCommon(container.BasicTod):
         ----------
         func : function object
             The opertation function object. It is of type func(vis, vis_mask,
-            local_index, global_index, jul_date, self, **kwargs), which
+            local_index, global_index, jul_date, self, \*\*kwargs), which
             will be called in a loop along the time axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
@@ -878,7 +829,7 @@ class TimestreamCommon(container.BasicTod):
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
-        **kwargs : any other arguments
+        \*\*kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
         """
@@ -891,7 +842,7 @@ class TimestreamCommon(container.BasicTod):
         ----------
         func : function object
             The opertation function object. It is of type func(vis, vis_mask,
-            local_index, global_index, freq, self, **kwargs), which
+            local_index, global_index, freq, self, \*\*kwargs), which
             will be called in a loop along the frequency axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
@@ -900,7 +851,7 @@ class TimestreamCommon(container.BasicTod):
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
-        **kwargs : any other arguments
+        \*\*kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
         """
@@ -913,7 +864,7 @@ class TimestreamCommon(container.BasicTod):
         ----------
         func : function object
             The opertation function object. It is of type func(vis, vis_mask,
-            local_index, global_index, chanpair, self, **kwargs), which
+            local_index, global_index, chanpair, self, \*\*kwargs), which
             will be called in a loop along the baseline axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
@@ -922,7 +873,7 @@ class TimestreamCommon(container.BasicTod):
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
-        **kwargs : any other arguments
+        \*\*kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
         """
@@ -935,7 +886,7 @@ class TimestreamCommon(container.BasicTod):
         ----------
         func : function object
             The opertation function object. It is of type func(vis, vis_mask,
-            local_index, global_index, tf, self, **kwargs), which
+            local_index, global_index, tf, self, \*\*kwargs), which
             will be called in a loop along the time and frequency axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
@@ -945,7 +896,7 @@ class TimestreamCommon(container.BasicTod):
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
-        **kwargs : any other arguments
+        \*\*kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
         """
@@ -958,7 +909,7 @@ class TimestreamCommon(container.BasicTod):
         ----------
         func : function object
             The opertation function object. It is of type func(vis, vis_mask,
-            local_index, global_index, tbl, self, **kwargs), which
+            local_index, global_index, tbl, self, \*\*kwargs), which
             will be called in a loop along the time and baseline axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
@@ -968,7 +919,7 @@ class TimestreamCommon(container.BasicTod):
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
-        **kwargs : any other arguments
+        \*\*kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
         """
@@ -981,7 +932,7 @@ class TimestreamCommon(container.BasicTod):
         ----------
         func : function object
             The opertation function object. It is of type func(vis, vis_mask,
-            local_index, global_index, fbl, self, **kwargs), which
+            local_index, global_index, fbl, self, \*\*kwargs), which
             will be called in a loop along the frequency and baseline axis.
         full_data : bool, optional
             Whether the operations of `func` will need the full data section
@@ -991,7 +942,7 @@ class TimestreamCommon(container.BasicTod):
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
-        **kwargs : any other arguments
+        \*\*kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
         """

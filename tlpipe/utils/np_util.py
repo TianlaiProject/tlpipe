@@ -23,7 +23,9 @@ def unique(ar, return_index=False, return_inverse=False, return_counts=False):
         If True, also return the indices of the unique array that can be used
         to reconstruct `ar`.
     return_counts : bool, optional
+
         .. versionadded:: 1.9.0
+
         If True, also return the number of times each unique value comes up
         in `ar`.
 

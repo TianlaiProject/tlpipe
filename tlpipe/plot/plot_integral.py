@@ -10,13 +10,6 @@ import matplotlib.pyplot as plt
 
 def plot(vis, vis_mask, li, gi, bl, ts, **kwargs):
 
-    # if isinstance(bl, tuple): # for Timestream
-    #     pol = bl[0]
-    #     bl = tuple(bl[1])
-    # else: # for RawTimestream
-    #     pol = None
-    #     bl = tuple(bl)
-
     integral = kwargs.get('integral', 'time')
     bl_incl = kwargs.get('bl_incl', 'all')
     bl_excl = kwargs.get('bl_excl', [])

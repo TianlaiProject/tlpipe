@@ -4,7 +4,7 @@ all the parameters are read from that file.  The input file will have plain
 python syntax.  I've found this to have the best flexibility, avoiding the
 need to have many versions of the same code.  However, because any python
 statements are executed when the input file is read, this system is not
-appropriate if security is an issue (it's an arbitrary code exceution security
+appropriate if security is an issue (it's an arbitrary code execution security
 hole).
 
 This is purposely written as a set of functions rather than a class.  I can
@@ -12,11 +12,21 @@ think of no reason that you would want the parser to stick around after being
 called and the output dictionaries are pretty self contained.
 
 Revision History:
-  KM August '10 - Wrote initial code (fileparser and dictparser).
-                - Later converted fileparser to just parse, which is an
-                  interface for both files and dicts.
-  KM Oct. '10   - Added write_params
-  KM Mar. '11   - Changed checking argument to feedback and type_check.
+
+    * KM Aug. '10
+
+        - Wrote initial code (fileparser and dictparser).
+        - Later converted fileparser to just parse, which is an
+          interface for both files and dicts.
+
+    * KM Oct. '10
+
+        - Added write_params
+
+    * KM Mar. '11
+
+        - Changed checking argument to feedback and type_check.
+
 """
 
 import custom_exceptions as ce
@@ -32,47 +42,57 @@ def parse(ini_data, params, return_undeclared=False, prefix='',
 
     Parameters
     ----------
-        ini_data: a string, containing a python file name, or a dictionary.  The
-            file must contain a script (not function) that defines parameter
-            values in the local namespace.  Alternately, if ini is a
-            dictionary, then parameters are read from the dictionary.
-            Variables must have names and
-            types corresponding to the params dictionary argument.
-        params: a dictionary of keys and corresponding to variable names to be
-            read from file and values corresponding to defaults if the
-            corresponding variable is not found in the file.
-        return_undeclared: Bool default False.  Whether to return a second
-            dictionary of with variables found in the parameter file but not in
-            the in params argument.
-        prefix: String default ''.  A prefix added to parameter names (defined
-            in the keys of params) when read from the input file or dictionary.
-            The prefix is not added to the returned output dictionary.
-        feedback: integer 1 to 10, default 2.  Desired feedback level,
-            controlling what to print to the standard out.
-        type_check: Boolian default False. Whethar to raise an exception if the
-            recived value for a parameter is a different type than the default
-            value.
-        checking (deprecated, use feedback and typecheck):
-            Perform various checks:
-            1's digit: perform type checking on the values in the file and in
-                passed params:
-                    0 not at all
-                    2 print warning (default)
-                    3 (or greater) raise an Exception
-            10s digit: parameter feedback:
-                    0 none
-                    2 print message when parameters remain default value
-                        (default)
-                    3 print all parameters and whether they've defaulted
+    ini_data : string
+        A string containing a python file name, or a dictionary.
+        The file must contain a script (not function) that defines parameter
+        values in the local namespace.  Alternately, if ini is a
+        dictionary, then parameters are read from the dictionary.
+        Variables must have names and
+        types corresponding to the params dictionary argument.
+    params : dict
+        A dictionary of keys and corresponding to variable names to be
+        read from file and values corresponding to defaults if the
+        corresponding variable is not found in the file.
+    return_undeclared : boolean
+        Whether to return a second dictionary of with variables found in the
+        parameter file but not in the in params argument. Default False.
+    prefix : string
+        A prefix added to parameter names (defined in the keys of params) when
+        read from the input file or dictionary. The prefix is not added to the
+        returned output dictionary. Default ''.
+    feedback : integer
+        Desired feedback level, controlling what to print to the standard out.
+        Value can be  1 to 10, default 2.
+    type_check : boolean
+        Whether to raise an exception if the recived value for a parameter is
+        a different type than the default value. Default False.
+    checking (deprecated, use feedback and typecheck) : integer
+        Perform various checks:
+
+            * 1's digit: perform type checking on the values in the file and in passed params:
+
+                + 0 not at all
+                + 2 print warning (default)
+                + 3 (or greater) raise an Exception
+
+            * 10s digit: parameter feedback:
+    
+                + 0 none
+                + 2 print message when parameters remain default value (default)
+                + 3 print all parameters and whether they've defaulted
+
 
     Returns
     -------
-        out_params: A dictionary with the same keys as argument params but 
-            with values read from file.
-        undeclared: Optional. A dictionary that holds any key found in the 
-            file but not in params. Returned if return_undeclared=True.
+    out_params : dict
+        A dictionary with the same keys as argument params but with values
+        read from file.
+    undeclared : dict, optional
+        A dictionary that holds any key found in the file but not in params.
+        Returned if `return\_undeclared` = True.
+
     """
-    
+
     # Deal with deprecated checking variable.
     if checking != -1 and feedback == 2 and type_check == False:
         old_typecheck = checking%10
@@ -83,7 +103,7 @@ def parse(ini_data, params, return_undeclared=False, prefix='',
             feedback = 2
         else :
             feedback = parcheck
-        
+
     if isinstance(ini_data, str) :
         if feedback > 0 :
             if mpiutil.rank0:
@@ -118,19 +138,20 @@ def parse_dict(dict_to_parse, params, return_undeclared=False, prefix='',
     This function is intended for internal use.  All of it's functionality is
     availble from the parse function.
 
-    This function accepts an input dictionary and a dictionary of keys 
-    and pre typed
-    values. It returns a dictionary of the same keys with values read from
-    the input dictionary.  See the docstring for parse for more
+    This function accepts an input dictionary and a dictionary of keys and
+    pre typed values. It returns a dictionary of the same keys with values
+    read from the input dictionary.  See the docstring for parse for more
     information, the only difference is the first argument must be a
     dictionary.
 
-    Arguments:
-        dict_to_parse: A dictionary containing keys and values to be read as
-            parameters.  Entries should have keys and
-            types corresponding to the pars dictionary argument (depending on
-            level of checking requested).
-      """
+    Parameters
+    ----------
+    dict_to_parse : dict
+        A dictionary containing keys and values to be read as parameters.
+        Entries should have keys and types corresponding to the pars
+        dictionary argument (depending on level of checking requested).
+    
+    """
     
     # Same keys as params but for checking but contains only a flag to indicate
     # if parameter retained it's default value.
@@ -220,12 +241,17 @@ def write_params(params, file_name, prefix='', mode='w') :
     other types. Basically if the out put of 'print param' looks like it could
     go on the rhs of the assignment operator, you are in good shape.
 
-    arguments:
-        params : dictionary of parameter names and values to be written to
-            file.
-        file_name: sting. File_name to write to.
-        prefix : prefix for teh parameter names when written to file.
-        mode: 'a' or 'w'.  Whether to open the file in write or append mode.
+    Parameters
+    ----------
+    params : dict
+        A dictionary of parameter names and values to be written to file.
+    file_name: string
+        File name to write to.
+    prefix : string
+        Prefix for the parameter names when written to file.
+    mode : string
+        Whether to open the file in write or append mode. Can be 'a' or 'w'.
+    
     """
     
     if not (mode == 'w' or mode == 'a') :

@@ -104,48 +104,6 @@ class BasicTod(memh5.MemDiskGroup):
     comm : None or MPI.Comm, optional
         MPI Communicator to distributed over. Default None to use mpiutil._comm.
 
-    Attributes
-    ----------
-    main_data
-    main_data_name
-    main_data_axes
-    main_axes_ordered_datasets
-    main_time_ordered_datasets
-    time_ordered_datasets
-    time_ordered_attrs
-    history
-
-    Methods
-    -------
-    data_select
-    load_common
-    load_main_data
-    load_tod_excl_main_data
-    load_time_ordered
-    load_all
-    reload_common
-    reload_main_data
-    reload_tod_excl_main_data
-    reload_time_ordered
-    reload_all
-    group_name_allowed
-    dataset_name_allowed
-    attrs_name_allowed
-    create_time_ordered_dataset
-    create_main_data
-    create_main_axis_ordered_dataset
-    create_main_time_ordered_dataset
-    delete_a_dataset
-    delete_an_attribute
-    add_history
-    info
-    redistribute
-    check_status
-    to_files
-    copy
-    data_operate
-    all_data_operate
-
     """
 
     _main_data_name_ = None
@@ -1254,8 +1212,8 @@ class BasicTod(memh5.MemDiskGroup):
         ----------
         func : function object
             The opertation function object. It is of type func(array, self,
-            **kwargs) if `op_axis=None`, func(array, local_index, global_index,
-            axis_val, self, **kwargs) else.
+            \*\*kwargs) if `op_axis=None`, func(array, local_index, global_index,
+            axis_val, self, \*\*kwargs) else.
         op_axis : None, string or integer, tuple of string or interger, optional
             Axis along which `func` will opterate. If None, `func` will operate on
             the whole main dataset (but note: since the main data is distributed
@@ -1276,7 +1234,7 @@ class BasicTod(memh5.MemDiskGroup):
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original dist axis if the
             dist axis has changed during the operation. Default False.
-        **kwargs : any other arguments
+        \*\*kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
         """
@@ -1342,10 +1300,10 @@ class BasicTod(memh5.MemDiskGroup):
         Parameters
         ----------
         func : function object
-            The opertation function object. It is of type func(array, self, **kwargs),
+            The opertation function object. It is of type func(array, self, \*\*kwargs),
             which will operate on the array and return an new array with the same
             shape and dtype.
-        **kwargs : any other arguments
+        \*\*kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
         """

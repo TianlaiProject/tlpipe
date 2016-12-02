@@ -21,6 +21,11 @@ def xyz2XYZ_m(lat):
     lat : float
         Latitude of the observing position in radians.
 
+    Returns
+    -------
+    mat : np.ndarray
+        The conversion matrix.
+
     """
     sin_a, cos_a = np.sin(lat), np.cos(lat)
     zero = np.zeros_like(lat)
@@ -35,7 +40,21 @@ def xyz2XYZ_m(lat):
 
 
 def top2eq_m(lat, lon):
-    """Conversion matrix between the topocentric coordinate and the equatorial coordinate at latitude `lat` and longitude `lon`.
+    """Conversion matrix from 'top' to 'eq'.
+
+    Conversion matrix between the topocentric coordinate and the equatorial
+    coordinate at latitude `lat` and longitude `lon`.
+
+    Parameters
+    ----------
+    lat, lon : float
+        Latitude, longitude of the observing position in radians.
+
+    Returns
+    -------
+    mat : np.ndarray
+        The conversion matrix.
+
     """
 
     slat, clat = np.sin(lat), np.cos(lat)
@@ -149,7 +168,7 @@ class CylinderBeam(ap.fit.Beam):
 
     @property
     def Omega(self):
-        """Return the beam solid angle \int |A(\vec{n})|^2 d^2\vec{n}."""
+        r"""Return the beam solid angle :math:`\int |A(\boldsymbol{n})|^2 \ d^2\boldsymbol{n}`."""
         nside = 256
         angpos = hputil.ang_positions(nside)
         lat = np.radians(44.15268333) # exact value not important

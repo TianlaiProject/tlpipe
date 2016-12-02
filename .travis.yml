@@ -1,0 +1,18 @@
+language: python
+os: linux
+python:
+    - 2.7
+addons:
+    apt:
+        packages:
+            # - libhdf5-serial-dev
+            # - libopenmpi-dev
+            # - openmpi-bin
+install:
+    # - "pip install -r requirements.txt"
+    # - "pip install -e .[mpi]"
+    # - "pip install -e .[skyfield]"
+    # - "pip install -r doc/requirements.txt"
+script:
+    - "sphinx-build -b html -d _build/doctrees   . _build/html"
+    # - "cd ~; nosetests tlpipe"
