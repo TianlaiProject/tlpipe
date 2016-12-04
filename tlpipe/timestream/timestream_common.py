@@ -1,3 +1,14 @@
+"""Common things for the raw timestream data and timestream data.
+
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: tlpipe.timestream.container.BasicTod TimestreamCommon tlpipe.timestream.raw_timestream.RawTimestream tlpipe.timestream.timestream.Timestream
+   :parts: 2
+
+"""
+
 import itertools
 import numpy as np
 import ephem

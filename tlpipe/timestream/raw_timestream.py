@@ -1,3 +1,14 @@
+"""Container class for the raw timestream data.
+
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: tlpipe.timestream.container.BasicTod tlpipe.timestream.timestream_common.TimestreamCommon RawTimestream tlpipe.timestream.timestream.Timestream
+   :parts: 2
+
+"""
+
 import itertools
 import numpy as np
 import timestream_common

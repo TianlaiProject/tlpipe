@@ -1,4 +1,12 @@
-"""Exceptional values flagging along the frequency axis."""
+"""Exceptional values flagging along the frequency axis.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: Flag
+   :parts: 2
+
+"""
 
 import warnings
 import numpy as np

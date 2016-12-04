@@ -1,4 +1,12 @@
-"""Phase the zenith-phased visibility data to a source."""
+"""Phase the zenith-phased visibility data to a source.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: Phs2src
+   :parts: 2
+
+"""
 
 import numpy as np
 import ephem

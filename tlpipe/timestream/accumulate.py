@@ -1,4 +1,12 @@
-"""Accurate data. This should be done after the data has been calibrated and re-ordered."""
+"""Accurate data. This should be done after the data has been calibrated and re-ordered.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: Accum
+   :parts: 2
+
+"""
 
 import numpy as np
 import tod_task

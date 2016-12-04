@@ -1,4 +1,12 @@
-"""Calibration using a strong point source."""
+"""Calibration using a strong point source.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: PsCal
+   :parts: 2
+
+"""
 
 import os
 import numpy as np

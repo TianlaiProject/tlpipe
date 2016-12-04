@@ -1,4 +1,12 @@
-"""Convert RawTimestream to Timestream."""
+"""Convert RawTimestream to Timestream.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: Rt2ts
+   :parts: 2
+
+"""
 
 import tod_task
 

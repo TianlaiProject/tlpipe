@@ -1,4 +1,12 @@
-"""Tianlai dish and cylinder array."""
+"""Tianlai dish and cylinder array.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: DishBeam CylinderBeam Antenna DishAntenna CylinderFeed AntennaArray
+   :parts: 3
+
+"""
 
 import numpy as np
 import aipy as ap

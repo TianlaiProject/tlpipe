@@ -1,4 +1,12 @@
-"""Rebin the frequency channels."""
+"""Rebin the frequency channels.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: Rebin
+   :parts: 2
+
+"""
 
 import warnings
 import numpy as np

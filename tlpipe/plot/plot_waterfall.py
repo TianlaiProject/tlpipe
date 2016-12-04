@@ -1,4 +1,12 @@
-"""Plot waterfall images."""
+"""Plot waterfall images.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: Plot
+   :parts: 2
+
+"""
 
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline

@@ -1,6 +1,13 @@
 """Subtract simulated strong point sources signal from the visibilities.
 
 This must be done after the data has been calibrated.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: PsSub
+   :parts: 2
+
 """
 
 import numpy as np

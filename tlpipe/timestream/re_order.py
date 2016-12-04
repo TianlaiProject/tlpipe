@@ -1,4 +1,12 @@
-"""Re-order data to have longitude from 0 to 2pi."""
+"""Re-order data to have longitude from 0 to 2pi.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: ReOrder
+   :parts: 2
+
+"""
 
 import numpy as np
 import tod_task

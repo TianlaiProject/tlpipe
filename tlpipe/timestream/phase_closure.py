@@ -1,4 +1,12 @@
-"""Check the phase closure relation."""
+"""Check the phase closure relation.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: Closure
+   :parts: 2
+
+"""
 
 import os
 import itertools

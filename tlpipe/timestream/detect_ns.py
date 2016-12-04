@@ -1,4 +1,12 @@
-"""Detect noise source signal."""
+"""Detect noise source signal.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: Detect
+   :parts: 2
+
+"""
 
 from collections import Counter
 import numpy as np

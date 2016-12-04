@@ -1,4 +1,12 @@
-"""Line RFI flagging."""
+"""Line RFI flagging.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: Flag
+   :parts: 2
+
+"""
 
 import warnings
 import numpy as np

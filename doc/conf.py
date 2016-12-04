@@ -41,6 +41,8 @@ extensions = [
     'sphinx.ext.ifconfig',
     'sphinx.ext.linkcode',
     'sphinx.ext.napoleon',
+    'sphinx.ext.graphviz',
+    'sphinx.ext.inheritance_diagram',
 ]
 
 # Source code links
@@ -86,6 +88,11 @@ def linkcode_resolve(domain, info):
     fn = os.path.relpath(fn, start=os.path.dirname(tlpipe.__file__))
 
     return 'https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/%s%s' % (fn, linespec)
+
+
+
+# option for sphinx.ext.inheritance_diagram
+inheritance_graph_attrs = dict(rankdir="TB", size='"6.0, 8.0"', fontsize=14, ratio='compress') # TB for top to bottom, LR for left to right
 
 
 # Add any paths that contain templates here, relative to this directory.

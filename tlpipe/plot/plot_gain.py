@@ -1,4 +1,12 @@
-"""Plot gain."""
+"""Plot gain.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: Plot
+   :parts: 2
+
+"""
 
 import os
 import numpy as np
@@ -9,7 +17,7 @@ from tlpipe.pipeline.pipeline import OneAndOne
 from tlpipe.utils.path_util import input_path, output_path
 
 
-class PlotGain(OneAndOne):
+class Plot(OneAndOne):
     """Plot gain."""
 
     params_init = {

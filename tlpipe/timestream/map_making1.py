@@ -1,4 +1,12 @@
-"""Initialize telescope array, average the timestream and do the map-making."""
+"""Initialize telescope array, average the timestream and do the map-making.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: MapMaking
+   :parts: 2
+
+"""
 
 import os
 import numpy as np

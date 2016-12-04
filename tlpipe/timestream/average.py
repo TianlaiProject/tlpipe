@@ -1,4 +1,12 @@
-"""Average the accumulated data by dividing its weight."""
+"""Average the accumulated data by dividing its weight.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: Average
+   :parts: 2
+
+"""
 
 import warnings
 import numpy as np

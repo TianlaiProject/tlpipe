@@ -1,4 +1,12 @@
-"""Plot time or frequency slices."""
+"""Plot time or frequency slices.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: Plot
+   :parts: 2
+
+"""
 
 import numpy as np
 from tlpipe.timestream import tod_task

@@ -1,4 +1,12 @@
-"""Dispatch data."""
+"""Dispatch data.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: Dispatch
+   :parts: 2
+
+"""
 
 import numpy as np
 import h5py

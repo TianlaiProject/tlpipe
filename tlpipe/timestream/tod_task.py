@@ -1,4 +1,12 @@
-"""Base pipeline tasks for time ordered data opteration."""
+"""Base pipeline tasks for time ordered data opteration.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: tlpipe.pipeline.pipeline.TaskBase tlpipe.pipeline.pipeline.OneAndOne TaskTimestream
+   :parts: 2
+
+"""
 
 import h5py
 from timestream_common import TimestreamCommon

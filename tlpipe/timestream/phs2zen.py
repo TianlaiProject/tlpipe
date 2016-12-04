@@ -1,4 +1,12 @@
-"""Phase the source-phased visibility data to the zenith, this is just the inverse operation of phs2src.py."""
+"""Phase the source-phased visibility data to the zenith, this is just the inverse operation of phs2src.py.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: Phs2zen
+   :parts: 2
+
+"""
 
 import numpy as np
 import ephem

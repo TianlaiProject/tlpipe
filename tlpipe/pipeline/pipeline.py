@@ -342,6 +342,13 @@ over-ridden for maximum functionality.  :meth:`~OneAndOne.setup` and
 :meth:`~OneAndOne.finish` may be overridden as usual. :class:`FileIterBase`
 for iterating tasks over input files.
 
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: TaskBase DoNothing OneAndOne FileIterBase
+   :parts: 1
+
+
 See the documentation for these base classes for more details.
 
 """

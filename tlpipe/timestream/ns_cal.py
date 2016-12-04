@@ -1,4 +1,12 @@
-"""Relative phase calibration using the noise source signal."""
+"""Relative phase calibration using the noise source signal.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: NsCal
+   :parts: 2
+
+"""
 
 import os
 import numpy as np

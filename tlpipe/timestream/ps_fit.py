@@ -1,4 +1,12 @@
-"""Calibration by strong point source fitting."""
+"""Calibration by strong point source fitting.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: PsFit
+   :parts: 2
+
+"""
 
 import os
 import numpy as np

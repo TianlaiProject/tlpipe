@@ -1,4 +1,12 @@
-"""Daytime data mask."""
+"""Daytime data mask.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: Mask
+   :parts: 2
+
+"""
 
 import numpy as np
 import tod_task

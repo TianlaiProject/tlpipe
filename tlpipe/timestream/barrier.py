@@ -1,4 +1,12 @@
-"""Barrier the iterative pipeline flow before executing its following tasks."""
+"""Barrier the iterative pipeline flow before executing its following tasks.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: Barrier
+   :parts: 2
+
+"""
 
 from tlpipe.pipeline import pipeline
 
