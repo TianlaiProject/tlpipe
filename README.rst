@@ -7,6 +7,8 @@ This is a Python project for the Tianlai data pipeline.
 Installation
 ============
 
+.. include:: INSTALL.rst
+
 First clone this package ::
 
     $ git clone git@github.com:TianlaiProject/tlpipe.git
@@ -26,5 +28,5 @@ It should also be installable directly with `pip` using the command ::
 
 How to
 ======
-Refer to the example in :doc:`/example` to see how to write an input pipeline file
+Refer to the example in :file:`example/` to see how to write an input pipeline file
 and execute the pipeline.
