@@ -18,7 +18,7 @@ setup(
     version = __version__,
 
     packages = find_packages(),
-    install_requires = requires
+    install_requires = requires,
     package_data = {},
     scripts = ['scripts/tlpipe', 'scripts/h5info'],
 
