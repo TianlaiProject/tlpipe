@@ -6,6 +6,7 @@ healpy
 pyephem
 
 cython
+urllib3[secure]
 
 -e git+https://github.com/zuoshifan/caput.git@zuo/develop#egg=caput
 -e git+https://github.com/zuoshifan/cora.git@master#egg=cora
