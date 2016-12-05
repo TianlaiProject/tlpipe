@@ -5,7 +5,8 @@ h5py
 healpy
 pyephem
 
+cython
+
 -e git+https://github.com/zuoshifan/caput.git@zuo/develop#egg=caput
 -e git+https://github.com/zuoshifan/cora.git@master#egg=cora
 -e git+https://github.com/zuoshifan/aipy.git@zuo/develop#egg=aipy
-aipy
