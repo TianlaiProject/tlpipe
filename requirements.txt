@@ -5,8 +5,8 @@ h5py
 healpy
 pyephem
 
-cython
 urllib3[secure]
+cython
 
 -e git+https://github.com/zuoshifan/caput.git@zuo/develop#egg=caput
 -e git+https://github.com/zuoshifan/cora.git@master#egg=cora
