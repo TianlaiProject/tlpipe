@@ -25,6 +25,24 @@ Installation
    install
 
 
+Tutorial
+--------
+
+.. toctree::
+   :maxdepth: 1
+
+   tutor
+
+
+Developer's guid
+----------------
+
+.. toctree::
+   :maxdepth: 1
+
+   guide
+
+
 Reference
 ---------
 

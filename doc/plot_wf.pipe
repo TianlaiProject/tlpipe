@@ -1,0 +1,44 @@
+# -*- mode: python; -*-
+
+# input file for the analysis pipeline
+# execute this pipeline by either command of the following two:
+# tlpipe dir/to/plot_wf.pipe
+# mpiexec -n N tlpipe dir/to/plot_wf.pipe
+
+
+pipe_tasks = []
+pipe_outdir = './output/'
+pipe_logging = 'notset'
+# pipe_logging = 'info'
+
+
+import glob
+data_dir = 'dir/to/data' # your data directory
+files = sorted(glob.glob(data_dir+'/*.hdf5')) # all data files as a list
+
+
+# data selection
+from tlpipe.timestream import dispatch
+pipe_tasks.append(dispatch.Dispatch)
+### parameters for Dispatch
+dp_input_files = files # data files as list
+dp_freq_select = (500, 510) # frequency indices, from 500 to 510
+dp_feed_select = [1, 2, 32, 33] # feed no. as a list
+dp_out = 'dp'
+
+# find and mask noise source signal
+from tlpipe.timestream import detect_ns
+pipe_tasks.append(detect_ns.Detect)
+### parameters for Detect
+dt_in = dp_out
+# dt_feed = 1
+dt_out = 'dt'
+
+# plot waterfall of selected data
+from tlpipe.plot import plot_waterfall
+pipe_tasks.append(plot_waterfall.Plot)
+### parameters for Plot
+pwf_in = dt_out
+pwf_flag_ns = True # mask noise source signal
+pwf_fig_name = 'waterfall/wf' # figure name to save
+pwf_out = 'pwf'
