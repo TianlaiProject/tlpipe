@@ -4,7 +4,7 @@ import os
 from tlpipe import __version__
 
 
-REQUIRES = ['numpy', 'scipy', 'h5py', 'healpy', 'pyephem']
+REQUIRES = ['numpy', 'scipy', 'matplotlib', 'h5py', 'healpy', 'pyephem', 'aipy']
 
 # Don't install requirements if on ReadTheDocs build system.
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
@@ -21,6 +21,9 @@ setup(
     install_requires = requires,
     package_data = {},
     scripts = ['scripts/tlpipe', 'scripts/h5info'],
+    extras_require={
+        'mpi': ['mpi4py>=1.3'],
+    },
 
     # metadata for upload to PyPI
     author = "Shifan Zuo",
