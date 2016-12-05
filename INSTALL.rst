@@ -1,6 +1,11 @@
 Installation
 ============
 
+Python version
+--------------
+The package works only with python 2 with version >= 2.75. Python 3 does not
+supported currently.
+
 Prerequisites
 -------------
 
@@ -9,6 +14,7 @@ required:
 
     * h5py_\ , Pythonic interface to the HDF5 binary data format;
     * healpy_\ , Healpix tools package for Python;
+    * pyephem_\ , Basic astronomical computations for the Python;
     * numpy_\ , Base N-dimensional array package for Python;
     * scipy_\ , The fundamental package for scientific computing with Python;
     * matplotlib_\ , A python 2D plotting library;
@@ -54,6 +60,7 @@ It should also be installable directly with `pip` using the command ::
 .. _GitHub: https://github.com/KeepSafe/aiohttp
 .. _h5py: http:/www.h5py.org/
 .. _healpy: https://pypi.python.org/pypi/healpy
+.. _pyephem: http://rhodesmill.org/pyephem/
 .. _numpy: http://www.numpy.org/
 .. _scipy: https://www.scipy.org
 .. _caput: https://github.com/zuoshifan/caput/tree/zuo/develop
