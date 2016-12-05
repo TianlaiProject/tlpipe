@@ -1,12 +1,24 @@
 from setuptools import setup, find_packages
-from caput import __version__
+import os
+
+from tlpipe import __version__
+
+
+REQUIRES = ['numpy', 'scipy', 'h5py', 'healpy', 'pyephem']
+
+# Don't install requirements if on ReadTheDocs build system.
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+if on_rtd:
+    requires = []
+else:
+    requires = REQUIRES
 
 setup(
     name = 'tlpipe',
     version = __version__,
 
     packages = find_packages(),
-    requires = ['numpy', 'scipy', 'h5py'],
+    install_requires = requires
     package_data = {},
     scripts = ['scripts/tlpipe', 'scripts/h5info'],
 
