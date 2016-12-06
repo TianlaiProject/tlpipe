@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.Timestream.require_group
+====================================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. automethod:: Timestream.require_group

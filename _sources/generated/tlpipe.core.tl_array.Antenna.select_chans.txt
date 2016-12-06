@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.Antenna.select_chans
+=========================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: Antenna.select_chans

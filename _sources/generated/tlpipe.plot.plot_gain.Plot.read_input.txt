@@ -1,0 +1,6 @@
+tlpipe.plot.plot_gain.Plot.read_input
+=====================================
+
+.. currentmodule:: tlpipe.plot.plot_gain
+
+.. automethod:: Plot.read_input

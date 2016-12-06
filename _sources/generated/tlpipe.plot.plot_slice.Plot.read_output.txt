@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.Plot.read_output
+=======================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: Plot.read_output

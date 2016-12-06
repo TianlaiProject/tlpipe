@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Timestream.vis
+=========================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. autoattribute:: Timestream.vis

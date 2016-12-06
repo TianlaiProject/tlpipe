@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.PsFit.data_select
+==========================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: PsFit.data_select

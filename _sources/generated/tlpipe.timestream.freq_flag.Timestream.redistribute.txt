@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.redistribute
+===================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Timestream.redistribute

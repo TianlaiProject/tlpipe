@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.DishBeam.set_params
+========================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: DishBeam.set_params

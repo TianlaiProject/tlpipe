@@ -1,0 +1,6 @@
+tlpipe.timestream.barrier.Barrier.embarrassingly_parallelizable
+===============================================================
+
+.. currentmodule:: tlpipe.timestream.barrier
+
+.. autoattribute:: Barrier.embarrassingly_parallelizable

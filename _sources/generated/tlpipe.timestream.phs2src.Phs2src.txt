@@ -1,0 +1,49 @@
+tlpipe.timestream.phs2src.Phs2src
+=================================
+
+.. currentmodule:: tlpipe.timestream.phs2src
+
+.. autoclass:: Phs2src
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Phs2src.cacheable
+      ~Phs2src.embarrassingly_parallelizable
+      ~Phs2src.history
+      ~Phs2src.iteration
+      ~Phs2src.params_init
+      ~Phs2src.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Phs2src.cast_input
+      ~Phs2src.copy_input
+      ~Phs2src.data_select
+      ~Phs2src.finish
+      ~Phs2src.next
+      ~Phs2src.process
+      ~Phs2src.read_input
+      ~Phs2src.read_output
+      ~Phs2src.read_process_write
+      ~Phs2src.setup
+      ~Phs2src.show_params
+      ~Phs2src.write_output
+   
+   

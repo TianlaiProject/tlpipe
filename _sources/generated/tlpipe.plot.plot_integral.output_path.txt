@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.output_path
+=====================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autofunction:: output_path

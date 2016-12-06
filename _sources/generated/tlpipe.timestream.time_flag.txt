@@ -1,0 +1,36 @@
+tlpipe.timestream.time_flag
+===========================
+
+.. automodule:: tlpipe.timestream.time_flag
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      flag
+      savitzky_golay
+   
+   
+
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      Flag
+      InterpolatedUnivariateSpline
+      RawTimestream
+      Timestream
+   
+   
+
+
+   
+   
+   

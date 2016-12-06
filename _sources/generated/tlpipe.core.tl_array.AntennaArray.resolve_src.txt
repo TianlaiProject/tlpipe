@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.AntennaArray.resolve_src
+=============================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: AntennaArray.resolve_src

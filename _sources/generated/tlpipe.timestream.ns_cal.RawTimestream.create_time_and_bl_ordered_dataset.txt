@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.RawTimestream.create_time_and_bl_ordered_dataset
+=========================================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: RawTimestream.create_time_and_bl_ordered_dataset

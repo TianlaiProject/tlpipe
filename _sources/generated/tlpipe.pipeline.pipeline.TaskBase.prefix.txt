@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.TaskBase.prefix
+========================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoattribute:: TaskBase.prefix

@@ -1,0 +1,47 @@
+tlpipe.pipeline.pipeline
+========================
+
+.. automodule:: tlpipe.pipeline.pipeline
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      format_list
+      input_path
+      output_path
+   
+   
+
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      DoNothing
+      FileIterBase
+      Manager
+      OneAndOne
+      TaskBase
+   
+   
+
+
+   
+   
+   .. rubric:: Exceptions
+
+   .. autosummary::
+      :toctree:
+   
+      PipelineConfigError
+      PipelineRuntimeError
+      PipelineStopIteration
+   
+   

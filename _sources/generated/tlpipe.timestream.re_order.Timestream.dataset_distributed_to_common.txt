@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.dataset_distributed_to_common
+===================================================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. automethod:: Timestream.dataset_distributed_to_common

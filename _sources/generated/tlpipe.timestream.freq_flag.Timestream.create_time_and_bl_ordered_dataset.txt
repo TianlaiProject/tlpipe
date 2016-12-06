@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.create_time_and_bl_ordered_dataset
+=========================================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Timestream.create_time_and_bl_ordered_dataset

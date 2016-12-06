@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.RawTimestream.local_time
+====================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. autoattribute:: RawTimestream.local_time

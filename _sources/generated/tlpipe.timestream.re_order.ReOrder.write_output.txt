@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.ReOrder.write_output
+===============================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. automethod:: ReOrder.write_output

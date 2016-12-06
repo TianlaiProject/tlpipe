@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Timestream.is_cylinder
+=================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. autoattribute:: Timestream.is_cylinder

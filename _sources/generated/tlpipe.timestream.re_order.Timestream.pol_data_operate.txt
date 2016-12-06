@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.pol_data_operate
+======================================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. automethod:: Timestream.pol_data_operate

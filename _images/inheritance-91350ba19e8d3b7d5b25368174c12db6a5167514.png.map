@@ -1,0 +1,5 @@
+<map id="inheritance8ca5671038" name="inheritance8ca5671038">
+<area shape="rect" id="node1" href="tlpipe.timestream.barrier.Barrier.html#tlpipe.timestream.barrier.Barrier" target="_top" title="Barrier the iterative pipeline flow before executing its following tasks." alt="" coords="23,161,135,189"/>
+<area shape="rect" id="node2" href="tlpipe.pipeline.pipeline.DoNothing.html#tlpipe.pipeline.pipeline.DoNothing" target="_top" title="Do nothing." alt="" coords="5,83,152,111"/>
+<area shape="rect" id="node4" href="tlpipe.pipeline.pipeline.TaskBase.html#tlpipe.pipeline.pipeline.TaskBase" target="_top" title="Base class for all pipeline tasks." alt="" coords="9,6,148,34"/>
+</map>

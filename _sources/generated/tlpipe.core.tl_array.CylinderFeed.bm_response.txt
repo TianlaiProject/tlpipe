@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.CylinderFeed.bm_response
+=============================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: CylinderFeed.bm_response

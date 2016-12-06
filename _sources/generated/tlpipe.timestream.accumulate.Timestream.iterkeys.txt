@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Timestream.iterkeys
+================================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Timestream.iterkeys

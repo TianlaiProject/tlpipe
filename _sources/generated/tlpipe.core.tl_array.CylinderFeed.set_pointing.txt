@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.CylinderFeed.set_pointing
+==============================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: CylinderFeed.set_pointing

@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.Timestream.freq_ordered_datasets
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. autoattribute:: Timestream.freq_ordered_datasets

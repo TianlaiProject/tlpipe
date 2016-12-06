@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.reload_all
+==================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Timestream.reload_all

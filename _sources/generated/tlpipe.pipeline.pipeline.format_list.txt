@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.format_list
+====================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autofunction:: format_list

@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.FileIterBase.embarrassingly_parallelizable
+===================================================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoattribute:: FileIterBase.embarrassingly_parallelizable

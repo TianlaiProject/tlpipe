@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_common.TimestreamCommon.redistribute
+=================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_common
+
+.. automethod:: TimestreamCommon.redistribute

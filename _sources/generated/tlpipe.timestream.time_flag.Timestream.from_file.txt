@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.Timestream.from_file
+================================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. automethod:: Timestream.from_file

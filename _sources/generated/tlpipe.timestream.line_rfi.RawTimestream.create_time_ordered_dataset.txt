@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.RawTimestream.create_time_ordered_dataset
+====================================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: RawTimestream.create_time_ordered_dataset

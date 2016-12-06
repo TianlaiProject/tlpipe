@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.AntennaArray.set_ephemtime
+===============================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: AntennaArray.set_ephemtime

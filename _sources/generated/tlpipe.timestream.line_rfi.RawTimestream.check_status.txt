@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.RawTimestream.check_status
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: RawTimestream.check_status

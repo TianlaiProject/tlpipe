@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.Antenna.set_params
+=======================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: Antenna.set_params

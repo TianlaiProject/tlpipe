@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.InterpolatedUnivariateSpline.get_residual
+==================================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: InterpolatedUnivariateSpline.get_residual

@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.output_path
+====================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autofunction:: output_path

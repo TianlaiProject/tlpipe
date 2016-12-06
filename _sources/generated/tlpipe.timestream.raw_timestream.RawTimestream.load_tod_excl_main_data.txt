@@ -1,0 +1,6 @@
+tlpipe.timestream.raw_timestream.RawTimestream.load_tod_excl_main_data
+======================================================================
+
+.. currentmodule:: tlpipe.timestream.raw_timestream
+
+.. automethod:: RawTimestream.load_tod_excl_main_data

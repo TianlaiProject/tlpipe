@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream.Timestream.create_main_time_ordered_dataset
+========================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream
+
+.. automethod:: Timestream.create_main_time_ordered_dataset

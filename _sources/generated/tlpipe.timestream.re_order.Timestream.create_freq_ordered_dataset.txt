@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.create_freq_ordered_dataset
+=================================================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. automethod:: Timestream.create_freq_ordered_dataset

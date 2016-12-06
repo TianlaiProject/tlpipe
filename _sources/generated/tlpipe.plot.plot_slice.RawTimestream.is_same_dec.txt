@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.RawTimestream.is_same_dec
+================================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. autoattribute:: RawTimestream.is_same_dec

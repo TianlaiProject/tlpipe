@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.PipelineStopIteration
+==============================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoexception:: PipelineStopIteration

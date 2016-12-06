@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Timestream.create_feed_ordered_dataset
+===================================================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Timestream.create_feed_ordered_dataset

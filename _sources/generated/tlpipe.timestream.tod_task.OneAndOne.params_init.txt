@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.OneAndOne.params_init
+================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. autoattribute:: OneAndOne.params_init

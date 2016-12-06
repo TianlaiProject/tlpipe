@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.RawTimestream.to_files
+==================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: RawTimestream.to_files

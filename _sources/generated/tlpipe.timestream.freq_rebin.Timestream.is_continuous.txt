@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.is_continuous
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. autoattribute:: Timestream.is_continuous

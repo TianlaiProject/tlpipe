@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Timestream.apply_mask
+================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: Timestream.apply_mask

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.require_group
+==================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Timestream.require_group

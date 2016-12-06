@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.bl_ordered_datasets
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. autoattribute:: Timestream.bl_ordered_datasets

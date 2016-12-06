@@ -1,0 +1,34 @@
+tlpipe.timestream.ps_fit
+========================
+
+.. automodule:: tlpipe.timestream.ps_fit
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      fit
+      output_path
+   
+   
+
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      PsFit
+      Timestream
+   
+   
+
+
+   
+   
+   

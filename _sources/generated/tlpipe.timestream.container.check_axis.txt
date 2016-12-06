@@ -1,0 +1,6 @@
+tlpipe.timestream.container.check_axis
+======================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. autofunction:: check_axis

@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.Timestream.stokes2lin
+==============================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: Timestream.stokes2lin

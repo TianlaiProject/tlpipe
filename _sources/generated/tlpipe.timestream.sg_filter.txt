@@ -1,0 +1,26 @@
+tlpipe.timestream.sg_filter
+===========================
+
+.. automodule:: tlpipe.timestream.sg_filter
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      factorial
+      savitzky_golay
+   
+   
+
+
+   
+   
+   
+
+
+   
+   
+   

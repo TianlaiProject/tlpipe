@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.comm
+============================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. autoattribute:: Timestream.comm

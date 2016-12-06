@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.RawTimestream.attrs_name_allowed
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: RawTimestream.attrs_name_allowed

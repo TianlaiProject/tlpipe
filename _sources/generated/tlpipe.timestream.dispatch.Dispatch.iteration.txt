@@ -1,0 +1,6 @@
+tlpipe.timestream.dispatch.Dispatch.iteration
+=============================================
+
+.. currentmodule:: tlpipe.timestream.dispatch
+
+.. autoattribute:: Dispatch.iteration

@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.Flag.read_input
+===========================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. automethod:: Flag.read_input

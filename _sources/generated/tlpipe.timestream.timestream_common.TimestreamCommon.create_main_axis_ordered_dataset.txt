@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_common.TimestreamCommon.create_main_axis_ordered_dataset
+=====================================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_common
+
+.. automethod:: TimestreamCommon.create_main_axis_ordered_dataset

@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.main_data
+===============================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. autoattribute:: Timestream.main_data

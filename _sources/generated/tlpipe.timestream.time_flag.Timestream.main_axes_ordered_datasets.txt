@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.Timestream.main_axes_ordered_datasets
+=================================================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. autoattribute:: Timestream.main_axes_ordered_datasets

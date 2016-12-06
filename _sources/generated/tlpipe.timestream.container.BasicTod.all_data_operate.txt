@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.all_data_operate
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. automethod:: BasicTod.all_data_operate

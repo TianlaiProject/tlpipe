@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.load_main_data
+===================================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. automethod:: BasicTod.load_main_data

@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Rebin.params_init
+==============================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. autoattribute:: Rebin.params_init

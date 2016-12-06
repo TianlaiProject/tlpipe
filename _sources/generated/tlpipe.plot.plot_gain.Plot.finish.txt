@@ -1,0 +1,6 @@
+tlpipe.plot.plot_gain.Plot.finish
+=================================
+
+.. currentmodule:: tlpipe.plot.plot_gain
+
+.. automethod:: Plot.finish

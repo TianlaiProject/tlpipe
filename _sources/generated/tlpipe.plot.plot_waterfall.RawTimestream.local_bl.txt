@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.RawTimestream.local_bl
+=================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoattribute:: RawTimestream.local_bl

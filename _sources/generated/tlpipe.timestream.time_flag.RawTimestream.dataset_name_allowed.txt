@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.RawTimestream.dataset_name_allowed
+==============================================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. automethod:: RawTimestream.dataset_name_allowed

@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.PsCal.iteration
+========================================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. autoattribute:: PsCal.iteration

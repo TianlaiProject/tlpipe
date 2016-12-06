@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.RawTimestream.delete_a_dataset
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: RawTimestream.delete_a_dataset

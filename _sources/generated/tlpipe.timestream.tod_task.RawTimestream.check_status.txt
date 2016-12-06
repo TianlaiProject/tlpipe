@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.RawTimestream.check_status
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: RawTimestream.check_status

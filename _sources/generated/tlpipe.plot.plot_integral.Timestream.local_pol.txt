@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.local_pol
+==============================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: Timestream.local_pol

@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.RawTimestream.dataset_name_allowed
+==============================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: RawTimestream.dataset_name_allowed

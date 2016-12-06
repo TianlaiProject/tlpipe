@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Timestream.group_name_allowed
+========================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: Timestream.group_name_allowed

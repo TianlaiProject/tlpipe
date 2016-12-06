@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.reload_all
+==================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: Timestream.reload_all

@@ -1,0 +1,49 @@
+tlpipe.timestream.average.Average
+=================================
+
+.. currentmodule:: tlpipe.timestream.average
+
+.. autoclass:: Average
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Average.cacheable
+      ~Average.embarrassingly_parallelizable
+      ~Average.history
+      ~Average.iteration
+      ~Average.params_init
+      ~Average.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Average.cast_input
+      ~Average.copy_input
+      ~Average.data_select
+      ~Average.finish
+      ~Average.next
+      ~Average.process
+      ~Average.read_input
+      ~Average.read_output
+      ~Average.read_process_write
+      ~Average.setup
+      ~Average.show_params
+      ~Average.write_output
+   
+   

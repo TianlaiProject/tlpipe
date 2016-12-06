@@ -1,0 +1,6 @@
+tlpipe.timestream.raw_timestream.RawTimestream.parent
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.raw_timestream
+
+.. autoattribute:: RawTimestream.parent

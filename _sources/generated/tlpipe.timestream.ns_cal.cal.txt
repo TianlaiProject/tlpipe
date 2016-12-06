@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.cal
+============================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. autofunction:: cal

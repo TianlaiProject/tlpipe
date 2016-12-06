@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Flag.next
+=====================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Flag.next

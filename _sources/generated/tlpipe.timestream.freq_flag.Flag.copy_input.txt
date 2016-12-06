@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Flag.copy_input
+===========================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Flag.copy_input

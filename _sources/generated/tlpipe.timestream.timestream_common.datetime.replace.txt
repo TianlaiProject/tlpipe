@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_common.datetime.replace
+====================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_common
+
+.. automethod:: datetime.replace

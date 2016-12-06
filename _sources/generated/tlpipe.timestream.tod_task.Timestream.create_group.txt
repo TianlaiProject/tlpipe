@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.Timestream.create_group
+==================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: Timestream.create_group

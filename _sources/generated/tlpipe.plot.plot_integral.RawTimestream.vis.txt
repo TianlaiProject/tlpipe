@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.RawTimestream.vis
+===========================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: RawTimestream.vis

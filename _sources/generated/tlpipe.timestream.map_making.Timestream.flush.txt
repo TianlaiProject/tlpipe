@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.flush
+=============================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: Timestream.flush

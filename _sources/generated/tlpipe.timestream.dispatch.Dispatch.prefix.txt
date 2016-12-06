@@ -1,0 +1,6 @@
+tlpipe.timestream.dispatch.Dispatch.prefix
+==========================================
+
+.. currentmodule:: tlpipe.timestream.dispatch
+
+.. autoattribute:: Dispatch.prefix

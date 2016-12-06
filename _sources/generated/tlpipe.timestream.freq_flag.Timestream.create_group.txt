@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.create_group
+===================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Timestream.create_group

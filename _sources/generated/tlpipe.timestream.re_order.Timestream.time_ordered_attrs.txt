@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.time_ordered_attrs
+========================================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. autoattribute:: Timestream.time_ordered_attrs

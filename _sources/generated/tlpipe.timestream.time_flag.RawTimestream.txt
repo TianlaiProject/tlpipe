@@ -1,0 +1,131 @@
+tlpipe.timestream.time_flag.RawTimestream
+=========================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. autoclass:: RawTimestream
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~RawTimestream.array
+      ~RawTimestream.attrs
+      ~RawTimestream.bl
+      ~RawTimestream.bl_ordered_datasets
+      ~RawTimestream.comm
+      ~RawTimestream.distributed
+      ~RawTimestream.feed_ordered_datasets
+      ~RawTimestream.file
+      ~RawTimestream.freq
+      ~RawTimestream.freq_ordered_datasets
+      ~RawTimestream.history
+      ~RawTimestream.is_continuous
+      ~RawTimestream.is_cylinder
+      ~RawTimestream.is_dish
+      ~RawTimestream.is_same_dec
+      ~RawTimestream.is_same_pointing
+      ~RawTimestream.local_bl
+      ~RawTimestream.local_freq
+      ~RawTimestream.local_time
+      ~RawTimestream.local_vis
+      ~RawTimestream.local_vis_mask
+      ~RawTimestream.main_axes_ordered_datasets
+      ~RawTimestream.main_data
+      ~RawTimestream.main_data_axes
+      ~RawTimestream.main_data_name
+      ~RawTimestream.main_time_ordered_datasets
+      ~RawTimestream.masked_vis
+      ~RawTimestream.name
+      ~RawTimestream.ondisk
+      ~RawTimestream.parent
+      ~RawTimestream.time
+      ~RawTimestream.time_ordered_attrs
+      ~RawTimestream.time_ordered_datasets
+      ~RawTimestream.vis
+      ~RawTimestream.vis_mask
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~RawTimestream.add_history
+      ~RawTimestream.all_data_operate
+      ~RawTimestream.apply_mask
+      ~RawTimestream.attrs_name_allowed
+      ~RawTimestream.bl_data_operate
+      ~RawTimestream.check_status
+      ~RawTimestream.close
+      ~RawTimestream.copy
+      ~RawTimestream.create_bl_ordered_dataset
+      ~RawTimestream.create_dataset
+      ~RawTimestream.create_feed_ordered_dataset
+      ~RawTimestream.create_freq_and_bl_ordered_dataset
+      ~RawTimestream.create_freq_ordered_dataset
+      ~RawTimestream.create_group
+      ~RawTimestream.create_main_axis_ordered_dataset
+      ~RawTimestream.create_main_data
+      ~RawTimestream.create_main_time_ordered_dataset
+      ~RawTimestream.create_time_and_bl_ordered_dataset
+      ~RawTimestream.create_time_and_freq_ordered_dataset
+      ~RawTimestream.create_time_ordered_dataset
+      ~RawTimestream.data_operate
+      ~RawTimestream.data_select
+      ~RawTimestream.dataset_common_to_distributed
+      ~RawTimestream.dataset_distributed_to_common
+      ~RawTimestream.dataset_name_allowed
+      ~RawTimestream.delete_a_dataset
+      ~RawTimestream.delete_an_attribute
+      ~RawTimestream.feed_select
+      ~RawTimestream.flush
+      ~RawTimestream.freq_and_bl_data_operate
+      ~RawTimestream.freq_data_operate
+      ~RawTimestream.frequency_select
+      ~RawTimestream.from_file
+      ~RawTimestream.from_group
+      ~RawTimestream.get
+      ~RawTimestream.group_name_allowed
+      ~RawTimestream.info
+      ~RawTimestream.items
+      ~RawTimestream.iteritems
+      ~RawTimestream.iterkeys
+      ~RawTimestream.itervalues
+      ~RawTimestream.keys
+      ~RawTimestream.load_all
+      ~RawTimestream.load_common
+      ~RawTimestream.load_main_data
+      ~RawTimestream.load_time_ordered
+      ~RawTimestream.load_tod_excl_main_data
+      ~RawTimestream.redistribute
+      ~RawTimestream.reload_all
+      ~RawTimestream.reload_common
+      ~RawTimestream.reload_main_data
+      ~RawTimestream.reload_time_ordered
+      ~RawTimestream.reload_tod_excl_main_data
+      ~RawTimestream.require_dataset
+      ~RawTimestream.require_group
+      ~RawTimestream.save
+      ~RawTimestream.separate_pol_and_bl
+      ~RawTimestream.time_and_bl_data_operate
+      ~RawTimestream.time_and_freq_data_operate
+      ~RawTimestream.time_data_operate
+      ~RawTimestream.time_select
+      ~RawTimestream.to_disk
+      ~RawTimestream.to_files
+      ~RawTimestream.to_memory
+      ~RawTimestream.values
+   
+   

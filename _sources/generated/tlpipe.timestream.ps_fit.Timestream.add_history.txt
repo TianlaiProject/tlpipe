@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.Timestream.add_history
+===============================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: Timestream.add_history

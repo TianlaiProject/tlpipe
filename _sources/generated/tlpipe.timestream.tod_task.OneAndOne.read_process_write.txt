@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.OneAndOne.read_process_write
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: OneAndOne.read_process_write

@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.data_operate
+===================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Timestream.data_operate

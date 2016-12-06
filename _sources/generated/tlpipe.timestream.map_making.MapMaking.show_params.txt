@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.MapMaking.show_params
+==================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: MapMaking.show_params

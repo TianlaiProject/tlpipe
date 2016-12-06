@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.RawTimestream.reload_tod_excl_main_data
+==============================================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: RawTimestream.reload_tod_excl_main_data

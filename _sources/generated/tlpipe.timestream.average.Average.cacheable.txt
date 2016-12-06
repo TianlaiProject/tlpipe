@@ -1,0 +1,6 @@
+tlpipe.timestream.average.Average.cacheable
+===========================================
+
+.. currentmodule:: tlpipe.timestream.average
+
+.. autoattribute:: Average.cacheable

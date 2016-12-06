@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.Timestream.iterkeys
+============================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: Timestream.iterkeys

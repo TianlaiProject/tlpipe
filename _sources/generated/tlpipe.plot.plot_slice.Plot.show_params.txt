@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.Plot.show_params
+=======================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: Plot.show_params

@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream.Timestream.distributed
+===================================================
+
+.. currentmodule:: tlpipe.timestream.timestream
+
+.. autoattribute:: Timestream.distributed

@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.RawTimestream.is_same_dec
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. autoattribute:: RawTimestream.is_same_dec

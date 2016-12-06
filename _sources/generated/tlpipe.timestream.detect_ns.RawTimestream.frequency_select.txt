@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.RawTimestream.frequency_select
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: RawTimestream.frequency_select

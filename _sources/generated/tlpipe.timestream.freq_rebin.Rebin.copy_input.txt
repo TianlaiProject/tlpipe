@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Rebin.copy_input
+=============================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Rebin.copy_input

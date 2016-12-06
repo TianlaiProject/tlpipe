@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.Timestream.dataset_name_allowed
+======================================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: Timestream.dataset_name_allowed

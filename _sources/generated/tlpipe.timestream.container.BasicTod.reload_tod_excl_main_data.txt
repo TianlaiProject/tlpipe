@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.reload_tod_excl_main_data
+==============================================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. automethod:: BasicTod.reload_tod_excl_main_data

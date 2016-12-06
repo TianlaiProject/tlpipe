@@ -1,0 +1,81 @@
+tlpipe.core.tl_array.AntennaArray
+=================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. autoclass:: AntennaArray
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~AntennaArray.date
+      ~AntennaArray.elev
+      ~AntennaArray.elevation
+      ~AntennaArray.epoch
+      ~AntennaArray.horizon
+      ~AntennaArray.lat
+      ~AntennaArray.lon
+      ~AntennaArray.long
+      ~AntennaArray.name
+      ~AntennaArray.pressure
+      ~AntennaArray.temp
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~AntennaArray.bl2ij
+      ~AntennaArray.bl_indices
+      ~AntennaArray.bm_response
+      ~AntennaArray.compute_pressure
+      ~AntennaArray.disallow_circumpolar
+      ~AntennaArray.gen_phs
+      ~AntennaArray.gen_uvw
+      ~AntennaArray.get_active_pol
+      ~AntennaArray.get_afreqs
+      ~AntennaArray.get_baseline
+      ~AntennaArray.get_freqs
+      ~AntennaArray.get_jultime
+      ~AntennaArray.get_params
+      ~AntennaArray.get_phs_offset
+      ~AntennaArray.ij2bl
+      ~AntennaArray.next_antitransit
+      ~AntennaArray.next_pass
+      ~AntennaArray.next_rising
+      ~AntennaArray.next_setting
+      ~AntennaArray.next_transit
+      ~AntennaArray.passband
+      ~AntennaArray.phs2src
+      ~AntennaArray.previous_antitransit
+      ~AntennaArray.previous_rising
+      ~AntennaArray.previous_setting
+      ~AntennaArray.previous_transit
+      ~AntennaArray.radec_of
+      ~AntennaArray.refract
+      ~AntennaArray.resolve_src
+      ~AntennaArray.select_chans
+      ~AntennaArray.set_active_pol
+      ~AntennaArray.set_ephemtime
+      ~AntennaArray.set_jultime
+      ~AntennaArray.set_params
+      ~AntennaArray.sidereal_time
+      ~AntennaArray.sim
+      ~AntennaArray.sim_cache
+      ~AntennaArray.unphs2src
+      ~AntennaArray.update
+   
+   

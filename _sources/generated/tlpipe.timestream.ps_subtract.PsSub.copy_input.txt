@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_subtract.PsSub.copy_input
+==============================================
+
+.. currentmodule:: tlpipe.timestream.ps_subtract
+
+.. automethod:: PsSub.copy_input

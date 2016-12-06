@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.RawTimestream.is_same_pointing
+=========================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoattribute:: RawTimestream.is_same_pointing

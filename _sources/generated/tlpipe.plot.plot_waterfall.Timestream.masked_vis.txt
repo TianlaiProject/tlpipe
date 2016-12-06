@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Timestream.masked_vis
+================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoattribute:: Timestream.masked_vis

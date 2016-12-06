@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.RawTimestream.array
+===============================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. autoattribute:: RawTimestream.array

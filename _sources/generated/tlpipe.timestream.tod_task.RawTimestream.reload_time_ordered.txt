@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.RawTimestream.reload_time_ordered
+============================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: RawTimestream.reload_time_ordered

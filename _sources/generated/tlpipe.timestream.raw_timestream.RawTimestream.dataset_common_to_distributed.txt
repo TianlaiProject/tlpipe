@@ -1,0 +1,6 @@
+tlpipe.timestream.raw_timestream.RawTimestream.dataset_common_to_distributed
+============================================================================
+
+.. currentmodule:: tlpipe.timestream.raw_timestream
+
+.. automethod:: RawTimestream.dataset_common_to_distributed

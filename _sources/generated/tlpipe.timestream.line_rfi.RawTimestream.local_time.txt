@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.RawTimestream.local_time
+===================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. autoattribute:: RawTimestream.local_time

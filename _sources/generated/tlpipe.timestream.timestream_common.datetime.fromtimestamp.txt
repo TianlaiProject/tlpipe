@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_common.datetime.fromtimestamp
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_common
+
+.. automethod:: datetime.fromtimestamp

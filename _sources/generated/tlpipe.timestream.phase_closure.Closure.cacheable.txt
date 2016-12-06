@@ -1,0 +1,6 @@
+tlpipe.timestream.phase_closure.Closure.cacheable
+=================================================
+
+.. currentmodule:: tlpipe.timestream.phase_closure
+
+.. autoattribute:: Closure.cacheable

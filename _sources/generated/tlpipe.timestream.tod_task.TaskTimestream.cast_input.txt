@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.TaskTimestream.cast_input
+====================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: TaskTimestream.cast_input

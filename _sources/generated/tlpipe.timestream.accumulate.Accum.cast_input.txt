@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Accum.cast_input
+=============================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Accum.cast_input

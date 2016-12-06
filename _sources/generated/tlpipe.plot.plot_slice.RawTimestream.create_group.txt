@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.RawTimestream.create_group
+=================================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: RawTimestream.create_group

@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.Timestream.info
+==========================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: Timestream.info

@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Timestream.create_group
+==================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: Timestream.create_group

@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.DoNothing.params_init
+==============================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoattribute:: DoNothing.params_init

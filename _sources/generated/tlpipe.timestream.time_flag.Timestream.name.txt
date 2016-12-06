@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.Timestream.name
+===========================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. autoattribute:: Timestream.name

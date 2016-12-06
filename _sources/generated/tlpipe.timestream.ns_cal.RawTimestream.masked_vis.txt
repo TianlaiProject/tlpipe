@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.RawTimestream.masked_vis
+=================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. autoattribute:: RawTimestream.masked_vis

@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.attrs_name_allowed
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. automethod:: BasicTod.attrs_name_allowed

@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.xyz2XYZ_m
+==============================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. autofunction:: xyz2XYZ_m

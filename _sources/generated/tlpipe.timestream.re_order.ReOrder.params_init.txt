@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.ReOrder.params_init
+==============================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. autoattribute:: ReOrder.params_init

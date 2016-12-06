@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Timestream.ondisk
+==============================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. autoattribute:: Timestream.ondisk

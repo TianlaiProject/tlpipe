@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Plot.params_init
+==========================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: Plot.params_init

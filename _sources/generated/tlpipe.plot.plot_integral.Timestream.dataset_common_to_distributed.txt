@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.dataset_common_to_distributed
+==================================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Timestream.dataset_common_to_distributed

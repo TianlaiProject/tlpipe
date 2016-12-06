@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.time_select
+==================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Timestream.time_select

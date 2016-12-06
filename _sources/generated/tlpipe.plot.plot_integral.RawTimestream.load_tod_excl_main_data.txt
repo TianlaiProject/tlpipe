@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.RawTimestream.load_tod_excl_main_data
+===============================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: RawTimestream.load_tod_excl_main_data

@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.RawTimestream.main_data_axes
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. autoattribute:: RawTimestream.main_data_axes

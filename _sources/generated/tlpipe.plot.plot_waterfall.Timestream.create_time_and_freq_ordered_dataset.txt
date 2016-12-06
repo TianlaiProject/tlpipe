@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Timestream.create_time_and_freq_ordered_dataset
+==========================================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: Timestream.create_time_and_freq_ordered_dataset

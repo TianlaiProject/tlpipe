@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.RawTimestream.save
+=============================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: RawTimestream.save

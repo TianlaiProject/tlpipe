@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Timestream.flush
+=============================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Timestream.flush

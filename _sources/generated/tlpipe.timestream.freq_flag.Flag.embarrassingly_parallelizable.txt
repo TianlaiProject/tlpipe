@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Flag.embarrassingly_parallelizable
+==============================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. autoattribute:: Flag.embarrassingly_parallelizable

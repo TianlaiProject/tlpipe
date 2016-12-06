@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.group_name_allowed
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. automethod:: BasicTod.group_name_allowed

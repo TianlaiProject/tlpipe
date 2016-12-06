@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.RawTimestream.local_vis_mask
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. autoattribute:: RawTimestream.local_vis_mask

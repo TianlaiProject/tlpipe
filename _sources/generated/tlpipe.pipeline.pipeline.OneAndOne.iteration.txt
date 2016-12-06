@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.OneAndOne.iteration
+============================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoattribute:: OneAndOne.iteration

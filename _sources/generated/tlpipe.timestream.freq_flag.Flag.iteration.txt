@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Flag.iteration
+==========================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. autoattribute:: Flag.iteration

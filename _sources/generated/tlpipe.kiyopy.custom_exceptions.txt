@@ -1,0 +1,28 @@
+tlpipe.kiyopy.custom_exceptions
+===============================
+
+.. automodule:: tlpipe.kiyopy.custom_exceptions
+
+   
+   
+   
+
+
+   
+   
+   
+
+
+   
+   
+   .. rubric:: Exceptions
+
+   .. autosummary::
+      :toctree:
+   
+      DataError
+      FileParameterTypeError
+      NextIteration
+      ParameterFileError
+   
+   

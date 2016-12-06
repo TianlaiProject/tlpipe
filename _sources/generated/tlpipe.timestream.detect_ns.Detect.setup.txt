@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.Detect.setup
+========================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: Detect.setup

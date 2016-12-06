@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.DoNothing.prefix
+=========================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoattribute:: DoNothing.prefix

@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Timestream.add_history
+===================================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Timestream.add_history

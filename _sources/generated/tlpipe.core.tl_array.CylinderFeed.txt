@@ -1,0 +1,31 @@
+tlpipe.core.tl_array.CylinderFeed
+=================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. autoclass:: CylinderFeed
+
+   
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~CylinderFeed.bm_response
+      ~CylinderFeed.get_params
+      ~CylinderFeed.passband
+      ~CylinderFeed.select_chans
+      ~CylinderFeed.set_params
+      ~CylinderFeed.set_pointing
+      ~CylinderFeed.update
+   
+   

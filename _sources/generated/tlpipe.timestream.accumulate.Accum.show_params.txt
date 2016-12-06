@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Accum.show_params
+==============================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Accum.show_params

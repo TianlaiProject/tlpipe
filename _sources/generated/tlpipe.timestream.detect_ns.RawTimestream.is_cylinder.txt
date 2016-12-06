@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.RawTimestream.is_cylinder
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. autoattribute:: RawTimestream.is_cylinder

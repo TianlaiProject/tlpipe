@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.to_disk
+==============================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Timestream.to_disk

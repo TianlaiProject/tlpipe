@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.MapMaking.write_output
+===================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: MapMaking.write_output

@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.RawTimestream.data_select
+==================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: RawTimestream.data_select

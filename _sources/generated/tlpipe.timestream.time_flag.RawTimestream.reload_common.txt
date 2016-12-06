@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.RawTimestream.reload_common
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. automethod:: RawTimestream.reload_common

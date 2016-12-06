@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.DoNothing.history
+==========================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoattribute:: DoNothing.history

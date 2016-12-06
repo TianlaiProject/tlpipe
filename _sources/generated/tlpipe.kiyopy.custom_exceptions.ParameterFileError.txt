@@ -1,0 +1,6 @@
+tlpipe.kiyopy.custom_exceptions.ParameterFileError
+==================================================
+
+.. currentmodule:: tlpipe.kiyopy.custom_exceptions
+
+.. autoexception:: ParameterFileError

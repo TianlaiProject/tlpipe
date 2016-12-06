@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.RawTimestream.data_select
+====================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: RawTimestream.data_select

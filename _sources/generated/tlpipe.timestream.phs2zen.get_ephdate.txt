@@ -1,0 +1,6 @@
+tlpipe.timestream.phs2zen.get_ephdate
+=====================================
+
+.. currentmodule:: tlpipe.timestream.phs2zen
+
+.. autofunction:: get_ephdate

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.RawTimestream.is_continuous
+==================================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. autoattribute:: RawTimestream.is_continuous

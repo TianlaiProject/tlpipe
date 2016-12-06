@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.RawTimestream.to_memory
+=================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: RawTimestream.to_memory

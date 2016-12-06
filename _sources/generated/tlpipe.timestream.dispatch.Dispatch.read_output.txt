@@ -1,0 +1,6 @@
+tlpipe.timestream.dispatch.Dispatch.read_output
+===============================================
+
+.. currentmodule:: tlpipe.timestream.dispatch
+
+.. automethod:: Dispatch.read_output

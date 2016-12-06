@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.DishAntenna.passband
+=========================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: DishAntenna.passband

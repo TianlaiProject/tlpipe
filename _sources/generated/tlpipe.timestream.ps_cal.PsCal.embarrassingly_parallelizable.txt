@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.PsCal.embarrassingly_parallelizable
+============================================================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. autoattribute:: PsCal.embarrassingly_parallelizable

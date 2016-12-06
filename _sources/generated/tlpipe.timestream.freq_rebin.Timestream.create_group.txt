@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.create_group
+====================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Timestream.create_group

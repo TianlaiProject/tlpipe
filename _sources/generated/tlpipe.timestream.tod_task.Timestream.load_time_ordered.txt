@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.Timestream.load_time_ordered
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: Timestream.load_time_ordered

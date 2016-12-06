@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.AntennaArray.get_phs_offset
+================================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: AntennaArray.get_phs_offset

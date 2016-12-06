@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Timestream.stokes2lin
+==================================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Timestream.stokes2lin

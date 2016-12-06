@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.Timestream.load_tod_excl_main_data
+=========================================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: Timestream.load_tod_excl_main_data

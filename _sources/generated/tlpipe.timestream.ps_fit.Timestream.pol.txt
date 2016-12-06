@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.Timestream.pol
+=======================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. autoattribute:: Timestream.pol

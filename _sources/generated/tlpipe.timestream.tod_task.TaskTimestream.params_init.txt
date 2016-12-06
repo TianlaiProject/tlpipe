@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.TaskTimestream.params_init
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. autoattribute:: TaskTimestream.params_init

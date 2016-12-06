@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.RawTimestream.is_dish
+=================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. autoattribute:: RawTimestream.is_dish

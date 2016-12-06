@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.RawTimestream.main_time_ordered_datasets
+=================================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. autoattribute:: RawTimestream.main_time_ordered_datasets

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Plot.next
+===================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Plot.next

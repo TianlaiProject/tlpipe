@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.RawTimestream.group_name_allowed
+============================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: RawTimestream.group_name_allowed

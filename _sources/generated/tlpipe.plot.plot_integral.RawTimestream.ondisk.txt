@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.RawTimestream.ondisk
+==============================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: RawTimestream.ondisk

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_gain.OneAndOne.prefix
+======================================
+
+.. currentmodule:: tlpipe.plot.plot_gain
+
+.. autoattribute:: OneAndOne.prefix

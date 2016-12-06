@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.output_path
+====================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. autofunction:: output_path

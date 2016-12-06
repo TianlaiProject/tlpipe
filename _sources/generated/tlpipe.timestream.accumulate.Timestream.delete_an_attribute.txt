@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Timestream.delete_an_attribute
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Timestream.delete_an_attribute

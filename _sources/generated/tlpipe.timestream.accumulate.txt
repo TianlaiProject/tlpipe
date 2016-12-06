@@ -1,0 +1,26 @@
+tlpipe.timestream.accumulate
+============================
+
+.. automodule:: tlpipe.timestream.accumulate
+
+   
+   
+   
+
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      Accum
+      Timestream
+   
+   
+
+
+   
+   
+   

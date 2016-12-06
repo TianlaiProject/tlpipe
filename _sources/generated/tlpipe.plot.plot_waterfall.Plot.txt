@@ -1,0 +1,49 @@
+tlpipe.plot.plot_waterfall.Plot
+===============================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoclass:: Plot
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Plot.cacheable
+      ~Plot.embarrassingly_parallelizable
+      ~Plot.history
+      ~Plot.iteration
+      ~Plot.params_init
+      ~Plot.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Plot.cast_input
+      ~Plot.copy_input
+      ~Plot.data_select
+      ~Plot.finish
+      ~Plot.next
+      ~Plot.process
+      ~Plot.read_input
+      ~Plot.read_output
+      ~Plot.read_process_write
+      ~Plot.setup
+      ~Plot.show_params
+      ~Plot.write_output
+   
+   

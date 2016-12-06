@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.local_bl
+==============================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. autoattribute:: Timestream.local_bl

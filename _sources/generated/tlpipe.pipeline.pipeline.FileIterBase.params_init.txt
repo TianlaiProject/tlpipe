@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.FileIterBase.params_init
+=================================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoattribute:: FileIterBase.params_init

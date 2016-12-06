@@ -1,0 +1,39 @@
+tlpipe.core.tl_array.CylinderBeam
+=================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. autoclass:: CylinderBeam
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~CylinderBeam.Omega
+      ~CylinderBeam.fwhm_e
+      ~CylinderBeam.fwhm_h
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~CylinderBeam.get_params
+      ~CylinderBeam.response
+      ~CylinderBeam.select_chans
+      ~CylinderBeam.set_params
+      ~CylinderBeam.update
+   
+   

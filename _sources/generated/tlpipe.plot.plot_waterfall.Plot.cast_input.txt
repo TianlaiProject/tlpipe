@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Plot.cast_input
+==========================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: Plot.cast_input

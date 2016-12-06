@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_common.datetime.utcoffset
+======================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_common
+
+.. automethod:: datetime.utcoffset

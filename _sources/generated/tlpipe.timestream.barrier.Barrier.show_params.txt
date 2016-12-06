@@ -1,0 +1,6 @@
+tlpipe.timestream.barrier.Barrier.show_params
+=============================================
+
+.. currentmodule:: tlpipe.timestream.barrier
+
+.. automethod:: Barrier.show_params

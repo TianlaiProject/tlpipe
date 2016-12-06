@@ -1,0 +1,25 @@
+tlpipe.timestream.average
+=========================
+
+.. automodule:: tlpipe.timestream.average
+
+   
+   
+   
+
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      Average
+   
+   
+
+
+   
+   
+   

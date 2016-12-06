@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.RawTimestream.is_dish
+===============================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: RawTimestream.is_dish

@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Rebin.cast_input
+=============================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Rebin.cast_input

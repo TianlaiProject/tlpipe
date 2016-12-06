@@ -1,0 +1,49 @@
+tlpipe.timestream.ps_subtract.PsSub
+===================================
+
+.. currentmodule:: tlpipe.timestream.ps_subtract
+
+.. autoclass:: PsSub
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~PsSub.cacheable
+      ~PsSub.embarrassingly_parallelizable
+      ~PsSub.history
+      ~PsSub.iteration
+      ~PsSub.params_init
+      ~PsSub.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~PsSub.cast_input
+      ~PsSub.copy_input
+      ~PsSub.data_select
+      ~PsSub.finish
+      ~PsSub.next
+      ~PsSub.process
+      ~PsSub.read_input
+      ~PsSub.read_output
+      ~PsSub.read_process_write
+      ~PsSub.setup
+      ~PsSub.show_params
+      ~PsSub.write_output
+   
+   

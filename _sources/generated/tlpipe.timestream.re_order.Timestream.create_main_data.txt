@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.create_main_data
+======================================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. automethod:: Timestream.create_main_data

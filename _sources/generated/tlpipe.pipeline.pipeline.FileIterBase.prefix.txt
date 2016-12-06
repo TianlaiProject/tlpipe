@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.FileIterBase.prefix
+============================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoattribute:: FileIterBase.prefix

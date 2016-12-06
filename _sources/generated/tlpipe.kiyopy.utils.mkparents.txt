@@ -1,0 +1,6 @@
+tlpipe.kiyopy.utils.mkparents
+=============================
+
+.. currentmodule:: tlpipe.kiyopy.utils
+
+.. autofunction:: mkparents

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.RawTimestream.separate_pol_and_bl
+============================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: RawTimestream.separate_pol_and_bl

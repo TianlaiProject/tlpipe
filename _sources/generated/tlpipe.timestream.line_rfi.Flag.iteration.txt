@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Flag.iteration
+=========================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. autoattribute:: Flag.iteration

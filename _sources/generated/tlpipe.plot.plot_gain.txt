@@ -1,0 +1,34 @@
+tlpipe.plot.plot_gain
+=====================
+
+.. automodule:: tlpipe.plot.plot_gain
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      input_path
+      output_path
+   
+   
+
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      OneAndOne
+      Plot
+   
+   
+
+
+   
+   
+   

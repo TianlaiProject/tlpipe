@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.TimestreamCommon.attrs_name_allowed
+==============================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: TimestreamCommon.attrs_name_allowed

@@ -1,0 +1,6 @@
+tlpipe.timestream.average.Average.iteration
+===========================================
+
+.. currentmodule:: tlpipe.timestream.average
+
+.. autoattribute:: Average.iteration

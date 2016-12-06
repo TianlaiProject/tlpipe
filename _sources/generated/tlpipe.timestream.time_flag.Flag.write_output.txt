@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.Flag.write_output
+=============================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. automethod:: Flag.write_output

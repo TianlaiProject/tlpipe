@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.delete_an_attribute
+========================================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. automethod:: BasicTod.delete_an_attribute

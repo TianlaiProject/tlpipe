@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Timestream.dataset_common_to_distributed
+===================================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: Timestream.dataset_common_to_distributed

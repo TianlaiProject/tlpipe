@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_common.TimestreamCommon.is_dish
+============================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_common
+
+.. autoattribute:: TimestreamCommon.is_dish

@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.RawTimestream.separate_pol_and_bl
+============================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: RawTimestream.separate_pol_and_bl

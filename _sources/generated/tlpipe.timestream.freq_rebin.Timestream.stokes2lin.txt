@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.stokes2lin
+==================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Timestream.stokes2lin

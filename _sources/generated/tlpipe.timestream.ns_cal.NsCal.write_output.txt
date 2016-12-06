@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.NsCal.write_output
+===========================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: NsCal.write_output

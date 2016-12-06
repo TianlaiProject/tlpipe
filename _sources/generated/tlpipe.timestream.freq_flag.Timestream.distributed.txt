@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.distributed
+==================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. autoattribute:: Timestream.distributed

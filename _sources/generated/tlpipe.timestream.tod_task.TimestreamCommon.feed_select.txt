@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.TimestreamCommon.feed_select
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: TimestreamCommon.feed_select

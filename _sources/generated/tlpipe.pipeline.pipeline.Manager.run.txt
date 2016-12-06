@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.Manager.run
+====================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: Manager.run

@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.ondisk
+===========================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. autoattribute:: BasicTod.ondisk

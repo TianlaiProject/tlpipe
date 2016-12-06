@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.NsCal.process
+======================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: NsCal.process

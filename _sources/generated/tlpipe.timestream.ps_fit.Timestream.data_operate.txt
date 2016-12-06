@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.Timestream.data_operate
+================================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: Timestream.data_operate

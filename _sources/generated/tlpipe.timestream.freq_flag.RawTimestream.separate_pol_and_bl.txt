@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.RawTimestream.separate_pol_and_bl
+=============================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: RawTimestream.separate_pol_and_bl

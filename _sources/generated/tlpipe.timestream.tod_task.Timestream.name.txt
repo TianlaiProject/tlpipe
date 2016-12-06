@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.Timestream.name
+==========================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. autoattribute:: Timestream.name

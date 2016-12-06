@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.lin2stokes
+================================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. automethod:: Timestream.lin2stokes

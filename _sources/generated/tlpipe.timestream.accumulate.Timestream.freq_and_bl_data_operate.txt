@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Timestream.freq_and_bl_data_operate
+================================================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Timestream.freq_and_bl_data_operate

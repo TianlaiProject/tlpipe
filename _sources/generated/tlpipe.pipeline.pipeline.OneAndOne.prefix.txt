@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.OneAndOne.prefix
+=========================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoattribute:: OneAndOne.prefix

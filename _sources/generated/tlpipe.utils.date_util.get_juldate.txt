@@ -1,0 +1,6 @@
+tlpipe.utils.date_util.get_juldate
+==================================
+
+.. currentmodule:: tlpipe.utils.date_util
+
+.. autofunction:: get_juldate

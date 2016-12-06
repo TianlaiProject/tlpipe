@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.main_axes_ordered_datasets
+==================================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. autoattribute:: Timestream.main_axes_ordered_datasets

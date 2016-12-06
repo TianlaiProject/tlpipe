@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.Detect.read_input
+=============================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: Detect.read_input

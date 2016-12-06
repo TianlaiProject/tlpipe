@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_common.datetime.utcnow
+===================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_common
+
+.. automethod:: datetime.utcnow

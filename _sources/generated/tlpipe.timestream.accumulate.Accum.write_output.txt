@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Accum.write_output
+===============================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Accum.write_output

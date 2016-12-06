@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.DishAntenna.get_params
+===========================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: DishAntenna.get_params

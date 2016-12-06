@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.AntennaArray.previous_antitransit
+======================================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: AntennaArray.previous_antitransit

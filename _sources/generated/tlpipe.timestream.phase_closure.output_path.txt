@@ -1,0 +1,6 @@
+tlpipe.timestream.phase_closure.output_path
+===========================================
+
+.. currentmodule:: tlpipe.timestream.phase_closure
+
+.. autofunction:: output_path

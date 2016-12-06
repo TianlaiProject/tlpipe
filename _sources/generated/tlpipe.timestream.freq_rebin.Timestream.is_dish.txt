@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.is_dish
+===============================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. autoattribute:: Timestream.is_dish

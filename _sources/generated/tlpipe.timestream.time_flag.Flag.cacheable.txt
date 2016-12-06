@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.Flag.cacheable
+==========================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. autoattribute:: Flag.cacheable

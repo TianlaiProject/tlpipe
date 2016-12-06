@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.DoNothing.setup
+========================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: DoNothing.setup

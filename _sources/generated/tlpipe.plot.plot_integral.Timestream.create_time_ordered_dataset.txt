@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.create_time_ordered_dataset
+================================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Timestream.create_time_ordered_dataset

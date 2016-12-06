@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.lin2stokes
+==================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: Timestream.lin2stokes

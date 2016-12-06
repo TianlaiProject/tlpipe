@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.Detect.embarrassingly_parallelizable
+================================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. autoattribute:: Detect.embarrassingly_parallelizable

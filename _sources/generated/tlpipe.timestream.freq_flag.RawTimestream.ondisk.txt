@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.RawTimestream.ondisk
+================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. autoattribute:: RawTimestream.ondisk

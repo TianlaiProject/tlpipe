@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.create_pol_ordered_dataset
+==================================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Timestream.create_pol_ordered_dataset

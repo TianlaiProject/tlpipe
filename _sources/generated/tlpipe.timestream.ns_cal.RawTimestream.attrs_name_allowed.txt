@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.RawTimestream.attrs_name_allowed
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: RawTimestream.attrs_name_allowed

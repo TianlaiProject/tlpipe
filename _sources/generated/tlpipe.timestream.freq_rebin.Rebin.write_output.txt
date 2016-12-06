@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Rebin.write_output
+===============================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Rebin.write_output

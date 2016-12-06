@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.AntennaArray.radec_of
+==========================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: AntennaArray.radec_of

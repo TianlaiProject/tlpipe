@@ -1,0 +1,6 @@
+tlpipe.timestream.average.Average.data_select
+=============================================
+
+.. currentmodule:: tlpipe.timestream.average
+
+.. automethod:: Average.data_select

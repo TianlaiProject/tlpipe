@@ -1,0 +1,860 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>tlpipe.pipeline.pipeline &mdash; tlpipe 0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="tlpipe 0.1 documentation" href="../index.html"/>
+        <link rel="up" title="pipeline – Pipeline control and tasks" href="../pipeline.html"/>
+        <link rel="next" title="tlpipe.pipeline.pipeline.format_list" href="tlpipe.pipeline.pipeline.format_list.html"/>
+        <link rel="prev" title="pipeline – Pipeline control and tasks" href="../pipeline.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="../index.html" class="icon icon-home"> tlpipe
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#python-version">Python version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#installation-guid">Installation guid</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutor.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#run-the-pipeline">Run the pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#single-process-run">Single process run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-process-run">Multiple process run</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#pipeline-products-and-intermediate-results">Pipeline products and intermediate results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#other-excutable-commands">Other excutable commands</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide.html">Developer&#8217;s guide</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../core.html"><code class="docutils literal"><span class="pre">core</span></code> &#8211; Core functionalities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../core.html#constants">Constants</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.core.constants.html">tlpipe.core.constants</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.core.constants.html#constants">Constants</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../core.html#tianlai-array-model">Tianlai array model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.core.tl_array.html">tlpipe.core.tl_array</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.core.tl_array.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../kiyopy.html"><code class="docutils literal"><span class="pre">kiyopy</span></code> &#8211; Kiyoshi Masui&#8217;s paramter parsing package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../kiyopy.html#pameter-parser">Pameter parser</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.kiyopy.parse_ini.html">tlpipe.kiyopy.parse_ini</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.parse_ini.parse.html">tlpipe.kiyopy.parse_ini.parse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.parse_ini.parse_dict.html">tlpipe.kiyopy.parse_ini.parse_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.parse_ini.write_params.html">tlpipe.kiyopy.parse_ini.write_params</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../kiyopy.html#custom-exceptions">Custom exceptions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.kiyopy.custom_exceptions.html">tlpipe.kiyopy.custom_exceptions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.custom_exceptions.DataError.html">tlpipe.kiyopy.custom_exceptions.DataError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.custom_exceptions.FileParameterTypeError.html">tlpipe.kiyopy.custom_exceptions.FileParameterTypeError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.custom_exceptions.NextIteration.html">tlpipe.kiyopy.custom_exceptions.NextIteration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.custom_exceptions.ParameterFileError.html">tlpipe.kiyopy.custom_exceptions.ParameterFileError</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../kiyopy.html#utilities">Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.kiyopy.utils.html">tlpipe.kiyopy.utils</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.utils.abbreviate_file_path.html">tlpipe.kiyopy.utils.abbreviate_file_path</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.utils.mkdir_p.html">tlpipe.kiyopy.utils.mkdir_p</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.utils.mkparents.html">tlpipe.kiyopy.utils.mkparents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../pipeline.html"><code class="docutils literal"><span class="pre">pipeline</span></code> &#8211; Pipeline control and tasks</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../pipeline.html#pipeline">Pipeline</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">tlpipe.pipeline.pipeline</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#basic-tasks">Basic Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pipeline-configuration">Pipeline Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#execution-order">Execution Order</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#advanced-tasks">Advanced Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../timestream.html"><code class="docutils literal"><span class="pre">timestream</span></code> &#8211; Timestream data containers and operating tasks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../timestream.html#data-containers">Data containers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.container.html">tlpipe.timestream.container</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.container.check_axis.html">tlpipe.timestream.container.check_axis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.container.deepcopy.html">tlpipe.timestream.container.deepcopy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.container.ensure_file_list.html">tlpipe.timestream.container.ensure_file_list</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.container.BasicTod.html">tlpipe.timestream.container.BasicTod</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.timestream_common.html">tlpipe.timestream.timestream_common</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.timestream_common.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.raw_timestream.html">tlpipe.timestream.raw_timestream</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.raw_timestream.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.timestream.html">tlpipe.timestream.timestream</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.timestream.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../timestream.html#timestream-base-task">Timestream base task</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.tod_task.html">tlpipe.timestream.tod_task</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.tod_task.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../timestream.html#operating-tasks">Operating tasks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.dispatch.html">tlpipe.timestream.dispatch</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.dispatch.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.detect_ns.html">tlpipe.timestream.detect_ns</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.detect_ns.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.line_rfi.html">tlpipe.timestream.line_rfi</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.line_rfi.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.time_flag.html">tlpipe.timestream.time_flag</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.time_flag.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.freq_flag.html">tlpipe.timestream.freq_flag</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.freq_flag.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ns_cal.html">tlpipe.timestream.ns_cal</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ns_cal.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.rt2ts.html">tlpipe.timestream.rt2ts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.rt2ts.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ps_fit.html">tlpipe.timestream.ps_fit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ps_fit.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ps_cal.html">tlpipe.timestream.ps_cal</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ps_cal.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.phs2src.html">tlpipe.timestream.phs2src</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.phs2src.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.phs2zen.html">tlpipe.timestream.phs2zen</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.phs2zen.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.phase_closure.html">tlpipe.timestream.phase_closure</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.phase_closure.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ps_subtract.html">tlpipe.timestream.ps_subtract</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ps_subtract.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.daytime_mask.html">tlpipe.timestream.daytime_mask</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.daytime_mask.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.re_order.html">tlpipe.timestream.re_order</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.re_order.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.accumulate.html">tlpipe.timestream.accumulate</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.accumulate.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.barrier.html">tlpipe.timestream.barrier</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.barrier.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.average.html">tlpipe.timestream.average</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.average.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.freq_rebin.html">tlpipe.timestream.freq_rebin</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.freq_rebin.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.map_making.html">tlpipe.timestream.map_making</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.map_making.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../timestream.html#utilities">Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.sg_filter.html">tlpipe.timestream.sg_filter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.sg_filter.factorial.html">tlpipe.timestream.sg_filter.factorial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.sg_filter.savitzky_golay.html">tlpipe.timestream.sg_filter.savitzky_golay</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../cal.html"><code class="docutils literal"><span class="pre">cal</span></code> &#8211; Calibration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../map.html"><code class="docutils literal"><span class="pre">map</span></code> &#8211; Map-making</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../map.html#driftscan-map-making">Driftscan map-making</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../foreground.html"><code class="docutils literal"><span class="pre">foreground</span></code> &#8211; Foreground subtraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ps.html"><code class="docutils literal"><span class="pre">ps</span></code> &#8211; Power spectrum estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plot.html"><code class="docutils literal"><span class="pre">plot</span></code> &#8211; Tasks for plottting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../plot.html#plotting-tasks">Plotting tasks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.plot.plot_integral.html">tlpipe.plot.plot_integral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_integral.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.plot.plot_slice.html">tlpipe.plot.plot_slice</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_slice.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.plot.plot_waterfall.html">tlpipe.plot.plot_waterfall</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_waterfall.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.plot.plot_gain.html">tlpipe.plot.plot_gain</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_gain.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../utils.html"><code class="docutils literal"><span class="pre">utils</span></code> &#8211; Utility functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../utils.html#utilities">Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.date_util.html">tlpipe.utils.date_util</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.date_util.get_ephdate.html">tlpipe.utils.date_util.get_ephdate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.date_util.get_juldate.html">tlpipe.utils.date_util.get_juldate</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.np_util.html">tlpipe.utils.np_util</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.np_util.average.html">tlpipe.utils.np_util.average</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.np_util.unique.html">tlpipe.utils.np_util.unique</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.path_util.html">tlpipe.utils.path_util</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.path_util.input_path.html">tlpipe.utils.path_util.input_path</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.path_util.iter_path.html">tlpipe.utils.path_util.iter_path</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.path_util.output_path.html">tlpipe.utils.path_util.output_path</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.pickle_util.html">tlpipe.utils.pickle_util</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.pickle_util.get_value.html">tlpipe.utils.pickle_util.get_value</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">tlpipe</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../pipeline.html"><code class="docutils literal"><span class="pre">pipeline</span></code> &#8211; Pipeline control and tasks</a> &raquo;</li>
+      
+    <li>tlpipe.pipeline.pipeline</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/generated/tlpipe.pipeline.pipeline.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="module-tlpipe.pipeline.pipeline">
+<span id="tlpipe-pipeline-pipeline"></span><h1>tlpipe.pipeline.pipeline<a class="headerlink" href="#module-tlpipe.pipeline.pipeline" title="Permalink to this headline">¶</a></h1>
+<p>Data Analysis and Simulation Pipeline.</p>
+<p>A data analysis pipeline is completely specified by a pipe file that specifies
+both what tasks are to be run and the parameters that go to those tasks.
+Included in this package are base classes for simplifying the construction of
+data analysis tasks, as well as the pipeline manager which executes them.</p>
+<p class="rubric">Examples</p>
+<div class="section" id="basic-tasks">
+<h2>Basic Tasks<a class="headerlink" href="#basic-tasks" title="Permalink to this headline">¶</a></h2>
+<p>A pipeline task is a subclass of <a class="reference internal" href="tlpipe.pipeline.pipeline.TaskBase.html#tlpipe.pipeline.pipeline.TaskBase" title="tlpipe.pipeline.pipeline.TaskBase"><code class="xref py py-class docutils literal"><span class="pre">TaskBase</span></code></a> intended to perform some small,
+modular piece analysis. The developer of the task must specify what input
+parameters the task expects as well as code to perform the actual processing
+for the task.</p>
+<p>Input parameters are specified by adding class attributes <cite>params_init</cite> which is a
+dictionary whose entries are key and default value pairs. For instance a task
+definition might begin with</p>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">SpamTask</span><span class="p">(</span><span class="n">TaskBase</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">params_init</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">... </span>                    <span class="s">&#39;eggs&#39;</span><span class="p">:</span> <span class="p">[],</span>
+<span class="gp">... </span>                  <span class="p">}</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="n">prefix</span> <span class="o">=</span> <span class="s">&#39;st_&#39;</span>
+</pre></div>
+</div>
+<p>This defines a new task named <code class="xref py py-class docutils literal"><span class="pre">SpamTask</span></code> with a parameter named <em>eggs</em>,
+whose default value is an empty list.  The default values in class attribute
+<code class="xref py py-attr docutils literal"><span class="pre">SpamTask.params_init</span></code> will be updated by reading parameters with the
+specified <cite>prefix</cite> in the pipe file, then the updated parameter dictionary will be
+used as the input parameters for this task.</p>
+<p>The actual work for the task is specified by over-ridding any of the
+<a class="reference internal" href="tlpipe.pipeline.pipeline.TaskBase.setup.html#tlpipe.pipeline.pipeline.TaskBase.setup" title="tlpipe.pipeline.pipeline.TaskBase.setup"><code class="xref py py-meth docutils literal"><span class="pre">setup()</span></code></a>, <a class="reference internal" href="tlpipe.pipeline.pipeline.TaskBase.next.html#tlpipe.pipeline.pipeline.TaskBase.next" title="tlpipe.pipeline.pipeline.TaskBase.next"><code class="xref py py-meth docutils literal"><span class="pre">next()</span></code></a> or
+<a class="reference internal" href="tlpipe.pipeline.pipeline.TaskBase.finish.html#tlpipe.pipeline.pipeline.TaskBase.finish" title="tlpipe.pipeline.pipeline.TaskBase.finish"><code class="xref py py-meth docutils literal"><span class="pre">finish()</span></code></a> methods (<a class="reference internal" href="tlpipe.pipeline.pipeline.TaskBase.html#tlpipe.pipeline.pipeline.TaskBase.__init__" title="tlpipe.pipeline.pipeline.TaskBase.__init__"><code class="xref py py-meth docutils literal"><span class="pre">__init__()</span></code></a> may also be
+implemented`).  These are executed in order, with <code class="xref py py-meth docutils literal"><span class="pre">next()</span></code>
+possibly being executed many times.  Iteration of <code class="xref py py-meth docutils literal"><span class="pre">next()</span></code> is halted by
+raising a <a class="reference internal" href="tlpipe.pipeline.pipeline.PipelineStopIteration.html#tlpipe.pipeline.pipeline.PipelineStopIteration" title="tlpipe.pipeline.pipeline.PipelineStopIteration"><code class="xref py py-exc docutils literal"><span class="pre">PipelineStopIteration</span></code></a>.  Here is a example of a somewhat
+trivial but fully implemented task:</p>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">PrintEggs</span><span class="p">(</span><span class="n">TaskBase</span><span class="p">):</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="n">params_init</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">... </span>                    <span class="s">&#39;eggs&#39;</span><span class="p">:</span> <span class="p">[],</span>
+<span class="gp">... </span>                  <span class="p">}</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="n">prefix</span> <span class="o">=</span> <span class="s">&#39;pe_&#39;</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_file_or_dict</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">feedback</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="gp">...</span>
+<span class="gp">... </span>        <span class="c"># Read in the parameters.</span>
+<span class="gp">... </span>        <span class="nb">super</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parameter_file_or_dict</span><span class="p">,</span> <span class="n">feedback</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="nb">print</span> <span class="s">&quot;Setting up PrintEggs.&quot;</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">i</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&#39;eggs&#39;</span><span class="p">]):</span>
+<span class="gp">... </span>            <span class="k">raise</span> <span class="n">PipelineStopIteration</span><span class="p">()</span>
+<span class="gp">... </span>        <span class="nb">print</span> <span class="s">&quot;Spam and %s eggs.&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&#39;eggs&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">i</span><span class="p">]</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">finish</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="nb">print</span> <span class="s">&quot;Finished PrintEggs.&quot;</span>
+</pre></div>
+</div>
+<p>Any return value of these three pipeline methods can be handled by the pipeline
+and provided to subsequent tasks. The methods <code class="xref py py-meth docutils literal"><span class="pre">setup()</span></code> and <code class="xref py py-meth docutils literal"><span class="pre">next()</span></code>
+may accept (positional only) arguments which will be received as the outputs of
+early tasks in a pipeline chain. The following is an example of a pair of tasks
+that are designed to operate in this manner.</p>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">GetEggs</span><span class="p">(</span><span class="n">TaskBase</span><span class="p">):</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="n">params_init</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">... </span>                    <span class="s">&#39;eggs&#39;</span><span class="p">:</span> <span class="p">[],</span>
+<span class="gp">... </span>                  <span class="p">}</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="n">prefix</span> <span class="o">=</span> <span class="s">&#39;ge_&#39;</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_file_or_dict</span><span class="o">=</span><span class="k">None</span><span class="p">,</span> <span class="n">feedback</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+<span class="gp">...</span>
+<span class="gp">... </span>        <span class="c"># Read in the parameters.</span>
+<span class="gp">... </span>        <span class="nb">super</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parameter_file_or_dict</span><span class="p">,</span> <span class="n">feedback</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">eggs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&#39;eggs&#39;</span><span class="p">]</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="nb">print</span> <span class="s">&quot;Setting up GetEggs.&quot;</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">i</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eggs</span><span class="p">):</span>
+<span class="gp">... </span>            <span class="k">raise</span> <span class="n">PipelineStopIteration</span><span class="p">()</span>
+<span class="gp">... </span>        <span class="n">egg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eggs</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">i</span><span class="p">]</span>
+<span class="gp">... </span>        <span class="bp">self</span><span class="o">.</span><span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+<span class="gp">... </span>        <span class="k">return</span> <span class="n">egg</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">finish</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="nb">print</span> <span class="s">&quot;Finished GetEggs.&quot;</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">CookEggs</span><span class="p">(</span><span class="n">TaskBase</span><span class="p">):</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="n">params_init</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">... </span>                    <span class="s">&#39;style&#39;</span><span class="p">:</span> <span class="s">&#39;fried&#39;</span><span class="p">,</span>
+<span class="gp">... </span>                  <span class="p">}</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="n">prefix</span> <span class="o">=</span> <span class="s">&#39;ce_&#39;</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="nb">print</span> <span class="s">&quot;Setting up CookEggs.&quot;</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">egg</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="nb">print</span> <span class="s">&quot;Cooking %s %s eggs.&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="s">&#39;style&#39;</span><span class="p">],</span> <span class="n">egg</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">finish</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="nb">print</span> <span class="s">&quot;Finished CookEggs.&quot;</span>
+</pre></div>
+</div>
+<p>Note that <code class="xref py py-meth docutils literal"><span class="pre">CookEggs.next()</span></code> never raises a <a class="reference internal" href="tlpipe.pipeline.pipeline.PipelineStopIteration.html#tlpipe.pipeline.pipeline.PipelineStopIteration" title="tlpipe.pipeline.pipeline.PipelineStopIteration"><code class="xref py py-exc docutils literal"><span class="pre">PipelineStopIteration</span></code></a>.
+This is because there is no way for the task to internally know how long to
+iterate.  <code class="xref py py-meth docutils literal"><span class="pre">next()</span></code> will continue to be called as long as there are inputs
+for <code class="xref py py-meth docutils literal"><span class="pre">next()</span></code> and will stop iterating when there are none.</p>
+</div>
+<div class="section" id="pipeline-configuration">
+<h2>Pipeline Configuration<a class="headerlink" href="#pipeline-configuration" title="Permalink to this headline">¶</a></h2>
+<p>To actually run a task or series of tasks, a pipe pipeline configuration file
+(actually is a python script) is required.  The pipeline configuration has two main
+functions: to specify the the pipeline (which tasks are run, in which order and
+how to handle the inputs and outputs of tasks) and to provide parameters to each
+individual task.  Here is an example of a pipeline configuration:</p>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">spam_pipe</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="gp">... </span><span class="s">pipe_tasks = []</span>
+<span class="gp">...</span><span class="s"></span>
+<span class="gp">... </span><span class="s">pipe_tasks.append(PrintEggs)</span>
+<span class="gp">... </span><span class="s">### parameters for PrintEggs</span>
+<span class="gp">... </span><span class="s">pe_eggs = [&#39;green&#39;, &#39;duck&#39;, &#39;ostrich&#39;]</span>
+<span class="gp">...</span><span class="s"></span>
+<span class="gp">... </span><span class="s">pipe_tasks.append(GetEggs)</span>
+<span class="gp">... </span><span class="s">### parameters for GetEggs</span>
+<span class="gp">... </span><span class="s">ge_eggs = pe_eggs</span>
+<span class="gp">... </span><span class="s">ge_out = &#39;egg&#39;</span>
+<span class="gp">...</span><span class="s"></span>
+<span class="gp">... </span><span class="s">pipe_tasks.append(CookEggs)</span>
+<span class="gp">... </span><span class="s">### parameters for CookEggs</span>
+<span class="gp">... </span><span class="s">ce_style = &#39;fried&#39;</span>
+<span class="gp">... </span><span class="s">ce_in = ge_out</span>
+<span class="gp">... </span><span class="s">&#39;&#39;&#39;</span>
+</pre></div>
+</div>
+<p>Here the <cite>pipe_tasks</cite> is a list to hold a list of tasks to be executed.  Other
+parameters with the specified prefix are the input parameters for the corresponding
+tasks, they include three keys that all taks will have:</p>
+<dl class="docutils">
+<dt>out</dt>
+<dd>A &#8216;pipeline product key&#8217; or list of keys that label any return values from
+<code class="xref py py-meth docutils literal"><span class="pre">setup()</span></code>, <code class="xref py py-meth docutils literal"><span class="pre">next()</span></code> or <code class="xref py py-meth docutils literal"><span class="pre">finish()</span></code>.</dd>
+<dt>requires</dt>
+<dd>A &#8216;pipeline product key&#8217; or list of keys representing values to be passed
+as arguments to <code class="xref py py-meth docutils literal"><span class="pre">setup()</span></code>.</dd>
+<dt>in</dt>
+<dd>A &#8216;pipeline product key&#8217; or list of keys representing values to be passed
+as arguments to <code class="xref py py-meth docutils literal"><span class="pre">next()</span></code>.</dd>
+</dl>
+</div>
+<div class="section" id="execution-order">
+<h2>Execution Order<a class="headerlink" href="#execution-order" title="Permalink to this headline">¶</a></h2>
+<p>When the above pipeline is executed it produces the following output.</p>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">exec</span><span class="p">(</span><span class="n">spam_pipe</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Manager</span><span class="p">(</span><span class="nb">globals</span><span class="p">())</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="go">Reading parameters from dictionary.</span>
+<span class="go">Parameters set.</span>
+<span class="go">parameter: logging defaulted to value: info</span>
+<span class="go">parameter: outdir defaulted to value: output/</span>
+<span class="go">Reading parameters from dictionary.</span>
+<span class="go">Parameters set.</span>
+<span class="go">parameter: out defaulted to value: None</span>
+<span class="go">parameter: requires defaulted to value: None</span>
+<span class="go">parameter: in defaulted to value: None</span>
+<span class="go">Reading parameters from dictionary.</span>
+<span class="go">Warning: Assigned an input parameter to the value of the wrong type. Parameter name: out</span>
+<span class="go">Parameters set.</span>
+<span class="go">parameter: requires defaulted to value: None</span>
+<span class="go">parameter: in defaulted to value: None</span>
+<span class="go">Reading parameters from dictionary.</span>
+<span class="go">Warning: Assigned an input parameter to the value of the wrong type. Parameter name: in</span>
+<span class="go">Parameters set.</span>
+<span class="go">parameter: out defaulted to value: None</span>
+<span class="go">parameter: requires defaulted to value: None</span>
+<span class="go">Setting up PrintEggs.</span>
+<span class="go">Setting up GetEggs.</span>
+<span class="go">Setting up CookEggs.</span>
+<span class="go">Spam and green eggs.</span>
+<span class="go">Cooking fried green eggs.</span>
+<span class="go">Spam and duck eggs.</span>
+<span class="go">Cooking fried duck eggs.</span>
+<span class="go">Spam and ostrich eggs.</span>
+<span class="go">Cooking fried ostrich eggs.</span>
+<span class="go">Finished PrintEggs.</span>
+<span class="go">Finished GetEggs.</span>
+<span class="go">Finished CookEggs.</span>
+
+
+<span class="go">==========================================</span>
+<span class="go">=                                        =</span>
+<span class="go">=        DONE FOR THE PIPELINE!!         =</span>
+<span class="go">=           CONGRATULATIONS!!            =</span>
+<span class="go">=                                        =</span>
+<span class="go">==========================================</span>
+</pre></div>
+</div>
+<p>The rules for execution order are as follows:</p>
+<ol class="arabic simple">
+<li>One of the methods <code class="xref py py-meth docutils literal"><span class="pre">setup()</span></code>, <code class="xref py py-meth docutils literal"><span class="pre">next()</span></code> or <code class="xref py py-meth docutils literal"><span class="pre">finish()</span></code>,
+as appropriate, will be executed from each task, in order.</li>
+<li>If the task method is missing its input, as specified by the &#8216;requires&#8217; or &#8216;in&#8217;
+keys, restart at the beginning of the <cite>tasks</cite> list.</li>
+<li>If the input to <code class="xref py py-meth docutils literal"><span class="pre">next()</span></code> is missing and the task is at the beginning
+of the list there will be no opportunity to generate this input. Stop iterating
+<code class="xref py py-meth docutils literal"><span class="pre">next()</span></code> and proceed to <code class="xref py py-meth docutils literal"><span class="pre">finish()</span></code>.</li>
+<li>Once a task has executed <code class="xref py py-meth docutils literal"><span class="pre">finish()</span></code>, remove it from the list.</li>
+<li>Once a method from the last member of the <cite>tasks</cite> list is executed, restart
+at the beginning of the list.</li>
+</ol>
+<p>If the above rules seem somewhat opaque, consider the following example which
+illustrates these rules in a pipeline with a slightly more non-trivial flow.</p>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">class</span> <span class="nc">DoNothing</span><span class="p">(</span><span class="n">TaskBase</span><span class="p">):</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="n">prefix</span> <span class="o">=</span> <span class="s">&#39;dn_&#39;</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="nb">print</span> <span class="s">&quot;Setting up DoNothing.&quot;</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="nb">print</span> <span class="s">&quot;DoNothing next.&quot;</span>
+<span class="gp">...</span>
+<span class="gp">... </span>    <span class="k">def</span> <span class="nf">finish</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="nb">print</span> <span class="s">&quot;Finished DoNothing.&quot;</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">new_spam_pipe</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;</span>
+<span class="gp">... </span><span class="s">pipe_tasks = []</span>
+<span class="gp">...</span><span class="s"></span>
+<span class="gp">... </span><span class="s">pipe_tasks.append(GetEggs)</span>
+<span class="gp">... </span><span class="s">### parameters for GetEggs</span>
+<span class="gp">... </span><span class="s">ge_eggs = pe_eggs</span>
+<span class="gp">... </span><span class="s">ge_out = &#39;egg&#39;</span>
+<span class="gp">...</span><span class="s"></span>
+<span class="gp">... </span><span class="s">pipe_tasks.append(CookEggs)</span>
+<span class="gp">... </span><span class="s">### parameters for CookEggs</span>
+<span class="gp">... </span><span class="s">ce_style = &#39;fried&#39;</span>
+<span class="gp">... </span><span class="s">ce_in = ge_out</span>
+<span class="gp">...</span><span class="s"></span>
+<span class="gp">... </span><span class="s">pipe_tasks.append(DoNothing)</span>
+<span class="gp">... </span><span class="s">### parameters for DoNothing</span>
+<span class="gp">... </span><span class="s">dn_in = &#39;non_existent_data_product&#39;</span>
+<span class="gp">...</span><span class="s"></span>
+<span class="gp">... </span><span class="s">pipe_tasks.append(PrintEggs)</span>
+<span class="gp">... </span><span class="s">### parameters for PrintEggs</span>
+<span class="gp">... </span><span class="s">pe_eggs = [&#39;green&#39;, &#39;duck&#39;, &#39;ostrich&#39;]</span>
+<span class="gp">... </span><span class="s">&#39;&#39;&#39;</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">exec</span><span class="p">(</span><span class="n">new_spam_pipe</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Manager</span><span class="p">(</span><span class="nb">globals</span><span class="p">())</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+<span class="go">Reading parameters from dictionary.</span>
+<span class="go">Parameters set.</span>
+<span class="go">parameter: logging defaulted to value: info</span>
+<span class="go">parameter: outdir defaulted to value: output/</span>
+<span class="go">Reading parameters from dictionary.</span>
+<span class="go">Warning: Assigned an input parameter to the value of the wrong type. Parameter name: out</span>
+<span class="go">Parameters set.</span>
+<span class="go">parameter: requires defaulted to value: None</span>
+<span class="go">parameter: in defaulted to value: None</span>
+<span class="go">Reading parameters from dictionary.</span>
+<span class="go">Warning: Assigned an input parameter to the value of the wrong type. Parameter name: in</span>
+<span class="go">Parameters set.</span>
+<span class="go">parameter: out defaulted to value: None</span>
+<span class="go">parameter: requires defaulted to value: None</span>
+<span class="go">Reading parameters from dictionary.</span>
+<span class="go">Warning: Assigned an input parameter to the value of the wrong type. Parameter name: in</span>
+<span class="go">Parameters set.</span>
+<span class="go">parameter: out defaulted to value: None</span>
+<span class="go">parameter: requires defaulted to value: None</span>
+<span class="go">Reading parameters from dictionary.</span>
+<span class="go">Parameters set.</span>
+<span class="go">parameter: out defaulted to value: None</span>
+<span class="go">parameter: requires defaulted to value: None</span>
+<span class="go">parameter: in defaulted to value: None</span>
+<span class="go">Setting up GetEggs.</span>
+<span class="go">Setting up CookEggs.</span>
+<span class="go">Setting up DoNothing.</span>
+<span class="go">Setting up PrintEggs.</span>
+<span class="go">Cooking fried green eggs.</span>
+<span class="go">Cooking fried duck eggs.</span>
+<span class="go">Cooking fried ostrich eggs.</span>
+<span class="go">Finished GetEggs.</span>
+<span class="go">Finished CookEggs.</span>
+<span class="go">Finished DoNothing.</span>
+<span class="go">Spam and green eggs.</span>
+<span class="go">Spam and duck eggs.</span>
+<span class="go">Spam and ostrich eggs.</span>
+<span class="go">Finished PrintEggs.</span>
+
+
+<span class="go">==========================================</span>
+<span class="go">=                                        =</span>
+<span class="go">=        DONE FOR THE PIPELINE!!         =</span>
+<span class="go">=           CONGRATULATIONS!!            =</span>
+<span class="go">=                                        =</span>
+<span class="go">==========================================</span>
+</pre></div>
+</div>
+<p>Notice that <a class="reference internal" href="tlpipe.pipeline.pipeline.DoNothing.next.html#tlpipe.pipeline.pipeline.DoNothing.next" title="tlpipe.pipeline.pipeline.DoNothing.next"><code class="xref py py-meth docutils literal"><span class="pre">DoNothing.next()</span></code></a> is never called, since the pipeline never
+generates its input, &#8216;non_existent_data_product&#8217;.  Once everything before
+<a class="reference internal" href="tlpipe.pipeline.pipeline.DoNothing.html#tlpipe.pipeline.pipeline.DoNothing" title="tlpipe.pipeline.pipeline.DoNothing"><code class="xref py py-class docutils literal"><span class="pre">DoNothing</span></code></a> has been executed the pipeline notices that there is no
+opertunity for &#8216;non_existent_data_product&#8217; to be generated and forces
+<cite>DoNothing</cite> to proceed to <code class="xref py py-meth docutils literal"><span class="pre">finish()</span></code>. This also unblocks <code class="xref py py-class docutils literal"><span class="pre">PrintEggs</span></code>
+allowing it to proceed normally.</p>
+</div>
+<div class="section" id="advanced-tasks">
+<h2>Advanced Tasks<a class="headerlink" href="#advanced-tasks" title="Permalink to this headline">¶</a></h2>
+<p>Several subclasses of <a class="reference internal" href="tlpipe.pipeline.pipeline.TaskBase.html#tlpipe.pipeline.pipeline.TaskBase" title="tlpipe.pipeline.pipeline.TaskBase"><code class="xref py py-class docutils literal"><span class="pre">TaskBase</span></code></a> provide advanced functionality for tasks
+that conform to the most common patterns. This functionality includes: optionally
+reading inputs from disk, instead of receiving them from the pipeline;
+optionally writing outputs to disk automatically; and caching the results of a
+large computation to disk in an intelligent manner (not yet implemented).</p>
+<p>Base classes providing this functionality are <a class="reference internal" href="tlpipe.pipeline.pipeline.OneAndOne.html#tlpipe.pipeline.pipeline.OneAndOne" title="tlpipe.pipeline.pipeline.OneAndOne"><code class="xref py py-class docutils literal"><span class="pre">OneAndOne</span></code></a> for (at most)
+one input and one output.  There are limited to a single input (&#8216;in&#8217; key) and
+a single output (&#8216;out&#8217; key).  Method <a class="reference internal" href="tlpipe.pipeline.pipeline.OneAndOne.process.html#tlpipe.pipeline.pipeline.OneAndOne.process" title="tlpipe.pipeline.pipeline.OneAndOne.process"><code class="xref py py-meth docutils literal"><span class="pre">process()</span></code></a> should be
+overwritten instead of <a class="reference internal" href="tlpipe.pipeline.pipeline.OneAndOne.next.html#tlpipe.pipeline.pipeline.OneAndOne.next" title="tlpipe.pipeline.pipeline.OneAndOne.next"><code class="xref py py-meth docutils literal"><span class="pre">next()</span></code></a>.  Optionally,
+<a class="reference internal" href="tlpipe.pipeline.pipeline.OneAndOne.read_input.html#tlpipe.pipeline.pipeline.OneAndOne.read_input" title="tlpipe.pipeline.pipeline.OneAndOne.read_input"><code class="xref py py-meth docutils literal"><span class="pre">read_input()</span></code></a> and <a class="reference internal" href="tlpipe.pipeline.pipeline.OneAndOne.write_output.html#tlpipe.pipeline.pipeline.OneAndOne.write_output" title="tlpipe.pipeline.pipeline.OneAndOne.write_output"><code class="xref py py-meth docutils literal"><span class="pre">write_output()</span></code></a> may be
+over-ridden for maximum functionality.  <a class="reference internal" href="tlpipe.pipeline.pipeline.OneAndOne.setup.html#tlpipe.pipeline.pipeline.OneAndOne.setup" title="tlpipe.pipeline.pipeline.OneAndOne.setup"><code class="xref py py-meth docutils literal"><span class="pre">setup()</span></code></a> and
+<a class="reference internal" href="tlpipe.pipeline.pipeline.OneAndOne.finish.html#tlpipe.pipeline.pipeline.OneAndOne.finish" title="tlpipe.pipeline.pipeline.OneAndOne.finish"><code class="xref py py-meth docutils literal"><span class="pre">finish()</span></code></a> may be overridden as usual. <a class="reference internal" href="tlpipe.pipeline.pipeline.FileIterBase.html#tlpipe.pipeline.pipeline.FileIterBase" title="tlpipe.pipeline.pipeline.FileIterBase"><code class="xref py py-class docutils literal"><span class="pre">FileIterBase</span></code></a>
+for iterating tasks over input files.</p>
+</div>
+<div class="section" id="inheritance-diagram">
+<h2>Inheritance diagram<a class="headerlink" href="#inheritance-diagram" title="Permalink to this headline">¶</a></h2>
+<img src="../_images/inheritance-04b1a36e7f3ce58b2be6f9c92d63750793ff1073.png" alt="Inheritance diagram of TaskBase, DoNothing, OneAndOne, FileIterBase" usemap="#inheritancefa8ae1f742" class="inheritance"/>
+<map id="inheritancefa8ae1f742" name="inheritancefa8ae1f742">
+<area shape="rect" id="node1" href="tlpipe.pipeline.pipeline.DoNothing.html#tlpipe.pipeline.pipeline.DoNothing" target="_top" title="Do nothing." alt="" coords="5,83,99,111"/>
+<area shape="rect" id="node2" href="tlpipe.pipeline.pipeline.TaskBase.html#tlpipe.pipeline.pipeline.TaskBase" target="_top" title="Base class for all pipeline tasks." alt="" coords="71,6,153,34"/>
+<area shape="rect" id="node5" href="tlpipe.pipeline.pipeline.OneAndOne.html#tlpipe.pipeline.pipeline.OneAndOne" target="_top" title="Base class for tasks that have (at most) one input and one output." alt="" coords="123,83,224,111"/>
+<area shape="rect" id="node4" href="tlpipe.pipeline.pipeline.FileIterBase.html#tlpipe.pipeline.pipeline.FileIterBase" target="_top" title="Base class for iterating tasks over input files." alt="" coords="123,161,224,189"/>
+</map>
+<p>See the documentation for these base classes for more details.</p>
+<p class="rubric">Functions</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.pipeline.pipeline.format_list.html#tlpipe.pipeline.pipeline.format_list" title="tlpipe.pipeline.pipeline.format_list"><code class="xref py py-obj docutils literal"><span class="pre">format_list</span></code></a>(val)</td>
+<td>Format parameter <cite>val</cite> to a list.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.pipeline.pipeline.input_path.html#tlpipe.pipeline.pipeline.input_path" title="tlpipe.pipeline.pipeline.input_path"><code class="xref py py-obj docutils literal"><span class="pre">input_path</span></code></a>(path[,&nbsp;iteration])</td>
+<td>Normalize the given input <cite>path</cite>.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.pipeline.pipeline.output_path.html#tlpipe.pipeline.pipeline.output_path" title="tlpipe.pipeline.pipeline.output_path"><code class="xref py py-obj docutils literal"><span class="pre">output_path</span></code></a>(path[,&nbsp;relative,&nbsp;mkdir,&nbsp;iteration])</td>
+<td>Normalize the given output <cite>path</cite>.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Classes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.pipeline.pipeline.DoNothing.html#tlpipe.pipeline.pipeline.DoNothing" title="tlpipe.pipeline.pipeline.DoNothing"><code class="xref py py-obj docutils literal"><span class="pre">DoNothing</span></code></a>([parameter_file_or_dict,&nbsp;feedback])</td>
+<td>Do nothing.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.pipeline.pipeline.FileIterBase.html#tlpipe.pipeline.pipeline.FileIterBase" title="tlpipe.pipeline.pipeline.FileIterBase"><code class="xref py py-obj docutils literal"><span class="pre">FileIterBase</span></code></a>([parameter_file_or_dict,&nbsp;feedback])</td>
+<td>Base class for iterating tasks over input files.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.pipeline.pipeline.Manager.html#tlpipe.pipeline.pipeline.Manager" title="tlpipe.pipeline.pipeline.Manager"><code class="xref py py-obj docutils literal"><span class="pre">Manager</span></code></a>([pipefile,&nbsp;feedback])</td>
+<td>Pipeline manager for setting up and running pipeline tasks.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.pipeline.pipeline.OneAndOne.html#tlpipe.pipeline.pipeline.OneAndOne" title="tlpipe.pipeline.pipeline.OneAndOne"><code class="xref py py-obj docutils literal"><span class="pre">OneAndOne</span></code></a>([parameter_file_or_dict,&nbsp;feedback])</td>
+<td>Base class for tasks that have (at most) one input and one output.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.pipeline.pipeline.TaskBase.html#tlpipe.pipeline.pipeline.TaskBase" title="tlpipe.pipeline.pipeline.TaskBase"><code class="xref py py-obj docutils literal"><span class="pre">TaskBase</span></code></a>([parameter_file_or_dict,&nbsp;feedback])</td>
+<td>Base class for all pipeline tasks.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Exceptions</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.pipeline.pipeline.PipelineConfigError.html#tlpipe.pipeline.pipeline.PipelineConfigError" title="tlpipe.pipeline.pipeline.PipelineConfigError"><code class="xref py py-obj docutils literal"><span class="pre">PipelineConfigError</span></code></a></td>
+<td>Raised when there is an error setting up a pipeline.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.pipeline.pipeline.PipelineRuntimeError.html#tlpipe.pipeline.pipeline.PipelineRuntimeError" title="tlpipe.pipeline.pipeline.PipelineRuntimeError"><code class="xref py py-obj docutils literal"><span class="pre">PipelineRuntimeError</span></code></a></td>
+<td>Raised when there is a pipeline related error at runtime.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.pipeline.pipeline.PipelineStopIteration.html#tlpipe.pipeline.pipeline.PipelineStopIteration" title="tlpipe.pipeline.pipeline.PipelineStopIteration"><code class="xref py py-obj docutils literal"><span class="pre">PipelineStopIteration</span></code></a></td>
+<td>This stops the iteration of <cite>next()</cite> in pipeline tasks.</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tlpipe.pipeline.pipeline.format_list.html" class="btn btn-neutral float-right" title="tlpipe.pipeline.pipeline.format_list" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../pipeline.html" class="btn btn-neutral" title="pipeline – Pipeline control and tasks" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Shifan Zuo.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

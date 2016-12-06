@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.DishAntenna.bm_response
+============================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: DishAntenna.bm_response

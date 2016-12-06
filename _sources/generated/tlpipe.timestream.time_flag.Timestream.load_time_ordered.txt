@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.Timestream.load_time_ordered
+========================================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. automethod:: Timestream.load_time_ordered

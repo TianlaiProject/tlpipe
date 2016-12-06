@@ -1,0 +1,6 @@
+tlpipe.timestream.dispatch.Dispatch.next
+========================================
+
+.. currentmodule:: tlpipe.timestream.dispatch
+
+.. automethod:: Dispatch.next

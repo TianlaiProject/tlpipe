@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.TaskTimestream.write_output
+======================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: TaskTimestream.write_output

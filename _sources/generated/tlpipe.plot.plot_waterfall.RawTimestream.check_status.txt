@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.RawTimestream.check_status
+=====================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: RawTimestream.check_status

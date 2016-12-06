@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.masked_vis
+==================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. autoattribute:: Timestream.masked_vis

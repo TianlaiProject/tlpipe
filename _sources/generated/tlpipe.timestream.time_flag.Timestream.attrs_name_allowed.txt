@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.Timestream.attrs_name_allowed
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. automethod:: Timestream.attrs_name_allowed

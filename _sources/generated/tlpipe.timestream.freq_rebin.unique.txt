@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.unique
+===================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. autofunction:: unique

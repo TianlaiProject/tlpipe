@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.CylinderBeam.Omega
+=======================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. autoattribute:: CylinderBeam.Omega

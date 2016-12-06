@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_common.datetime.microsecond
+========================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_common
+
+.. autoattribute:: datetime.microsecond

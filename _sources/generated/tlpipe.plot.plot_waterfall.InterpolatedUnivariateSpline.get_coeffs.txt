@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.InterpolatedUnivariateSpline.get_coeffs
+==================================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: InterpolatedUnivariateSpline.get_coeffs

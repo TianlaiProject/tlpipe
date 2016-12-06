@@ -1,0 +1,6 @@
+tlpipe.timestream.phase_closure.Closure.embarrassingly_parallelizable
+=====================================================================
+
+.. currentmodule:: tlpipe.timestream.phase_closure
+
+.. autoattribute:: Closure.embarrassingly_parallelizable

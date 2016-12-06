@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.ReOrder.embarrassingly_parallelizable
+================================================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. autoattribute:: ReOrder.embarrassingly_parallelizable

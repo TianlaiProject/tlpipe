@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.RawTimestream.is_cylinder
+==================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. autoattribute:: RawTimestream.is_cylinder

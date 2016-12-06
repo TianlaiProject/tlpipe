@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Flag.show_params
+===========================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: Flag.show_params

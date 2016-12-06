@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Timestream.copy
+============================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Timestream.copy

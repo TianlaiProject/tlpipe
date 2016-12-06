@@ -1,0 +1,7 @@
+<map id="inheritance7c19868d5a" name="inheritance7c19868d5a">
+<area shape="rect" id="node1" href="tlpipe.timestream.container.BasicTod.html#tlpipe.timestream.container.BasicTod" target="_top" title="Basic time ordered data container." alt="" coords="147,83,293,111"/>
+<area shape="rect" id="node5" href="tlpipe.timestream.timestream_common.TimestreamCommon.html#tlpipe.timestream.timestream_common.TimestreamCommon" target="_top" title="Common things for the raw timestream data and timestream data." alt="" coords="63,161,377,189"/>
+<area shape="rect" id="node2" title="Container whose data may either be stored on disk or in memory." alt="" coords="131,6,309,34"/>
+<area shape="rect" id="node4" href="tlpipe.timestream.raw_timestream.RawTimestream.html#tlpipe.timestream.raw_timestream.RawTimestream" target="_top" title="Container class for the raw timestream data." alt="" coords="5,238,253,266"/>
+<area shape="rect" id="node7" href="tlpipe.timestream.timestream.Timestream.html#tlpipe.timestream.timestream.Timestream" target="_top" title="Container class for the timestream data." alt="" coords="277,238,467,266"/>
+</map>

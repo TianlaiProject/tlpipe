@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.output_path
+==================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. autofunction:: output_path

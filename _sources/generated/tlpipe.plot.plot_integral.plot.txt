@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.plot
+==============================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autofunction:: plot

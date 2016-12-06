@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.Manager.prefix
+=======================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoattribute:: Manager.prefix

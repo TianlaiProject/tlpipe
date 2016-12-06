@@ -1,0 +1,6 @@
+tlpipe.kiyopy.utils.abbreviate_file_path
+========================================
+
+.. currentmodule:: tlpipe.kiyopy.utils
+
+.. autofunction:: abbreviate_file_path

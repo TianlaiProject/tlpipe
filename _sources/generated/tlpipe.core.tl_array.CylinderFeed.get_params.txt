@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.CylinderFeed.get_params
+============================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: CylinderFeed.get_params

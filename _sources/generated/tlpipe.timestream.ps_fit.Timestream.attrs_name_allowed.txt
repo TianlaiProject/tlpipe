@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.Timestream.attrs_name_allowed
+======================================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: Timestream.attrs_name_allowed

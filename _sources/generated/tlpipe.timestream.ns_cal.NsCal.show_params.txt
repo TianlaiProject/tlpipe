@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.NsCal.show_params
+==========================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: NsCal.show_params

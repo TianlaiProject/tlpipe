@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.RawTimestream.reload_main_data
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: RawTimestream.reload_main_data

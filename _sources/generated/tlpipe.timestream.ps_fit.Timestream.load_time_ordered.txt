@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.Timestream.load_time_ordered
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: Timestream.load_time_ordered

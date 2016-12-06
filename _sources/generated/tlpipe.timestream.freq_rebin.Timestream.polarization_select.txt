@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.polarization_select
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Timestream.polarization_select

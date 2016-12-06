@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.OneAndOne.setup
+========================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: OneAndOne.setup

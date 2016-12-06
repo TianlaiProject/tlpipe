@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.is_same_pointing
+======================================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. autoattribute:: Timestream.is_same_pointing

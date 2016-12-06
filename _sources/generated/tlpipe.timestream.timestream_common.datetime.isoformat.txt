@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_common.datetime.isoformat
+======================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_common
+
+.. automethod:: datetime.isoformat

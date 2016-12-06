@@ -1,0 +1,6 @@
+tlpipe.utils.date_util.get_ephdate
+==================================
+
+.. currentmodule:: tlpipe.utils.date_util
+
+.. autofunction:: get_ephdate

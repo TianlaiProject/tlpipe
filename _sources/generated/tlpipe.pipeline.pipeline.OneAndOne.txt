@@ -1,0 +1,48 @@
+tlpipe.pipeline.pipeline.OneAndOne
+==================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoclass:: OneAndOne
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~OneAndOne.cacheable
+      ~OneAndOne.embarrassingly_parallelizable
+      ~OneAndOne.history
+      ~OneAndOne.iteration
+      ~OneAndOne.params_init
+      ~OneAndOne.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~OneAndOne.cast_input
+      ~OneAndOne.copy_input
+      ~OneAndOne.finish
+      ~OneAndOne.next
+      ~OneAndOne.process
+      ~OneAndOne.read_input
+      ~OneAndOne.read_output
+      ~OneAndOne.read_process_write
+      ~OneAndOne.setup
+      ~OneAndOne.show_params
+      ~OneAndOne.write_output
+   
+   

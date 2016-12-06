@@ -1,0 +1,6 @@
+tlpipe.plot.plot_gain.OneAndOne.embarrassingly_parallelizable
+=============================================================
+
+.. currentmodule:: tlpipe.plot.plot_gain
+
+.. autoattribute:: OneAndOne.embarrassingly_parallelizable

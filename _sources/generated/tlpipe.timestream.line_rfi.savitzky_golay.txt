@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.savitzky_golay
+=========================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. autofunction:: savitzky_golay

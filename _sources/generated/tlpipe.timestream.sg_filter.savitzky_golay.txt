@@ -1,0 +1,6 @@
+tlpipe.timestream.sg_filter.savitzky_golay
+==========================================
+
+.. currentmodule:: tlpipe.timestream.sg_filter
+
+.. autofunction:: savitzky_golay

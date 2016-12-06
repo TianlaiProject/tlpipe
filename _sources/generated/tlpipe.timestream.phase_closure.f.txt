@@ -1,0 +1,6 @@
+tlpipe.timestream.phase_closure.f
+=================================
+
+.. currentmodule:: tlpipe.timestream.phase_closure
+
+.. autofunction:: f

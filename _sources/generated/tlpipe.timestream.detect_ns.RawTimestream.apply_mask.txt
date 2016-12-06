@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.RawTimestream.apply_mask
+====================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: RawTimestream.apply_mask

@@ -1,0 +1,49 @@
+tlpipe.timestream.rt2ts.Rt2ts
+=============================
+
+.. currentmodule:: tlpipe.timestream.rt2ts
+
+.. autoclass:: Rt2ts
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Rt2ts.cacheable
+      ~Rt2ts.embarrassingly_parallelizable
+      ~Rt2ts.history
+      ~Rt2ts.iteration
+      ~Rt2ts.params_init
+      ~Rt2ts.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Rt2ts.cast_input
+      ~Rt2ts.copy_input
+      ~Rt2ts.data_select
+      ~Rt2ts.finish
+      ~Rt2ts.next
+      ~Rt2ts.process
+      ~Rt2ts.read_input
+      ~Rt2ts.read_output
+      ~Rt2ts.read_process_write
+      ~Rt2ts.setup
+      ~Rt2ts.show_params
+      ~Rt2ts.write_output
+   
+   

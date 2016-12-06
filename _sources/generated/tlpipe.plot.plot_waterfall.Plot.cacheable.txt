@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Plot.cacheable
+=========================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoattribute:: Plot.cacheable

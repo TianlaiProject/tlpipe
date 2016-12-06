@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.frequency_select
+========================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: Timestream.frequency_select

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.to_files
+=============================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Timestream.to_files

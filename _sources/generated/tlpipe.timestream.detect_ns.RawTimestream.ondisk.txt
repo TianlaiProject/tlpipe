@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.RawTimestream.ondisk
+================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. autoattribute:: RawTimestream.ondisk

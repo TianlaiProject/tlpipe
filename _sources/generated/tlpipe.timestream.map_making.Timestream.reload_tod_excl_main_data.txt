@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.reload_tod_excl_main_data
+=================================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: Timestream.reload_tod_excl_main_data

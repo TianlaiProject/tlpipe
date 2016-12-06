@@ -1,0 +1,6 @@
+tlpipe.timestream.phase_closure.Closure.prefix
+==============================================
+
+.. currentmodule:: tlpipe.timestream.phase_closure
+
+.. autoattribute:: Closure.prefix

@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.from_group
+==================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Timestream.from_group

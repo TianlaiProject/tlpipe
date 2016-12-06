@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.TaskBase.show_params
+=============================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: TaskBase.show_params

@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Timestream.main_axes_ordered_datasets
+==================================================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. autoattribute:: Timestream.main_axes_ordered_datasets

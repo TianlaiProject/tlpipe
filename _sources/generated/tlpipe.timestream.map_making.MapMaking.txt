@@ -1,0 +1,49 @@
+tlpipe.timestream.map_making.MapMaking
+======================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. autoclass:: MapMaking
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~MapMaking.cacheable
+      ~MapMaking.embarrassingly_parallelizable
+      ~MapMaking.history
+      ~MapMaking.iteration
+      ~MapMaking.params_init
+      ~MapMaking.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~MapMaking.cast_input
+      ~MapMaking.copy_input
+      ~MapMaking.data_select
+      ~MapMaking.finish
+      ~MapMaking.next
+      ~MapMaking.process
+      ~MapMaking.read_input
+      ~MapMaking.read_output
+      ~MapMaking.read_process_write
+      ~MapMaking.setup
+      ~MapMaking.show_params
+      ~MapMaking.write_output
+   
+   

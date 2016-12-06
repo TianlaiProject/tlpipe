@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.FileIterBase.next
+==========================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: FileIterBase.next

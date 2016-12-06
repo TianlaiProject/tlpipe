@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.RawTimestream.feed_select
+====================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: RawTimestream.feed_select

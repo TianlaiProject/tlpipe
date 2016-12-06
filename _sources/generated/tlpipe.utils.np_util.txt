@@ -1,0 +1,26 @@
+tlpipe.utils.np_util
+====================
+
+.. automodule:: tlpipe.utils.np_util
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      average
+      unique
+   
+   
+
+
+   
+   
+   
+
+
+   
+   
+   

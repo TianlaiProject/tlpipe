@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.TimestreamCommon.from_file
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: TimestreamCommon.from_file

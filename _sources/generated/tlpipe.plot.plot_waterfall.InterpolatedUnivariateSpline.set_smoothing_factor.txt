@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.InterpolatedUnivariateSpline.set_smoothing_factor
+============================================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: InterpolatedUnivariateSpline.set_smoothing_factor

@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Flag.params_init
+===========================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. autoattribute:: Flag.params_init

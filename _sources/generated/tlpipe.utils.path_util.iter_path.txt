@@ -1,0 +1,6 @@
+tlpipe.utils.path_util.iter_path
+================================
+
+.. currentmodule:: tlpipe.utils.path_util
+
+.. autofunction:: iter_path

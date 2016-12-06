@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Timestream.bl_data_operate
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: Timestream.bl_data_operate

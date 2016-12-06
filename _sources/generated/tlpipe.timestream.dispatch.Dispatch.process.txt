@@ -1,0 +1,6 @@
+tlpipe.timestream.dispatch.Dispatch.process
+===========================================
+
+.. currentmodule:: tlpipe.timestream.dispatch
+
+.. automethod:: Dispatch.process

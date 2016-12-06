@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.delete_a_dataset
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. automethod:: BasicTod.delete_a_dataset

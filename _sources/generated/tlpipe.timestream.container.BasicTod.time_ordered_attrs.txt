@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.time_ordered_attrs
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. autoattribute:: BasicTod.time_ordered_attrs

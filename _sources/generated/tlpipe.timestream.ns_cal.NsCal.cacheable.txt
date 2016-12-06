@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.NsCal.cacheable
+========================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. autoattribute:: NsCal.cacheable

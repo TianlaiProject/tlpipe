@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.fit
+============================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. autofunction:: fit

@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.Detect.iteration
+============================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. autoattribute:: Detect.iteration

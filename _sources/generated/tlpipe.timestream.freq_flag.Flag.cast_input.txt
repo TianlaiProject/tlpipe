@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Flag.cast_input
+===========================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Flag.cast_input

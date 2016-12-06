@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.plot
+===========================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. autofunction:: plot

@@ -1,0 +1,6 @@
+tlpipe.timestream.raw_timestream.RawTimestream.redistribute
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.raw_timestream
+
+.. automethod:: RawTimestream.redistribute

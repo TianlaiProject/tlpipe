@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.DoNothing.show_params
+==============================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: DoNothing.show_params

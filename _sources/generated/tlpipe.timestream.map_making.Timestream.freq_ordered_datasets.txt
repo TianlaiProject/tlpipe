@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.freq_ordered_datasets
+=============================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. autoattribute:: Timestream.freq_ordered_datasets

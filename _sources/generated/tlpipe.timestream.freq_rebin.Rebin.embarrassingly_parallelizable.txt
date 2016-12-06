@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Rebin.embarrassingly_parallelizable
+================================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. autoattribute:: Rebin.embarrassingly_parallelizable

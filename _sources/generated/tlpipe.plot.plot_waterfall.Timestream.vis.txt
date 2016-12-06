@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Timestream.vis
+=========================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoattribute:: Timestream.vis

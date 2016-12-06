@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.OneAndOne.copy_input
+=============================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: OneAndOne.copy_input

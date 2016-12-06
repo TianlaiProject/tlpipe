@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.time_ordered_attrs
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. autoattribute:: Timestream.time_ordered_attrs

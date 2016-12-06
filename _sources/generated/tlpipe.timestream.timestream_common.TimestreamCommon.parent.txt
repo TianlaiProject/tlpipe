@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_common.TimestreamCommon.parent
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_common
+
+.. autoattribute:: TimestreamCommon.parent

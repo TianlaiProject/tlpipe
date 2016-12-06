@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.Detect.prefix
+=========================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. autoattribute:: Detect.prefix

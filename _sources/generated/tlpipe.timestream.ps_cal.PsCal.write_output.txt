@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.PsCal.write_output
+===========================================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. automethod:: PsCal.write_output

@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.PsCal.data_select
+==========================================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. automethod:: PsCal.data_select

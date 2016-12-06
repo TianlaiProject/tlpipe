@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.freq
+=========================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: Timestream.freq

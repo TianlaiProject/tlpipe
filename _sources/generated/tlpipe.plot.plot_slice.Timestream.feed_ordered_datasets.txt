@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.Timestream.feed_ordered_datasets
+=======================================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. autoattribute:: Timestream.feed_ordered_datasets

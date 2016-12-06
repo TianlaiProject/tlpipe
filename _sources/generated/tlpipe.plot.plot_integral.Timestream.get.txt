@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.get
+========================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Timestream.get

@@ -1,0 +1,6 @@
+tlpipe.kiyopy.parse_ini.parse
+=============================
+
+.. currentmodule:: tlpipe.kiyopy.parse_ini
+
+.. autofunction:: parse

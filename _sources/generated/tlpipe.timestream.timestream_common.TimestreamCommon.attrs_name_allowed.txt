@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_common.TimestreamCommon.attrs_name_allowed
+=======================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_common
+
+.. automethod:: TimestreamCommon.attrs_name_allowed

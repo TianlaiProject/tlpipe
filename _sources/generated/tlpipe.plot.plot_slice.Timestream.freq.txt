@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.Timestream.freq
+======================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. autoattribute:: Timestream.freq

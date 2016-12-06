@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.iterkeys
+==============================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. automethod:: Timestream.iterkeys

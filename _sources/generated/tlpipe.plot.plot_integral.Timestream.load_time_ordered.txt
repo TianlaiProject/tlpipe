@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.load_time_ordered
+======================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Timestream.load_time_ordered

@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Timestream.is_same_pointing
+========================================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. autoattribute:: Timestream.is_same_pointing

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.Timestream.require_dataset
+=================================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: Timestream.require_dataset

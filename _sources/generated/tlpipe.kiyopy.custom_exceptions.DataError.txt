@@ -1,0 +1,6 @@
+tlpipe.kiyopy.custom_exceptions.DataError
+=========================================
+
+.. currentmodule:: tlpipe.kiyopy.custom_exceptions
+
+.. autoexception:: DataError

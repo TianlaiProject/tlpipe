@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_common.TimestreamCommon.frequency_select
+=====================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_common
+
+.. automethod:: TimestreamCommon.frequency_select

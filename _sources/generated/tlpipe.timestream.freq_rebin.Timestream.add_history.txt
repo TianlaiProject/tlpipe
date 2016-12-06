@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.add_history
+===================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Timestream.add_history

@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.pol_and_bl_data_operate
+===============================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: Timestream.pol_and_bl_data_operate

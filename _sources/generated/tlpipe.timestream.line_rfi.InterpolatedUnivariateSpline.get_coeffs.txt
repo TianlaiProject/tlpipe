@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.InterpolatedUnivariateSpline.get_coeffs
+==================================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: InterpolatedUnivariateSpline.get_coeffs

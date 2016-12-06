@@ -1,0 +1,31 @@
+tlpipe.core.tl_array.Antenna
+============================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. autoclass:: Antenna
+
+   
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Antenna.bm_response
+      ~Antenna.get_params
+      ~Antenna.passband
+      ~Antenna.select_chans
+      ~Antenna.set_params
+      ~Antenna.set_pointing
+      ~Antenna.update
+   
+   

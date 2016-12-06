@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.iteritems
+==============================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. automethod:: BasicTod.iteritems

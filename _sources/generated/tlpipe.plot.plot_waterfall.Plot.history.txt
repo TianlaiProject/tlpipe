@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Plot.history
+=======================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoattribute:: Plot.history

@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.file
+=========================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. autoattribute:: BasicTod.file

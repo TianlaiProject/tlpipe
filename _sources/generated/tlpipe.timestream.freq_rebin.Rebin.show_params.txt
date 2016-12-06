@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Rebin.show_params
+==============================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Rebin.show_params

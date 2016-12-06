@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.to_files
+================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: Timestream.to_files

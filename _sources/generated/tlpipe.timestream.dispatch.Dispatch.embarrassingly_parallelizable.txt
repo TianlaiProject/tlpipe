@@ -1,0 +1,6 @@
+tlpipe.timestream.dispatch.Dispatch.embarrassingly_parallelizable
+=================================================================
+
+.. currentmodule:: tlpipe.timestream.dispatch
+
+.. autoattribute:: Dispatch.embarrassingly_parallelizable

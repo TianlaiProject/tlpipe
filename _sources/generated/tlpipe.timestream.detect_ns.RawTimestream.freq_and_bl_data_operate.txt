@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.RawTimestream.freq_and_bl_data_operate
+==================================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: RawTimestream.freq_and_bl_data_operate

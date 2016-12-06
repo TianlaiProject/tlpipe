@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Timestream.from_file
+===============================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: Timestream.from_file

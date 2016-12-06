@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.lin2stokes
+=================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Timestream.lin2stokes

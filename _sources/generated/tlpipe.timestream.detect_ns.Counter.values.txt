@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.Counter.values
+==========================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: Counter.values

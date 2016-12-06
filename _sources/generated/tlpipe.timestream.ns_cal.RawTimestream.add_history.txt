@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.RawTimestream.add_history
+==================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: RawTimestream.add_history

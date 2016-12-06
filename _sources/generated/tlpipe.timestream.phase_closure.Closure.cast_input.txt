@@ -1,0 +1,6 @@
+tlpipe.timestream.phase_closure.Closure.cast_input
+==================================================
+
+.. currentmodule:: tlpipe.timestream.phase_closure
+
+.. automethod:: Closure.cast_input

@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream.Timestream.local_pol
+=================================================
+
+.. currentmodule:: tlpipe.timestream.timestream
+
+.. autoattribute:: Timestream.local_pol

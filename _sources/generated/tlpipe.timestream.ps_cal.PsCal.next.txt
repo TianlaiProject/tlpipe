@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.PsCal.next
+===================================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. automethod:: PsCal.next

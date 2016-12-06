@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_common.datetime.ctime
+==================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_common
+
+.. automethod:: datetime.ctime

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Timestream.frequency_select
+======================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: Timestream.frequency_select

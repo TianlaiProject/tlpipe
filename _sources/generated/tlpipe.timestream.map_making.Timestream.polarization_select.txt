@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.polarization_select
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: Timestream.polarization_select

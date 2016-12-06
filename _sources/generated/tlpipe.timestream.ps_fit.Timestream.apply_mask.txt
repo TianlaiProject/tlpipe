@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.Timestream.apply_mask
+==============================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: Timestream.apply_mask

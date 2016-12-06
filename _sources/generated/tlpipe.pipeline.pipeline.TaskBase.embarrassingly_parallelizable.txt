@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.TaskBase.embarrassingly_parallelizable
+===============================================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoattribute:: TaskBase.embarrassingly_parallelizable

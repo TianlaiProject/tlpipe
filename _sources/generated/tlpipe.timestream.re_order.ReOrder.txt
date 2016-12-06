@@ -1,0 +1,49 @@
+tlpipe.timestream.re_order.ReOrder
+==================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. autoclass:: ReOrder
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~ReOrder.cacheable
+      ~ReOrder.embarrassingly_parallelizable
+      ~ReOrder.history
+      ~ReOrder.iteration
+      ~ReOrder.params_init
+      ~ReOrder.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~ReOrder.cast_input
+      ~ReOrder.copy_input
+      ~ReOrder.data_select
+      ~ReOrder.finish
+      ~ReOrder.next
+      ~ReOrder.process
+      ~ReOrder.read_input
+      ~ReOrder.read_output
+      ~ReOrder.read_process_write
+      ~ReOrder.setup
+      ~ReOrder.show_params
+      ~ReOrder.write_output
+   
+   

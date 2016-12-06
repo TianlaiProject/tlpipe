@@ -1,0 +1,6 @@
+tlpipe.timestream.average.Average.copy_input
+============================================
+
+.. currentmodule:: tlpipe.timestream.average
+
+.. automethod:: Average.copy_input

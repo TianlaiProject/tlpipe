@@ -1,0 +1,6 @@
+tlpipe.timestream.dispatch.Dispatch.show_params
+===============================================
+
+.. currentmodule:: tlpipe.timestream.dispatch
+
+.. automethod:: Dispatch.show_params

@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.RawTimestream.feed_select
+==================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: RawTimestream.feed_select

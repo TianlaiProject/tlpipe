@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Timestream.apply_mask
+================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: Timestream.apply_mask

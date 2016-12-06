@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.InterpolatedUnivariateSpline.derivatives
+=================================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: InterpolatedUnivariateSpline.derivatives

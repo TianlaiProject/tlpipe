@@ -1,0 +1,48 @@
+tlpipe.pipeline.pipeline.FileIterBase
+=====================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoclass:: FileIterBase
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~FileIterBase.cacheable
+      ~FileIterBase.embarrassingly_parallelizable
+      ~FileIterBase.history
+      ~FileIterBase.iteration
+      ~FileIterBase.params_init
+      ~FileIterBase.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~FileIterBase.cast_input
+      ~FileIterBase.copy_input
+      ~FileIterBase.finish
+      ~FileIterBase.next
+      ~FileIterBase.process
+      ~FileIterBase.read_input
+      ~FileIterBase.read_output
+      ~FileIterBase.read_process_write
+      ~FileIterBase.setup
+      ~FileIterBase.show_params
+      ~FileIterBase.write_output
+   
+   

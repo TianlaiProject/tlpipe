@@ -1,0 +1,36 @@
+tlpipe.timestream.map_making
+============================
+
+.. automodule:: tlpipe.timestream.map_making
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      average
+      eigh
+      output_path
+      unique
+   
+   
+
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      MapMaking
+      Timestream
+   
+   
+
+
+   
+   
+   

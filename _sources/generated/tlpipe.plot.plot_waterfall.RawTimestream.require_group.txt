@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.RawTimestream.require_group
+======================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: RawTimestream.require_group

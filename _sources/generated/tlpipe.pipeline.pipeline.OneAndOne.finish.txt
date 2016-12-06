@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.OneAndOne.finish
+=========================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: OneAndOne.finish

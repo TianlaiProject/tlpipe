@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Rebin.setup
+========================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Rebin.setup

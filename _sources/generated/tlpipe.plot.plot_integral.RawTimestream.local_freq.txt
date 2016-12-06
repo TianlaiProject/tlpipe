@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.RawTimestream.local_freq
+==================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: RawTimestream.local_freq

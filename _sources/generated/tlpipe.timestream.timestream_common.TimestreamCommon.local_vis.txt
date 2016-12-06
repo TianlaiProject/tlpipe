@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_common.TimestreamCommon.local_vis
+==============================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_common
+
+.. autoattribute:: TimestreamCommon.local_vis

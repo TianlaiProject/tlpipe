@@ -1,0 +1,6 @@
+tlpipe.kiyopy.utils.mkdir_p
+===========================
+
+.. currentmodule:: tlpipe.kiyopy.utils
+
+.. autofunction:: mkdir_p

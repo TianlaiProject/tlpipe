@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_common.TimestreamCommon.reload_time_ordered
+========================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_common
+
+.. automethod:: TimestreamCommon.reload_time_ordered

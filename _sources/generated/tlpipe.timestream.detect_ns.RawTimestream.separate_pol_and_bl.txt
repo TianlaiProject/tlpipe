@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.RawTimestream.separate_pol_and_bl
+=============================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: RawTimestream.separate_pol_and_bl

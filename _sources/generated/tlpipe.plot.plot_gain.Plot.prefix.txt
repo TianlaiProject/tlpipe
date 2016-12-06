@@ -1,0 +1,6 @@
+tlpipe.plot.plot_gain.Plot.prefix
+=================================
+
+.. currentmodule:: tlpipe.plot.plot_gain
+
+.. autoattribute:: Plot.prefix

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.RawTimestream.array
+==========================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. autoattribute:: RawTimestream.array

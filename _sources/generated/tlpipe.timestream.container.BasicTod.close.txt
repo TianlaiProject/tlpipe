@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.close
+==========================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. automethod:: BasicTod.close

@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.RawTimestream.copy
+===========================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: RawTimestream.copy

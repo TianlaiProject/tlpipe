@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Flag.prefix
+======================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. autoattribute:: Flag.prefix

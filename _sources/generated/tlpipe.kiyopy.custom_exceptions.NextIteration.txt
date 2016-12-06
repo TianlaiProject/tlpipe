@@ -1,0 +1,6 @@
+tlpipe.kiyopy.custom_exceptions.NextIteration
+=============================================
+
+.. currentmodule:: tlpipe.kiyopy.custom_exceptions
+
+.. autoexception:: NextIteration

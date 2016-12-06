@@ -1,0 +1,31 @@
+tlpipe.plot.plot_waterfall.InterpolatedUnivariateSpline
+=======================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoclass:: InterpolatedUnivariateSpline
+
+   
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~InterpolatedUnivariateSpline.derivatives
+      ~InterpolatedUnivariateSpline.get_coeffs
+      ~InterpolatedUnivariateSpline.get_knots
+      ~InterpolatedUnivariateSpline.get_residual
+      ~InterpolatedUnivariateSpline.integral
+      ~InterpolatedUnivariateSpline.roots
+      ~InterpolatedUnivariateSpline.set_smoothing_factor
+   
+   

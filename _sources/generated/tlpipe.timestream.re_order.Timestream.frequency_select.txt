@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.frequency_select
+======================================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. automethod:: Timestream.frequency_select

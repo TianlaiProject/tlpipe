@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Timestream.dataset_name_allowed
+============================================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Timestream.dataset_name_allowed

@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.PipelineRuntimeError
+=============================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoexception:: PipelineRuntimeError

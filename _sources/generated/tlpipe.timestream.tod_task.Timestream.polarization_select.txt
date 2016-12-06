@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.Timestream.polarization_select
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: Timestream.polarization_select

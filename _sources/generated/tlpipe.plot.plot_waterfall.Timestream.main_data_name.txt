@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Timestream.main_data_name
+====================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoattribute:: Timestream.main_data_name

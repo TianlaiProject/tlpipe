@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.main_data_axes
+======================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. autoattribute:: Timestream.main_data_axes

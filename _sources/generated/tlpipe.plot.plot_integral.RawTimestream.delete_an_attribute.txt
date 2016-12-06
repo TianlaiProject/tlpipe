@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.RawTimestream.delete_an_attribute
+===========================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: RawTimestream.delete_an_attribute

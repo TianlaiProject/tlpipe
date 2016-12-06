@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.OneAndOne.copy_input
+===============================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: OneAndOne.copy_input

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.array
+==========================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: Timestream.array

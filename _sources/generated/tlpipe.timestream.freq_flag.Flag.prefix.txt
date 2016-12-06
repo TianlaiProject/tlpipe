@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Flag.prefix
+=======================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. autoattribute:: Flag.prefix

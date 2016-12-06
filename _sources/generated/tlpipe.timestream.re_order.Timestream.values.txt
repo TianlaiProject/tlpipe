@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.values
+============================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. automethod:: Timestream.values

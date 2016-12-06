@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.Detect.params_init
+==============================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. autoattribute:: Detect.params_init

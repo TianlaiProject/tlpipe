@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.ReOrder.copy_input
+=============================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. automethod:: ReOrder.copy_input

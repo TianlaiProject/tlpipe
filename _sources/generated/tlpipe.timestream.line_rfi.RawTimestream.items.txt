@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.RawTimestream.items
+==============================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: RawTimestream.items

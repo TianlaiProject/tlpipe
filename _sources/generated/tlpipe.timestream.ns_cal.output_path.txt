@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.output_path
+====================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. autofunction:: output_path

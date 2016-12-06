@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.AntennaArray.gen_phs
+=========================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: AntennaArray.gen_phs

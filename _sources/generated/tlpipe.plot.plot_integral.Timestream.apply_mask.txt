@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.apply_mask
+===============================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Timestream.apply_mask

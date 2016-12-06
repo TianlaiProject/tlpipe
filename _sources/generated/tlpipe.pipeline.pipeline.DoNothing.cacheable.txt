@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.DoNothing.cacheable
+============================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoattribute:: DoNothing.cacheable

@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_common.datetime.day
+================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_common
+
+.. autoattribute:: datetime.day

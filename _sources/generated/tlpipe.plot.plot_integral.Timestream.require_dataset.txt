@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.require_dataset
+====================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Timestream.require_dataset

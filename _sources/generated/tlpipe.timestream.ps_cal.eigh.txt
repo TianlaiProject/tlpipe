@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.eigh
+=============================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. autofunction:: eigh

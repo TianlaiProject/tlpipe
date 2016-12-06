@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.RawTimestream.add_history
+====================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: RawTimestream.add_history

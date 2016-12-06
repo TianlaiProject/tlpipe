@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.RawTimestream.main_axes_ordered_datasets
+===================================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoattribute:: RawTimestream.main_axes_ordered_datasets

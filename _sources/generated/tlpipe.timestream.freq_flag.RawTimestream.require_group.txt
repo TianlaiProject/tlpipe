@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.RawTimestream.require_group
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: RawTimestream.require_group

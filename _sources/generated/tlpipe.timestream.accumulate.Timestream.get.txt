@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Timestream.get
+===========================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Timestream.get

@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream.Timestream.reload_all
+==================================================
+
+.. currentmodule:: tlpipe.timestream.timestream
+
+.. automethod:: Timestream.reload_all

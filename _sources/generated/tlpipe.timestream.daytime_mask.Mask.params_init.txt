@@ -1,0 +1,6 @@
+tlpipe.timestream.daytime_mask.Mask.params_init
+===============================================
+
+.. currentmodule:: tlpipe.timestream.daytime_mask
+
+.. autoattribute:: Mask.params_init

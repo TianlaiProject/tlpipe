@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_subtract.PsSub.process
+===========================================
+
+.. currentmodule:: tlpipe.timestream.ps_subtract
+
+.. automethod:: PsSub.process

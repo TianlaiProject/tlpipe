@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Timestream.parent
+============================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoattribute:: Timestream.parent

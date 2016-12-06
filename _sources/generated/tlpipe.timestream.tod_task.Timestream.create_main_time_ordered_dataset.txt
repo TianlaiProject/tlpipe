@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.Timestream.create_main_time_ordered_dataset
+======================================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: Timestream.create_main_time_ordered_dataset

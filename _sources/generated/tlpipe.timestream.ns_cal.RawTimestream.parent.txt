@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.RawTimestream.parent
+=============================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. autoattribute:: RawTimestream.parent

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.Plot.data_select
+=======================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: Plot.data_select

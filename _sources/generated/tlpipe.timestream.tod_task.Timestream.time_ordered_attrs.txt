@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.Timestream.time_ordered_attrs
+========================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. autoattribute:: Timestream.time_ordered_attrs

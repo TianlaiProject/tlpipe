@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.RawTimestream.iteritems
+===================================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. automethod:: RawTimestream.iteritems

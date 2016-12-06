@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.RawTimestream.keys
+============================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: RawTimestream.keys

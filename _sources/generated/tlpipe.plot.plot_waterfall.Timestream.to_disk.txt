@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Timestream.to_disk
+=============================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: Timestream.to_disk

@@ -1,0 +1,49 @@
+tlpipe.timestream.phs2zen.Phs2zen
+=================================
+
+.. currentmodule:: tlpipe.timestream.phs2zen
+
+.. autoclass:: Phs2zen
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Phs2zen.cacheable
+      ~Phs2zen.embarrassingly_parallelizable
+      ~Phs2zen.history
+      ~Phs2zen.iteration
+      ~Phs2zen.params_init
+      ~Phs2zen.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Phs2zen.cast_input
+      ~Phs2zen.copy_input
+      ~Phs2zen.data_select
+      ~Phs2zen.finish
+      ~Phs2zen.next
+      ~Phs2zen.process
+      ~Phs2zen.read_input
+      ~Phs2zen.read_output
+      ~Phs2zen.read_process_write
+      ~Phs2zen.setup
+      ~Phs2zen.show_params
+      ~Phs2zen.write_output
+   
+   

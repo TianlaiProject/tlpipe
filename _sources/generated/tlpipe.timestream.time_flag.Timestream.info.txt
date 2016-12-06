@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.Timestream.info
+===========================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. automethod:: Timestream.info

@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.local_time
+==================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. autoattribute:: Timestream.local_time

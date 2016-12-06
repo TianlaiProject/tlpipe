@@ -1,0 +1,6 @@
+tlpipe.plot.plot_gain.Plot.cacheable
+====================================
+
+.. currentmodule:: tlpipe.plot.plot_gain
+
+.. autoattribute:: Plot.cacheable

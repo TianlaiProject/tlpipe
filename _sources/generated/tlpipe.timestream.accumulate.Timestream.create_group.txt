@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Timestream.create_group
+====================================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Timestream.create_group

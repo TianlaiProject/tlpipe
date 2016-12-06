@@ -1,0 +1,49 @@
+tlpipe.timestream.ps_cal.PsCal
+==============================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. autoclass:: PsCal
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~PsCal.cacheable
+      ~PsCal.embarrassingly_parallelizable
+      ~PsCal.history
+      ~PsCal.iteration
+      ~PsCal.params_init
+      ~PsCal.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~PsCal.cast_input
+      ~PsCal.copy_input
+      ~PsCal.data_select
+      ~PsCal.finish
+      ~PsCal.next
+      ~PsCal.process
+      ~PsCal.read_input
+      ~PsCal.read_output
+      ~PsCal.read_process_write
+      ~PsCal.setup
+      ~PsCal.show_params
+      ~PsCal.write_output
+   
+   

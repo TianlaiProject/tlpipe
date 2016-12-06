@@ -1,0 +1,6 @@
+tlpipe.timestream.phase_closure.Closure.setup
+=============================================
+
+.. currentmodule:: tlpipe.timestream.phase_closure
+
+.. automethod:: Closure.setup

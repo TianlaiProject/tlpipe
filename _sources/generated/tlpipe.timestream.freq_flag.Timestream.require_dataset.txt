@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.require_dataset
+======================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Timestream.require_dataset

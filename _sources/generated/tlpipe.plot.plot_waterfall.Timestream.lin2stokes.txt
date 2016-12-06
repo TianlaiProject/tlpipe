@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Timestream.lin2stokes
+================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: Timestream.lin2stokes

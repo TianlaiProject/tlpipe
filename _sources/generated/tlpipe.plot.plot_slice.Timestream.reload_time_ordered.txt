@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.Timestream.reload_time_ordered
+=====================================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: Timestream.reload_time_ordered

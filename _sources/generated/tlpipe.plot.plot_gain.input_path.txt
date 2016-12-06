@@ -1,0 +1,6 @@
+tlpipe.plot.plot_gain.input_path
+================================
+
+.. currentmodule:: tlpipe.plot.plot_gain
+
+.. autofunction:: input_path

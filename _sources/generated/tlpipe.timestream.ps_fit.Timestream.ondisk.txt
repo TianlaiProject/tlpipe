@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.Timestream.ondisk
+==========================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. autoattribute:: Timestream.ondisk

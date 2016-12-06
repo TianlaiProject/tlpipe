@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.RawTimestream.from_group
+===================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: RawTimestream.from_group

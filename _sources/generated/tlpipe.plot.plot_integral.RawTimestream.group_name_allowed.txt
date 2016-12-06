@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.RawTimestream.group_name_allowed
+==========================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: RawTimestream.group_name_allowed

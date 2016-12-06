@@ -1,0 +1,6 @@
+tlpipe.timestream.phase_closure.Closure.copy_input
+==================================================
+
+.. currentmodule:: tlpipe.timestream.phase_closure
+
+.. automethod:: Closure.copy_input

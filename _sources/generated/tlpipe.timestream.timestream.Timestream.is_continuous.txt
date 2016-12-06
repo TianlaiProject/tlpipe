@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream.Timestream.is_continuous
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.timestream
+
+.. autoattribute:: Timestream.is_continuous

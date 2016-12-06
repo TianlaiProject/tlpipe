@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.create_main_data
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. automethod:: BasicTod.create_main_data

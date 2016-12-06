@@ -1,0 +1,6 @@
+<map id="inheritancee2a181f5fc" name="inheritancee2a181f5fc">
+<area shape="rect" id="node1" href="tlpipe.timestream.phase_closure.Closure.html#tlpipe.timestream.phase_closure.Closure" target="_top" title="Check the phase closure relation." alt="" coords="17,238,188,266"/>
+<area shape="rect" id="node2" href="tlpipe.timestream.tod_task.TaskTimestream.html#tlpipe.timestream.tod_task.TaskTimestream" target="_top" title="Task that provides raw timestream or timestream IO and data selection operations." alt="" coords="5,161,200,189"/>
+<area shape="rect" id="node4" href="tlpipe.pipeline.pipeline.OneAndOne.html#tlpipe.pipeline.pipeline.OneAndOne" target="_top" title="Base class for tasks that have (at most) one input and one output." alt="" coords="24,83,181,111"/>
+<area shape="rect" id="node5" href="tlpipe.pipeline.pipeline.TaskBase.html#tlpipe.pipeline.pipeline.TaskBase" target="_top" title="Base class for all pipeline tasks." alt="" coords="33,6,172,34"/>
+</map>

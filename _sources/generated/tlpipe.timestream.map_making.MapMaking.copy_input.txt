@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.MapMaking.copy_input
+=================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: MapMaking.copy_input

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.Plot.cast_input
+======================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: Plot.cast_input

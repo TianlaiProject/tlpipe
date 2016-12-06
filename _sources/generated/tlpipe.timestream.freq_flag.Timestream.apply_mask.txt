@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.apply_mask
+=================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Timestream.apply_mask

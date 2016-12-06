@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Timestream.time_ordered_attrs
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. autoattribute:: Timestream.time_ordered_attrs

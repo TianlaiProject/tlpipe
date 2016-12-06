@@ -1,0 +1,6 @@
+<map id="inheritancefa8ae1f742" name="inheritancefa8ae1f742">
+<area shape="rect" id="node1" href="tlpipe.pipeline.pipeline.DoNothing.html#tlpipe.pipeline.pipeline.DoNothing" target="_top" title="Do nothing." alt="" coords="5,83,99,111"/>
+<area shape="rect" id="node2" href="tlpipe.pipeline.pipeline.TaskBase.html#tlpipe.pipeline.pipeline.TaskBase" target="_top" title="Base class for all pipeline tasks." alt="" coords="71,6,153,34"/>
+<area shape="rect" id="node5" href="tlpipe.pipeline.pipeline.OneAndOne.html#tlpipe.pipeline.pipeline.OneAndOne" target="_top" title="Base class for tasks that have (at most) one input and one output." alt="" coords="123,83,224,111"/>
+<area shape="rect" id="node4" href="tlpipe.pipeline.pipeline.FileIterBase.html#tlpipe.pipeline.pipeline.FileIterBase" target="_top" title="Base class for iterating tasks over input files." alt="" coords="123,161,224,189"/>
+</map>

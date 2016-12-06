@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.flag
+================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. autofunction:: flag

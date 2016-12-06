@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.is_continuous
+====================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. autoattribute:: Timestream.is_continuous

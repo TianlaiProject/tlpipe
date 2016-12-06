@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Timestream.freq
+==========================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. autoattribute:: Timestream.freq

@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.copy
+=========================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. automethod:: BasicTod.copy

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.RawTimestream.reload_time_ordered
+===========================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: RawTimestream.reload_time_ordered

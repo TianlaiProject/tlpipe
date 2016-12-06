@@ -1,0 +1,6 @@
+tlpipe.timestream.rt2ts.Rt2ts.show_params
+=========================================
+
+.. currentmodule:: tlpipe.timestream.rt2ts
+
+.. automethod:: Rt2ts.show_params

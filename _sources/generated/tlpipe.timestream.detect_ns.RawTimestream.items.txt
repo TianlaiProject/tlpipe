@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.RawTimestream.items
+===============================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: RawTimestream.items

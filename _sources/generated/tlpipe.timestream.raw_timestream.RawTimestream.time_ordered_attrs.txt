@@ -1,0 +1,6 @@
+tlpipe.timestream.raw_timestream.RawTimestream.time_ordered_attrs
+=================================================================
+
+.. currentmodule:: tlpipe.timestream.raw_timestream
+
+.. autoattribute:: RawTimestream.time_ordered_attrs

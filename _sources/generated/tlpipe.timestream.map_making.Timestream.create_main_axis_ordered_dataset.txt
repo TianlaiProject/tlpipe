@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.create_main_axis_ordered_dataset
+========================================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: Timestream.create_main_axis_ordered_dataset

@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.Timestream.to_disk
+===========================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: Timestream.to_disk

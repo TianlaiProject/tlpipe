@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.RawTimestream.iteritems
+================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: RawTimestream.iteritems

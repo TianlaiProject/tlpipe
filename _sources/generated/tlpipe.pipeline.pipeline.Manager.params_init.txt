@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.Manager.params_init
+============================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoattribute:: Manager.params_init

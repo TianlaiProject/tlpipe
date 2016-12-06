@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.DishBeam.select_chans
+==========================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: DishBeam.select_chans

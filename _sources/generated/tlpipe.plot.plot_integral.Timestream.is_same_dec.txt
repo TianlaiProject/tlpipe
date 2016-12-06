@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.is_same_dec
+================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: Timestream.is_same_dec

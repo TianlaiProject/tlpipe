@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.OneAndOne.prefix
+===========================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. autoattribute:: OneAndOne.prefix

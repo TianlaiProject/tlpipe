@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.load_time_ordered
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Timestream.load_time_ordered

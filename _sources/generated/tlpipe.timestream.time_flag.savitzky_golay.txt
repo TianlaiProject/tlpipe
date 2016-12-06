@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.savitzky_golay
+==========================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. autofunction:: savitzky_golay

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.copy
+=========================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Timestream.copy

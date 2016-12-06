@@ -1,0 +1,6 @@
+tlpipe.timestream.rt2ts.Rt2ts.iteration
+=======================================
+
+.. currentmodule:: tlpipe.timestream.rt2ts
+
+.. autoattribute:: Rt2ts.iteration

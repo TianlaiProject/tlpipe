@@ -1,0 +1,6 @@
+tlpipe.timestream.rt2ts.Rt2ts.embarrassingly_parallelizable
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.rt2ts
+
+.. autoattribute:: Rt2ts.embarrassingly_parallelizable

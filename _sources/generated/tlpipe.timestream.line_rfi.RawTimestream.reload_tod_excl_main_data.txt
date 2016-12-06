@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.RawTimestream.reload_tod_excl_main_data
+==================================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: RawTimestream.reload_tod_excl_main_data

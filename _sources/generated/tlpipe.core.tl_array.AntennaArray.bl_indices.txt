@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.AntennaArray.bl_indices
+============================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: AntennaArray.bl_indices

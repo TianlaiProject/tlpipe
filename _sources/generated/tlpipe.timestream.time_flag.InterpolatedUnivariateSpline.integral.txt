@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.InterpolatedUnivariateSpline.integral
+=================================================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. automethod:: InterpolatedUnivariateSpline.integral

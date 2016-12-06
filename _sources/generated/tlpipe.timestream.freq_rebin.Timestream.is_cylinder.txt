@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.is_cylinder
+===================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. autoattribute:: Timestream.is_cylinder

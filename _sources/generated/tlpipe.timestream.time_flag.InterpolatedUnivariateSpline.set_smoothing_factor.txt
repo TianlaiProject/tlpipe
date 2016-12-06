@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.InterpolatedUnivariateSpline.set_smoothing_factor
+=============================================================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. automethod:: InterpolatedUnivariateSpline.set_smoothing_factor

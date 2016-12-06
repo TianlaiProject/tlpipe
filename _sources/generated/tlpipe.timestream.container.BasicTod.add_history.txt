@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.add_history
+================================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. automethod:: BasicTod.add_history

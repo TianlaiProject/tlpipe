@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.FileIterBase.finish
+============================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: FileIterBase.finish

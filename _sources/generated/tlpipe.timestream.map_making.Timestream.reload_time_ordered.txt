@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.reload_time_ordered
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: Timestream.reload_time_ordered

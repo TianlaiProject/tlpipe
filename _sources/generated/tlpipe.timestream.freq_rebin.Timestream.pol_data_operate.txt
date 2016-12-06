@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.pol_data_operate
+========================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Timestream.pol_data_operate

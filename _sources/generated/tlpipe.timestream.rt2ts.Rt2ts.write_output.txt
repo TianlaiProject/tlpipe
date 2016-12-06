@@ -1,0 +1,6 @@
+tlpipe.timestream.rt2ts.Rt2ts.write_output
+==========================================
+
+.. currentmodule:: tlpipe.timestream.rt2ts
+
+.. automethod:: Rt2ts.write_output

@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.TimestreamCommon.frequency_select
+============================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: TimestreamCommon.frequency_select

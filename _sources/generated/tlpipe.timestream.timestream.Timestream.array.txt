@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream.Timestream.array
+=============================================
+
+.. currentmodule:: tlpipe.timestream.timestream
+
+.. autoattribute:: Timestream.array

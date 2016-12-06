@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.plot
+===============================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autofunction:: plot

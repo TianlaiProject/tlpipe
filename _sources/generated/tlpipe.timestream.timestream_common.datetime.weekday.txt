@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_common.datetime.weekday
+====================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_common
+
+.. automethod:: datetime.weekday

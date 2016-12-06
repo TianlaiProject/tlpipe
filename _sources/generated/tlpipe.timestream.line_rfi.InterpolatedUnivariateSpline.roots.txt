@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.InterpolatedUnivariateSpline.roots
+=============================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: InterpolatedUnivariateSpline.roots

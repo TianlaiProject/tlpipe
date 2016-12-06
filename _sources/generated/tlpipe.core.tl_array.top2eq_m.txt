@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.top2eq_m
+=============================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. autofunction:: top2eq_m

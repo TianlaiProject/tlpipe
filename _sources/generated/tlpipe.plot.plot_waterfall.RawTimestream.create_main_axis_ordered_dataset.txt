@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.RawTimestream.create_main_axis_ordered_dataset
+=========================================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: RawTimestream.create_main_axis_ordered_dataset

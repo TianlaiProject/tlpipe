@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.Timestream.check_status
+================================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: Timestream.check_status

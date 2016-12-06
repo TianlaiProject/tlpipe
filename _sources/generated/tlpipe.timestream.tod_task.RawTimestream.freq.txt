@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.RawTimestream.freq
+=============================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. autoattribute:: RawTimestream.freq

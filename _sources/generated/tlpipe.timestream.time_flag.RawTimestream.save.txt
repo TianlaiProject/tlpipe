@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.RawTimestream.save
+==============================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. automethod:: RawTimestream.save

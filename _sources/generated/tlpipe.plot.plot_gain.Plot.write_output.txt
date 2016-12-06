@@ -1,0 +1,6 @@
+tlpipe.plot.plot_gain.Plot.write_output
+=======================================
+
+.. currentmodule:: tlpipe.plot.plot_gain
+
+.. automethod:: Plot.write_output

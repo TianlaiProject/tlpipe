@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Timestream.attrs_name_allowed
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Timestream.attrs_name_allowed

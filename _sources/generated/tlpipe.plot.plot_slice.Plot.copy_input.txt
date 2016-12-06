@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.Plot.copy_input
+======================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: Plot.copy_input

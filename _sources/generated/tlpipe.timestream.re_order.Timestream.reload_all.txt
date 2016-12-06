@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.reload_all
+================================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. automethod:: Timestream.reload_all

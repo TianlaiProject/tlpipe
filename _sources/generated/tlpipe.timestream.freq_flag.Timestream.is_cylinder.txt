@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.is_cylinder
+==================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. autoattribute:: Timestream.is_cylinder

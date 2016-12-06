@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.RawTimestream.load_all
+================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: RawTimestream.load_all

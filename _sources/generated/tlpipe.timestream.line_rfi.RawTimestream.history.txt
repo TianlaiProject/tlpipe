@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.RawTimestream.history
+================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. autoattribute:: RawTimestream.history

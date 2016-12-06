@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.RawTimestream.separate_pol_and_bl
+===========================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: RawTimestream.separate_pol_and_bl

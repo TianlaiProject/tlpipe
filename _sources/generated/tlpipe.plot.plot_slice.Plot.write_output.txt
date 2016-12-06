@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.Plot.write_output
+========================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: Plot.write_output

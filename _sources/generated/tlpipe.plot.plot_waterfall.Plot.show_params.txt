@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Plot.show_params
+===========================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: Plot.show_params

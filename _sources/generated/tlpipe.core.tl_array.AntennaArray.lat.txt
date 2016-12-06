@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.AntennaArray.lat
+=====================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. autoattribute:: AntennaArray.lat

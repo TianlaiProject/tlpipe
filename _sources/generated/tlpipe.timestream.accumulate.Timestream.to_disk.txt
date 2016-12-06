@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Timestream.to_disk
+===============================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Timestream.to_disk

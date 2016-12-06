@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.OneAndOne.params_init
+==============================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoattribute:: OneAndOne.params_init

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Plot.write_output
+============================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: Plot.write_output

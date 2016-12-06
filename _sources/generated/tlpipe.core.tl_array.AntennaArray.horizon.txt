@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.AntennaArray.horizon
+=========================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. autoattribute:: AntennaArray.horizon

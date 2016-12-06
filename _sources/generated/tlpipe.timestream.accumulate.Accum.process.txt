@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Accum.process
+==========================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Accum.process

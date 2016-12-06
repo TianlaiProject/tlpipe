@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.TimestreamCommon.dataset_name_allowed
+================================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: TimestreamCommon.dataset_name_allowed

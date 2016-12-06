@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Accum.prefix
+=========================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. autoattribute:: Accum.prefix

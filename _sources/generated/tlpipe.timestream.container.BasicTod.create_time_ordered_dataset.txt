@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.create_time_ordered_dataset
+================================================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. automethod:: BasicTod.create_time_ordered_dataset

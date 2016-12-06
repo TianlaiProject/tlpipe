@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.RawTimestream.require_dataset
+========================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: RawTimestream.require_dataset

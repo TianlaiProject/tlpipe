@@ -1,0 +1,6 @@
+tlpipe.timestream.rt2ts.Rt2ts.cacheable
+=======================================
+
+.. currentmodule:: tlpipe.timestream.rt2ts
+
+.. autoattribute:: Rt2ts.cacheable

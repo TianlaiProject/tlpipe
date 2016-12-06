@@ -1,0 +1,6 @@
+tlpipe.timestream.raw_timestream.RawTimestream.apply_mask
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.raw_timestream
+
+.. automethod:: RawTimestream.apply_mask

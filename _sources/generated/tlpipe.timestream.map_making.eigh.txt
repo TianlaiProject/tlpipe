@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.eigh
+=================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. autofunction:: eigh

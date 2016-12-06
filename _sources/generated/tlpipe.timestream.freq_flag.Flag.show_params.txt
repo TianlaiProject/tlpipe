@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Flag.show_params
+============================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Flag.show_params

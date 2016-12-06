@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_common.TimestreamCommon.time_select
+================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_common
+
+.. automethod:: TimestreamCommon.time_select

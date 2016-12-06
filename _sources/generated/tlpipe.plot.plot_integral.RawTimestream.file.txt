@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.RawTimestream.file
+============================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: RawTimestream.file

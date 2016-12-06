@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Rebin.iteration
+============================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. autoattribute:: Rebin.iteration

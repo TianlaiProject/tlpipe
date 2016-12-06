@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Timestream.flush
+===========================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: Timestream.flush

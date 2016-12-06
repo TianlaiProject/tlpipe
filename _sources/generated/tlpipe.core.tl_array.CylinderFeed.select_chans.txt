@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.CylinderFeed.select_chans
+==============================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: CylinderFeed.select_chans

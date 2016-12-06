@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.CylinderBeam.set_params
+============================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: CylinderBeam.set_params

@@ -1,0 +1,6 @@
+tlpipe.timestream.raw_timestream.RawTimestream.create_main_data
+===============================================================
+
+.. currentmodule:: tlpipe.timestream.raw_timestream
+
+.. automethod:: RawTimestream.create_main_data

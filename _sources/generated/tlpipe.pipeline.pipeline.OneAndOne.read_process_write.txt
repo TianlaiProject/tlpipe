@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.OneAndOne.read_process_write
+=====================================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: OneAndOne.read_process_write

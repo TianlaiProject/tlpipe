@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Rebin.finish
+=========================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Rebin.finish

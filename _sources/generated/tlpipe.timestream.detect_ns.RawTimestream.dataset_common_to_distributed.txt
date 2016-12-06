@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.RawTimestream.dataset_common_to_distributed
+=======================================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: RawTimestream.dataset_common_to_distributed

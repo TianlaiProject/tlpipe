@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream.Timestream.main_data
+=================================================
+
+.. currentmodule:: tlpipe.timestream.timestream
+
+.. autoattribute:: Timestream.main_data

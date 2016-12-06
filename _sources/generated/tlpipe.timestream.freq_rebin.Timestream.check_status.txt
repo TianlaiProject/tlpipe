@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.check_status
+====================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Timestream.check_status

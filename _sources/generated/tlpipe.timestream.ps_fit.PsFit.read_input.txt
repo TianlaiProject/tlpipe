@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.PsFit.read_input
+=========================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: PsFit.read_input

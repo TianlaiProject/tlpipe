@@ -1,0 +1,6 @@
+tlpipe.timestream.average.Average.embarrassingly_parallelizable
+===============================================================
+
+.. currentmodule:: tlpipe.timestream.average
+
+.. autoattribute:: Average.embarrassingly_parallelizable

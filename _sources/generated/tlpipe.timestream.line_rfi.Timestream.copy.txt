@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Timestream.copy
+==========================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: Timestream.copy

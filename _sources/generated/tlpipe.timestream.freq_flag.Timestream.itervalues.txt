@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.itervalues
+=================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Timestream.itervalues

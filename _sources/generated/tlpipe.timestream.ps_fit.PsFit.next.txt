@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.PsFit.next
+===================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: PsFit.next

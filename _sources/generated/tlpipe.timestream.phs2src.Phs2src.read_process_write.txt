@@ -1,0 +1,6 @@
+tlpipe.timestream.phs2src.Phs2src.read_process_write
+====================================================
+
+.. currentmodule:: tlpipe.timestream.phs2src
+
+.. automethod:: Phs2src.read_process_write

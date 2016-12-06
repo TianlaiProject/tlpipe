@@ -1,0 +1,49 @@
+tlpipe.timestream.daytime_mask.Mask
+===================================
+
+.. currentmodule:: tlpipe.timestream.daytime_mask
+
+.. autoclass:: Mask
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Mask.cacheable
+      ~Mask.embarrassingly_parallelizable
+      ~Mask.history
+      ~Mask.iteration
+      ~Mask.params_init
+      ~Mask.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Mask.cast_input
+      ~Mask.copy_input
+      ~Mask.data_select
+      ~Mask.finish
+      ~Mask.next
+      ~Mask.process
+      ~Mask.read_input
+      ~Mask.read_output
+      ~Mask.read_process_write
+      ~Mask.setup
+      ~Mask.show_params
+      ~Mask.write_output
+   
+   

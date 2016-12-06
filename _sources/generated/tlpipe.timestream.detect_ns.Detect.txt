@@ -1,0 +1,49 @@
+tlpipe.timestream.detect_ns.Detect
+==================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. autoclass:: Detect
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Detect.cacheable
+      ~Detect.embarrassingly_parallelizable
+      ~Detect.history
+      ~Detect.iteration
+      ~Detect.params_init
+      ~Detect.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Detect.cast_input
+      ~Detect.copy_input
+      ~Detect.data_select
+      ~Detect.finish
+      ~Detect.next
+      ~Detect.process
+      ~Detect.read_input
+      ~Detect.read_output
+      ~Detect.read_process_write
+      ~Detect.setup
+      ~Detect.show_params
+      ~Detect.write_output
+   
+   

@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.OneAndOne.embarrassingly_parallelizable
+================================================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoattribute:: OneAndOne.embarrassingly_parallelizable

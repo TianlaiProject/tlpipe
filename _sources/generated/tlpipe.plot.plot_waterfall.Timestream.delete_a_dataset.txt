@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Timestream.delete_a_dataset
+======================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: Timestream.delete_a_dataset

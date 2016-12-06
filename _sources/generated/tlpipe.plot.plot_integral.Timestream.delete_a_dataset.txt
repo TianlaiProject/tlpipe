@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.delete_a_dataset
+=====================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Timestream.delete_a_dataset

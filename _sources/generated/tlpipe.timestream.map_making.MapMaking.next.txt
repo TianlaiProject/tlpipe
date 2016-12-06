@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.MapMaking.next
+===========================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: MapMaking.next

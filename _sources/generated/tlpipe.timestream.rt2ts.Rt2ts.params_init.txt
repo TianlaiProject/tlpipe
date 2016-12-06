@@ -1,0 +1,6 @@
+tlpipe.timestream.rt2ts.Rt2ts.params_init
+=========================================
+
+.. currentmodule:: tlpipe.timestream.rt2ts
+
+.. autoattribute:: Rt2ts.params_init

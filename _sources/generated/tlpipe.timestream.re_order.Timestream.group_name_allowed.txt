@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.group_name_allowed
+========================================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. automethod:: Timestream.group_name_allowed

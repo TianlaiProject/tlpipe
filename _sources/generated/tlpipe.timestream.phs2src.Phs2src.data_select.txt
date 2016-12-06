@@ -1,0 +1,6 @@
+tlpipe.timestream.phs2src.Phs2src.data_select
+=============================================
+
+.. currentmodule:: tlpipe.timestream.phs2src
+
+.. automethod:: Phs2src.data_select

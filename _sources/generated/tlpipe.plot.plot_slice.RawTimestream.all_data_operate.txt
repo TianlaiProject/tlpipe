@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.RawTimestream.all_data_operate
+=====================================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: RawTimestream.all_data_operate

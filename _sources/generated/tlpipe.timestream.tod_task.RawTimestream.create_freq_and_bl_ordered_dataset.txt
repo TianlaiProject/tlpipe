@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.RawTimestream.create_freq_and_bl_ordered_dataset
+===========================================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: RawTimestream.create_freq_and_bl_ordered_dataset

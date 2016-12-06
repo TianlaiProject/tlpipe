@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.input_path
+=====================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. autofunction:: input_path

@@ -1,0 +1,6 @@
+tlpipe.timestream.rt2ts.Rt2ts.process
+=====================================
+
+.. currentmodule:: tlpipe.timestream.rt2ts
+
+.. automethod:: Rt2ts.process

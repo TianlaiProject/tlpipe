@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.RawTimestream.vis
+============================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. autoattribute:: RawTimestream.vis

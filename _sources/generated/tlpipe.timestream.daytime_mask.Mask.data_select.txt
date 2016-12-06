@@ -1,0 +1,6 @@
+tlpipe.timestream.daytime_mask.Mask.data_select
+===============================================
+
+.. currentmodule:: tlpipe.timestream.daytime_mask
+
+.. automethod:: Mask.data_select

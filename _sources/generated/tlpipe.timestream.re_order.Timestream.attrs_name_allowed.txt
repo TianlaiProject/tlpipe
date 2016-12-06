@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.attrs_name_allowed
+========================================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. automethod:: Timestream.attrs_name_allowed

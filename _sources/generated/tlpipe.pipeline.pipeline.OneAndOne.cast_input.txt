@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.OneAndOne.cast_input
+=============================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: OneAndOne.cast_input

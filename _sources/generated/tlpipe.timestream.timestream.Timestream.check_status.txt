@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream.Timestream.check_status
+====================================================
+
+.. currentmodule:: tlpipe.timestream.timestream
+
+.. automethod:: Timestream.check_status

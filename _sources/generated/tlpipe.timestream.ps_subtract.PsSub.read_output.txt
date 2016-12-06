@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_subtract.PsSub.read_output
+===============================================
+
+.. currentmodule:: tlpipe.timestream.ps_subtract
+
+.. automethod:: PsSub.read_output

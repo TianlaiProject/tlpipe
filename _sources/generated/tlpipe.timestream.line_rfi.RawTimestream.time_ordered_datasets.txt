@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.RawTimestream.time_ordered_datasets
+==============================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. autoattribute:: RawTimestream.time_ordered_datasets

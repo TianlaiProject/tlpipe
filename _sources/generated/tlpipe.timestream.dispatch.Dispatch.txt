@@ -1,0 +1,49 @@
+tlpipe.timestream.dispatch.Dispatch
+===================================
+
+.. currentmodule:: tlpipe.timestream.dispatch
+
+.. autoclass:: Dispatch
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Dispatch.cacheable
+      ~Dispatch.embarrassingly_parallelizable
+      ~Dispatch.history
+      ~Dispatch.iteration
+      ~Dispatch.params_init
+      ~Dispatch.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Dispatch.cast_input
+      ~Dispatch.copy_input
+      ~Dispatch.data_select
+      ~Dispatch.finish
+      ~Dispatch.next
+      ~Dispatch.process
+      ~Dispatch.read_input
+      ~Dispatch.read_output
+      ~Dispatch.read_process_write
+      ~Dispatch.setup
+      ~Dispatch.show_params
+      ~Dispatch.write_output
+   
+   

@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.RawTimestream.local_bl
+==================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. autoattribute:: RawTimestream.local_bl

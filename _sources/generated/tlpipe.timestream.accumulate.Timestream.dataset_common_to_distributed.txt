@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Timestream.dataset_common_to_distributed
+=====================================================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Timestream.dataset_common_to_distributed

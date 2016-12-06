@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.RawTimestream.feed_ordered_datasets
+==============================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoattribute:: RawTimestream.feed_ordered_datasets

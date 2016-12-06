@@ -1,0 +1,6 @@
+tlpipe.utils.np_util.average
+============================
+
+.. currentmodule:: tlpipe.utils.np_util
+
+.. autofunction:: average

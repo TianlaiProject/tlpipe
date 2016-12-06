@@ -1,0 +1,6 @@
+tlpipe.timestream.barrier.Barrier.prefix
+========================================
+
+.. currentmodule:: tlpipe.timestream.barrier
+
+.. autoattribute:: Barrier.prefix

@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.DoNothing.finish
+=========================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: DoNothing.finish

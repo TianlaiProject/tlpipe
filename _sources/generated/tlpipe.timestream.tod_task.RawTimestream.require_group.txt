@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.RawTimestream.require_group
+======================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: RawTimestream.require_group

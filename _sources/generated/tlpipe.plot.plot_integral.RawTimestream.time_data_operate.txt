@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.RawTimestream.time_data_operate
+=========================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: RawTimestream.time_data_operate

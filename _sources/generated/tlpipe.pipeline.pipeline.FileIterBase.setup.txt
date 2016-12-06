@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.FileIterBase.setup
+===========================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: FileIterBase.setup

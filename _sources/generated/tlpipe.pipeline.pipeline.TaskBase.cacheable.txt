@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.TaskBase.cacheable
+===========================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoattribute:: TaskBase.cacheable

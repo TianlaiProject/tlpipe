@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.RawTimestream.close
+============================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: RawTimestream.close

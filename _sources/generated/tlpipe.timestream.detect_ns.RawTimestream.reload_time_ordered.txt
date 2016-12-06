@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.RawTimestream.reload_time_ordered
+=============================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: RawTimestream.reload_time_ordered

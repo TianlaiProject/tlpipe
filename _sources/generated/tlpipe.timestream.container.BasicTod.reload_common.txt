@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.reload_common
+==================================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. automethod:: BasicTod.reload_common

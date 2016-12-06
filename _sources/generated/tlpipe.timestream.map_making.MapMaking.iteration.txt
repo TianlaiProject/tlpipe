@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.MapMaking.iteration
+================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. autoattribute:: MapMaking.iteration

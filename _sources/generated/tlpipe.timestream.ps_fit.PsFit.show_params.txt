@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.PsFit.show_params
+==========================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: PsFit.show_params

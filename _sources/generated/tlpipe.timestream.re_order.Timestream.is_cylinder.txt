@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.is_cylinder
+=================================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. autoattribute:: Timestream.is_cylinder

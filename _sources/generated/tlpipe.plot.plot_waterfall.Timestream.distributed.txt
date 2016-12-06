@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Timestream.distributed
+=================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoattribute:: Timestream.distributed

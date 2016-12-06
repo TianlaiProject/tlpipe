@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.local_bl
+================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. autoattribute:: Timestream.local_bl

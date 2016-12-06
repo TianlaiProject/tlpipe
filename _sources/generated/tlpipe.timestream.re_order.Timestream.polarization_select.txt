@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.polarization_select
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. automethod:: Timestream.polarization_select

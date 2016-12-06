@@ -1,0 +1,6 @@
+tlpipe.timestream.average.Average.prefix
+========================================
+
+.. currentmodule:: tlpipe.timestream.average
+
+.. autoattribute:: Average.prefix

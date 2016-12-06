@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.RawTimestream.flush
+============================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: RawTimestream.flush

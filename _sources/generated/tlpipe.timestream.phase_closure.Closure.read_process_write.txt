@@ -1,0 +1,6 @@
+tlpipe.timestream.phase_closure.Closure.read_process_write
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.phase_closure
+
+.. automethod:: Closure.read_process_write

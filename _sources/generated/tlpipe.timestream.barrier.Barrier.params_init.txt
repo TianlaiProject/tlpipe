@@ -1,0 +1,6 @@
+tlpipe.timestream.barrier.Barrier.params_init
+=============================================
+
+.. currentmodule:: tlpipe.timestream.barrier
+
+.. autoattribute:: Barrier.params_init

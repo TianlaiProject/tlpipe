@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.time_freq_and_bl_data_operate
+==================================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Timestream.time_freq_and_bl_data_operate

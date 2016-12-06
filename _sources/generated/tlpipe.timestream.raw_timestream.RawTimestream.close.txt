@@ -1,0 +1,6 @@
+tlpipe.timestream.raw_timestream.RawTimestream.close
+====================================================
+
+.. currentmodule:: tlpipe.timestream.raw_timestream
+
+.. automethod:: RawTimestream.close

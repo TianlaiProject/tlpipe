@@ -1,0 +1,6 @@
+tlpipe.timestream.raw_timestream.RawTimestream.copy
+===================================================
+
+.. currentmodule:: tlpipe.timestream.raw_timestream
+
+.. automethod:: RawTimestream.copy

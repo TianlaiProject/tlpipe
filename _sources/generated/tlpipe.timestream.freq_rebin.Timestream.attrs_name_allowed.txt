@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.attrs_name_allowed
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Timestream.attrs_name_allowed

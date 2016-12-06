@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.PsFit.copy_input
+=========================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: PsFit.copy_input

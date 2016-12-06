@@ -1,0 +1,6 @@
+tlpipe.kiyopy.parse_ini.write_params
+====================================
+
+.. currentmodule:: tlpipe.kiyopy.parse_ini
+
+.. autofunction:: write_params

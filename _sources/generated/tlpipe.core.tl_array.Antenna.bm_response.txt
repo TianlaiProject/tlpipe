@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.Antenna.bm_response
+========================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: Antenna.bm_response

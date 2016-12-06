@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.freq_and_bl_data_operate
+==============================================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. automethod:: Timestream.freq_and_bl_data_operate

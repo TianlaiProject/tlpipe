@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.InterpolatedUnivariateSpline.integral
+================================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: InterpolatedUnivariateSpline.integral

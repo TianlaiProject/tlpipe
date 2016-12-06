@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.RawTimestream.reload_common
+======================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: RawTimestream.reload_common

@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.Detect.data_select
+==============================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: Detect.data_select

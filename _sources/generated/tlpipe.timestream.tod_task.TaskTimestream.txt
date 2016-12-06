@@ -1,0 +1,49 @@
+tlpipe.timestream.tod_task.TaskTimestream
+=========================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. autoclass:: TaskTimestream
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~TaskTimestream.cacheable
+      ~TaskTimestream.embarrassingly_parallelizable
+      ~TaskTimestream.history
+      ~TaskTimestream.iteration
+      ~TaskTimestream.params_init
+      ~TaskTimestream.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~TaskTimestream.cast_input
+      ~TaskTimestream.copy_input
+      ~TaskTimestream.data_select
+      ~TaskTimestream.finish
+      ~TaskTimestream.next
+      ~TaskTimestream.process
+      ~TaskTimestream.read_input
+      ~TaskTimestream.read_output
+      ~TaskTimestream.read_process_write
+      ~TaskTimestream.setup
+      ~TaskTimestream.show_params
+      ~TaskTimestream.write_output
+   
+   

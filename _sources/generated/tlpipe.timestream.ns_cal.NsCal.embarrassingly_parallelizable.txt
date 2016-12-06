@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.NsCal.embarrassingly_parallelizable
+============================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. autoattribute:: NsCal.embarrassingly_parallelizable

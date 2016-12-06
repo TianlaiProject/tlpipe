@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.TimestreamCommon.group_name_allowed
+==============================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: TimestreamCommon.group_name_allowed

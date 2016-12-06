@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream.Timestream.ondisk
+==============================================
+
+.. currentmodule:: tlpipe.timestream.timestream
+
+.. autoattribute:: Timestream.ondisk

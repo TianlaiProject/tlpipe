@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.info
+=========================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Timestream.info

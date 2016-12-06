@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Timestream.create_dataset
+======================================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Timestream.create_dataset

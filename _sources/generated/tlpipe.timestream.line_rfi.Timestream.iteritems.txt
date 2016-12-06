@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Timestream.iteritems
+===============================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: Timestream.iteritems

@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Accum.iteration
+============================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. autoattribute:: Accum.iteration

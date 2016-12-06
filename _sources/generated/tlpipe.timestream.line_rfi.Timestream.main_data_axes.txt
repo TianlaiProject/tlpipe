@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Timestream.main_data_axes
+====================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. autoattribute:: Timestream.main_data_axes

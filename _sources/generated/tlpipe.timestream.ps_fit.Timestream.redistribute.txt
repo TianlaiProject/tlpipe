@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.Timestream.redistribute
+================================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: Timestream.redistribute

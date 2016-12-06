@@ -1,0 +1,6 @@
+tlpipe.timestream.dispatch.Dispatch.params_init
+===============================================
+
+.. currentmodule:: tlpipe.timestream.dispatch
+
+.. autoattribute:: Dispatch.params_init

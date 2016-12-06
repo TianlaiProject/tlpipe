@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.OneAndOne.write_output
+===============================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: OneAndOne.write_output

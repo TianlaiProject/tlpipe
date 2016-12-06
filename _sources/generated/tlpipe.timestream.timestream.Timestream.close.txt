@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream.Timestream.close
+=============================================
+
+.. currentmodule:: tlpipe.timestream.timestream
+
+.. automethod:: Timestream.close

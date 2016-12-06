@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.FileIterBase.write_output
+==================================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: FileIterBase.write_output

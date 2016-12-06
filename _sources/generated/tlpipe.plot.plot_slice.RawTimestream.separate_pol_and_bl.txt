@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.RawTimestream.separate_pol_and_bl
+========================================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: RawTimestream.separate_pol_and_bl

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Plot.cacheable
+========================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: Plot.cacheable

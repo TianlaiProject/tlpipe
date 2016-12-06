@@ -1,0 +1,6 @@
+tlpipe.timestream.phs2src.Phs2src.embarrassingly_parallelizable
+===============================================================
+
+.. currentmodule:: tlpipe.timestream.phs2src
+
+.. autoattribute:: Phs2src.embarrassingly_parallelizable

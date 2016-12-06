@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.Timestream.all_data_operate
+======================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: Timestream.all_data_operate

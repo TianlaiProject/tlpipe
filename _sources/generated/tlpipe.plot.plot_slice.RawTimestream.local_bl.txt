@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.RawTimestream.local_bl
+=============================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. autoattribute:: RawTimestream.local_bl

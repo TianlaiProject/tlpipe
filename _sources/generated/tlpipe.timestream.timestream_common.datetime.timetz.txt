@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_common.datetime.timetz
+===================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_common
+
+.. automethod:: datetime.timetz

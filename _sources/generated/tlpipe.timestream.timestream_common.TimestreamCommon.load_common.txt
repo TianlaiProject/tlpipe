@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_common.TimestreamCommon.load_common
+================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_common
+
+.. automethod:: TimestreamCommon.load_common

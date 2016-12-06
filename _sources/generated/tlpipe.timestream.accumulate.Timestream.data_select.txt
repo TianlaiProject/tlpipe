@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Timestream.data_select
+===================================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Timestream.data_select

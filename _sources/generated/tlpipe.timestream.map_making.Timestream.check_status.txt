@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.check_status
+====================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: Timestream.check_status

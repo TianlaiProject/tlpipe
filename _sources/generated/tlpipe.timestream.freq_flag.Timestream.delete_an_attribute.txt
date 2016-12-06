@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.delete_an_attribute
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Timestream.delete_an_attribute

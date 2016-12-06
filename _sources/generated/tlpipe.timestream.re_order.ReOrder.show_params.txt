@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.ReOrder.show_params
+==============================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. automethod:: ReOrder.show_params

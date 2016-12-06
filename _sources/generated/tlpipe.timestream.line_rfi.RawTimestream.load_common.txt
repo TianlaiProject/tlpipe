@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.RawTimestream.load_common
+====================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: RawTimestream.load_common

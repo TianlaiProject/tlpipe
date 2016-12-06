@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.TaskTimestream.embarrassingly_parallelizable
+=======================================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. autoattribute:: TaskTimestream.embarrassingly_parallelizable

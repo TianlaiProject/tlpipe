@@ -1,0 +1,6 @@
+tlpipe.timestream.daytime_mask.Mask.cacheable
+=============================================
+
+.. currentmodule:: tlpipe.timestream.daytime_mask
+
+.. autoattribute:: Mask.cacheable

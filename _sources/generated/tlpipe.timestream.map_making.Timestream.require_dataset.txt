@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.require_dataset
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: Timestream.require_dataset

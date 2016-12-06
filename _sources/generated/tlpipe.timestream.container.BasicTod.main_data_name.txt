@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.main_data_name
+===================================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. autoattribute:: BasicTod.main_data_name

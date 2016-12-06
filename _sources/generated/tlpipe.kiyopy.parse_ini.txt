@@ -1,0 +1,27 @@
+tlpipe.kiyopy.parse_ini
+=======================
+
+.. automodule:: tlpipe.kiyopy.parse_ini
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      parse
+      parse_dict
+      write_params
+   
+   
+
+
+   
+   
+   
+
+
+   
+   
+   

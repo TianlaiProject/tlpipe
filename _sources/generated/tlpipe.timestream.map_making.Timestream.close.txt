@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.close
+=============================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: Timestream.close

@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.Timestream.main_data_name
+====================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. autoattribute:: Timestream.main_data_name

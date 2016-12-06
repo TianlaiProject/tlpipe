@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Timestream.lin2stokes
+================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: Timestream.lin2stokes

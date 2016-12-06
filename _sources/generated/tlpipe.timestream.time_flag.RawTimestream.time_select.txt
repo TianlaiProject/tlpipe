@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.RawTimestream.time_select
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. automethod:: RawTimestream.time_select

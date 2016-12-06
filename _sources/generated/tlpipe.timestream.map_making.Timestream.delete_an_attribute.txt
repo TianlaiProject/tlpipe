@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.delete_an_attribute
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: Timestream.delete_an_attribute

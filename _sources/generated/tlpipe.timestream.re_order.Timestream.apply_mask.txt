@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.apply_mask
+================================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. automethod:: Timestream.apply_mask

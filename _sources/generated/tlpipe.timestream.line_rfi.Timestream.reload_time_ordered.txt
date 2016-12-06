@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Timestream.reload_time_ordered
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: Timestream.reload_time_ordered

@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Timestream.load_main_data
+====================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: Timestream.load_main_data

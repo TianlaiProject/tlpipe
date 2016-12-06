@@ -1,0 +1,6 @@
+tlpipe.timestream.raw_timestream.RawTimestream.delete_a_dataset
+===============================================================
+
+.. currentmodule:: tlpipe.timestream.raw_timestream
+
+.. automethod:: RawTimestream.delete_a_dataset

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_gain.OneAndOne.finish
+======================================
+
+.. currentmodule:: tlpipe.plot.plot_gain
+
+.. automethod:: OneAndOne.finish

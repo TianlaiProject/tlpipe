@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.data_select
+=================================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. automethod:: Timestream.data_select

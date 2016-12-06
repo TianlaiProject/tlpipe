@@ -1,0 +1,6 @@
+tlpipe.timestream.raw_timestream.RawTimestream.freq_data_operate
+================================================================
+
+.. currentmodule:: tlpipe.timestream.raw_timestream
+
+.. automethod:: RawTimestream.freq_data_operate

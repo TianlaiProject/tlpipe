@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Timestream.local_pol
+===============================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoattribute:: Timestream.local_pol

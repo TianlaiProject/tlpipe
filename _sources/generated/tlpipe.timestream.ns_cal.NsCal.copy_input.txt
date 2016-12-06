@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.NsCal.copy_input
+=========================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: NsCal.copy_input

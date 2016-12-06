@@ -1,0 +1,6 @@
+tlpipe.timestream.raw_timestream.RawTimestream.to_files
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.raw_timestream
+
+.. automethod:: RawTimestream.to_files

@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.PsCal.prefix
+=====================================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. autoattribute:: PsCal.prefix

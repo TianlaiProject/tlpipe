@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.RawTimestream.freq_ordered_datasets
+============================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. autoattribute:: RawTimestream.freq_ordered_datasets

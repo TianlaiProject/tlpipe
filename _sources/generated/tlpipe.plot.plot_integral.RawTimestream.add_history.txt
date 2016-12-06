@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.RawTimestream.add_history
+===================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: RawTimestream.add_history

@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.AntennaArray.compute_pressure
+==================================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: AntennaArray.compute_pressure

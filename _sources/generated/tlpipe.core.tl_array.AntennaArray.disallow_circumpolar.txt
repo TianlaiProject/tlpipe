@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.AntennaArray.disallow_circumpolar
+======================================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: AntennaArray.disallow_circumpolar

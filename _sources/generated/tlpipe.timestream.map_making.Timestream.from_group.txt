@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.from_group
+==================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: Timestream.from_group

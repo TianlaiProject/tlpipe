@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.RawTimestream.vis_mask
+==================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. autoattribute:: RawTimestream.vis_mask

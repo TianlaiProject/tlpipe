@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Rebin.read_process_write
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Rebin.read_process_write

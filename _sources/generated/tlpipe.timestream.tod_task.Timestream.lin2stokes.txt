@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.Timestream.lin2stokes
+================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: Timestream.lin2stokes

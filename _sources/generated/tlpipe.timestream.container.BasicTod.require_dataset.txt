@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.require_dataset
+====================================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. automethod:: BasicTod.require_dataset

@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.main_time_ordered_datasets
+=================================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. autoattribute:: Timestream.main_time_ordered_datasets

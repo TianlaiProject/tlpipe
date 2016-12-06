@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.RawTimestream.create_freq_and_bl_ordered_dataset
+============================================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: RawTimestream.create_freq_and_bl_ordered_dataset

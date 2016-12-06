@@ -1,0 +1,29 @@
+tlpipe.core.tl_array.DishBeam
+=============================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. autoclass:: DishBeam
+
+   
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~DishBeam.get_params
+      ~DishBeam.response
+      ~DishBeam.select_chans
+      ~DishBeam.set_params
+      ~DishBeam.update
+   
+   

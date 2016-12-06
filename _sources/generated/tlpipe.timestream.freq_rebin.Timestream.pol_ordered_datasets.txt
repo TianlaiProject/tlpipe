@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.pol_ordered_datasets
+============================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. autoattribute:: Timestream.pol_ordered_datasets

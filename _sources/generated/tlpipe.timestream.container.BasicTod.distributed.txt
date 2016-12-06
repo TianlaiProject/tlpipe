@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.distributed
+================================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. autoattribute:: BasicTod.distributed

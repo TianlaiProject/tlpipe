@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.RawTimestream.is_continuous
+======================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. autoattribute:: RawTimestream.is_continuous

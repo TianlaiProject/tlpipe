@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.RawTimestream.separate_pol_and_bl
+============================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: RawTimestream.separate_pol_and_bl

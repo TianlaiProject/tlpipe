@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Plot.params_init
+===========================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoattribute:: Plot.params_init

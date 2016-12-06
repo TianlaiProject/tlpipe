@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.RawTimestream.delete_a_dataset
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: RawTimestream.delete_a_dataset

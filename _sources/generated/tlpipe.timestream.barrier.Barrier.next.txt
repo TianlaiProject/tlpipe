@@ -1,0 +1,6 @@
+tlpipe.timestream.barrier.Barrier.next
+======================================
+
+.. currentmodule:: tlpipe.timestream.barrier
+
+.. automethod:: Barrier.next

@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Flag.cast_input
+==========================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: Flag.cast_input

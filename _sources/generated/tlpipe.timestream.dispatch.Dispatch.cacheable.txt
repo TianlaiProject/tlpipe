@@ -1,0 +1,6 @@
+tlpipe.timestream.dispatch.Dispatch.cacheable
+=============================================
+
+.. currentmodule:: tlpipe.timestream.dispatch
+
+.. autoattribute:: Dispatch.cacheable

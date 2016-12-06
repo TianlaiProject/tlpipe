@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.is_dish
+=============================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. autoattribute:: Timestream.is_dish

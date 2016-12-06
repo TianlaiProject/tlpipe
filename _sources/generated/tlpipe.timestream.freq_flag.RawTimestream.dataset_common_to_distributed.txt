@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.RawTimestream.dataset_common_to_distributed
+=======================================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: RawTimestream.dataset_common_to_distributed

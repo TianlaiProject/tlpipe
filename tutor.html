@@ -1,0 +1,794 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Tutorial &mdash; tlpipe 0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="tlpipe 0.1 documentation" href="index.html"/>
+        <link rel="next" title="Developer’s guide" href="guide.html"/>
+        <link rel="prev" title="Installation" href="install.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="index.html" class="icon icon-home"> tlpipe
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="install.html#python-version">Python version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#installation-guid">Installation guid</a></li>
+</ul>
+</li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#run-the-pipeline">Run the pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#single-process-run">Single process run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#multiple-process-run">Multiple process run</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pipeline-products-and-intermediate-results">Pipeline products and intermediate results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#other-excutable-commands">Other excutable commands</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="guide.html">Developer&#8217;s guide</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="core.html"><code class="docutils literal"><span class="pre">core</span></code> &#8211; Core functionalities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="core.html#constants">Constants</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.core.constants.html">tlpipe.core.constants</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.core.constants.html#constants">Constants</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="core.html#tianlai-array-model">Tianlai array model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.core.tl_array.html">tlpipe.core.tl_array</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.core.tl_array.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="kiyopy.html"><code class="docutils literal"><span class="pre">kiyopy</span></code> &#8211; Kiyoshi Masui&#8217;s paramter parsing package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="kiyopy.html#pameter-parser">Pameter parser</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.kiyopy.parse_ini.html">tlpipe.kiyopy.parse_ini</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.kiyopy.parse_ini.parse.html">tlpipe.kiyopy.parse_ini.parse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.kiyopy.parse_ini.parse_dict.html">tlpipe.kiyopy.parse_ini.parse_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.kiyopy.parse_ini.write_params.html">tlpipe.kiyopy.parse_ini.write_params</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="kiyopy.html#custom-exceptions">Custom exceptions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.kiyopy.custom_exceptions.html">tlpipe.kiyopy.custom_exceptions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.kiyopy.custom_exceptions.DataError.html">tlpipe.kiyopy.custom_exceptions.DataError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.kiyopy.custom_exceptions.FileParameterTypeError.html">tlpipe.kiyopy.custom_exceptions.FileParameterTypeError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.kiyopy.custom_exceptions.NextIteration.html">tlpipe.kiyopy.custom_exceptions.NextIteration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.kiyopy.custom_exceptions.ParameterFileError.html">tlpipe.kiyopy.custom_exceptions.ParameterFileError</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="kiyopy.html#utilities">Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.kiyopy.utils.html">tlpipe.kiyopy.utils</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.kiyopy.utils.abbreviate_file_path.html">tlpipe.kiyopy.utils.abbreviate_file_path</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.kiyopy.utils.mkdir_p.html">tlpipe.kiyopy.utils.mkdir_p</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.kiyopy.utils.mkparents.html">tlpipe.kiyopy.utils.mkparents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pipeline.html"><code class="docutils literal"><span class="pre">pipeline</span></code> &#8211; Pipeline control and tasks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="pipeline.html#pipeline">Pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.pipeline.pipeline.html">tlpipe.pipeline.pipeline</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.pipeline.pipeline.html#basic-tasks">Basic Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.pipeline.pipeline.html#pipeline-configuration">Pipeline Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.pipeline.pipeline.html#execution-order">Execution Order</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.pipeline.pipeline.html#advanced-tasks">Advanced Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.pipeline.pipeline.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="timestream.html"><code class="docutils literal"><span class="pre">timestream</span></code> &#8211; Timestream data containers and operating tasks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="timestream.html#data-containers">Data containers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.container.html">tlpipe.timestream.container</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.container.check_axis.html">tlpipe.timestream.container.check_axis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.container.deepcopy.html">tlpipe.timestream.container.deepcopy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.container.ensure_file_list.html">tlpipe.timestream.container.ensure_file_list</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.container.BasicTod.html">tlpipe.timestream.container.BasicTod</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.timestream_common.html">tlpipe.timestream.timestream_common</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.timestream_common.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.raw_timestream.html">tlpipe.timestream.raw_timestream</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.raw_timestream.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.timestream.html">tlpipe.timestream.timestream</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.timestream.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="timestream.html#timestream-base-task">Timestream base task</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.tod_task.html">tlpipe.timestream.tod_task</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.tod_task.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="timestream.html#operating-tasks">Operating tasks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.dispatch.html">tlpipe.timestream.dispatch</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.dispatch.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.detect_ns.html">tlpipe.timestream.detect_ns</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.detect_ns.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.line_rfi.html">tlpipe.timestream.line_rfi</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.line_rfi.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.time_flag.html">tlpipe.timestream.time_flag</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.time_flag.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.freq_flag.html">tlpipe.timestream.freq_flag</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.freq_flag.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.ns_cal.html">tlpipe.timestream.ns_cal</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.ns_cal.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.rt2ts.html">tlpipe.timestream.rt2ts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.rt2ts.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.ps_fit.html">tlpipe.timestream.ps_fit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.ps_fit.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.ps_cal.html">tlpipe.timestream.ps_cal</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.ps_cal.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.phs2src.html">tlpipe.timestream.phs2src</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.phs2src.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.phs2zen.html">tlpipe.timestream.phs2zen</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.phs2zen.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.phase_closure.html">tlpipe.timestream.phase_closure</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.phase_closure.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.ps_subtract.html">tlpipe.timestream.ps_subtract</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.ps_subtract.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.daytime_mask.html">tlpipe.timestream.daytime_mask</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.daytime_mask.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.re_order.html">tlpipe.timestream.re_order</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.re_order.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.accumulate.html">tlpipe.timestream.accumulate</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.accumulate.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.barrier.html">tlpipe.timestream.barrier</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.barrier.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.average.html">tlpipe.timestream.average</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.average.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.freq_rebin.html">tlpipe.timestream.freq_rebin</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.freq_rebin.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.map_making.html">tlpipe.timestream.map_making</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.map_making.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="timestream.html#utilities">Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.sg_filter.html">tlpipe.timestream.sg_filter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.sg_filter.factorial.html">tlpipe.timestream.sg_filter.factorial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.sg_filter.savitzky_golay.html">tlpipe.timestream.sg_filter.savitzky_golay</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cal.html"><code class="docutils literal"><span class="pre">cal</span></code> &#8211; Calibration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="map.html"><code class="docutils literal"><span class="pre">map</span></code> &#8211; Map-making</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="map.html#driftscan-map-making">Driftscan map-making</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="foreground.html"><code class="docutils literal"><span class="pre">foreground</span></code> &#8211; Foreground subtraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ps.html"><code class="docutils literal"><span class="pre">ps</span></code> &#8211; Power spectrum estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plot.html"><code class="docutils literal"><span class="pre">plot</span></code> &#8211; Tasks for plottting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="plot.html#plotting-tasks">Plotting tasks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.plot.plot_integral.html">tlpipe.plot.plot_integral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.plot.plot_integral.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.plot.plot_slice.html">tlpipe.plot.plot_slice</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.plot.plot_slice.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.plot.plot_waterfall.html">tlpipe.plot.plot_waterfall</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.plot.plot_waterfall.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.plot.plot_gain.html">tlpipe.plot.plot_gain</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.plot.plot_gain.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="utils.html"><code class="docutils literal"><span class="pre">utils</span></code> &#8211; Utility functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="utils.html#utilities">Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.utils.date_util.html">tlpipe.utils.date_util</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.utils.date_util.get_ephdate.html">tlpipe.utils.date_util.get_ephdate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.utils.date_util.get_juldate.html">tlpipe.utils.date_util.get_juldate</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.utils.np_util.html">tlpipe.utils.np_util</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.utils.np_util.average.html">tlpipe.utils.np_util.average</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.utils.np_util.unique.html">tlpipe.utils.np_util.unique</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.utils.path_util.html">tlpipe.utils.path_util</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.utils.path_util.input_path.html">tlpipe.utils.path_util.input_path</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.utils.path_util.iter_path.html">tlpipe.utils.path_util.iter_path</a></li>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.utils.path_util.output_path.html">tlpipe.utils.path_util.output_path</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.utils.pickle_util.html">tlpipe.utils.pickle_util</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.utils.pickle_util.get_value.html">tlpipe.utils.pickle_util.get_value</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">tlpipe</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>Tutorial</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/tutor.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="tutorial">
+<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This is intended to be a tutorial for the user of <em>tlpipe</em> package, who will
+just use the already presented tasks in the package to do some data analysis.
+For the developers of this package and those who want to do some
+developments/continuations, you may want to refer
+<a class="reference internal" href="guide.html"><span class="doc">Developer&#8217;s guide</span></a> for a deeper introduction.</p>
+</div>
+<div class="section" id="prepare-for-the-input-pipe-file">
+<h2>Prepare for the input pipe file<a class="headerlink" href="#prepare-for-the-input-pipe-file" title="Permalink to this headline">¶</a></h2>
+<p>An input pipe file is actually a <em>python</em> script file, so it follows plain
+python syntax, but to emphasis that it is just used as an input pipe file
+for a data analysis pipeline, usually it is named with a suffix &#8221;.pipe&#8221;
+instead of &#8221;.py&#8221;.</p>
+<p>The only required argument to run a data analysis pipeline is the input pipe
+file, in which one specifies all tasks to be imported and excuted, all
+parameter settings for each task and also the excuting order (or flow
+controlling) of the pipeline.</p>
+<p>Here we take the waterfall plot as an example to show how to write an input
+pipe file.</p>
+<ol class="arabic">
+<li><p class="first">Create and open an file named <em>plot_wf.pipe</em> (the name can be choosen arbitrary);</p>
+</li>
+<li><p class="first">Speicify a variable <cite>pipe_tasks</cite> to hold analysis tasks that will be
+imported and excuted, and (<strong>optionally</strong>) a variable <cite>pipe_outdir</cite> to set
+the output directory (the default value is &#8216;./output/&#8217;). You can set other
+parameters related to the pipeline according to your need or just use the
+default values, see all paramters that can be set in
+<a class="reference internal" href="generated/tlpipe.pipeline.pipeline.Manager.html#tlpipe.pipeline.pipeline.Manager" title="tlpipe.pipeline.pipeline.Manager"><code class="xref py py-class docutils literal"><span class="pre">Manager</span></code></a>, <strong>note</strong>: all these parameters
+should be prepended with a prefix &#8220;pipe_&#8221;;</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12</pre></div></td><td class="code"><div class="highlight"><pre><span class="c"># -*- mode: python; -*-</span>
+
+<span class="c"># input file for the analysis pipeline</span>
+<span class="c"># execute this pipeline by either command of the following two:</span>
+<span class="c"># tlpipe dir/to/plot_wf.pipe</span>
+<span class="c"># mpiexec -n N tlpipe dir/to/plot_wf.pipe</span>
+
+
+<span class="n">pipe_tasks</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">pipe_outdir</span> <span class="o">=</span> <span class="s">&#39;./output/&#39;</span>
+<span class="n">pipe_logging</span> <span class="o">=</span> <span class="s">&#39;notset&#39;</span>
+<span class="c"># pipe_logging = &#39;info&#39;</span>
+</pre></div>
+</td></tr></table></div>
+</li>
+<li><p class="first">Import tasks and set task parameters:</p>
+<ol class="arabic">
+<li><p class="first">Import <a class="reference internal" href="generated/tlpipe.timestream.dispatch.Dispatch.html#tlpipe.timestream.dispatch.Dispatch" title="tlpipe.timestream.dispatch.Dispatch"><code class="xref py py-class docutils literal"><span class="pre">Dispatch</span></code></a> to select data to plot;</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">glob</span>
+<span class="n">data_dir</span> <span class="o">=</span> <span class="s">&#39;dir/to/data&#39;</span> <span class="c"># your data directory</span>
+<span class="n">files</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">data_dir</span><span class="o">+</span><span class="s">&#39;/*.hdf5&#39;</span><span class="p">))</span> <span class="c"># all data files as a list</span>
+
+
+<span class="c"># data selection</span>
+<span class="kn">from</span> <span class="nn">tlpipe.timestream</span> <span class="kn">import</span> <span class="n">dispatch</span>
+<span class="n">pipe_tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dispatch</span><span class="o">.</span><span class="n">Dispatch</span><span class="p">)</span>
+<span class="c">### parameters for Dispatch</span>
+<span class="n">dp_input_files</span> <span class="o">=</span> <span class="n">files</span> <span class="c"># data files as list</span>
+<span class="n">dp_freq_select</span> <span class="o">=</span> <span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">510</span><span class="p">)</span> <span class="c"># frequency indices, from 500 to 510</span>
+<span class="n">dp_feed_select</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">33</span><span class="p">]</span> <span class="c"># feed no. as a list</span>
+<span class="n">dp_out</span> <span class="o">=</span> <span class="s">&#39;dp&#39;</span>
+</pre></div>
+</td></tr></table></div>
+</li>
+<li><p class="first">Import <a class="reference internal" href="generated/tlpipe.timestream.detect_ns.Detect.html#tlpipe.timestream.detect_ns.Detect" title="tlpipe.timestream.detect_ns.Detect"><code class="xref py py-class docutils literal"><span class="pre">Detect</span></code></a> to find and mask noise
+source signal;</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7</pre></div></td><td class="code"><div class="highlight"><pre><span class="c"># find and mask noise source signal</span>
+<span class="kn">from</span> <span class="nn">tlpipe.timestream</span> <span class="kn">import</span> <span class="n">detect_ns</span>
+<span class="n">pipe_tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">detect_ns</span><span class="o">.</span><span class="n">Detect</span><span class="p">)</span>
+<span class="c">### parameters for Detect</span>
+<span class="n">dt_in</span> <span class="o">=</span> <span class="n">dp_out</span>
+<span class="c"># dt_feed = 1</span>
+<span class="n">dt_out</span> <span class="o">=</span> <span class="s">&#39;dt&#39;</span>
+</pre></div>
+</td></tr></table></div>
+</li>
+<li><p class="first">Import <a class="reference internal" href="generated/tlpipe.plot.plot_waterfall.Plot.html#tlpipe.plot.plot_waterfall.Plot" title="tlpipe.plot.plot_waterfall.Plot"><code class="xref py py-class docutils literal"><span class="pre">Plot</span></code></a> to plot;</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7</pre></div></td><td class="code"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">tlpipe.plot</span> <span class="kn">import</span> <span class="n">plot_waterfall</span>
+<span class="n">pipe_tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plot_waterfall</span><span class="o">.</span><span class="n">Plot</span><span class="p">)</span>
+<span class="c">### parameters for Plot</span>
+<span class="n">pwf_in</span> <span class="o">=</span> <span class="n">dt_out</span>
+<span class="n">pwf_flag_ns</span> <span class="o">=</span> <span class="bp">True</span> <span class="c"># mask noise source signal</span>
+<span class="n">pwf_fig_name</span> <span class="o">=</span> <span class="s">&#39;waterfall/wf&#39;</span> <span class="c"># figure name to save</span>
+<span class="n">pwf_out</span> <span class="o">=</span> <span class="s">&#39;pwf&#39;</span>
+</pre></div>
+</td></tr></table></div>
+</li>
+</ol>
+</li>
+</ol>
+<p>The final input pipe file looks like:</p>
+<blockquote>
+<div><div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44</pre></div></td><td class="code"><div class="highlight"><pre><span class="c"># -*- mode: python; -*-</span>
+
+<span class="c"># input file for the analysis pipeline</span>
+<span class="c"># execute this pipeline by either command of the following two:</span>
+<span class="c"># tlpipe dir/to/plot_wf.pipe</span>
+<span class="c"># mpiexec -n N tlpipe dir/to/plot_wf.pipe</span>
+
+
+<span class="n">pipe_tasks</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">pipe_outdir</span> <span class="o">=</span> <span class="s">&#39;./output/&#39;</span>
+<span class="n">pipe_logging</span> <span class="o">=</span> <span class="s">&#39;notset&#39;</span>
+<span class="c"># pipe_logging = &#39;info&#39;</span>
+
+
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="n">data_dir</span> <span class="o">=</span> <span class="s">&#39;dir/to/data&#39;</span> <span class="c"># your data directory</span>
+<span class="n">files</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">data_dir</span><span class="o">+</span><span class="s">&#39;/*.hdf5&#39;</span><span class="p">))</span> <span class="c"># all data files as a list</span>
+
+
+<span class="c"># data selection</span>
+<span class="kn">from</span> <span class="nn">tlpipe.timestream</span> <span class="kn">import</span> <span class="n">dispatch</span>
+<span class="n">pipe_tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dispatch</span><span class="o">.</span><span class="n">Dispatch</span><span class="p">)</span>
+<span class="c">### parameters for Dispatch</span>
+<span class="n">dp_input_files</span> <span class="o">=</span> <span class="n">files</span> <span class="c"># data files as list</span>
+<span class="n">dp_freq_select</span> <span class="o">=</span> <span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">510</span><span class="p">)</span> <span class="c"># frequency indices, from 500 to 510</span>
+<span class="n">dp_feed_select</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">33</span><span class="p">]</span> <span class="c"># feed no. as a list</span>
+<span class="n">dp_out</span> <span class="o">=</span> <span class="s">&#39;dp&#39;</span>
+
+<span class="c"># find and mask noise source signal</span>
+<span class="kn">from</span> <span class="nn">tlpipe.timestream</span> <span class="kn">import</span> <span class="n">detect_ns</span>
+<span class="n">pipe_tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">detect_ns</span><span class="o">.</span><span class="n">Detect</span><span class="p">)</span>
+<span class="c">### parameters for Detect</span>
+<span class="n">dt_in</span> <span class="o">=</span> <span class="n">dp_out</span>
+<span class="c"># dt_feed = 1</span>
+<span class="n">dt_out</span> <span class="o">=</span> <span class="s">&#39;dt&#39;</span>
+
+<span class="c"># plot waterfall of selected data</span>
+<span class="kn">from</span> <span class="nn">tlpipe.plot</span> <span class="kn">import</span> <span class="n">plot_waterfall</span>
+<span class="n">pipe_tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plot_waterfall</span><span class="o">.</span><span class="n">Plot</span><span class="p">)</span>
+<span class="c">### parameters for Plot</span>
+<span class="n">pwf_in</span> <span class="o">=</span> <span class="n">dt_out</span>
+<span class="n">pwf_flag_ns</span> <span class="o">=</span> <span class="bp">True</span> <span class="c"># mask noise source signal</span>
+<span class="n">pwf_fig_name</span> <span class="o">=</span> <span class="s">&#39;waterfall/wf&#39;</span> <span class="c"># figure name to save</span>
+<span class="n">pwf_out</span> <span class="o">=</span> <span class="s">&#39;pwf&#39;</span>
+</pre></div>
+</td></tr></table></div>
+</div></blockquote>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<ol class="last arabic">
+<li><p class="first">Each imported task should be appended into the list <cite>pipe_tasks</cite> in
+order to be excuted by the pipeline;</p>
+</li>
+<li><p class="first">Each task&#8217;s paramters should be prepended with its own prefix. See the
+source file of each task to get the prefix and all paramters that can
+be set. You can also get the prefix and paramters (and their default
+values) by the following method (take <a class="reference internal" href="generated/tlpipe.timestream.dispatch.Dispatch.html#tlpipe.timestream.dispatch.Dispatch" title="tlpipe.timestream.dispatch.Dispatch"><code class="xref py py-class docutils literal"><span class="pre">Dispatch</span></code></a>
+for example):</p>
+<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">tlpipe.timestream</span> <span class="k">import</span> <span class="n">dispatch</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dispatch</span><span class="o">.</span><span class="n">Dispatch</span><span class="o">.</span><span class="n">prefix</span>
+<span class="go">&#39;dp_&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dispatch</span><span class="o">.</span><span class="n">Dispatch</span><span class="o">.</span><span class="n">show_params</span><span class="p">()</span>
+<span class="go">Parameters of task Dispatch:</span>
+<span class="go">out:  None</span>
+<span class="go">requires:  None</span>
+<span class="go">in:  None</span>
+<span class="go">iter_start:  0</span>
+<span class="go">iter_step:  1</span>
+<span class="go">input_files:  None</span>
+<span class="go">iter_num:  None</span>
+<span class="go">copy:  False</span>
+<span class="go">iterable:  False</span>
+<span class="go">output_files:  None</span>
+<span class="go">time_select:  (0, None)</span>
+<span class="go">stop:  None</span>
+<span class="go">libver:  latest</span>
+<span class="go">corr:  all</span>
+<span class="go">exclude:  []</span>
+<span class="go">check_status:  True</span>
+<span class="go">dist_axis:  0</span>
+<span class="go">freq_select:  (0, None)</span>
+<span class="go">feed_select:  (0, None)</span>
+<span class="go">tag_output_iter:  True</span>
+<span class="go">tag_input_iter:  True</span>
+<span class="go">start:  0</span>
+<span class="go">mode:  r</span>
+<span class="go">pol_select:  (0, None)</span>
+<span class="go">extra_inttime:  150</span>
+<span class="go">days:  1.0</span>
+<span class="go">exclude_bad:  True</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Usally the input of one task should be ether read from the data files,
+for example:</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span class="n">dp_input_files</span> <span class="o">=</span> <span class="n">files</span> <span class="c"># data files as list</span>
+</pre></div>
+</td></tr></table></div>
+<p>or is the output of a previously excuted task (to construct a task chain),
+for example:</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span class="n">dt_in</span> <span class="o">=</span> <span class="n">dp_out</span>
+</pre></div>
+</td></tr></table></div>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span class="n">pwf_in</span> <span class="o">=</span> <span class="n">dt_out</span>
+</pre></div>
+</td></tr></table></div>
+</li>
+</ol>
+</div>
+</div>
+<div class="section" id="run-the-pipeline">
+<h2>Run the pipeline<a class="headerlink" href="#run-the-pipeline" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="single-process-run">
+<h3>Single process run<a class="headerlink" href="#single-process-run" title="Permalink to this headline">¶</a></h3>
+<p>If you do not have an MPI environment installed, or you just want a single
+process run, just do (in case <em>plot_wf.pipe</em> is in you working directory)</p>
+<div class="highlight-default"><div class="highlight"><pre>$ tlpipe plot_wf.pipe
+</pre></div>
+</div>
+<p>or (in case <em>plot_wf.pipe</em> isn&#8217;t in you working directory)</p>
+<div class="highlight-default"><div class="highlight"><pre>$ tlpipe dir/to/plot_wf.pipe
+</pre></div>
+</div>
+<p>If you want to submit and run the pipeline in the background, do like</p>
+<div class="highlight-default"><div class="highlight"><pre>$ nohup tlpipe dir/to/plot_wf.pipe &amp;&gt; output.txt &amp;
+</pre></div>
+</div>
+</div>
+<div class="section" id="multiple-process-run">
+<h3>Multiple process run<a class="headerlink" href="#multiple-process-run" title="Permalink to this headline">¶</a></h3>
+<p>To run the pipeline in parallel and distributed maner on a cluster using
+multiple processes, you can do something like (in case <em>plot_wf.pipe</em> is
+in you working directory)</p>
+<div class="highlight-default"><div class="highlight"><pre>$ mpiexec -n N tlpipe plot_wf.pipe
+</pre></div>
+</div>
+<p>or (in case <em>plot_wf.pipe</em> isn&#8217;t in you working directory)</p>
+<div class="highlight-default"><div class="highlight"><pre>$ mpiexec -n N tlpipe dir/to/plot_wf.pipe
+</pre></div>
+</div>
+<p>If you want to submit and run the pipeline in the background on several nodes,
+for example, <em>node2</em>, <em>node3</em>, <em>node4</em>, do like</p>
+<div class="highlight-default"><div class="highlight"><pre>$ nohup mpiexec -n N -host node2,node3,node4 --map-by node tlpipe dir/to/plot_wf.pipe &amp;&gt; output.txt &amp;
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">In the above commands, <strong>N</strong> is the number of processes you want to run!</p>
+</div>
+</div>
+</div>
+<div class="section" id="pipeline-products-and-intermediate-results">
+<h2>Pipeline products and intermediate results<a class="headerlink" href="#pipeline-products-and-intermediate-results" title="Permalink to this headline">¶</a></h2>
+<p>Pipeline products and intermediate results will be in the directory setting
+by <cite>pipe_outdir</cite>.</p>
+</div>
+<div class="section" id="other-excutable-commands">
+<h2>Other excutable commands<a class="headerlink" href="#other-excutable-commands" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><p class="first"><em>h5info</em>: Check what&#8217;s in a (or a list of) HDF5 data file(s).
+For its use, do some thing like</p>
+<div class="highlight-default"><div class="highlight"><pre>$ h5info data.hdf5
+</pre></div>
+</div>
+<p>or</p>
+<div class="highlight-default"><div class="highlight"><pre>$ h5info data1.hdf5, data2.hdf5, data3.hdf5
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="guide.html" class="btn btn-neutral float-right" title="Developer’s guide" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="install.html" class="btn btn-neutral" title="Installation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Shifan Zuo.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

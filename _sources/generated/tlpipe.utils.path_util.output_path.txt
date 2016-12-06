@@ -1,0 +1,6 @@
+tlpipe.utils.path_util.output_path
+==================================
+
+.. currentmodule:: tlpipe.utils.path_util
+
+.. autofunction:: output_path

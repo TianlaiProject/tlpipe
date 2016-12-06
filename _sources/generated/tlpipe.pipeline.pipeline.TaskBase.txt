@@ -1,0 +1,40 @@
+tlpipe.pipeline.pipeline.TaskBase
+=================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoclass:: TaskBase
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~TaskBase.cacheable
+      ~TaskBase.embarrassingly_parallelizable
+      ~TaskBase.history
+      ~TaskBase.params_init
+      ~TaskBase.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~TaskBase.finish
+      ~TaskBase.next
+      ~TaskBase.setup
+      ~TaskBase.show_params
+   
+   

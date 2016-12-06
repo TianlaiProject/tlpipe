@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.from_file
+==============================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. automethod:: BasicTod.from_file

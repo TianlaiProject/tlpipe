@@ -1,0 +1,6 @@
+tlpipe.timestream.daytime_mask.Mask.read_process_write
+======================================================
+
+.. currentmodule:: tlpipe.timestream.daytime_mask
+
+.. automethod:: Mask.read_process_write

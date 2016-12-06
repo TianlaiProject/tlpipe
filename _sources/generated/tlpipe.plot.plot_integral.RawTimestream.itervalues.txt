@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.RawTimestream.itervalues
+==================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: RawTimestream.itervalues

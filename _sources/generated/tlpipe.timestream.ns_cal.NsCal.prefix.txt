@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.NsCal.prefix
+=====================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. autoattribute:: NsCal.prefix

@@ -1,0 +1,637 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>tlpipe.core.tl_array.AntennaArray &mdash; tlpipe 0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="tlpipe 0.1 documentation" href="../index.html"/>
+        <link rel="up" title="tlpipe.core.tl_array" href="tlpipe.core.tl_array.html"/>
+        <link rel="next" title="tlpipe.core.tl_array.AntennaArray.date" href="tlpipe.core.tl_array.AntennaArray.date.html"/>
+        <link rel="prev" title="tlpipe.core.tl_array.Antenna.update" href="tlpipe.core.tl_array.Antenna.update.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="../index.html" class="icon icon-home"> tlpipe
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#python-version">Python version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#installation-guid">Installation guid</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutor.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#run-the-pipeline">Run the pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#single-process-run">Single process run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-process-run">Multiple process run</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#pipeline-products-and-intermediate-results">Pipeline products and intermediate results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#other-excutable-commands">Other excutable commands</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide.html">Developer&#8217;s guide</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../core.html"><code class="docutils literal"><span class="pre">core</span></code> &#8211; Core functionalities</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../core.html#constants">Constants</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.core.constants.html">tlpipe.core.constants</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.core.constants.html#constants">Constants</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="reference internal" href="../core.html#tianlai-array-model">Tianlai array model</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="tlpipe.core.tl_array.html">tlpipe.core.tl_array</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="tlpipe.core.tl_array.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../kiyopy.html"><code class="docutils literal"><span class="pre">kiyopy</span></code> &#8211; Kiyoshi Masui&#8217;s paramter parsing package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../kiyopy.html#pameter-parser">Pameter parser</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.kiyopy.parse_ini.html">tlpipe.kiyopy.parse_ini</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.parse_ini.parse.html">tlpipe.kiyopy.parse_ini.parse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.parse_ini.parse_dict.html">tlpipe.kiyopy.parse_ini.parse_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.parse_ini.write_params.html">tlpipe.kiyopy.parse_ini.write_params</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../kiyopy.html#custom-exceptions">Custom exceptions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.kiyopy.custom_exceptions.html">tlpipe.kiyopy.custom_exceptions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.custom_exceptions.DataError.html">tlpipe.kiyopy.custom_exceptions.DataError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.custom_exceptions.FileParameterTypeError.html">tlpipe.kiyopy.custom_exceptions.FileParameterTypeError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.custom_exceptions.NextIteration.html">tlpipe.kiyopy.custom_exceptions.NextIteration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.custom_exceptions.ParameterFileError.html">tlpipe.kiyopy.custom_exceptions.ParameterFileError</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../kiyopy.html#utilities">Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.kiyopy.utils.html">tlpipe.kiyopy.utils</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.utils.abbreviate_file_path.html">tlpipe.kiyopy.utils.abbreviate_file_path</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.utils.mkdir_p.html">tlpipe.kiyopy.utils.mkdir_p</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.utils.mkparents.html">tlpipe.kiyopy.utils.mkparents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html"><code class="docutils literal"><span class="pre">pipeline</span></code> &#8211; Pipeline control and tasks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../pipeline.html#pipeline">Pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.pipeline.pipeline.html">tlpipe.pipeline.pipeline</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.pipeline.pipeline.html#basic-tasks">Basic Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.pipeline.pipeline.html#pipeline-configuration">Pipeline Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.pipeline.pipeline.html#execution-order">Execution Order</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.pipeline.pipeline.html#advanced-tasks">Advanced Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.pipeline.pipeline.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../timestream.html"><code class="docutils literal"><span class="pre">timestream</span></code> &#8211; Timestream data containers and operating tasks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../timestream.html#data-containers">Data containers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.container.html">tlpipe.timestream.container</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.container.check_axis.html">tlpipe.timestream.container.check_axis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.container.deepcopy.html">tlpipe.timestream.container.deepcopy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.container.ensure_file_list.html">tlpipe.timestream.container.ensure_file_list</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.container.BasicTod.html">tlpipe.timestream.container.BasicTod</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.timestream_common.html">tlpipe.timestream.timestream_common</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.timestream_common.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.raw_timestream.html">tlpipe.timestream.raw_timestream</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.raw_timestream.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.timestream.html">tlpipe.timestream.timestream</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.timestream.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../timestream.html#timestream-base-task">Timestream base task</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.tod_task.html">tlpipe.timestream.tod_task</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.tod_task.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../timestream.html#operating-tasks">Operating tasks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.dispatch.html">tlpipe.timestream.dispatch</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.dispatch.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.detect_ns.html">tlpipe.timestream.detect_ns</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.detect_ns.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.line_rfi.html">tlpipe.timestream.line_rfi</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.line_rfi.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.time_flag.html">tlpipe.timestream.time_flag</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.time_flag.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.freq_flag.html">tlpipe.timestream.freq_flag</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.freq_flag.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ns_cal.html">tlpipe.timestream.ns_cal</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ns_cal.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.rt2ts.html">tlpipe.timestream.rt2ts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.rt2ts.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ps_fit.html">tlpipe.timestream.ps_fit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ps_fit.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ps_cal.html">tlpipe.timestream.ps_cal</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ps_cal.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.phs2src.html">tlpipe.timestream.phs2src</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.phs2src.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.phs2zen.html">tlpipe.timestream.phs2zen</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.phs2zen.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.phase_closure.html">tlpipe.timestream.phase_closure</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.phase_closure.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ps_subtract.html">tlpipe.timestream.ps_subtract</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ps_subtract.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.daytime_mask.html">tlpipe.timestream.daytime_mask</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.daytime_mask.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.re_order.html">tlpipe.timestream.re_order</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.re_order.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.accumulate.html">tlpipe.timestream.accumulate</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.accumulate.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.barrier.html">tlpipe.timestream.barrier</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.barrier.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.average.html">tlpipe.timestream.average</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.average.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.freq_rebin.html">tlpipe.timestream.freq_rebin</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.freq_rebin.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.map_making.html">tlpipe.timestream.map_making</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.map_making.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../timestream.html#utilities">Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.sg_filter.html">tlpipe.timestream.sg_filter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.sg_filter.factorial.html">tlpipe.timestream.sg_filter.factorial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.sg_filter.savitzky_golay.html">tlpipe.timestream.sg_filter.savitzky_golay</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../cal.html"><code class="docutils literal"><span class="pre">cal</span></code> &#8211; Calibration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../map.html"><code class="docutils literal"><span class="pre">map</span></code> &#8211; Map-making</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../map.html#driftscan-map-making">Driftscan map-making</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../foreground.html"><code class="docutils literal"><span class="pre">foreground</span></code> &#8211; Foreground subtraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ps.html"><code class="docutils literal"><span class="pre">ps</span></code> &#8211; Power spectrum estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plot.html"><code class="docutils literal"><span class="pre">plot</span></code> &#8211; Tasks for plottting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../plot.html#plotting-tasks">Plotting tasks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.plot.plot_integral.html">tlpipe.plot.plot_integral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_integral.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.plot.plot_slice.html">tlpipe.plot.plot_slice</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_slice.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.plot.plot_waterfall.html">tlpipe.plot.plot_waterfall</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_waterfall.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.plot.plot_gain.html">tlpipe.plot.plot_gain</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_gain.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../utils.html"><code class="docutils literal"><span class="pre">utils</span></code> &#8211; Utility functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../utils.html#utilities">Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.date_util.html">tlpipe.utils.date_util</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.date_util.get_ephdate.html">tlpipe.utils.date_util.get_ephdate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.date_util.get_juldate.html">tlpipe.utils.date_util.get_juldate</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.np_util.html">tlpipe.utils.np_util</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.np_util.average.html">tlpipe.utils.np_util.average</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.np_util.unique.html">tlpipe.utils.np_util.unique</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.path_util.html">tlpipe.utils.path_util</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.path_util.input_path.html">tlpipe.utils.path_util.input_path</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.path_util.iter_path.html">tlpipe.utils.path_util.iter_path</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.path_util.output_path.html">tlpipe.utils.path_util.output_path</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.pickle_util.html">tlpipe.utils.pickle_util</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.pickle_util.get_value.html">tlpipe.utils.pickle_util.get_value</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">tlpipe</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../core.html"><code class="docutils literal"><span class="pre">core</span></code> &#8211; Core functionalities</a> &raquo;</li>
+      
+          <li><a href="tlpipe.core.tl_array.html">tlpipe.core.tl_array</a> &raquo;</li>
+      
+    <li>tlpipe.core.tl_array.AntennaArray</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/generated/tlpipe.core.tl_array.AntennaArray.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="tlpipe-core-tl-array-antennaarray">
+<h1>tlpipe.core.tl_array.AntennaArray<a class="headerlink" href="#tlpipe-core-tl-array-antennaarray" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="tlpipe.core.tl_array.AntennaArray">
+<em class="property">class </em><code class="descclassname">tlpipe.core.tl_array.</code><code class="descname">AntennaArray</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/core/tl_array.py#L267"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.core.tl_array.AntennaArray" title="Permalink to this definition">¶</a></dt>
+<dd><p>Representation of an antenna array.</p>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.date.html#tlpipe.core.tl_array.AntennaArray.date" title="tlpipe.core.tl_array.AntennaArray.date"><code class="xref py py-obj docutils literal"><span class="pre">date</span></code></a></td>
+<td>Date</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.elev.html#tlpipe.core.tl_array.AntennaArray.elev" title="tlpipe.core.tl_array.AntennaArray.elev"><code class="xref py py-obj docutils literal"><span class="pre">elev</span></code></a></td>
+<td>Elevation above sea level in meters</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.elevation.html#tlpipe.core.tl_array.AntennaArray.elevation" title="tlpipe.core.tl_array.AntennaArray.elevation"><code class="xref py py-obj docutils literal"><span class="pre">elevation</span></code></a></td>
+<td>Elevation above sea level in meters</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.epoch.html#tlpipe.core.tl_array.AntennaArray.epoch" title="tlpipe.core.tl_array.AntennaArray.epoch"><code class="xref py py-obj docutils literal"><span class="pre">epoch</span></code></a></td>
+<td>Precession epoch</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.horizon.html#tlpipe.core.tl_array.AntennaArray.horizon" title="tlpipe.core.tl_array.AntennaArray.horizon"><code class="xref py py-obj docutils literal"><span class="pre">horizon</span></code></a></td>
+<td><a href="#id1"><span class="problematic" id="id2">**</span></a>The angle above (+) or below (-) the horizon at which an object should be considered at the moment of rising or setting as a float giving radians, or a string giving degrees* &#8211; minutes* &#8211; seconds</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.lat.html#tlpipe.core.tl_array.AntennaArray.lat" title="tlpipe.core.tl_array.AntennaArray.lat"><code class="xref py py-obj docutils literal"><span class="pre">lat</span></code></a></td>
+<td><a href="#id3"><span class="problematic" id="id4">**</span></a>Latitude north of the Equator as a float giving radians, or a string giving degrees* &#8211; minutes* &#8211; seconds</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.lon.html#tlpipe.core.tl_array.AntennaArray.lon" title="tlpipe.core.tl_array.AntennaArray.lon"><code class="xref py py-obj docutils literal"><span class="pre">lon</span></code></a></td>
+<td><a href="#id5"><span class="problematic" id="id6">**</span></a>Longitude east of Greenwich as a float giving radians, or a string giving degrees* &#8211; minutes* &#8211; seconds</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.long.html#tlpipe.core.tl_array.AntennaArray.long" title="tlpipe.core.tl_array.AntennaArray.long"><code class="xref py py-obj docutils literal"><span class="pre">long</span></code></a></td>
+<td><a href="#id7"><span class="problematic" id="id8">**</span></a>Longitude east of Greenwich as a float giving radians, or a string giving degrees* &#8211; minutes* &#8211; seconds</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.name.html#tlpipe.core.tl_array.AntennaArray.name" title="tlpipe.core.tl_array.AntennaArray.name"><code class="xref py py-obj docutils literal"><span class="pre">name</span></code></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.pressure.html#tlpipe.core.tl_array.AntennaArray.pressure" title="tlpipe.core.tl_array.AntennaArray.pressure"><code class="xref py py-obj docutils literal"><span class="pre">pressure</span></code></a></td>
+<td>atmospheric pressure in millibar</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.temp.html#tlpipe.core.tl_array.AntennaArray.temp" title="tlpipe.core.tl_array.AntennaArray.temp"><code class="xref py py-obj docutils literal"><span class="pre">temp</span></code></a></td>
+<td>atmospheric temperature in degrees Celsius</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="tlpipe.core.tl_array.AntennaArray.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/../../../../../.local/lib/python2.7/site-packages/aipy/amp.py#L280"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.core.tl_array.AntennaArray.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.bl2ij.html#tlpipe.core.tl_array.AntennaArray.bl2ij" title="tlpipe.core.tl_array.AntennaArray.bl2ij"><code class="xref py py-obj docutils literal"><span class="pre">bl2ij</span></code></a>(bl)</td>
+<td>Convert Miriad&#8217;s (i+1) &lt;&lt; 8 | (j+1) baseline indexing scheme to</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.bl_indices.html#tlpipe.core.tl_array.AntennaArray.bl_indices" title="tlpipe.core.tl_array.AntennaArray.bl_indices"><code class="xref py py-obj docutils literal"><span class="pre">bl_indices</span></code></a>([auto,&nbsp;cross])</td>
+<td>Return bl indices for baselines in the array.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.bm_response.html#tlpipe.core.tl_array.AntennaArray.bm_response" title="tlpipe.core.tl_array.AntennaArray.bm_response"><code class="xref py py-obj docutils literal"><span class="pre">bm_response</span></code></a>(i,&nbsp;j)</td>
+<td>Return the beam response towards the cached source positions for baseline i,j with the specified polarization.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.compute_pressure.html#tlpipe.core.tl_array.AntennaArray.compute_pressure" title="tlpipe.core.tl_array.AntennaArray.compute_pressure"><code class="xref py py-obj docutils literal"><span class="pre">compute_pressure</span></code></a>()</td>
+<td>Set the atmospheric pressure for the current elevation.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.disallow_circumpolar.html#tlpipe.core.tl_array.AntennaArray.disallow_circumpolar" title="tlpipe.core.tl_array.AntennaArray.disallow_circumpolar"><code class="xref py py-obj docutils literal"><span class="pre">disallow_circumpolar</span></code></a>(declination)</td>
+<td>Raise an exception if the given declination is circumpolar.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.gen_phs.html#tlpipe.core.tl_array.AntennaArray.gen_phs" title="tlpipe.core.tl_array.AntennaArray.gen_phs"><code class="xref py py-obj docutils literal"><span class="pre">gen_phs</span></code></a>(src,&nbsp;i,&nbsp;j[,&nbsp;mfreq,&nbsp;ionref,&nbsp;...])</td>
+<td>Return phasing that is multiplied to data to point to src.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.gen_uvw.html#tlpipe.core.tl_array.AntennaArray.gen_uvw" title="tlpipe.core.tl_array.AntennaArray.gen_uvw"><code class="xref py py-obj docutils literal"><span class="pre">gen_uvw</span></code></a>(i,&nbsp;j[,&nbsp;src,&nbsp;w_only])</td>
+<td>Compute uvw coordinates of baseline relative to provided RadioBody, or &#8216;z&#8217; for zenith uvw coordinates.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.get_active_pol.html#tlpipe.core.tl_array.AntennaArray.get_active_pol" title="tlpipe.core.tl_array.AntennaArray.get_active_pol"><code class="xref py py-obj docutils literal"><span class="pre">get_active_pol</span></code></a>()</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.get_afreqs.html#tlpipe.core.tl_array.AntennaArray.get_afreqs" title="tlpipe.core.tl_array.AntennaArray.get_afreqs"><code class="xref py py-obj docutils literal"><span class="pre">get_afreqs</span></code></a>()</td>
+<td>Return array of frequencies that are active for simulation.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.get_baseline.html#tlpipe.core.tl_array.AntennaArray.get_baseline" title="tlpipe.core.tl_array.AntennaArray.get_baseline"><code class="xref py py-obj docutils literal"><span class="pre">get_baseline</span></code></a>(i,&nbsp;j[,&nbsp;src])</td>
+<td>Return the baseline corresponding to i,j in various coordinate projections: src=&#8217;e&#8217; for current equatorial, &#8216;z&#8217; for zenith topocentric, &#8216;r&#8217; for unrotated equatorial, or a RadioBody for projection toward that source.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.get_freqs.html#tlpipe.core.tl_array.AntennaArray.get_freqs" title="tlpipe.core.tl_array.AntennaArray.get_freqs"><code class="xref py py-obj docutils literal"><span class="pre">get_freqs</span></code></a>()</td>
+<td>Return array of (all) frequencies.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.get_jultime.html#tlpipe.core.tl_array.AntennaArray.get_jultime" title="tlpipe.core.tl_array.AntennaArray.get_jultime"><code class="xref py py-obj docutils literal"><span class="pre">get_jultime</span></code></a>()</td>
+<td>Get current time as a Julian date.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.get_params.html#tlpipe.core.tl_array.AntennaArray.get_params" title="tlpipe.core.tl_array.AntennaArray.get_params"><code class="xref py py-obj docutils literal"><span class="pre">get_params</span></code></a>([ant_prms])</td>
+<td>Return all fitable parameters in a dictionary.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.get_phs_offset.html#tlpipe.core.tl_array.AntennaArray.get_phs_offset" title="tlpipe.core.tl_array.AntennaArray.get_phs_offset"><code class="xref py py-obj docutils literal"><span class="pre">get_phs_offset</span></code></a>(i,&nbsp;j)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.ij2bl.html#tlpipe.core.tl_array.AntennaArray.ij2bl" title="tlpipe.core.tl_array.AntennaArray.ij2bl"><code class="xref py py-obj docutils literal"><span class="pre">ij2bl</span></code></a>(i,&nbsp;j)</td>
+<td>Convert baseline i,j (0 indexed) to Miriad&#8217;s (i+1) &lt;&lt; 8 | (j+1) indexing scheme.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.next_antitransit.html#tlpipe.core.tl_array.AntennaArray.next_antitransit" title="tlpipe.core.tl_array.AntennaArray.next_antitransit"><code class="xref py py-obj docutils literal"><span class="pre">next_antitransit</span></code></a>(body[,&nbsp;start])</td>
+<td>Find the next passage of a body across the anti-meridian.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.next_pass.html#tlpipe.core.tl_array.AntennaArray.next_pass" title="tlpipe.core.tl_array.AntennaArray.next_pass"><code class="xref py py-obj docutils literal"><span class="pre">next_pass</span></code></a>(body)</td>
+<td>Return the next rising, culmination, and setting of a satellite.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.next_rising.html#tlpipe.core.tl_array.AntennaArray.next_rising" title="tlpipe.core.tl_array.AntennaArray.next_rising"><code class="xref py py-obj docutils literal"><span class="pre">next_rising</span></code></a>(body[,&nbsp;start,&nbsp;use_center])</td>
+<td>Move to the given body&#8217;s next rising, returning the date.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.next_setting.html#tlpipe.core.tl_array.AntennaArray.next_setting" title="tlpipe.core.tl_array.AntennaArray.next_setting"><code class="xref py py-obj docutils literal"><span class="pre">next_setting</span></code></a>(body[,&nbsp;start,&nbsp;use_center])</td>
+<td>Move to the given body&#8217;s next setting, returning the date.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.next_transit.html#tlpipe.core.tl_array.AntennaArray.next_transit" title="tlpipe.core.tl_array.AntennaArray.next_transit"><code class="xref py py-obj docutils literal"><span class="pre">next_transit</span></code></a>(body[,&nbsp;start])</td>
+<td>Find the next passage of a body across the meridian.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.passband.html#tlpipe.core.tl_array.AntennaArray.passband" title="tlpipe.core.tl_array.AntennaArray.passband"><code class="xref py py-obj docutils literal"><span class="pre">passband</span></code></a>(i,&nbsp;j)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.phs2src.html#tlpipe.core.tl_array.AntennaArray.phs2src" title="tlpipe.core.tl_array.AntennaArray.phs2src"><code class="xref py py-obj docutils literal"><span class="pre">phs2src</span></code></a>(data,&nbsp;src,&nbsp;i,&nbsp;j[,&nbsp;mfreq,&nbsp;ionref,&nbsp;...])</td>
+<td>Apply phasing to zenith-phased data to point to src.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.previous_antitransit.html#tlpipe.core.tl_array.AntennaArray.previous_antitransit" title="tlpipe.core.tl_array.AntennaArray.previous_antitransit"><code class="xref py py-obj docutils literal"><span class="pre">previous_antitransit</span></code></a>(body[,&nbsp;start])</td>
+<td>Find the previous passage of a body across the anti-meridian.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.previous_rising.html#tlpipe.core.tl_array.AntennaArray.previous_rising" title="tlpipe.core.tl_array.AntennaArray.previous_rising"><code class="xref py py-obj docutils literal"><span class="pre">previous_rising</span></code></a>(body[,&nbsp;start,&nbsp;use_center])</td>
+<td>Move to the given body&#8217;s previous rising, returning the date.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.previous_setting.html#tlpipe.core.tl_array.AntennaArray.previous_setting" title="tlpipe.core.tl_array.AntennaArray.previous_setting"><code class="xref py py-obj docutils literal"><span class="pre">previous_setting</span></code></a>(body[,&nbsp;start,&nbsp;use_center])</td>
+<td>Move to the given body&#8217;s previous setting, returning the date.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.previous_transit.html#tlpipe.core.tl_array.AntennaArray.previous_transit" title="tlpipe.core.tl_array.AntennaArray.previous_transit"><code class="xref py py-obj docutils literal"><span class="pre">previous_transit</span></code></a>(body[,&nbsp;start])</td>
+<td>Find the previous passage of a body across the meridian.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.radec_of.html#tlpipe.core.tl_array.AntennaArray.radec_of" title="tlpipe.core.tl_array.AntennaArray.radec_of"><code class="xref py py-obj docutils literal"><span class="pre">radec_of</span></code></a></td>
+<td>compute the right ascension and declination of a point identified by its azimuth and altitude</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.refract.html#tlpipe.core.tl_array.AntennaArray.refract" title="tlpipe.core.tl_array.AntennaArray.refract"><code class="xref py py-obj docutils literal"><span class="pre">refract</span></code></a>(u_sf,&nbsp;v_sf[,&nbsp;mfreq,&nbsp;ionref])</td>
+<td>Calibrate a frequency-dependent source offset by scaling measured offsets at a given frequency.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.resolve_src.html#tlpipe.core.tl_array.AntennaArray.resolve_src" title="tlpipe.core.tl_array.AntennaArray.resolve_src"><code class="xref py py-obj docutils literal"><span class="pre">resolve_src</span></code></a>(u,&nbsp;v[,&nbsp;srcshape])</td>
+<td>Adjust amplitudes to reflect resolution effects for a uniform elliptical disk characterized by srcshape: srcshape = (a1,a2,th) where a1,a2 are angular sizes along the     semimajor, semiminor axes, and th is the angle (in radians) of     the semimajor axis from E.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.select_chans.html#tlpipe.core.tl_array.AntennaArray.select_chans" title="tlpipe.core.tl_array.AntennaArray.select_chans"><code class="xref py py-obj docutils literal"><span class="pre">select_chans</span></code></a>([active_chans])</td>
+<td>Select which channels are used in computations.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.set_active_pol.html#tlpipe.core.tl_array.AntennaArray.set_active_pol" title="tlpipe.core.tl_array.AntennaArray.set_active_pol"><code class="xref py py-obj docutils literal"><span class="pre">set_active_pol</span></code></a>(pol)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.set_ephemtime.html#tlpipe.core.tl_array.AntennaArray.set_ephemtime" title="tlpipe.core.tl_array.AntennaArray.set_ephemtime"><code class="xref py py-obj docutils literal"><span class="pre">set_ephemtime</span></code></a>([t])</td>
+<td>Set current time as derived from the ephem package.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.set_jultime.html#tlpipe.core.tl_array.AntennaArray.set_jultime" title="tlpipe.core.tl_array.AntennaArray.set_jultime"><code class="xref py py-obj docutils literal"><span class="pre">set_jultime</span></code></a>([t])</td>
+<td>Set current time as a Julian date.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.set_params.html#tlpipe.core.tl_array.AntennaArray.set_params" title="tlpipe.core.tl_array.AntennaArray.set_params"><code class="xref py py-obj docutils literal"><span class="pre">set_params</span></code></a>(prms)</td>
+<td>Set all parameters from a dictionary.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.sidereal_time.html#tlpipe.core.tl_array.AntennaArray.sidereal_time" title="tlpipe.core.tl_array.AntennaArray.sidereal_time"><code class="xref py py-obj docutils literal"><span class="pre">sidereal_time</span></code></a></td>
+<td>compute the local sidereal time for this location and time</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.sim.html#tlpipe.core.tl_array.AntennaArray.sim" title="tlpipe.core.tl_array.AntennaArray.sim"><code class="xref py py-obj docutils literal"><span class="pre">sim</span></code></a>(i,&nbsp;j)</td>
+<td>Simulate visibilites for the specified (i,j) baseline and polarization (set with AntennaArray.set_active_pol).</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.sim_cache.html#tlpipe.core.tl_array.AntennaArray.sim_cache" title="tlpipe.core.tl_array.AntennaArray.sim_cache"><code class="xref py py-obj docutils literal"><span class="pre">sim_cache</span></code></a>(s_eqs[,&nbsp;jys,&nbsp;mfreqs,&nbsp;ionrefs,&nbsp;...])</td>
+<td>Cache intermediate computations given catalog information to speed simulation for multiple baselines.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.unphs2src.html#tlpipe.core.tl_array.AntennaArray.unphs2src" title="tlpipe.core.tl_array.AntennaArray.unphs2src"><code class="xref py py-obj docutils literal"><span class="pre">unphs2src</span></code></a>(data,&nbsp;src,&nbsp;i,&nbsp;j[,&nbsp;mfreq,&nbsp;ionref,&nbsp;...])</td>
+<td>Remove phasing from src-phased data to point to zenith.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.core.tl_array.AntennaArray.update.html#tlpipe.core.tl_array.AntennaArray.update" title="tlpipe.core.tl_array.AntennaArray.update"><code class="xref py py-obj docutils literal"><span class="pre">update</span></code></a>()</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tlpipe.core.tl_array.AntennaArray.date.html" class="btn btn-neutral float-right" title="tlpipe.core.tl_array.AntennaArray.date" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="tlpipe.core.tl_array.Antenna.update.html" class="btn btn-neutral" title="tlpipe.core.tl_array.Antenna.update" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Shifan Zuo.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

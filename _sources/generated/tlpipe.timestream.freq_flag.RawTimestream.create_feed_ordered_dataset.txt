@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.RawTimestream.create_feed_ordered_dataset
+=====================================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: RawTimestream.create_feed_ordered_dataset

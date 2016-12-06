@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_subtract.PsSub.cast_input
+==============================================
+
+.. currentmodule:: tlpipe.timestream.ps_subtract
+
+.. automethod:: PsSub.cast_input

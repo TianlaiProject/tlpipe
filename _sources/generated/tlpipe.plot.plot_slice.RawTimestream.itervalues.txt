@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.RawTimestream.itervalues
+===============================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: RawTimestream.itervalues

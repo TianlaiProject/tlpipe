@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.Timestream.local_pol
+===============================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. autoattribute:: Timestream.local_pol

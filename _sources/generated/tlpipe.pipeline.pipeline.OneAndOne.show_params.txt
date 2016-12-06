@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.OneAndOne.show_params
+==============================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: OneAndOne.show_params

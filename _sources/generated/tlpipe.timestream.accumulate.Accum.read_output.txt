@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Accum.read_output
+==============================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Accum.read_output

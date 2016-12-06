@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.MapMaking.history
+==============================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. autoattribute:: MapMaking.history

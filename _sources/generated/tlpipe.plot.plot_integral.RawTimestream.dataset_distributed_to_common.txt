@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.RawTimestream.dataset_distributed_to_common
+=====================================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: RawTimestream.dataset_distributed_to_common

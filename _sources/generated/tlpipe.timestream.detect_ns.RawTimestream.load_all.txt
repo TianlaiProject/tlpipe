@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.RawTimestream.load_all
+==================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: RawTimestream.load_all

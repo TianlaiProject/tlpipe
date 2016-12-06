@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Timestream.ondisk
+============================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoattribute:: Timestream.ondisk

@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.RawTimestream.reload_main_data
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: RawTimestream.reload_main_data

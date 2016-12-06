@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.RawTimestream.frequency_select
+=========================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: RawTimestream.frequency_select

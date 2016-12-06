@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.TaskBase.setup
+=======================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: TaskBase.setup

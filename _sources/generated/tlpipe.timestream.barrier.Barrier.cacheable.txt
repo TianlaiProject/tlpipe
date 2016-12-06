@@ -1,0 +1,6 @@
+tlpipe.timestream.barrier.Barrier.cacheable
+===========================================
+
+.. currentmodule:: tlpipe.timestream.barrier
+
+.. autoattribute:: Barrier.cacheable

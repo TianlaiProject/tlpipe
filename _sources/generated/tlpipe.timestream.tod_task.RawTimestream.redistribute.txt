@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.RawTimestream.redistribute
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: RawTimestream.redistribute

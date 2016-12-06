@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.redistribute
+=================================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. automethod:: BasicTod.redistribute

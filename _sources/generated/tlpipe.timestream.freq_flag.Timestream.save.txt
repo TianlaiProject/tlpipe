@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.save
+===========================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Timestream.save

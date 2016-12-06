@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Flag.params_init
+============================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. autoattribute:: Flag.params_init

@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Accum.params_init
+==============================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. autoattribute:: Accum.params_init

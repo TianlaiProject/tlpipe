@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.AntennaArray.next_transit
+==============================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: AntennaArray.next_transit

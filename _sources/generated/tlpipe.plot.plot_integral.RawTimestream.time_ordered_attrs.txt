@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.RawTimestream.time_ordered_attrs
+==========================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: RawTimestream.time_ordered_attrs

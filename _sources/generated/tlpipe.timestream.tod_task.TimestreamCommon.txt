@@ -1,0 +1,130 @@
+tlpipe.timestream.tod_task.TimestreamCommon
+===========================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. autoclass:: TimestreamCommon
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~TimestreamCommon.array
+      ~TimestreamCommon.attrs
+      ~TimestreamCommon.bl
+      ~TimestreamCommon.bl_ordered_datasets
+      ~TimestreamCommon.comm
+      ~TimestreamCommon.distributed
+      ~TimestreamCommon.feed_ordered_datasets
+      ~TimestreamCommon.file
+      ~TimestreamCommon.freq
+      ~TimestreamCommon.freq_ordered_datasets
+      ~TimestreamCommon.history
+      ~TimestreamCommon.is_continuous
+      ~TimestreamCommon.is_cylinder
+      ~TimestreamCommon.is_dish
+      ~TimestreamCommon.is_same_dec
+      ~TimestreamCommon.is_same_pointing
+      ~TimestreamCommon.local_bl
+      ~TimestreamCommon.local_freq
+      ~TimestreamCommon.local_time
+      ~TimestreamCommon.local_vis
+      ~TimestreamCommon.local_vis_mask
+      ~TimestreamCommon.main_axes_ordered_datasets
+      ~TimestreamCommon.main_data
+      ~TimestreamCommon.main_data_axes
+      ~TimestreamCommon.main_data_name
+      ~TimestreamCommon.main_time_ordered_datasets
+      ~TimestreamCommon.masked_vis
+      ~TimestreamCommon.name
+      ~TimestreamCommon.ondisk
+      ~TimestreamCommon.parent
+      ~TimestreamCommon.time
+      ~TimestreamCommon.time_ordered_attrs
+      ~TimestreamCommon.time_ordered_datasets
+      ~TimestreamCommon.vis
+      ~TimestreamCommon.vis_mask
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~TimestreamCommon.add_history
+      ~TimestreamCommon.all_data_operate
+      ~TimestreamCommon.apply_mask
+      ~TimestreamCommon.attrs_name_allowed
+      ~TimestreamCommon.bl_data_operate
+      ~TimestreamCommon.check_status
+      ~TimestreamCommon.close
+      ~TimestreamCommon.copy
+      ~TimestreamCommon.create_bl_ordered_dataset
+      ~TimestreamCommon.create_dataset
+      ~TimestreamCommon.create_feed_ordered_dataset
+      ~TimestreamCommon.create_freq_and_bl_ordered_dataset
+      ~TimestreamCommon.create_freq_ordered_dataset
+      ~TimestreamCommon.create_group
+      ~TimestreamCommon.create_main_axis_ordered_dataset
+      ~TimestreamCommon.create_main_data
+      ~TimestreamCommon.create_main_time_ordered_dataset
+      ~TimestreamCommon.create_time_and_bl_ordered_dataset
+      ~TimestreamCommon.create_time_and_freq_ordered_dataset
+      ~TimestreamCommon.create_time_ordered_dataset
+      ~TimestreamCommon.data_operate
+      ~TimestreamCommon.data_select
+      ~TimestreamCommon.dataset_common_to_distributed
+      ~TimestreamCommon.dataset_distributed_to_common
+      ~TimestreamCommon.dataset_name_allowed
+      ~TimestreamCommon.delete_a_dataset
+      ~TimestreamCommon.delete_an_attribute
+      ~TimestreamCommon.feed_select
+      ~TimestreamCommon.flush
+      ~TimestreamCommon.freq_and_bl_data_operate
+      ~TimestreamCommon.freq_data_operate
+      ~TimestreamCommon.frequency_select
+      ~TimestreamCommon.from_file
+      ~TimestreamCommon.from_group
+      ~TimestreamCommon.get
+      ~TimestreamCommon.group_name_allowed
+      ~TimestreamCommon.info
+      ~TimestreamCommon.items
+      ~TimestreamCommon.iteritems
+      ~TimestreamCommon.iterkeys
+      ~TimestreamCommon.itervalues
+      ~TimestreamCommon.keys
+      ~TimestreamCommon.load_all
+      ~TimestreamCommon.load_common
+      ~TimestreamCommon.load_main_data
+      ~TimestreamCommon.load_time_ordered
+      ~TimestreamCommon.load_tod_excl_main_data
+      ~TimestreamCommon.redistribute
+      ~TimestreamCommon.reload_all
+      ~TimestreamCommon.reload_common
+      ~TimestreamCommon.reload_main_data
+      ~TimestreamCommon.reload_time_ordered
+      ~TimestreamCommon.reload_tod_excl_main_data
+      ~TimestreamCommon.require_dataset
+      ~TimestreamCommon.require_group
+      ~TimestreamCommon.save
+      ~TimestreamCommon.time_and_bl_data_operate
+      ~TimestreamCommon.time_and_freq_data_operate
+      ~TimestreamCommon.time_data_operate
+      ~TimestreamCommon.time_select
+      ~TimestreamCommon.to_disk
+      ~TimestreamCommon.to_files
+      ~TimestreamCommon.to_memory
+      ~TimestreamCommon.values
+   
+   

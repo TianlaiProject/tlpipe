@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Timestream.from_group
+================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: Timestream.from_group

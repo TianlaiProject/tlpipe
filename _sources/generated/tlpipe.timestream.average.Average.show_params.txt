@@ -1,0 +1,6 @@
+tlpipe.timestream.average.Average.show_params
+=============================================
+
+.. currentmodule:: tlpipe.timestream.average
+
+.. automethod:: Average.show_params

@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.Timestream.reload_common
+===================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: Timestream.reload_common

@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.RawTimestream.time_data_operate
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: RawTimestream.time_data_operate

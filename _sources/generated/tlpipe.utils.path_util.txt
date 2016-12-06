@@ -1,0 +1,27 @@
+tlpipe.utils.path_util
+======================
+
+.. automodule:: tlpipe.utils.path_util
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      input_path
+      iter_path
+      output_path
+   
+   
+
+
+   
+   
+   
+
+
+   
+   
+   

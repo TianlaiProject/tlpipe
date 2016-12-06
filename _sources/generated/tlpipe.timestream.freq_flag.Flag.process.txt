@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Flag.process
+========================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Flag.process

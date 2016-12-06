@@ -1,0 +1,6 @@
+tlpipe.timestream.raw_timestream.RawTimestream.data_select
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.raw_timestream
+
+.. automethod:: RawTimestream.data_select

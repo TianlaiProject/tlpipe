@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.main_data_axes
+===================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: Timestream.main_data_axes

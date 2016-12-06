@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.Timestream.reload_main_data
+====================================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: Timestream.reload_main_data

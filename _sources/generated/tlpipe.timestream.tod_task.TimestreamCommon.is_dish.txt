@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.TimestreamCommon.is_dish
+===================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. autoattribute:: TimestreamCommon.is_dish

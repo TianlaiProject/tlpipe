@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Flag.embarrassingly_parallelizable
+=============================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. autoattribute:: Flag.embarrassingly_parallelizable

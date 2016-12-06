@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.reload_time_ordered
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Timestream.reload_time_ordered

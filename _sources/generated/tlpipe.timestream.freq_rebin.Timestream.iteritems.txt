@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.iteritems
+=================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Timestream.iteritems

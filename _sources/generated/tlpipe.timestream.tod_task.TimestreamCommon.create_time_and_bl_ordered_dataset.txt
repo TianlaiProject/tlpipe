@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.TimestreamCommon.create_time_and_bl_ordered_dataset
+==============================================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: TimestreamCommon.create_time_and_bl_ordered_dataset

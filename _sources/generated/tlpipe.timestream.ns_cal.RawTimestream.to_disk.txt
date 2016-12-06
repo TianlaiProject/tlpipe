@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.RawTimestream.to_disk
+==============================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: RawTimestream.to_disk

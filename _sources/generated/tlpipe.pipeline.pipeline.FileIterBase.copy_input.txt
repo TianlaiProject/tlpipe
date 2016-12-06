@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.FileIterBase.copy_input
+================================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: FileIterBase.copy_input

@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.main_data_axes
+======================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. autoattribute:: Timestream.main_data_axes

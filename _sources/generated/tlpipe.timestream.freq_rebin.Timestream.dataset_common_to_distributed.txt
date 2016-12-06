@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.dataset_common_to_distributed
+=====================================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Timestream.dataset_common_to_distributed

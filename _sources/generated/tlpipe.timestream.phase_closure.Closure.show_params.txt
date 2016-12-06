@@ -1,0 +1,6 @@
+tlpipe.timestream.phase_closure.Closure.show_params
+===================================================
+
+.. currentmodule:: tlpipe.timestream.phase_closure
+
+.. automethod:: Closure.show_params

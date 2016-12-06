@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.Timestream.create_group
+================================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: Timestream.create_group

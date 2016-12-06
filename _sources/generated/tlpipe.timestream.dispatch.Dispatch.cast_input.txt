@@ -1,0 +1,6 @@
+tlpipe.timestream.dispatch.Dispatch.cast_input
+==============================================
+
+.. currentmodule:: tlpipe.timestream.dispatch
+
+.. automethod:: Dispatch.cast_input

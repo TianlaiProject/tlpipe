@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.to_memory
+=================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Timestream.to_memory

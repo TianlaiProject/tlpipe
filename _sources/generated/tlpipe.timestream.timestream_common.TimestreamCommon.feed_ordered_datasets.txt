@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_common.TimestreamCommon.feed_ordered_datasets
+==========================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_common
+
+.. autoattribute:: TimestreamCommon.feed_ordered_datasets

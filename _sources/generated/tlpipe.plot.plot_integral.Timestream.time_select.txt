@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.time_select
+================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Timestream.time_select

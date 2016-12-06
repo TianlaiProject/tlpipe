@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.Timestream.data_select
+=================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: Timestream.data_select

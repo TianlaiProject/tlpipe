@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.local_vis
+==============================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: Timestream.local_vis

@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.Timestream.history
+==============================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. autoattribute:: Timestream.history

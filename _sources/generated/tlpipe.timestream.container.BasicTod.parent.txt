@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.parent
+===========================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. autoattribute:: BasicTod.parent

@@ -1,0 +1,6 @@
+tlpipe.timestream.phs2zen.Phs2zen.prefix
+========================================
+
+.. currentmodule:: tlpipe.timestream.phs2zen
+
+.. autoattribute:: Phs2zen.prefix

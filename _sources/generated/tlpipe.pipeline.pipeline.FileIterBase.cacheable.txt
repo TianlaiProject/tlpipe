@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.FileIterBase.cacheable
+===============================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoattribute:: FileIterBase.cacheable

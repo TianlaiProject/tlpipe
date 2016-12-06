@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.RawTimestream.freq_ordered_datasets
+==============================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoattribute:: RawTimestream.freq_ordered_datasets

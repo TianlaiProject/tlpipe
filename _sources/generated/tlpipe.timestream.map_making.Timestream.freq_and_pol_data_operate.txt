@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.freq_and_pol_data_operate
+=================================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: Timestream.freq_and_pol_data_operate

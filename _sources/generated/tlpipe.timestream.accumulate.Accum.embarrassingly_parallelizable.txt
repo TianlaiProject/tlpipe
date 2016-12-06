@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Accum.embarrassingly_parallelizable
+================================================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. autoattribute:: Accum.embarrassingly_parallelizable

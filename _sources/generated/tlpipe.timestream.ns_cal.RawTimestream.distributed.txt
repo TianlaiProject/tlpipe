@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.RawTimestream.distributed
+==================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. autoattribute:: RawTimestream.distributed

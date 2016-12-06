@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.Timestream.reload_tod_excl_main_data
+================================================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. automethod:: Timestream.reload_tod_excl_main_data

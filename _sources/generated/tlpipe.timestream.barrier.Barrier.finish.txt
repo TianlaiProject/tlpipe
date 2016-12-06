@@ -1,0 +1,6 @@
+tlpipe.timestream.barrier.Barrier.finish
+========================================
+
+.. currentmodule:: tlpipe.timestream.barrier
+
+.. automethod:: Barrier.finish

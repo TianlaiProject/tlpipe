@@ -1,0 +1,34 @@
+tlpipe.timestream.freq_flag
+===========================
+
+.. automodule:: tlpipe.timestream.freq_flag
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      flag
+   
+   
+
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      Flag
+      RawTimestream
+      Timestream
+   
+   
+
+
+   
+   
+   

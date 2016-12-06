@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.RawTimestream.time_and_bl_data_operate
+=================================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: RawTimestream.time_and_bl_data_operate

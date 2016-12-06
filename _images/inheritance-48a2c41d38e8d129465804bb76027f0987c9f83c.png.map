@@ -1,0 +1,5 @@
+<map id="inheritance2468c596f6" name="inheritance2468c596f6">
+<area shape="rect" id="node1" href="tlpipe.pipeline.pipeline.OneAndOne.html#tlpipe.pipeline.pipeline.OneAndOne" target="_top" title="Base class for tasks that have (at most) one input and one output." alt="" coords="5,83,163,111"/>
+<area shape="rect" id="node4" href="tlpipe.plot.plot_gain.Plot.html#tlpipe.plot.plot_gain.Plot" target="_top" title="Plot gain." alt="" coords="28,161,140,189"/>
+<area shape="rect" id="node2" href="tlpipe.pipeline.pipeline.TaskBase.html#tlpipe.pipeline.pipeline.TaskBase" target="_top" title="Base class for all pipeline tasks." alt="" coords="15,6,153,34"/>
+</map>

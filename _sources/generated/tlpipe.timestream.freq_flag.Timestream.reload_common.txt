@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.reload_common
+====================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Timestream.reload_common

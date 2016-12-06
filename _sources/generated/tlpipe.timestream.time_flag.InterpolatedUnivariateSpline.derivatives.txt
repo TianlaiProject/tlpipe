@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.InterpolatedUnivariateSpline.derivatives
+====================================================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. automethod:: InterpolatedUnivariateSpline.derivatives

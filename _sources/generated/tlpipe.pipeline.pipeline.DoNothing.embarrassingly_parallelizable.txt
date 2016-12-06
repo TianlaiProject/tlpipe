@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.DoNothing.embarrassingly_parallelizable
+================================================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoattribute:: DoNothing.embarrassingly_parallelizable

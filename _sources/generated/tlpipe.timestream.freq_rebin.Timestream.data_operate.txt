@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.data_operate
+====================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Timestream.data_operate

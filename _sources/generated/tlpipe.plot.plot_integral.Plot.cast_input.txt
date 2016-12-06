@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Plot.cast_input
+=========================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Plot.cast_input

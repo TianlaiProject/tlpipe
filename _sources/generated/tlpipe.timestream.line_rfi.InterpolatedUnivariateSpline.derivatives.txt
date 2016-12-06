@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.InterpolatedUnivariateSpline.derivatives
+===================================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: InterpolatedUnivariateSpline.derivatives

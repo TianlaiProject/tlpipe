@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.delete_a_dataset
+========================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Timestream.delete_a_dataset

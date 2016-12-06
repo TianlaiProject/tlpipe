@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.TaskBase.params_init
+=============================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoattribute:: TaskBase.params_init

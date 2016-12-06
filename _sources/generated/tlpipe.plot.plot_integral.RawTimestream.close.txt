@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.RawTimestream.close
+=============================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: RawTimestream.close

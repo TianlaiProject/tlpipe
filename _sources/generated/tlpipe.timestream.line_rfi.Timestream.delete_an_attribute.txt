@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Timestream.delete_an_attribute
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: Timestream.delete_an_attribute

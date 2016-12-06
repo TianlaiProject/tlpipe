@@ -1,0 +1,6 @@
+tlpipe.timestream.phs2zen.Phs2zen.cast_input
+============================================
+
+.. currentmodule:: tlpipe.timestream.phs2zen
+
+.. automethod:: Phs2zen.cast_input

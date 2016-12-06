@@ -1,0 +1,6 @@
+tlpipe.timestream.barrier.Barrier.history
+=========================================
+
+.. currentmodule:: tlpipe.timestream.barrier
+
+.. autoattribute:: Barrier.history

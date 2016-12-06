@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream.Timestream.vis_mask
+================================================
+
+.. currentmodule:: tlpipe.timestream.timestream
+
+.. autoattribute:: Timestream.vis_mask

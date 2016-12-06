@@ -1,0 +1,37 @@
+tlpipe.timestream.line_rfi
+==========================
+
+.. automodule:: tlpipe.timestream.line_rfi
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      flag
+      output_path
+      savitzky_golay
+   
+   
+
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      Flag
+      InterpolatedUnivariateSpline
+      RawTimestream
+      Timestream
+   
+   
+
+
+   
+   
+   

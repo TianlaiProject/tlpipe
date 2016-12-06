@@ -1,0 +1,6 @@
+tlpipe.timestream.sg_filter.factorial
+=====================================
+
+.. currentmodule:: tlpipe.timestream.sg_filter
+
+.. autofunction:: factorial

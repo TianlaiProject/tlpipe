@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.Timestream.close
+===========================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: Timestream.close

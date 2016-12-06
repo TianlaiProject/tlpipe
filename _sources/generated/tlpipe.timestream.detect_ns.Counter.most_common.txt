@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.Counter.most_common
+===============================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: Counter.most_common

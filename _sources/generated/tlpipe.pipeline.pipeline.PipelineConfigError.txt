@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.PipelineConfigError
+============================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoexception:: PipelineConfigError

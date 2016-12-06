@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.values
+==============================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: Timestream.values

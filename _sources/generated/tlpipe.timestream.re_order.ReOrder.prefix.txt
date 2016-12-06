@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.ReOrder.prefix
+=========================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. autoattribute:: ReOrder.prefix

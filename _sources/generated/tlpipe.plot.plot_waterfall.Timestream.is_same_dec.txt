@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Timestream.is_same_dec
+=================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoattribute:: Timestream.is_same_dec

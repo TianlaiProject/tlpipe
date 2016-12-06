@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.FileIterBase.show_params
+=================================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: FileIterBase.show_params

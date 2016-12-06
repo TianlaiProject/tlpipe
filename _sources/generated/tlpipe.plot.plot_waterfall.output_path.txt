@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.output_path
+======================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autofunction:: output_path

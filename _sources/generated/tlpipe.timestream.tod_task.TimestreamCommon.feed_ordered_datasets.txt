@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.TimestreamCommon.feed_ordered_datasets
+=================================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. autoattribute:: TimestreamCommon.feed_ordered_datasets

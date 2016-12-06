@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Timestream.time_ordered_attrs
+========================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. autoattribute:: Timestream.time_ordered_attrs

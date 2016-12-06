@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.RawTimestream.time_ordered_datasets
+===============================================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. autoattribute:: RawTimestream.time_ordered_datasets

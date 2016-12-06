@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.TimestreamCommon.local_vis_mask
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. autoattribute:: TimestreamCommon.local_vis_mask

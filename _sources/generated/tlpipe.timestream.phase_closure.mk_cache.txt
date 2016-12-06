@@ -1,0 +1,6 @@
+tlpipe.timestream.phase_closure.mk_cache
+========================================
+
+.. currentmodule:: tlpipe.timestream.phase_closure
+
+.. autofunction:: mk_cache

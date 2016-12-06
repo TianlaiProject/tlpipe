@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.CylinderBeam.fwhm_e
+========================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. autoattribute:: CylinderBeam.fwhm_e

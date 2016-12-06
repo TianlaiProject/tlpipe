@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.MapMaking.embarrassingly_parallelizable
+====================================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. autoattribute:: MapMaking.embarrassingly_parallelizable

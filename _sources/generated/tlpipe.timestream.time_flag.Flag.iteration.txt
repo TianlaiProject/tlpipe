@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.Flag.iteration
+==========================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. autoattribute:: Flag.iteration

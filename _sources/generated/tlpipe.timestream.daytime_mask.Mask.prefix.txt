@@ -1,0 +1,6 @@
+tlpipe.timestream.daytime_mask.Mask.prefix
+==========================================
+
+.. currentmodule:: tlpipe.timestream.daytime_mask
+
+.. autoattribute:: Mask.prefix

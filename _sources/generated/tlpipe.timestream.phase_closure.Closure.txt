@@ -1,0 +1,49 @@
+tlpipe.timestream.phase_closure.Closure
+=======================================
+
+.. currentmodule:: tlpipe.timestream.phase_closure
+
+.. autoclass:: Closure
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Closure.cacheable
+      ~Closure.embarrassingly_parallelizable
+      ~Closure.history
+      ~Closure.iteration
+      ~Closure.params_init
+      ~Closure.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Closure.cast_input
+      ~Closure.copy_input
+      ~Closure.data_select
+      ~Closure.finish
+      ~Closure.next
+      ~Closure.process
+      ~Closure.read_input
+      ~Closure.read_output
+      ~Closure.read_process_write
+      ~Closure.setup
+      ~Closure.show_params
+      ~Closure.write_output
+   
+   

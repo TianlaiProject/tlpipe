@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.reload_common
+==================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Timestream.reload_common

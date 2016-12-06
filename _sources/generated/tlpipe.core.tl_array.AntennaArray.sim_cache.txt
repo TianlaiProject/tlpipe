@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.AntennaArray.sim_cache
+===========================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: AntennaArray.sim_cache

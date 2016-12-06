@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.RawTimestream.bl_ordered_datasets
+============================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. autoattribute:: RawTimestream.bl_ordered_datasets

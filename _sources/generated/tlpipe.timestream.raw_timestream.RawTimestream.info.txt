@@ -1,0 +1,6 @@
+tlpipe.timestream.raw_timestream.RawTimestream.info
+===================================================
+
+.. currentmodule:: tlpipe.timestream.raw_timestream
+
+.. automethod:: RawTimestream.info

@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Timestream.require_group
+===================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: Timestream.require_group

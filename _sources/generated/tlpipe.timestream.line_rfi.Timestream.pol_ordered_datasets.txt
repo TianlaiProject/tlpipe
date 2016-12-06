@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Timestream.pol_ordered_datasets
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. autoattribute:: Timestream.pol_ordered_datasets

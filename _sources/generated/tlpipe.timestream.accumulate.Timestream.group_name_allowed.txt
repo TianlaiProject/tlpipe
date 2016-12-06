@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Timestream.group_name_allowed
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Timestream.group_name_allowed

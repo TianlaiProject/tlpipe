@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.RawTimestream.vis_mask
+================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: RawTimestream.vis_mask

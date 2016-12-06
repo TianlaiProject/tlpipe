@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.polarization_select
+========================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Timestream.polarization_select

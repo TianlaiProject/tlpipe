@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.is_same_dec
+===================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. autoattribute:: Timestream.is_same_dec

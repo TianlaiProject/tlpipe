@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.AntennaArray.ij2bl
+=======================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: AntennaArray.ij2bl

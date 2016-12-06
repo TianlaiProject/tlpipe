@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.is_same_pointing
+========================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. autoattribute:: Timestream.is_same_pointing

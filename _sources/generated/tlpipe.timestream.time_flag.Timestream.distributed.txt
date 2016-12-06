@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.Timestream.distributed
+==================================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. autoattribute:: Timestream.distributed

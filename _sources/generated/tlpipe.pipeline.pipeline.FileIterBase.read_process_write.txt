@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.FileIterBase.read_process_write
+========================================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: FileIterBase.read_process_write

@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.average
+====================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. autofunction:: average

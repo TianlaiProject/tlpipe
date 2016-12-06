@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.frequency_select
+=====================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Timestream.frequency_select

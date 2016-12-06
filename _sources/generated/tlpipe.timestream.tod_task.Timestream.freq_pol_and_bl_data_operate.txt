@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.Timestream.freq_pol_and_bl_data_operate
+==================================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: Timestream.freq_pol_and_bl_data_operate

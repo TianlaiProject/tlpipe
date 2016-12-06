@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.Timestream.to_memory
+===========================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: Timestream.to_memory

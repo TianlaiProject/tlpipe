@@ -1,0 +1,49 @@
+tlpipe.timestream.ns_cal.NsCal
+==============================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. autoclass:: NsCal
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~NsCal.cacheable
+      ~NsCal.embarrassingly_parallelizable
+      ~NsCal.history
+      ~NsCal.iteration
+      ~NsCal.params_init
+      ~NsCal.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~NsCal.cast_input
+      ~NsCal.copy_input
+      ~NsCal.data_select
+      ~NsCal.finish
+      ~NsCal.next
+      ~NsCal.process
+      ~NsCal.read_input
+      ~NsCal.read_output
+      ~NsCal.read_process_write
+      ~NsCal.setup
+      ~NsCal.show_params
+      ~NsCal.write_output
+   
+   

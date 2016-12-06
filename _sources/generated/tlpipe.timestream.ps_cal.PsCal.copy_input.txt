@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.PsCal.copy_input
+=========================================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. automethod:: PsCal.copy_input

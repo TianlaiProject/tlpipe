@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Plot.read_output
+==========================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Plot.read_output

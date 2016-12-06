@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.array
+=============================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. autoattribute:: Timestream.array

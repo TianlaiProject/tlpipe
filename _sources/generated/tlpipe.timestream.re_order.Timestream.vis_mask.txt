@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.vis_mask
+==============================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. autoattribute:: Timestream.vis_mask

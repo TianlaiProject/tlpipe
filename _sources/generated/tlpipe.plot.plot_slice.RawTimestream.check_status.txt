@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.RawTimestream.check_status
+=================================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: RawTimestream.check_status

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Plot.prefix
+=====================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: Plot.prefix

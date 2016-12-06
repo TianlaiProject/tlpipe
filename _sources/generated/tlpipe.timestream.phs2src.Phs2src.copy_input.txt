@@ -1,0 +1,6 @@
+tlpipe.timestream.phs2src.Phs2src.copy_input
+============================================
+
+.. currentmodule:: tlpipe.timestream.phs2src
+
+.. automethod:: Phs2src.copy_input

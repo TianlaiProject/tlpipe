@@ -1,0 +1,21 @@
+<map id="inheritancec92142d125" name="inheritancec92142d125">
+<area shape="rect" id="node2" title="Representation of physical location and beam pattern of individual " alt="" coords="147,63,253,84"/>
+<area shape="rect" id="node13" title="Representation of physical location and beam pattern of individual " alt="" coords="153,121,247,142"/>
+<area shape="rect" id="node3" title="Representation of physical attributes of individual antenna." alt="" coords="150,5,250,26"/>
+<area shape="rect" id="node5" title="Representation of location and time of observation, and response of" alt="" coords="4,237,136,258"/>
+<area shape="rect" id="node15" title="Representation of location and time of observation, and response of" alt="" coords="9,296,131,317"/>
+<area shape="rect" id="node6" title="A collection of antennas, their spacings, and location/time of " alt="" coords="4,179,132,200"/>
+<area shape="rect" id="node8" title="Representation of a flat (gain=1) antenna beam pattern." alt="" coords="300,63,392,84"/>
+<area shape="rect" id="node17" title="Representation of a flat (gain=1) antenna beam pattern." alt="" coords="303,121,385,142"/>
+<area shape="rect" id="node9" title="Template for representing antenna beam pattern. &#160;Beams also hold" alt="" coords="374,5,463,26"/>
+<area shape="rect" id="node11" title="Representation of a 2D Gaussian beam pattern, with default setting for " alt="" coords="414,63,567,84"/>
+<area shape="rect" id="node19" title="Representation of a 2D Gaussian beam pattern, with default setting for " alt="" coords="429,121,570,142"/>
+<area shape="rect" id="node25" title="This is like fit.Antenna, except now it is expected that phsoff, amp," alt="" coords="151,179,249,200"/>
+<area shape="rect" id="node33" href="tlpipe.core.tl_array.CylinderBeam.html#tlpipe.core.tl_array.CylinderBeam" target="_top" title="Beam of a cylinder feed." alt="" coords="267,179,419,200"/>
+<area shape="rect" id="node39" href="tlpipe.core.tl_array.DishBeam.html#tlpipe.core.tl_array.DishBeam" target="_top" title="Circular beam of a dish antenna." alt="" coords="438,179,572,200"/>
+<area shape="rect" id="node21" title="The location and time of an observation." alt="" coords="4,121,132,142"/>
+<area shape="rect" id="node29" href="tlpipe.core.tl_array.Antenna.html#tlpipe.core.tl_array.Antenna" target="_top" title="Representation of an individual dish antenna or cylinder feed." alt="" coords="161,237,285,258"/>
+<area shape="rect" id="node31" href="tlpipe.core.tl_array.AntennaArray.html#tlpipe.core.tl_array.AntennaArray" target="_top" title="Representation of an antenna array." alt="" coords="4,412,155,433"/>
+<area shape="rect" id="node35" href="tlpipe.core.tl_array.CylinderFeed.html#tlpipe.core.tl_array.CylinderFeed" target="_top" title="Representation of an individual cylinder feed." alt="" coords="150,296,296,317"/>
+<area shape="rect" id="node37" href="tlpipe.core.tl_array.DishAntenna.html#tlpipe.core.tl_array.DishAntenna" target="_top" title="Representation of an individual dish antenna." alt="" coords="314,296,461,317"/>
+</map>

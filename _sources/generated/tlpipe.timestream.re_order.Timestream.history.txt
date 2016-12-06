@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.history
+=============================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. autoattribute:: Timestream.history

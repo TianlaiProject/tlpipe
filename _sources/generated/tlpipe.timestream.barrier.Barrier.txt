@@ -1,0 +1,40 @@
+tlpipe.timestream.barrier.Barrier
+=================================
+
+.. currentmodule:: tlpipe.timestream.barrier
+
+.. autoclass:: Barrier
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Barrier.cacheable
+      ~Barrier.embarrassingly_parallelizable
+      ~Barrier.history
+      ~Barrier.params_init
+      ~Barrier.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Barrier.finish
+      ~Barrier.next
+      ~Barrier.setup
+      ~Barrier.show_params
+   
+   

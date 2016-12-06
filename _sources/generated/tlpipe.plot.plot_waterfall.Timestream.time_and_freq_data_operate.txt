@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Timestream.time_and_freq_data_operate
+================================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: Timestream.time_and_freq_data_operate

@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.AntennaArray.elevation
+===========================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. autoattribute:: AntennaArray.elevation

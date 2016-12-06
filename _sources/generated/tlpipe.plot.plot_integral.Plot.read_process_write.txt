@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Plot.read_process_write
+=================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Plot.read_process_write

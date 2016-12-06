@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.attrs_name_allowed
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: Timestream.attrs_name_allowed

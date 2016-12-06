@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.dataset_name_allowed
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Timestream.dataset_name_allowed

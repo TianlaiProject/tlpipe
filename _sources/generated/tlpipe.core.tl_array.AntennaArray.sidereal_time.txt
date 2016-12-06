@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.AntennaArray.sidereal_time
+===============================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: AntennaArray.sidereal_time

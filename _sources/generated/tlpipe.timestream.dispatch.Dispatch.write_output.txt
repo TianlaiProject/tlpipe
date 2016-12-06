@@ -1,0 +1,6 @@
+tlpipe.timestream.dispatch.Dispatch.write_output
+================================================
+
+.. currentmodule:: tlpipe.timestream.dispatch
+
+.. automethod:: Dispatch.write_output

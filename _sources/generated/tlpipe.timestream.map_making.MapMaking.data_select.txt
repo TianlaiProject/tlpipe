@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.MapMaking.data_select
+==================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: MapMaking.data_select

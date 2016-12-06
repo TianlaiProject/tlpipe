@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream.Timestream.apply_mask
+==================================================
+
+.. currentmodule:: tlpipe.timestream.timestream
+
+.. automethod:: Timestream.apply_mask

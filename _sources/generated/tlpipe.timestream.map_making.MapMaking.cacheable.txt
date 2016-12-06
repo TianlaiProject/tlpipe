@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.MapMaking.cacheable
+================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. autoattribute:: MapMaking.cacheable

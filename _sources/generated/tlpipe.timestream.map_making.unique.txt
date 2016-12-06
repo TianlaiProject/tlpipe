@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.unique
+===================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. autofunction:: unique

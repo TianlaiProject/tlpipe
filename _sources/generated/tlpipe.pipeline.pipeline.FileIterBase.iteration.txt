@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.FileIterBase.iteration
+===============================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoattribute:: FileIterBase.iteration

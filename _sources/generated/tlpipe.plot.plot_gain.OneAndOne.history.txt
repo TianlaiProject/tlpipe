@@ -1,0 +1,6 @@
+tlpipe.plot.plot_gain.OneAndOne.history
+=======================================
+
+.. currentmodule:: tlpipe.plot.plot_gain
+
+.. autoattribute:: OneAndOne.history

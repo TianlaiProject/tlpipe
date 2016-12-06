@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.comm
+============================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. autoattribute:: Timestream.comm

@@ -1,0 +1,6 @@
+tlpipe.timestream.phs2zen.Phs2zen.read_output
+=============================================
+
+.. currentmodule:: tlpipe.timestream.phs2zen
+
+.. automethod:: Phs2zen.read_output

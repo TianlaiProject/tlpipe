@@ -1,0 +1,6 @@
+tlpipe.timestream.average.Average.finish
+========================================
+
+.. currentmodule:: tlpipe.timestream.average
+
+.. automethod:: Average.finish

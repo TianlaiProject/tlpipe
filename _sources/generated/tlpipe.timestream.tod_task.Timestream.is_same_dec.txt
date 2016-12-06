@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.Timestream.is_same_dec
+=================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. autoattribute:: Timestream.is_same_dec

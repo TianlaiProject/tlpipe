@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.RawTimestream.from_group
+====================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: RawTimestream.from_group

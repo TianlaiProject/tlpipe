@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.data_select
+================================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. automethod:: BasicTod.data_select

@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.RawTimestream.main_data_axes
+========================================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. autoattribute:: RawTimestream.main_data_axes

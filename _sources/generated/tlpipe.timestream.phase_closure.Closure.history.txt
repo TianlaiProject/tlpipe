@@ -1,0 +1,6 @@
+tlpipe.timestream.phase_closure.Closure.history
+===============================================
+
+.. currentmodule:: tlpipe.timestream.phase_closure
+
+.. autoattribute:: Closure.history

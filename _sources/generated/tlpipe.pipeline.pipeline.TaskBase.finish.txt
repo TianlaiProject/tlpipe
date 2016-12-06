@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.TaskBase.finish
+========================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: TaskBase.finish

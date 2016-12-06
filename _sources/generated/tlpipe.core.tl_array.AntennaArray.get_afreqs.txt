@@ -1,0 +1,6 @@
+tlpipe.core.tl_array.AntennaArray.get_afreqs
+============================================
+
+.. currentmodule:: tlpipe.core.tl_array
+
+.. automethod:: AntennaArray.get_afreqs

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.RawTimestream.is_same_pointing
+========================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: RawTimestream.is_same_pointing

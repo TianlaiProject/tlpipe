@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.NsCal.data_select
+==========================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: NsCal.data_select

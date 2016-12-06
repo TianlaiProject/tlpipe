@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.Plot.params_init
+=======================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. autoattribute:: Plot.params_init

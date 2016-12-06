@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.FileIterBase.read_input
+================================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: FileIterBase.read_input

@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.RawTimestream.add_history
+====================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: RawTimestream.add_history

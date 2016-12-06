@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.RawTimestream.create_main_data
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: RawTimestream.create_main_data

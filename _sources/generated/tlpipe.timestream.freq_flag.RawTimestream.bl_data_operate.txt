@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.RawTimestream.bl_data_operate
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: RawTimestream.bl_data_operate

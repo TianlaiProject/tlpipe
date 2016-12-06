@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.TimestreamCommon.reload_tod_excl_main_data
+=====================================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: TimestreamCommon.reload_tod_excl_main_data

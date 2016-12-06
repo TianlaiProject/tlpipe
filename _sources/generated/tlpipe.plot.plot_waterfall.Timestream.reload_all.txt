@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Timestream.reload_all
+================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: Timestream.reload_all

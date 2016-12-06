@@ -1,0 +1,6 @@
+tlpipe.timestream.barrier.Barrier.setup
+=======================================
+
+.. currentmodule:: tlpipe.timestream.barrier
+
+.. automethod:: Barrier.setup

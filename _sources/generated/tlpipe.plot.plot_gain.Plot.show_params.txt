@@ -1,0 +1,6 @@
+tlpipe.plot.plot_gain.Plot.show_params
+======================================
+
+.. currentmodule:: tlpipe.plot.plot_gain
+
+.. automethod:: Plot.show_params

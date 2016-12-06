@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.Timestream.create_pol_ordered_dataset
+============================================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: Timestream.create_pol_ordered_dataset

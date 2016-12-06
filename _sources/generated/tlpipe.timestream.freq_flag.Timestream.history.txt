@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.history
+==============================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. autoattribute:: Timestream.history

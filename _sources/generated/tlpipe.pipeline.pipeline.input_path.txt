@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.input_path
+===================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autofunction:: input_path

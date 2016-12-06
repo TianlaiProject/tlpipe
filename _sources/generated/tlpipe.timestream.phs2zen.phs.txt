@@ -1,0 +1,6 @@
+tlpipe.timestream.phs2zen.phs
+=============================
+
+.. currentmodule:: tlpipe.timestream.phs2zen
+
+.. autofunction:: phs

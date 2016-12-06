@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.RawTimestream.comm
+===========================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. autoattribute:: RawTimestream.comm

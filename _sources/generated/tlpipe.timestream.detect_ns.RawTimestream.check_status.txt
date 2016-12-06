@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.RawTimestream.check_status
+======================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: RawTimestream.check_status

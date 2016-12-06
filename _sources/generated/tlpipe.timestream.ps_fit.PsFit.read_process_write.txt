@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.PsFit.read_process_write
+=================================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: PsFit.read_process_write

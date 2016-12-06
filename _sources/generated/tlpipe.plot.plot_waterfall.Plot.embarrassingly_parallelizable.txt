@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Plot.embarrassingly_parallelizable
+=============================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoattribute:: Plot.embarrassingly_parallelizable

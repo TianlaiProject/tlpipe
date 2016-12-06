@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.RawTimestream.reload_main_data
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: RawTimestream.reload_main_data

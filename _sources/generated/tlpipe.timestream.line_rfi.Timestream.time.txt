@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Timestream.time
+==========================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. autoattribute:: Timestream.time

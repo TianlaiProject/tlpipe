@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.add_history
+===================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: Timestream.add_history

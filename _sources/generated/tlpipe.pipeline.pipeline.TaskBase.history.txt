@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.TaskBase.history
+=========================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoattribute:: TaskBase.history

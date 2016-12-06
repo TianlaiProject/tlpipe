@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.close
+==========================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Timestream.close

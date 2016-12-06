@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.RawTimestream.time_and_freq_data_operate
+===================================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: RawTimestream.time_and_freq_data_operate

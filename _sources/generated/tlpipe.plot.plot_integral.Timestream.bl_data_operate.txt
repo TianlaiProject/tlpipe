@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.bl_data_operate
+====================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Timestream.bl_data_operate

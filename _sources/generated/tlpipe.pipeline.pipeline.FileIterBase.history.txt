@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.FileIterBase.history
+=============================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. autoattribute:: FileIterBase.history
