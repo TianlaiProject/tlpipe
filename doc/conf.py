@@ -29,7 +29,7 @@ from mock import Mock as MagicMock
 class Mock(MagicMock):
     @classmethod
     def __getattr__(cls, name):
-            return Mock()
+            return MagicMock()
 
 # Do not mock up mpi4py. This is an "extra", and docs build without it.
 # MOCK_MODULES = ['cora', 'mpi4py']

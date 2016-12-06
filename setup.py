@@ -4,7 +4,7 @@ import os
 from tlpipe import __version__
 
 
-REQUIRES = ['numpy', 'scipy', 'matplotlib', 'h5py', 'healpy', 'pyephem', 'aipy']
+REQUIRES = ['numpy', 'scipy', 'matplotlib', 'h5py', 'healpy', 'pyephem', 'aipy', 'caput', 'cora']
 
 # Don't install requirements if on ReadTheDocs build system.
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
