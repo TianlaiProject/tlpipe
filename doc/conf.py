@@ -24,17 +24,18 @@ import sys
 # Check if we are on readthedocs
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
-# Mock up modules missing on readthedocs.
-from mock import Mock as MagicMock
-class Mock(MagicMock):
-    @classmethod
-    def __getattr__(cls, name):
-            return MagicMock()
-
-# Do not mock up mpi4py. This is an "extra", and docs build without it.
-# MOCK_MODULES = ['cora', 'mpi4py']
-MOCK_MODULES = ['cora', 'cora.core', 'cora.util', 'cora.signal', 'cora.foreground']
 if on_rtd:
+    
+    # Mock up modules missing on readthedocs.
+    from mock import Mock as MagicMock
+    class Mock(MagicMock):
+        @classmethod
+        def __getattr__(cls, name):
+                return MagicMock()
+
+    # Do not mock up mpi4py. This is an "extra", and docs build without it.
+    # MOCK_MODULES = ['cora', 'mpi4py']
+    MOCK_MODULES = ['cora', 'cora.core', 'cora.util', 'cora.signal', 'cora.foreground']
     sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 
