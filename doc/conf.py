@@ -33,7 +33,7 @@ class Mock(MagicMock):
 
 # Do not mock up mpi4py. This is an "extra", and docs build without it.
 # MOCK_MODULES = ['cora', 'mpi4py']
-MOCK_MODULES = ['cora',]
+MOCK_MODULES = ['cora', 'cora.core', 'cora.util', 'cora.signal', 'cora.foreground']
 if on_rtd:
     sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
