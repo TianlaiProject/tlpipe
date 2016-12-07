@@ -18,28 +18,6 @@ from caput import mpiutil
 from tlpipe.utils.date_util import get_ephdate
 
 
-def phs(vis, vis_mask, li, gi, tbl, ts, **kwargs):
-    t = tbl[0]
-    ai, aj = tbl[1]
-    aa = kwargs.get('aa')
-    s = kwargs.get('s')
-
-    feedno = ts['feedno'][:].tolist()
-    i = feedno.index(ai)
-    j = feedno.index(aj)
-
-    aa.set_jultime(t)
-    s.compute(aa)
-    # get fluxes vs. freq of the calibrator
-    # Sc = s.get_jys()
-    # get the topocentric coordinate of the calibrator at the current time
-    s_top = s.get_crds('top', ncrd=3)
-    # aa.sim_cache(cat.get_crds('eq', ncrd=3)) # for compute bm_response and sim
-    uij = aa.gen_uvw(i, j, src='z').squeeze() # (rj - ri)/lambda
-
-    return vis * np.exp(-2.0J * np.pi * np.dot(s_top, uij))[:, np.newaxis], vis_mask
-
-
 class Phs2zen(tod_task.TaskTimestream):
     """Phase the source-phased visibility data to the zenith, this is just the inverse operation of phs2src.py."""
 
@@ -98,8 +76,31 @@ class Phs2zen(tod_task.TaskTimestream):
             print 'Undo the source-phase %s to phase to the zenith.' % source
 
 
-        ts.time_and_bl_data_operate(phs, aa=aa, s=s)
+        ts.time_and_bl_data_operate(self.phs, aa=aa, s=s)
 
         ts.add_history(self.history)
 
         return ts
+
+    def phs(self, vis, vis_mask, li, gi, tbl, ts, **kwargs):
+        """Function that does the actual phs."""
+
+        t = tbl[0]
+        ai, aj = tbl[1]
+        aa = kwargs.get('aa')
+        s = kwargs.get('s')
+
+        feedno = ts['feedno'][:].tolist()
+        i = feedno.index(ai)
+        j = feedno.index(aj)
+
+        aa.set_jultime(t)
+        s.compute(aa)
+        # get fluxes vs. freq of the calibrator
+        # Sc = s.get_jys()
+        # get the topocentric coordinate of the calibrator at the current time
+        s_top = s.get_crds('top', ncrd=3)
+        # aa.sim_cache(cat.get_crds('eq', ncrd=3)) # for compute bm_response and sim
+        uij = aa.gen_uvw(i, j, src='z').squeeze() # (rj - ri)/lambda
+
+        return vis * np.exp(-2.0J * np.pi * np.dot(s_top, uij))[:, np.newaxis], vis_mask

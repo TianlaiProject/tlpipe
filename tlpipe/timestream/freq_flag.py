@@ -15,21 +15,6 @@ from raw_timestream import RawTimestream
 from timestream import Timestream
 
 
-def flag(vis, vis_mask, li, gi, tbl, ts, **kwargs):
-
-    sigma = kwargs.get('sigma', 3.0)
-    freq_points = kwargs.get('freq_points', 10)
-
-    vis_abs = np.abs(np.ma.array(vis, mask=vis_mask))
-    if vis_abs.count() >= freq_points:
-        mean = np.ma.mean(vis_abs)
-        std = np.ma.std(vis_abs)
-        inds = np.where(np.abs(vis_abs - mean) > sigma*std)[0] # masked inds
-        vis_mask[inds] = True # set mask
-
-    return vis, vis_mask
-
-
 class Flag(tod_task.TaskTimestream):
     """Exceptional values flagging along the frequency axis."""
 
@@ -42,7 +27,6 @@ class Flag(tod_task.TaskTimestream):
 
     def process(self, ts):
 
-        sigma = self.params['sigma']
         freq_points = self.params['freq_points']
 
         nfreq = ts.freq.shape[0] # global shape
@@ -55,7 +39,7 @@ class Flag(tod_task.TaskTimestream):
             elif isinstance(ts, Timestream):
                 func = ts.time_pol_and_bl_data_operate
 
-            func(flag, full_data=True, keep_dist_axis=False, sigma=sigma, freq_points=freq_points)
+            func(self.flag, full_data=True, keep_dist_axis=False)
         else:
             warnings.warn('Not enough frequency points to do the flag')
 
@@ -64,3 +48,18 @@ class Flag(tod_task.TaskTimestream):
         # ts.info()
 
         return ts
+
+    def flag(self, vis, vis_mask, li, gi, tbl, ts, **kwargs):
+        """Function that does the actual flag."""
+
+        sigma = self.params['sigma']
+        freq_points = self.params['freq_points']
+
+        vis_abs = np.abs(np.ma.array(vis, mask=vis_mask))
+        if vis_abs.count() >= freq_points:
+            mean = np.ma.mean(vis_abs)
+            std = np.ma.std(vis_abs)
+            inds = np.where(np.abs(vis_abs - mean) > sigma*std)[0] # masked inds
+            vis_mask[inds] = True # set mask
+
+        return vis, vis_mask
