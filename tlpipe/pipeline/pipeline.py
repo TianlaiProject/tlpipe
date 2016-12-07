@@ -474,6 +474,19 @@ class Manager(object):
             mpiutil.barrier()
 
 
+    @classmethod
+    def show_params(cls):
+        """Show all parameters that can be set and their default values."""
+        if mpiutil.rank0:
+
+            print 'Parameters of %s:' % cls.__name__
+            for key, val in cls.params_init.items():
+                print '%s:  %s' % (key, val)
+            print
+
+        mpiutil.barrier()
+
+
     def run(self):
         """Main driver method for the pipeline.
 

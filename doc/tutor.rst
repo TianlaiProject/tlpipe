@@ -31,9 +31,9 @@ pipe file.
    imported and excuted, and (**optionally**) a variable `pipe\_outdir` to set
    the output directory (the default value is './output/'). You can set other
    parameters related to the pipeline according to your need or just use the
-   default values, see all paramters that can be set in
-   :class:`~tlpipe.pipeline.pipeline.Manager`, **note**: all these parameters
-   should be prepended with a prefix "pipe\_";
+   default values. All paramters and their default values can be checked by method
+   :meth:`~tlpipe.pipeline.pipeline.Manager.show_params()`,
+   **note**: all these parameters should be prepended with a prefix "pipe\_";
 
    .. literalinclude:: plot_wf.pipe
       :language: python
@@ -71,6 +71,20 @@ The final input pipe file looks like:
       :linenos:
 
 .. note::
+
+   #. To show all pipeline related parameters and their default values, you
+      can do:
+
+      >>> from tlpipe.pipeline import pipeline
+      >>> pipeline.Manager.prefix
+      'pipe_'
+      >>> pipeline.Manager.show_params()
+      Parameters of Manager:
+      copy:  True
+      tasks:  []
+      logging:  info
+      overwrite:  False
+      outdir:  output/
 
    #. Each imported task should be appended into the list `pipe\_tasks` in
       order to be excuted by the pipeline;
