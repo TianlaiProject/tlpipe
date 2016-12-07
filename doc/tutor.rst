@@ -64,10 +64,11 @@ pipe file.
          :lines: 38-44
          :linenos:
 
-The final input pipe file looks like:
+The final input pipe file looks like :download:`download <plot_wf.pipe>`:
 
    .. literalinclude:: plot_wf.pipe
       :language: python
+      :emphasis-lines: 9, 22, 31, 39
       :linenos:
 
 .. note::
