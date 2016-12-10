@@ -1,7 +1,5 @@
 """Subtract simulated strong point sources signal from the visibilities.
 
-This must be done after the data has been calibrated.
-
 Inheritance diagram
 -------------------
 
@@ -18,7 +16,13 @@ from caput import mpiutil
 
 
 class PsSub(tod_task.TaskTimestream):
-    """Calibration by strong point source fitting."""
+    """Subtract simulated strong point sources signal from the visibilities.
+
+    .. note::
+
+        This must be done after the data has been calibrated.
+
+    """
 
     params_init = {
                     'ps': 'cas,cyg', # may also 'hyd', 'her', 'crab', 'vir'

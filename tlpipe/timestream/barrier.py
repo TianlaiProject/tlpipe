@@ -12,7 +12,12 @@ from tlpipe.pipeline import pipeline
 
 
 class Barrier(pipeline.DoNothing):
-    """Barrier the iterative pipeline flow before executing its following tasks."""
+    """Barrier the iterative pipeline flow before executing its following tasks.
+
+    This inherits from :class:`~tlpipe.pipeline.pipeline.DoNothing` just for
+    convenient use.
+
+    """
 
     prefix = 'br_'
 

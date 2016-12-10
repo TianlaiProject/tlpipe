@@ -1,4 +1,4 @@
-"""Phase the source-phased visibility data to the zenith, this is just the inverse operation of phs2src.py.
+"""Phase the source-phased visibility data to the zenith.
 
 Inheritance diagram
 -------------------
@@ -19,7 +19,17 @@ from tlpipe.utils.date_util import get_ephdate
 
 
 class Phs2zen(tod_task.TaskTimestream):
-    """Phase the source-phased visibility data to the zenith, this is just the inverse operation of phs2src.py."""
+    """Phase the source-phased visibility data to the zenith
+
+    The phasing is done by multiply the visibility by the reference phase of
+    the given *source*, as
+
+    .. math:: V_{ij}^{\\text{phs}} = V_{ij} \\cdot e^{2 \\pi i \\, \\boldsymbol{s}_0 \\cdot \\boldsymbol{u}_{ij}}
+
+    This is just the inverse operation of task
+    :class:`~tlpipe.timestream.phs2src.Phs2src`.
+
+    """
 
     params_init = {
                     'source': 'cyg', # <src_name> or <ra XX[:XX:xx]>_<dec XX[:XX:xx]> or <time y/m/d h:m:s> (array pointing of this local time)

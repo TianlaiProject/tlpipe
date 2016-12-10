@@ -18,7 +18,13 @@ from caput import mpiarray
 
 
 class Detect(tod_task.TaskTimestream):
-    """Detect noise source signal."""
+    """Detect noise source signal.
+
+    This task automatically finds out the time points that the noise source
+    is **on**, and creates a new bool dataset "ns_on" with elements *True*
+    corresponding to time points when the noise source is **on**.
+
+    """
 
     params_init = {
                     'feed': None, # use this feed

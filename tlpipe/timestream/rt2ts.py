@@ -12,7 +12,17 @@ import tod_task
 
 
 class Rt2ts(tod_task.TaskTimestream):
-    """Convert RawTimestream to Timestream."""
+    """Convert RawTimestream to Timestream.
+
+    This converts the current data which is held in a
+    :class:`~tlpipe.timestream.raw_timestream.RawTimestream` container
+    to data held in a
+    :class:`~tlpipe.timestream.timestream.Timestream` container.
+
+    By doing so, the original mixed *polarization* and *baseline* will be
+    separated, which will be more convenient for the following processing.
+
+    """
 
     params_init = {
                     'keep_dist_axis': False,

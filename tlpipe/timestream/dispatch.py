@@ -17,7 +17,26 @@ from caput import mpiutil
 
 
 class Dispatch(tod_task.TaskTimestream):
-    """Dispatch data."""
+    """Dispatch data.
+
+    This task will (maybe iteratively) load data from the input data files
+    according to the required data selection (time, frequency, baseline
+    selection). If work iteratively, data will be iteratively loaded according
+    to the time unit set in the input pipe file, and the loaded data (contained
+    in a data container which is a
+    :class:`~tlpipe.timestream.raw_timestream.RawTimestream` object) will be
+    dispatched to other tasks to be further processed.
+
+    .. note::
+        This usually should be the first task in the input pipe file to select
+        and load the data from input data files for other tasks.
+
+    .. note::
+        Current this task only works for a continuously observed data sets.
+        Works need to do to make it work also for data observed in dis-continuous
+        time periods.
+
+    """
 
     params_init = {
                     'days': 1.0, # how many sidereal days in one iteration
@@ -28,7 +47,7 @@ class Dispatch(tod_task.TaskTimestream):
     prefix = 'dp_'
 
     def read_input(self):
-        """Method for reading time ordered data input."""
+        """Method for (maybe iteratively) reading data from input data files."""
 
         days = self.params['days']
         extra_inttime = self.params['extra_inttime']
@@ -97,6 +116,8 @@ class Dispatch(tod_task.TaskTimestream):
         return tod
 
     def process(self, rt):
+        """Return loaded data as a
+        :class:`~tlpipe.timestream.raw_timestream.RawTimestream` object."""
 
         rt.add_history(self.history)
 

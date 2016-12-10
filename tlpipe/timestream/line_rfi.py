@@ -21,7 +21,13 @@ import matplotlib.pyplot as plt
 
 
 class Flag(tod_task.TaskTimestream):
-    """Line RFI flagging."""
+    """Line RFI flagging.
+
+    This task flags the line RFI along time (then frequency) by first integrate
+    data along frequency (and correspondingly time) axis, and mask values that
+    exceeds the given threshold.
+
+    """
 
     params_init = {
                     'freq_window': 15,

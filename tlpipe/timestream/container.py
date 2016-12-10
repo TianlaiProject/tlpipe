@@ -1,3 +1,5 @@
+"""Basic time ordered data container."""
+
 import re
 import glob
 import pickle
@@ -15,7 +17,7 @@ from caput import mpiutil
 def ensure_file_list(files):
     """Tries to interpret the input as a sequence of files
 
-    Expands filename wildcards ("globs") and casts sequences to a list.
+    Expands file name wild-cards ("globs") and casts sequences to a list.
 
     """
 
@@ -37,7 +39,7 @@ def check_axis(axis, axes):
     Parameters
     ----------
     axis : string or integer
-        The axis to be ckecked.
+        The axis to be checked.
     axes : tuple of strings
         A tuple of axis names.
 
@@ -71,14 +73,14 @@ def check_axis(axis, axes):
 class BasicTod(memh5.MemDiskGroup):
     """Basic time ordered data container.
 
-    Inherits from :class:`memh5.MemDiskGroup`.
+    Inherits from :class:`caput.memh5.MemDiskGroup`.
 
     Basic one-level time ordered data container that allows any number of
     datasets in the root group but no nesting.
 
-    This container is intended to be an base class for other concreate data
+    This container is intended to be an base class for other concrete data
     classes, so only basic input/output and a limited operations are provided.
-    Usally you should not use this class directly, use a concreate sub-class
+    Usually you should not use this class directly, use a concrete sub-class
     instead.
 
     Parameters
@@ -107,7 +109,7 @@ class BasicTod(memh5.MemDiskGroup):
     """
 
     _main_data_name_ = None
-    _main_data_axes_ = () # time shold be the first axis
+    _main_data_axes_ = () # time should be the first axis
     _main_axes_ordered_datasets_ = {_main_data_name_: (0,)}
     _time_ordered_datasets_ = {_main_data_name_: (0,)}
     _time_ordered_attrs_ = {}

@@ -99,7 +99,17 @@ def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit
 
 
 class PsFit(tod_task.TaskTimestream):
-    """Calibration by strong point source fitting."""
+    """Calibration by strong point source fitting.
+
+    This works by minimize
+
+    .. math:: \\chi^2 = \| V_{ij}^{\\text{obs}}(t + \\Delta t) - G_{ij} V_{ij}^{\\text{sim}}(t) \|^2
+
+    Its solution is
+
+    .. math:: G_{ij} = \\frac{V_{ij}^{\\text{obs} \\dagger} V_{ij}^{\\text{sim}}}{V_{ij}^{\\text{sim} \\dagger} V_{ij}^{\\text{sim}}}
+
+    """
 
     params_init = {
                     'calibrator': 'cas',

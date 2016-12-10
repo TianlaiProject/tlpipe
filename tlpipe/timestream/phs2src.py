@@ -19,7 +19,17 @@ from tlpipe.utils.date_util import get_ephdate
 
 
 class Phs2src(tod_task.TaskTimestream):
-    """Phase the zenith-phased visibility data to a source."""
+    """Phase the zenith-phased visibility data to a source.
+
+    The phasing is done by divide the visibility by the reference phase of
+    the given *source*, as
+
+    .. math:: V_{ij}^{\\text{phs}} = V_{ij} \\, / \\, e^{2 \\pi i \\, \\boldsymbol{s}_0 \\cdot \\boldsymbol{u}_{ij}}
+
+    This will make the visibility has a phase reference center at the location
+    of the given *source*.
+
+    """
 
     params_init = {
                     'source': 'cyg', # <src_name> or <ra XX[:XX:xx]>_<dec XX[:XX:xx]> or <time y/m/d h:m:s> (array pointing of this local time)

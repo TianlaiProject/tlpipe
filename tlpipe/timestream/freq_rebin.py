@@ -19,7 +19,12 @@ from tlpipe.utils.np_util import unique, average
 
 
 class Rebin(tod_task.TaskTimestream):
-    """Rebin the frequency channels."""
+    """Rebin the frequency channels.
+
+    This task rebins the data along the frequency by merging (and average)
+    the adjacent frequency channels.
+
+    """
 
     params_init = {
                     'bin_number': 16,

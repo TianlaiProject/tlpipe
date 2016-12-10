@@ -1,4 +1,4 @@
-"""Accurate data. This should be done after the data has been calibrated and re-ordered.
+"""Accumulate data.
 
 Inheritance diagram
 -------------------
@@ -16,7 +16,17 @@ from caput import mpiarray
 
 
 class Accum(tod_task.TaskTimestream):
-    """Accurate data. This should be done after the data has been calibrated and re-ordered."""
+    """Accumulate data.
+
+    This task accumulates data abserved in different (sidereal) days
+    and records the weight (i.e., the number of valid or un-masked data)
+    of each data point.
+
+    .. note::
+        This should be done after the data has been calibrated and re-ordered
+        to a same LST (or RA).
+
+    """
 
     params_init = {
                     'check': True, # check data alignment before accumulate

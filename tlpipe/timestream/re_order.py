@@ -16,7 +16,11 @@ from caput import mpiarray
 
 
 class ReOrder(tod_task.TaskTimestream):
-    """Re-order data to have longitude from 0 to 2pi."""
+    """Re-order data to have longitude from 0 to 2pi.
+
+    By doing this, data of different days can be accumulated and averaged.
+
+    """
 
     params_init = {
                     'discard_less': 0.2, # discard if data less than this sidereal day

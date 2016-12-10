@@ -18,7 +18,12 @@ from sg_filter import savitzky_golay
 
 
 class Flag(tod_task.TaskTimestream):
-    """Exceptional values flagging along the time axis."""
+    """Exceptional values flagging along the time axis.
+
+    This flags the data along the time axis by comparing the data with its
+    smoothing, its difference that exceed the given threshold will be masked.
+
+    """
 
     params_init = {
                     'time_window': 15,

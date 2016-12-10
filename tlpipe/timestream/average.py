@@ -14,7 +14,12 @@ import tod_task
 
 
 class Average(tod_task.TaskTimestream):
-    """Average the accumulated data by dividing its weight."""
+    """Average the accumulated data by dividing its weight.
+
+    This task works for the accelerated data returned by task
+    :class:`~tlpipe.timestream.accumulate.Accum`.
+
+    """
 
     prefix = 'av_'
 

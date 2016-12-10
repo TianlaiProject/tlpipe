@@ -28,7 +28,12 @@ from tlpipe.map.drift.pipeline import timestream
 
 
 class MapMaking(tod_task.TaskTimestream):
-    """Initialize telescope array, average the timestream and do the map-making."""
+    """Initialize telescope array, average the timestream and do the map-making.
+
+    This task calls the submodule :mod:`~tlpipe.map.drift` which uses the m-mode
+    formalism method to do the map-making.
+
+    """
 
     params_init = {
                     'mask_daytime': True,

@@ -18,7 +18,15 @@ import matplotlib.pyplot as plt
 
 
 class Plot(tod_task.TaskTimestream):
-    """Waterfall plot for Timestream."""
+    """Waterfall plot for Timestream.
+
+    This task plots the waterfall (i.e., visibility as a function of time
+    and frequency) of the visibility
+    for each baseline (and also each polarization if the input data is a
+    :class:`~tlpipe.timestream.timestream.Timestream` instead of a
+    :class:`~tlpipe.timestream.raw_timestream.RawTimestream`).
+
+    """
 
     params_init = {
                     'bl_incl': 'all', # or a list of include (bl1, bl2)

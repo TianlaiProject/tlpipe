@@ -44,7 +44,13 @@ def cal(vis, vis_mask, li, gi, pbl, ts, **kwargs):
 
 
 class PsCal(tod_task.TaskTimestream):
-    """Calibration using a strong point source."""
+    """Calibration using a strong point source.
+
+    The calibration is done by using the Eigen-decomposition method.
+
+    May be more explain to this...
+
+    """
 
     params_init = {
                     'calibrator': 'cyg',

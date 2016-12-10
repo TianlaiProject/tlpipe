@@ -22,6 +22,13 @@ class TaskTimestream(OneAndOne):
     Provides the methods `read_input`, `read_output` and `write_output` for
     raw timestream or timestream data.
 
+    This is usually used as a direct base class as those tasks that operates on
+    timestream data (can be data held in both
+    :class:`~tlpipe.timestream.raw_timestream.RawTimestream` and
+    :class:`~tlpipe.timestream.timestream.Timestream`), which can determine which
+    data container the data is being held from the *input* or from data stored in
+    the input data files.
+
     """
 
     _Tod_class = TimestreamCommon

@@ -17,7 +17,14 @@ import matplotlib.pyplot as plt
 
 
 class Plot(tod_task.TaskTimestream):
-    """Plot time or frequency slices."""
+    """Plot time or frequency slices.
+
+    This task plots a given number of time (or frequency) slice of the visibility
+    for each baseline (and also each polarization if the input data is a
+    :class:`~tlpipe.timestream.timestream.Timestream` instead of a
+    :class:`~tlpipe.timestream.raw_timestream.RawTimestream`).
+
+    """
 
     params_init = {
                     'plot_type': 'time', # or 'freq'

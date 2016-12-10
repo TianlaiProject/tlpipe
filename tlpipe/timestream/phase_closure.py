@@ -50,7 +50,13 @@ def f(x, a, b, c):
 
 
 class Closure(tod_task.TaskTimestream):
-    """Check the phase closure relation."""
+    """Check the phase closure relation.
+
+    The closure phase of the visibility for feeds :math:`i,j,k` is
+    :math:`\\text{Arg}(V_{ij} V_{jk} V_{ki})`. We see for a strong point source,
+    the closure phase should be nearly *zero*.
+
+    """
 
     params_init = {
                     'calibrator': 'cas',

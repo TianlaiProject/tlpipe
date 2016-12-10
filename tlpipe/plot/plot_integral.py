@@ -17,7 +17,15 @@ import matplotlib.pyplot as plt
 
 
 class Plot(tod_task.TaskTimestream):
-    """Plot time or frequency integral."""
+    """Plot time or frequency integral.
+
+    This tasks plots the real, imagery part and the absolute value of the
+    time or frequency integrated visibility for each baseline (and also each
+    polarization if the input data is a
+    :class:`~tlpipe.timestream.timestream.Timestream` instead of a
+    :class:`~tlpipe.timestream.raw_timestream.RawTimestream`).
+
+    """
 
     params_init = {
                     'integral': 'time', # or 'freq'

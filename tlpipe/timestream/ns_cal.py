@@ -19,7 +19,42 @@ import matplotlib.pyplot as plt
 
 
 class NsCal(tod_task.TaskTimestream):
-    """Relative phase calibration using the noise source signal."""
+    """Relative phase calibration using the noise source signal.
+
+    The noise source can be viewed as a near-field source, its visibility
+    can be expressed as
+
+    .. math:: V_{ij}^{\\text{ns}} = C \\cdot e^{i k (r_{i} - r_{j})}
+
+    where :math:`C` is a real constant.
+
+    .. math::
+
+        V_{ij}^{\\text{on}} &= G_{ij} (V_{ij}^{\\text{sky}} + V_{ij}^{\\text{ns}} + n_{ij}) \\\\
+        V_{ij}^{\\text{off}} &= G_{ij} (V_{ij}^{\\text{sky}} + n_{ij})
+
+    where :math:`G_{ij}` is the gain of baseline :math:`i,j`.
+
+    .. math::
+
+        V_{ij}^{\\text{on}} - V_{ij}^{\\text{off}} &= G_{ij} V_{ij}^{\\text{ns}} \\\\
+                                       &=|G_{ij}| e^{i k \\Delta L} C \\cdot e^{i k (r_{i} - r_{j})} \\\\
+                                       & = C |G_{ij}| e^{i k (\\Delta L + (r_{i} - r_{j}))}
+
+    where :math:`\\Delta L` is the equivalent cable length.
+
+    .. math:: \\text{Arg}(V_{ij}^{\\text{on}} - V_{ij}^{\\text{off}}) = k (\\Delta L + (r_{i} - r_{j})) = k \\Delta L + const.
+
+    To compensate for the relative phase change (due to :math:`\\Delta L`) of the
+    visibility, we can do
+
+    .. math:: V_{ij}^{\\text{rel-cal}} = e^{-i \\; \\text{Arg}(V_{ij}^{\\text{on}} - V_{ij}^{\\text{off}})} \\, V_{ij}
+
+    .. note::
+        Note there is still an unknown (constant) phase factor to be determined in
+        :math:`V_{ij}^{\\text{rel-cal}}`, which may be done by absolute calibration.
+
+    """
 
     params_init = {
                     'num_mean': 5, # use the mean of num_mean signals
