@@ -10,6 +10,8 @@ Tutorial
    :doc:`guide` for a deeper introduction.
 
 
+.. contents::
+
 Prepare for the input pipe file
 -------------------------------
 
@@ -26,6 +28,9 @@ controlling) of the pipeline.
 Here we take the waterfall plot as an example to show how to write an input
 pipe file.
 
+Non-iterative pipeline
+^^^^^^^^^^^^^^^^^^^^^^
+
 #. Create and open an file named *plot_wf.pipe* (the name can be choosen arbitrary);
 #. Speicify a variable `pipe\_tasks` to hold analysis tasks that will be
    imported and excuted, and (**optionally**) a variable `pipe\_outdir` to set
@@ -35,7 +40,7 @@ pipe file.
    :meth:`~tlpipe.pipeline.pipeline.Manager.show_params()`,
    **note**: all these parameters should be prepended with a prefix "pipe\_";
 
-   .. literalinclude:: plot_wf.pipe
+   .. literalinclude:: examples/plot_wf.pipe
       :language: python
       :lines: 1-12
       :linenos:
@@ -44,7 +49,7 @@ pipe file.
 
    #. Import :class:`~tlpipe.timestream.dispatch.Dispatch` to select data to plot;
 
-      .. literalinclude:: plot_wf.pipe
+      .. literalinclude:: examples/plot_wf.pipe
          :language: python
          :lines: 15-27
          :linenos:
@@ -52,21 +57,21 @@ pipe file.
    #. Import :class:`~tlpipe.timestream.detect_ns.Detect` to find and mask noise
       source signal;
 
-      .. literalinclude:: plot_wf.pipe
+      .. literalinclude:: examples/plot_wf.pipe
          :language: python
          :lines: 29-35
          :linenos:
 
    #. Import :class:`~tlpipe.plot.plot_waterfall.Plot` to plot;
 
-      .. literalinclude:: plot_wf.pipe
+      .. literalinclude:: examples/plot_wf.pipe
          :language: python
          :lines: 38-44
          :linenos:
 
-The final input pipe file looks like :download:`download <plot_wf.pipe>`:
+The final input pipe file looks like :download:`download <examples/plot\_wf.pipe>`:
 
-   .. literalinclude:: plot_wf.pipe
+   .. literalinclude:: examples/plot_wf.pipe
       :language: python
       :emphasize-lines: 9, 22, 31, 39
       :linenos:
@@ -131,7 +136,7 @@ The final input pipe file looks like :download:`download <plot_wf.pipe>`:
    #. Usally the input of one task should be ether read from the data files,
       for example:
 
-      .. literalinclude:: plot_wf.pipe
+      .. literalinclude:: examples/plot_wf.pipe
          :language: python
          :lines: 24
          :linenos:
@@ -139,15 +144,135 @@ The final input pipe file looks like :download:`download <plot_wf.pipe>`:
       or is the output of a previously excuted task (to construct a task chain),
       for example:
 
-      .. literalinclude:: plot_wf.pipe
+      .. literalinclude:: examples/plot_wf.pipe
          :language: python
          :lines: 33
          :linenos:
 
-      .. literalinclude:: plot_wf.pipe
+      .. literalinclude:: examples/plot_wf.pipe
          :language: python
          :lines: 41
          :linenos:
+
+Iterative pipeline
+^^^^^^^^^^^^^^^^^^
+
+To make the pipeline iteratively run for several days data, you should set the
+parameter `iterable` of each task you want to iterate to *True*, and optionally
+specify an iteration number. If no iteration number is specified, the pipeline
+will iteratively run until all input data has been processed. Take again the
+above waterfall plot as an example, suppose you want to iteratively plot the
+waterfall of 2 days data, the input pipe file *plot_wf_iter.pipe*
+:download:`download <examples/plot\_wf\_iter.pipe>` is like:
+
+   .. literalinclude:: examples/plot_wf_iter.pipe
+      :language: python
+      :emphasize-lines: 27, 28, 38, 46
+      :linenos:
+
+.. note::
+
+   The number of iterations can be set only once in the first task, as after
+   the first task has been executed the specified number of iterations, it will
+   no longer produce its output for the subsequent tasks, those task will stop
+   to iterate when there is no input for it.
+
+Non-trivial control flow
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+You can run several tasks iteratively, and then run some other tasks
+non-iteratively when the iterative tasks all have done.
+
+For example, if you want the waterfall plot of two days averaged data,
+you can iteratively run several tasks, each iteration for one day data, and
+then combine (accumulate and average) the two days data and plot its
+waterfall, just as follows shown in *plot_wf_nontrivial.pipe*
+:download:`download <examples/plot\_wf\_nontrivial.pipe>`:
+
+   .. literalinclude:: examples/plot_wf_nontrivial.pipe
+      :language: python
+      :emphasize-lines: 43, 77, 90
+      :linenos:
+
+.. note::
+
+   Notice the use of the task :class:`~tlpipe.timestream.barrier.Barrier` to
+   block the control flow before the executing of its subsequent tasks. As
+   the task :class:`~tlpipe.timestream.barrier.Barrier` won't get its input
+   from any other tasks, the pipeline will restart at the begining every time
+   when it gets to execute :class:`~tlpipe.timestream.barrier.Barrier`. Once
+   everything before :class:`~tlpipe.timestream.barrier.Barrier` has been
+   executed, it will unblocks its subsequent tasks and allow them to proceed
+   normally.
+
+.. note::
+
+   Note in real data analysis, the data should be RFI flagged, calibrated,
+   and maybe some other processes done before the data accumulating and
+   averaging, here for simplicity and easy understanding, we have omitted
+   all those processes. One can refer to the real data analysis pipeline
+   input files in the package's *input* directory.
+
+Executing several times a same task
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Special care need to be taken when executing several times a same task. Since
+the input pipe file is just a plain python script, it will be first executed
+before the parameters parsing process, the assignment of a variable will
+override the same named variable before it during the excuting of the pipe
+file script. So for the need of executing several times a same task, different
+prefixes should be set for each of these tasks (i.e., except for the first
+appeared which could have just use the default prefix of the task, all others
+need to set a different prefix). To do this, you need to append a 2-tuple to
+the list `pipe\_tasks`, with its first element being the imported task, and
+the second element being a new prefix to use. See for example the line
+
+   .. literalinclude:: examples/plot_wf_nontrivial.pipe
+      :language: python
+      :lines: 90
+      :linenos:
+
+in *plot_wf_nontrivial.pipe* in the above example.
+
+Save intermediate data
+^^^^^^^^^^^^^^^^^^^^^^
+
+To save data that has been processed by one task (used for maybe break point
+recovery, etc.), you can just set the `output\_files` paramter of this task
+to be a list of file names (can only save as *hdf5* data files), then data
+will be split into almost equal chunks along the time axis and save each
+chunk to one of the data file. For example, see the line
+
+   .. literalinclude:: examples/plot_wf_nontrivial.pipe
+      :language: python
+      :lines: 85
+      :linenos:
+
+in *plot_wf_nontrivial.pipe* in the above example.
+
+Recovery from intermediate data
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+You can recovery the pipeline from a break point (where you have saved the
+intermediate data) by reading data from data files you have saved. To do this,
+instead of set the `in` parameter, you need to set the `input\_files` paramter
+to a list with elements being the saved data files. For example, see the line
+
+   .. literalinclude:: examples/plot_wf_nontrivial.pipe
+      :language: python
+      :lines: 93
+      :linenos:
+
+in *plot_wf_nontrivial.pipe* in the above example.
+
+.. note::
+
+   If the `in` paramter and the `input\_files` parameter are both set, the
+   task will get its input from the `in` paramter instead of reading data
+   from the `input\_files` as it is much slower to read the data from the
+   files. So in order to recovery from the break point, you should not set
+   the `in` parameter, or should set `in` to be None, which is the default
+   value.
 
 
 Run the pipeline
@@ -169,8 +294,8 @@ If you want to submit and run the pipeline in the background, do like ::
 
    $ nohup tlpipe dir/to/plot_wf.pipe &> output.txt &
 
-Multiple process run
-^^^^^^^^^^^^^^^^^^^^
+Multiple processes run
+^^^^^^^^^^^^^^^^^^^^^^
 
 To run the pipeline in parallel and distributed maner on a cluster using
 multiple processes, you can do something like (in case *plot_wf.pipe* is
