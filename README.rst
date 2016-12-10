@@ -20,4 +20,4 @@ Document
 
 Documentation can be found at `<http://tianlaiproject.github.io/tlpipe/>`_.
 
-Another documentation which does not build so successful can be found at `<http://tlpipe.readthedocs.io/en/latest/>`_.
+Another documentation which does not build so successful can be found at `<http://tlpipe.readthedocs.io/en/latest/>`_, which will usually be more up to date.
