@@ -88,10 +88,18 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../tutor.html">Tutorial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-iterative-pipeline">Non-iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#iterative-pipeline">Iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-trivial-control-flow">Non-trivial control flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#executing-several-times-a-same-task">Executing several times a same task</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#save-intermediate-data">Save intermediate data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#recovery-from-intermediate-data">Recovery from intermediate data</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#run-the-pipeline">Run the pipeline</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../tutor.html#single-process-run">Single process run</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-process-run">Multiple process run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-processes-run">Multiple processes run</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#pipeline-products-and-intermediate-results">Pipeline products and intermediate results</a></li>
@@ -384,12 +392,12 @@
             
   <div class="section" id="module-tlpipe.timestream.accumulate">
 <span id="tlpipe-timestream-accumulate"></span><h1>tlpipe.timestream.accumulate<a class="headerlink" href="#module-tlpipe.timestream.accumulate" title="Permalink to this headline">¶</a></h1>
-<p>Accurate data. This should be done after the data has been calibrated and re-ordered.</p>
+<p>Accumulate data.</p>
 <div class="section" id="inheritance-diagram">
 <h2>Inheritance diagram<a class="headerlink" href="#inheritance-diagram" title="Permalink to this headline">¶</a></h2>
-<img src="../_images/inheritance-d4c3bbfd8ef771918972f237471ebcd933ea783d.png" alt="Inheritance diagram of Accum" usemap="#inheritanceb5fd8de3f2" class="inheritance"/>
+<img src="../_images/inheritance-62e29b3cbdceb10ae4056e304fe6067f3380619a.png" alt="Inheritance diagram of Accum" usemap="#inheritanceb5fd8de3f2" class="inheritance"/>
 <map id="inheritanceb5fd8de3f2" name="inheritanceb5fd8de3f2">
-<area shape="rect" id="node1" href="tlpipe.timestream.accumulate.Accum.html#tlpipe.timestream.accumulate.Accum" target="_top" title="Accurate data. This should be done after the data has been calibrated and re&#45;ordered." alt="" coords="27,238,179,266"/>
+<area shape="rect" id="node1" href="tlpipe.timestream.accumulate.Accum.html#tlpipe.timestream.accumulate.Accum" target="_top" title="Accumulate data." alt="" coords="27,238,179,266"/>
 <area shape="rect" id="node2" href="tlpipe.timestream.tod_task.TaskTimestream.html#tlpipe.timestream.tod_task.TaskTimestream" target="_top" title="Task that provides raw timestream or timestream IO and data selection operations." alt="" coords="5,161,200,189"/>
 <area shape="rect" id="node4" href="tlpipe.pipeline.pipeline.OneAndOne.html#tlpipe.pipeline.pipeline.OneAndOne" target="_top" title="Base class for tasks that have (at most) one input and one output." alt="" coords="24,83,181,111"/>
 <area shape="rect" id="node5" href="tlpipe.pipeline.pipeline.TaskBase.html#tlpipe.pipeline.pipeline.TaskBase" target="_top" title="Base class for all pipeline tasks." alt="" coords="33,6,172,34"/>
@@ -402,7 +410,7 @@
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.accumulate.Accum.html#tlpipe.timestream.accumulate.Accum" title="tlpipe.timestream.accumulate.Accum"><code class="xref py py-obj docutils literal"><span class="pre">Accum</span></code></a>([parameter_file_or_dict,&nbsp;feedback])</td>
-<td>Accurate data.</td>
+<td>Accumulate data.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.accumulate.Timestream.html#tlpipe.timestream.accumulate.Timestream" title="tlpipe.timestream.accumulate.Timestream"><code class="xref py py-obj docutils literal"><span class="pre">Timestream</span></code></a>([files,&nbsp;mode,&nbsp;start,&nbsp;stop,&nbsp;...])</td>
 <td>Container class for the timestream data.</td>

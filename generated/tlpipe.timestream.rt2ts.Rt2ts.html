@@ -88,10 +88,18 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../tutor.html">Tutorial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-iterative-pipeline">Non-iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#iterative-pipeline">Iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-trivial-control-flow">Non-trivial control flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#executing-several-times-a-same-task">Executing several times a same task</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#save-intermediate-data">Save intermediate data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#recovery-from-intermediate-data">Recovery from intermediate data</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#run-the-pipeline">Run the pipeline</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../tutor.html#single-process-run">Single process run</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-process-run">Multiple process run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-processes-run">Multiple processes run</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#pipeline-products-and-intermediate-results">Pipeline products and intermediate results</a></li>
@@ -390,6 +398,12 @@
 <dt id="tlpipe.timestream.rt2ts.Rt2ts">
 <em class="property">class </em><code class="descclassname">tlpipe.timestream.rt2ts.</code><code class="descname">Rt2ts</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/timestream/rt2ts.py#L14"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.rt2ts.Rt2ts" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert RawTimestream to Timestream.</p>
+<p>This converts the current data which is held in a
+<a class="reference internal" href="tlpipe.timestream.raw_timestream.RawTimestream.html#tlpipe.timestream.raw_timestream.RawTimestream" title="tlpipe.timestream.raw_timestream.RawTimestream"><code class="xref py py-class docutils literal"><span class="pre">RawTimestream</span></code></a> container
+to data held in a
+<a class="reference internal" href="tlpipe.timestream.timestream.Timestream.html#tlpipe.timestream.timestream.Timestream" title="tlpipe.timestream.timestream.Timestream"><code class="xref py py-class docutils literal"><span class="pre">Timestream</span></code></a> container.</p>
+<p>By doing so, the original mixed <em>polarization</em> and <em>baseline</em> will be
+separated, which will be more convenient for the following processing.</p>
 <p class="rubric">Attributes</p>
 <table border="1" class="longtable docutils">
 <colgroup>
@@ -419,7 +433,7 @@
 </table>
 <dl class="method">
 <dt id="tlpipe.timestream.rt2ts.Rt2ts.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L999"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.rt2ts.Rt2ts.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L1012"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.rt2ts.Rt2ts.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>

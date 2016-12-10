@@ -1,0 +1,96 @@
+# -*- mode: python; -*-
+
+# input file for the analysis pipeline
+# execute this pipeline by either command of the following two:
+# tlpipe dir/to/plot_wf_nontrivial.pipe
+# mpiexec -n N tlpipe dir/to/plot_wf_nontrivial.pipe
+
+
+pipe_tasks = []
+pipe_outdir = './output/'
+pipe_logging = 'notset'
+# pipe_logging = 'info'
+
+
+import glob
+data_dir = 'dir/to/data' # your data directory
+files = sorted(glob.glob(data_dir+'/*.hdf5')) # at least 2 days data files as a list
+
+
+# data selection
+from tlpipe.timestream import dispatch
+pipe_tasks.append(dispatch.Dispatch)
+### parameters for Dispatch
+dp_input_files = files # data files as list
+dp_freq_select = (500, 510) # frequency indices, from 500 to 510
+dp_feed_select = [1, 2, 32, 33] # feed no. as a list
+dp_iterable = True
+dp_iter_num = 2 # set the number of iterations
+dp_tag_input_iter = False
+dp_out = 'dp'
+
+# find and mask noise source signal
+from tlpipe.timestream import detect_ns
+pipe_tasks.append(detect_ns.Detect)
+### parameters for Detect
+dt_in = dp_out
+# dt_feed = 1
+dt_iterable = True
+dt_out = 'dt'
+
+# plot waterfall of selected data
+from tlpipe.plot import plot_waterfall
+pipe_tasks.append(plot_waterfall.Plot)
+### parameters for Plot
+pwf_in = dt_out
+pwf_iterable = True
+pwf_flag_ns = True # mask noise source signal
+pwf_fig_name = 'waterfall/wf' # figure name to save
+pwf_out = 'pwf'
+
+# convert raw timestream to timestream
+from tlpipe.timestream import rt2ts
+pipe_tasks.append(rt2ts.Rt2ts)
+### parameters for Rt2ts
+r2t_in = dt_out # can also be pwf_out as it is the same
+r2t_iterable = True
+r2t_out = 'r2t'
+
+# re-order the data to have RA from 0 to 2pi
+from tlpipe.timestream import re_order
+pipe_tasks.append(re_order.ReOrder)
+### parameters for ReOrder
+ro_in = r2t_out
+ro_iterable = True
+ro_out = 'ro'
+
+# accumulate the re-ordered data from different days
+from tlpipe.timestream import accumulate
+pipe_tasks.append(accumulate.Accum)
+### parameters for Accum
+ac_in = ro_out
+ac_iterable = True
+ac_out = 'ac'
+
+# barrier above iterative tasks before executing the following tasks.
+from tlpipe.timestream import barrier
+pipe_tasks.append(barrier.Barrier)
+### parameters for Barrier
+
+# average the accumulated data
+from tlpipe.timestream import average
+pipe_tasks.append(average.Average)
+### parameters for Average
+av_in = ac_out
+av_output_files = [ 'average/file_%d.hdf5' %i for i in range(1, 7) ] # here save intermediate results
+av_out = 'av'
+
+# waterfall plot of the averaged data
+from tlpipe.plot import plot_waterfall
+pipe_tasks.append((plot_waterfall.Plot, 'pwf1_')) # here use a new prefix pwf1_ instead of the default pwf_ to discriminate from the previous plot_waterfall
+### parameters for Plot
+pwf1_in = av_out
+pwf1_input_files = av_output_files # here you can read data from the saved intermediate data files if you do not set pwf1_in
+pwf1_flag_ns = True
+pwf1_fig_name = 'vis_av/vis'
+pwf1_out = 'pwf1'

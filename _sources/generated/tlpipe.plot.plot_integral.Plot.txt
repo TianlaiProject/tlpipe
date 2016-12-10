@@ -38,6 +38,7 @@ tlpipe.plot.plot_integral.Plot
       ~Plot.data_select
       ~Plot.finish
       ~Plot.next
+      ~Plot.plot
       ~Plot.process
       ~Plot.read_input
       ~Plot.read_output

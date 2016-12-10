@@ -88,10 +88,18 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../tutor.html">Tutorial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-iterative-pipeline">Non-iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#iterative-pipeline">Iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-trivial-control-flow">Non-trivial control flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#executing-several-times-a-same-task">Executing several times a same task</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#save-intermediate-data">Save intermediate data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#recovery-from-intermediate-data">Recovery from intermediate data</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#run-the-pipeline">Run the pipeline</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../tutor.html#single-process-run">Single process run</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-process-run">Multiple process run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-processes-run">Multiple processes run</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#pipeline-products-and-intermediate-results">Pipeline products and intermediate results</a></li>
@@ -390,7 +398,7 @@
 <h1>tlpipe.pipeline.pipeline.FileIterBase.copy_input<a class="headerlink" href="#tlpipe-pipeline-pipeline-fileiterbase-copy-input" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
 <dt id="tlpipe.pipeline.pipeline.FileIterBase.copy_input">
-<code class="descclassname">FileIterBase.</code><code class="descname">copy_input</code><span class="sig-paren">(</span><em>input</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L1112"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.pipeline.pipeline.FileIterBase.copy_input" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">FileIterBase.</code><code class="descname">copy_input</code><span class="sig-paren">(</span><em>input</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L1125"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.pipeline.pipeline.FileIterBase.copy_input" title="Permalink to this definition">¶</a></dt>
 <dd><p>Override to return a copy of the input so that the original input would
 not be changed by the task.</p>
 </dd></dl>

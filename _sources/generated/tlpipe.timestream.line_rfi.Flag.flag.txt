@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Flag.flag
+====================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: Flag.flag

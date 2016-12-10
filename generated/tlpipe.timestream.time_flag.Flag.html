@@ -88,10 +88,18 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../tutor.html">Tutorial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-iterative-pipeline">Non-iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#iterative-pipeline">Iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-trivial-control-flow">Non-trivial control flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#executing-several-times-a-same-task">Executing several times a same task</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#save-intermediate-data">Save intermediate data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#recovery-from-intermediate-data">Recovery from intermediate data</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#run-the-pipeline">Run the pipeline</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../tutor.html#single-process-run">Single process run</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-process-run">Multiple process run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-processes-run">Multiple processes run</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#pipeline-products-and-intermediate-results">Pipeline products and intermediate results</a></li>
@@ -388,8 +396,10 @@
 <h1>tlpipe.timestream.time_flag.Flag<a class="headerlink" href="#tlpipe-timestream-time-flag-flag" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="tlpipe.timestream.time_flag.Flag">
-<em class="property">class </em><code class="descclassname">tlpipe.timestream.time_flag.</code><code class="descname">Flag</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/timestream/time_flag.py#L61"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.time_flag.Flag" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">tlpipe.timestream.time_flag.</code><code class="descname">Flag</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/timestream/time_flag.py#L20"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.time_flag.Flag" title="Permalink to this definition">¶</a></dt>
 <dd><p>Exceptional values flagging along the time axis.</p>
+<p>This flags the data along the time axis by comparing the data with its
+smoothing, its difference that exceed the given threshold will be masked.</p>
 <p class="rubric">Attributes</p>
 <table border="1" class="longtable docutils">
 <colgroup>
@@ -419,7 +429,7 @@
 </table>
 <dl class="method">
 <dt id="tlpipe.timestream.time_flag.Flag.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L999"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.time_flag.Flag.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L1012"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.time_flag.Flag.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -441,28 +451,31 @@
 <tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.time_flag.Flag.finish.html#tlpipe.timestream.time_flag.Flag.finish" title="tlpipe.timestream.time_flag.Flag.finish"><code class="xref py py-obj docutils literal"><span class="pre">finish</span></code></a>()</td>
 <td>Final analysis stage of pipeline task.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.time_flag.Flag.next.html#tlpipe.timestream.time_flag.Flag.next" title="tlpipe.timestream.time_flag.Flag.next"><code class="xref py py-obj docutils literal"><span class="pre">next</span></code></a>([input])</td>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.time_flag.Flag.flag.html#tlpipe.timestream.time_flag.Flag.flag" title="tlpipe.timestream.time_flag.Flag.flag"><code class="xref py py-obj docutils literal"><span class="pre">flag</span></code></a>(vis,&nbsp;vis_mask,&nbsp;li,&nbsp;gi,&nbsp;tbl,&nbsp;ts,&nbsp;\*\*kwargs)</td>
+<td>Function that does the actual flag.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.time_flag.Flag.next.html#tlpipe.timestream.time_flag.Flag.next" title="tlpipe.timestream.time_flag.Flag.next"><code class="xref py py-obj docutils literal"><span class="pre">next</span></code></a>([input])</td>
 <td>Should not need to override.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.time_flag.Flag.process.html#tlpipe.timestream.time_flag.Flag.process" title="tlpipe.timestream.time_flag.Flag.process"><code class="xref py py-obj docutils literal"><span class="pre">process</span></code></a>(ts)</td>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.time_flag.Flag.process.html#tlpipe.timestream.time_flag.Flag.process" title="tlpipe.timestream.time_flag.Flag.process"><code class="xref py py-obj docutils literal"><span class="pre">process</span></code></a>(ts)</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.time_flag.Flag.read_input.html#tlpipe.timestream.time_flag.Flag.read_input" title="tlpipe.timestream.time_flag.Flag.read_input"><code class="xref py py-obj docutils literal"><span class="pre">read_input</span></code></a>()</td>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.time_flag.Flag.read_input.html#tlpipe.timestream.time_flag.Flag.read_input" title="tlpipe.timestream.time_flag.Flag.read_input"><code class="xref py py-obj docutils literal"><span class="pre">read_input</span></code></a>()</td>
 <td>Method for reading time ordered data input.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.time_flag.Flag.read_output.html#tlpipe.timestream.time_flag.Flag.read_output" title="tlpipe.timestream.time_flag.Flag.read_output"><code class="xref py py-obj docutils literal"><span class="pre">read_output</span></code></a>(filenames)</td>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.time_flag.Flag.read_output.html#tlpipe.timestream.time_flag.Flag.read_output" title="tlpipe.timestream.time_flag.Flag.read_output"><code class="xref py py-obj docutils literal"><span class="pre">read_output</span></code></a>(filenames)</td>
 <td>Override to implement reading outputs from disk.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.time_flag.Flag.read_process_write.html#tlpipe.timestream.time_flag.Flag.read_process_write" title="tlpipe.timestream.time_flag.Flag.read_process_write"><code class="xref py py-obj docutils literal"><span class="pre">read_process_write</span></code></a>(tod)</td>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.time_flag.Flag.read_process_write.html#tlpipe.timestream.time_flag.Flag.read_process_write" title="tlpipe.timestream.time_flag.Flag.read_process_write"><code class="xref py py-obj docutils literal"><span class="pre">read_process_write</span></code></a>(tod)</td>
 <td>Reads input, executes any processing and writes output.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.time_flag.Flag.setup.html#tlpipe.timestream.time_flag.Flag.setup" title="tlpipe.timestream.time_flag.Flag.setup"><code class="xref py py-obj docutils literal"><span class="pre">setup</span></code></a>([requires])</td>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.time_flag.Flag.setup.html#tlpipe.timestream.time_flag.Flag.setup" title="tlpipe.timestream.time_flag.Flag.setup"><code class="xref py py-obj docutils literal"><span class="pre">setup</span></code></a>([requires])</td>
 <td>First analysis stage of pipeline task.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.time_flag.Flag.show_params.html#tlpipe.timestream.time_flag.Flag.show_params" title="tlpipe.timestream.time_flag.Flag.show_params"><code class="xref py py-obj docutils literal"><span class="pre">show_params</span></code></a>()</td>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.time_flag.Flag.show_params.html#tlpipe.timestream.time_flag.Flag.show_params" title="tlpipe.timestream.time_flag.Flag.show_params"><code class="xref py py-obj docutils literal"><span class="pre">show_params</span></code></a>()</td>
 <td>Show all parameters that can be set and their default values of this task.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.time_flag.Flag.write_output.html#tlpipe.timestream.time_flag.Flag.write_output" title="tlpipe.timestream.time_flag.Flag.write_output"><code class="xref py py-obj docutils literal"><span class="pre">write_output</span></code></a>(output)</td>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.time_flag.Flag.write_output.html#tlpipe.timestream.time_flag.Flag.write_output" title="tlpipe.timestream.time_flag.Flag.write_output"><code class="xref py py-obj docutils literal"><span class="pre">write_output</span></code></a>(output)</td>
 <td>Method for writing time ordered data output.</td>
 </tr>
 </tbody>

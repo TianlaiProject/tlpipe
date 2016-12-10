@@ -36,7 +36,7 @@
     <link rel="top" title="tlpipe 0.1 documentation" href="../index.html"/>
         <link rel="up" title="tlpipe.timestream.phs2zen" href="tlpipe.timestream.phs2zen.html"/>
         <link rel="next" title="tlpipe.timestream.phs2zen.Phs2zen.cacheable" href="tlpipe.timestream.phs2zen.Phs2zen.cacheable.html"/>
-        <link rel="prev" title="tlpipe.timestream.phs2zen.phs" href="tlpipe.timestream.phs2zen.phs.html"/> 
+        <link rel="prev" title="tlpipe.timestream.phs2zen.get_ephdate" href="tlpipe.timestream.phs2zen.get_ephdate.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -88,10 +88,18 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../tutor.html">Tutorial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-iterative-pipeline">Non-iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#iterative-pipeline">Iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-trivial-control-flow">Non-trivial control flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#executing-several-times-a-same-task">Executing several times a same task</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#save-intermediate-data">Save intermediate data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#recovery-from-intermediate-data">Recovery from intermediate data</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#run-the-pipeline">Run the pipeline</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../tutor.html#single-process-run">Single process run</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-process-run">Multiple process run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-processes-run">Multiple processes run</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#pipeline-products-and-intermediate-results">Pipeline products and intermediate results</a></li>
@@ -388,8 +396,14 @@
 <h1>tlpipe.timestream.phs2zen.Phs2zen<a class="headerlink" href="#tlpipe-timestream-phs2zen-phs2zen" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="tlpipe.timestream.phs2zen.Phs2zen">
-<em class="property">class </em><code class="descclassname">tlpipe.timestream.phs2zen.</code><code class="descname">Phs2zen</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/timestream/phs2zen.py#L43"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.phs2zen.Phs2zen" title="Permalink to this definition">¶</a></dt>
-<dd><p>Phase the source-phased visibility data to the zenith, this is just the inverse operation of phs2src.py.</p>
+<em class="property">class </em><code class="descclassname">tlpipe.timestream.phs2zen.</code><code class="descname">Phs2zen</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/timestream/phs2zen.py#L21"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.phs2zen.Phs2zen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Phase the source-phased visibility data to the zenith</p>
+<p>The phasing is done by multiply the visibility by the reference phase of
+the given <em>source</em>, as</p>
+<div class="math">
+\[V_{ij}^{\text{phs}} = V_{ij} \cdot e^{2 \pi i \, \boldsymbol{s}_0 \cdot \boldsymbol{u}_{ij}}\]</div>
+<p>This is just the inverse operation of task
+<a class="reference internal" href="tlpipe.timestream.phs2src.Phs2src.html#tlpipe.timestream.phs2src.Phs2src" title="tlpipe.timestream.phs2src.Phs2src"><code class="xref py py-class docutils literal"><span class="pre">Phs2src</span></code></a>.</p>
 <p class="rubric">Attributes</p>
 <table border="1" class="longtable docutils">
 <colgroup>
@@ -419,7 +433,7 @@
 </table>
 <dl class="method">
 <dt id="tlpipe.timestream.phs2zen.Phs2zen.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L999"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.phs2zen.Phs2zen.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L1012"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.phs2zen.Phs2zen.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -444,25 +458,28 @@
 <tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.phs2zen.Phs2zen.next.html#tlpipe.timestream.phs2zen.Phs2zen.next" title="tlpipe.timestream.phs2zen.Phs2zen.next"><code class="xref py py-obj docutils literal"><span class="pre">next</span></code></a>([input])</td>
 <td>Should not need to override.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.phs2zen.Phs2zen.process.html#tlpipe.timestream.phs2zen.Phs2zen.process" title="tlpipe.timestream.phs2zen.Phs2zen.process"><code class="xref py py-obj docutils literal"><span class="pre">process</span></code></a>(ts)</td>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.phs2zen.Phs2zen.phs.html#tlpipe.timestream.phs2zen.Phs2zen.phs" title="tlpipe.timestream.phs2zen.Phs2zen.phs"><code class="xref py py-obj docutils literal"><span class="pre">phs</span></code></a>(vis,&nbsp;vis_mask,&nbsp;li,&nbsp;gi,&nbsp;tbl,&nbsp;ts,&nbsp;\*\*kwargs)</td>
+<td>Function that does the actual phs.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.phs2zen.Phs2zen.process.html#tlpipe.timestream.phs2zen.Phs2zen.process" title="tlpipe.timestream.phs2zen.Phs2zen.process"><code class="xref py py-obj docutils literal"><span class="pre">process</span></code></a>(ts)</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.phs2zen.Phs2zen.read_input.html#tlpipe.timestream.phs2zen.Phs2zen.read_input" title="tlpipe.timestream.phs2zen.Phs2zen.read_input"><code class="xref py py-obj docutils literal"><span class="pre">read_input</span></code></a>()</td>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.phs2zen.Phs2zen.read_input.html#tlpipe.timestream.phs2zen.Phs2zen.read_input" title="tlpipe.timestream.phs2zen.Phs2zen.read_input"><code class="xref py py-obj docutils literal"><span class="pre">read_input</span></code></a>()</td>
 <td>Method for reading time ordered data input.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.phs2zen.Phs2zen.read_output.html#tlpipe.timestream.phs2zen.Phs2zen.read_output" title="tlpipe.timestream.phs2zen.Phs2zen.read_output"><code class="xref py py-obj docutils literal"><span class="pre">read_output</span></code></a>(filenames)</td>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.phs2zen.Phs2zen.read_output.html#tlpipe.timestream.phs2zen.Phs2zen.read_output" title="tlpipe.timestream.phs2zen.Phs2zen.read_output"><code class="xref py py-obj docutils literal"><span class="pre">read_output</span></code></a>(filenames)</td>
 <td>Override to implement reading outputs from disk.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.phs2zen.Phs2zen.read_process_write.html#tlpipe.timestream.phs2zen.Phs2zen.read_process_write" title="tlpipe.timestream.phs2zen.Phs2zen.read_process_write"><code class="xref py py-obj docutils literal"><span class="pre">read_process_write</span></code></a>(tod)</td>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.phs2zen.Phs2zen.read_process_write.html#tlpipe.timestream.phs2zen.Phs2zen.read_process_write" title="tlpipe.timestream.phs2zen.Phs2zen.read_process_write"><code class="xref py py-obj docutils literal"><span class="pre">read_process_write</span></code></a>(tod)</td>
 <td>Reads input, executes any processing and writes output.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.phs2zen.Phs2zen.setup.html#tlpipe.timestream.phs2zen.Phs2zen.setup" title="tlpipe.timestream.phs2zen.Phs2zen.setup"><code class="xref py py-obj docutils literal"><span class="pre">setup</span></code></a>([requires])</td>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.phs2zen.Phs2zen.setup.html#tlpipe.timestream.phs2zen.Phs2zen.setup" title="tlpipe.timestream.phs2zen.Phs2zen.setup"><code class="xref py py-obj docutils literal"><span class="pre">setup</span></code></a>([requires])</td>
 <td>First analysis stage of pipeline task.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.phs2zen.Phs2zen.show_params.html#tlpipe.timestream.phs2zen.Phs2zen.show_params" title="tlpipe.timestream.phs2zen.Phs2zen.show_params"><code class="xref py py-obj docutils literal"><span class="pre">show_params</span></code></a>()</td>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.phs2zen.Phs2zen.show_params.html#tlpipe.timestream.phs2zen.Phs2zen.show_params" title="tlpipe.timestream.phs2zen.Phs2zen.show_params"><code class="xref py py-obj docutils literal"><span class="pre">show_params</span></code></a>()</td>
 <td>Show all parameters that can be set and their default values of this task.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.phs2zen.Phs2zen.write_output.html#tlpipe.timestream.phs2zen.Phs2zen.write_output" title="tlpipe.timestream.phs2zen.Phs2zen.write_output"><code class="xref py py-obj docutils literal"><span class="pre">write_output</span></code></a>(output)</td>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.phs2zen.Phs2zen.write_output.html#tlpipe.timestream.phs2zen.Phs2zen.write_output" title="tlpipe.timestream.phs2zen.Phs2zen.write_output"><code class="xref py py-obj docutils literal"><span class="pre">write_output</span></code></a>(output)</td>
 <td>Method for writing time ordered data output.</td>
 </tr>
 </tbody>
@@ -480,7 +497,7 @@
         <a href="tlpipe.timestream.phs2zen.Phs2zen.cacheable.html" class="btn btn-neutral float-right" title="tlpipe.timestream.phs2zen.Phs2zen.cacheable" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="tlpipe.timestream.phs2zen.phs.html" class="btn btn-neutral" title="tlpipe.timestream.phs2zen.phs" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="tlpipe.timestream.phs2zen.get_ephdate.html" class="btn btn-neutral" title="tlpipe.timestream.phs2zen.get_ephdate" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

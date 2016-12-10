@@ -36,7 +36,7 @@
     <link rel="top" title="tlpipe 0.1 documentation" href="../index.html"/>
         <link rel="up" title="tlpipe.plot.plot_integral" href="tlpipe.plot.plot_integral.html"/>
         <link rel="next" title="tlpipe.plot.plot_integral.Plot.cacheable" href="tlpipe.plot.plot_integral.Plot.cacheable.html"/>
-        <link rel="prev" title="tlpipe.plot.plot_integral.plot" href="tlpipe.plot.plot_integral.plot.html"/> 
+        <link rel="prev" title="tlpipe.plot.plot_integral.output_path" href="tlpipe.plot.plot_integral.output_path.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -88,10 +88,18 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../tutor.html">Tutorial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-iterative-pipeline">Non-iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#iterative-pipeline">Iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-trivial-control-flow">Non-trivial control flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#executing-several-times-a-same-task">Executing several times a same task</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#save-intermediate-data">Save intermediate data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#recovery-from-intermediate-data">Recovery from intermediate data</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#run-the-pipeline">Run the pipeline</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../tutor.html#single-process-run">Single process run</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-process-run">Multiple process run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-processes-run">Multiple processes run</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#pipeline-products-and-intermediate-results">Pipeline products and intermediate results</a></li>
@@ -388,8 +396,13 @@
 <h1>tlpipe.plot.plot_integral.Plot<a class="headerlink" href="#tlpipe-plot-plot-integral-plot" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="tlpipe.plot.plot_integral.Plot">
-<em class="property">class </em><code class="descclassname">tlpipe.plot.plot_integral.</code><code class="descname">Plot</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/plot/plot_integral.py#L90"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.plot.plot_integral.Plot" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">tlpipe.plot.plot_integral.</code><code class="descname">Plot</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/plot/plot_integral.py#L19"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.plot.plot_integral.Plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plot time or frequency integral.</p>
+<p>This tasks plots the real, imagery part and the absolute value of the
+time or frequency integrated visibility for each baseline (and also each
+polarization if the input data is a
+<a class="reference internal" href="tlpipe.timestream.timestream.Timestream.html#tlpipe.timestream.timestream.Timestream" title="tlpipe.timestream.timestream.Timestream"><code class="xref py py-class docutils literal"><span class="pre">Timestream</span></code></a> instead of a
+<a class="reference internal" href="tlpipe.timestream.raw_timestream.RawTimestream.html#tlpipe.timestream.raw_timestream.RawTimestream" title="tlpipe.timestream.raw_timestream.RawTimestream"><code class="xref py py-class docutils literal"><span class="pre">RawTimestream</span></code></a>).</p>
 <p class="rubric">Attributes</p>
 <table border="1" class="longtable docutils">
 <colgroup>
@@ -419,7 +432,7 @@
 </table>
 <dl class="method">
 <dt id="tlpipe.plot.plot_integral.Plot.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L999"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.plot.plot_integral.Plot.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L1012"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.plot.plot_integral.Plot.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -444,25 +457,28 @@
 <tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_integral.Plot.next.html#tlpipe.plot.plot_integral.Plot.next" title="tlpipe.plot.plot_integral.Plot.next"><code class="xref py py-obj docutils literal"><span class="pre">next</span></code></a>([input])</td>
 <td>Should not need to override.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_integral.Plot.process.html#tlpipe.plot.plot_integral.Plot.process" title="tlpipe.plot.plot_integral.Plot.process"><code class="xref py py-obj docutils literal"><span class="pre">process</span></code></a>(ts)</td>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_integral.Plot.plot.html#tlpipe.plot.plot_integral.Plot.plot" title="tlpipe.plot.plot_integral.Plot.plot"><code class="xref py py-obj docutils literal"><span class="pre">plot</span></code></a>(vis,&nbsp;vis_mask,&nbsp;li,&nbsp;gi,&nbsp;bl,&nbsp;ts,&nbsp;\*\*kwargs)</td>
+<td>Function that does the actual plot work.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_integral.Plot.process.html#tlpipe.plot.plot_integral.Plot.process" title="tlpipe.plot.plot_integral.Plot.process"><code class="xref py py-obj docutils literal"><span class="pre">process</span></code></a>(ts)</td>
 <td></td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_integral.Plot.read_input.html#tlpipe.plot.plot_integral.Plot.read_input" title="tlpipe.plot.plot_integral.Plot.read_input"><code class="xref py py-obj docutils literal"><span class="pre">read_input</span></code></a>()</td>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_integral.Plot.read_input.html#tlpipe.plot.plot_integral.Plot.read_input" title="tlpipe.plot.plot_integral.Plot.read_input"><code class="xref py py-obj docutils literal"><span class="pre">read_input</span></code></a>()</td>
 <td>Method for reading time ordered data input.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_integral.Plot.read_output.html#tlpipe.plot.plot_integral.Plot.read_output" title="tlpipe.plot.plot_integral.Plot.read_output"><code class="xref py py-obj docutils literal"><span class="pre">read_output</span></code></a>(filenames)</td>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_integral.Plot.read_output.html#tlpipe.plot.plot_integral.Plot.read_output" title="tlpipe.plot.plot_integral.Plot.read_output"><code class="xref py py-obj docutils literal"><span class="pre">read_output</span></code></a>(filenames)</td>
 <td>Override to implement reading outputs from disk.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_integral.Plot.read_process_write.html#tlpipe.plot.plot_integral.Plot.read_process_write" title="tlpipe.plot.plot_integral.Plot.read_process_write"><code class="xref py py-obj docutils literal"><span class="pre">read_process_write</span></code></a>(tod)</td>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_integral.Plot.read_process_write.html#tlpipe.plot.plot_integral.Plot.read_process_write" title="tlpipe.plot.plot_integral.Plot.read_process_write"><code class="xref py py-obj docutils literal"><span class="pre">read_process_write</span></code></a>(tod)</td>
 <td>Reads input, executes any processing and writes output.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_integral.Plot.setup.html#tlpipe.plot.plot_integral.Plot.setup" title="tlpipe.plot.plot_integral.Plot.setup"><code class="xref py py-obj docutils literal"><span class="pre">setup</span></code></a>([requires])</td>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_integral.Plot.setup.html#tlpipe.plot.plot_integral.Plot.setup" title="tlpipe.plot.plot_integral.Plot.setup"><code class="xref py py-obj docutils literal"><span class="pre">setup</span></code></a>([requires])</td>
 <td>First analysis stage of pipeline task.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_integral.Plot.show_params.html#tlpipe.plot.plot_integral.Plot.show_params" title="tlpipe.plot.plot_integral.Plot.show_params"><code class="xref py py-obj docutils literal"><span class="pre">show_params</span></code></a>()</td>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_integral.Plot.show_params.html#tlpipe.plot.plot_integral.Plot.show_params" title="tlpipe.plot.plot_integral.Plot.show_params"><code class="xref py py-obj docutils literal"><span class="pre">show_params</span></code></a>()</td>
 <td>Show all parameters that can be set and their default values of this task.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_integral.Plot.write_output.html#tlpipe.plot.plot_integral.Plot.write_output" title="tlpipe.plot.plot_integral.Plot.write_output"><code class="xref py py-obj docutils literal"><span class="pre">write_output</span></code></a>(output)</td>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_integral.Plot.write_output.html#tlpipe.plot.plot_integral.Plot.write_output" title="tlpipe.plot.plot_integral.Plot.write_output"><code class="xref py py-obj docutils literal"><span class="pre">write_output</span></code></a>(output)</td>
 <td>Method for writing time ordered data output.</td>
 </tr>
 </tbody>
@@ -480,7 +496,7 @@
         <a href="tlpipe.plot.plot_integral.Plot.cacheable.html" class="btn btn-neutral float-right" title="tlpipe.plot.plot_integral.Plot.cacheable" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="tlpipe.plot.plot_integral.plot.html" class="btn btn-neutral" title="tlpipe.plot.plot_integral.plot" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="tlpipe.plot.plot_integral.output_path.html" class="btn btn-neutral" title="tlpipe.plot.plot_integral.output_path" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

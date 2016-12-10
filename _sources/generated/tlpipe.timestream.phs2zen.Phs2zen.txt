@@ -38,6 +38,7 @@ tlpipe.timestream.phs2zen.Phs2zen
       ~Phs2zen.data_select
       ~Phs2zen.finish
       ~Phs2zen.next
+      ~Phs2zen.phs
       ~Phs2zen.process
       ~Phs2zen.read_input
       ~Phs2zen.read_output

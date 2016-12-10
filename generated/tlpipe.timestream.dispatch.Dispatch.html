@@ -88,10 +88,18 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../tutor.html">Tutorial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-iterative-pipeline">Non-iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#iterative-pipeline">Iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-trivial-control-flow">Non-trivial control flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#executing-several-times-a-same-task">Executing several times a same task</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#save-intermediate-data">Save intermediate data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#recovery-from-intermediate-data">Recovery from intermediate data</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#run-the-pipeline">Run the pipeline</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../tutor.html#single-process-run">Single process run</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-process-run">Multiple process run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-processes-run">Multiple processes run</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#pipeline-products-and-intermediate-results">Pipeline products and intermediate results</a></li>
@@ -390,6 +398,24 @@
 <dt id="tlpipe.timestream.dispatch.Dispatch">
 <em class="property">class </em><code class="descclassname">tlpipe.timestream.dispatch.</code><code class="descname">Dispatch</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/timestream/dispatch.py#L19"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.dispatch.Dispatch" title="Permalink to this definition">¶</a></dt>
 <dd><p>Dispatch data.</p>
+<p>This task will (maybe iteratively) load data from the input data files
+according to the required data selection (time, frequency, baseline
+selection). If work iteratively, data will be iteratively loaded according
+to the time unit set in the input pipe file, and the loaded data (contained
+in a data container which is a
+<a class="reference internal" href="tlpipe.timestream.raw_timestream.RawTimestream.html#tlpipe.timestream.raw_timestream.RawTimestream" title="tlpipe.timestream.raw_timestream.RawTimestream"><code class="xref py py-class docutils literal"><span class="pre">RawTimestream</span></code></a> object) will be
+dispatched to other tasks to be further processed.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This usually should be the first task in the input pipe file to select
+and load the data from input data files for other tasks.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Current this task only works for a continuously observed data sets.
+Works need to do to make it work also for data observed in dis-continuous
+time periods.</p>
+</div>
 <p class="rubric">Attributes</p>
 <table border="1" class="longtable docutils">
 <colgroup>
@@ -419,7 +445,7 @@
 </table>
 <dl class="method">
 <dt id="tlpipe.timestream.dispatch.Dispatch.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L999"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.dispatch.Dispatch.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L1012"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.dispatch.Dispatch.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>
@@ -445,10 +471,10 @@
 <td>Should not need to override.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.dispatch.Dispatch.process.html#tlpipe.timestream.dispatch.Dispatch.process" title="tlpipe.timestream.dispatch.Dispatch.process"><code class="xref py py-obj docutils literal"><span class="pre">process</span></code></a>(rt)</td>
-<td></td>
+<td>Return loaded data as a <a class="reference internal" href="tlpipe.timestream.raw_timestream.RawTimestream.html#tlpipe.timestream.raw_timestream.RawTimestream" title="tlpipe.timestream.raw_timestream.RawTimestream"><code class="xref py py-class docutils literal"><span class="pre">RawTimestream</span></code></a> object.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.dispatch.Dispatch.read_input.html#tlpipe.timestream.dispatch.Dispatch.read_input" title="tlpipe.timestream.dispatch.Dispatch.read_input"><code class="xref py py-obj docutils literal"><span class="pre">read_input</span></code></a>()</td>
-<td>Method for reading time ordered data input.</td>
+<td>Method for (maybe iteratively) reading data from input data files.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.dispatch.Dispatch.read_output.html#tlpipe.timestream.dispatch.Dispatch.read_output" title="tlpipe.timestream.dispatch.Dispatch.read_output"><code class="xref py py-obj docutils literal"><span class="pre">read_output</span></code></a>(filenames)</td>
 <td>Override to implement reading outputs from disk.</td>

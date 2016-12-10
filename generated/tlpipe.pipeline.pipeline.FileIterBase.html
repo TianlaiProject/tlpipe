@@ -88,10 +88,18 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../tutor.html">Tutorial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-iterative-pipeline">Non-iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#iterative-pipeline">Iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-trivial-control-flow">Non-trivial control flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#executing-several-times-a-same-task">Executing several times a same task</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#save-intermediate-data">Save intermediate data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#recovery-from-intermediate-data">Recovery from intermediate data</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#run-the-pipeline">Run the pipeline</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../tutor.html#single-process-run">Single process run</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-process-run">Multiple process run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-processes-run">Multiple processes run</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#pipeline-products-and-intermediate-results">Pipeline products and intermediate results</a></li>
@@ -388,7 +396,7 @@
 <h1>tlpipe.pipeline.pipeline.FileIterBase<a class="headerlink" href="#tlpipe-pipeline-pipeline-fileiterbase" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="tlpipe.pipeline.pipeline.FileIterBase">
-<em class="property">class </em><code class="descclassname">tlpipe.pipeline.pipeline.</code><code class="descname">FileIterBase</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L1145"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.pipeline.pipeline.FileIterBase" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">tlpipe.pipeline.pipeline.</code><code class="descname">FileIterBase</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L1158"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.pipeline.pipeline.FileIterBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base class for iterating tasks over input files.</p>
 <p>Tasks inheriting from this class should override <a class="reference internal" href="tlpipe.pipeline.pipeline.FileIterBase.process.html#tlpipe.pipeline.pipeline.FileIterBase.process" title="tlpipe.pipeline.pipeline.FileIterBase.process"><code class="xref py py-meth docutils literal"><span class="pre">process()</span></code></a> and
 optionally <a class="reference internal" href="tlpipe.pipeline.pipeline.FileIterBase.setup.html#tlpipe.pipeline.pipeline.FileIterBase.setup" title="tlpipe.pipeline.pipeline.FileIterBase.setup"><code class="xref py py-meth docutils literal"><span class="pre">setup()</span></code></a>, <a class="reference internal" href="tlpipe.pipeline.pipeline.FileIterBase.finish.html#tlpipe.pipeline.pipeline.FileIterBase.finish" title="tlpipe.pipeline.pipeline.FileIterBase.finish"><code class="xref py py-meth docutils literal"><span class="pre">finish()</span></code></a>, <a class="reference internal" href="tlpipe.pipeline.pipeline.FileIterBase.read_input.html#tlpipe.pipeline.pipeline.FileIterBase.read_input" title="tlpipe.pipeline.pipeline.FileIterBase.read_input"><code class="xref py py-meth docutils literal"><span class="pre">read_input()</span></code></a>,
@@ -423,7 +431,7 @@ optionally <a class="reference internal" href="tlpipe.pipeline.pipeline.FileIter
 </table>
 <dl class="method">
 <dt id="tlpipe.pipeline.pipeline.FileIterBase.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L1161"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.pipeline.pipeline.FileIterBase.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L1174"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.pipeline.pipeline.FileIterBase.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>

@@ -10,7 +10,6 @@ tlpipe.timestream.time_flag
    .. autosummary::
       :toctree:
    
-      flag
       savitzky_golay
    
    

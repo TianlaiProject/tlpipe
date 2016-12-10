@@ -35,7 +35,7 @@
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="tlpipe 0.1 documentation" href="../index.html"/>
         <link rel="up" title="timestream – Timestream data containers and operating tasks" href="../timestream.html"/>
-        <link rel="next" title="tlpipe.timestream.freq_flag.flag" href="tlpipe.timestream.freq_flag.flag.html"/>
+        <link rel="next" title="tlpipe.timestream.freq_flag.Flag" href="tlpipe.timestream.freq_flag.Flag.html"/>
         <link rel="prev" title="tlpipe.timestream.time_flag.Timestream.values" href="tlpipe.timestream.time_flag.Timestream.values.html"/> 
 
   
@@ -88,10 +88,18 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../tutor.html">Tutorial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-iterative-pipeline">Non-iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#iterative-pipeline">Iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-trivial-control-flow">Non-trivial control flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#executing-several-times-a-same-task">Executing several times a same task</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#save-intermediate-data">Save intermediate data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#recovery-from-intermediate-data">Recovery from intermediate data</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#run-the-pipeline">Run the pipeline</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../tutor.html#single-process-run">Single process run</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-process-run">Multiple process run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-processes-run">Multiple processes run</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#pipeline-products-and-intermediate-results">Pipeline products and intermediate results</a></li>
@@ -394,18 +402,6 @@
 <area shape="rect" id="node4" href="tlpipe.pipeline.pipeline.OneAndOne.html#tlpipe.pipeline.pipeline.OneAndOne" target="_top" title="Base class for tasks that have (at most) one input and one output." alt="" coords="24,83,181,111"/>
 <area shape="rect" id="node5" href="tlpipe.pipeline.pipeline.TaskBase.html#tlpipe.pipeline.pipeline.TaskBase" target="_top" title="Base class for all pipeline tasks." alt="" coords="33,6,172,34"/>
 </map>
-<p class="rubric">Functions</p>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.freq_flag.flag.html#tlpipe.timestream.freq_flag.flag" title="tlpipe.timestream.freq_flag.flag"><code class="xref py py-obj docutils literal"><span class="pre">flag</span></code></a>(vis,&nbsp;vis_mask,&nbsp;li,&nbsp;gi,&nbsp;tbl,&nbsp;ts,&nbsp;\*\*kwargs)</td>
-<td></td>
-</tr>
-</tbody>
-</table>
 <p class="rubric">Classes</p>
 <table border="1" class="longtable docutils">
 <colgroup>
@@ -433,7 +429,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="tlpipe.timestream.freq_flag.flag.html" class="btn btn-neutral float-right" title="tlpipe.timestream.freq_flag.flag" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="tlpipe.timestream.freq_flag.Flag.html" class="btn btn-neutral float-right" title="tlpipe.timestream.freq_flag.Flag" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="tlpipe.timestream.time_flag.Timestream.values.html" class="btn btn-neutral" title="tlpipe.timestream.time_flag.Timestream.values" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>

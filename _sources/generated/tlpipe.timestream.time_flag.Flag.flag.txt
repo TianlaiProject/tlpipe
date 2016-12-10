@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.Flag.flag
+=====================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. automethod:: Flag.flag

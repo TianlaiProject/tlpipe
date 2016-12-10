@@ -38,6 +38,7 @@ tlpipe.timestream.phs2src.Phs2src
       ~Phs2src.data_select
       ~Phs2src.finish
       ~Phs2src.next
+      ~Phs2src.phs
       ~Phs2src.process
       ~Phs2src.read_input
       ~Phs2src.read_output

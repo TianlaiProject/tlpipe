@@ -11,7 +11,6 @@ tlpipe.timestream.phs2src
       :toctree:
    
       get_ephdate
-      phs
    
    
 

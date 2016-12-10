@@ -33,6 +33,7 @@ tlpipe.timestream.ns_cal.NsCal
       :toctree:
 
    
+      ~NsCal.cal
       ~NsCal.cast_input
       ~NsCal.copy_input
       ~NsCal.data_select

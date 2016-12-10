@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.Manager.show_params
+============================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: Manager.show_params

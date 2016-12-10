@@ -30,5 +30,6 @@ tlpipe.pipeline.pipeline.Manager
 
    
       ~Manager.run
+      ~Manager.show_params
    
    

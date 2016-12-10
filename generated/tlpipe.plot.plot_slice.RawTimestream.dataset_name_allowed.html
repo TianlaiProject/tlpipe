@@ -88,10 +88,18 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../tutor.html">Tutorial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-iterative-pipeline">Non-iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#iterative-pipeline">Iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-trivial-control-flow">Non-trivial control flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#executing-several-times-a-same-task">Executing several times a same task</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#save-intermediate-data">Save intermediate data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#recovery-from-intermediate-data">Recovery from intermediate data</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#run-the-pipeline">Run the pipeline</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../tutor.html#single-process-run">Single process run</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-process-run">Multiple process run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-processes-run">Multiple processes run</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#pipeline-products-and-intermediate-results">Pipeline products and intermediate results</a></li>
@@ -390,7 +398,7 @@
 <h1>tlpipe.plot.plot_slice.RawTimestream.dataset_name_allowed<a class="headerlink" href="#tlpipe-plot-plot-slice-rawtimestream-dataset-name-allowed" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
 <dt id="tlpipe.plot.plot_slice.RawTimestream.dataset_name_allowed">
-<code class="descclassname">RawTimestream.</code><code class="descname">dataset_name_allowed</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/timestream/container.py#L722"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.plot.plot_slice.RawTimestream.dataset_name_allowed" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">RawTimestream.</code><code class="descname">dataset_name_allowed</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/timestream/container.py#L724"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.plot.plot_slice.RawTimestream.dataset_name_allowed" title="Permalink to this definition">¶</a></dt>
 <dd><p>Datasets may only be created and accessed in the root level group.</p>
 <p>Returns <code class="docutils literal"><span class="pre">True</span></code> is <em>name</em> is a path in the root group i.e. &#8216;/dataset&#8217;.</p>
 </dd></dl>

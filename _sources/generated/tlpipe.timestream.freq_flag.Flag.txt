@@ -37,6 +37,7 @@ tlpipe.timestream.freq_flag.Flag
       ~Flag.copy_input
       ~Flag.data_select
       ~Flag.finish
+      ~Flag.flag
       ~Flag.next
       ~Flag.process
       ~Flag.read_input

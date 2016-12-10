@@ -35,7 +35,7 @@
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="tlpipe 0.1 documentation" href="../index.html"/>
         <link rel="up" title="tlpipe.plot.plot_integral.Plot" href="tlpipe.plot.plot_integral.Plot.html"/>
-        <link rel="next" title="tlpipe.plot.plot_integral.Plot.process" href="tlpipe.plot.plot_integral.Plot.process.html"/>
+        <link rel="next" title="tlpipe.plot.plot_integral.Plot.plot" href="tlpipe.plot.plot_integral.Plot.plot.html"/>
         <link rel="prev" title="tlpipe.plot.plot_integral.Plot.finish" href="tlpipe.plot.plot_integral.Plot.finish.html"/> 
 
   
@@ -88,10 +88,18 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../tutor.html">Tutorial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-iterative-pipeline">Non-iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#iterative-pipeline">Iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-trivial-control-flow">Non-trivial control flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#executing-several-times-a-same-task">Executing several times a same task</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#save-intermediate-data">Save intermediate data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#recovery-from-intermediate-data">Recovery from intermediate data</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#run-the-pipeline">Run the pipeline</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../tutor.html#single-process-run">Single process run</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-process-run">Multiple process run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-processes-run">Multiple processes run</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#pipeline-products-and-intermediate-results">Pipeline products and intermediate results</a></li>
@@ -390,7 +398,7 @@
 <h1>tlpipe.plot.plot_integral.Plot.next<a class="headerlink" href="#tlpipe-plot-plot-integral-plot-next" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
 <dt id="tlpipe.plot.plot_integral.Plot.next">
-<code class="descclassname">Plot.</code><code class="descname">next</code><span class="sig-paren">(</span><em>input=None</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L1042"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.plot.plot_integral.Plot.next" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">Plot.</code><code class="descname">next</code><span class="sig-paren">(</span><em>input=None</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L1055"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.plot.plot_integral.Plot.next" title="Permalink to this definition">¶</a></dt>
 <dd><p>Should not need to override.</p>
 </dd></dl>
 
@@ -402,7 +410,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="tlpipe.plot.plot_integral.Plot.process.html" class="btn btn-neutral float-right" title="tlpipe.plot.plot_integral.Plot.process" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="tlpipe.plot.plot_integral.Plot.plot.html" class="btn btn-neutral float-right" title="tlpipe.plot.plot_integral.Plot.plot" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="tlpipe.plot.plot_integral.Plot.finish.html" class="btn btn-neutral" title="tlpipe.plot.plot_integral.Plot.finish" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>

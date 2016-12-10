@@ -37,6 +37,7 @@ tlpipe.timestream.line_rfi.Flag
       ~Flag.copy_input
       ~Flag.data_select
       ~Flag.finish
+      ~Flag.flag
       ~Flag.next
       ~Flag.process
       ~Flag.read_input

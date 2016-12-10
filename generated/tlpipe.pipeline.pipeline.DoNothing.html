@@ -88,10 +88,18 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../tutor.html">Tutorial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-iterative-pipeline">Non-iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#iterative-pipeline">Iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-trivial-control-flow">Non-trivial control flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#executing-several-times-a-same-task">Executing several times a same task</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#save-intermediate-data">Save intermediate data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#recovery-from-intermediate-data">Recovery from intermediate data</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#run-the-pipeline">Run the pipeline</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="../tutor.html#single-process-run">Single process run</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-process-run">Multiple process run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-processes-run">Multiple processes run</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../tutor.html#pipeline-products-and-intermediate-results">Pipeline products and intermediate results</a></li>
@@ -388,7 +396,7 @@
 <h1>tlpipe.pipeline.pipeline.DoNothing<a class="headerlink" href="#tlpipe-pipeline-pipeline-donothing" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="tlpipe.pipeline.pipeline.DoNothing">
-<em class="property">class </em><code class="descclassname">tlpipe.pipeline.pipeline.</code><code class="descname">DoNothing</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L937"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.pipeline.pipeline.DoNothing" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">tlpipe.pipeline.pipeline.</code><code class="descname">DoNothing</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L950"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.pipeline.pipeline.DoNothing" title="Permalink to this definition">¶</a></dt>
 <dd><p>Do nothing.</p>
 <p>This task will actually do nothing and its <a class="reference internal" href="tlpipe.pipeline.pipeline.DoNothing.next.html#tlpipe.pipeline.pipeline.DoNothing.next" title="tlpipe.pipeline.pipeline.DoNothing.next"><code class="xref py py-meth docutils literal"><span class="pre">next()</span></code></a> is never called,
 since the pipeline never generates its input, &#8216;non_existent_input&#8217;.
@@ -426,7 +434,7 @@ proceed normally.</p>
 </table>
 <dl class="method">
 <dt id="tlpipe.pipeline.pipeline.DoNothing.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L631"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.pipeline.pipeline.DoNothing.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L644"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.pipeline.pipeline.DoNothing.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>

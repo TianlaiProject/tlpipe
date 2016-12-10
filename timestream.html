@@ -87,10 +87,18 @@
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="tutor.html">Tutorial</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutor.html#non-iterative-pipeline">Non-iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutor.html#iterative-pipeline">Iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutor.html#non-trivial-control-flow">Non-trivial control flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutor.html#executing-several-times-a-same-task">Executing several times a same task</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutor.html#save-intermediate-data">Save intermediate data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutor.html#recovery-from-intermediate-data">Recovery from intermediate data</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="tutor.html#run-the-pipeline">Run the pipeline</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="tutor.html#single-process-run">Single process run</a></li>
-<li class="toctree-l3"><a class="reference internal" href="tutor.html#multiple-process-run">Multiple process run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutor.html#multiple-processes-run">Multiple processes run</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="tutor.html#pipeline-products-and-intermediate-results">Pipeline products and intermediate results</a></li>
@@ -390,7 +398,7 @@
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><a class="reference internal" href="generated/tlpipe.timestream.container.html#module-tlpipe.timestream.container" title="tlpipe.timestream.container"><code class="xref py py-obj docutils literal"><span class="pre">container</span></code></a></td>
-<td></td>
+<td>Basic time ordered data container.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/tlpipe.timestream.timestream_common.html#module-tlpipe.timestream.timestream_common" title="tlpipe.timestream.timestream_common"><code class="xref py py-obj docutils literal"><span class="pre">timestream_common</span></code></a></td>
 <td>Common things for the raw timestream data and timestream data.</td>
@@ -457,7 +465,7 @@
 <td>Phase the zenith-phased visibility data to a source.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="generated/tlpipe.timestream.phs2zen.html#module-tlpipe.timestream.phs2zen" title="tlpipe.timestream.phs2zen"><code class="xref py py-obj docutils literal"><span class="pre">phs2zen</span></code></a></td>
-<td>Phase the source-phased visibility data to the zenith, this is just the inverse operation of phs2src.py.</td>
+<td>Phase the source-phased visibility data to the zenith.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/tlpipe.timestream.phase_closure.html#module-tlpipe.timestream.phase_closure" title="tlpipe.timestream.phase_closure"><code class="xref py py-obj docutils literal"><span class="pre">phase_closure</span></code></a></td>
 <td>Check the phase closure relation.</td>
@@ -472,7 +480,7 @@
 <td>Re-order data to have longitude from 0 to 2pi.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="generated/tlpipe.timestream.accumulate.html#module-tlpipe.timestream.accumulate" title="tlpipe.timestream.accumulate"><code class="xref py py-obj docutils literal"><span class="pre">accumulate</span></code></a></td>
-<td>Accurate data.</td>
+<td>Accumulate data.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="generated/tlpipe.timestream.barrier.html#module-tlpipe.timestream.barrier" title="tlpipe.timestream.barrier"><code class="xref py py-obj docutils literal"><span class="pre">barrier</span></code></a></td>
 <td>Barrier the iterative pipeline flow before executing its following tasks.</td>

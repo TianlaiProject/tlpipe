@@ -10,7 +10,6 @@ tlpipe.timestream.ns_cal
    .. autosummary::
       :toctree:
    
-      cal
       output_path
    
    
