@@ -18,7 +18,7 @@ from timestream import Timestream
 class Flag(tod_task.TaskTimestream):
     """Exceptional values flagging along the frequency axis.
 
-    This taks does a very simple flagging by masking data points whose
+    This task does a very simple flagging by masking data points whose
     absolute value exceed a given threshold (in unit of std of the data)
     along the frequency axis.
 
