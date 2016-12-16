@@ -8,6 +8,7 @@ Inheritance diagram
 
 """
 
+import warnings
 from collections import Counter
 import numpy as np
 import tod_task
@@ -74,12 +75,15 @@ class Detect(tod_task.TaskTimestream):
             raise RuntimeError('period %d != on_time %d + off_time %d' % (period, on_time, off_time))
         else:
             if 'noisesource' in rt.iterkeys():
-                start, stop, cycle = rt['noisesource'][0, :]
-                int_time = rt.attrs['inttime']
-                true_on_time = np.round((stop - start)/int_time)
-                true_period = np.round(cycle / int_time)
-                if on_time != true_on_time and period != true_period:
-                    raise RuntimeError('Detected wrong noise source on_time %d != %d, period %d != %d' % (on_time, true_on_time, period, true_period))
+                if rt['noisesource'].shape[0] == 1: # only 1 noise source
+                    start, stop, cycle = rt['noisesource'][0, :]
+                    int_time = rt.attrs['inttime']
+                    true_on_time = np.round((stop - start)/int_time)
+                    true_period = np.round(cycle / int_time)
+                    if on_time != true_on_time and period != true_period:
+                        raise RuntimeError('Detected wrong noise source on_time %d != %d, period %d != %d' % (on_time, true_on_time, period, true_period))
+                elif rt['noisesource'].shape[0] >= 2: # more than 1 noise source
+                    warnings.warn('More than 1 noise source, do not know how to deal with this currently')
             if mpiutil.rank0:
                 print 'Detected noise source: period = %d, on_time = %d, off_time = %d' % (period, on_time, off_time)
         num_period = np.int(np.ceil(len(tt_mean) / np.float(period)))
