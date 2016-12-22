@@ -8,6 +8,7 @@ Inheritance diagram
 
 """
 
+import itertools
 import numpy as np
 import h5py
 import tod_task
@@ -42,48 +43,182 @@ class Dispatch(tod_task.TaskTimestream):
                     'days': 1.0, # how many sidereal days in one iteration
                     'extra_inttime': 150, # extra int time to ensure smooth transition in the two ends
                     'exclude_bad': True, # exclude bad channels
+                    'drop_days': 0.0, # drop data if time is less than this factor of days
                   }
 
     prefix = 'dp_'
+
+    def __init__(self, parameter_file_or_dict=None, feedback=2):
+
+        super(Dispatch, self).__init__(parameter_file_or_dict, feedback)
+
+        # group state
+        self.grp_cnt = 0
+        self.next_grp = True
+
+        # int time for later use
+        self.int_time = None
+        # record start RA for later use
+        self.start_ra = None
+
+    def _init_input_files(self):
+        input_files = self.params['input_files']
+        start = self.params['start']
+        stop = self.params['stop']
+
+        # regularize file groups
+        if input_files is None: # no file
+            self.input_grps = [] # empty group
+            self.start = []
+            self.stop = []
+        elif isinstance(input_files, str): # in case a single file name
+            self.input_grps = [ [input_files] ] # a single group
+            if isinstance(start, int):
+                self.start = [ start ]
+            else:
+                raise ValueError('Paramter start should be a integer, not %s' % start)
+            if isinstance(stop, int) or stop is None:
+                self.stop = [ stop ]
+            else:
+                raise ValueError('Paramter stop should be a integer or None, not %s' % stop)
+        elif isinstance(input_files, list): # in case of a list
+            if len(input_files) == 0:
+                self.input_grps = [] # empty group
+                self.start = []
+                self.stop = []
+            else:
+                if isinstance(input_files[0], str): # in case a list of file names
+                    for fn in input_files:
+                        if not isinstance(fn, str):
+                            raise ValueError('Paramter input_files should be a list of file names, not contain %s', fn)
+                    self.input_grps = [ input_files[:] ] # a single group
+
+                    if isinstance(start, int):
+                        self.start = [ start ]
+                    else:
+                        raise ValueError('Paramter start should be a integer, not %s' % start)
+                    if isinstance(stop, int) or stop is None:
+                        self.stop = [ stop ]
+                    else:
+                        raise ValueError('Paramter stop should be a integer or None, not %s' % stop)
+                elif isinstance(input_files[0], list): # in case a list of lists, i.e., several groups
+                    self.input_grps = []
+                    for li, lt in enumerate(input_files):
+                        if not isinstance(lt, list):
+                            raise ValueError('Parameter input_files contains list, so its elements should all be a list of file names, not %s' % lt)
+                        else:
+                            if len(lt) == 0:
+                                continue
+                            for fn in lt:
+                                if not isinstance(fn, str):
+                                    raise ValueError('Paramter input_files[%d] should be a list of file names, not contain %s', (li, fn))
+
+                            self.input_grps.append(lt[:])
+
+                    if isinstance(start, int):
+                        self.start = [ start ] * len(self.input_grps)
+                    elif isinstance(start, list):
+                        if not len(start) == len(self.input_grps):
+                            raise ValueError('Parameter start is a list, so it must have a same length with input_files: %d != %d' % (len(start), len(self.input_grps)))
+                        for st in start:
+                            if not isinstance(st, int):
+                                raise ValueError('Parameter start is a list, its elements should be integers, not %s' % st)
+                        self.start = start
+                    else:
+                        raise ValueError('Paramter start should be a integer or a list of integers, not %s' % start)
+
+                    if isinstance(stop, int) or stop is None:
+                        self.stop = [ stop ] * len(self.input_grps)
+                    elif isinstance(stop, list):
+                        if not len(stop) == len(self.input_grps):
+                            raise ValueError('Parameter stop is a list, so it must have a same length with input_files: %d != %d' % (len(stop), len(self.input_grps)))
+                        for sp in stop:
+                            if not (isinstance(sp, int) or sp is None):
+                                raise ValueError('Parameter start is a list, its elements should be integers or None, not %s', sp)
+                        self.stop = stop
+                    else:
+                        raise ValueError('Paramter stop should be a integer or None or a list of integers and None, not %s' % stop)
+                else:
+                    raise ValueError('Parater input_files should be a list of file names or a list of lists of files names, not contain %s' % input_files[0])
+
+        else:
+            raise ValueError('Parater input_files should be a single file name or a list with its elements being file names or lists of file names')
+
+        # reset self.input_files
+        self.input_files = list(itertools.chain(*self.input_grps)) # flat input_grps
+
 
     def read_input(self):
         """Method for (maybe iteratively) reading data from input data files."""
 
         days = self.params['days']
         extra_inttime = self.params['extra_inttime']
+        drop_days = self.params['drop_days']
         mode = self.params['mode']
-        start = self.params['start']
-        stop = self.params['stop']
         dist_axis = self.params['dist_axis']
 
-        if self._iter_cnt == 0: # the first iteration
-            tmp_tod = self._Tod_class(self.input_files, mode, start, stop, dist_axis)
-            self.abs_start = tmp_tod.main_data_start
-            self.abs_stop = tmp_tod.main_data_stop
+        ngrp = len(self.input_grps)
 
+        if self.next_grp:
+            if mpiutil.rank0 and ngrp > 1:
+                print 'Start file group %d of %d...' % (self.grp_cnt, ngrp)
+            self.restart_iteration() # re-start iteration for each group
+            self.next_grp = False
+            self.abs_start = None
+            self.abs_stop = None
+
+        if self.grp_cnt >= ngrp:
+            self.stop_iteration(True)
+            return None
+
+        input_files = self.input_grps[self.grp_cnt]
+        start = self.start[self.grp_cnt]
+        stop = self.stop[self.grp_cnt]
+
+        if self.int_time is None:
+            # NOTE: here assume all files have the same int_time
             with h5py.File(self.input_files[0], 'r') as f:
                 self.int_time = f.attrs['inttime']
-            if self.iterable and self.iter_num is None:
-                self.iter_num = np.int(np.ceil(self.int_time * (self.abs_stop - self.abs_start - 2*extra_inttime) / (days * const.sday)))
 
-        # num_int = np.int(np.around(days * const.sday / self.int_time)) # number of int_time
+        if self.abs_start is None or self.abs_stop is None:
+            tmp_tod = self._Tod_class(input_files, mode, start, stop, dist_axis)
+            self.abs_start = tmp_tod.main_data_start
+            self.abs_stop = tmp_tod.main_data_stop
+            del tmp_tod
+
         iteration = self.iteration if self.iterable else 0
-        start = self.abs_start + np.int(np.around(iteration * days * const.sday / self.int_time))
-        stop = min(self.abs_stop, np.int(np.around((iteration+1) * days * const.sday / self.int_time)) + 2*extra_inttime)
+        this_start = self.abs_start + np.int(np.around(iteration * days * const.sday / self.int_time))
+        this_stop = min(self.abs_stop, self.abs_start + np.int(np.around((iteration+1) * days * const.sday / self.int_time)) + 2*extra_inttime)
+        if  this_stop >= self.abs_stop:
+            self.next_grp = True
+            self.grp_cnt += 1
+        if this_start >= this_stop:
+            self.next_grp = True
+            self.grp_cnt += 1
+            return None
 
-        tod = self._Tod_class(self.input_files, mode, start, stop, dist_axis)
+        this_span = self.int_time * (this_stop - this_start) # in unit second
+        if this_span < drop_days * const.sday:
+            if mpiutil.rank0:
+                print 'Not enough span time, drop it...'
+            return None
+        elif (this_stop - this_start) <= extra_inttime: # use int comparision
+            if mpiutil.rank0:
+                print 'Not enough span time (less than `extra_inttime`), drop it...'
+            return None
+
+        tod = self._Tod_class(input_files, mode, this_start, this_stop, dist_axis)
 
         tod = self.data_select(tod)
 
         tod.load_all() # load in all data
 
-        if self._iter_cnt == 0: # the first iteration
+        if self.start_ra is None: # the first iteration
             ra_dec = mpiutil.gather_array(tod['ra_dec'].local_data, root=None)
             self.start_ra = ra_dec[extra_inttime, 0]
         tod.vis.attrs['start_ra'] = self.start_ra # used for re_order
 
         return tod
-
 
     def data_select(self, tod):
         """Data select."""
