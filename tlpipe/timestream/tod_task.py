@@ -63,8 +63,12 @@ class TaskTimestream(OneAndOne):
         else:
             # read from files
             if tod is None:
-                if len(self.input_files) == 0:
-                    raise RuntimeError('No file to read from')
+                if self.input_files is None or len(self.input_files) == 0:
+                    if mpiutil.rank0:
+                        msg = 'No file to read from, will stop then...'
+                        logger.info(msg)
+                    self.stop_iteration(True)
+                    return None
                 tag_input_iter = self.params['tag_input_iter']
                 if self.iterable and tag_input_iter:
                     input_files = input_path(self.input_files, iteration=self.iteration)

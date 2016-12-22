@@ -1013,8 +1013,8 @@ class OneAndOne(TaskBase):
 
         super(OneAndOne, self).__init__(parameter_file_or_dict, feedback)
 
-        self.input_files = input_path(format_list(self.params['input_files']))
-        self.output_files = output_path(format_list(self.params['output_files']), mkdir=False)
+        self._init_input_files()
+        self._init_output_files()
 
         self.iterable = self.params['iterable']
         if self.iterable:
@@ -1022,6 +1022,7 @@ class OneAndOne(TaskBase):
             self.iter_step = self.params['iter_step']
             self.iter_num = self.params['iter_num']
         self._iter_cnt = 0 # inner iter counter
+        self._iter_stop = False # inner state
 
         # Inspect the `process` method to see how many arguments it takes.
         pro_argspec = inspect.getargspec(self.process)
@@ -1040,8 +1041,16 @@ class OneAndOne(TaskBase):
             self._no_input = False
 
             if len(self._in) != n_args and len(self.input_files) == 0:
-                msg = ("No data to iterate over. There are no 'in' keys and no 'input_files'")
-                raise PipelineConfigError(msg)
+                msg = ("No data to iterate over. There are no 'in' keys and no 'input_files', will stop then...")
+                if mpiutil.rank0:
+                    logger.info(msg)
+                self.stop_iteration(True)
+
+    def _init_input_files(self):
+        self.input_files = input_path(format_list(self.params['input_files']))
+
+    def _init_output_files(self):
+        self.output_files = output_path(format_list(self.params['output_files']), mkdir=False)
 
 
     @property
@@ -1052,16 +1061,41 @@ class OneAndOne(TaskBase):
         else:
             warnings.warn('Not iterable when iterable == False')
 
+    def restart_iteration(self):
+        """Re-start the iteration.
+
+        This will re-start the iteration with the original `iter_start` and
+        `iter_step` and `iter_num` unchanged.
+        """
+        self._iter_cnt = 0
+
+    def stop_iteration(self, force_stop=False):
+        """Determine whether to stop the iteration.
+
+        Return *True* if this is the second iteration in the non-iterable case,
+        or when run out of the given iteration numbers in the iterable case,
+        or when `force\_stop` is *True*.
+        """
+        if not self._iter_stop:
+            if force_stop:
+                self._iter_stop = True
+            else:
+                if self.iterable:
+                    # after run out of the given iter numbers
+                    if self.iter_num is not None and self._iter_cnt >= self.iter_num:
+                        self._iter_stop = True
+                else:
+                    if self._iter_cnt > 0:
+                        self._iter_stop = True
+
+        return self._iter_stop
+
+
     def next(self, input=None):
         """Should not need to override."""
 
-        if self.iterable:
-            if self.iter_num is not None and self._iter_cnt >= self.iter_num:
-                # We have run the required number of iterations
-                raise PipelineStopIteration()
-        else:
-            if self._iter_cnt > 0:
-                raise PipelineStopIteration()
+        if self.stop_iteration():
+            raise PipelineStopIteration()
 
         if input:
             if self.params['copy']:
@@ -1078,8 +1112,12 @@ class OneAndOne(TaskBase):
 
         # Read input if needed.
         if input is None and not self._no_input:
-            if len(self.input_files) == 0:
-                raise RuntimeError('No file to read from')
+            if self.input_files is None or len(self.input_files) == 0:
+                if mpiutil.rank0:
+                    msg = 'No file to read from, will stop then...'
+                    logger.info(msg)
+                self.stop_iteration(True)
+                return None
             if mpiutil.rank0:
                 msg = "%s reading data from files:" % self.__class__.__name__
                 for input_file in self.input_files:
@@ -1088,14 +1126,17 @@ class OneAndOne(TaskBase):
             mpiutil.barrier()
             input = self.read_input()
 
-        # Analyse.
+        # Analyze.
         if self._no_input:
             if not input is None:
                 # This should never happen.  Just here to catch bugs.
                 raise RuntimeError("Somehow `input` was set")
             output = self.process()
         else:
-            output = self.process(input)
+            if input is None:
+                output = None
+            else:
+                output = self.process(input)
 
         # Write output if needed.
         if output is not None and len(self.output_files) != 0:
