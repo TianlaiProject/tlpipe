@@ -148,6 +148,19 @@ class Dispatch(tod_task.TaskTimestream):
         self.input_files = list(itertools.chain(*self.input_grps)) # flat input_grps
 
 
+    def read_process_write(self, tod):
+        """Reads input, executes any processing and writes output."""
+
+        ngrp = len(self.input_grps)
+        if self.grp_cnt >= ngrp:
+            self.stop_iteration(True)
+            return None
+
+        # set input_files as this group of files
+        self.input_files = self.input_grps[self.grp_cnt]
+
+        return super(Dispatch, self).read_process_write(tod)
+
     def read_input(self):
         """Method for (maybe iteratively) reading data from input data files."""
 
@@ -166,10 +179,6 @@ class Dispatch(tod_task.TaskTimestream):
             self.next_grp = False
             self.abs_start = None
             self.abs_stop = None
-
-        if self.grp_cnt >= ngrp:
-            self.stop_iteration(True)
-            return None
 
         input_files = self.input_grps[self.grp_cnt]
         start = self.start[self.grp_cnt]
