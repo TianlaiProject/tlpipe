@@ -45,47 +45,72 @@ class Detect(tod_task.TaskTimestream):
 
         rt.redistribute(0) # make time the dist axis
 
-        bls = [ set(b) for b in rt.bl ]
+        auto_inds = np.where(rt.bl[:, 0]==rt.bl[:, 1])[0].tolist() # inds for auto-correlations
+        feeds = [ rt.bl[ai, 0] for ai in auto_inds ] # all chosen feeds
         if feed is not None:
-            bl_ind = bls.index({feed})
+            if feed in feeds:
+                bl_ind = auto_inds[feeds.index(feed)]
+            else:
+                bl_ind = auto_inds[0]
+                if mpiutil.rank0:
+                    print 'Warning: Required feed %d doen not in the data, use feed %d instead' % (feed, rt.bl[bl_ind, 0])
         else:
-            bl_ind = np.where(rt.bl[:, 0]==rt.bl[:, 1])[0][0]
+            bl_ind = auto_inds[0]
+        # move the chosen feed to the first
+        auto_inds.remove(bl_ind)
+        auto_inds = [bl_ind] + auto_inds
 
-        tt_mean = mpiutil.gather_array(np.mean(rt.local_vis[:, :, bl_ind].real, axis=-1), root=None)
-        df =  np.diff(tt_mean, axis=-1)
-        pdf = np.where(df>0, df, 0)
-        pinds = np.where(pdf>pdf.mean() + sigma*pdf.std())[0]
-        pinds = pinds + 1
-        pT = Counter(np.diff(pinds)).most_common(1)[0][0] # period of pinds
-        ndf = np.where(df<0, df, 0)
-        ninds = np.where(ndf<ndf.mean() - sigma*ndf.std())[0]
-        ninds = ninds + 1
-        nT = Counter(np.diff(ninds)).most_common(1)[0][0] # period of pinds
-        if pT != nT:
-            raise RuntimeError('Period of pinds %d != period of ninds %d' % (pT, nT))
+        for bl_ind in auto_inds:
+            vis = np.ma.array(rt.local_vis[:, :, bl_ind].real, mask=rt.local_vis_mask[:, :, bl_ind])
+            cnt = vis.count() # number of not masked vals
+            total_cnt = mpiutil.allreduce(cnt)
+            vis_shp = rt.vis.shape
+            ratio = float(total_cnt) / np.prod((vis_shp[0], vis_shp[1])) # ratio of un-maksed vals
+            if ratio < 0.5: # too many masked vals
+                continue
+
+            tt_mean = mpiutil.gather_array(np.ma.mean(vis, axis=-1).filled(0), root=None)
+            df =  np.diff(tt_mean, axis=-1)
+            pdf = np.where(df>0, df, 0)
+            pinds = np.where(pdf>pdf.mean() + sigma*pdf.std())[0]
+            pinds = pinds + 1
+            pT = Counter(np.diff(pinds)).most_common(1)[0][0] # period of pinds
+            ndf = np.where(df<0, df, 0)
+            ninds = np.where(ndf<ndf.mean() - sigma*ndf.std())[0]
+            ninds = ninds + 1
+            nT = Counter(np.diff(ninds)).most_common(1)[0][0] # period of ninds
+            if pT != nT: # failed to detect correct period
+                continue
+            else:
+                period = pT
+
+            ninds = ninds.reshape(-1, 1)
+            dinds = (ninds - pinds).flatten()
+            on_time = Counter(dinds[dinds>0] % period).most_common(1)[0][0]
+            off_time = Counter(-dinds[dinds<0] % period).most_common(1)[0][0]
+
+            if period != on_time + off_time: # incorrect detect
+                continue
+            else:
+                if 'noisesource' in rt.iterkeys():
+                    if rt['noisesource'].shape[0] == 1: # only 1 noise source
+                        start, stop, cycle = rt['noisesource'][0, :]
+                        int_time = rt.attrs['inttime']
+                        true_on_time = np.round((stop - start)/int_time)
+                        true_period = np.round(cycle / int_time)
+                        if on_time != true_on_time and period != true_period: # inconsistant with the record in the data
+                            continue
+                    elif rt['noisesource'].shape[0] >= 2: # more than 1 noise source
+                        warnings.warn('More than 1 noise source, do not know how to deal with this currently')
+
+                # break if succeed
+                break
+
         else:
-            period = pT
+            raise RuntimeError('Failed to detect noise source signal')
 
-        ninds = ninds.reshape(-1, 1)
-        dinds = (ninds - pinds).flatten()
-        on_time = Counter(dinds[dinds>0] % period).most_common(1)[0][0]
-        off_time = Counter(-dinds[dinds<0] % period).most_common(1)[0][0]
-
-        if period != on_time + off_time:
-            raise RuntimeError('period %d != on_time %d + off_time %d' % (period, on_time, off_time))
-        else:
-            if 'noisesource' in rt.iterkeys():
-                if rt['noisesource'].shape[0] == 1: # only 1 noise source
-                    start, stop, cycle = rt['noisesource'][0, :]
-                    int_time = rt.attrs['inttime']
-                    true_on_time = np.round((stop - start)/int_time)
-                    true_period = np.round(cycle / int_time)
-                    if on_time != true_on_time and period != true_period:
-                        raise RuntimeError('Detected wrong noise source on_time %d != %d, period %d != %d' % (on_time, true_on_time, period, true_period))
-                elif rt['noisesource'].shape[0] >= 2: # more than 1 noise source
-                    warnings.warn('More than 1 noise source, do not know how to deal with this currently')
-            if mpiutil.rank0:
-                print 'Detected noise source: period = %d, on_time = %d, off_time = %d' % (period, on_time, off_time)
+        if mpiutil.rank0:
+            print 'Detected noise source: period = %d, on_time = %d, off_time = %d' % (period, on_time, off_time)
         num_period = np.int(np.ceil(len(tt_mean) / np.float(period)))
         tmp_ns_on = np.array(([True] * on_time + [False] * off_time) * num_period)[:len(tt_mean)]
         on_start = Counter(pinds % period).most_common(1)[0][0]
