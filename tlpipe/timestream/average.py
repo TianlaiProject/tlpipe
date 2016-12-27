@@ -29,7 +29,10 @@ class Average(tod_task.TaskTimestream):
             warnings.warn('Can not do the averrage without the weight, do nothing...')
         else:
             # divide weight
-            ts.local_vis[:] = np.where(ts['weight'].local_data == 0, 0, ts.local_vis / ts['weight'].local_data)
+            with warnings.catch_warnings():
+                warnings.filterwarnings('ignore', 'invalid value encountered in divide')
+                warnings.filterwarnings('ignore', 'divide by zero encountered in divide')
+                ts.local_vis[:] = np.where(ts['weight'].local_data == 0, 0, ts.local_vis / ts['weight'].local_data)
             # set mask
             # ts.local_vis_mask[:] = np.where(ts['weight'].local_data != 0, False, True) # already done in accumulate
 

@@ -105,7 +105,8 @@ class Closure(tod_task.TaskTimestream):
         ra = ra[np.logical_not(ts['ns_on'][:])] # get only ns_off values
         abs_diff = np.abs(np.diff(s._ra - ra))
         ind1 = np.argmin(abs_diff)
-        print 'ind1:', ind1
+        if mpiutil.rank0:
+            print 'ind1:', ind1
 
         for pi in [ pol.index('xx'), pol.index('yy') ]: # xx and yy
             if nfreq > 0: # skip empty processes
@@ -120,7 +121,8 @@ class Closure(tod_task.TaskTimestream):
                 else:
                     raise RuntimeError('vis is masked during this period for pol %s' % pol[pi])
 
-                print 'ind:', ind
+                if mpiutil.rank0:
+                    print 'ind:', ind
 
                 for fi in xrange(nfreq):
                     gfi = fi + ts.freq.local_offset[0] # global freq index

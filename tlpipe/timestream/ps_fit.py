@@ -176,7 +176,8 @@ class PsFit(tod_task.TaskTimestream):
             transit_time = a.phs.ephem2juldate(aa.next_transit(s)) # Julian date
             cnt += 1
 
-        print transit_inds
+        if mpiutil.rank0:
+            print 'transit inds: ', transit_inds
 
         ### now only use the first transit point to do the cal
         ### may need to improve in the future

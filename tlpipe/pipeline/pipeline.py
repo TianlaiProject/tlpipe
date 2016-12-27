@@ -1055,11 +1055,11 @@ class OneAndOne(TaskBase):
 
     @property
     def iteration(self):
-        """Current iteration."""
+        """Current iteration when `iterable` is *True*, None else."""
         if self.iterable:
             return self.iter_start + self.iter_step * self._iter_cnt
         else:
-            warnings.warn('Not iterable when iterable == False')
+            return None
 
     def restart_iteration(self):
         """Re-start the iteration.
