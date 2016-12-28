@@ -21,7 +21,7 @@ class Plot(OneAndOne):
     """Plot gain."""
 
     params_init = {
-                    'fig_name': 'gain',
+                    'fig_name': 'gain/gain',
                   }
 
     prefix = 'pg_'

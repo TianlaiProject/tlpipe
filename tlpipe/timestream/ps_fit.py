@@ -21,7 +21,7 @@ import tlpipe.plot
 import matplotlib.pyplot as plt
 
 
-def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit, fig_prefix, iteration, tag_output_iter):
+def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit, fig_prefix, iteration, tag_output_iter, bls_plt, freq_plt):
     vis_obs = np.ma.array(vis_obs, mask=vis_mask)
     num_nomask = vis_obs.count()
     if num_nomask == 0: # no valid vis data
@@ -66,7 +66,7 @@ def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit
     if si != 0 and mpiutil.rank0:
         print 'shift %d for %s...' % (si, idx)
 
-    if plot_fit:
+    if plot_fit and (fi in freq_plt and (i, j) in bls_plt):
         # plot the fit
         plt.figure()
         plt.subplot(311)
@@ -117,7 +117,11 @@ class PsFit(tod_task.TaskTimestream):
                     'span': 1200.0, # second
                     'shift': 600.0, # second
                     'plot_fit': False, # plot the smoothing fit
-                    'fig_name': 'fit',
+                    'fig_name': 'fit/fit',
+                    'bl_incl': 'all', # or a list of include (bl1, bl2)
+                    'bl_excl': [],
+                    'freq_incl': 'all', # or a list of include freq idx
+                    'freq_excl': [],
                   }
 
     prefix = 'pf_'
@@ -133,8 +137,22 @@ class PsFit(tod_task.TaskTimestream):
         plot_fit = self.params['plot_fit']
         fig_prefix = self.params['fig_name']
         tag_output_iter = self.params['tag_output_iter']
+        bl_incl = self.params['bl_incl']
+        bl_excl = self.params['bl_excl']
+        freq_incl = self.params['freq_incl']
+        freq_excl = self.params['freq_excl']
 
         ts.redistribute('baseline')
+
+        if bl_incl == 'all':
+            bls_plt = [ tuple(bl) for bl in ts.local_bl ]
+        else:
+            bls_plt = [ bl for bl in bl_incl if not bl in bl_excl ]
+
+        if freq_incl == 'all':
+            freq_plt = range(ts.freq.size)
+        else:
+            freq_plt = [ fi for fi in freq_incl if not fi in freq_excl ]
 
         feedno = ts['feedno'][:].tolist()
         freq = ts['freq'][:]
@@ -236,7 +254,7 @@ class PsFit(tod_task.TaskTimestream):
             # for pi in xrange(len(pol)):
             for pi in xrange(2): # only cal for xx, yy
                 for bi, (i, j) in enumerate(bls):
-                    gain, si = fit(vis[:, fi, pi, bi], vis_mask[:, fi, pi, bi], vis_sim[:, fi, pi, bi], start_ind, end_ind, num_shift, (fi, pi, (i, j)), plot_fit, fig_prefix, self.iteration, tag_output_iter)
+                    gain, si = fit(vis[:, fi, pi, bi], vis_mask[:, fi, pi, bi], vis_sim[:, fi, pi, bi], start_ind, end_ind, num_shift, (fi, pi, (i, j)), plot_fit, fig_prefix, self.iteration, tag_output_iter, bls_plt, freq_plt)
                     # cal for vis
                     ts.local_vis[:, fi, pi, bi] = np.roll(vis[:, fi, pi, bi], -si) / gain # NOTE the use of -si
                     ts.local_vis_mask[:, fi, pi, bi] = np.roll(vis_mask[:, fi, pi, bi], -si) # NOTE the use of -si

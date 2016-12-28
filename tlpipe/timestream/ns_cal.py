@@ -59,7 +59,11 @@ class NsCal(tod_task.TaskTimestream):
     params_init = {
                     'num_mean': 5, # use the mean of num_mean signals
                     'plot_phs': False, # plot the phase change
-                    'fig_name': 'phs_change',
+                    'fig_name': 'phs/phs_change',
+                    'bl_incl': 'all', # or a list of include (bl1, bl2)
+                    'bl_excl': [],
+                    'freq_incl': 'all', # or a list of include freq idx
+                    'freq_excl': [],
                   }
 
     prefix = 'nc_'
@@ -71,7 +75,24 @@ class NsCal(tod_task.TaskTimestream):
         if not 'ns_on' in rt.iterkeys():
             raise RuntimeError('No noise source info, can not do noise source calibration')
 
-        rt.freq_and_bl_data_operate(self.cal, full_data=True, keep_dist_axis=False)
+        rt.redistribute('time')
+
+        bl_incl = self.params['bl_incl']
+        bl_excl = self.params['bl_excl']
+        freq_incl = self.params['freq_incl']
+        freq_excl = self.params['freq_excl']
+
+        if bl_incl == 'all':
+            bls_plt = [ tuple(bl) for bl in rt.bl ]
+        else:
+            bls_plt = [ bl for bl in bl_incl if not bl in bl_excl ]
+
+        if freq_incl == 'all':
+            freq_plt = range(rt.freq.size)
+        else:
+            freq_plt = [ fi for fi in freq_incl if not fi in freq_excl ]
+
+        rt.freq_and_bl_data_operate(self.cal, full_data=True, keep_dist_axis=False, bls_plt=bls_plt, freq_plt=freq_plt)
 
         rt.add_history(self.history)
 
@@ -85,9 +106,14 @@ class NsCal(tod_task.TaskTimestream):
         fig_prefix = self.params['fig_name']
         tag_output_iter = self.params['tag_output_iter']
         iteration = self.iteration
+        bls_plt = kwargs['bls_plt']
+        freq_plt = kwargs['freq_plt']
 
         if np.prod(vis.shape) == 0 :
             return vis, vis_mask
+
+        fi = gi[0] # freq idx for this cal
+        bl = tuple(fbl[1]) # bl for this cal
 
         nt = vis.shape[0]
         on_time = rt['ns_on'].attrs['on_time']
@@ -131,7 +157,7 @@ class NsCal(tod_task.TaskTimestream):
         f = InterpolatedUnivariateSpline(valid_inds, phase)
         all_phase = f(np.arange(nt))
 
-        if plot_phs:
+        if plot_phs and (bl in bls_plt and fi in freq_plt):
             plt.figure()
             time = rt.time[:]
             plt.plot(time, all_phase)

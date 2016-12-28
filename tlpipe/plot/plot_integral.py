@@ -33,7 +33,7 @@ class Plot(tod_task.TaskTimestream):
                     'bl_excl': [],
                     'flag_mask': True,
                     'flag_ns': True,
-                    'fig_name': 'int',
+                    'fig_name': 'int/int',
                   }
 
     prefix = 'pit_'

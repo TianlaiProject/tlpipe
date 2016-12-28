@@ -36,7 +36,7 @@ class Plot(tod_task.TaskTimestream):
                     'interpolate_ns': False,
                     'y_axis': 'jul_date', # or 'ra'
                     'plot_abs': False,
-                    'fig_name': 'vis',
+                    'fig_name': 'wf/vis',
                   }
 
     prefix = 'pwf_'

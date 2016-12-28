@@ -64,6 +64,8 @@ class Closure(tod_task.TaskTimestream):
                     'file_name': 'closure/closure',
                     'plot_closure': True,
                     'fig_name': 'closure/closure',
+                    'freq_incl': 'all', # or a list of include freq idx
+                    'freq_excl': [],
                     'bins': 201,
                     'gauss_fit': False,
                   }
@@ -80,8 +82,15 @@ class Closure(tod_task.TaskTimestream):
         bins = self.params['bins']
         gauss_fit = self.params['gauss_fit']
         tag_output_iter = self.params['tag_output_iter']
+        freq_incl = self.params['freq_incl']
+        freq_excl = self.params['freq_excl']
 
         ts.redistribute('frequency')
+
+        if freq_incl == 'all':
+            freq_plt = range(rt.freq.shape[0])
+        else:
+            freq_plt = [ fi for fi in freq_incl if not fi in freq_excl ]
 
         nfreq = len(ts.local_freq[:]) # local nfreq
         feedno = ts['feedno'][:].tolist()
@@ -157,7 +166,7 @@ class Closure(tod_task.TaskTimestream):
                     with h5py.File(file_name, 'w') as f:
                         f.create_dataset('closure_phase', data=np.array(closure))
 
-                    if plot_closure:
+                    if plot_closure and gfi in freq_plt:
                         # plot all closure phase
                         plt.figure()
                         plt.plot(closure, 'o')

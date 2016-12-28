@@ -33,7 +33,7 @@ class Plot(tod_task.TaskTimestream):
                     'flag_mask': True,
                     'flag_ns': True,
                     'slices': 10, # number of slices to plot
-                    'fig_name': 'slice',
+                    'fig_name': 'slice/slice',
                   }
 
     prefix = 'psl_'
