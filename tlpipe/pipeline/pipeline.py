@@ -364,6 +364,7 @@ from os import path
 import warnings
 import shutil
 import itertools
+import datetime
 
 from caput import mpiutil
 from tlpipe.kiyopy import parse_ini
@@ -438,6 +439,8 @@ class Manager(object):
                     'copy': True, # copy pipefile to outdir
                     'overwrite': False, # overwrite the same name pipefile if True
                     'outdir': 'output/', # output directory of pipeline data, default is current-dir/output/
+                    'timing': False, # log the running time
+                    'flush': False, # flush stdout buffer after each task, may slower the running
                   }
 
     prefix = 'pipe_'
@@ -448,6 +451,12 @@ class Manager(object):
         # Read in the parameters.
         self.params, self.task_params = parse_ini.parse(pipefile, self.params_init, prefix=self.prefix, return_undeclared=True, feedback=feedback)
         self.tasks = self.params['tasks']
+
+        # timing the running
+        if self.params['timing']:
+            self.start_time = datetime.datetime.now()
+            if mpiutil.rank0:
+                print 'Start the pipeline at %s...' % self.start_time
 
         # set environment var
         os.environ['TL_OUTPUT'] = self.params['outdir'] + '/'
@@ -501,6 +510,9 @@ class Manager(object):
             raise ValueError('Invalid logging level: %s' % self.logging)
         logging.basicConfig(level=numeric_level)
 
+        # Flush output or not
+        flush = self.params['flush']
+
         # Initialize all tasks.
         pipeline_tasks = []
         for ii, task_spec in enumerate(self.tasks):
@@ -526,6 +538,11 @@ class Manager(object):
             pipeline_tasks.append(task)
             if mpiutil.rank0:
                 logger.debug("Added %s to task list." % task.__class__.__name__)
+
+        # flush if requires
+        if flush:
+            sys.stdout.flush()
+            sys.stderr.flush()
 
         # Run the pipeline.
         while pipeline_tasks:
@@ -565,6 +582,11 @@ class Manager(object):
                 for receiving_task in pipeline_tasks:
                     receiving_task._pipeline_inspect_queue_product(out_keys, out)
 
+                # flush if requires
+                if flush:
+                    sys.stdout.flush()
+                    sys.stderr.flush()
+
 
     def _setup_task(self, task):
         """Set up a pipeline task from the spec given in the tasks list."""
@@ -580,6 +602,38 @@ class Manager(object):
         """Finish."""
         # remove environment var set earlier
         del(os.environ['TL_OUTPUT'])
+
+        # get the running time
+        if self.params['timing']:
+            end_time = datetime.datetime.now()
+            run_time = end_time - self.start_time
+            days, secs, msecs = run_time.days, run_time.seconds, run_time.microseconds
+            hours = secs / 3600
+            mins = (secs / 60) % 60
+            secs = secs % 60 + 1.0e-6 * msecs
+
+            msg = 'Total run time:'
+            if days > 0 :
+                msg += (' %d day' % days)
+                if days > 1:
+                    msg += 's'
+            if hours > 0:
+                msg += (' %d hour' % hours)
+                if hours > 1:
+                    msg += 's'
+            if mins > 0:
+                msg += (' %d minute' % mins)
+                if mins > 1:
+                    msg += 's'
+            if secs > 0:
+                msg += (' %.2f second' % secs)
+                if secs > 1:
+                    msg += 's'
+
+            if mpiutil.rank0:
+                print
+                print 'End the pipeline at %s...' % end_time
+                print msg
 
         if mpiutil.rank0:
             # done for the pipeline
