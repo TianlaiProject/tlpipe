@@ -33,7 +33,8 @@ def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit
     chi2s = []
     shifts = xrange(-num_shift/2, num_shift/2+1)
     for si in shifts:
-        vis = vis_obs[start_ind+si:end_ind+si].astype(np.complex128) # improve precision
+        # vis = vis_obs[start_ind+si:end_ind+si].astype(np.complex128) # improve precision
+        vis = vis_obs[start_ind+si:end_ind+si]
         num_nomask = vis.count()
         if num_nomask == 0: # no valid vis data
             continue
@@ -215,7 +216,8 @@ class PsFit(tod_task.TaskTimestream):
         vis_mask = ts.local_vis_mask
         # vis[ts.local_vis_mask] = complex(np.nan, np.nan) # set masked vis to nan
         nt = end_ind - start_ind
-        vis_sim = np.zeros((nt,)+vis.shape[1:], dtype=np.complex128) # to hold the simulated vis, use float64 to have better precision
+        # vis_sim = np.zeros((nt,)+vis.shape[1:], dtype=np.complex128) # to hold the simulated vis, use float64 to have better precision
+        vis_sim = np.zeros((nt,)+vis.shape[1:], dtype=np.complex64) # to hold the simulated vis, use float64 to have better precision
 
         # get beam solid angle (suppose it is the same for all feeds)
         Omega_ij = aa[0].beam.Omega
