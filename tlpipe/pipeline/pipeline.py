@@ -626,9 +626,7 @@ class Manager(object):
                 if mins > 1:
                     msg += 's'
             if secs > 0:
-                msg += (' %.2f second' % secs)
-                if secs > 1:
-                    msg += 's'
+                msg += (' %.2f seconds' % secs)
 
             if mpiutil.rank0:
                 print
