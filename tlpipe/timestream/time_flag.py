@@ -69,6 +69,11 @@ class Flag(tod_task.TaskTimestream):
 
         nt = vis.shape[0]
         abs_vis = np.abs(np.ma.array(vis, mask=vis_mask))
+        # mask all if valid values less than the given threshold
+        if abs_vis.count() < 0.1 * nt or abs_vis.count() <= 3:
+            vis_mask[:] = True
+            return vis, vis_mask
+
         if np.ma.count_masked(abs_vis) > 0: # has masked value
             abs_vis_valid = abs_vis[~abs_vis.mask]
             inds_valid = np.arange(nt)[~abs_vis.mask]
