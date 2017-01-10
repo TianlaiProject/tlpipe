@@ -151,7 +151,7 @@ class PsFit(tod_task.TaskTimestream):
             bls_plt = [ bl for bl in bl_incl if not bl in bl_excl ]
 
         if freq_incl == 'all':
-            freq_plt = range(ts.freq.size)
+            freq_plt = range(ts.freq.shape[0])
         else:
             freq_plt = [ fi for fi in freq_incl if not fi in freq_excl ]
 
