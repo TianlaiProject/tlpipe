@@ -217,7 +217,7 @@ class PsFit(tod_task.TaskTimestream):
         # vis[ts.local_vis_mask] = complex(np.nan, np.nan) # set masked vis to nan
         nt = end_ind - start_ind
         # vis_sim = np.zeros((nt,)+vis.shape[1:], dtype=np.complex128) # to hold the simulated vis, use float64 to have better precision
-        vis_sim = np.zeros((nt,)+vis.shape[1:], dtype=np.complex64) # to hold the simulated vis, use float64 to have better precision
+        vis_sim = np.zeros((nt,)+vis.shape[1:], dtype=vis.dtype)
 
         # get beam solid angle (suppose it is the same for all feeds)
         Omega_ij = aa[0].beam.Omega
