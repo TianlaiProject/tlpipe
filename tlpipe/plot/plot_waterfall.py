@@ -36,6 +36,9 @@ class Plot(tod_task.TaskTimestream):
                     'interpolate_ns': False,
                     'y_axis': 'jul_date', # or 'ra'
                     'plot_abs': False,
+                    'abs_only': False,
+                    'gray_color': False,
+                    'transpose': False, # now only for abs plot
                     'fig_name': 'wf/vis',
                   }
 
@@ -66,6 +69,9 @@ class Plot(tod_task.TaskTimestream):
         interpolate_ns = self.params['interpolate_ns']
         y_axis = self.params['y_axis']
         plot_abs = self.params['plot_abs']
+        abs_only = self.params['abs_only']
+        gray_color = self.params['gray_color']
+        transpose = self.params['transpose']
         fig_prefix = self.params['fig_name']
         tag_output_iter = self.params['tag_output_iter']
         iteration = self.iteration
@@ -103,30 +109,50 @@ class Plot(tod_task.TaskTimestream):
             vis1 = vis
 
         freq = ts.freq[:]
+        x_label = r'$\nu$ / MHz'
         if y_axis == 'jul_date':
             y_aixs = ts.time[:]
             y_label = r'$t$ / Julian Date'
         elif y_axis == 'ra':
             y_aixs = ts['ra_dec'][:, 0]
             y_label = r'RA / radian'
-        extent = [freq[0], freq[-1], y_aixs[0], y_aixs[-1]]
+
+        freq_extent = [freq[0], freq[-1]]
+        time_extent = [y_aixs[0], y_aixs[-1]]
+        extent = freq_extent + time_extent
 
         plt.figure()
-        if plot_abs:
-            fig, axarr = plt.subplots(1, 3, sharey=True)
+
+        if gray_color:
+            cmap = 'gray'
         else:
-            fig, axarr = plt.subplots(1, 2, sharey=True)
-        im = axarr[0].imshow(vis1.real, extent=extent, origin='lower', aspect='auto')
-        axarr[0].set_xlabel(r'$\nu$ / MHz')
-        axarr[0].set_ylabel(y_label)
-        plt.colorbar(im, ax=axarr[0])
-        im = axarr[1].imshow(vis1.imag, extent=extent, origin='lower', aspect='auto')
-        axarr[1].set_xlabel(r'$\nu$ / MHz')
-        plt.colorbar(im, ax=axarr[1])
-        if plot_abs:
-            im = axarr[2].imshow(np.abs(vis1), extent=extent, origin='lower', aspect='auto')
-            axarr[2].set_xlabel(r'$\nu$ / MHz')
-            plt.colorbar(im, ax=axarr[2])
+            cmap = None
+
+        if abs_only:
+            if transpose:
+                vis1 = vis1.T
+                x_label, y_label = y_label, x_label
+                extent = time_extent + freq_extent
+            plt.imshow(np.abs(vis1), extent=extent, origin='lower', aspect='auto', cmap=cmap)
+            plt.xlabel(x_label)
+            plt.ylabel(y_label)
+            plt.colorbar()
+        else:
+            if plot_abs:
+                fig, axarr = plt.subplots(1, 3, sharey=True)
+            else:
+                fig, axarr = plt.subplots(1, 2, sharey=True)
+            im = axarr[0].imshow(vis1.real, extent=extent, origin='lower', aspect='auto', cmap=cmap)
+            axarr[0].set_xlabel(x_label)
+            axarr[0].set_ylabel(y_label)
+            plt.colorbar(im, ax=axarr[0])
+            im = axarr[1].imshow(vis1.imag, extent=extent, origin='lower', aspect='auto', cmap=cmap)
+            axarr[1].set_xlabel(x_label)
+            plt.colorbar(im, ax=axarr[1])
+            if plot_abs:
+                im = axarr[2].imshow(np.abs(vis1), extent=extent, origin='lower', aspect='auto', cmap=cmap)
+                axarr[2].set_xlabel(x_label)
+                plt.colorbar(im, ax=axarr[2])
 
         if pol is None:
             fig_name = '%s_%d_%d.png' % (fig_prefix, bl[0], bl[1])
