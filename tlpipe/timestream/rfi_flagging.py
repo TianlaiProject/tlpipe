@@ -13,7 +13,7 @@ import tod_task
 from raw_timestream import RawTimestream
 from timestream import Timestream
 from tlpipe.rfi import interpolate
-from tlpipe.rfi import local_gaussian_filter
+from tlpipe.rfi import gaussian_filter
 from tlpipe.rfi import sum_threshold
 
 
@@ -31,8 +31,9 @@ class Flag(tod_task.TaskTimestream):
                     'max_threshold_len': 1024,
                     'sensitivity': 1.0,
                     'min_connected': 1,
-                    'tk_size': 7.5,
-                    'fk_size': 15.0,
+                    'tk_size': 1.0,
+                    'fk_size': 3.0,
+                    'threshold_num': 2, # number of threshold
                   }
 
     prefix = 'rf_'
@@ -65,25 +66,33 @@ class Flag(tod_task.TaskTimestream):
         min_connected = self.params['min_connected']
         tk_size = self.params['tk_size']
         fk_size = self.params['fk_size']
+        threshold_num = self.params['threshold_num']
 
         vis_abs = np.abs(vis) # operate only on the amplitude
+
+        # first round
         # first complete masked vals due to ns by interpolate
         itp = interpolate.Interpolate(vis_abs, vis_mask)
         background = itp.fit()
-        # gaussian fileter
-        gf = local_gaussian_filter.LocalGaussianFilter(background, time_kernal_size=tk_size, freq_kernal_size=fk_size)
+        # Gaussian fileter
+        gf = gaussian_filter.GaussianFilter(background, time_kernal_size=tk_size, freq_kernal_size=fk_size)
         background = gf.fit()
-
         # sum-threshold
         vis_diff = vis_abs - background
         st = sum_threshold.SumThreshold(vis_diff, vis_mask, first_threshold, exp_factor, distribution, max_threshold_len, min_connected)
         st.execute(sensitivity)
 
-        # second round
-        gf = local_gaussian_filter.LocalGaussianFilter(vis_diff, st.vis_mask, time_kernal_size=tk_size, freq_kernal_size=fk_size)
-        background = gf.fit()
-        vis_diff = vis_diff - background
-        st = sum_threshold.SumThreshold(vis_diff, st.vis_mask, first_threshold, exp_factor, distribution, max_threshold_len, min_connected)
-        st.execute(sensitivity)
+        threshold_num -= 1
+        # next rounds
+        while threshold_num > 0:
+            # Gaussian fileter
+            gf = gaussian_filter.GaussianFilter(vis_diff, st.vis_mask, time_kernal_size=tk_size, freq_kernal_size=fk_size)
+            background = gf.fit()
+            # sum-threshold
+            vis_diff = vis_diff - background
+            st = sum_threshold.SumThreshold(vis_diff, st.vis_mask, first_threshold, exp_factor, distribution, max_threshold_len, min_connected)
+            st.execute(sensitivity)
+            # sub threshold_num
+            threshold_num -= 1
 
         return vis, st.vis_mask
