@@ -16,9 +16,9 @@ def winsorized_mean_and_std(a):
         return 0, 0
 
     mean = np.mean(a)
-    sqr = (a - mean)**2
+    sqr_sum = np.sum((a - mean)**2)
     # 1.54 from aoflagger thresholdtools.cpp
-    std = (1.54 * sqr / a.size)**0.5
+    std = (1.54 * sqr_sum / a.size)**0.5
 
     return mean, std
 
@@ -28,7 +28,7 @@ def winsorized_mode(a):
     if a.size == 0:
         return 0
 
-    sqr = a**2
+    sqr_sum = np.sum(a**2)
 
     # 1.0541 from aoflagger thresholdtools.cpp
-    return 1.0541 * (sqr / (2*a.size))
+    return 1.0541 * (sqr_sum / (2*a.size))**0.5

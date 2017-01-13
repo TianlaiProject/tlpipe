@@ -1,13 +1,13 @@
-import local_fit
+import surface_fit
 import numpy as np
 import scipy.ndimage as ndimage
 
 
-class LocalGaussianFilter(local_fit.LocalFitMethod):
+class LocalGaussianFilter(surface_fit.SurfaceFitMethod):
 
-    def __init__(self, time_freq_vis, time_freq_vis_mask=None, time_window_size=20, freq_window_size=40, time_kernal_size=7.5, freq_kernal_size=15.0):
+    def __init__(self, time_freq_vis, time_freq_vis_mask=None, time_kernal_size=7.5, freq_kernal_size=15.0):
 
-        super(LocalGaussianFilter, self).__init__(time_freq_vis, time_freq_vis_mask, time_window_size, freq_window_size)
+        super(LocalGaussianFilter, self).__init__(time_freq_vis, time_freq_vis_mask)
 
         self._hksize = freq_kernal_size
         self._vksize = time_kernal_size

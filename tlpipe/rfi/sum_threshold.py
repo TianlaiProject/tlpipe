@@ -9,7 +9,7 @@ class SumThreshold(combinatorial_threshold.CombinatorialThreshold):
 
         super(SumThreshold, self).__init__(time_freq_vis, time_freq_vis_mask, first_threshold, exp_factor, distribution, max_threshold_length)
 
-        self.min_connected = max(1, min_connected)
+        self.min_connected = max(1, int(min_connected))
 
 
     def horizontal_sum_threshold(self, length, threshold):
@@ -21,12 +21,22 @@ class SumThreshold(combinatorial_threshold.CombinatorialThreshold):
 
         if length == 1:
             for y in xrange(height):
+
+                # if all have been masked, continue
+                if self.vis_mask[y].all():
+                    continue
+
                 for x in xrange(width):
                     if (not self.vis_mask[y, x]) and (self.vis[y, x] > threshold):
                         self.vis_mask[y, x] = True
         elif length > 1:
             tmp_mask = self.vis_mask.copy()
             for y in xrange(height):
+
+                # if all have been masked, continue
+                if self.vis_mask[y].all():
+                    continue
+
                 sm, cnt, left, right = 0, 0, 0, 0
                 for right in xrange(length-1):
                     if not self.vis_mask[y, right]:
@@ -60,13 +70,23 @@ class SumThreshold(combinatorial_threshold.CombinatorialThreshold):
             return
 
         if length == 1:
-            for y in xrange(height):
-                for x in xrange(width):
+            for x in xrange(width):
+
+                # if all have been masked, continue
+                if self.vis_mask[:, x].all():
+                    continue
+
+                for y in xrange(height):
                     if (not self.vis_mask[y, x]) and (self.vis[y, x] > threshold):
                         self.vis_mask[y, x] = True
         elif length > 1:
             tmp_mask = self.vis_mask.copy()
             for x in xrange(width):
+
+                # if all have been masked, continue
+                if self.vis_mask[:, x].all():
+                    continue
+
                 sm, cnt, top, bottom = 0, 0, 0, 0
                 for bottom in xrange(length-1):
                     if not self.vis_mask[bottom, x]:
@@ -94,8 +114,8 @@ class SumThreshold(combinatorial_threshold.CombinatorialThreshold):
 
     def execute_threshold(self, factor):
         for length, threshold in zip(self.lengths, self.thresholds):
-            self.horizontal_sum_threshold(length, factor*threshold)
-            self.vertical_sum_threshold(length, factor*threshold)
+            self.vertical_sum_threshold(length, factor*threshold) # first time
+            self.horizontal_sum_threshold(length, factor*threshold) # then freq
 
     def execute(self, sensitivity=1.0):
         super(SumThreshold, self).execute(sensitivity)

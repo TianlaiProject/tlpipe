@@ -10,7 +10,7 @@ class SurfaceFitMethod(object):
 
     def __init__(self, time_freq_vis, time_freq_vis_mask=None):
 
-        self.vis = np.abs(time_freq_vis) # fit for only the amplitude
+        self.vis = time_freq_vis
 
         if time_freq_vis_mask is None:
             self.vis_mask = np.where(np.isfinite(self.vis), False, True)
