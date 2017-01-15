@@ -48,6 +48,9 @@ def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit
             gains.append(gain)
             chi2s.append(chi2/num_nomask)
 
+    if len(gains) == 0: # no valid vis data
+        return 1.0, 0
+
     chi2s = np.array(chi2s)
     if np.allclose(chi2s, np.sort(chi2s)):
         if mpiutil.rank0:
