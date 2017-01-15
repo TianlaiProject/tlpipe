@@ -38,6 +38,8 @@ class Plot(tod_task.TaskTimestream):
                     'plot_abs': False,
                     'abs_only': False,
                     'gray_color': False,
+                    'color_flag': False,
+                    'flag_color': 'yellow',
                     'transpose': False, # now only for abs plot
                     'fig_name': 'wf/vis',
                   }
@@ -71,6 +73,8 @@ class Plot(tod_task.TaskTimestream):
         plot_abs = self.params['plot_abs']
         abs_only = self.params['abs_only']
         gray_color = self.params['gray_color']
+        color_flag = self.params['color_flag']
+        flag_color = self.params['flag_color']
         transpose = self.params['transpose']
         fig_prefix = self.params['fig_name']
         tag_output_iter = self.params['tag_output_iter']
@@ -124,7 +128,10 @@ class Plot(tod_task.TaskTimestream):
         plt.figure()
 
         if gray_color:
-            cmap = 'gray'
+            # cmap = 'gray'
+            cmap = plt.cm.gray
+            if color_flag:
+                cmap.set_bad(flag_color)
         else:
             cmap = None
 
