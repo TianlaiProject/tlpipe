@@ -3,38 +3,30 @@ import numpy as np
 
 def sir1d(mask, eta):
 
+    if eta <= 0 or mask.all():
+        return mask
+
+    if eta >= 1:
+        return np.ones_like(mask)
+
     size = len(mask)
 
     # make an array in which flagged samples are eta and unflagged samples are eta-1,
     vals = np.where(mask, eta, eta-1.0)
-    # make an array w(x) = \\sum_{y=0}^{x-1} vals[y]
-    w = np.zeros(size+1, dtype=vals.dtype)
-    w[0] = 0
-    current_min_ind = 0
-    min_inds = np.zeros(size, dtype=int)
-    min_inds[0] = 0
-    # calculate these w's and minimum prefixes
-    for i in xrange(1, size+1):
-        w[i] = w[i-1] + vals[i-1]
-        if w[i] < w[current_min_ind]:
-            current_min_ind = i
-        min_inds[i] = current_min_ind
+    # make an array M(x) = \\sum_{y=0}^{x-1} vals[y]
+    M = np.zeros(size+1, dtype=vals.dtype)
+    M[1:] = np.cumsum(vals)
 
-    current_max_ind = size
-    max_inds = np.zeros_like(min_inds)
-    # calculate the maximum suffixes
-    for i in xrange(size-1, 0):
-        max_inds[i] = current_max_ind
-        if w[i] > w[current_max_ind]:
-            current_max_ind = i
-
-    max_inds[0] = current_max_ind
-
-    # see if max sequence exceeds limit.
-    for i in xrange(size):
-        mask = ( w[max_inds] >= w[min_inds] )
+    # check mask condition
+    for i in xrange(0, size):
+        if np.max(M[i+1:]) >= np.min(M[:i+1]):
+            mask[i] = True
+        else:
+            mask[i] = False
 
     return mask
+
+
 
 def horizontal_sir(mask, eta, overwrite=True):
 
@@ -64,3 +56,23 @@ def vertical_sir(mask, eta, overwrite=True):
         mask1[:, ci] = sir1d(mask1[:, ci], eta)
 
     return mask1
+
+
+if __name__ == '__main__':
+    # test sir 1d
+    # mask = np.array([False]*8)
+    # mask = np.array([False]*3 + [True] + [False]*7)
+    # mask = np.array([True] + [False]*3 + [True] + [False]*7 + [True])
+    # mask = np.array([True] + [False]*3 + [True, True] + [False]*7)
+    mask = np.array([0, 0, 1, 0, 1, 0, 1, 1, 0, 0], dtype=bool)
+    eta = 0.2
+    # eta = 0.5
+    print mask.astype(int)
+    print sir1d(mask, eta).astype(int)
+
+    # test sir 2d
+    ra = np.random.rand(8, 10) - 0.5
+    mask = np.where(ra>0, True, False)
+    print mask.astype(int)
+    print horizontal_sir(mask, eta, False).astype(int)
+    print vertical_sir(mask, eta, False).astype(int)
