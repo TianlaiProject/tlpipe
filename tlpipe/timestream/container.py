@@ -294,6 +294,16 @@ class BasicTod(memh5.MemDiskGroup):
             raise ValueError('Attribute main_data_axes must be a tuple of strings')
 
     @property
+    def dist_axis(self):
+        """Convenience for self.main_data_dist_axis."""
+        return self.main_data_dist_axis
+
+    @property
+    def dist_axis_name(self):
+        """Name of self.main_data_dist_axis."""
+        return self._main_data_axes_[self.main_data_dist_axis]
+
+    @property
     def main_axes_ordered_datasets(self):
         """Datasets that have axis aligned with the main data."""
         return self._main_axes_ordered_datasets_
