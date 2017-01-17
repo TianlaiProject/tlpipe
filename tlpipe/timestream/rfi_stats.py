@@ -24,6 +24,7 @@ class Stats(tod_task.TaskTimestream):
     """
 
     params_init = {
+                    'excl_auto': False, # exclude auto-correclation
                     'plot_stats': True, # plot RFI statistics
                     'fig_name': 'stats/stats',
                   }
@@ -32,6 +33,7 @@ class Stats(tod_task.TaskTimestream):
 
     def process(self, ts):
 
+        excl_auto = self.params['excl_auto']
         plot_stats = self.params['plot_stats']
         fig_prefix = self.params['fig_name']
         tag_output_iter = self.params['tag_output_iter']
@@ -39,14 +41,25 @@ class Stats(tod_task.TaskTimestream):
         ts.redistribute('baseline')
 
         if ts.local_vis_mask.ndim == 3: # RawTimestream
-            vis_mask = ts.local_vis_mask.copy()
-            nt, nf, nb = ts.vis.shape
+            if excl_auto:
+                bl = ts.local_bl
+                vis_mask = ts.local_vis_mask[:, :, bl[:, 0] != bl[:, 1]].copy()
+            else:
+                vis_mask = ts.local_vis_mask.copy()
+            nt, nf, lnb = vis_mask.shape
         elif ts.local_vis_mask.ndim == 4: # Timestream
             # suppose masks are the same for all 4 pols
-            vis_mask = ts.local_vis_mask[:, :, 0].copy()
-            nt, nf, npol, nb = ts.vis.shape
+            if excl_auto:
+                bl = ts.local_bl
+                vis_mask = ts.local_vis_mask[:, :, 0, bl[:, 0] != bl[:, 1]].copy()
+            else:
+                vis_mask = ts.local_vis_mask[:, :, 0].copy()
+            nt, nf, lnb = vis_mask.shape
         else:
             raise RuntimeError('Incorrect vis_mask shape %s' % ts.local_vis_mask.shape)
+
+        # total number of bl
+        nb = mpiutil.allreduce(lnb, comm=ts.comm)
 
         # un-mask ns-on positions
         vis_mask[ts['ns_on'][:]] = False
