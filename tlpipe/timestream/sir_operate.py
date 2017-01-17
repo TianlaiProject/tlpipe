@@ -46,12 +46,18 @@ class Sir(tod_task.TaskTimestream):
         eta = self.params['eta']
 
         if vis_mask.ndim == 2:
-            vis_mask[:] = sir_operator.vertical_sir(vis_mask, eta)
-            vis_mask[:] = sir_operator.horizontal_sir(vis_mask, eta)
+            mask = vis_mask.copy()
+            mask[ts['ns_on']] = False
+            mask = sir_operator.vertical_sir(mask, eta)
+            mask[ts['ns_on']] = True
+            vis_mask[:] = sir_operator.horizontal_sir(mask, eta)
         elif vis_mask.ndim == 3:
             # This shold be done after the combination of all pols
-            vis_mask[:] = sir_operator.vertical_sir(vis_mask[:, :, 0], eta)[:, :, np.newaxis]
-            vis_mask[:] = sir_operator.horizontal_sir(vis_mask[:, :, 0], eta)[:, :, np.newaxis]
+            mask = vis_mask[:, :, 0].copy()
+            mask[ts['ns_on']] = False
+            mask = sir_operator.vertical_sir(mask, eta)
+            mask[ts['ns_on']] = True
+            vis_mask[:] = sir_operator.horizontal_sir(mask, eta)[:, :, np.newaxis]
         else:
             raise RuntimeError('Invalid shape of vis_mask: %s' % vis_mask.shape)
 
