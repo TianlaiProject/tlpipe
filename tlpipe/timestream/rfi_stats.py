@@ -89,7 +89,7 @@ class Stats(tod_task.TaskTimestream):
             plt.figure()
             plt.plot(ts.time[:], 100*time_mask/np.float(nf*nb))
             plt.xlabel(r'$t$ / Julian Date')
-            plt.ylabel(r'RFI (percentage)')
+            plt.ylabel(r'RFI (%)')
             plt.savefig(time_fig_name)
             plt.close()
 
@@ -103,7 +103,7 @@ class Stats(tod_task.TaskTimestream):
             plt.figure()
             plt.plot(ts.freq[:], 100*freq_mask/np.float(nt*nb))
             plt.xlabel(r'$\nu$ / MHz')
-            plt.ylabel(r'RFI (percentage)')
+            plt.ylabel(r'RFI (%)')
             plt.savefig(freq_fig_name)
             plt.close()
 
