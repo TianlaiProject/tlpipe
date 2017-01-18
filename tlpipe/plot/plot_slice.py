@@ -86,7 +86,7 @@ class Plot(tod_task.TaskTimestream):
             nt = vis.shape[0]
             c = nt/2
             s = max(0, c-slices/2)
-            e = min(nt, c+slices/2)
+            e = min(nt, s+slices)
             if flag_mask:
                 vis1 = np.ma.array(vis[s:e], mask=vis_mask[s:e])
             elif flag_ns:
@@ -106,7 +106,7 @@ class Plot(tod_task.TaskTimestream):
             nfreq = vis.shape[1]
             c = nfreq/2
             s = max(0, c-slices/2)
-            e = min(nfreq, c+slices/2)
+            e = min(nfreq, s+slices)
             if flag_mask:
                 vis1 = np.ma.array(vis[:, s:e], mask=vis_mask[:, s:e])
             elif flag_ns:
