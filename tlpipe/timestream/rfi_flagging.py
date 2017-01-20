@@ -66,7 +66,7 @@ class Flag(tod_task.TaskTimestream):
         min_connected = self.params['min_connected']
         tk_size = self.params['tk_size']
         fk_size = self.params['fk_size']
-        threshold_num = self.params['threshold_num']
+        threshold_num = max(0, int(self.params['threshold_num']))
 
         vis_abs = np.abs(vis) # operate only on the amplitude
 
@@ -79,12 +79,12 @@ class Flag(tod_task.TaskTimestream):
         background = gf.fit()
         # sum-threshold
         vis_diff = vis_abs - background
-        st = sum_threshold.SumThreshold(vis_diff, vis_mask, first_threshold, exp_factor, distribution, max_threshold_len, min_connected)
+        # an initial run of N = 1 only to remove extremely high amplitude RFI
+        st = sum_threshold.SumThreshold(vis_diff, vis_mask, first_threshold, exp_factor, distribution, 1, min_connected)
         st.execute(sensitivity)
 
-        threshold_num -= 1
         # next rounds
-        while threshold_num > 0:
+        for i in xrange(threshold_num):
             # Gaussian fileter
             gf = gaussian_filter.GaussianFilter(vis_diff, st.vis_mask, time_kernal_size=tk_size, freq_kernal_size=fk_size)
             background = gf.fit()
@@ -92,7 +92,5 @@ class Flag(tod_task.TaskTimestream):
             vis_diff = vis_diff - background
             st = sum_threshold.SumThreshold(vis_diff, st.vis_mask, first_threshold, exp_factor, distribution, max_threshold_len, min_connected)
             st.execute(sensitivity)
-            # sub threshold_num
-            threshold_num -= 1
 
         return vis, st.vis_mask
