@@ -8,6 +8,7 @@ Inheritance diagram
 
 """
 
+from datetime import datetime
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
 from tlpipe.timestream import tod_task
@@ -15,6 +16,7 @@ from tlpipe.timestream.raw_timestream import RawTimestream
 from tlpipe.timestream.timestream import Timestream
 from tlpipe.utils.path_util import output_path
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 
 class Plot(tod_task.TaskTimestream):
@@ -34,7 +36,7 @@ class Plot(tod_task.TaskTimestream):
                     'flag_mask': False,
                     'flag_ns': False,
                     'interpolate_ns': False,
-                    'y_axis': 'jul_date', # or 'ra'
+                    'y_axis': 'time', # or 'jul_date', or 'ra'
                     'plot_abs': False,
                     'abs_only': False,
                     'gray_color': False,
@@ -120,6 +122,13 @@ class Plot(tod_task.TaskTimestream):
         elif y_axis == 'ra':
             y_aixs = ts['ra_dec'][:, 0]
             y_label = r'RA / radian'
+        elif y_axis == 'time':
+            y_aixs = [ datetime.fromtimestamp(s) for s in (ts['sec1970'][0], ts['sec1970'][-1]) ]
+            y_label = '%s' % y_aixs[0].date()
+            # convert datetime objects to the correct format for matplotlib to work with
+            y_aixs = mdates.date2num(y_aixs)
+        else:
+            raise ValueError('Invalid y_axis %s, can only be "time", "jul_data" or "ra"' % y_axis)
 
         freq_extent = [freq[0], freq[-1]]
         time_extent = [y_aixs[0], y_aixs[-1]]
@@ -140,10 +149,29 @@ class Plot(tod_task.TaskTimestream):
                 vis1 = vis1.T
                 x_label, y_label = y_label, x_label
                 extent = time_extent + freq_extent
-            plt.imshow(np.abs(vis1), extent=extent, origin='lower', aspect='auto', cmap=cmap)
-            plt.xlabel(x_label)
-            plt.ylabel(y_label)
-            plt.colorbar()
+
+            fig, ax = plt.subplots()
+            im = ax.imshow(np.abs(vis1), extent=extent, origin='lower', aspect='auto', cmap=cmap)
+            # convert axis to datetime string
+            if transpose:
+                ax.xaxis_date()
+            else:
+                ax.yaxis_date()
+            # format datetime string
+            # date_format = mdates.DateFormatter('%y/%m/%d %H:%M')
+            date_format = mdates.DateFormatter('%H:%M')
+            if transpose:
+                ax.xaxis.set_major_formatter(date_format)
+            else:
+                ax.yaxis.set_major_formatter(date_format)
+
+            # This simply sets the y-axis data to diagonal so it fits better.
+            if transpose:
+                fig.autofmt_xdate()
+
+            ax.set_xlabel(x_label)
+            ax.set_ylabel(y_label)
+            plt.colorbar(im)
         else:
             if plot_abs:
                 fig, axarr = plt.subplots(1, 3, sharey=True)
