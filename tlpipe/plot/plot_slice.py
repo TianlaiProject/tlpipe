@@ -8,12 +8,14 @@ Inheritance diagram
 
 """
 
+from datetime import datetime
 import numpy as np
 from tlpipe.timestream import tod_task
 from tlpipe.timestream.raw_timestream import RawTimestream
 from tlpipe.timestream.timestream import Timestream
 from tlpipe.utils.path_util import output_path
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 
 class Plot(tod_task.TaskTimestream):
@@ -120,8 +122,11 @@ class Plot(tod_task.TaskTimestream):
             o = c - s
             shift = 0.1 * np.ma.max(np.abs(vis1[:, o]))
 
-            ax_val = ts.time[:]
-            xlabel = r'$t$ / Julian Date'
+            # ax_val = ts.time[:]
+            # xlabel = r'$t$ / Julian Date'
+            ax_val = np.array([ datetime.fromtimestamp(sec) for sec in ts['sec1970'][:] ])
+            xlabel = '%s' % ax_val[0].date()
+            ax_val = mdates.date2num(ax_val)
         else:
             raise ValueError('Unknown plot_type %s, must be either time or freq' % plot_type)
 
@@ -149,6 +154,11 @@ class Plot(tod_task.TaskTimestream):
             if i == 0:
                 axarr[2].legend()
 
+        if plot_type == 'freq':
+            axarr[2].xaxis_date()
+            date_format = mdates.DateFormatter('%H:%M')
+            axarr[2].xaxis.set_major_formatter(date_format)
+            f.autofmt_xdate()
         axarr[2].set_xlabel(xlabel)
 
         if pol is None:
