@@ -8,11 +8,13 @@ Inheritance diagram
 
 """
 
+from datetime import datetime
 import numpy as np
 import tod_task
 from tlpipe.utils.path_util import output_path
 import tlpipe.plot
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 from caput import mpiutil
 
 
@@ -87,9 +89,17 @@ class Stats(tod_task.TaskTimestream):
 
             # plot time_mask
             plt.figure()
-            plt.plot(ts.time[:], 100*time_mask/np.float(nf*nb))
-            plt.xlabel(r'$t$ / Julian Date')
-            plt.ylabel(r'RFI (%)')
+            fig, ax = plt.subplots()
+            x_vals = np.array([ datetime.fromtimestamp(s) for s in ts['sec1970'][:] ])
+            xlabel = '%s' % x_vals[0].date()
+            x_vals = mdates.date2num(x_vals)
+            ax.plot(x_vals, 100*time_mask/np.float(nf*nb))
+            ax.xaxis_date()
+            date_format = mdates.DateFormatter('%H:%M')
+            ax.xaxis.set_major_formatter(date_format)
+            fig.autofmt_xdate()
+            ax.set_xlabel(xlabel)
+            ax.set_ylabel(r'RFI (%)')
             plt.savefig(time_fig_name)
             plt.close()
 
