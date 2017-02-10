@@ -4,6 +4,27 @@ from winsorized_stats import winsorized_mean_and_std, winsorized_mode
 
 
 class CombinatorialThreshold(object):
+    """Abstract base class for combinatorial thresholding methods.
+
+    The method will flag a combination of samples when a property of this
+    combination exceeds some limit. The more connected samples are combined,
+    the lower the sample threshold.
+
+    For more details, see Offringa et al., 2000, MNRAS, 405, 155,
+    *Post-correlation radio frequency interference classification methods*.
+
+    For this implementation, the sequence of thresholds are determined by
+    the following formula:
+
+    .. math:: \\alpha \\times \\frac{\\rho^{i}}{w} \\times (\\sigma \\times \\beta) + \\eta
+
+    in which :math:`\\alpha` is the first threshold set to 6.0,
+    :math:`\\rho = 1.5`, :math:`i` is the current iteration, :math:`w` the
+    current window size, :math:`\\sigma` the standard deviation of the values,
+    :math:`\\beta` the base sensitivity, set to 1.0, and :math:`\\eta` the
+    median.
+
+    """
 
     def __init__(self, time_freq_vis, time_freq_vis_mask=None, first_threshold=6.0, exp_factor=1.5, distribution='Rayleigh', max_threshold_length=1024):
 
@@ -36,9 +57,11 @@ class CombinatorialThreshold(object):
 
     @abc.abstractmethod
     def execute_threshold(self, factor):
+        """Abstract method that needs to be implemented by sub-classes."""
         return
 
     def execute(self, sensitivity=1.0):
+        """Execute the thresholding method."""
 
         if self.distribution == 'Gaussian':
             mean, std = winsorized_mean_and_std(np.ma.array(self.vis, mask=self.vis_mask))

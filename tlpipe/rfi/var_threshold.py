@@ -1,8 +1,24 @@
+"""The VarThreshold method.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: VarThreshold tlpipe.rfi.sum_threshold.SumThreshold
+   :parts: 1
+
+"""
+
 import numpy as np
 import combinatorial_threshold
 
 
 class VarThreshold(combinatorial_threshold.CombinatorialThreshold):
+    """The VarThreshold method.
+
+    For more details, see Offringa et al., 2000, MNRAS, 405, 155,
+    *Post-correlation radio frequency interference classification methods*.
+
+    """
 
     def __init__(self, time_freq_vis, time_freq_vis_mask=None, first_threshold=6.0, exp_factor=1.2, distribution='Rayleigh', max_threshold_length=1024):
 

@@ -53,6 +53,7 @@ Reference
    kiyopy
    pipeline
    timestream
+   rfi
    cal
    map
    foreground

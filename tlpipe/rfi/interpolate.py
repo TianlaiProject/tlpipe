@@ -1,9 +1,25 @@
+"""Spline interpolation method.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: Interpolate
+   :parts: 1
+
+"""
+
 import surface_fit
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
 
 
 class Interpolate(surface_fit.SurfaceFitMethod):
+    """Spline interpolation method.
+
+    This is not really a surface fit method, but intended to fill masked
+    (or invalid) values presented in the data by spline interpolation.
+
+    """
 
     def __init__(self, time_freq_vis, time_freq_vis_mask=None, direction='vertical', order=3, ext=0, mask_ratio=0.1):
 

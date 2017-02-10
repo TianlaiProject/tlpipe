@@ -20,7 +20,7 @@ from tlpipe.rfi import sum_threshold
 class Flag(tod_task.TaskTimestream):
     """RFI flagging.
 
-    RFI flagging by using the sum-threshold method.
+    RFI flagging by using the SumThreshold method.
 
     """
 

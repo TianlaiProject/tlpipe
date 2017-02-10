@@ -1,3 +1,29 @@
+"""This implements the scale-invariant rank (SIR) operator.
+
+The operator considers a sample to be contaminated with RFI when the sample
+is in a subsequence of mostly flagged samples. To be more precise, it will
+flag a subsequence when more than :math:`(1 - \\eta) N` of its samples are
+flagged, with :math:`N` the number of samples in the subsequence and
+:math:`\\eta` a constant, :math:`0 \\le \\eta \\le 1`. Using :math:`\\rho`
+to denote the operator, the output :math:`\\rho(X)` can be formally defined
+as
+
+.. math:: \\rho(X) \\equiv \\bigcup \\left\\{ [Y1, Y2) \\ \\mid \\ \#(X \\cap [Y1, Y2)) \ge (1 - \\eta)(Y2 - Y1) \\right\\},
+
+with :math:`[Y1, Y2)` a half-open interval of a one-dimensional set, and the
+hash symbol :math:`\#` denoting the count-operator that returns the number of
+elements in the set. In words, the equation defines :math:`\\rho(X)` to consist
+of all the samples that are in an interval :math:`[Y1, Y2)`, in which the ratio
+of samples in the input :math:`X` is greater or equal than :math:`(1 - \\eta)`.
+Parameter :math:`\\eta` represents the aggressiveness of the method: with
+:math:`\\eta = 0`, no additional samples are flagged and :math:`\\rho(X) = X`.
+On the other hand, :math:`\\eta = 1` implies all samples will be flagged.
+
+For more details, see Offringa et al., 2012, A&A, 539, A95, *A morphological
+algorithm for improving radio-frequency interference detection*.
+
+"""
+
 import numpy as np
 
 

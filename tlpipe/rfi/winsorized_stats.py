@@ -1,3 +1,25 @@
+"""This implements some Winsorized statistical methods.
+
+A sample :math:`x_1, \\cdots, x_n` is sorted in ascending order. For the
+chosen :math:`0 \\le \\gamma \\le 0.5` and :math:`k = [\\gamma n]`
+winsorization of the sorted data consists of setting
+
+.. math:: W_i = \\left \\{ \\begin{array}{lll}
+         x_{(k+1)}, & \\mbox{ if } & x_{(i)} \\le x_{(k+1)} \\\\
+         x_{(i)}, & \\mbox{ if } & x_{(k+1)} \\le x_{(i)} \\le x_{(n-k)} \\\\
+         x_{(n-k)}, & \\mbox{ if } & x_{(i)} \\ge x_{(n-k)}.
+                \\end{array} \\right.
+
+The winsorized sample mean is :math:`\\hat{\\mu}_w = \\frac{1}{n}
+\\sum_{i=1}^{n} W_i` and the winsorized sample variance is
+:math:`D_w = \\frac{1}{n-1} \\sum_{i=1}^{n} (W_i - \\hat{\\mu}_w)^2`.
+
+For this implementation, the statistics is computed for winsorized data
+with :math:`\\gamma = 0.1`.
+
+"""
+
+
 import numpy as np
 from scipy.stats.mstats import winsorize
 

@@ -1,3 +1,5 @@
+"""This implements the mathematical morphological dilate operation."""
+
 import numpy as np
 
 

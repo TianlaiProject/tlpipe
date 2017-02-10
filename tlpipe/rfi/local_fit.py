@@ -1,9 +1,19 @@
+"""Local fit method.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: LocalFitMethod
+   :parts: 1
+
+"""
+
 import abc
 import surface_fit
 
 
 class LocalFitMethod(surface_fit.SurfaceFitMethod):
-    """Local fit method."""
+    """Abstract base class for local fit method."""
 
     __metaclass__ = abc.ABCMeta  # Enforce Abstract class
 

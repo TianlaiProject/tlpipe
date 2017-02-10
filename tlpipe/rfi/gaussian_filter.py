@@ -1,9 +1,25 @@
+"""Gaussian filter method.
+
+Inheritance diagram
+-------------------
+
+.. inheritance-diagram:: GaussianFilter
+   :parts: 1
+
+"""
+
 import surface_fit
 import numpy as np
 import scipy.ndimage as ndimage
 
 
 class GaussianFilter(surface_fit.SurfaceFitMethod):
+    """Gaussian filter method.
+
+    In this method, the background is caculated by a Gaussian high pass
+    filtering process.
+
+    """
 
     def __init__(self, time_freq_vis, time_freq_vis_mask=None, time_kernal_size=7.5, freq_kernal_size=15.0, fill_val=0):
 
