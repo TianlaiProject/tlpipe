@@ -1,0 +1,25 @@
+tlpipe.rfi.surface_fit.SurfaceFitMethod
+=======================================
+
+.. currentmodule:: tlpipe.rfi.surface_fit
+
+.. autoclass:: SurfaceFitMethod
+
+   
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~SurfaceFitMethod.fit
+   
+   

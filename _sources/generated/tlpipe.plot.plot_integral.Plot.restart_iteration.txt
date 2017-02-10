@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Plot.restart_iteration
+================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Plot.restart_iteration

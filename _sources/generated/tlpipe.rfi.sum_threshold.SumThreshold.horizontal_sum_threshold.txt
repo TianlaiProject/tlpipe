@@ -1,0 +1,6 @@
+tlpipe.rfi.sum_threshold.SumThreshold.horizontal_sum_threshold
+==============================================================
+
+.. currentmodule:: tlpipe.rfi.sum_threshold
+
+.. automethod:: SumThreshold.horizontal_sum_threshold

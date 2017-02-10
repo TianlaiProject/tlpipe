@@ -52,7 +52,7 @@ Operating tasks
    map_making
 
 Utilities
------------------
+---------
 
 .. autosummary::
    :toctree: generated/

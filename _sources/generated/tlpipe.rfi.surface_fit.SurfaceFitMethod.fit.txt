@@ -1,0 +1,6 @@
+tlpipe.rfi.surface_fit.SurfaceFitMethod.fit
+===========================================
+
+.. currentmodule:: tlpipe.rfi.surface_fit
+
+.. automethod:: SurfaceFitMethod.fit

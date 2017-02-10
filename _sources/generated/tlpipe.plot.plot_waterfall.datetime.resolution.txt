@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.datetime.resolution
+==============================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoattribute:: datetime.resolution

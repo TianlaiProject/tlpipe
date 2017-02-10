@@ -1,0 +1,6 @@
+tlpipe.rfi.combinatorial_threshold.CombinatorialThreshold.execute_threshold
+===========================================================================
+
+.. currentmodule:: tlpipe.rfi.combinatorial_threshold
+
+.. automethod:: CombinatorialThreshold.execute_threshold

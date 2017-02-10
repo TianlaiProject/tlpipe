@@ -1,0 +1,6 @@
+tlpipe.timestream.phs2zen.Phs2zen.stop_iteration
+================================================
+
+.. currentmodule:: tlpipe.timestream.phs2zen
+
+.. automethod:: Phs2zen.stop_iteration

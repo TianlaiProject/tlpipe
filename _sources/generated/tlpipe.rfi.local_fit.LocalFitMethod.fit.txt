@@ -1,0 +1,6 @@
+tlpipe.rfi.local_fit.LocalFitMethod.fit
+=======================================
+
+.. currentmodule:: tlpipe.rfi.local_fit
+
+.. automethod:: LocalFitMethod.fit

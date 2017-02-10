@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.OneAndOne.stop_iteration
+=================================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: OneAndOne.stop_iteration

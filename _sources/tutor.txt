@@ -89,6 +89,8 @@ The final input pipe file looks like :download:`download <examples/plot\_wf.pipe
       copy:  True
       tasks:  []
       logging:  info
+      flush:  False
+      timing:  False
       overwrite:  False
       outdir:  output/
 
@@ -131,6 +133,7 @@ The final input pipe file looks like :download:`download <examples/plot\_wf.pipe
       pol_select:  (0, None)
       extra_inttime:  150
       days:  1.0
+      drop_days:  0.0
       exclude_bad:  True
 
    #. Usally the input of one task should be ether read from the data files,

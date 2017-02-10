@@ -1,0 +1,25 @@
+tlpipe.rfi.sum_threshold
+========================
+
+.. automodule:: tlpipe.rfi.sum_threshold
+
+   
+   
+   
+
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      SumThreshold
+   
+   
+
+
+   
+   
+   

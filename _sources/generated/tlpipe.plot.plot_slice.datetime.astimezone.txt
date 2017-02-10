@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.datetime.astimezone
+==========================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: datetime.astimezone

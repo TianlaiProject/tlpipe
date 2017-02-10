@@ -1,0 +1,6 @@
+tlpipe.rfi.var_threshold.VarThreshold.vertical_var_threshold
+============================================================
+
+.. currentmodule:: tlpipe.rfi.var_threshold
+
+.. automethod:: VarThreshold.vertical_var_threshold

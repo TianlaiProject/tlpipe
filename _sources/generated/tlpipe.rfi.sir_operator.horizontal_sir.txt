@@ -1,0 +1,6 @@
+tlpipe.rfi.sir_operator.horizontal_sir
+======================================
+
+.. currentmodule:: tlpipe.rfi.sir_operator
+
+.. autofunction:: horizontal_sir

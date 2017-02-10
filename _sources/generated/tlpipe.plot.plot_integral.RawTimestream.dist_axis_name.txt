@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.RawTimestream.dist_axis_name
+======================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: RawTimestream.dist_axis_name

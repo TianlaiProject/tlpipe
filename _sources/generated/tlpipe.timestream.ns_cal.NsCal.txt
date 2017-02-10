@@ -43,8 +43,10 @@ tlpipe.timestream.ns_cal.NsCal
       ~NsCal.read_input
       ~NsCal.read_output
       ~NsCal.read_process_write
+      ~NsCal.restart_iteration
       ~NsCal.setup
       ~NsCal.show_params
+      ~NsCal.stop_iteration
       ~NsCal.write_output
    
    

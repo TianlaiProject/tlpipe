@@ -1,0 +1,6 @@
+tlpipe.rfi.combinatorial_threshold.CombinatorialThreshold.init_threshold_with_flase_rate
+========================================================================================
+
+.. currentmodule:: tlpipe.rfi.combinatorial_threshold
+
+.. automethod:: CombinatorialThreshold.init_threshold_with_flase_rate

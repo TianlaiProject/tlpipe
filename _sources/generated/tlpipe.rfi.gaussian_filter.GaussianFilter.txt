@@ -1,0 +1,25 @@
+tlpipe.rfi.gaussian_filter.GaussianFilter
+=========================================
+
+.. currentmodule:: tlpipe.rfi.gaussian_filter
+
+.. autoclass:: GaussianFilter
+
+   
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~GaussianFilter.fit
+   
+   

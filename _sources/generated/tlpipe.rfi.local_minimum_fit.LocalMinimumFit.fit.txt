@@ -1,0 +1,6 @@
+tlpipe.rfi.local_minimum_fit.LocalMinimumFit.fit
+================================================
+
+.. currentmodule:: tlpipe.rfi.local_minimum_fit
+
+.. automethod:: LocalMinimumFit.fit

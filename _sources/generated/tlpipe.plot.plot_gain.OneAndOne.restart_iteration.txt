@@ -1,0 +1,6 @@
+tlpipe.plot.plot_gain.OneAndOne.restart_iteration
+=================================================
+
+.. currentmodule:: tlpipe.plot.plot_gain
+
+.. automethod:: OneAndOne.restart_iteration

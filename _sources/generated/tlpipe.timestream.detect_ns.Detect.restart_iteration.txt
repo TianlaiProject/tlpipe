@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.Detect.restart_iteration
+====================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: Detect.restart_iteration

@@ -1,0 +1,6 @@
+tlpipe.timestream.dispatch.Dispatch.stop_iteration
+==================================================
+
+.. currentmodule:: tlpipe.timestream.dispatch
+
+.. automethod:: Dispatch.stop_iteration

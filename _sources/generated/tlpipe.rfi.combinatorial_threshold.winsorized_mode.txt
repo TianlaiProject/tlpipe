@@ -1,0 +1,6 @@
+tlpipe.rfi.combinatorial_threshold.winsorized_mode
+==================================================
+
+.. currentmodule:: tlpipe.rfi.combinatorial_threshold
+
+.. autofunction:: winsorized_mode

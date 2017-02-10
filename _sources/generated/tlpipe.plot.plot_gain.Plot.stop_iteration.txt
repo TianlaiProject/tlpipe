@@ -1,0 +1,6 @@
+tlpipe.plot.plot_gain.Plot.stop_iteration
+=========================================
+
+.. currentmodule:: tlpipe.plot.plot_gain
+
+.. automethod:: Plot.stop_iteration

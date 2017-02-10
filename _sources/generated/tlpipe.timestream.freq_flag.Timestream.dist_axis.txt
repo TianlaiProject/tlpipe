@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.dist_axis
+================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. autoattribute:: Timestream.dist_axis

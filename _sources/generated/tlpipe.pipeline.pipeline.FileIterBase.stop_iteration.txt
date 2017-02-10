@@ -1,0 +1,6 @@
+tlpipe.pipeline.pipeline.FileIterBase.stop_iteration
+====================================================
+
+.. currentmodule:: tlpipe.pipeline.pipeline
+
+.. automethod:: FileIterBase.stop_iteration

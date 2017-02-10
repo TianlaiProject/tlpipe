@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.RawTimestream.dist_axis
+================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. autoattribute:: RawTimestream.dist_axis

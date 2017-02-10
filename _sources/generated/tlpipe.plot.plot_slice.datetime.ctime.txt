@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.datetime.ctime
+=====================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: datetime.ctime

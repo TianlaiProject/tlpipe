@@ -1,0 +1,6 @@
+tlpipe.rfi.var_threshold.VarThreshold.init_threshold_with_flase_rate
+====================================================================
+
+.. currentmodule:: tlpipe.rfi.var_threshold
+
+.. automethod:: VarThreshold.init_threshold_with_flase_rate

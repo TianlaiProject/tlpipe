@@ -1,0 +1,25 @@
+tlpipe.rfi.gaussian_filter
+==========================
+
+.. automodule:: tlpipe.rfi.gaussian_filter
+
+   
+   
+   
+
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      GaussianFilter
+   
+   
+
+
+   
+   
+   

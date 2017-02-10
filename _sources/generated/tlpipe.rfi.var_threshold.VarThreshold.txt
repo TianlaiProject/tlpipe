@@ -1,0 +1,29 @@
+tlpipe.rfi.var_threshold.VarThreshold
+=====================================
+
+.. currentmodule:: tlpipe.rfi.var_threshold
+
+.. autoclass:: VarThreshold
+
+   
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~VarThreshold.execute
+      ~VarThreshold.execute_threshold
+      ~VarThreshold.horizontal_var_threshold
+      ~VarThreshold.init_threshold_with_flase_rate
+      ~VarThreshold.vertical_var_threshold
+   
+   

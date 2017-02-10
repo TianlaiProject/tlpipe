@@ -1,0 +1,26 @@
+tlpipe.rfi.local_median_fit.LocalMedianFit
+==========================================
+
+.. currentmodule:: tlpipe.rfi.local_median_fit
+
+.. autoclass:: LocalMedianFit
+
+   
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~LocalMedianFit.calculate_background
+      ~LocalMedianFit.fit
+   
+   

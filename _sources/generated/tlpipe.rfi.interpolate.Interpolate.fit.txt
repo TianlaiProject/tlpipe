@@ -1,0 +1,6 @@
+tlpipe.rfi.interpolate.Interpolate.fit
+======================================
+
+.. currentmodule:: tlpipe.rfi.interpolate
+
+.. automethod:: Interpolate.fit

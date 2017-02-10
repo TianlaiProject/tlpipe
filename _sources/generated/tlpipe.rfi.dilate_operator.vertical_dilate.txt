@@ -1,0 +1,6 @@
+tlpipe.rfi.dilate_operator.vertical_dilate
+==========================================
+
+.. currentmodule:: tlpipe.rfi.dilate_operator
+
+.. autofunction:: vertical_dilate

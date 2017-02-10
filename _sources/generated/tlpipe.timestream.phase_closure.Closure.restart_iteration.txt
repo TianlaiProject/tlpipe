@@ -1,0 +1,6 @@
+tlpipe.timestream.phase_closure.Closure.restart_iteration
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.phase_closure
+
+.. automethod:: Closure.restart_iteration

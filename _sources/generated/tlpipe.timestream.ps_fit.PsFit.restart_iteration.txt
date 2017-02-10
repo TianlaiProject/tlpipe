@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.PsFit.restart_iteration
+================================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: PsFit.restart_iteration

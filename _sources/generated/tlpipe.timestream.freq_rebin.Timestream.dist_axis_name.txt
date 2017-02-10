@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.dist_axis_name
+======================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. autoattribute:: Timestream.dist_axis_name

@@ -1,0 +1,6 @@
+tlpipe.rfi.local_fit.LocalFitMethod.calculate_background
+========================================================
+
+.. currentmodule:: tlpipe.rfi.local_fit
+
+.. automethod:: LocalFitMethod.calculate_background

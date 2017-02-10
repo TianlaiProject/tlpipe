@@ -1,0 +1,25 @@
+tlpipe.rfi.local_minimum_fit
+============================
+
+.. automodule:: tlpipe.rfi.local_minimum_fit
+
+   
+   
+   
+
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      LocalMinimumFit
+   
+   
+
+
+   
+   
+   

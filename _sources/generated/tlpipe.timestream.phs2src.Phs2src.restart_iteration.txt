@@ -1,0 +1,6 @@
+tlpipe.timestream.phs2src.Phs2src.restart_iteration
+===================================================
+
+.. currentmodule:: tlpipe.timestream.phs2src
+
+.. automethod:: Phs2src.restart_iteration

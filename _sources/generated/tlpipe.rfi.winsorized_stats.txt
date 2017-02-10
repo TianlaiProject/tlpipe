@@ -1,0 +1,27 @@
+tlpipe.rfi.winsorized_stats
+===========================
+
+.. automodule:: tlpipe.rfi.winsorized_stats
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      winsorize
+      winsorized_mean_and_std
+      winsorized_mode
+   
+   
+
+
+   
+   
+   
+
+
+   
+   
+   

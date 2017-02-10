@@ -1,0 +1,6 @@
+tlpipe.rfi.interpolate.InterpolatedUnivariateSpline.get_residual
+================================================================
+
+.. currentmodule:: tlpipe.rfi.interpolate
+
+.. automethod:: InterpolatedUnivariateSpline.get_residual

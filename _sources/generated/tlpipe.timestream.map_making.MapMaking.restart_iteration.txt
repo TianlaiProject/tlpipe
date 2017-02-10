@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.MapMaking.restart_iteration
+========================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: MapMaking.restart_iteration

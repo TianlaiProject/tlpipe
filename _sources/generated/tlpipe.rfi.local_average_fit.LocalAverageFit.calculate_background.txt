@@ -1,0 +1,6 @@
+tlpipe.rfi.local_average_fit.LocalAverageFit.calculate_background
+=================================================================
+
+.. currentmodule:: tlpipe.rfi.local_average_fit
+
+.. automethod:: LocalAverageFit.calculate_background

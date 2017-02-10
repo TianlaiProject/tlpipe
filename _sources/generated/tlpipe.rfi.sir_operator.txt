@@ -1,0 +1,27 @@
+tlpipe.rfi.sir_operator
+=======================
+
+.. automodule:: tlpipe.rfi.sir_operator
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      horizontal_sir
+      sir1d
+      vertical_sir
+   
+   
+
+
+   
+   
+   
+
+
+   
+   
+   

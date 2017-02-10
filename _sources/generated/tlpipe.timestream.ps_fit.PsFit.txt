@@ -42,8 +42,10 @@ tlpipe.timestream.ps_fit.PsFit
       ~PsFit.read_input
       ~PsFit.read_output
       ~PsFit.read_process_write
+      ~PsFit.restart_iteration
       ~PsFit.setup
       ~PsFit.show_params
+      ~PsFit.stop_iteration
       ~PsFit.write_output
    
    

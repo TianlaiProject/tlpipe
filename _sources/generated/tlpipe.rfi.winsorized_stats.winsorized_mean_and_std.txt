@@ -1,0 +1,6 @@
+tlpipe.rfi.winsorized_stats.winsorized_mean_and_std
+===================================================
+
+.. currentmodule:: tlpipe.rfi.winsorized_stats
+
+.. autofunction:: winsorized_mean_and_std

@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.dist_axis
+=================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. autoattribute:: Timestream.dist_axis

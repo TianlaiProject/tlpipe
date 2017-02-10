@@ -43,8 +43,10 @@ tlpipe.timestream.phs2zen.Phs2zen
       ~Phs2zen.read_input
       ~Phs2zen.read_output
       ~Phs2zen.read_process_write
+      ~Phs2zen.restart_iteration
       ~Phs2zen.setup
       ~Phs2zen.show_params
+      ~Phs2zen.stop_iteration
       ~Phs2zen.write_output
    
    

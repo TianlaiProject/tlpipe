@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.Detect.stop_iteration
+=================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: Detect.stop_iteration

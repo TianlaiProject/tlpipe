@@ -1,0 +1,27 @@
+tlpipe.rfi.combinatorial_threshold.CombinatorialThreshold
+=========================================================
+
+.. currentmodule:: tlpipe.rfi.combinatorial_threshold
+
+.. autoclass:: CombinatorialThreshold
+
+   
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~CombinatorialThreshold.execute
+      ~CombinatorialThreshold.execute_threshold
+      ~CombinatorialThreshold.init_threshold_with_flase_rate
+   
+   

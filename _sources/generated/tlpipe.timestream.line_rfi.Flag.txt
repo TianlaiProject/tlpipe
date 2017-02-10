@@ -43,8 +43,10 @@ tlpipe.timestream.line_rfi.Flag
       ~Flag.read_input
       ~Flag.read_output
       ~Flag.read_process_write
+      ~Flag.restart_iteration
       ~Flag.setup
       ~Flag.show_params
+      ~Flag.stop_iteration
       ~Flag.write_output
    
    

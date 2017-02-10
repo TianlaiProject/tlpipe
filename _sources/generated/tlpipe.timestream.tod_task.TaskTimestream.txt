@@ -42,8 +42,10 @@ tlpipe.timestream.tod_task.TaskTimestream
       ~TaskTimestream.read_input
       ~TaskTimestream.read_output
       ~TaskTimestream.read_process_write
+      ~TaskTimestream.restart_iteration
       ~TaskTimestream.setup
       ~TaskTimestream.show_params
+      ~TaskTimestream.stop_iteration
       ~TaskTimestream.write_output
    
    

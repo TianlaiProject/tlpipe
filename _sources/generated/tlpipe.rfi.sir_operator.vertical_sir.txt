@@ -1,0 +1,6 @@
+tlpipe.rfi.sir_operator.vertical_sir
+====================================
+
+.. currentmodule:: tlpipe.rfi.sir_operator
+
+.. autofunction:: vertical_sir

@@ -1,0 +1,33 @@
+tlpipe.rfi.combinatorial_threshold
+==================================
+
+.. automodule:: tlpipe.rfi.combinatorial_threshold
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      winsorized_mean_and_std
+      winsorized_mode
+   
+   
+
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      CombinatorialThreshold
+   
+   
+
+
+   
+   
+   

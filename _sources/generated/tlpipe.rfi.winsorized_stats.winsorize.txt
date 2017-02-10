@@ -1,0 +1,6 @@
+tlpipe.rfi.winsorized_stats.winsorize
+=====================================
+
+.. currentmodule:: tlpipe.rfi.winsorized_stats
+
+.. autofunction:: winsorize

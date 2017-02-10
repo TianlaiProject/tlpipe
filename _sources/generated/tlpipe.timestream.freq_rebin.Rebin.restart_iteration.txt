@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Rebin.restart_iteration
+====================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Rebin.restart_iteration

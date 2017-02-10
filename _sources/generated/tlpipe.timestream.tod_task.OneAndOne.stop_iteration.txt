@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.OneAndOne.stop_iteration
+===================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: OneAndOne.stop_iteration

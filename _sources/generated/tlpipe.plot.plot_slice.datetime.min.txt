@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.datetime.min
+===================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. autoattribute:: datetime.min

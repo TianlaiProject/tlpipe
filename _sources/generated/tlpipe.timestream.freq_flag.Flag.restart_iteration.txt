@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Flag.restart_iteration
+==================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Flag.restart_iteration

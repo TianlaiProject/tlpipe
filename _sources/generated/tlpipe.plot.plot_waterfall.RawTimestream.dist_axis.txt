@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.RawTimestream.dist_axis
+==================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoattribute:: RawTimestream.dist_axis

@@ -26,6 +26,7 @@ tlpipe.plot.plot_waterfall
       Plot
       RawTimestream
       Timestream
+      datetime
    
    
 

@@ -1,0 +1,6 @@
+tlpipe.rfi.sir_operator.sir1d
+=============================
+
+.. currentmodule:: tlpipe.rfi.sir_operator
+
+.. autofunction:: sir1d

@@ -42,8 +42,10 @@ tlpipe.timestream.phase_closure.Closure
       ~Closure.read_input
       ~Closure.read_output
       ~Closure.read_process_write
+      ~Closure.restart_iteration
       ~Closure.setup
       ~Closure.show_params
+      ~Closure.stop_iteration
       ~Closure.write_output
    
    

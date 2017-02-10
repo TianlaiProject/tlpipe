@@ -1,0 +1,6 @@
+tlpipe.timestream.average.Average.restart_iteration
+===================================================
+
+.. currentmodule:: tlpipe.timestream.average
+
+.. automethod:: Average.restart_iteration

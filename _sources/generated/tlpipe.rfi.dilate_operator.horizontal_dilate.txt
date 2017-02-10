@@ -1,0 +1,6 @@
+tlpipe.rfi.dilate_operator.horizontal_dilate
+============================================
+
+.. currentmodule:: tlpipe.rfi.dilate_operator
+
+.. autofunction:: horizontal_dilate

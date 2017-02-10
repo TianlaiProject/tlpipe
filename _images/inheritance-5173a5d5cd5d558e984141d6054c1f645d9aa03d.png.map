@@ -1,0 +1,7 @@
+<map id="inheritance48cc30816e" name="inheritance48cc30816e">
+<area shape="rect" id="node1" href="tlpipe.rfi.local_average_fit.LocalAverageFit.html#tlpipe.rfi.local_average_fit.LocalAverageFit" target="_top" title="Local average fit method." alt="" coords="5,161,133,189"/>
+<area shape="rect" id="node2" href="tlpipe.rfi.local_fit.LocalFitMethod.html#tlpipe.rfi.local_fit.LocalFitMethod" target="_top" title="Abstract base class for local fit method." alt="" coords="156,83,281,111"/>
+<area shape="rect" id="node6" href="tlpipe.rfi.local_median_fit.LocalMedianFit.html#tlpipe.rfi.local_median_fit.LocalMedianFit" target="_top" title="Local median fit method." alt="" coords="157,161,280,189"/>
+<area shape="rect" id="node8" href="tlpipe.rfi.local_minimum_fit.LocalMinimumFit.html#tlpipe.rfi.local_minimum_fit.LocalMinimumFit" target="_top" title="Local minimum fit method." alt="" coords="304,161,437,189"/>
+<area shape="rect" id="node4" href="tlpipe.rfi.surface_fit.SurfaceFitMethod.html#tlpipe.rfi.surface_fit.SurfaceFitMethod" target="_top" title="Abstract base class for surface fitting methods." alt="" coords="148,6,289,34"/>
+</map>

@@ -42,8 +42,10 @@ tlpipe.timestream.ps_cal.PsCal
       ~PsCal.read_input
       ~PsCal.read_output
       ~PsCal.read_process_write
+      ~PsCal.restart_iteration
       ~PsCal.setup
       ~PsCal.show_params
+      ~PsCal.stop_iteration
       ~PsCal.write_output
    
    

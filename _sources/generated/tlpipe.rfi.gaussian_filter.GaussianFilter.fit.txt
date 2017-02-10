@@ -1,0 +1,6 @@
+tlpipe.rfi.gaussian_filter.GaussianFilter.fit
+=============================================
+
+.. currentmodule:: tlpipe.rfi.gaussian_filter
+
+.. automethod:: GaussianFilter.fit

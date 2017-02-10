@@ -42,8 +42,10 @@ tlpipe.timestream.rt2ts.Rt2ts
       ~Rt2ts.read_input
       ~Rt2ts.read_output
       ~Rt2ts.read_process_write
+      ~Rt2ts.restart_iteration
       ~Rt2ts.setup
       ~Rt2ts.show_params
+      ~Rt2ts.stop_iteration
       ~Rt2ts.write_output
    
    

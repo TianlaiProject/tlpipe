@@ -1,0 +1,6 @@
+tlpipe.rfi.combinatorial_threshold.winsorized_mean_and_std
+==========================================================
+
+.. currentmodule:: tlpipe.rfi.combinatorial_threshold
+
+.. autofunction:: winsorized_mean_and_std

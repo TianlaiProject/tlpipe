@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.datetime.isocalendar
+===========================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: datetime.isocalendar

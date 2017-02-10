@@ -1,0 +1,6 @@
+tlpipe.rfi.dilate_operator.dilate1d
+===================================
+
+.. currentmodule:: tlpipe.rfi.dilate_operator
+
+.. autofunction:: dilate1d

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.RawTimestream.dist_axis
+==============================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. autoattribute:: RawTimestream.dist_axis

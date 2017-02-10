@@ -18,6 +18,8 @@ tlpipe.timestream.timestream_common.TimestreamCommon
       ~TimestreamCommon.bl
       ~TimestreamCommon.bl_ordered_datasets
       ~TimestreamCommon.comm
+      ~TimestreamCommon.dist_axis
+      ~TimestreamCommon.dist_axis_name
       ~TimestreamCommon.distributed
       ~TimestreamCommon.feed_ordered_datasets
       ~TimestreamCommon.file

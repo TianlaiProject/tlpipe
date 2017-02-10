@@ -42,8 +42,10 @@ tlpipe.timestream.average.Average
       ~Average.read_input
       ~Average.read_output
       ~Average.read_process_write
+      ~Average.restart_iteration
       ~Average.setup
       ~Average.show_params
+      ~Average.stop_iteration
       ~Average.write_output
    
    

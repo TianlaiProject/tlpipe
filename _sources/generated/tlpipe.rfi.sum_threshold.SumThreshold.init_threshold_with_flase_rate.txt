@@ -1,0 +1,6 @@
+tlpipe.rfi.sum_threshold.SumThreshold.init_threshold_with_flase_rate
+====================================================================
+
+.. currentmodule:: tlpipe.rfi.sum_threshold
+
+.. automethod:: SumThreshold.init_threshold_with_flase_rate

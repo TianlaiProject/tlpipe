@@ -1,0 +1,6 @@
+tlpipe.rfi.interpolate.InterpolatedUnivariateSpline.get_knots
+=============================================================
+
+.. currentmodule:: tlpipe.rfi.interpolate
+
+.. automethod:: InterpolatedUnivariateSpline.get_knots

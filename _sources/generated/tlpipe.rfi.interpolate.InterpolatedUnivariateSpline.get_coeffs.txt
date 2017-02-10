@@ -1,0 +1,6 @@
+tlpipe.rfi.interpolate.InterpolatedUnivariateSpline.get_coeffs
+==============================================================
+
+.. currentmodule:: tlpipe.rfi.interpolate
+
+.. automethod:: InterpolatedUnivariateSpline.get_coeffs

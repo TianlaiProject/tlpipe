@@ -1,0 +1,29 @@
+tlpipe.rfi.sum_threshold.SumThreshold
+=====================================
+
+.. currentmodule:: tlpipe.rfi.sum_threshold
+
+.. autoclass:: SumThreshold
+
+   
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~SumThreshold.execute
+      ~SumThreshold.execute_threshold
+      ~SumThreshold.horizontal_sum_threshold
+      ~SumThreshold.init_threshold_with_flase_rate
+      ~SumThreshold.vertical_sum_threshold
+   
+   

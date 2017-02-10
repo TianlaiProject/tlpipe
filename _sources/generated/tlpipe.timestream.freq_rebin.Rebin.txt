@@ -42,8 +42,10 @@ tlpipe.timestream.freq_rebin.Rebin
       ~Rebin.read_input
       ~Rebin.read_output
       ~Rebin.read_process_write
+      ~Rebin.restart_iteration
       ~Rebin.setup
       ~Rebin.show_params
+      ~Rebin.stop_iteration
       ~Rebin.write_output
    
    

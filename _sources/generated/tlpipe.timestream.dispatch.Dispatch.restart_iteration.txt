@@ -1,0 +1,6 @@
+tlpipe.timestream.dispatch.Dispatch.restart_iteration
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.dispatch
+
+.. automethod:: Dispatch.restart_iteration

@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Flag.stop_iteration
+===============================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Flag.stop_iteration

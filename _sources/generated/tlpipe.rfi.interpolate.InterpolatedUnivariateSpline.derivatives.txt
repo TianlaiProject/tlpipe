@@ -1,0 +1,6 @@
+tlpipe.rfi.interpolate.InterpolatedUnivariateSpline.derivatives
+===============================================================
+
+.. currentmodule:: tlpipe.rfi.interpolate
+
+.. automethod:: InterpolatedUnivariateSpline.derivatives

@@ -1,0 +1,6 @@
+tlpipe.timestream.container.BasicTod.dist_axis
+==============================================
+
+.. currentmodule:: tlpipe.timestream.container
+
+.. autoattribute:: BasicTod.dist_axis

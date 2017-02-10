@@ -1,0 +1,5 @@
+<map id="inheritance4536b2d53d" name="inheritance4536b2d53d">
+<area shape="rect" id="node1" href="tlpipe.rfi.combinatorial_threshold.CombinatorialThreshold.html#tlpipe.rfi.combinatorial_threshold.CombinatorialThreshold" target="_top" title="Abstract base class for combinatorial thresholding methods." alt="" coords="15,6,193,34"/>
+<area shape="rect" id="node2" href="tlpipe.rfi.sum_threshold.SumThreshold.html#tlpipe.rfi.sum_threshold.SumThreshold" target="_top" title="The SumThreshold method." alt="" coords="5,83,120,111"/>
+<area shape="rect" id="node4" href="tlpipe.rfi.var_threshold.VarThreshold.html#tlpipe.rfi.var_threshold.VarThreshold" target="_top" title="The VarThreshold method." alt="" coords="144,83,251,111"/>
+</map>

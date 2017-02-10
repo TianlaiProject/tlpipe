@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Accum.restart_iteration
+====================================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Accum.restart_iteration

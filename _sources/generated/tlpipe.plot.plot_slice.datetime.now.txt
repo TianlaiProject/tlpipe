@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.datetime.now
+===================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: datetime.now

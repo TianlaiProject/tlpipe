@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.NsCal.stop_iteration
+=============================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: NsCal.stop_iteration

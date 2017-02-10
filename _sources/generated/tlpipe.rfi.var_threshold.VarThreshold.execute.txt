@@ -1,0 +1,6 @@
+tlpipe.rfi.var_threshold.VarThreshold.execute
+=============================================
+
+.. currentmodule:: tlpipe.rfi.var_threshold
+
+.. automethod:: VarThreshold.execute

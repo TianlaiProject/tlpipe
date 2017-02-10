@@ -18,6 +18,8 @@ tlpipe.timestream.line_rfi.RawTimestream
       ~RawTimestream.bl
       ~RawTimestream.bl_ordered_datasets
       ~RawTimestream.comm
+      ~RawTimestream.dist_axis
+      ~RawTimestream.dist_axis_name
       ~RawTimestream.distributed
       ~RawTimestream.feed_ordered_datasets
       ~RawTimestream.file

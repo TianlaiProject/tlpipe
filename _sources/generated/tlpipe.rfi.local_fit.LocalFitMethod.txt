@@ -1,0 +1,26 @@
+tlpipe.rfi.local_fit.LocalFitMethod
+===================================
+
+.. currentmodule:: tlpipe.rfi.local_fit
+
+.. autoclass:: LocalFitMethod
+
+   
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~LocalFitMethod.calculate_background
+      ~LocalFitMethod.fit
+   
+   

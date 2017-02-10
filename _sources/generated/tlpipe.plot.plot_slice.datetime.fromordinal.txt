@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.datetime.fromordinal
+===========================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: datetime.fromordinal

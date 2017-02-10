@@ -1,0 +1,6 @@
+tlpipe.rfi.local_average_fit.LocalAverageFit.fit
+================================================
+
+.. currentmodule:: tlpipe.rfi.local_average_fit
+
+.. automethod:: LocalAverageFit.fit

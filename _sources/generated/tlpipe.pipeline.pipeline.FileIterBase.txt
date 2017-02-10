@@ -41,8 +41,10 @@ tlpipe.pipeline.pipeline.FileIterBase
       ~FileIterBase.read_input
       ~FileIterBase.read_output
       ~FileIterBase.read_process_write
+      ~FileIterBase.restart_iteration
       ~FileIterBase.setup
       ~FileIterBase.show_params
+      ~FileIterBase.stop_iteration
       ~FileIterBase.write_output
    
    

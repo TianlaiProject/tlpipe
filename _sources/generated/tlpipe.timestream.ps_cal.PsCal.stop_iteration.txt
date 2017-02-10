@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.PsCal.stop_iteration
+=============================================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. automethod:: PsCal.stop_iteration

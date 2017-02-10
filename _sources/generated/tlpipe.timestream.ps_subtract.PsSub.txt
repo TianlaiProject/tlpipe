@@ -42,8 +42,10 @@ tlpipe.timestream.ps_subtract.PsSub
       ~PsSub.read_input
       ~PsSub.read_output
       ~PsSub.read_process_write
+      ~PsSub.restart_iteration
       ~PsSub.setup
       ~PsSub.show_params
+      ~PsSub.stop_iteration
       ~PsSub.write_output
    
    

@@ -43,8 +43,10 @@ tlpipe.plot.plot_slice.Plot
       ~Plot.read_input
       ~Plot.read_output
       ~Plot.read_process_write
+      ~Plot.restart_iteration
       ~Plot.setup
       ~Plot.show_params
+      ~Plot.stop_iteration
       ~Plot.write_output
    
    

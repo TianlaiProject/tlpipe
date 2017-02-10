@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.TaskTimestream.restart_iteration
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. automethod:: TaskTimestream.restart_iteration

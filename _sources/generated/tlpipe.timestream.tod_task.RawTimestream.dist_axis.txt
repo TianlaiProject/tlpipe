@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.RawTimestream.dist_axis
+==================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. autoattribute:: RawTimestream.dist_axis

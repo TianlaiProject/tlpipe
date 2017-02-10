@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.datetime.resolution
+==========================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. autoattribute:: datetime.resolution

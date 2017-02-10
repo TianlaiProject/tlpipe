@@ -42,8 +42,10 @@ tlpipe.timestream.accumulate.Accum
       ~Accum.read_input
       ~Accum.read_output
       ~Accum.read_process_write
+      ~Accum.restart_iteration
       ~Accum.setup
       ~Accum.show_params
+      ~Accum.stop_iteration
       ~Accum.write_output
    
    

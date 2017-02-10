@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.datetime.utcoffset
+=============================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: datetime.utcoffset

@@ -1,0 +1,680 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>tlpipe.plot.plot_waterfall.datetime &mdash; tlpipe 0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="tlpipe 0.1 documentation" href="../index.html"/>
+        <link rel="up" title="tlpipe.plot.plot_waterfall" href="tlpipe.plot.plot_waterfall.html"/>
+        <link rel="next" title="tlpipe.plot.plot_waterfall.datetime.day" href="tlpipe.plot.plot_waterfall.datetime.day.html"/>
+        <link rel="prev" title="tlpipe.plot.plot_waterfall.Timestream.values" href="tlpipe.plot.plot_waterfall.Timestream.values.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="../index.html" class="icon icon-home"> tlpipe
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#python-version">Python version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#installation-guid">Installation guid</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutor.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-iterative-pipeline">Non-iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#iterative-pipeline">Iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-trivial-control-flow">Non-trivial control flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#executing-several-times-a-same-task">Executing several times a same task</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#save-intermediate-data">Save intermediate data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#recovery-from-intermediate-data">Recovery from intermediate data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#run-the-pipeline">Run the pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#single-process-run">Single process run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-processes-run">Multiple processes run</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#pipeline-products-and-intermediate-results">Pipeline products and intermediate results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#other-excutable-commands">Other excutable commands</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide.html">Developer&#8217;s guide</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../core.html"><code class="docutils literal"><span class="pre">core</span></code> &#8211; Core functionalities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../core.html#constants">Constants</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.core.constants.html">tlpipe.core.constants</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.core.constants.html#constants">Constants</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../core.html#tianlai-array-model">Tianlai array model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.core.tl_array.html">tlpipe.core.tl_array</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.core.tl_array.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../kiyopy.html"><code class="docutils literal"><span class="pre">kiyopy</span></code> &#8211; Kiyoshi Masui&#8217;s paramter parsing package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../kiyopy.html#pameter-parser">Pameter parser</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.kiyopy.parse_ini.html">tlpipe.kiyopy.parse_ini</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.parse_ini.parse.html">tlpipe.kiyopy.parse_ini.parse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.parse_ini.parse_dict.html">tlpipe.kiyopy.parse_ini.parse_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.parse_ini.write_params.html">tlpipe.kiyopy.parse_ini.write_params</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../kiyopy.html#custom-exceptions">Custom exceptions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.kiyopy.custom_exceptions.html">tlpipe.kiyopy.custom_exceptions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.custom_exceptions.DataError.html">tlpipe.kiyopy.custom_exceptions.DataError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.custom_exceptions.FileParameterTypeError.html">tlpipe.kiyopy.custom_exceptions.FileParameterTypeError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.custom_exceptions.NextIteration.html">tlpipe.kiyopy.custom_exceptions.NextIteration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.custom_exceptions.ParameterFileError.html">tlpipe.kiyopy.custom_exceptions.ParameterFileError</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../kiyopy.html#utilities">Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.kiyopy.utils.html">tlpipe.kiyopy.utils</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.utils.abbreviate_file_path.html">tlpipe.kiyopy.utils.abbreviate_file_path</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.utils.mkdir_p.html">tlpipe.kiyopy.utils.mkdir_p</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.utils.mkparents.html">tlpipe.kiyopy.utils.mkparents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html"><code class="docutils literal"><span class="pre">pipeline</span></code> &#8211; Pipeline control and tasks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../pipeline.html#pipeline">Pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.pipeline.pipeline.html">tlpipe.pipeline.pipeline</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.pipeline.pipeline.html#basic-tasks">Basic Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.pipeline.pipeline.html#pipeline-configuration">Pipeline Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.pipeline.pipeline.html#execution-order">Execution Order</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.pipeline.pipeline.html#advanced-tasks">Advanced Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.pipeline.pipeline.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../timestream.html"><code class="docutils literal"><span class="pre">timestream</span></code> &#8211; Timestream data containers and operating tasks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../timestream.html#data-containers">Data containers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.container.html">tlpipe.timestream.container</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.container.check_axis.html">tlpipe.timestream.container.check_axis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.container.deepcopy.html">tlpipe.timestream.container.deepcopy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.container.ensure_file_list.html">tlpipe.timestream.container.ensure_file_list</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.container.BasicTod.html">tlpipe.timestream.container.BasicTod</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.timestream_common.html">tlpipe.timestream.timestream_common</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.timestream_common.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.raw_timestream.html">tlpipe.timestream.raw_timestream</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.raw_timestream.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.timestream.html">tlpipe.timestream.timestream</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.timestream.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../timestream.html#timestream-base-task">Timestream base task</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.tod_task.html">tlpipe.timestream.tod_task</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.tod_task.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../timestream.html#operating-tasks">Operating tasks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.dispatch.html">tlpipe.timestream.dispatch</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.dispatch.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.detect_ns.html">tlpipe.timestream.detect_ns</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.detect_ns.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.line_rfi.html">tlpipe.timestream.line_rfi</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.line_rfi.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.time_flag.html">tlpipe.timestream.time_flag</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.time_flag.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.freq_flag.html">tlpipe.timestream.freq_flag</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.freq_flag.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ns_cal.html">tlpipe.timestream.ns_cal</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ns_cal.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.rt2ts.html">tlpipe.timestream.rt2ts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.rt2ts.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ps_fit.html">tlpipe.timestream.ps_fit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ps_fit.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ps_cal.html">tlpipe.timestream.ps_cal</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ps_cal.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.phs2src.html">tlpipe.timestream.phs2src</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.phs2src.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.phs2zen.html">tlpipe.timestream.phs2zen</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.phs2zen.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.phase_closure.html">tlpipe.timestream.phase_closure</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.phase_closure.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ps_subtract.html">tlpipe.timestream.ps_subtract</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ps_subtract.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.daytime_mask.html">tlpipe.timestream.daytime_mask</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.daytime_mask.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.re_order.html">tlpipe.timestream.re_order</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.re_order.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.accumulate.html">tlpipe.timestream.accumulate</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.accumulate.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.barrier.html">tlpipe.timestream.barrier</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.barrier.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.average.html">tlpipe.timestream.average</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.average.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.freq_rebin.html">tlpipe.timestream.freq_rebin</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.freq_rebin.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.map_making.html">tlpipe.timestream.map_making</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.map_making.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../timestream.html#utilities">Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.sg_filter.html">tlpipe.timestream.sg_filter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.sg_filter.factorial.html">tlpipe.timestream.sg_filter.factorial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.sg_filter.savitzky_golay.html">tlpipe.timestream.sg_filter.savitzky_golay</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../rfi.html"><code class="docutils literal"><span class="pre">rfi</span></code> &#8211; RFI flagging methods</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../rfi.html#surface-fitting-methods">Surface fitting methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.surface_fit.html">tlpipe.rfi.surface_fit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.surface_fit.SurfaceFitMethod.html">tlpipe.rfi.surface_fit.SurfaceFitMethod</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.local_fit.html">tlpipe.rfi.local_fit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.local_fit.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.local_average_fit.html">tlpipe.rfi.local_average_fit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.local_average_fit.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.local_median_fit.html">tlpipe.rfi.local_median_fit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.local_median_fit.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.local_minimum_fit.html">tlpipe.rfi.local_minimum_fit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.local_minimum_fit.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.gaussian_filter.html">tlpipe.rfi.gaussian_filter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.gaussian_filter.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.interpolate.html">tlpipe.rfi.interpolate</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.interpolate.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../rfi.html#combinatorial-thresholding-methods">Combinatorial thresholding methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.combinatorial_threshold.html">tlpipe.rfi.combinatorial_threshold</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.combinatorial_threshold.winsorized_mean_and_std.html">tlpipe.rfi.combinatorial_threshold.winsorized_mean_and_std</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.combinatorial_threshold.winsorized_mode.html">tlpipe.rfi.combinatorial_threshold.winsorized_mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.combinatorial_threshold.CombinatorialThreshold.html">tlpipe.rfi.combinatorial_threshold.CombinatorialThreshold</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.var_threshold.html">tlpipe.rfi.var_threshold</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.var_threshold.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.sum_threshold.html">tlpipe.rfi.sum_threshold</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.sum_threshold.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../rfi.html#mathematical-morphological-methods">Mathematical morphological methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.dilate_operator.html">tlpipe.rfi.dilate_operator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.dilate_operator.dilate1d.html">tlpipe.rfi.dilate_operator.dilate1d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.dilate_operator.horizontal_dilate.html">tlpipe.rfi.dilate_operator.horizontal_dilate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.dilate_operator.vertical_dilate.html">tlpipe.rfi.dilate_operator.vertical_dilate</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.sir_operator.html">tlpipe.rfi.sir_operator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.sir_operator.horizontal_sir.html">tlpipe.rfi.sir_operator.horizontal_sir</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.sir_operator.sir1d.html">tlpipe.rfi.sir_operator.sir1d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.sir_operator.vertical_sir.html">tlpipe.rfi.sir_operator.vertical_sir</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../rfi.html#utilities">Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.winsorized_stats.html">tlpipe.rfi.winsorized_stats</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.winsorized_stats.winsorize.html">tlpipe.rfi.winsorized_stats.winsorize</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.winsorized_stats.winsorized_mean_and_std.html">tlpipe.rfi.winsorized_stats.winsorized_mean_and_std</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.winsorized_stats.winsorized_mode.html">tlpipe.rfi.winsorized_stats.winsorized_mode</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../cal.html"><code class="docutils literal"><span class="pre">cal</span></code> &#8211; Calibration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../map.html"><code class="docutils literal"><span class="pre">map</span></code> &#8211; Map-making</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../map.html#driftscan-map-making">Driftscan map-making</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../foreground.html"><code class="docutils literal"><span class="pre">foreground</span></code> &#8211; Foreground subtraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ps.html"><code class="docutils literal"><span class="pre">ps</span></code> &#8211; Power spectrum estimation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../plot.html"><code class="docutils literal"><span class="pre">plot</span></code> &#8211; Tasks for plottting</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../plot.html#plotting-tasks">Plotting tasks</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.plot.plot_integral.html">tlpipe.plot.plot_integral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_integral.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.plot.plot_slice.html">tlpipe.plot.plot_slice</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_slice.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="tlpipe.plot.plot_waterfall.html">tlpipe.plot.plot_waterfall</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="tlpipe.plot.plot_waterfall.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.plot.plot_gain.html">tlpipe.plot.plot_gain</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_gain.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../utils.html"><code class="docutils literal"><span class="pre">utils</span></code> &#8211; Utility functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../utils.html#utilities">Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.date_util.html">tlpipe.utils.date_util</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.date_util.get_ephdate.html">tlpipe.utils.date_util.get_ephdate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.date_util.get_juldate.html">tlpipe.utils.date_util.get_juldate</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.np_util.html">tlpipe.utils.np_util</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.np_util.average.html">tlpipe.utils.np_util.average</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.np_util.unique.html">tlpipe.utils.np_util.unique</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.path_util.html">tlpipe.utils.path_util</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.path_util.input_path.html">tlpipe.utils.path_util.input_path</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.path_util.iter_path.html">tlpipe.utils.path_util.iter_path</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.path_util.output_path.html">tlpipe.utils.path_util.output_path</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.pickle_util.html">tlpipe.utils.pickle_util</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.pickle_util.get_value.html">tlpipe.utils.pickle_util.get_value</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">tlpipe</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../plot.html"><code class="docutils literal"><span class="pre">plot</span></code> &#8211; Tasks for plottting</a> &raquo;</li>
+      
+          <li><a href="tlpipe.plot.plot_waterfall.html">tlpipe.plot.plot_waterfall</a> &raquo;</li>
+      
+    <li>tlpipe.plot.plot_waterfall.datetime</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/generated/tlpipe.plot.plot_waterfall.datetime.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="tlpipe-plot-plot-waterfall-datetime">
+<h1>tlpipe.plot.plot_waterfall.datetime<a class="headerlink" href="#tlpipe-plot-plot-waterfall-datetime" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="tlpipe.plot.plot_waterfall.datetime">
+<em class="property">class </em><code class="descclassname">tlpipe.plot.plot_waterfall.</code><code class="descname">datetime</code><span class="sig-paren">(</span><em>year</em>, <em>month</em>, <em>day</em><span class="optional">[</span>, <em>hour</em><span class="optional">[</span>, <em>minute</em><span class="optional">[</span>, <em>second</em><span class="optional">[</span>, <em>microsecond</em><span class="optional">[</span>, <em>tzinfo</em><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#tlpipe.plot.plot_waterfall.datetime" title="Permalink to this definition">¶</a></dt>
+<dd><p>The year, month and day arguments are required. tzinfo may be None, or an
+instance of a tzinfo subclass. The remaining arguments may be ints or longs.</p>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.day.html#tlpipe.plot.plot_waterfall.datetime.day" title="tlpipe.plot.plot_waterfall.datetime.day"><code class="xref py py-obj docutils literal"><span class="pre">day</span></code></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.hour.html#tlpipe.plot.plot_waterfall.datetime.hour" title="tlpipe.plot.plot_waterfall.datetime.hour"><code class="xref py py-obj docutils literal"><span class="pre">hour</span></code></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.max.html#tlpipe.plot.plot_waterfall.datetime.max" title="tlpipe.plot.plot_waterfall.datetime.max"><code class="xref py py-obj docutils literal"><span class="pre">max</span></code></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.microsecond.html#tlpipe.plot.plot_waterfall.datetime.microsecond" title="tlpipe.plot.plot_waterfall.datetime.microsecond"><code class="xref py py-obj docutils literal"><span class="pre">microsecond</span></code></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.min.html#tlpipe.plot.plot_waterfall.datetime.min" title="tlpipe.plot.plot_waterfall.datetime.min"><code class="xref py py-obj docutils literal"><span class="pre">min</span></code></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.minute.html#tlpipe.plot.plot_waterfall.datetime.minute" title="tlpipe.plot.plot_waterfall.datetime.minute"><code class="xref py py-obj docutils literal"><span class="pre">minute</span></code></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.month.html#tlpipe.plot.plot_waterfall.datetime.month" title="tlpipe.plot.plot_waterfall.datetime.month"><code class="xref py py-obj docutils literal"><span class="pre">month</span></code></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.resolution.html#tlpipe.plot.plot_waterfall.datetime.resolution" title="tlpipe.plot.plot_waterfall.datetime.resolution"><code class="xref py py-obj docutils literal"><span class="pre">resolution</span></code></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.second.html#tlpipe.plot.plot_waterfall.datetime.second" title="tlpipe.plot.plot_waterfall.datetime.second"><code class="xref py py-obj docutils literal"><span class="pre">second</span></code></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.tzinfo.html#tlpipe.plot.plot_waterfall.datetime.tzinfo" title="tlpipe.plot.plot_waterfall.datetime.tzinfo"><code class="xref py py-obj docutils literal"><span class="pre">tzinfo</span></code></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.year.html#tlpipe.plot.plot_waterfall.datetime.year" title="tlpipe.plot.plot_waterfall.datetime.year"><code class="xref py py-obj docutils literal"><span class="pre">year</span></code></a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="tlpipe.plot.plot_waterfall.datetime.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tlpipe.plot.plot_waterfall.datetime.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>x.__init__(...) initializes x; see help(type(x)) for signature</p>
+</dd></dl>
+
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.astimezone.html#tlpipe.plot.plot_waterfall.datetime.astimezone" title="tlpipe.plot.plot_waterfall.datetime.astimezone"><code class="xref py py-obj docutils literal"><span class="pre">astimezone</span></code></a></td>
+<td>tz -&gt; convert to local time in new timezone tz</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.combine.html#tlpipe.plot.plot_waterfall.datetime.combine" title="tlpipe.plot.plot_waterfall.datetime.combine"><code class="xref py py-obj docutils literal"><span class="pre">combine</span></code></a></td>
+<td>date, time -&gt; datetime with same date and time fields</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.ctime.html#tlpipe.plot.plot_waterfall.datetime.ctime" title="tlpipe.plot.plot_waterfall.datetime.ctime"><code class="xref py py-obj docutils literal"><span class="pre">ctime</span></code></a></td>
+<td>Return ctime() style string.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.date.html#tlpipe.plot.plot_waterfall.datetime.date" title="tlpipe.plot.plot_waterfall.datetime.date"><code class="xref py py-obj docutils literal"><span class="pre">date</span></code></a></td>
+<td>Return date object with same year, month and day.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.dst.html#tlpipe.plot.plot_waterfall.datetime.dst" title="tlpipe.plot.plot_waterfall.datetime.dst"><code class="xref py py-obj docutils literal"><span class="pre">dst</span></code></a></td>
+<td>Return self.tzinfo.dst(self).</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.fromordinal.html#tlpipe.plot.plot_waterfall.datetime.fromordinal" title="tlpipe.plot.plot_waterfall.datetime.fromordinal"><code class="xref py py-obj docutils literal"><span class="pre">fromordinal</span></code></a></td>
+<td>int -&gt; date corresponding to a proleptic Gregorian ordinal.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.fromtimestamp.html#tlpipe.plot.plot_waterfall.datetime.fromtimestamp" title="tlpipe.plot.plot_waterfall.datetime.fromtimestamp"><code class="xref py py-obj docutils literal"><span class="pre">fromtimestamp</span></code></a></td>
+<td>timestamp[, tz] -&gt; tz&#8217;s local time from POSIX timestamp.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.isocalendar.html#tlpipe.plot.plot_waterfall.datetime.isocalendar" title="tlpipe.plot.plot_waterfall.datetime.isocalendar"><code class="xref py py-obj docutils literal"><span class="pre">isocalendar</span></code></a></td>
+<td>Return a 3-tuple containing ISO year, week number, and weekday.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.isoformat.html#tlpipe.plot.plot_waterfall.datetime.isoformat" title="tlpipe.plot.plot_waterfall.datetime.isoformat"><code class="xref py py-obj docutils literal"><span class="pre">isoformat</span></code></a></td>
+<td>[sep] -&gt; string in ISO 8601 format, YYYY-MM-DDTHH:MM:SS[.mmmmmm][+HH:MM].</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.isoweekday.html#tlpipe.plot.plot_waterfall.datetime.isoweekday" title="tlpipe.plot.plot_waterfall.datetime.isoweekday"><code class="xref py py-obj docutils literal"><span class="pre">isoweekday</span></code></a></td>
+<td>Return the day of the week represented by the date.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.now.html#tlpipe.plot.plot_waterfall.datetime.now" title="tlpipe.plot.plot_waterfall.datetime.now"><code class="xref py py-obj docutils literal"><span class="pre">now</span></code></a></td>
+<td>[tz] -&gt; new datetime with tz&#8217;s local day and time.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.replace.html#tlpipe.plot.plot_waterfall.datetime.replace" title="tlpipe.plot.plot_waterfall.datetime.replace"><code class="xref py py-obj docutils literal"><span class="pre">replace</span></code></a></td>
+<td>Return datetime with new specified fields.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.strftime.html#tlpipe.plot.plot_waterfall.datetime.strftime" title="tlpipe.plot.plot_waterfall.datetime.strftime"><code class="xref py py-obj docutils literal"><span class="pre">strftime</span></code></a></td>
+<td>format -&gt; strftime() style string.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.strptime.html#tlpipe.plot.plot_waterfall.datetime.strptime" title="tlpipe.plot.plot_waterfall.datetime.strptime"><code class="xref py py-obj docutils literal"><span class="pre">strptime</span></code></a></td>
+<td>string, format -&gt; new datetime parsed from a string (like time.strptime()).</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.time.html#tlpipe.plot.plot_waterfall.datetime.time" title="tlpipe.plot.plot_waterfall.datetime.time"><code class="xref py py-obj docutils literal"><span class="pre">time</span></code></a></td>
+<td>Return time object with same time but with tzinfo=None.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.timetuple.html#tlpipe.plot.plot_waterfall.datetime.timetuple" title="tlpipe.plot.plot_waterfall.datetime.timetuple"><code class="xref py py-obj docutils literal"><span class="pre">timetuple</span></code></a></td>
+<td>Return time tuple, compatible with time.localtime().</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.timetz.html#tlpipe.plot.plot_waterfall.datetime.timetz" title="tlpipe.plot.plot_waterfall.datetime.timetz"><code class="xref py py-obj docutils literal"><span class="pre">timetz</span></code></a></td>
+<td>Return time object with same time and tzinfo.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.today.html#tlpipe.plot.plot_waterfall.datetime.today" title="tlpipe.plot.plot_waterfall.datetime.today"><code class="xref py py-obj docutils literal"><span class="pre">today</span></code></a></td>
+<td>Current date or datetime:  same as self.__class__.fromtimestamp(time.time()).</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.toordinal.html#tlpipe.plot.plot_waterfall.datetime.toordinal" title="tlpipe.plot.plot_waterfall.datetime.toordinal"><code class="xref py py-obj docutils literal"><span class="pre">toordinal</span></code></a></td>
+<td>Return proleptic Gregorian ordinal.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.tzname.html#tlpipe.plot.plot_waterfall.datetime.tzname" title="tlpipe.plot.plot_waterfall.datetime.tzname"><code class="xref py py-obj docutils literal"><span class="pre">tzname</span></code></a></td>
+<td>Return self.tzinfo.tzname(self).</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.utcfromtimestamp.html#tlpipe.plot.plot_waterfall.datetime.utcfromtimestamp" title="tlpipe.plot.plot_waterfall.datetime.utcfromtimestamp"><code class="xref py py-obj docutils literal"><span class="pre">utcfromtimestamp</span></code></a></td>
+<td>timestamp -&gt; UTC datetime from a POSIX timestamp (like time.time()).</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.utcnow.html#tlpipe.plot.plot_waterfall.datetime.utcnow" title="tlpipe.plot.plot_waterfall.datetime.utcnow"><code class="xref py py-obj docutils literal"><span class="pre">utcnow</span></code></a></td>
+<td>Return a new datetime representing UTC day and time.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.utcoffset.html#tlpipe.plot.plot_waterfall.datetime.utcoffset" title="tlpipe.plot.plot_waterfall.datetime.utcoffset"><code class="xref py py-obj docutils literal"><span class="pre">utcoffset</span></code></a></td>
+<td>Return self.tzinfo.utcoffset(self).</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.utctimetuple.html#tlpipe.plot.plot_waterfall.datetime.utctimetuple" title="tlpipe.plot.plot_waterfall.datetime.utctimetuple"><code class="xref py py-obj docutils literal"><span class="pre">utctimetuple</span></code></a></td>
+<td>Return UTC time tuple, compatible with time.localtime().</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.plot.plot_waterfall.datetime.weekday.html#tlpipe.plot.plot_waterfall.datetime.weekday" title="tlpipe.plot.plot_waterfall.datetime.weekday"><code class="xref py py-obj docutils literal"><span class="pre">weekday</span></code></a></td>
+<td>Return the day of the week represented by the date.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tlpipe.plot.plot_waterfall.datetime.day.html" class="btn btn-neutral float-right" title="tlpipe.plot.plot_waterfall.datetime.day" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="tlpipe.plot.plot_waterfall.Timestream.values.html" class="btn btn-neutral" title="tlpipe.plot.plot_waterfall.Timestream.values" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Shifan Zuo.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

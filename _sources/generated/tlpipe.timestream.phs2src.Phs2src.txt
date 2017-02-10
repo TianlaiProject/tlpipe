@@ -43,8 +43,10 @@ tlpipe.timestream.phs2src.Phs2src
       ~Phs2src.read_input
       ~Phs2src.read_output
       ~Phs2src.read_process_write
+      ~Phs2src.restart_iteration
       ~Phs2src.setup
       ~Phs2src.show_params
+      ~Phs2src.stop_iteration
       ~Phs2src.write_output
    
    

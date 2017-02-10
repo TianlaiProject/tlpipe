@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.ReOrder.restart_iteration
+====================================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. automethod:: ReOrder.restart_iteration

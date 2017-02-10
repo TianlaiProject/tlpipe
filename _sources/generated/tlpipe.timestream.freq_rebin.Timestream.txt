@@ -18,6 +18,8 @@ tlpipe.timestream.freq_rebin.Timestream
       ~Timestream.bl
       ~Timestream.bl_ordered_datasets
       ~Timestream.comm
+      ~Timestream.dist_axis
+      ~Timestream.dist_axis_name
       ~Timestream.distributed
       ~Timestream.feed_ordered_datasets
       ~Timestream.file

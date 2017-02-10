@@ -1,0 +1,27 @@
+tlpipe.rfi.dilate_operator
+==========================
+
+.. automodule:: tlpipe.rfi.dilate_operator
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      dilate1d
+      horizontal_dilate
+      vertical_dilate
+   
+   
+
+
+   
+   
+   
+
+
+   
+   
+   

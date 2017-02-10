@@ -1,0 +1,26 @@
+tlpipe.rfi.local_minimum_fit.LocalMinimumFit
+============================================
+
+.. currentmodule:: tlpipe.rfi.local_minimum_fit
+
+.. autoclass:: LocalMinimumFit
+
+   
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~LocalMinimumFit.calculate_background
+      ~LocalMinimumFit.fit
+   
+   

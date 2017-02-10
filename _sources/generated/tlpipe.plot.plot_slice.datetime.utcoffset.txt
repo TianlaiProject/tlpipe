@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.datetime.utcoffset
+=========================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: datetime.utcoffset

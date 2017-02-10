@@ -1,0 +1,6 @@
+tlpipe.timestream.rt2ts.Rt2ts.stop_iteration
+============================================
+
+.. currentmodule:: tlpipe.timestream.rt2ts
+
+.. automethod:: Rt2ts.stop_iteration

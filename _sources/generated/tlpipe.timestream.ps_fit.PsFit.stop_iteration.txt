@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.PsFit.stop_iteration
+=============================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: PsFit.stop_iteration

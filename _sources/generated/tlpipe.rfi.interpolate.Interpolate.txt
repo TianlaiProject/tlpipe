@@ -1,0 +1,27 @@
+tlpipe.rfi.interpolate.Interpolate
+==================================
+
+.. currentmodule:: tlpipe.rfi.interpolate
+
+.. autoclass:: Interpolate
+
+   
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Interpolate.fit
+      ~Interpolate.interpolate_horizontally
+      ~Interpolate.interpolate_vertically
+   
+   

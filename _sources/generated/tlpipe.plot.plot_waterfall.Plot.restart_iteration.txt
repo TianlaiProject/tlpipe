@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Plot.restart_iteration
+=================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: Plot.restart_iteration

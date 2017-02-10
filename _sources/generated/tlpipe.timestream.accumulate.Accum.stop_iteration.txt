@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Accum.stop_iteration
+=================================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Accum.stop_iteration

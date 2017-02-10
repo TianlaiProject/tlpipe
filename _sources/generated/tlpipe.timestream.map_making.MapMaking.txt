@@ -42,8 +42,10 @@ tlpipe.timestream.map_making.MapMaking
       ~MapMaking.read_input
       ~MapMaking.read_output
       ~MapMaking.read_process_write
+      ~MapMaking.restart_iteration
       ~MapMaking.setup
       ~MapMaking.show_params
+      ~MapMaking.stop_iteration
       ~MapMaking.write_output
    
    

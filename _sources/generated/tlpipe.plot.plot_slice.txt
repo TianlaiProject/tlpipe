@@ -25,6 +25,7 @@ tlpipe.plot.plot_slice
       Plot
       RawTimestream
       Timestream
+      datetime
    
    
 

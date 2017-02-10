@@ -1,0 +1,6 @@
+tlpipe.rfi.local_median_fit.LocalMedianFit.fit
+==============================================
+
+.. currentmodule:: tlpipe.rfi.local_median_fit
+
+.. automethod:: LocalMedianFit.fit

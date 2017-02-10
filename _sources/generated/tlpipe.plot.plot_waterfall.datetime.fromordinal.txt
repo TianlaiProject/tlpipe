@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.datetime.fromordinal
+===============================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: datetime.fromordinal

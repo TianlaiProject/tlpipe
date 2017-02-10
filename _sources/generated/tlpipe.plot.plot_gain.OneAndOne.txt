@@ -41,8 +41,10 @@ tlpipe.plot.plot_gain.OneAndOne
       ~OneAndOne.read_input
       ~OneAndOne.read_output
       ~OneAndOne.read_process_write
+      ~OneAndOne.restart_iteration
       ~OneAndOne.setup
       ~OneAndOne.show_params
+      ~OneAndOne.stop_iteration
       ~OneAndOne.write_output
    
    

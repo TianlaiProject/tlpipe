@@ -42,8 +42,10 @@ tlpipe.timestream.dispatch.Dispatch
       ~Dispatch.read_input
       ~Dispatch.read_output
       ~Dispatch.read_process_write
+      ~Dispatch.restart_iteration
       ~Dispatch.setup
       ~Dispatch.show_params
+      ~Dispatch.stop_iteration
       ~Dispatch.write_output
    
    

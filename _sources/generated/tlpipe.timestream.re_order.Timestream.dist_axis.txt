@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.dist_axis
+===============================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. autoattribute:: Timestream.dist_axis

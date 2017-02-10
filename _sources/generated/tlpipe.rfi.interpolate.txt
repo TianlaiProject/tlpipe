@@ -1,0 +1,26 @@
+tlpipe.rfi.interpolate
+======================
+
+.. automodule:: tlpipe.rfi.interpolate
+
+   
+   
+   
+
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      Interpolate
+      InterpolatedUnivariateSpline
+   
+   
+
+
+   
+   
+   

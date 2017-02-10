@@ -1,0 +1,6 @@
+tlpipe.rfi.local_median_fit.LocalMedianFit.calculate_background
+===============================================================
+
+.. currentmodule:: tlpipe.rfi.local_median_fit
+
+.. automethod:: LocalMedianFit.calculate_background

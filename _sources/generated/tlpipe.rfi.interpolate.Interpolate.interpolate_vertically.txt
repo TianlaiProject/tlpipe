@@ -1,0 +1,6 @@
+tlpipe.rfi.interpolate.Interpolate.interpolate_vertically
+=========================================================
+
+.. currentmodule:: tlpipe.rfi.interpolate
+
+.. automethod:: Interpolate.interpolate_vertically
