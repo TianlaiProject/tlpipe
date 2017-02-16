@@ -16,6 +16,7 @@ from tlpipe.timestream.timestream import Timestream
 from tlpipe.utils.path_util import output_path
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from matplotlib.ticker import MaxNLocator
 
 
 class Plot(tod_task.TaskTimestream):
@@ -36,6 +37,7 @@ class Plot(tod_task.TaskTimestream):
                     'flag_ns': True,
                     'slices': 10, # number of slices to plot
                     'fig_name': 'slice/slice',
+                    'rotate_xdate': False, # True to rotate xaxis date ticks, else half the number of date ticks
                   }
 
     prefix = 'psl_'
@@ -65,6 +67,7 @@ class Plot(tod_task.TaskTimestream):
         flag_ns = self.params['flag_ns']
         slices = self.params['slices']
         fig_prefix = self.params['fig_name']
+        rotate_xdate = self.params['rotate_xdate']
         tag_output_iter = self.params['tag_output_iter']
         iteration= self.iteration
 
@@ -158,7 +161,16 @@ class Plot(tod_task.TaskTimestream):
             axarr[2].xaxis_date()
             date_format = mdates.DateFormatter('%H:%M')
             axarr[2].xaxis.set_major_formatter(date_format)
-            f.autofmt_xdate()
+            if rotate_xdate:
+                # set the x-axis tick labels to diagonal so it fits better
+                f.autofmt_xdate()
+            else:
+                # half the number of date ticks so they do not overlap
+                # axarr[2].set_xticks(axarr[2].get_xticks()[::2])
+                # reduce the number of tick locators
+                locator = MaxNLocator(nbins=6)
+                axarr[2].xaxis.set_major_locator(locator)
+
         axarr[2].set_xlabel(xlabel)
 
         if pol is None:

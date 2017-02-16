@@ -17,6 +17,7 @@ from tlpipe.timestream.timestream import Timestream
 from tlpipe.utils.path_util import output_path
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from matplotlib.ticker import MaxNLocator
 
 
 class Plot(tod_task.TaskTimestream):
@@ -44,6 +45,7 @@ class Plot(tod_task.TaskTimestream):
                     'flag_color': 'yellow',
                     'transpose': False, # now only for abs plot
                     'fig_name': 'wf/vis',
+                    'rotate_xdate': False, # True to rotate xaxis date ticks, else half the number of date ticks
                   }
 
     prefix = 'pwf_'
@@ -79,6 +81,7 @@ class Plot(tod_task.TaskTimestream):
         flag_color = self.params['flag_color']
         transpose = self.params['transpose']
         fig_prefix = self.params['fig_name']
+        rotate_xdate = self.params['rotate_xdate']
         tag_output_iter = self.params['tag_output_iter']
         iteration = self.iteration
 
@@ -165,9 +168,14 @@ class Plot(tod_task.TaskTimestream):
             else:
                 ax.yaxis.set_major_formatter(date_format)
 
-            # This simply sets the y-axis data to diagonal so it fits better.
             if transpose:
-                fig.autofmt_xdate()
+                if rotate_xdate:
+                    # set the x-axis tick labels to diagonal so it fits better
+                    fig.autofmt_xdate()
+                else:
+                    # reduce the number of tick locators
+                    locator = MaxNLocator(nbins=6)
+                    ax.xaxis.set_major_locator(locator)
 
             ax.set_xlabel(x_label)
             ax.set_ylabel(y_label)

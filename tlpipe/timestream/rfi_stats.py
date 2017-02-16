@@ -15,6 +15,7 @@ from tlpipe.utils.path_util import output_path
 import tlpipe.plot
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from matplotlib.ticker import MaxNLocator
 from caput import mpiutil
 
 
@@ -29,6 +30,7 @@ class Stats(tod_task.TaskTimestream):
                     'excl_auto': False, # exclude auto-correclation
                     'plot_stats': True, # plot RFI statistics
                     'fig_name': 'stats/stats',
+                    'rotate_xdate': False, # True to rotate xaxis date ticks, else half the number of date ticks
                   }
 
     prefix = 'rs_'
@@ -38,6 +40,7 @@ class Stats(tod_task.TaskTimestream):
         excl_auto = self.params['excl_auto']
         plot_stats = self.params['plot_stats']
         fig_prefix = self.params['fig_name']
+        rotate_xdate = self.params['rotate_xdate']
         tag_output_iter = self.params['tag_output_iter']
 
         ts.redistribute('baseline')
@@ -97,7 +100,14 @@ class Stats(tod_task.TaskTimestream):
             ax.xaxis_date()
             date_format = mdates.DateFormatter('%H:%M')
             ax.xaxis.set_major_formatter(date_format)
-            fig.autofmt_xdate()
+            if rotate_xdate:
+                # set the x-axis tick labels to diagonal so it fits better
+                fig.autofmt_xdate()
+            else:
+                # reduce the number of tick locators
+                locator = MaxNLocator(nbins=6)
+                ax.xaxis.set_major_locator(locator)
+
             ax.set_xlabel(xlabel)
             ax.set_ylabel(r'RFI (%)')
             plt.savefig(time_fig_name)
