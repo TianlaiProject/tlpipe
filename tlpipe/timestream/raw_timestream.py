@@ -185,7 +185,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
             # create a bl_ordered dataset that is the feed numbered blorder
             true_bl = np.zeros_like(bl_order)
             # create a bl_ordered dataset that is the pol status of blorder
-            bl_pol = np.empty(bl_order.shape[0], dtype='S2')
+            bl_pol = np.empty(bl_order.shape[0], dtype='i4')
             # fill the dataset
             for bi, (ch1, ch2) in enumerate(bl_order):
                 if ch1 in xch_no:
@@ -208,7 +208,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
 
                 true_bl[bi, 0] = fd1
                 true_bl[bi, 1] = fd2
-                bl_pol[bi] = p1 + p2
+                bl_pol[bi] = self.pol_dict[p1+p2]
 
             # if baseline is just the distributed axis, load the datasets distributed
             if 'baseline' == self.main_data_axes[self.main_data_dist_axis]:
@@ -311,7 +311,8 @@ class RawTimestream(timestream_common.TimestreamCommon):
 
         # create other datasets needed
         # pol ordered dataset
-        ts.create_pol_ordered_dataset('pol', data=np.array(['xx', 'yy', 'xy', 'yx']))
+        p = self.pol_dict
+        ts.create_pol_ordered_dataset('pol', data=np.array([p['xx'], p['yy'], p['xy'], p['yx']]), dtype='i4')
         ts['pol'].attrs['pol_type'] = 'linear'
 
         # bl ordered dataset

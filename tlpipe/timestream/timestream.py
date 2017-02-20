@@ -184,20 +184,22 @@ class Timestream(timestream_common.TimestreamCommon):
             return
 
         if pol.attrs['pol_type'] == 'linear' and pol.shape[0] == 4:
-            pol = pol[:].tolist()
 
             # redistribute to 0 axis if polarization is the distributed axis
             original_dist_axis = self.main_data_dist_axis
             if 'polarization' == self.main_data_axes[self.main_data_dist_axis]:
                 self.redistribute(0)
 
+            pol = pol[:].tolist()
+            p = self.pol_dict
+
             # create a new MPIArray to hold the new data
             md = mpiarray.MPIArray(self.main_data.shape, axis=self.main_data_dist_axis, comm=self.comm, dtype=self.main_data.dtype)
             # convert to Stokes I, Q, U, V
-            md.local_array[:, :, 0] = 0.5 * (self.main_data.local_data[:, :, pol.index('xx')] + self.main_data.local_data[:, :, pol.index('yy')]) # I
-            md.local_array[:, :, 1] = 0.5 * (self.main_data.local_data[:, :, pol.index('xx')] - self.main_data.local_data[:, :, pol.index('yy')]) # Q
-            md.local_array[:, :, 2] = 0.5 * (self.main_data.local_data[:, :, pol.index('xy')] + self.main_data.local_data[:, :, pol.index('yx')]) # U
-            md.local_array[:, :, 3] = -0.5J * (self.main_data.local_data[:, :, pol.index('xy')] - self.main_data.local_data[:, :, pol.index('yx')]) # V
+            md.local_array[:, :, 0] = 0.5 * (self.main_data.local_data[:, :, pol.index(p['xx'])] + self.main_data.local_data[:, :, pol.index(p['yy'])]) # I
+            md.local_array[:, :, 1] = 0.5 * (self.main_data.local_data[:, :, pol.index(p['xx'])] - self.main_data.local_data[:, :, pol.index(p['yy'])]) # Q
+            md.local_array[:, :, 2] = 0.5 * (self.main_data.local_data[:, :, pol.index(p['xy'])] + self.main_data.local_data[:, :, pol.index(p['yx'])]) # U
+            md.local_array[:, :, 3] = -0.5J * (self.main_data.local_data[:, :, pol.index(p['xy'])] - self.main_data.local_data[:, :, pol.index(p['yx'])]) # V
 
             attr_dict = {} # temporarily save attrs of this dataset
             memh5.copyattrs(self.main_data.attrs, attr_dict)
@@ -207,14 +209,14 @@ class Timestream(timestream_common.TimestreamCommon):
             memh5.copyattrs(attr_dict, self.main_data.attrs)
 
             del self['pol']
-            self.create_dataset('pol', data=np.array(['I', 'Q', 'U', 'V']))
+            self.create_dataset('pol', data=np.array([p['I'], p['Q'], p['U'], p['V']]), dtype='i4')
             self['pol'].attrs['pol_type'] = 'stokes'
 
             # redistribute self to original axis
             self.redistribute(original_dist_axis)
 
         else:
-            raise RuntimeError('Can not conver to Stokes polarization')
+            raise RuntimeError('Can not convert to Stokes polarization')
 
     def stokes2lin(self):
         """Convert the Stokes polarized data to linear polarization."""
@@ -228,20 +230,22 @@ class Timestream(timestream_common.TimestreamCommon):
             return
 
         if pol.attrs['pol_type'] == 'stokes' and pol.shape[0] == 4:
-            pol = pol[:].tolist()
 
             # redistribute to 0 axis if polarization is the distributed axis
             original_dist_axis = self.main_data_dist_axis
             if 'polarization' == self.main_data_axes[self.main_data_dist_axis]:
                 self.redistribute(0)
 
+            pol = pol[:].tolist()
+            p = self.pol_dict
+
             # create a new MPIArray to hold the new data
             md = mpiarray.MPIArray(self.main_data.shape, axis=self.main_data_dist_axis, comm=self.comm, dtype=self.main_data.dtype)
             # convert to linear xx, yy, xy, yx
-            md.local_array[:, :, 0] = self.main_data.local_data[:, :, pol.index('I')] + self.main_data.local_data[:, :, pol.index('Q')] # xx
-            md.local_array[:, :, 1] = self.main_data.local_data[:, :, pol.index('I')] - self.main_data.local_data[:, :, pol.index('Q')] # yy
-            md.local_array[:, :, 2] = self.main_data.local_data[:, :, pol.index('U')] + 1.0J * self.main_data.local_data[:, :, pol.index('V')] # xy
-            md.local_array[:, :, 3] = self.main_data.local_data[:, :, pol.index('U')] - 1.0J * self.main_data.local_data[:, :, pol.index('V')] # yx
+            md.local_array[:, :, 0] = self.main_data.local_data[:, :, pol.index(p['I'])] + self.main_data.local_data[:, :, pol.index(p['Q'])] # xx
+            md.local_array[:, :, 1] = self.main_data.local_data[:, :, pol.index(p['I'])] - self.main_data.local_data[:, :, pol.index(p['Q'])] # yy
+            md.local_array[:, :, 2] = self.main_data.local_data[:, :, pol.index(p['U'])] + 1.0J * self.main_data.local_data[:, :, pol.index(p['V'])] # xy
+            md.local_array[:, :, 3] = self.main_data.local_data[:, :, pol.index(p['U'])] - 1.0J * self.main_data.local_data[:, :, pol.index(p['V'])] # yx
 
             attr_dict = {} # temporarily save attrs of this dataset
             memh5.copyattrs(self.main_data.attrs, attr_dict)
@@ -251,14 +255,14 @@ class Timestream(timestream_common.TimestreamCommon):
             memh5.copyattrs(attr_dict, self.main_data.attrs)
 
             del self['pol']
-            self.create_dataset('pol', data=np.array(['xx', 'yy', 'xy', 'yx']))
+            self.create_dataset('pol', data=np.array([p['xx'], p['yy'], p['xy'], p['yx']]), dtype='i4')
             self['pol'].attrs['pol_type'] = 'linear'
 
             # redistribute self to original axis
             self.redistribute(original_dist_axis)
 
         else:
-            raise RuntimeError('Can not conver to linear polarization')
+            raise RuntimeError('Can not convert to linear polarization')
 
 
     def pol_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):

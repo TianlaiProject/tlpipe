@@ -70,6 +70,15 @@ class TimestreamCommon(container.BasicTod):
         return self._feed_ordered_datasets_
 
 
+    _pol_dict = {0: 'xx', 1: 'yy', 2: 'xy', 3: 'yx', 4: 'I', 5: 'Q', 6: 'U', 7: 'V',
+                 'xx': 0, 'yy': 1, 'xy': 2, 'yx': 3, 'I': 4, 'Q': 5, 'U': 6, 'V':7}
+
+    @property
+    def pol_dict(self):
+        "A dict maps polarization code to integer."
+        return self._pol_dict
+
+
     def time_select(self, value):
         """Select data to be loaded from input files along the time axis.
 
