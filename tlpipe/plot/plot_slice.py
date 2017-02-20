@@ -19,6 +19,20 @@ import matplotlib.dates as mdates
 from matplotlib.ticker import MaxNLocator
 
 
+def chno2fno(chp):
+    """Simple way to convert a channel pair `chp` to polarization and true baseline number."""
+    pol_dict = {0: 'x', 1: 'y'}
+    fd1, p1 = (chp[0]+1)/2, pol_dict[(chp[0]+1)%2]
+    fd2, p2 = (chp[1]+1)/2, pol_dict[(chp[1]+1)%2]
+
+    # NOTE: change order needs conjugate the corresponding visibility
+    # if fd1 > fd2:
+    #     fd1, fd2 = fd2, fd1
+    #     p1, p2 = p2, p1
+
+    return p1+p2, (fd1, fd2)
+
+
 class Plot(tod_task.TaskTimestream):
     """Plot time or frequency slices.
 
@@ -38,6 +52,7 @@ class Plot(tod_task.TaskTimestream):
                     'slices': 10, # number of slices to plot
                     'fig_name': 'slice/slice',
                     'rotate_xdate': False, # True to rotate xaxis date ticks, else half the number of date ticks
+                    'feed_no': False, # True to use feed number (true baseline) else use channel no
                   }
 
     prefix = 'psl_'
@@ -68,15 +83,19 @@ class Plot(tod_task.TaskTimestream):
         slices = self.params['slices']
         fig_prefix = self.params['fig_name']
         rotate_xdate = self.params['rotate_xdate']
+        feed_no = self.params['feed_no']
         tag_output_iter = self.params['tag_output_iter']
         iteration= self.iteration
 
         if isinstance(ts, Timestream): # for Timestream
             pol = bl[0]
             bl = tuple(bl[1])
+            feed_no = True
         elif isinstance(ts, RawTimestream): # for RawTimestream
             pol = None
             bl = tuple(bl)
+            if feed_no:
+                pol, bl = chno2fno(bl)
         else:
             raise ValueError('Need either a RawTimestream or Timestream')
 
@@ -173,10 +192,10 @@ class Plot(tod_task.TaskTimestream):
 
         axarr[2].set_xlabel(xlabel)
 
-        if pol is None:
-            fig_name = '%s_%s_%d_%d.png' % (fig_prefix, plot_type, bl[0], bl[1])
-        else:
+        if feed_no:
             fig_name = '%s_%s_%d_%d_%s.png' % (fig_prefix, plot_type, bl[0], bl[1], pol)
+        else:
+            fig_name = '%s_%s_%d_%d.png' % (fig_prefix, plot_type, bl[0], bl[1])
         if tag_output_iter:
             fig_name = output_path(fig_name, iteration=iteration)
         else:
