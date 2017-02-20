@@ -169,6 +169,55 @@ class RawTimestream(timestream_common.TimestreamCommon):
             super(RawTimestream, self)._load_a_common_dataset(name)
 
 
+    def load_common(self):
+        """Load common attributes and datasets from the first file.
+
+        This supposes that all common data are the same as that in the first file.
+        """
+
+        super(RawTimestream, self).load_common()
+
+        if 'true_blorder' not in self.iterkeys():
+            feed_no = self['feedno'][:].tolist()
+            xch_no = self['channo'][:, 0].tolist()
+            ych_no = self['channo'][:, 1].tolist()
+            bl_order = self['blorder'].local_data
+            # create a bl_ordered dataset that is the feed numbered blorder
+            true_bl = np.zeros_like(bl_order)
+            # create a bl_ordered dataset that is the pol status of blorder
+            bl_pol = np.empty(bl_order.shape[0], dtype='S2')
+            # fill the dataset
+            for bi, (ch1, ch2) in enumerate(bl_order):
+                if ch1 in xch_no:
+                    fd1 = feed_no[xch_no.index(ch1)]
+                    p1 = 'x'
+                elif ch1 in ych_no:
+                    fd1 = feed_no[ych_no.index(ch1)]
+                    p1 = 'y'
+                else:
+                    raise RuntimeError('%d is not in dataset channo' % ch1)
+
+                if ch2 in xch_no:
+                    fd2 = feed_no[xch_no.index(ch2)]
+                    p2 = 'x'
+                elif ch2 in ych_no:
+                    fd2 = feed_no[ych_no.index(ch2)]
+                    p2 = 'y'
+                else:
+                    raise RuntimeError('%d is not in dataset channo' % ch2)
+
+                true_bl[bi, 0] = fd1
+                true_bl[bi, 1] = fd2
+                bl_pol[bi] = p1 + p2
+
+            # if baseline is just the distributed axis, load the datasets distributed
+            if 'baseline' == self.main_data_axes[self.main_data_dist_axis]:
+                true_bl = mpiarray.MPIArray.wrap(true_bl, axis=0, comm=self.comm)
+                bl_pol = mpiarray.MPIArray.wrap(bl_pol, axis=0, comm=self.comm)
+            self.create_bl_ordered_dataset('true_blorder', data=true_bl)
+            self.create_bl_ordered_dataset('bl_pol', data=bl_pol)
+
+
     def separate_pol_and_bl(self, keep_dist_axis=False):
         """Separate baseline axis to polarization and baseline.
 
@@ -271,7 +320,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
         # copy attrs of this dset
         memh5.copyattrs(self['blorder'].attrs, ts['blorder'].attrs)
         # other bl ordered dataset
-        if len(set(self.bl_ordered_datasets.keys()) - {'vis', 'vis_mask', 'blorder'}) > 0:
+        if len(set(self.bl_ordered_datasets.keys()) - {'vis', 'vis_mask', 'blorder', 'true_blorder', 'bl_pol'}) > 0:
             raise RuntimeError('Should not have other bl_ordered_datasets %s' % (set(self.bl_ordered_datasets.keys()) - {'vis', 'vis_mask', 'blorder'}))
 
         # copy other attrs
