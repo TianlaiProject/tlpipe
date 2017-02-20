@@ -19,20 +19,6 @@ import matplotlib.dates as mdates
 from matplotlib.ticker import MaxNLocator
 
 
-def chno2fno(chp):
-    """Simple way to convert a channel pair `chp` to polarization and true baseline number."""
-    pol_dict = {0: 'x', 1: 'y'}
-    fd1, p1 = (chp[0]+1)/2, pol_dict[(chp[0]+1)%2]
-    fd2, p2 = (chp[1]+1)/2, pol_dict[(chp[1]+1)%2]
-
-    # NOTE: change order needs conjugate the corresponding visibility
-    # if fd1 > fd2:
-    #     fd1, fd2 = fd2, fd1
-    #     p1, p2 = p2, p1
-
-    return p1+p2, (fd1, fd2)
-
-
 class Plot(tod_task.TaskTimestream):
     """Plot time or frequency slices.
 
@@ -95,7 +81,8 @@ class Plot(tod_task.TaskTimestream):
             pol = None
             bl = tuple(bl)
             if feed_no:
-                pol, bl = chno2fno(bl)
+                pol = ts['bl_pol'].local_data[li]
+                bl = tuple(ts['true_blorder'].local_data[li])
         else:
             raise ValueError('Need either a RawTimestream or Timestream')
 
@@ -193,7 +180,7 @@ class Plot(tod_task.TaskTimestream):
         axarr[2].set_xlabel(xlabel)
 
         if feed_no:
-            fig_name = '%s_%s_%d_%d_%s.png' % (fig_prefix, plot_type, bl[0], bl[1], pol)
+            fig_name = '%s_%s_%d_%d_%s.png' % (fig_prefix, plot_type, bl[0], bl[1], ts.pol_dict[pol])
         else:
             fig_name = '%s_%s_%d_%d.png' % (fig_prefix, plot_type, bl[0], bl[1])
         if tag_output_iter:
