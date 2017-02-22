@@ -26,7 +26,7 @@ class Detect(tod_task.TaskTimestream):
 
     params_init = {
                     'num_auto': 6, # least number of feeds to check auto-correlation
-                    'sigma': 3.0, # how many std to mask
+                    'threshold': 2.24, # threshold of the MAD-median rule
                   }
 
     prefix = 'bd_'
@@ -36,7 +36,7 @@ class Detect(tod_task.TaskTimestream):
         assert isinstance(rt, RawTimestream), '%s only works for RawTimestream object currently' % self.__class__.__name__
 
         num_auto = self.params['num_auto']
-        sigma = self.params['sigma']
+        threshold = self.params['threshold']
 
         rt.redistribute('time')
 
@@ -57,16 +57,18 @@ class Detect(tod_task.TaskTimestream):
                 else:
                     yy_auto.append(bi)
 
-        # mask values exceed given threshold
+        # mask values exceed given threshold by using the MAD-median rule
+        # see Wilcox, 2014, Modern robust statistical methods can provide substantially higher power and a deeper understanding of data
         for auto in [xx_auto, yy_auto]:
             if len(auto) >= num_auto:
                 vis1 = np.ma.array(vis[..., auto].real, mask=vis_mask[..., auto])
-                mean = vis1.mean(axis=2)
-                std = vis1.std(axis=2)
+                median = np.ma.median(vis1, axis=2)
+                abs_diff = np.abs(vis1-median[:, :, np.newaxis])
+                mad = np.ma.median(abs_diff, axis=2) / 0.6745
                 cnt = vis1.count(axis=2)
                 mask1 = vis_mask[..., auto].copy()
                 # avoid statistical error for small cnt
-                cond = np.logical_and(np.abs(vis1-mean[:, :, np.newaxis])>sigma*std[:, :, np.newaxis], np.tile(cnt[:, :, np.newaxis], (1, 1, len(auto)))>=num_auto)
+                cond = np.logical_and(abs_diff>threshold*mad[:, :, np.newaxis], np.tile(cnt[:, :, np.newaxis], (1, 1, len(auto)))>=num_auto)
                 mask1 = np.where(cond, True, mask1)
 
                 vis_mask[..., auto] = mask1 # replace with the new mask
@@ -79,7 +81,7 @@ class Detect(tod_task.TaskTimestream):
         for bi in xrange(len(rt.local_bl)):
             # create a copy of vis for this bi, and fill 0 in masked positions
             vis1 = np.where(rt.local_vis_mask[..., bi], 0, rt.local_vis[..., bi])
-            if np.sum(rt.local_vis_mask) >= 0.15 * np.prod(rt.local_vis.shape):
+            if np.sum(rt.local_vis_mask) >= 0.5 * np.prod(rt.local_vis.shape):
                 bl = tuple(rt.local_bl[bi])
                 problematic_bls.append(bl)
                 # print 'Problematic baseline: (%d, %d)' % bl
