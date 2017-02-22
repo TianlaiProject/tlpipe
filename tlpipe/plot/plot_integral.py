@@ -8,12 +8,15 @@ Inheritance diagram
 
 """
 
+from datetime import datetime
 import numpy as np
 from tlpipe.timestream import tod_task
 from tlpipe.timestream.raw_timestream import RawTimestream
 from tlpipe.timestream.timestream import Timestream
 from tlpipe.utils.path_util import output_path
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+from matplotlib.ticker import MaxNLocator
 
 
 class Plot(tod_task.TaskTimestream):
@@ -34,6 +37,8 @@ class Plot(tod_task.TaskTimestream):
                     'flag_mask': True,
                     'flag_ns': True,
                     'fig_name': 'int/int',
+                    'rotate_xdate': False, # True to rotate xaxis date ticks, else half the number of date ticks
+                    'feed_no': False, # True to use feed number (true baseline) else use channel no
                   }
 
     prefix = 'pit_'
@@ -62,15 +67,21 @@ class Plot(tod_task.TaskTimestream):
         flag_mask = self.params['flag_mask']
         flag_ns = self.params['flag_ns']
         fig_prefix = self.params['fig_name']
+        rotate_xdate = self.params['rotate_xdate']
+        feed_no = self.params['feed_no']
         tag_output_iter = self.params['tag_output_iter']
         iteration= self.iteration
 
         if isinstance(ts, Timestream): # for Timestream
             pol = bl[0]
             bl = tuple(bl[1])
+            feed_no = True
         elif isinstance(ts, RawTimestream): # for RawTimestream
             pol = None
             bl = tuple(bl)
+            if feed_no:
+                pol = ts['bl_pol'].local_data[li]
+                bl = tuple(ts['true_blorder'].local_data[li])
         else:
             raise ValueError('Need either a RawTimestream or Timestream')
 
@@ -94,13 +105,16 @@ class Plot(tod_task.TaskTimestream):
             vis1 = vis
 
         if integral == 'time':
-            ax_val = ts.freq[:]
             vis1 = np.ma.mean(np.ma.masked_invalid(vis1), axis=0)
+            ax_val = ts.freq[:]
             xlabel = r'$\nu$ / MHz'
         elif integral == 'freq':
-            ax_val = ts.time[:]
             vis1 = np.ma.mean(np.ma.masked_invalid(vis1), axis=1)
-            xlabel = r'$t$ / Julian Date'
+            # ax_val = ts.time[:]
+            # xlabel = r'$t$ / Julian Date'
+            ax_val = np.array([ datetime.fromtimestamp(sec) for sec in ts['sec1970'][:] ])
+            xlabel = '%s' % ax_val[0].date()
+            ax_val = mdates.date2num(ax_val)
         else:
             raise ValueError('Unknown integral type %s' % integral)
 
@@ -112,12 +126,22 @@ class Plot(tod_task.TaskTimestream):
         axarr[1].legend()
         axarr[2].plot(ax_val, np.abs(vis1), label='abs')
         axarr[2].legend()
+        axarr[2].xaxis_date()
+        date_format = mdates.DateFormatter('%H:%M')
+        axarr[2].xaxis.set_major_formatter(date_format)
+        if rotate_xdate:
+            # set the x-axis tick labels to diagonal so it fits better
+            f.autofmt_xdate()
+        else:
+            # reduce the number of tick locators
+            locator = MaxNLocator(nbins=6)
+            axarr[2].xaxis.set_major_locator(locator)
         axarr[2].set_xlabel(xlabel)
 
-        if pol is None:
-            fig_name = '%s_%s_%d_%d.png' % (fig_prefix, integral, bl[0], bl[1])
+        if feed_no:
+            fig_name = '%s_%s_%d_%d_%s.png' % (fig_prefix, integral, bl[0], bl[1], ts.pol_dict[pol])
         else:
-            fig_name = '%s_%s_%d_%d_%s.png' % (fig_prefix, integral, bl[0], bl[1], pol)
+            fig_name = '%s_%s_%d_%d.png' % (fig_prefix, integral, bl[0], bl[1])
         if tag_output_iter:
             fig_name = output_path(fig_name, iteration=iteration)
         else:

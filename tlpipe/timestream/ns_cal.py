@@ -9,6 +9,7 @@ Inheritance diagram
 """
 
 import os
+from datetime import datetime
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
 import tod_task
@@ -16,6 +17,8 @@ from raw_timestream import RawTimestream
 from tlpipe.utils.path_util import output_path
 import tlpipe.plot
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+from matplotlib.ticker import MaxNLocator
 
 
 class NsCal(tod_task.TaskTimestream):
@@ -64,6 +67,8 @@ class NsCal(tod_task.TaskTimestream):
                     'bl_excl': [],
                     'freq_incl': 'all', # or a list of include freq idx
                     'freq_excl': [],
+                    'rotate_xdate': False, # True to rotate xaxis date ticks, else half the number of date ticks
+                    'feed_no': False, # True to use feed number (true baseline) else use channel no
                   }
 
     prefix = 'nc_'
@@ -104,6 +109,8 @@ class NsCal(tod_task.TaskTimestream):
         num_mean = self.params['num_mean']
         plot_phs = self.params['plot_phs']
         fig_prefix = self.params['fig_name']
+        rotate_xdate = self.params['rotate_xdate']
+        feed_no = self.params['feed_no']
         tag_output_iter = self.params['tag_output_iter']
         iteration = self.iteration
         bls_plt = kwargs['bls_plt']
@@ -159,12 +166,31 @@ class NsCal(tod_task.TaskTimestream):
 
         if plot_phs and (bl in bls_plt and fi in freq_plt):
             plt.figure()
-            time = rt.time[:]
-            plt.plot(time, all_phase)
-            plt.plot(time[valid_inds], phase, 'ro')
-            plt.xlabel(r'$t$ / Julian Date')
-            plt.ylabel(r'$\Delta \phi$ / radian')
-            fig_name = '%s_%f_%d_%d.png' % (fig_prefix, fbl[0], fbl[1][0], fbl[1][1])
+            fig, ax = plt.subplots()
+            ax_val = np.array([ datetime.fromtimestamp(sec) for sec in rt['sec1970'][:] ])
+            xlabel = '%s' % ax_val[0].date()
+            ax_val = mdates.date2num(ax_val)
+            ax.plot(ax_val, all_phase)
+            ax.plot(ax_val[valid_inds], phase, 'ro')
+            ax.xaxis_date()
+            date_format = mdates.DateFormatter('%H:%M')
+            ax.xaxis.set_major_formatter(date_format)
+            if rotate_xdate:
+                # set the x-axis tick labels to diagonal so it fits better
+                fig.autofmt_xdate()
+            else:
+                # reduce the number of tick locators
+                locator = MaxNLocator(nbins=6)
+                ax.xaxis.set_major_locator(locator)
+            ax.set_xlabel(xlabel)
+            ax.set_ylabel(r'$\Delta \phi$ / radian')
+
+            if feed_no:
+                pol = rt['bl_pol'].local_data[li[1]]
+                bl = tuple(rt['true_blorder'].local_data[li[1]])
+                fig_name = '%s_%f_%d_%d_%s.png' % (fig_prefix, fbl[0], bl[0], bl[1], rt.pol_dict[pol])
+            else:
+                fig_name = '%s_%f_%d_%d.png' % (fig_prefix, fbl[0], fbl[1][0], fbl[1][1])
             if tag_output_iter:
                 fig_name = output_path(fig_name, iteration=iteration)
             else:

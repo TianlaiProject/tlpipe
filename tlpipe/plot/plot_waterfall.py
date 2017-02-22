@@ -46,6 +46,7 @@ class Plot(tod_task.TaskTimestream):
                     'transpose': False, # now only for abs plot
                     'fig_name': 'wf/vis',
                     'rotate_xdate': False, # True to rotate xaxis date ticks, else half the number of date ticks
+                    'feed_no': False, # True to use feed number (true baseline) else use channel no
                   }
 
     prefix = 'pwf_'
@@ -82,15 +83,20 @@ class Plot(tod_task.TaskTimestream):
         transpose = self.params['transpose']
         fig_prefix = self.params['fig_name']
         rotate_xdate = self.params['rotate_xdate']
+        feed_no = self.params['feed_no']
         tag_output_iter = self.params['tag_output_iter']
         iteration = self.iteration
 
         if isinstance(ts, Timestream): # for Timestream
             pol = bl[0]
             bl = tuple(bl[1])
+            feed_no = True
         elif isinstance(ts, RawTimestream): # for RawTimestream
             pol = None
             bl = tuple(bl)
+            if feed_no:
+                pol = ts['bl_pol'].local_data[li]
+                bl = tuple(ts['true_blorder'].local_data[li])
         else:
             raise ValueError('Need either a RawTimestream or Timestream')
 
@@ -200,10 +206,10 @@ class Plot(tod_task.TaskTimestream):
                 axarr[2].set_xlabel(x_label)
                 plt.colorbar(im, ax=axarr[2])
 
-        if pol is None:
-            fig_name = '%s_%d_%d.png' % (fig_prefix, bl[0], bl[1])
+        if feed_no:
+            fig_name = '%s_%d_%d_%s.png' % (fig_prefix, bl[0], bl[1], ts.pol_dict[pol])
         else:
-            fig_name = '%s_%d_%d_%s.png' % (fig_prefix, bl[0], bl[1], pol)
+            fig_name = '%s_%d_%d.png' % (fig_prefix, bl[0], bl[1])
 
         if tag_output_iter:
             fig_name = output_path(fig_name, iteration=iteration)
