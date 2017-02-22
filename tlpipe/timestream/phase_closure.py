@@ -111,7 +111,8 @@ class Closure(tod_task.TaskTimestream):
 
         ra = ts['ra_dec'][:, 0]
         ra = np.unwrap(ra)
-        ra = ra[np.logical_not(ts['ns_on'][:])] # get only ns_off values
+        if 'ns_on' in ts.iterkeys():
+            ra = ra[np.logical_not(ts['ns_on'][:])] # get only ns_off values
         abs_diff = np.abs(np.diff(s._ra - ra))
         ind1 = np.argmin(abs_diff)
         if mpiutil.rank0:

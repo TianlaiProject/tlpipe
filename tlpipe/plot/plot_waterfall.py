@@ -104,16 +104,19 @@ class Plot(tod_task.TaskTimestream):
         if flag_mask:
             vis1 = np.ma.array(vis, mask=vis_mask)
         elif flag_ns:
-            vis1 = vis.copy()
-            on = np.where(ts['ns_on'][:])[0]
-            if not interpolate_ns:
-                vis1[on] = complex(np.nan, np.nan)
+            if 'ns_on' in ts.iterkeys():
+                vis1 = vis.copy()
+                on = np.where(ts['ns_on'][:])[0]
+                if not interpolate_ns:
+                    vis1[on] = complex(np.nan, np.nan)
+                else:
+                    off = np.where(np.logical_not(ts['ns_on'][:]))[0]
+                    for fi in xrange(vis1.shape[1]):
+                        itp_real = InterpolatedUnivariateSpline(off, vis1[off, fi].real)
+                        itp_imag= InterpolatedUnivariateSpline(off, vis1[off, fi].imag)
+                        vis1[on, fi] = itp_real(on) + 1.0J * itp_imag(on)
             else:
-                off = np.where(np.logical_not(ts['ns_on'][:]))[0]
-                for fi in xrange(vis1.shape[1]):
-                    itp_real = InterpolatedUnivariateSpline(off, vis1[off, fi].real)
-                    itp_imag= InterpolatedUnivariateSpline(off, vis1[off, fi].imag)
-                    vis1[on, fi] = itp_real(on) + 1.0J * itp_imag(on)
+                vis1 = vis
         else:
             vis1 = vis
 

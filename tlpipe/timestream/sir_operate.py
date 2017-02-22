@@ -47,19 +47,23 @@ class Sir(tod_task.TaskTimestream):
 
         if vis_mask.ndim == 2:
             mask = vis_mask.copy()
-            mask[ts['ns_on']] = False
+            if 'ns_on' in ts.iterkeys():
+                mask[ts['ns_on']] = False
             mask = sir_operator.vertical_sir(mask, eta)
             # mask[ts['ns_on']] = True
             vis_mask[:] = sir_operator.horizontal_sir(mask, eta)
-            mask[ts['ns_on']] = True
+            if 'ns_on' in ts.iterkeys():
+                mask[ts['ns_on']] = True
         elif vis_mask.ndim == 3:
             # This shold be done after the combination of all pols
             mask = vis_mask[:, :, 0].copy()
-            mask[ts['ns_on']] = False
+            if 'ns_on' in ts.iterkeys():
+                mask[ts['ns_on']] = False
             mask = sir_operator.vertical_sir(mask, eta)
             # mask[ts['ns_on']] = True
             vis_mask[:] = sir_operator.horizontal_sir(mask, eta)[:, :, np.newaxis]
-            mask[ts['ns_on']] = True
+            if 'ns_on' in ts.iterkeys():
+                mask[ts['ns_on']] = True
         else:
             raise RuntimeError('Invalid shape of vis_mask: %s' % vis_mask.shape)
 

@@ -67,7 +67,8 @@ class Stats(tod_task.TaskTimestream):
         nb = mpiutil.allreduce(lnb, comm=ts.comm)
 
         # un-mask ns-on positions
-        vis_mask[ts['ns_on'][:]] = False
+        if 'ns_on' in ts.iterkeys():
+            vis_mask[ts['ns_on'][:]] = False
 
         # statistics along time axis
         time_mask = np.sum(vis_mask, axis=(1, 2)).reshape(-1, 1)

@@ -102,9 +102,10 @@ class Plot(tod_task.TaskTimestream):
                 vis1 = np.ma.array(vis[s:e], mask=vis_mask[s:e])
             elif flag_ns:
                 vis1 = vis[s:e].copy()
-                ns_on = ts['ns_on'][s:e]
-                on = np.where(ns_on)[0]
-                vis1[on] = complex(np.nan, np.nan)
+                if 'ns_on' in ts.iterkeys():
+                    ns_on = ts['ns_on'][s:e]
+                    on = np.where(ns_on)[0]
+                    vis1[on] = complex(np.nan, np.nan)
             else:
                 vis1 = vis[s:e]
 
@@ -122,9 +123,10 @@ class Plot(tod_task.TaskTimestream):
                 vis1 = np.ma.array(vis[:, s:e], mask=vis_mask[:, s:e])
             elif flag_ns:
                 vis1 = vis[:, s:e].copy()
-                ns_on = ts['ns_on'][:]
-                on = np.where(ns_on)[0]
-                vis1[on] = complex(np.nan, np.nan)
+                if 'ns_on' in ts.iterkeys():
+                    ns_on = ts['ns_on'][:]
+                    on = np.where(ns_on)[0]
+                    vis1[on] = complex(np.nan, np.nan)
             else:
                 vis1 = vis[:, s:e]
 

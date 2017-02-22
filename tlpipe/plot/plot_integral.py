@@ -84,9 +84,12 @@ class Plot(tod_task.TaskTimestream):
         if flag_mask:
             vis1 = np.ma.array(vis, mask=vis_mask)
         elif flag_ns:
-            vis1 = vis.copy()
-            on = np.where(ts['ns_on'][:])[0]
-            vis1[on] = complex(np.nan, np.nan)
+            if 'ns_on' in ts.iterkeys():
+                vis1 = vis.copy()
+                on = np.where(ts['ns_on'][:])[0]
+                vis1[on] = complex(np.nan, np.nan)
+            else:
+                vis1 = vis
         else:
             vis1 = vis
 

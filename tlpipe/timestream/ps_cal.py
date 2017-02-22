@@ -136,7 +136,7 @@ class PsCal(tod_task.TaskTimestream):
         Vmat = np.zeros((nfeed, nfeed), dtype=ts.main_data.dtype)
         for ind, ti in enumerate(range(start_ind, end_ind)):
             # when noise on, just pass
-            if ts['ns_on'][ti]:
+            if 'ns_on' in ts.iterkeys() and ts['ns_on'][ti]:
                 continue
             aa.set_jultime(ts['jul_date'][ti])
             s.compute(aa)
