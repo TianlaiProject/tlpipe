@@ -197,6 +197,10 @@ class Plot(tod_task.TaskTimestream):
                 fig, axarr = plt.subplots(1, 2, sharey=True)
             im = axarr[0].imshow(vis1.real, extent=extent, origin='lower', aspect='auto', cmap=cmap)
             axarr[0].set_xlabel(x_label)
+            axarr[0].yaxis_date()
+            # format datetime string
+            date_format = mdates.DateFormatter('%H:%M')
+            axarr[0].yaxis.set_major_formatter(date_format)
             axarr[0].set_ylabel(y_label)
             plt.colorbar(im, ax=axarr[0])
             im = axarr[1].imshow(vis1.imag, extent=extent, origin='lower', aspect='auto', cmap=cmap)
