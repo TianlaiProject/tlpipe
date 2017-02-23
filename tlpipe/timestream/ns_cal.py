@@ -18,7 +18,7 @@ from tlpipe.utils.path_util import output_path
 import tlpipe.plot
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import MaxNLocator, AutoMinorLocator
 
 
 class NsCal(tod_task.TaskTimestream):
@@ -182,6 +182,7 @@ class NsCal(tod_task.TaskTimestream):
                 # reduce the number of tick locators
                 locator = MaxNLocator(nbins=6)
                 ax.xaxis.set_major_locator(locator)
+                ax.xaxis.set_minor_locator(AutoMinorLocator(2))
             ax.set_xlabel(xlabel)
             ax.set_ylabel(r'$\Delta \phi$ / radian')
 

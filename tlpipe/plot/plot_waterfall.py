@@ -17,7 +17,7 @@ from tlpipe.timestream.timestream import Timestream
 from tlpipe.utils.path_util import output_path
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from matplotlib.ticker import MaxNLocator
+from matplotlib.ticker import MaxNLocator, AutoMinorLocator
 
 
 class Plot(tod_task.TaskTimestream):
@@ -185,6 +185,7 @@ class Plot(tod_task.TaskTimestream):
                     # reduce the number of tick locators
                     locator = MaxNLocator(nbins=6)
                     ax.xaxis.set_major_locator(locator)
+                    ax.xaxis.set_minor_locator(AutoMinorLocator(2))
 
             ax.set_xlabel(x_label)
             ax.set_ylabel(y_label)
