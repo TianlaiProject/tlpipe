@@ -265,7 +265,7 @@ class Timestream(timestream_common.TimestreamCommon):
             raise RuntimeError('Can not convert to linear polarization')
 
 
-    def pol_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
+    def pol_data_operate(self, func, full_data=False, copy_data=False, keep_dist_axis=False, **kwargs):
         """Data operation along the polarization axis.
 
         Parameters
@@ -278,6 +278,9 @@ class Timestream(timestream_common.TimestreamCommon):
             Whether the operations of `func` will need the full data section
             corresponding to the axis index, if True, data will first
             redistributed along polarization axis. Default False.
+        copy_data : bool, optional
+            If True, `func` will operate on a copy of the data, so changes will
+            have no impact on the data the container holds. Default False.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
@@ -285,10 +288,10 @@ class Timestream(timestream_common.TimestreamCommon):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis='polarization', axis_vals=self.pol, full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis='polarization', axis_vals=self.pol, full_data=full_data, copy_data=copy_data, keep_dist_axis=keep_dist_axis, **kwargs)
 
 
-    def time_and_pol_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
+    def time_and_pol_data_operate(self, func, full_data=False, copy_data=False, keep_dist_axis=False, **kwargs):
         """Data operation along the time and polarization axis.
 
         Parameters
@@ -302,6 +305,9 @@ class Timestream(timestream_common.TimestreamCommon):
             corresponding to the axis index, if True, data will first
             redistributed along time or polarization axis which is longer.
             Default False.
+        copy_data : bool, optional
+            If True, `func` will operate on a copy of the data, so changes will
+            have no impact on the data the container holds. Default False.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
@@ -309,9 +315,9 @@ class Timestream(timestream_common.TimestreamCommon):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=('time', 'polarization'), axis_vals=(self.time, self.pol), full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis=('time', 'polarization'), axis_vals=(self.time, self.pol), full_data=full_data, copy_data=copy_data, keep_dist_axis=keep_dist_axis, **kwargs)
 
-    def freq_and_pol_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
+    def freq_and_pol_data_operate(self, func, full_data=False, copy_data=False, keep_dist_axis=False, **kwargs):
         """Data operation along the frequency and polarization axis.
 
         Parameters
@@ -325,6 +331,9 @@ class Timestream(timestream_common.TimestreamCommon):
             corresponding to the axis index, if True, data will first
             redistributed along frequency or polarization axis which is longer.
             Default False.
+        copy_data : bool, optional
+            If True, `func` will operate on a copy of the data, so changes will
+            have no impact on the data the container holds. Default False.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
@@ -332,9 +341,9 @@ class Timestream(timestream_common.TimestreamCommon):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=('frequency', 'polarization'), axis_vals=(self.freq, self.pol), full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis=('frequency', 'polarization'), axis_vals=(self.freq, self.pol), full_data=full_data, copy_data=copy_data, keep_dist_axis=keep_dist_axis, **kwargs)
 
-    def pol_and_bl_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
+    def pol_and_bl_data_operate(self, func, full_data=False, copy_data=False, keep_dist_axis=False, **kwargs):
         """Data operation along the polarization and baseline axis.
 
         Parameters
@@ -348,6 +357,9 @@ class Timestream(timestream_common.TimestreamCommon):
             corresponding to the axis index, if True, data will first
             redistributed along polarization or baseline axis which is longer.
             Default False.
+        copy_data : bool, optional
+            If True, `func` will operate on a copy of the data, so changes will
+            have no impact on the data the container holds. Default False.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
@@ -355,9 +367,9 @@ class Timestream(timestream_common.TimestreamCommon):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=('polarization', 'baseline'), axis_vals=(self.pol, self.bl), full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis=('polarization', 'baseline'), axis_vals=(self.pol, self.bl), full_data=full_data, copy_data=copy_data, keep_dist_axis=keep_dist_axis, **kwargs)
 
-    def time_freq_and_pol_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
+    def time_freq_and_pol_data_operate(self, func, full_data=False, copy_data=False, keep_dist_axis=False, **kwargs):
         """Data operation along the time, frequency and polarization axis.
 
         Parameters
@@ -372,6 +384,9 @@ class Timestream(timestream_common.TimestreamCommon):
             corresponding to the axis index, if True, data will first
             redistributed along time or frequency or polarization axis which is
             longer. Default False.
+        copy_data : bool, optional
+            If True, `func` will operate on a copy of the data, so changes will
+            have no impact on the data the container holds. Default False.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
@@ -379,9 +394,9 @@ class Timestream(timestream_common.TimestreamCommon):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=('time', 'frequency', 'polarization'), axis_vals=(self.time, self.freq, self.pol), full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis=('time', 'frequency', 'polarization'), axis_vals=(self.time, self.freq, self.pol), full_data=full_data, copy_data=copy_data, keep_dist_axis=keep_dist_axis, **kwargs)
 
-    def time_freq_and_bl_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
+    def time_freq_and_bl_data_operate(self, func, full_data=False, copy_data=False, keep_dist_axis=False, **kwargs):
         """Data operation along the time, frequency and baseline axis.
 
         Parameters
@@ -396,6 +411,9 @@ class Timestream(timestream_common.TimestreamCommon):
             corresponding to the axis index, if True, data will first
             redistributed along time or frequency or baseline axis which is
             longer. Default False.
+        copy_data : bool, optional
+            If True, `func` will operate on a copy of the data, so changes will
+            have no impact on the data the container holds. Default False.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
@@ -403,9 +421,9 @@ class Timestream(timestream_common.TimestreamCommon):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=('time', 'frequency', 'baseline'), axis_vals=(self.time, self.freq, self.bl), full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis=('time', 'frequency', 'baseline'), axis_vals=(self.time, self.freq, self.bl), full_data=full_data, copy_data=copy_data, keep_dist_axis=keep_dist_axis, **kwargs)
 
-    def time_pol_and_bl_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
+    def time_pol_and_bl_data_operate(self, func, full_data=False, copy_data=False, keep_dist_axis=False, **kwargs):
         """Data operation along the time, polarization and baseline axis.
 
         Parameters
@@ -420,6 +438,9 @@ class Timestream(timestream_common.TimestreamCommon):
             corresponding to the axis index, if True, data will first
             redistributed along time or polarization or baseline axis which is
             longer. Default False.
+        copy_data : bool, optional
+            If True, `func` will operate on a copy of the data, so changes will
+            have no impact on the data the container holds. Default False.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
@@ -427,9 +448,9 @@ class Timestream(timestream_common.TimestreamCommon):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=('time', 'polarization', 'baseline'), axis_vals=(self.time, self.pol, self.bl), full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis=('time', 'polarization', 'baseline'), axis_vals=(self.time, self.pol, self.bl), full_data=full_data, copy_data=copy_data, keep_dist_axis=keep_dist_axis, **kwargs)
 
-    def freq_pol_and_bl_data_operate(self, func, full_data=False, keep_dist_axis=False, **kwargs):
+    def freq_pol_and_bl_data_operate(self, func, full_data=False, copy_data=False, keep_dist_axis=False, **kwargs):
         """Data operation along the frequency, polarization and baseline axis.
 
         Parameters
@@ -444,6 +465,9 @@ class Timestream(timestream_common.TimestreamCommon):
             corresponding to the axis index, if True, data will first
             redistributed along frequency or polarization or baseline axis which
             is longer. Default False.
+        copy_data : bool, optional
+            If True, `func` will operate on a copy of the data, so changes will
+            have no impact on the data the container holds. Default False.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
@@ -451,4 +475,4 @@ class Timestream(timestream_common.TimestreamCommon):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=('frequency', 'polarization', 'baseline'), axis_vals=(self.freq, self.pol, self.bl), full_data=full_data, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis=('frequency', 'polarization', 'baseline'), axis_vals=(self.freq, self.pol, self.bl), full_data=full_data, copy_data=copy_data, keep_dist_axis=keep_dist_axis, **kwargs)

@@ -1213,7 +1213,7 @@ class BasicTod(memh5.MemDiskGroup):
 
 
 
-    def data_operate(self, func, op_axis=None, axis_vals=0, full_data=False, keep_dist_axis=False, **kwargs):
+    def data_operate(self, func, op_axis=None, axis_vals=0, full_data=False, copy_data=False, keep_dist_axis=False, **kwargs):
         """A basic data operation interface.
 
         You can use this method to do some constrained operations to the main data
@@ -1243,6 +1243,9 @@ class BasicTod(memh5.MemDiskGroup):
             Whether the operations of `func` will need the full data section
             corresponding to the axis index, if True, the main data will first
             redistributed along the `op_axis`. Default False.
+        copy_data : bool, optional
+            If True, `func` will operate on a copy of the data, so changes will
+            have no impact on the data the container holds. Default False.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original dist axis if the
             dist axis has changed during the operation. Default False.
@@ -1252,7 +1255,10 @@ class BasicTod(memh5.MemDiskGroup):
         """
 
         if op_axis is None:
-            self.main_data.local_data[:] = func(self.main_data.local_data[:], self, **kwargs)
+            if copy_data:
+                func(self.main_data.local_data.copy(), self, **kwargs)
+            else:
+                func(self.main_data.local_data, self, **kwargs)
         elif isinstance(op_axis, int) or isinstance(op_axis, basestring):
             axis = check_axis(op_axis, self.main_data_axes)
             data_sel = [ slice(0, None) ] * len(self.main_data_axes)
@@ -1268,7 +1274,10 @@ class BasicTod(memh5.MemDiskGroup):
                     axis_val = axis_vals[lind]
                 else:
                     axis_val = axis_vals
-                self.main_data.local_data[data_sel] = func(self.main_data.local_data[data_sel], lind, gind, axis_val, self, **kwargs)
+                if copy_data:
+                    func(self.main_data.local_data[data_sel].copy(), lind, gind, axis_val, self, **kwargs)
+                else:
+                    func(self.main_data.local_data[data_sel], lind, gind, axis_val, self, **kwargs)
             if full_data and keep_dist_axis:
                 self.redistribute(original_dist_axis)
         elif isinstance(op_axis, tuple):
@@ -1296,13 +1305,16 @@ class BasicTod(memh5.MemDiskGroup):
                         axis_val += (axis_vals[ai][lind[ai]],)
                     else:
                         axis_val += (axis_vals[ai],)
-                self.main_data.local_data[data_sel] = func(self.main_data.local_data[data_sel], lind, gind, axis_val, self, **kwargs)
+                if copy_data:
+                    func(self.main_data.local_data[data_sel].copy(), lind, gind, axis_val, self, **kwargs)
+                else:
+                    func(self.main_data.local_data[data_sel], lind, gind, axis_val, self, **kwargs)
             if full_data and keep_dist_axis:
                 self.redistribute(original_dist_axis)
         else:
             raise ValueError('Invalid op_axis: %s', op_axis)
 
-    def all_data_operate(self, func, **kwargs):
+    def all_data_operate(self, func, copy_data=False, **kwargs):
         """Operation to the whole main data.
 
         Note since the main data is distributed on different processes, `func`
@@ -1315,8 +1327,11 @@ class BasicTod(memh5.MemDiskGroup):
             The opertation function object. It is of type func(array, self, \*\*kwargs),
             which will operate on the array and return an new array with the same
             shape and dtype.
+        copy_data : bool, optional
+            If True, `func` will operate on a copy of the data, so changes will
+            have no impact on the data the container holds. Default False.
         \*\*kwargs : any other arguments
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=None, axis_vals=0, full_data=False, keep_dist_axis=False, **kwargs)
+        self.data_operate(func, op_axis=None, axis_vals=0, full_data=False, copy_data=copy_data, keep_dist_axis=False, **kwargs)
