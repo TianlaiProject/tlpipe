@@ -72,7 +72,7 @@ class Flag(tod_task.TaskTimestream):
         # mask all if valid values less than the given threshold
         if abs_vis.count() < 0.1 * nt or abs_vis.count() <= 3:
             vis_mask[:] = True
-            return vis, vis_mask
+            return
 
         if np.ma.count_masked(abs_vis) > 0: # has masked value
             abs_vis_valid = abs_vis[~abs_vis.mask]
@@ -104,5 +104,3 @@ class Flag(tod_task.TaskTimestream):
         # inds1 = np.where(np.abs(diff[inds]) > 1.0e-2*np.abs(smooth[inds]))[0]
         # inds = inds[inds1]
         vis_mask[inds] = True # set mask
-
-        return vis, vis_mask

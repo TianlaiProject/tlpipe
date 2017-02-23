@@ -43,5 +43,3 @@ class Combine(tod_task.TaskTimestream):
         """Function that does the combine operation."""
 
         vis_mask[:] = np.sum(vis_mask, axis=2).astype(bool)[:, :, np.newaxis]
-
-        return vis, vis_mask

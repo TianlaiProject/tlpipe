@@ -93,4 +93,5 @@ class Flag(tod_task.TaskTimestream):
             st = sum_threshold.SumThreshold(vis_diff, st.vis_mask, first_threshold, exp_factor, distribution, max_threshold_len, min_connected)
             st.execute(sensitivity)
 
-        return vis, st.vis_mask
+        # replace vis_mask with the flagged mask
+        vis_mask[:] = st.vis_mask

@@ -36,11 +36,11 @@ def cal(vis, vis_mask, li, gi, pbl, ts, **kwargs):
     elif pol == 'yy':
         pi = 1
     else:
-        return vis, vis_mask
+        return
 
     bl_gain = tgain[i, pi, :] * tgain[j, pi, :].conj()
 
-    return vis / bl_gain, vis_mask
+    vis[:] = vis / bl_gain
 
 
 class PsCal(tod_task.TaskTimestream):

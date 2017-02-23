@@ -66,5 +66,3 @@ class Sir(tod_task.TaskTimestream):
                 mask[ts['ns_on']] = True
         else:
             raise RuntimeError('Invalid shape of vis_mask: %s' % vis_mask.shape)
-
-        return vis, vis_mask

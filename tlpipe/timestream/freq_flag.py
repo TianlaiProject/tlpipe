@@ -67,5 +67,3 @@ class Flag(tod_task.TaskTimestream):
             std = np.ma.std(vis_abs)
             inds = np.where(np.abs(vis_abs - mean) > sigma*std)[0] # masked inds
             vis_mask[inds] = True # set mask
-
-        return vis, vis_mask

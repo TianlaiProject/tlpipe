@@ -117,7 +117,7 @@ class NsCal(tod_task.TaskTimestream):
         freq_plt = kwargs['freq_plt']
 
         if np.prod(vis.shape) == 0 :
-            return vis, vis_mask
+            return
 
         fi = gi[0] # freq idx for this cal
         bl = tuple(fbl[1]) # bl for this cal
@@ -157,7 +157,7 @@ class NsCal(tod_task.TaskTimestream):
         # not enough valid data to do the ns_cal
         if len(phase) <= 3:
             vis_mask[:] = True # mask the vis as no ns_cal has done
-            return vis, vis_mask
+            return
 
         phase = np.unwrap(phase) # unwrap 2pi discontinuity
 
@@ -199,6 +199,4 @@ class NsCal(tod_task.TaskTimestream):
             plt.savefig(fig_name)
             plt.close()
 
-        vis = vis * np.exp(-1.0J * all_phase)
-
-        return vis, vis_mask
+        vis[:] = vis * np.exp(-1.0J * all_phase)

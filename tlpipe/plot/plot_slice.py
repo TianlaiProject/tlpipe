@@ -91,7 +91,7 @@ class Plot(tod_task.TaskTimestream):
             bl_incl = [ {f1, f2} for (f1, f2) in bl_incl ]
             bl_excl = [ {f1, f2} for (f1, f2) in bl_excl ]
             if (not bl1 in bl_incl) or (bl1 in bl_excl):
-                return vis, vis_mask
+                return
 
         if plot_type == 'time':
             nt = vis.shape[0]
@@ -192,5 +192,3 @@ class Plot(tod_task.TaskTimestream):
             fig_name = output_path(fig_name)
         plt.savefig(fig_name)
         plt.close()
-
-        return vis, vis_mask

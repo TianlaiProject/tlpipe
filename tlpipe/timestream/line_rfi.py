@@ -218,5 +218,3 @@ class Flag(tod_task.TaskTimestream):
                     fig_name = output_path(fig_name)
                 plt.savefig(fig_name)
                 plt.close()
-
-        return vis, vis_mask
