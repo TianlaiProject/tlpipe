@@ -37,7 +37,7 @@ class VarThreshold(combinatorial_threshold.CombinatorialThreshold):
         for y in xrange(height):
             for x in xrange(width-length):
                 vis1 = np.ma.compressed(vis[y, x:x+length])
-                if vis1.size > 0 and (vis1 > threshold).all():
+                if vis1.size > 0 and (np.abs(vis1) > threshold).all():
                     self.vis_mask[y, x:x+length] = True
 
     def vertical_var_threshold(self, length, threshold):
@@ -52,7 +52,7 @@ class VarThreshold(combinatorial_threshold.CombinatorialThreshold):
         for x in xrange(width):
             for y in xrange(height-length):
                 vis1 = np.ma.compressed(vis[y:y+length, x])
-                if vis1.size > 0 and (vis1 > threshold).all():
+                if vis1.size > 0 and (np.abs(vis1) > threshold).all():
                     self.vis_mask[y:y+length, x] = True
 
     def execute_threshold(self, factor):
