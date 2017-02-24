@@ -42,7 +42,7 @@ class SumThreshold(combinatorial_threshold.CombinatorialThreshold):
                     continue
 
                 for x in xrange(width):
-                    if (not self.vis_mask[y, x]) and (self.vis[y, x] > threshold):
+                    if (not self.vis_mask[y, x]) and (np.abs(self.vis[y, x]) > threshold):
                         self.vis_mask[y, x] = True
         elif length > 1:
             tmp_mask = self.vis_mask.copy()
@@ -64,7 +64,7 @@ class SumThreshold(combinatorial_threshold.CombinatorialThreshold):
                         sm += self.vis[y, right]
                         cnt += 1
                     # check
-                    if (cnt > 0) and (sm / cnt > threshold):
+                    if (cnt > 0) and (np.abs(sm / cnt) > threshold):
                         tmp_mask[y, left:left+length] = True
                     # subtract the sample at the left
                     if not self.vis_mask[y, left]:
@@ -92,7 +92,7 @@ class SumThreshold(combinatorial_threshold.CombinatorialThreshold):
                     continue
 
                 for y in xrange(height):
-                    if (not self.vis_mask[y, x]) and (self.vis[y, x] > threshold):
+                    if (not self.vis_mask[y, x]) and (np.abs(self.vis[y, x]) > threshold):
                         self.vis_mask[y, x] = True
         elif length > 1:
             tmp_mask = self.vis_mask.copy()
@@ -114,7 +114,7 @@ class SumThreshold(combinatorial_threshold.CombinatorialThreshold):
                         sm += self.vis[bottom, x]
                         cnt += 1
                     # check
-                    if (cnt > 0) and (sm / cnt > threshold):
+                    if (cnt > 0) and (np.abs(sm / cnt) > threshold):
                         tmp_mask[top:top+length, x] = True
                     # subtract the sample at the top
                     if not self.vis_mask[top, x]:
