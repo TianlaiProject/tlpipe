@@ -15,6 +15,7 @@ from tlpipe.timestream import tod_task
 from tlpipe.timestream.raw_timestream import RawTimestream
 from tlpipe.timestream.timestream import Timestream
 from tlpipe.utils.path_util import output_path
+from tlpipe.utils import hist_eq
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.ticker import MaxNLocator, AutoMinorLocator
@@ -44,6 +45,7 @@ class Plot(tod_task.TaskTimestream):
                     'color_flag': False,
                     'flag_color': 'yellow',
                     'transpose': False, # now only for abs plot
+                    'hist_equal': False, # Histogram equalization
                     'fig_name': 'wf/vis',
                     'rotate_xdate': False, # True to rotate xaxis date ticks, else half the number of date ticks
                     'feed_no': False, # True to use feed number (true baseline) else use channel no
@@ -81,6 +83,7 @@ class Plot(tod_task.TaskTimestream):
         color_flag = self.params['color_flag']
         flag_color = self.params['flag_color']
         transpose = self.params['transpose']
+        hist_equal = self.params['hist_equal']
         fig_prefix = self.params['fig_name']
         rotate_xdate = self.params['rotate_xdate']
         feed_no = self.params['feed_no']
@@ -163,7 +166,16 @@ class Plot(tod_task.TaskTimestream):
                 extent = time_extent + freq_extent
 
             fig, ax = plt.subplots()
-            im = ax.imshow(np.abs(vis1), extent=extent, origin='lower', aspect='auto', cmap=cmap)
+            vis_abs = np.abs(vis1)
+            if hist_equal:
+                if isinstance(vis_abs, np.ma.MaskedArray):
+                    vis_hist = hist_eq.hist_eq(vis_abs.filled(0))
+                    vis_abs = np.ma.array(vis_hist, mask=np.ma.getmask(vis_abs))
+                else:
+                    vis_hist = hist_eq.hist_eq(np.where(np.isfinite(vis_abs), vis_abs, 0))
+                    mask = np.where(np.isfinite(vis_abs), False, True)
+                    vis_abs = np.ma.array(vis_hist, mask=mask)
+            im = ax.imshow(vis_abs, extent=extent, origin='lower', aspect='auto', cmap=cmap)
             # convert axis to datetime string
             if transpose:
                 ax.xaxis_date()
