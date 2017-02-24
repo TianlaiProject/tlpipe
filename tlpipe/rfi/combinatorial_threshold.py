@@ -29,6 +29,7 @@ class CombinatorialThreshold(object):
     def __init__(self, time_freq_vis, time_freq_vis_mask=None, first_threshold=6.0, exp_factor=1.5, distribution='Rayleigh', max_threshold_length=1024):
 
         self.vis = time_freq_vis
+        nt, nf = self.vis.shape
 
         if time_freq_vis_mask is None:
             self.vis_mask = np.where(np.isfinite(self.vis), False, True)
@@ -38,7 +39,9 @@ class CombinatorialThreshold(object):
             raise ValueError('Invalid time_freq_vis_mask')
 
         max_log2_length = np.int(np.ceil(np.log2(max_threshold_length))) + 1
-        self.lengths = np.array([ 2**i for i in xrange(max_log2_length) ])
+        lengths = [ 2**i for i in xrange(max_log2_length) ]
+        # include nt, nf in lengths
+        self.lengths = np.array(sorted(lengths + [nt, nf]))
 
         if distribution in ('Uniform', 'Gaussian', 'Rayleigh'):
             self.distribution = distribution
