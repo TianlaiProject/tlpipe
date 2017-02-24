@@ -88,9 +88,7 @@ class Phs2zen(tod_task.TaskTimestream):
 
         ts.time_and_bl_data_operate(self.phs, aa=aa, s=s)
 
-        ts.add_history(self.history)
-
-        return ts
+        return super(Phs2zen, self).process(ts)
 
     def phs(self, vis, vis_mask, li, gi, tbl, ts, **kwargs):
         """Function that does the actual phs."""

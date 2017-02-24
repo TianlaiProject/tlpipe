@@ -118,8 +118,4 @@ class ReOrder(tod_task.TaskTimestream):
                 sel2[time_axis] = slice(0, ind0)
                 dset.local_data[:] = np.concatenate([ dset.local_data[sel1], dset.local_data[sel2] ], axis=time_axis)
 
-        ts.add_history(self.history)
-
-        # ts.info()
-
-        return ts
+        return super(ReOrder, self).process(ts)

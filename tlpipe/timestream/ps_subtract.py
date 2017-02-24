@@ -99,6 +99,4 @@ class PsSub(tod_task.TaskTimestream):
                         ts.local_vis[ti, :, pi, bi] -= vis_sim # subtract this ps
 
 
-        ts.add_history(self.history)
-
-        return ts
+        return super(PsSub, self).process(ts)

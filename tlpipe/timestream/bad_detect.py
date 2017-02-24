@@ -101,8 +101,4 @@ class Detect(tod_task.TaskTimestream):
             print 'Problematic baseline: ', problematic_bls
             print 'Bad baseline: ', bad_bls
 
-        rt.add_history(self.history)
-
-        # rt.info()
-
-        return rt
+        return super(Detect, self).process(rt)

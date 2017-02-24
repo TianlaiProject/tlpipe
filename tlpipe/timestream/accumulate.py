@@ -83,8 +83,4 @@ class Accum(tod_task.TaskTimestream):
             self.data.local_vis_mask[:] = np.where(self.data['weight'].local_data != 0, False, True) # update mask
 
 
-        self.data.add_history(self.history)
-
-        # self.data.info()
-
-        return self.data
+        return super(Accum, self).process(self.data)

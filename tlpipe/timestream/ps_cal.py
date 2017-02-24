@@ -202,6 +202,4 @@ class PsCal(tod_task.TaskTimestream):
             # save to file
             mem_gain.to_hdf5(gain_file, hints=False)
 
-        ts.add_history(self.history)
-
-        return ts
+        return super(PsCal, self).process(ts)

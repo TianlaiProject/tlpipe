@@ -266,6 +266,4 @@ class PsFit(tod_task.TaskTimestream):
 
         mpiutil.barrier()
 
-        ts.add_history(self.history)
-
-        return ts
+        return super(PsFit, self).process(ts)

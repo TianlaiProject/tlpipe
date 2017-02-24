@@ -151,8 +151,4 @@ class Detect(tod_task.TaskTimestream):
             local_on_inds = [ global_inds.index(i) for i in new_on_inds ]
             rt.local_vis_mask[local_on_inds] = True # set mask using global slicing
 
-        rt.add_history(self.history)
-
-        # rt.info()
-
-        return rt
+        return super(Detect, self).process(rt)

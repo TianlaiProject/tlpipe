@@ -31,7 +31,7 @@ class Rt2ts(tod_task.TaskTimestream):
     prefix = 'r2t_'
 
     def process(self, rt):
-        ts = rt.separate_pol_and_bl(self.params['keep_dist_axis'])
-        ts.add_history(self.history)
 
-        return ts
+        ts = rt.separate_pol_and_bl(self.params['keep_dist_axis'])
+
+        return super(Rt2ts, self).process(ts)

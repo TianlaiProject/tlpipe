@@ -64,9 +64,7 @@ class Plot(tod_task.TaskTimestream):
 
         func(self.plot, full_data=True, keep_dist_axis=False)
 
-        ts.add_history(self.history)
-
-        return ts
+        return super(Plot, self).process(ts)
 
     def plot(self, vis, vis_mask, li, gi, bl, ts, **kwargs):
         """Function that does the actual plot work."""

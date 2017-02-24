@@ -29,8 +29,4 @@ class Mask(tod_task.TaskTimestream):
         day_inds = np.where(np.logical_and(local_hour>=mask_time_range[0], local_hour<=mask_time_range[1]))[0]
         ts.local_vis_mask[day_inds] = True # do not change vis directly
 
-        ts.add_history(self.history)
-
-        # ts.info()
-
-        return ts
+        return super(Mask, self).process(ts)

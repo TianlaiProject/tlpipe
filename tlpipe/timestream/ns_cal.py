@@ -99,9 +99,7 @@ class NsCal(tod_task.TaskTimestream):
 
         rt.freq_and_bl_data_operate(self.cal, full_data=True, keep_dist_axis=False, bls_plt=bls_plt, freq_plt=freq_plt)
 
-        rt.add_history(self.history)
-
-        return rt
+        return super(NsCal, self).process(rt)
 
     def cal(self, vis, vis_mask, li, gi, fbl, rt, **kwargs):
         """Function that does the actual cal."""

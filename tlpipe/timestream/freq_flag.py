@@ -49,11 +49,7 @@ class Flag(tod_task.TaskTimestream):
         else:
             warnings.warn('Not enough frequency points to do the flag')
 
-        ts.add_history(self.history)
-
-        # ts.info()
-
-        return ts
+        return super(Flag, self).process(ts)
 
     def flag(self, vis, vis_mask, li, gi, tbl, ts, **kwargs):
         """Function that does the actual flag."""

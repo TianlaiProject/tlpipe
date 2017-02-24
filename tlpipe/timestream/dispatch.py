@@ -263,8 +263,4 @@ class Dispatch(tod_task.TaskTimestream):
         """Return loaded data as a
         :class:`~tlpipe.timestream.raw_timestream.RawTimestream` object."""
 
-        rt.add_history(self.history)
-
-        # rt.info()
-
-        return rt
+        return super(Dispatch, self).process(rt)

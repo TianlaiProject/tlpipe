@@ -46,6 +46,7 @@ class TaskTimestream(OneAndOne):
                     'pol_select': (0, None), # only useful for ts
                     'feed_select': (0, None),
                     'corr': 'all',
+                    'show_info': False,
                     'tag_input_iter': True, # tag current iteration to input file path
                     'tag_output_iter': True, # tag current iteration to output file path
                   }
@@ -132,6 +133,9 @@ class TaskTimestream(OneAndOne):
     def process(self, tod):
 
         tod.add_history(self.history)
+
+        if self.params['show_info']:
+            tod.info()
 
         return tod
 

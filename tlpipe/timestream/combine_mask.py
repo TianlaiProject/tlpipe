@@ -33,11 +33,7 @@ class Combine(tod_task.TaskTimestream):
 
         ts.bl_data_operate(self.combine)
 
-        ts.add_history(self.history)
-
-        # ts.info()
-
-        return ts
+        return super(Combine, self).process(ts)
 
     def combine(self, vis, vis_mask, li, gi, tf, ts, **kwargs):
         """Function that does the combine operation."""

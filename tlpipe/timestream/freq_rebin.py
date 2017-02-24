@@ -80,6 +80,4 @@ class Rebin(tod_task.TaskTimestream):
             # update freqstep attr
             ts.attrs['freqstep'] = nfreq * ts.attrs['freqstep'] / bin_number
 
-        ts.add_history(self.history)
-
-        return ts
+        return super(Rebin, self).process(ts)

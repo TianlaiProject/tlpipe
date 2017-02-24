@@ -129,8 +129,4 @@ class Stats(tod_task.TaskTimestream):
             plt.savefig(freq_fig_name)
             plt.close()
 
-        ts.add_history(self.history)
-
-        # ts.info()
-
-        return ts
+        return super(Stats, self).process(ts)

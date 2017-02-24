@@ -81,11 +81,7 @@ class Flag(tod_task.TaskTimestream):
 
         func(self.flag, full_data=True, keep_dist_axis=False, freq_flag=freq_flag, time_flag=time_flag)
 
-        ts.add_history(self.history)
-
-        # ts.info()
-
-        return ts
+        return super(Flag, self).process(ts)
 
     def flag(self, vis, vis_mask, li, gi, bl, ts, **kwargs):
         """Function that does the actual flag."""

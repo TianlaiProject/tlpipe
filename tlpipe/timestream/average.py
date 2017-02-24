@@ -39,8 +39,4 @@ class Average(tod_task.TaskTimestream):
             # del weight to save memory
             ts.delete_a_dataset('weight')
 
-        ts.add_history(self.history)
-
-        # ts.info()
-
-        return ts
+        return super(Average, self).process(ts)
