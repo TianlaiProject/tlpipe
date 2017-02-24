@@ -130,6 +130,7 @@ class SumThreshold(combinatorial_threshold.CombinatorialThreshold):
     def execute_threshold(self, factor):
         for length, threshold in zip(self.lengths, self.thresholds):
             self.vertical_sum_threshold(length, factor*threshold) # first time
+        for length, threshold in zip(self.lengths, self.thresholds):
             self.horizontal_sum_threshold(length, factor*threshold) # then freq
 
     def execute(self, sensitivity=1.0):

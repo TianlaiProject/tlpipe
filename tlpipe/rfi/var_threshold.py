@@ -58,4 +58,5 @@ class VarThreshold(combinatorial_threshold.CombinatorialThreshold):
     def execute_threshold(self, factor):
         for length, threshold in zip(self.lengths, self.thresholds):
             self.vertical_var_threshold(length, factor*threshold) # first time
+        for length, threshold in zip(self.lengths, self.thresholds):
             self.horizontal_var_threshold(length, factor*threshold) # then freq
