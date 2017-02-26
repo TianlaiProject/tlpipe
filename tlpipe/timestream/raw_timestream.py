@@ -312,7 +312,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
         # create other datasets needed
         # pol ordered dataset
         p = self.pol_dict
-        ts.create_pol_ordered_dataset('pol', data=np.array([p['xx'], p['yy'], p['xy'], p['yx']]), dtype='i4')
+        ts.create_pol_ordered_dataset('pol', data=np.array([p['xx'], p['yy'], p['xy'], p['yx']], dtype='i4'))
         ts['pol'].attrs['pol_type'] = 'linear'
 
         # bl ordered dataset
