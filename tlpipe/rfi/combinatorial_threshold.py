@@ -41,7 +41,11 @@ class CombinatorialThreshold(object):
         max_log2_length = np.int(np.ceil(np.log2(max_threshold_length))) + 1
         lengths = [ 2**i for i in xrange(max_log2_length) ]
         # include nt, nf in lengths
-        self.lengths = np.unique(sorted(lengths + [nt, nf]))
+        if nt < max_threshold_length:
+            lengths.append(nt)
+        if nf < max_threshold_length:
+            lengths.append(nf)
+        self.lengths = np.unique(sorted(lengths))
 
         if distribution in ('Uniform', 'Gaussian', 'Rayleigh'):
             self.distribution = distribution
