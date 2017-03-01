@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.MaxNLocator.view_limits
+================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: MaxNLocator.view_limits

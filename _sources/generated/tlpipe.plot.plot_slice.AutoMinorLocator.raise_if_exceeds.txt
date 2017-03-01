@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.AutoMinorLocator.raise_if_exceeds
+========================================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: AutoMinorLocator.raise_if_exceeds

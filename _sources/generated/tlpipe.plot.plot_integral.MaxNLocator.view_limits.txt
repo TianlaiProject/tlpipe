@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.MaxNLocator.view_limits
+=================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: MaxNLocator.view_limits

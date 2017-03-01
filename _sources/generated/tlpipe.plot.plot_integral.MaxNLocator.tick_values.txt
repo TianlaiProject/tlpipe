@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.MaxNLocator.tick_values
+=================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: MaxNLocator.tick_values

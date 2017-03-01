@@ -45,6 +45,7 @@ tlpipe.timestream.timestream_common.TimestreamCommon
       ~TimestreamCommon.name
       ~TimestreamCommon.ondisk
       ~TimestreamCommon.parent
+      ~TimestreamCommon.pol_dict
       ~TimestreamCommon.time
       ~TimestreamCommon.time_ordered_attrs
       ~TimestreamCommon.time_ordered_datasets

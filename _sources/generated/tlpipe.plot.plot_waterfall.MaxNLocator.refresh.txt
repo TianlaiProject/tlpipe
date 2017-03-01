@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.MaxNLocator.refresh
+==============================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: MaxNLocator.refresh

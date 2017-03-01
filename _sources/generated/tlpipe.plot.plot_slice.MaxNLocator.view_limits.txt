@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.MaxNLocator.view_limits
+==============================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: MaxNLocator.view_limits

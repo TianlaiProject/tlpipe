@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.MaxNLocator.axis
+===========================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoattribute:: MaxNLocator.axis

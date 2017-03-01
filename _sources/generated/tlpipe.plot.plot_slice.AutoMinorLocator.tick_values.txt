@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.AutoMinorLocator.tick_values
+===================================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: AutoMinorLocator.tick_values

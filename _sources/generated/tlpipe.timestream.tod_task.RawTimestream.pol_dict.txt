@@ -1,0 +1,6 @@
+tlpipe.timestream.tod_task.RawTimestream.pol_dict
+=================================================
+
+.. currentmodule:: tlpipe.timestream.tod_task
+
+.. autoattribute:: RawTimestream.pol_dict

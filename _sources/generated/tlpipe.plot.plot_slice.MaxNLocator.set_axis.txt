@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.MaxNLocator.set_axis
+===========================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: MaxNLocator.set_axis

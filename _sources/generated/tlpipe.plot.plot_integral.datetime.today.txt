@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.datetime.today
+========================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: datetime.today

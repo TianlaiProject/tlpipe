@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.MaxNLocator.bin_boundaries
+===================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: MaxNLocator.bin_boundaries

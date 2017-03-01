@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.MaxNLocator.set_data_interval
+====================================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: MaxNLocator.set_data_interval

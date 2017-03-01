@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.AutoMinorLocator.zoom
+===============================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: AutoMinorLocator.zoom

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.MaxNLocator.raise_if_exceeds
+=======================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: MaxNLocator.raise_if_exceeds

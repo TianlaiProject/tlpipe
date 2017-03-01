@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.MaxNLocator.autoscale
+==============================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: MaxNLocator.autoscale

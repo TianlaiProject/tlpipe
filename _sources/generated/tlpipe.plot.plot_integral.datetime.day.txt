@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.datetime.day
+======================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: datetime.day

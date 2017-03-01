@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.AutoMinorLocator.refresh
+===============================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: AutoMinorLocator.refresh

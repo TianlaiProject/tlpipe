@@ -22,9 +22,12 @@ tlpipe.timestream.ns_cal
    .. autosummary::
       :toctree:
    
+      AutoMinorLocator
       InterpolatedUnivariateSpline
+      MaxNLocator
       NsCal
       RawTimestream
+      datetime
    
    
 

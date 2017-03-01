@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.AutoMinorLocator.view_limits
+===================================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: AutoMinorLocator.view_limits

@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.pol_dict
+===============================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. autoattribute:: Timestream.pol_dict

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.datetime.microsecond
+==============================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: datetime.microsecond

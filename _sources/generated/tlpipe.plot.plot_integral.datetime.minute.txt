@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.datetime.minute
+=========================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: datetime.minute

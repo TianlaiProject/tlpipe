@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.pol_dict
+================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. autoattribute:: Timestream.pol_dict

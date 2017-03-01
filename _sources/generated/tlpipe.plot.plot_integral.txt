@@ -22,9 +22,12 @@ tlpipe.plot.plot_integral
    .. autosummary::
       :toctree:
    
+      AutoMinorLocator
+      MaxNLocator
       Plot
       RawTimestream
       Timestream
+      datetime
    
    
 

@@ -473,7 +473,7 @@
 <h1>tlpipe.plot.plot_waterfall.Timestream.all_data_operate<a class="headerlink" href="#tlpipe-plot-plot-waterfall-timestream-all-data-operate" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
 <dt id="tlpipe.plot.plot_waterfall.Timestream.all_data_operate">
-<code class="descclassname">Timestream.</code><code class="descname">all_data_operate</code><span class="sig-paren">(</span><em>func</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/timestream/timestream_common.py#L808"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.plot.plot_waterfall.Timestream.all_data_operate" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">Timestream.</code><code class="descname">all_data_operate</code><span class="sig-paren">(</span><em>func</em>, <em>copy_data=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/timestream/timestream_common.py#L829"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.plot.plot_waterfall.Timestream.all_data_operate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Operation to the whole <cite>vis</cite> and <cite>vis_mask</cite>.</p>
 <p>Note since <cite>vis</cite> and <cite>vis_mask</cite> is usually distributed on different
 processes, <cite>func</cite> should not have operations that depend on their
@@ -486,6 +486,8 @@ elements not held in their local array of each process.</p>
 <li><strong>func</strong> (<em>function object</em>) &#8211; The opertation function object. It is of type func(vis, vis_mask, self,
 **kwargs), which will operate on vis, vis_mask and return two new
 arrays with their original shape and dtype.</li>
+<li><strong>copy_data</strong> (<em>bool, optional</em>) &#8211; If True, <cite>func</cite> will operate on a copy of the data, so changes will
+have no impact on the data the container holds. Default False.</li>
 <li><strong>**kwargs</strong> (<em>any other arguments</em>) &#8211; Any other arguments that will passed to <cite>func</cite>.</li>
 </ul>
 </td>

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.MaxNLocator.create_dummy_axis
+========================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: MaxNLocator.create_dummy_axis

@@ -22,6 +22,8 @@ tlpipe.plot.plot_slice
    .. autosummary::
       :toctree:
    
+      AutoMinorLocator
+      MaxNLocator
       Plot
       RawTimestream
       Timestream

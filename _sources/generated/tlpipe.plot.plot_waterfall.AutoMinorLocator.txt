@@ -1,0 +1,45 @@
+tlpipe.plot.plot_waterfall.AutoMinorLocator
+===========================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoclass:: AutoMinorLocator
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~AutoMinorLocator.MAXTICKS
+      ~AutoMinorLocator.axis
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~AutoMinorLocator.autoscale
+      ~AutoMinorLocator.create_dummy_axis
+      ~AutoMinorLocator.pan
+      ~AutoMinorLocator.raise_if_exceeds
+      ~AutoMinorLocator.refresh
+      ~AutoMinorLocator.set_axis
+      ~AutoMinorLocator.set_bounds
+      ~AutoMinorLocator.set_data_interval
+      ~AutoMinorLocator.set_view_interval
+      ~AutoMinorLocator.tick_values
+      ~AutoMinorLocator.view_limits
+      ~AutoMinorLocator.zoom
+   
+   

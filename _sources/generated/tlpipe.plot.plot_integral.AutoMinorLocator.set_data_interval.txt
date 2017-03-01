@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.AutoMinorLocator.set_data_interval
+============================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: AutoMinorLocator.set_data_interval

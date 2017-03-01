@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.AutoMinorLocator.set_view_interval
+=============================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: AutoMinorLocator.set_view_interval

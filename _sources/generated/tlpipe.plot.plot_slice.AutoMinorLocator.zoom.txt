@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.AutoMinorLocator.zoom
+============================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: AutoMinorLocator.zoom

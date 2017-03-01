@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.datetime.isoweekday
+=============================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: datetime.isoweekday

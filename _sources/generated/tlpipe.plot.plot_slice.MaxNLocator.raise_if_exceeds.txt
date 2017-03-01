@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.MaxNLocator.raise_if_exceeds
+===================================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: MaxNLocator.raise_if_exceeds

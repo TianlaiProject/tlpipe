@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.AutoMinorLocator.pan
+=============================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: AutoMinorLocator.pan

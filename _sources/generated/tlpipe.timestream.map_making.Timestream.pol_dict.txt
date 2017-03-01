@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.pol_dict
+================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. autoattribute:: Timestream.pol_dict

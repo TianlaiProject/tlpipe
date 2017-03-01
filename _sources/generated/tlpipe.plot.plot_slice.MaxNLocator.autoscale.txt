@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.MaxNLocator.autoscale
+============================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: MaxNLocator.autoscale

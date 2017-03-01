@@ -47,6 +47,7 @@ tlpipe.timestream.tod_task.Timestream
       ~Timestream.ondisk
       ~Timestream.parent
       ~Timestream.pol
+      ~Timestream.pol_dict
       ~Timestream.pol_ordered_datasets
       ~Timestream.time
       ~Timestream.time_ordered_attrs

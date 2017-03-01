@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.MaxNLocator.pan
+======================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: MaxNLocator.pan

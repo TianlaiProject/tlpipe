@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.MaxNLocator.default_params
+===================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. autoattribute:: MaxNLocator.default_params

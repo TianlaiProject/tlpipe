@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.AutoMinorLocator.create_dummy_axis
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: AutoMinorLocator.create_dummy_axis

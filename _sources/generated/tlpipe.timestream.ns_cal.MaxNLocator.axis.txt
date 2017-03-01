@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.MaxNLocator.axis
+=========================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. autoattribute:: MaxNLocator.axis

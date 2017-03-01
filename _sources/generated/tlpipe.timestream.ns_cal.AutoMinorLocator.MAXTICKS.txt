@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.AutoMinorLocator.MAXTICKS
+==================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. autoattribute:: AutoMinorLocator.MAXTICKS

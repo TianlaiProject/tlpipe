@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.MaxNLocator.default_params
+====================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: MaxNLocator.default_params

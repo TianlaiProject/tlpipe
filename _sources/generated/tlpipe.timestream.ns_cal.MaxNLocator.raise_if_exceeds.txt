@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.MaxNLocator.raise_if_exceeds
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: MaxNLocator.raise_if_exceeds

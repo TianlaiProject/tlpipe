@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.datetime.utcoffset
+============================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: datetime.utcoffset

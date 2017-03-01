@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.AutoMinorLocator.refresh
+===================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: AutoMinorLocator.refresh

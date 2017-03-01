@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.AutoMinorLocator.pan
+==============================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: AutoMinorLocator.pan

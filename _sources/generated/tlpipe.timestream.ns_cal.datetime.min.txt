@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.datetime.min
+=====================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. autoattribute:: datetime.min

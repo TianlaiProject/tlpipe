@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.MaxNLocator.tick_values
+================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: MaxNLocator.tick_values

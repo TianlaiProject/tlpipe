@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.RawTimestream.pol_dict
+==================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. autoattribute:: RawTimestream.pol_dict

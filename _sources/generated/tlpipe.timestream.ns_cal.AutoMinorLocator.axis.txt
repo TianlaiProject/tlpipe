@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.AutoMinorLocator.axis
+==============================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. autoattribute:: AutoMinorLocator.axis

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.datetime.astimezone
+=============================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: datetime.astimezone

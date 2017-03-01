@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.datetime.timetuple
+============================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: datetime.timetuple

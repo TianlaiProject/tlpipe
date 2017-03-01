@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.datetime.tzname
+========================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: datetime.tzname

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.AutoMinorLocator.axis
+================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoattribute:: AutoMinorLocator.axis

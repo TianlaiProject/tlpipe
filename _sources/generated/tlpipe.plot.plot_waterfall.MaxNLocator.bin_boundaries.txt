@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.MaxNLocator.bin_boundaries
+=====================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: MaxNLocator.bin_boundaries

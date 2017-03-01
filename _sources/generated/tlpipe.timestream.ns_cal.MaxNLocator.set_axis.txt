@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.MaxNLocator.set_axis
+=============================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: MaxNLocator.set_axis

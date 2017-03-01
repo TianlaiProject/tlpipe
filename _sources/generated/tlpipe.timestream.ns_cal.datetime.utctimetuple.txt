@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.datetime.utctimetuple
+==============================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: datetime.utctimetuple

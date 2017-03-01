@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.datetime.tzinfo
+=========================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: datetime.tzinfo

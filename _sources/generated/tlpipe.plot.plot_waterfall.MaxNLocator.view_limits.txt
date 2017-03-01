@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.MaxNLocator.view_limits
+==================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: MaxNLocator.view_limits

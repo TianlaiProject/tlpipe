@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.datetime.now
+=====================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: datetime.now

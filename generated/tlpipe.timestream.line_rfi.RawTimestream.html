@@ -579,19 +579,22 @@ and meta data saved in HDF5 files which are recorded from the correlator.</p>
 <tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.line_rfi.RawTimestream.parent.html#tlpipe.timestream.line_rfi.RawTimestream.parent" title="tlpipe.timestream.line_rfi.RawTimestream.parent"><code class="xref py py-obj docutils literal"><span class="pre">parent</span></code></a></td>
 <td>Parent <code class="xref py py-class docutils literal"><span class="pre">MemGroup</span></code> that contains this group.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.line_rfi.RawTimestream.time.html#tlpipe.timestream.line_rfi.RawTimestream.time" title="tlpipe.timestream.line_rfi.RawTimestream.time"><code class="xref py py-obj docutils literal"><span class="pre">time</span></code></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.line_rfi.RawTimestream.pol_dict.html#tlpipe.timestream.line_rfi.RawTimestream.pol_dict" title="tlpipe.timestream.line_rfi.RawTimestream.pol_dict"><code class="xref py py-obj docutils literal"><span class="pre">pol_dict</span></code></a></td>
+<td>A dict maps polarization code to integer.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.line_rfi.RawTimestream.time.html#tlpipe.timestream.line_rfi.RawTimestream.time" title="tlpipe.timestream.line_rfi.RawTimestream.time"><code class="xref py py-obj docutils literal"><span class="pre">time</span></code></a></td>
 <td>Return the jul_date dataset for convenient use.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.line_rfi.RawTimestream.time_ordered_attrs.html#tlpipe.timestream.line_rfi.RawTimestream.time_ordered_attrs" title="tlpipe.timestream.line_rfi.RawTimestream.time_ordered_attrs"><code class="xref py py-obj docutils literal"><span class="pre">time_ordered_attrs</span></code></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.line_rfi.RawTimestream.time_ordered_attrs.html#tlpipe.timestream.line_rfi.RawTimestream.time_ordered_attrs" title="tlpipe.timestream.line_rfi.RawTimestream.time_ordered_attrs"><code class="xref py py-obj docutils literal"><span class="pre">time_ordered_attrs</span></code></a></td>
 <td>Attributes that are different in different files.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.line_rfi.RawTimestream.time_ordered_datasets.html#tlpipe.timestream.line_rfi.RawTimestream.time_ordered_datasets" title="tlpipe.timestream.line_rfi.RawTimestream.time_ordered_datasets"><code class="xref py py-obj docutils literal"><span class="pre">time_ordered_datasets</span></code></a></td>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.line_rfi.RawTimestream.time_ordered_datasets.html#tlpipe.timestream.line_rfi.RawTimestream.time_ordered_datasets" title="tlpipe.timestream.line_rfi.RawTimestream.time_ordered_datasets"><code class="xref py py-obj docutils literal"><span class="pre">time_ordered_datasets</span></code></a></td>
 <td>Time ordered datasets.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.line_rfi.RawTimestream.vis.html#tlpipe.timestream.line_rfi.RawTimestream.vis" title="tlpipe.timestream.line_rfi.RawTimestream.vis"><code class="xref py py-obj docutils literal"><span class="pre">vis</span></code></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.line_rfi.RawTimestream.vis.html#tlpipe.timestream.line_rfi.RawTimestream.vis" title="tlpipe.timestream.line_rfi.RawTimestream.vis"><code class="xref py py-obj docutils literal"><span class="pre">vis</span></code></a></td>
 <td>Return the main data for convenient use.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.line_rfi.RawTimestream.vis_mask.html#tlpipe.timestream.line_rfi.RawTimestream.vis_mask" title="tlpipe.timestream.line_rfi.RawTimestream.vis_mask"><code class="xref py py-obj docutils literal"><span class="pre">vis_mask</span></code></a></td>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.line_rfi.RawTimestream.vis_mask.html#tlpipe.timestream.line_rfi.RawTimestream.vis_mask" title="tlpipe.timestream.line_rfi.RawTimestream.vis_mask"><code class="xref py py-obj docutils literal"><span class="pre">vis_mask</span></code></a></td>
 <td>A convenience for self[&#8216;vis_mask&#8217;].</td>
 </tr>
 </tbody>
@@ -611,7 +614,7 @@ and meta data saved in HDF5 files which are recorded from the correlator.</p>
 <tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.line_rfi.RawTimestream.add_history.html#tlpipe.timestream.line_rfi.RawTimestream.add_history" title="tlpipe.timestream.line_rfi.RawTimestream.add_history"><code class="xref py py-obj docutils literal"><span class="pre">add_history</span></code></a>([history])</td>
 <td>Create a new history entry.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.line_rfi.RawTimestream.all_data_operate.html#tlpipe.timestream.line_rfi.RawTimestream.all_data_operate" title="tlpipe.timestream.line_rfi.RawTimestream.all_data_operate"><code class="xref py py-obj docutils literal"><span class="pre">all_data_operate</span></code></a>(func,&nbsp;\*\*kwargs)</td>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.line_rfi.RawTimestream.all_data_operate.html#tlpipe.timestream.line_rfi.RawTimestream.all_data_operate" title="tlpipe.timestream.line_rfi.RawTimestream.all_data_operate"><code class="xref py py-obj docutils literal"><span class="pre">all_data_operate</span></code></a>(func[,&nbsp;copy_data])</td>
 <td>Operation to the whole <cite>vis</cite> and <cite>vis_mask</cite>.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.line_rfi.RawTimestream.apply_mask.html#tlpipe.timestream.line_rfi.RawTimestream.apply_mask" title="tlpipe.timestream.line_rfi.RawTimestream.apply_mask"><code class="xref py py-obj docutils literal"><span class="pre">apply_mask</span></code></a>([fill_val])</td>

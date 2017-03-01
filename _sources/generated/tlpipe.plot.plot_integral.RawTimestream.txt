@@ -45,6 +45,7 @@ tlpipe.plot.plot_integral.RawTimestream
       ~RawTimestream.name
       ~RawTimestream.ondisk
       ~RawTimestream.parent
+      ~RawTimestream.pol_dict
       ~RawTimestream.time
       ~RawTimestream.time_ordered_attrs
       ~RawTimestream.time_ordered_datasets

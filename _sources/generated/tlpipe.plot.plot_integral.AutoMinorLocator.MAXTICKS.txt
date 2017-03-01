@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.AutoMinorLocator.MAXTICKS
+===================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: AutoMinorLocator.MAXTICKS

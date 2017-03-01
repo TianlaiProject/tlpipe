@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.datetime.isocalendar
+=============================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: datetime.isocalendar

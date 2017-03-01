@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.AutoMinorLocator.tick_values
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: AutoMinorLocator.tick_values

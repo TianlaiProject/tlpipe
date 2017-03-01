@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.MaxNLocator.tick_values
+==================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: MaxNLocator.tick_values

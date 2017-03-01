@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.datetime.second
+=========================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. autoattribute:: datetime.second

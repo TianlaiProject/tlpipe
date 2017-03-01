@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.RawTimestream.pol_dict
+=============================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. autoattribute:: RawTimestream.pol_dict

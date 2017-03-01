@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.AutoMinorLocator.set_axis
+===================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: AutoMinorLocator.set_axis

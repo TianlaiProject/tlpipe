@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.MaxNLocator.default_params
+=====================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoattribute:: MaxNLocator.default_params

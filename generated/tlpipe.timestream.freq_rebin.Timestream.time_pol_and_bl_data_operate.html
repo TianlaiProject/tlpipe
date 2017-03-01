@@ -473,7 +473,7 @@
 <h1>tlpipe.timestream.freq_rebin.Timestream.time_pol_and_bl_data_operate<a class="headerlink" href="#tlpipe-timestream-freq-rebin-timestream-time-pol-and-bl-data-operate" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
 <dt id="tlpipe.timestream.freq_rebin.Timestream.time_pol_and_bl_data_operate">
-<code class="descclassname">Timestream.</code><code class="descname">time_pol_and_bl_data_operate</code><span class="sig-paren">(</span><em>func</em>, <em>full_data=False</em>, <em>keep_dist_axis=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/timestream/timestream.py#L396"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.freq_rebin.Timestream.time_pol_and_bl_data_operate" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">Timestream.</code><code class="descname">time_pol_and_bl_data_operate</code><span class="sig-paren">(</span><em>func</em>, <em>full_data=False</em>, <em>copy_data=False</em>, <em>keep_dist_axis=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/timestream/timestream.py#L426"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.freq_rebin.Timestream.time_pol_and_bl_data_operate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data operation along the time, polarization and baseline axis.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -488,6 +488,8 @@ axis.</li>
 corresponding to the axis index, if True, data will first
 redistributed along time or polarization or baseline axis which is
 longer. Default False.</li>
+<li><strong>copy_data</strong> (<em>bool, optional</em>) &#8211; If True, <cite>func</cite> will operate on a copy of the data, so changes will
+have no impact on the data the container holds. Default False.</li>
 <li><strong>keep_dist_axis</strong> (<em>bool, optional</em>) &#8211; Whether to redistribute main data to the original axis if the dist
 axis has changed during the operation. Default False.</li>
 <li><strong>**kwargs</strong> (<em>any other arguments</em>) &#8211; Any other arguments that will passed to <cite>func</cite>.</li>

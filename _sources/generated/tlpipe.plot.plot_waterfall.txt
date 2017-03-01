@@ -22,7 +22,9 @@ tlpipe.plot.plot_waterfall
    .. autosummary::
       :toctree:
    
+      AutoMinorLocator
       InterpolatedUnivariateSpline
+      MaxNLocator
       Plot
       RawTimestream
       Timestream

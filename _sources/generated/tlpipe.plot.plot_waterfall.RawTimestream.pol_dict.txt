@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.RawTimestream.pol_dict
+=================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. autoattribute:: RawTimestream.pol_dict
