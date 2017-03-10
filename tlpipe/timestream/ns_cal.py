@@ -143,23 +143,36 @@ class NsCal(tod_task.TaskTimestream):
         if not phs_only:
             amp = []
         for ind in inds:
-            if ind == inds[0]: # the first ind
-                lower = max(0, ind-num_mean)
-            else:
-                lower = ind - num_mean
+            # if ind == inds[0]: # the first ind
+            #     lower = max(0, ind-num_mean)
+            # else:
+            #     lower = ind - num_mean
+
+            # drop the first and the last ind, as it may lead to exceptional vals
+            if ind == inds[0] or ind == inds[-1]:
+                continue
+
+            lower = ind - num_mean
             off_sec = np.ma.array(vis[lower:ind], mask=vis_mask[lower:ind])
             # if off_sec.count() > 0: # not all data in this section are masked
             if off_sec.count() >= max(2, num_mean/2): # more valid sample to make stable
-                if ind == inds[-1]: # the last ind
-                    upper = min(nt, ind+2+num_mean)
-                else:
-                    upper = ind + 2 + num_mean
-                if upper - (ind+2) >= max(2, num_mean/2): # more valid sample to make stable
-                    valid_inds.append(ind)
-                    diff = np.mean(vis[ind+2:upper]) - np.ma.mean(off_sec)
-                    phase.append( np.angle(diff) ) # in radians
-                    if not phs_only:
-                        amp.append( np.abs(diff) )
+                upper = ind + 2 + num_mean
+                valid_inds.append(ind)
+                diff = np.mean(vis[ind+2:upper]) - np.ma.mean(off_sec)
+                phase.append( np.angle(diff) ) # in radians
+                if not phs_only:
+                    amp.append( np.abs(diff) )
+
+                # if ind == inds[-1]: # the last ind
+                #     upper = min(nt, ind+2+num_mean)
+                # else:
+                #     upper = ind + 2 + num_mean
+                # if upper - (ind+2) >= max(2, num_mean/2): # more valid sample to make stable
+                #     valid_inds.append(ind)
+                #     diff = np.mean(vis[ind+2:upper]) - np.ma.mean(off_sec)
+                #     phase.append( np.angle(diff) ) # in radians
+                #     if not phs_only:
+                #         amp.append( np.abs(diff) )
 
         # not enough valid data to do the ns_cal
         if len(phase) <= 3:
