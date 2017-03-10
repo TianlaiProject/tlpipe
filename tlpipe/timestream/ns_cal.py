@@ -61,8 +61,9 @@ class NsCal(tod_task.TaskTimestream):
 
     params_init = {
                     'num_mean': 5, # use the mean of num_mean signals
-                    'plot_phs': False, # plot the phase change
-                    'fig_name': 'phs/phs_change',
+                    'phs_only': True, # phase cal only
+                    'plot_gain': False, # plot the gain change
+                    'fig_name': 'ns_cal/gain_change',
                     'bl_incl': 'all', # or a list of include (bl1, bl2)
                     'bl_excl': [],
                     'freq_incl': 'all', # or a list of include freq idx
@@ -105,7 +106,8 @@ class NsCal(tod_task.TaskTimestream):
         """Function that does the actual cal."""
 
         num_mean = self.params['num_mean']
-        plot_phs = self.params['plot_phs']
+        phs_only = self.params['phs_only']
+        plot_gain = self.params['plot_gain']
         fig_prefix = self.params['fig_name']
         rotate_xdate = self.params['rotate_xdate']
         feed_no = self.params['feed_no']
@@ -138,19 +140,26 @@ class NsCal(tod_task.TaskTimestream):
 
         valid_inds = []
         phase = []
+        if not phs_only:
+            amp = []
         for ind in inds:
             if ind == inds[0]: # the first ind
                 lower = max(0, ind-num_mean)
             else:
                 lower = ind - num_mean
             off_sec = np.ma.array(vis[lower:ind], mask=vis_mask[lower:ind])
-            if off_sec.count() > 0: # not all data in this section are masked
-                valid_inds.append(ind)
+            # if off_sec.count() > 0: # not all data in this section are masked
+            if off_sec.count() >= max(2, num_mean/2): # more valid sample to make stable
                 if ind == inds[-1]: # the last ind
                     upper = min(nt, ind+2+num_mean)
                 else:
                     upper = ind + 2 + num_mean
-                phase.append( np.angle(np.mean(vis[ind+2:upper]) - np.ma.mean(off_sec)) ) # in radians
+                if upper - (ind+2) >= max(2, num_mean/2): # more valid sample to make stable
+                    valid_inds.append(ind)
+                    diff = np.mean(vis[ind+2:upper]) - np.ma.mean(off_sec)
+                    phase.append( np.angle(diff) ) # in radians
+                    if not phs_only:
+                        amp.append( np.abs(diff) )
 
         # not enough valid data to do the ns_cal
         if len(phase) <= 3:
@@ -158,31 +167,94 @@ class NsCal(tod_task.TaskTimestream):
             return
 
         phase = np.unwrap(phase) # unwrap 2pi discontinuity
-
         f = InterpolatedUnivariateSpline(valid_inds, phase)
         all_phase = f(np.arange(nt))
+        # # make the interpolated values in the appropriate range
+        # all_phase = np.where(all_phase>np.pi, np.pi, all_phase)
+        # all_phase = np.where(all_phase<-np.pi, np.pi, all_phase)
+        # do phase cal
+        vis[:] = vis * np.exp(-1.0J * all_phase)
 
-        if plot_phs and (bl in bls_plt and fi in freq_plt):
+        # # exclude exceptional values
+        # median = np.median(phase)
+        # abs_diff = np.abs(phase - median)
+        # mad = np.median(abs_diff)
+        # phs_normal_inds = np.where(abs_diff < 5.0*mad)[0]
+        # if phs_only:
+        #     normal_inds = phs_normal_inds
+        # else:
+        #     amp = np.array(amp) / np.median(amp) # normalize
+        #     # exclude exceptional values
+        #     median = np.median(amp)
+        #     abs_diff = np.abs(amp - median)
+        #     mad = np.median(abs_diff)
+        #     amp_normal_inds = np.where(abs_diff < 5.0*mad)[0]
+        #     normal_inds = np.intersect1d(phs_normal_inds, amp_normal_inds)
+
+        # # not enough valid data to do the ns_cal
+        # if len(normal_inds) <= 3:
+        #     vis_mask[:] = True # mask the vis as no ns_cal has done
+        #     return
+
+        # valid_inds = np.array(valid_inds)[normal_inds]
+        # # do phase cal
+        # phase = phase[normal_inds]
+        # f = InterpolatedUnivariateSpline(valid_inds, phase)
+        # all_phase = f(np.arange(nt))
+        # vis[:] = vis * np.exp(-1.0J * all_phase)
+        # # do amp cal
+        # if not phs_only:
+        #     amp = amp[normal_inds]
+        #     f = InterpolatedUnivariateSpline(valid_inds, amp)
+        #     all_amp = f(np.arange(nt))
+        #     vis[:] = vis / all_amp
+
+        if not phs_only:
+            amp = np.array(amp) / np.median(amp) # normalize
+            # # exclude exceptional values
+            # median = np.median(amp)
+            # abs_diff = np.abs(amp - median)
+            # mad = np.median(abs_diff)
+            # normal_inds = np.where(abs_diff < 5.0*mad)[0]
+            # valid_inds = valid_inds[normal_inds]
+            # amp = amp[normal_inds]
+            f = InterpolatedUnivariateSpline(valid_inds, amp)
+            all_amp = f(np.arange(nt))
+            vis[:] = vis / all_amp
+
+        if plot_gain and (bl in bls_plt and fi in freq_plt):
             plt.figure()
-            fig, ax = plt.subplots()
+            if phs_only:
+                fig, ax = plt.subplots()
+            else:
+                fig, ax = plt.subplots(2, sharex=True)
             ax_val = np.array([ datetime.fromtimestamp(sec) for sec in rt['sec1970'][:] ])
             xlabel = '%s' % ax_val[0].date()
             ax_val = mdates.date2num(ax_val)
-            ax.plot(ax_val, all_phase)
-            ax.plot(ax_val[valid_inds], phase, 'ro')
-            ax.xaxis_date()
+            if phs_only:
+                ax.plot(ax_val, all_phase)
+                ax.plot(ax_val[valid_inds], phase, 'ro')
+                ax1 = ax
+            else:
+                ax[0].plot(ax_val, all_amp)
+                ax[0].plot(ax_val[valid_inds], amp, 'ro')
+                ax[0].set_ylabel(r'$\Delta |g|$')
+                ax[1].plot(ax_val, all_phase)
+                ax[1].plot(ax_val[valid_inds], phase, 'ro')
+                ax1 = ax[1]
+            ax1.xaxis_date()
             date_format = mdates.DateFormatter('%H:%M')
-            ax.xaxis.set_major_formatter(date_format)
+            ax1.xaxis.set_major_formatter(date_format)
             if rotate_xdate:
                 # set the x-axis tick labels to diagonal so it fits better
                 fig.autofmt_xdate()
             else:
                 # reduce the number of tick locators
                 locator = MaxNLocator(nbins=6)
-                ax.xaxis.set_major_locator(locator)
-                ax.xaxis.set_minor_locator(AutoMinorLocator(2))
-            ax.set_xlabel(xlabel)
-            ax.set_ylabel(r'$\Delta \phi$ / radian')
+                ax1.xaxis.set_major_locator(locator)
+                ax1.xaxis.set_minor_locator(AutoMinorLocator(2))
+            ax1.set_xlabel(xlabel)
+            ax1.set_ylabel(r'$\Delta \phi$ / radian')
 
             if feed_no:
                 pol = rt['bl_pol'].local_data[li[1]]
@@ -196,5 +268,3 @@ class NsCal(tod_task.TaskTimestream):
                 fig_name = output_path(fig_name)
             plt.savefig(fig_name)
             plt.close()
-
-        vis[:] = vis * np.exp(-1.0J * all_phase)
