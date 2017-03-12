@@ -124,6 +124,8 @@ class NsCal(tod_task.TaskTimestream):
 
         nt = vis.shape[0]
         on_time = rt['ns_on'].attrs['on_time']
+        off_time = rt['ns_on'].attrs['off_time']
+        period = rt['ns_on'].attrs['period']
         num_mean = min(num_mean, on_time-2)
         if num_mean <= 0:
             raise RuntimeError('Do not have enough noise on time samples to do the ns_cal')
@@ -158,32 +160,78 @@ class NsCal(tod_task.TaskTimestream):
                 if not phs_only:
                     amp.append( np.abs(diff) )
 
+
         # not enough valid data to do the ns_cal
-        if len(phase) <= 3:
+        num_valid = len(valid_inds)
+        if num_valid <= 3:
             vis_mask[:] = True # mask the vis as no ns_cal has done
             return
 
         phase = np.unwrap(phase) # unwrap 2pi discontinuity
-        f = InterpolatedUnivariateSpline(valid_inds, phase)
-        all_phase = f(np.arange(nt))
-        # # make the interpolated values in the appropriate range
-        # all_phase = np.where(all_phase>np.pi, np.pi, all_phase)
-        # all_phase = np.where(all_phase<-np.pi, np.pi, all_phase)
-        # do phase cal
-        vis[:] = vis * np.exp(-1.0J * all_phase)
-
         if not phs_only:
             amp = np.array(amp) / np.median(amp) # normalize
-            # # exclude exceptional values
-            # median = np.median(amp)
-            # abs_diff = np.abs(amp - median)
-            # mad = np.median(abs_diff)
-            # normal_inds = np.where(abs_diff < 5.0*mad)[0]
-            # valid_inds = valid_inds[normal_inds]
-            # amp = amp[normal_inds]
-            f = InterpolatedUnivariateSpline(valid_inds, amp)
-            all_amp = f(np.arange(nt))
-            vis[:] = vis / all_amp
+        # split valid_inds into consecutive chunks
+        intervals = [0] + (np.where(np.diff(valid_inds) > 3 * period)[0] + 1).tolist() + [num_valid]
+        itp_inds = []
+        itp_phase = []
+        if not phs_only:
+            itp_amp = []
+        for i in range(len(intervals) -1):
+            this_chunk = valid_inds[intervals[i]:intervals[i+1]]
+            if len(this_chunk) > 3:
+                itp_inds.append(this_chunk)
+                itp_phase.append(phase[intervals[i]:intervals[i+1]])
+                if not phs_only:
+                    itp_amp.append(amp[intervals[i]:intervals[i+1]])
+
+        # if no such chunk, mask all the data
+        num_itp = len(itp_inds)
+        if num_itp == 0:
+            vis_mask[:] = True
+
+        # get itp pairs
+        itp_pairs = []
+        for it in itp_inds:
+            itp_pairs.append((max(0, it[0]-off_time), min(nt, it[-1]+period)))
+
+        # get mask pairs
+        mask_pairs = []
+        for i in range(num_itp):
+            if i == 0:
+                mask_pairs.append((0, itp_pairs[i][0]))
+            if i == num_itp - 1:
+                mask_pairs.append((itp_pairs[i][-1], nt))
+            else:
+                mask_pairs.append((itp_pairs[i][-1], itp_pairs[i+1][0]))
+
+        # set maskd for inds in mask_pairs
+        for mp1, mp2 in mask_pairs:
+            vis_mask[mp1:mp2] = True
+
+        # interpolate for inds in itp_inds
+        all_phase = np.array([np.nan]*nt)
+        for this_inds, this_phase, (i1, i2) in zip(itp_inds, itp_phase, itp_pairs):
+            # no need to interpolate for auto-correlation
+            if bl[0] == bl[1]:
+                all_phase[i1:i2] = 0
+            else:
+                f = InterpolatedUnivariateSpline(this_inds, this_phase)
+                this_itp_phs = f(np.arange(i1, i2))
+                # # make the interpolated values in the appropriate range
+                # this_itp_phs = np.where(this_itp_phs>np.pi, np.pi, this_itp_phs)
+                # this_itp_phs = np.where(this_itp_phs<-np.pi, np.pi, this_itp_phs)
+                all_phase[i1:i2] = this_itp_phs
+                # do phase cal for this range of inds
+                vis[i1:i2] = vis[i1:i2] * np.exp(-1.0J * this_itp_phs)
+
+        if not phs_only:
+            all_amp = np.array([np.nan]*nt)
+            for this_inds, this_amp, (i1, i2) in zip(itp_inds, itp_amp, itp_pairs):
+                f = InterpolatedUnivariateSpline(this_inds, this_amp)
+                this_itp_amp = f(np.arange(i1, i2))
+                all_amp[i1:i2] = this_itp_amp
+                # do amp cal for this range of inds
+                vis[i1:i2] = vis[i1:i2] / this_itp_amp
 
         if plot_gain and (bl in bls_plt and fi in freq_plt):
             plt.figure()
