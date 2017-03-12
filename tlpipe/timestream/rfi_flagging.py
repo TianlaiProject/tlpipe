@@ -31,6 +31,7 @@ class Flag(tod_task.TaskTimestream):
                     'max_threshold_len': 1024,
                     'sensitivity': 1.0,
                     'min_connected': 1,
+                    'flag_direction': ('time', 'freq'),
                     'tk_size': 1.0,
                     'fk_size': 3.0,
                     'threshold_num': 2, # number of threshold
@@ -60,6 +61,7 @@ class Flag(tod_task.TaskTimestream):
         max_threshold_len = self.params['max_threshold_len']
         sensitivity = self.params['sensitivity']
         min_connected = self.params['min_connected']
+        flag_direction = self.params['flag_direction']
         tk_size = self.params['tk_size']
         fk_size = self.params['fk_size']
         threshold_num = max(0, int(self.params['threshold_num']))
@@ -77,7 +79,7 @@ class Flag(tod_task.TaskTimestream):
         vis_diff = vis_abs - background
         # an initial run of N = 1 only to remove extremely high amplitude RFI
         st = sum_threshold.SumThreshold(vis_diff, vis_mask, first_threshold, exp_factor, distribution, 1, min_connected)
-        st.execute(sensitivity)
+        st.execute(sensitivity, flag_direction)
 
         # next rounds
         for i in xrange(threshold_num):
@@ -87,7 +89,7 @@ class Flag(tod_task.TaskTimestream):
             # sum-threshold
             vis_diff = vis_diff - background
             st = sum_threshold.SumThreshold(vis_diff, st.vis_mask, first_threshold, exp_factor, distribution, max_threshold_len, min_connected)
-            st.execute(sensitivity)
+            st.execute(sensitivity, flag_direction)
 
         # replace vis_mask with the flagged mask
         vis_mask[:] = st.vis_mask

@@ -8,6 +8,7 @@ Inheritance diagram
 
 """
 
+import warnings
 import numpy as np
 import combinatorial_threshold
 
@@ -127,14 +128,19 @@ class SumThreshold(combinatorial_threshold.CombinatorialThreshold):
             # set to the new mask
             self.vis_mask[:] = tmp_mask
 
-    def execute_threshold(self, factor):
-        for length, threshold in zip(self.lengths, self.thresholds):
-            self.vertical_sum_threshold(length, factor*threshold) # first time
-        for length, threshold in zip(self.lengths, self.thresholds):
-            self.horizontal_sum_threshold(length, factor*threshold) # then freq
+    def execute_threshold(self, factor, direction):
+        for direct in direction:
+            if direct == 'time':
+                for length, threshold in zip(self.time_lengths, self.time_thresholds):
+                    self.vertical_sum_threshold(length, factor*threshold) # first time
+            elif direct == 'freq':
+                for length, threshold in zip(self.freq_lengths, self.freq_thresholds):
+                    self.horizontal_sum_threshold(length, factor*threshold) # then freq
+            else:
+                warnings.warn('Invalid direction: %s, no RFI thresholding will be done' % direct)
 
-    def execute(self, sensitivity=1.0):
-        super(SumThreshold, self).execute(sensitivity)
+    def execute(self, sensitivity=1.0, direction=('time', 'freq')):
+        super(SumThreshold, self).execute(sensitivity, direction)
 
         if self.min_connected > 1:
             # self.filter_connected_samples()

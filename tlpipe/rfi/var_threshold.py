@@ -55,8 +55,13 @@ class VarThreshold(combinatorial_threshold.CombinatorialThreshold):
                 if vis1.size > 0 and (np.abs(vis1) > threshold).all():
                     self.vis_mask[y:y+length, x] = True
 
-    def execute_threshold(self, factor):
-        for length, threshold in zip(self.lengths, self.thresholds):
-            self.vertical_var_threshold(length, factor*threshold) # first time
-        for length, threshold in zip(self.lengths, self.thresholds):
-            self.horizontal_var_threshold(length, factor*threshold) # then freq
+    def execute_threshold(self, factor, direction):
+        for direct in direction:
+            if direct == 'time':
+                for length, threshold in zip(self.time_lengths, self.time_thresholds):
+                    self.vertical_var_threshold(length, factor*threshold) # first time
+            elif direct == 'freq':
+                for length, threshold in zip(self.freq_lengths, self.freq_thresholds):
+                    self.horizontal_var_threshold(length, factor*threshold) # then freq
+            else:
+                warnings.warn('Invalid direction: %s, no RFI thresholding will be done' % direct)

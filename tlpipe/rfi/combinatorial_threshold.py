@@ -39,13 +39,15 @@ class CombinatorialThreshold(object):
             raise ValueError('Invalid time_freq_vis_mask')
 
         max_log2_length = np.int(np.ceil(np.log2(max_threshold_length))) + 1
-        lengths = [ 2**i for i in xrange(max_log2_length) ]
+        time_lengths = [ 2**i for i in xrange(max_log2_length) ]
+        freq_lengths = [ 2**i for i in xrange(max_log2_length) ]
         # include nt, nf in lengths
         if nt < max_threshold_length:
-            lengths.append(nt)
+            time_lengths.append(nt)
         if nf < max_threshold_length:
-            lengths.append(nf)
-        self.lengths = np.unique(sorted(lengths))
+            freq_lengths.append(nf)
+        self.time_lengths = np.unique(sorted(time_lengths))
+        self.freq_lengths = np.unique(sorted(freq_lengths))
 
         if distribution in ('Uniform', 'Gaussian', 'Rayleigh'):
             self.distribution = distribution
@@ -56,18 +58,20 @@ class CombinatorialThreshold(object):
             self.init_threshold_with_flase_rate(resolution, false_alarm_rate)
         else:
             # self.thresholds = first_threshold / exp_factor**(np.log2(self.lengths))
-            self.thresholds = first_threshold * exp_factor**(np.log2(self.lengths)) / self.lengths # used in aoflagger
+            # self.thresholds = first_threshold * exp_factor**(np.log2(self.lengths)) / self.lengths # used in aoflagger
+            self.time_thresholds = first_threshold * exp_factor**(np.log2(self.time_lengths)) / self.time_lengths # used in aoflagger
+            self.freq_thresholds = first_threshold * exp_factor**(np.log2(self.freq_lengths)) / self.freq_lengths # used in aoflagger
 
     def init_threshold_with_flase_rate(self, resolution, false_alarm_rate):
         raise NotImplementedError('Not implemented yet')
 
 
     @abc.abstractmethod
-    def execute_threshold(self, factor):
+    def execute_threshold(self, factor, direction):
         """Abstract method that needs to be implemented by sub-classes."""
         return
 
-    def execute(self, sensitivity=1.0):
+    def execute(self, sensitivity=1.0, direction=('time', 'freq')):
         """Execute the thresholding method."""
 
         if self.distribution == 'Gaussian':
@@ -79,4 +83,4 @@ class CombinatorialThreshold(object):
         else:
             factor = sensitivity
 
-        self.execute_threshold(factor)
+        self.execute_threshold(factor, direction)
