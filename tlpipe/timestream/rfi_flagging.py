@@ -55,6 +55,10 @@ class Flag(tod_task.TaskTimestream):
     def flag(self, vis, vis_mask, li, gi, tf, ts, **kwargs):
         """Function that does the actual flag."""
 
+        # if all have been masked, no need to flag again
+        if vis_mask.all():
+            return
+
         first_threshold = self.params['first_threshold']
         exp_factor = self.params['exp_factor']
         distribution = self.params['distribution']
@@ -81,6 +85,11 @@ class Flag(tod_task.TaskTimestream):
         st = sum_threshold.SumThreshold(vis_diff, vis_mask, first_threshold, exp_factor, distribution, 1, min_connected)
         st.execute(sensitivity, flag_direction)
 
+        # if all have been masked, no need to flag again
+        if st.vis_mask.all():
+            vis_mask[:] = st.vis_mask
+            return
+
         # next rounds
         for i in xrange(threshold_num):
             # Gaussian fileter
@@ -90,6 +99,10 @@ class Flag(tod_task.TaskTimestream):
             vis_diff = vis_diff - background
             st = sum_threshold.SumThreshold(vis_diff, st.vis_mask, first_threshold, exp_factor, distribution, max_threshold_len, min_connected)
             st.execute(sensitivity, flag_direction)
+
+            # if all have been masked, no need to flag again
+            if st.vis_mask.all():
+                break
 
         # replace vis_mask with the flagged mask
         vis_mask[:] = st.vis_mask
