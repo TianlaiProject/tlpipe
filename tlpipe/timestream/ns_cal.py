@@ -171,12 +171,12 @@ class NsCal(tod_task.TaskTimestream):
         if not phs_only:
             amp = np.array(amp) / np.median(amp) # normalize
         # split valid_inds into consecutive chunks
-        intervals = [0] + (np.where(np.diff(valid_inds) > 3 * period)[0] + 1).tolist() + [num_valid]
+        intervals = [0] + (np.where(np.diff(valid_inds) > 5 * period)[0] + 1).tolist() + [num_valid]
         itp_inds = []
         itp_phase = []
         if not phs_only:
             itp_amp = []
-        for i in range(len(intervals) -1):
+        for i in xrange(len(intervals) -1):
             this_chunk = valid_inds[intervals[i]:intervals[i+1]]
             if len(this_chunk) > 3:
                 itp_inds.append(this_chunk)
@@ -192,11 +192,12 @@ class NsCal(tod_task.TaskTimestream):
         # get itp pairs
         itp_pairs = []
         for it in itp_inds:
-            itp_pairs.append((max(0, it[0]-off_time), min(nt, it[-1]+period)))
+            # itp_pairs.append((max(0, it[0]-off_time), min(nt, it[-1]+period)))
+            itp_pairs.append((max(0, it[0]-5), min(nt, it[-1]))) # not to out interpolate two much, which may lead to very inaccurate values
 
         # get mask pairs
         mask_pairs = []
-        for i in range(num_itp):
+        for i in xrange(num_itp):
             if i == 0:
                 mask_pairs.append((0, itp_pairs[i][0]))
             if i == num_itp - 1:
@@ -204,7 +205,7 @@ class NsCal(tod_task.TaskTimestream):
             else:
                 mask_pairs.append((itp_pairs[i][-1], itp_pairs[i+1][0]))
 
-        # set maskd for inds in mask_pairs
+        # set mask for inds in mask_pairs
         for mp1, mp2 in mask_pairs:
             vis_mask[mp1:mp2] = True
 
