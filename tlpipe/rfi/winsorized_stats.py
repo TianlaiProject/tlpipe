@@ -29,7 +29,12 @@ def _winsorize(a, limits=None, inclusive=(True, True)):
     a1 = np.ma.compressed(a)
 
     # use .data to return an np.ndarray instead of a masked array
-    return winsorize(a1, limits=limits, inclusive=inclusive).data
+    try:
+        wa = winsorize(a1, limits=limits, inclusive=inclusive).data
+    except IndexError:
+        wa = np.zeros(0, dtype=a.dtype)
+
+    return wa
 
 def winsorized_mean_and_std(a):
     a = _winsorize(a, limits=(0.1, 0.1), inclusive=(True, True))
