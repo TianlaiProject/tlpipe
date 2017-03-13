@@ -254,6 +254,10 @@ class NsCal(tod_task.TaskTimestream):
                 ax[1].plot(ax_val, all_phase)
                 ax[1].plot(ax_val[valid_inds], phase, 'ro')
                 ax1 = ax[1]
+            duration = (ax_val[-1] - ax_val[0])
+            dt = duration / nt
+            ext = max(0.05*duration, 5*dt)
+            ax1.set_xlim([ax_val[0]-ext, ax_val[-1]+ext])
             ax1.xaxis_date()
             date_format = mdates.DateFormatter('%H:%M')
             ax1.xaxis.set_major_formatter(date_format)
