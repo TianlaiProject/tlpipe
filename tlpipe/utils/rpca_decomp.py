@@ -79,6 +79,7 @@ def decompose(V, rank=1, lmbda=None, threshold='hard', max_iter=100, tol=1.0e-8,
             if debug:
                 print 'lmbda:', lmbda
             lmbdas.append(lmbda)
+            tols.append(tol1)
 
         if threshold == 'hard':
             S = truncate(res, lmbda)
