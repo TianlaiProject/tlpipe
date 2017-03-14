@@ -164,6 +164,10 @@ class Plot(tod_task.TaskTimestream):
                 axarr[2].legend()
 
         if plot_type == 'freq':
+            duration = (ax_val[-1] - ax_val[0])
+            dt = duration / len(ax_val)
+            ext = max(0.05*duration, 5*dt)
+            axarr[2].set_xlim([ax_val[0]-ext, ax_val[-1]+ext])
             axarr[2].xaxis_date()
             date_format = mdates.DateFormatter('%H:%M')
             axarr[2].xaxis.set_major_formatter(date_format)
@@ -177,6 +181,11 @@ class Plot(tod_task.TaskTimestream):
                 locator = MaxNLocator(nbins=6)
                 axarr[2].xaxis.set_major_locator(locator)
                 axarr[2].xaxis.set_minor_locator(AutoMinorLocator(2))
+        elif plot_type == 'time':
+            bw = (ax_val[-1] - ax_val[0])
+            df = bw / len(ax_val)
+            ext = max(0.05*bw, df)
+            axarr[2].set_xlim([ax_val[0]-ext, ax_val[-1]+ext])
 
         axarr[2].set_xlabel(xlabel)
 

@@ -124,6 +124,15 @@ class Plot(tod_task.TaskTimestream):
         axarr[1].legend()
         axarr[2].plot(ax_val, np.abs(vis1), label='abs')
         axarr[2].legend()
+        if integral == 'freq':
+            duration = (ax_val[-1] - ax_val[0])
+            dt = duration / len(ax_val)
+            ext = max(0.05*duration, 5*dt)
+        elif integral == 'time':
+            bw = (ax_val[-1] - ax_val[0])
+            df = bw / len(ax_val)
+            ext = max(0.05*bw, df)
+        axarr[2].set_xlim([ax_val[0]-ext, ax_val[-1]+ext])
         axarr[2].xaxis_date()
         date_format = mdates.DateFormatter('%H:%M')
         axarr[2].xaxis.set_major_formatter(date_format)
