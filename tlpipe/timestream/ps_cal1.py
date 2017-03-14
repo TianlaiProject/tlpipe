@@ -283,7 +283,7 @@ class PsCal(tod_task.TaskTimestream):
                     dset.attrs['dim'] = 'time, freq, pol, feed'
                     dset.attrs['time'] = ts.time[start_ind:end_ind]
                     dset.attrs['freq'] = ts.freq[:]
-                    dset.attrs['pol'] = np.array(pol)
+                    dset.attrs['pol'] = np.array(['xx', 'yy'])
                     dset.attrs['feed'] = np.array(feedno)
 
             # # if plot_figs:
