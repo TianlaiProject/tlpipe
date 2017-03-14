@@ -21,18 +21,22 @@ def decompose(V, rank=1, lmbda=None, threshold='hard', max_iter=100, tol=1.0e-8,
         if not np.allclose(V, V.T.conj()):
             raise ValueError('V must be a Hermitian matrix')
 
+    d = V.shape[0]
     if lmbda is None:
-        lmbda = MAD(V)
+        lmbda = max(1.0, 2 * np.log(d)**0.5) * MAD(V)
         fixed_lmbda = False
         if debug:
             print 'lmbda:', lmbda
     else:
         fixed_lmbda = True
 
-    d = V.shape[0]
     S = np.zeros_like(V)
     NF_old = np.Inf
-    lmbdas = [ lmbda ]
+
+    min_tol = np.Inf
+    if not fixed_lmbda:
+        min_lmbda = lmbda
+        lmbdas = [ lmbda ]
 
     for it in xrange(max_iter):
         # compute only the largest rank eigen values and vectors, which is faster
@@ -48,17 +52,26 @@ def decompose(V, rank=1, lmbda=None, threshold='hard', max_iter=100, tol=1.0e-8,
             if debug:
                 print 'Converge when iteration: %d with tol: %g < %g' % (it, tol1, tol)
             break
+
+        # record the minimum tol and its corresponding V0, S and lmbda
+        if tol1 < min_tol:
+            min_tol = tol1
+            min_V0 = V0
+            min_S = S
+            if not fixed_lmbda:
+                min_lmbda = lmbda
+
         NF_old = NF
         if not fixed_lmbda and it >= 1:
             # lmbda = 5.0 * np.std(N)
-            # use a threshold of sigma * (2 * log(d*d))**0.5
-            lmbda = 2 * np.log(d)**0.5 * np.std(N)
+            # use the universal threshold: sigma * (2 * log(d*d))**0.5
+            lmbda = max(1.0, 2 * np.log(d)**0.5) * np.std(N)
 
             # avoid cycling between two lambdas
             if len(lmbdas) == 2:
                 if lmbdas[0] == lmbda:
                     # lmbda = 0.5 * (lmbdas[1] + lmbda)
-                    lmbda = (lmbdas[1] + lmbda)
+                    lmbda = max(0.1, min(10.0, np.random.gamma(1.0))) * min_lmbda
                 lmbdas.pop(0)
             if debug:
                 print 'lmbda:', lmbda
@@ -71,6 +84,7 @@ def decompose(V, rank=1, lmbda=None, threshold='hard', max_iter=100, tol=1.0e-8,
         else:
             raise ValueError('Unknown thresholding method: %s' % threshold)
     else:
-        print 'Exit with max_iter: %d, tol: %g >= %g' % (it, tol1, tol)
+        print 'Exit with max_iter: %d, tol: %g >= %g' % (it, min_tol, tol)
+        return min_V0, min_S
 
     return V0, S
