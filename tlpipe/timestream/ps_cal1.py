@@ -8,10 +8,12 @@ Inheritance diagram
 
 """
 
+import re
 import itertools
 import numpy as np
 from scipy import linalg as la
 import ephem
+import h5py
 import aipy as a
 import tod_task
 
@@ -35,9 +37,10 @@ class PsCal(tod_task.TaskTimestream):
                     'calibrator': 'cyg',
                     'catalog': 'misc,helm,nvss',
                     'span': 60, # second
+                    'plot_figs': False,
                     'fig_name': 'gain/gain',
                     'save_gain': False,
-                    'gain_file': 'gain.hdf5',
+                    'gain_file': 'gain/gain.hdf5',
                   }
 
     prefix = 'pc_'
@@ -47,6 +50,7 @@ class PsCal(tod_task.TaskTimestream):
         calibrator = self.params['calibrator']
         catalog = self.params['catalog']
         span = self.params['span']
+        plot_figs = self.params['plot_figs']
         fig_prefix = self.params['fig_name']
         tag_output_iter = self.params['tag_output_iter']
         save_gain = self.params['save_gain']
@@ -80,8 +84,12 @@ class PsCal(tod_task.TaskTimestream):
         aa.set_jultime(ts['jul_date'][0]) # the first obs time point
         next_transit = aa.next_transit(s)
         transit_time = a.phs.ephem2juldate(next_transit) # Julian date
+        # get time zone
+        pattern = '[-+]?\d+'
+        tz = re.search(pattern, ts.attrs['timezone']).group()
+        tz = int(tz)
+        local_next_transit = ephem.Date(next_transit + tz * ephem.hour) # plus 8h to get Beijing time
         if transit_time > ts['jul_date'][-1]:
-            local_next_transit = ephem.Date(next_transit + 8.0 * ephem.hour)
             raise RuntimeError('Data does not contain local transit time %s of source %s' % (local_next_transit, calibrator))
 
         # the first transit index
@@ -97,7 +105,7 @@ class PsCal(tod_task.TaskTimestream):
             cnt += 1
 
         if mpiutil.rank0:
-            print 'transit ind of %s: %s' % (calibrator, transit_inds)
+            print 'transit ind of %s: %s, time: %s' % (calibrator, transit_inds, local_next_transit)
 
         ### now only use the first transit point to do the cal
         ### may need to improve in the future
@@ -146,128 +154,152 @@ class PsCal(tod_task.TaskTimestream):
             # get the topocentric coordinate of the calibrator at the current time
             # s_top = s.get_crds('top', ncrd=3)
             # aa.sim_cache(cat.get_crds('eq', ncrd=3)) # for compute bm_response and sim
+            mask_cnt = 0
             for i, ai in enumerate(feedno):
                 for j, aj in enumerate(feedno):
                     try:
                         bi = bls.index((ai, aj))
-                        if this_vis_mask[ii, bi]:
+                        if this_vis_mask[ii, bi] and not np.isfinite(this_vis[ii, bi]):
+                            mask_cnt += 1
                             Vmat[i, j] = 0
                         else:
                             Vmat[i, j] = this_vis[ii, bi] / Sc[fi] # xx, yy
                     except ValueError:
                         bi = bls.index((aj, ai))
-                        if this_vis_mask[ii, bi]:
+                        if this_vis_mask[ii, bi] and not np.isfinite(this_vis[ii, bi]):
+                            mask_cnt += 1
                             Vmat[i, j] = 0
                         else:
                             Vmat[i, j] = np.conj(this_vis[ii, bi] / Sc[fi]) # xx, yy
 
+            # if too many masks
+            if mask_cnt > 0.3 * nfeed**2:
+                continue
+
             # Eigen decomposition
-            Vmat = np.where(np.isfinite(Vmat), Vmat, 0)
-            V0, S = rpca_decomp.decompose(Vmat, debug=True)
+            # Vmat = np.where(np.isfinite(Vmat), Vmat, 0)
+            V0, S = rpca_decomp.decompose(Vmat, max_iter=300, debug=True)
 
             # plot
-            ind = ti - start_ind
-            # plot Vmat
-            plt.figure(figsize=(13, 5))
-            plt.subplot(121)
-            plt.imshow(Vmat.real, aspect='equal', origin='lower', interpolation='nearest')
-            plt.colorbar(shrink=1.0)
-            plt.subplot(122)
-            plt.imshow(Vmat.imag, aspect='equal', origin='lower', interpolation='nearest')
-            plt.colorbar(shrink=1.0)
-            fig_name = '%s_V_%d_%d_%s.png' % (fig_prefix, ind, fi, ts.pol_dict[pi])
-            if tag_output_iter:
-                fig_name = output_path(fig_name, iteration=self.iteration)
-            else:
-                fig_name = output_path(fig_name)
-            plt.savefig(fig_name)
-            plt.close()
-            # plot V0
-            plt.figure(figsize=(13, 5))
-            plt.subplot(121)
-            plt.imshow(V0.real, aspect='equal', origin='lower', interpolation='nearest')
-            plt.colorbar(shrink=1.0)
-            plt.subplot(122)
-            plt.imshow(V0.imag, aspect='equal', origin='lower', interpolation='nearest')
-            plt.colorbar(shrink=1.0)
-            fig_name = '%s_V0_%d_%d_%s.png' % (fig_prefix, ind, fi, ts.pol_dict[pi])
-            if tag_output_iter:
-                fig_name = output_path(fig_name, iteration=self.iteration)
-            else:
-                fig_name = output_path(fig_name)
-            plt.savefig(fig_name)
-            plt.close()
-            # plot S
-            plt.figure(figsize=(13, 5))
-            plt.subplot(121)
-            plt.imshow(S.real, aspect='equal', origin='lower', interpolation='nearest')
-            plt.colorbar(shrink=1.0)
-            plt.subplot(122)
-            plt.imshow(S.imag, aspect='equal', origin='lower', interpolation='nearest')
-            plt.colorbar(shrink=1.0)
-            fig_name = '%s_S_%d_%d_%s.png' % (fig_prefix, ind, fi, ts.pol_dict[pi])
-            if tag_output_iter:
-                fig_name = output_path(fig_name, iteration=self.iteration)
-            else:
-                fig_name = output_path(fig_name)
-            plt.savefig(fig_name)
-            plt.close()
-            # plot N
-            N = Vmat - V0 - S
-            plt.figure(figsize=(13, 5))
-            plt.subplot(121)
-            plt.imshow(N.real, aspect='equal', origin='lower', interpolation='nearest')
-            plt.colorbar(shrink=1.0)
-            plt.subplot(122)
-            plt.imshow(N.imag, aspect='equal', origin='lower', interpolation='nearest')
-            plt.colorbar(shrink=1.0)
-            fig_name = '%s_N_%d_%d_%s.png' % (fig_prefix, ind, fi, ts.pol_dict[pi])
-            if tag_output_iter:
-                fig_name = output_path(fig_name, iteration=self.iteration)
-            else:
-                fig_name = output_path(fig_name)
-            plt.savefig(fig_name)
-            plt.close()
-
-            e, U = la.eigh(V0, eigvals=(nfeed-1, nfeed-1))
-            g = U[:, -1] * e[-1]**0.5
-            lgain[ii] = g
-
-            # plot gain
-            plt.figure()
-            plt.plot(range(1, nfeed+1), g.real, 'b-', label='real')
-            plt.plot(range(1, nfeed+1), g.real, 'bo')
-            plt.plot(range(1, nfeed+1), g.imag, 'g-', label='imag')
-            plt.plot(range(1, nfeed+1), g.imag, 'go')
-            plt.plot(range(1, nfeed+1), np.abs(g), 'r-', label='abs')
-            plt.plot(range(1, nfeed+1), np.abs(g), 'ro')
-            plt.xlim(0, nfeed+2)
-            plt.xlabel('Feed number')
-            plt.legend()
-            fig_name = '%s_ants_%d_%d_%s.png' % (fig_prefix, ind, fi, ts.pol_dict[pi])
-            if tag_output_iter:
-                fig_name = output_path(fig_name, iteration=self.iteration)
-            else:
-                fig_name = output_path(fig_name)
-            plt.savefig(fig_name)
-            plt.close()
-
-        # gather gain from each processes
-        gain = mpiutil.gather_array(lgain, axis=0, root=0, comm=ts.comm)
-        if mpiutil.rank0:
-            gain = gain.reshape(nt, nf, 2, nfeed)
-            for idx, fd in enumerate(feedno):
-                plt.figure()
-                plt.plot(np.abs(gain[:, 0, 0, idx]), label='xx') # only plot fi == 0
-                plt.plot(np.abs(gain[:, 0, 1, idx]), label='yy') # only plot fi == 0
-                plt.legend()
-                fig_name = '%s_%d.png' % (fig_prefix, fd)
+            if plot_figs:
+                ind = ti - start_ind
+                # plot Vmat
+                plt.figure(figsize=(13, 5))
+                plt.subplot(121)
+                plt.imshow(Vmat.real, aspect='equal', origin='lower', interpolation='nearest')
+                plt.colorbar(shrink=1.0)
+                plt.subplot(122)
+                plt.imshow(Vmat.imag, aspect='equal', origin='lower', interpolation='nearest')
+                plt.colorbar(shrink=1.0)
+                fig_name = '%s_V_%d_%d_%s.png' % (fig_prefix, ind, fi, ts.pol_dict[pi])
                 if tag_output_iter:
                     fig_name = output_path(fig_name, iteration=self.iteration)
                 else:
                     fig_name = output_path(fig_name)
                 plt.savefig(fig_name)
                 plt.close()
+                # plot V0
+                plt.figure(figsize=(13, 5))
+                plt.subplot(121)
+                plt.imshow(V0.real, aspect='equal', origin='lower', interpolation='nearest')
+                plt.colorbar(shrink=1.0)
+                plt.subplot(122)
+                plt.imshow(V0.imag, aspect='equal', origin='lower', interpolation='nearest')
+                plt.colorbar(shrink=1.0)
+                fig_name = '%s_V0_%d_%d_%s.png' % (fig_prefix, ind, fi, ts.pol_dict[pi])
+                if tag_output_iter:
+                    fig_name = output_path(fig_name, iteration=self.iteration)
+                else:
+                    fig_name = output_path(fig_name)
+                plt.savefig(fig_name)
+                plt.close()
+                # plot S
+                plt.figure(figsize=(13, 5))
+                plt.subplot(121)
+                plt.imshow(S.real, aspect='equal', origin='lower', interpolation='nearest')
+                plt.colorbar(shrink=1.0)
+                plt.subplot(122)
+                plt.imshow(S.imag, aspect='equal', origin='lower', interpolation='nearest')
+                plt.colorbar(shrink=1.0)
+                fig_name = '%s_S_%d_%d_%s.png' % (fig_prefix, ind, fi, ts.pol_dict[pi])
+                if tag_output_iter:
+                    fig_name = output_path(fig_name, iteration=self.iteration)
+                else:
+                    fig_name = output_path(fig_name)
+                plt.savefig(fig_name)
+                plt.close()
+                # plot N
+                N = Vmat - V0 - S
+                plt.figure(figsize=(13, 5))
+                plt.subplot(121)
+                plt.imshow(N.real, aspect='equal', origin='lower', interpolation='nearest')
+                plt.colorbar(shrink=1.0)
+                plt.subplot(122)
+                plt.imshow(N.imag, aspect='equal', origin='lower', interpolation='nearest')
+                plt.colorbar(shrink=1.0)
+                fig_name = '%s_N_%d_%d_%s.png' % (fig_prefix, ind, fi, ts.pol_dict[pi])
+                if tag_output_iter:
+                    fig_name = output_path(fig_name, iteration=self.iteration)
+                else:
+                    fig_name = output_path(fig_name)
+                plt.savefig(fig_name)
+                plt.close()
+
+            e, U = la.eigh(V0, eigvals=(nfeed-1, nfeed-1))
+            g = U[:, -1] * e[-1]**0.5
+            lgain[ii] = g
+
+            # plot gain
+            if plot_figs:
+                plt.figure()
+                plt.plot(feedno, g.real, 'b-', label='real')
+                plt.plot(feedno, g.real, 'bo')
+                plt.plot(feedno, g.imag, 'g-', label='imag')
+                plt.plot(feedno, g.imag, 'go')
+                plt.plot(feedno, np.abs(g), 'r-', label='abs')
+                plt.plot(feedno, np.abs(g), 'ro')
+                plt.xlim(feedno[0]-1, feedno[-1]+1)
+                plt.xlabel('Feed number')
+                plt.legend()
+                fig_name = '%s_ants_%d_%d_%s.png' % (fig_prefix, ind, fi, ts.pol_dict[pi])
+                if tag_output_iter:
+                    fig_name = output_path(fig_name, iteration=self.iteration)
+                else:
+                    fig_name = output_path(fig_name)
+                plt.savefig(fig_name)
+                plt.close()
+
+        # gather gain from each processes
+        gain = mpiutil.gather_array(lgain, axis=0, root=0, comm=ts.comm)
+        if mpiutil.rank0:
+            gain = gain.reshape(nt, nf, 2, nfeed)
+            if save_gain:
+                if tag_output_iter:
+                    gain_file = output_path(gain_file, iteration=self.iteration)
+                else:
+                    gain_file = output_path(gain_file)
+                with h5py.File(gain_file, 'w') as f:
+                    dset = f.create_dataset('gain', data=gain)
+                    dset.attrs['dim'] = 'time, freq, pol, feed'
+                    dset.attrs['time'] = ts.time[start_ind:end_ind]
+                    dset.attrs['freq'] = ts.freq[:]
+                    dset.attrs['pol'] = np.array(pol)
+                    dset.attrs['feed'] = np.array(feedno)
+
+            # # if plot_figs:
+            # if True:
+            #     for idx, fd in enumerate(feedno):
+            #         plt.figure()
+            #         plt.plot(np.abs(gain[:, 0, 0, idx]), label='xx') # only plot fi == 0
+            #         plt.plot(np.abs(gain[:, 0, 1, idx]), label='yy') # only plot fi == 0
+            #         plt.legend()
+            #         fig_name = '%s_feed_%d.png' % (fig_prefix, fd)
+            #         if tag_output_iter:
+            #             fig_name = output_path(fig_name, iteration=self.iteration)
+            #         else:
+            #             fig_name = output_path(fig_name)
+            #         plt.savefig(fig_name)
+            #         plt.close()
 
 
         return super(PsCal, self).process(ts)
