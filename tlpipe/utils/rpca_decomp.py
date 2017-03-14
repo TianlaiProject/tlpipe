@@ -37,6 +37,7 @@ def decompose(V, rank=1, lmbda=None, threshold='hard', max_iter=100, tol=1.0e-8,
     if not fixed_lmbda:
         min_lmbda = lmbda
         lmbdas = [ lmbda ]
+        tols = [ np.Inf ]
 
     for it in xrange(max_iter):
         # compute only the largest rank eigen values and vectors, which is faster
@@ -67,12 +68,14 @@ def decompose(V, rank=1, lmbda=None, threshold='hard', max_iter=100, tol=1.0e-8,
             # use the universal threshold: sigma * (2 * log(d*d))**0.5
             lmbda = max(1.0, 2 * np.log(d)**0.5) * np.std(N)
 
-            # avoid cycling between two lambdas
-            if len(lmbdas) == 2:
-                if lmbdas[0] == lmbda:
-                    # lmbda = 0.5 * (lmbdas[1] + lmbda)
-                    lmbda = max(0.1, min(10.0, np.random.gamma(1.0))) * min_lmbda
-                lmbdas.pop(0)
+            # avoid cycling around
+            while (lmbda in lmbdas) and (tol1 in tols):
+                while True:
+                    factor = np.random.gamma(1.0)
+                    if factor != 1.0 and (factor >=0.9 or factor <= 10.0):
+                        break
+                lmbda = factor * min_lmbda
+
             if debug:
                 print 'lmbda:', lmbda
             lmbdas.append(lmbda)
