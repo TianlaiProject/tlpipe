@@ -178,7 +178,8 @@ class PsCal(tod_task.TaskTimestream):
 
             # Eigen decomposition
             # Vmat = np.where(np.isfinite(Vmat), Vmat, 0)
-            V0, S = rpca_decomp.decompose(Vmat, max_iter=300, debug=True)
+            V0, S = rpca_decomp.decompose(Vmat, max_iter=100, threshold='hard', debug=True)
+            # V0, S = rpca_decomp.decompose(Vmat, max_iter=100, threshold='soft', debug=True)
 
             # plot
             if plot_figs:
