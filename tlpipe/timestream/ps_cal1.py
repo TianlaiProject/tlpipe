@@ -18,6 +18,7 @@ import h5py
 import aipy as a
 import tod_task
 from timestream import Timestream
+from tlpipe.core import constants as const
 
 from caput import mpiutil
 from caput import mpiarray
@@ -135,7 +136,8 @@ class PsCal(tod_task.TaskTimestream):
 
         nt = end_ind - start_ind
         t_inds = range(start_ind, end_ind)
-        nf = len(ts.freq[:])
+        freq = ts.freq[:]
+        nf = len(freq)
         nlb = len(ts.local_bl[:])
         nfeed = len(feedno)
         tfp_inds = list(itertools.product(t_inds, range(nf), [pol.index('xx'), pol.index('yy')])) # only for xx and yy
@@ -299,7 +301,7 @@ class PsCal(tod_task.TaskTimestream):
         hi = min(nt, c + 100 + 1)
         x = np.arange(li, hi)
         # compute s_top for this time range
-        n0 = np.zeros(((hi-li), nf, 3))
+        n0 = np.zeros(((hi-li), 3))
         for ti, jt in enumerate(ts.time[start_ind:end_ind][li:hi]):
             aa.set_jultime(jt)
             s.compute(aa)
@@ -337,8 +339,8 @@ class PsCal(tod_task.TaskTimestream):
                         continue
 
                     An = y / fc(popt[1], *popt) # the beam profile
-                    ui = feedpos[idx] # position of this feed
-                    exp_factor = np.exp(2.0J * np.pi * np.dot(n0[:, fi, :], ui))
+                    ui = feedpos[idx] * (1.0e6*freq[fi]) / const.c # position of this feed in unit of wavelength
+                    exp_factor = np.exp(2.0J * np.pi * np.dot(n0, ui))
                     Ae = An * exp_factor
                     # compute gain for this feed
                     lgain[ii, idx] = np.dot(y[inds].conj(), Ae[inds]) / np.dot(Ae[inds].conj(), Ae[inds])
@@ -370,13 +372,13 @@ class PsCal(tod_task.TaskTimestream):
                 Gain = f.create_dataset('Gain', data=Gain)
                 Gain.attrs['dim'] = 'time, freq, pol, feed'
                 Gain.attrs['time'] = ts.time[start_ind:end_ind]
-                Gain.attrs['freq'] = ts.freq[:]
+                Gain.attrs['freq'] = freq
                 Gain.attrs['pol'] = np.array(['xx', 'yy'])
                 Gain.attrs['feed'] = np.array(feedno)
                 # save gain
                 gain = f.create_dataset('gain', data=gain)
                 gain.attrs['dim'] = 'freq, pol, feed'
-                gain.attrs['freq'] = ts.freq[:]
+                gain.attrs['freq'] = freq
                 gain.attrs['pol'] = np.array(['xx', 'yy'])
                 gain.attrs['feed'] = np.array(feedno)
 
