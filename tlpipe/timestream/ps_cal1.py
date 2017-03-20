@@ -21,7 +21,6 @@ from timestream import Timestream
 from tlpipe.core import constants as const
 
 from caput import mpiutil
-from caput import mpiarray
 from tlpipe.utils.path_util import output_path
 from tlpipe.utils import rpca_decomp
 import tlpipe.plot
@@ -334,16 +333,18 @@ class PsCal(tod_task.TaskTimestream):
                         # popt, pcov = optimize.curve_fit(fg, x[inds], y[inds], p0=(cval, c, 90, 0))
                         # sinc function seems fit better
                         popt, pcov = optimize.curve_fit(fc, x[inds], y[inds], p0=(cval, c, 1.0e-2, 0))
+                        # print 'popt:', popt
                     except RuntimeError:
                         print 'curve_fit failed for fi = %d, pol = %s, feed = %d' % (fi, ['xx', 'yy'][pi], feedno[idx])
                         continue
 
                     An = y / fc(popt[1], *popt) # the beam profile
-                    ui = feedpos[idx] * (1.0e6*freq[fi]) / const.c # position of this feed in unit of wavelength
+                    ui = (feedpos[idx] - feedpos[0]) * (1.0e6*freq[fi]) / const.c # position of this feed (relative to the first feed) in unit of wavelength
                     exp_factor = np.exp(2.0J * np.pi * np.dot(n0, ui))
                     Ae = An * exp_factor
+                    Gi = Gain[li:hi, fi, pi, idx]
                     # compute gain for this feed
-                    lgain[ii, idx] = np.dot(y[inds].conj(), Ae[inds]) / np.dot(Ae[inds].conj(), Ae[inds])
+                    lgain[ii, idx] = np.dot(Gi[inds].conj(), Ae[inds]) / np.dot(Ae[inds].conj(), Ae[inds])
 
         # gather local gain
         gain = mpiutil.gather_array(lgain, axis=0, root=None, comm=ts.comm)
