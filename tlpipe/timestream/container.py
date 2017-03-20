@@ -14,6 +14,20 @@ from caput import memh5
 from caput import mpiutil
 
 
+def _to_slice_obj(lst):
+    ### convert a list to a slice object if possible
+    if len(lst) == 0:
+        return slice(0, 0)
+    elif len(lst) == 1:
+        return slice(lst[0], lst[0]+1)
+    else:
+        d = np.diff(lst)
+        if np.all(d == d[0]):
+            return slice(lst[0], lst[-1]+d[0], d[0])
+        else:
+            return lst
+
+
 def ensure_file_list(files):
     """Tries to interpret the input as a sequence of files
 
@@ -379,7 +393,7 @@ class BasicTod(memh5.MemDiskGroup):
         fh = self.infiles[0]
         self.attrs[name] = fh.attrs[name]
 
-    def _load_a_tod_attribute(self, name):
+    def _load_a_time_ordered_attribute(self, name):
         ### load a time ordered attribute from all the file
         if self.num_infiles == 0:
             warnings.warn('No input file')
@@ -400,7 +414,7 @@ class BasicTod(memh5.MemDiskGroup):
             return
 
         if name in self.time_ordered_attrs:
-            self._load_a_tod_attribute(name)
+            self._load_a_time_ordered_attribute(name)
         else:
             self._load_a_common_attribute(name)
 
@@ -416,162 +430,351 @@ class BasicTod(memh5.MemDiskGroup):
         # copy attrs of this dset
         memh5.copyattrs(dset.attrs, self[name].attrs)
 
-    def _load_a_tod_dataset(self, name):
-        ### load a time ordered dataset from all files, distributed along the first axis
+    def _load_a_main_axes_ordered_dataset(self, name):
+        ### load a main_axes_ordered_dataset from the first file if it is not time
+        ### ordered, else from all files, distribute the data along
+        ### self.main_data_dist_axis if data has this axis
         if self.num_infiles == 0:
             warnings.warn('No input file')
             return
-
-        def _to_slice_obj(lst):
-            ### convert a list to a slice object if possible
-            if len(lst) == 0:
-                return slice(0, 0)
-            elif len(lst) == 1:
-                return slice(lst[0], lst[0]+1)
-            else:
-                d = np.diff(lst)
-                if np.all(d == d[0]):
-                    return slice(lst[0], lst[-1]+d[0], d[0])
-                else:
-                    return lst
 
         if name in self.main_time_ordered_datasets.keys():
             dset_shape, dset_type, infiles_map = self._get_input_info(name, self.main_data_start, self.main_data_stop)
             first_start = mpiutil.bcast(infiles_map[0][1], root=0, comm=self.comm) # start form the first file
             last_stop = mpiutil.bcast(infiles_map[-1][2], root=self.nproc-1, comm=self.comm) # stop from the last file
         else:
-            dset_shape, dset_type, infiles_map = self._get_input_info(name, 0, None)
+            dset_shape, dset_type = self.infiles[0][name].shape, self.infiles[0][name].dtype
 
-        # for main data
-        if name == self.main_data_name:
-            main_data_select = self.main_data_select[:] # copy here to not change self.main_data_select
-            new_dset_shape = (dset_shape[0],)
-            for axis in xrange(1, len(dset_shape)): # exclude the first axis
-                tmp = np.arange(dset_shape[axis])
-                sel = tmp[main_data_select[axis]]
-                new_dset_shape += (len(sel),)
-                if axis == self.main_data_dist_axis:
-                    main_data_select[axis] = mpiutil.mpilist(sel, method='con', comm=self.comm).tolist() # must have tolist as a single number numpy array index will reduce one axis in h5py slice
+        axes = list(self.main_axes_ordered_datasets[name])
+        axes = axes + [None] * (len(dset_shape) - len(axes)) # complete the un-write axes
+        if 0 in axes:
+            ti = axes.index(0) # index of 0 axis
+        if self.main_data_dist_axis in axes:
+            di = axes.index(self.main_data_dist_axis) # index of dist axis
+        fsel = [ ( self.main_data_select[a] if a is not None else slice(0, None, None) ) for a in axes ] # for data in file
+        msel = [ slice(0, None, None) ] # for data in memory
+        shp = [ len(np.arange(ni)[si]) for (ni, si) in zip(dset_shape, fsel) ]
 
-                # convert list to slice object if possible
-                main_data_select = [  ( _to_slice_obj(lst) if isinstance(lst, list) else lst ) for lst in main_data_select ]
-
-            self.create_dataset(name, shape=new_dset_shape, dtype=dset_type, distributed=True, distributed_axis=self.main_data_dist_axis)
+        if self.main_data_dist_axis in axes:
+            # load as a distributed dataset
+            # create a distributed dataset to hold the data to be load
+            self.create_dataset(name, shape=shp, dtype=dset_type, distributed=True, distributed_axis=di)
             # copy attrs of this dset
             memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
 
-            if self.main_data_dist_axis == 0:
-                st = 0
-                for fi, start, stop in infiles_map:
-                    main_data_select[0] = slice(start, stop)
-                    et = st + (stop - start)
-                    fh = self.infiles[fi]
-                    if np.prod(self[name].local_data[st:et].shape) > 0:
-                        # only read in data if non-empty, may get error otherwise
-                        # main_data_select = [  ( _to_slice_obj(lst) if isinstance(lst, list) else lst ) for lst in main_data_select ]
-                        self[name].local_data[st:et] = fh[name][tuple(main_data_select)]
-                    st = et
-            # need to take special care when dist_axis != 0
+            if 0 in axes:
+                if self.main_data_dist_axis == 0:
+                    # load data from all files as a distributed dataset
+                    st = 0
+                    for fi, start, stop in infiles_map:
+                        et = st + (stop - start)
+                        fsel[ti] = slice(start, stop)
+                        msel[ti] = slice(st, et)
+                        st = et
+                        fh = self.infiles[fi]
+                        if np.prod(self[name].local_data[msel].shape) > 0:
+                            # only read in data if non-empty, may get error otherwise
+                            fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
+                            self[name].local_data[msel] = fh[name][tuple(fsel)]
+
+                else:
+                    # load data from all files as a distributed dataset
+                    linds = mpiutil.mpilist(np.arange(shp[di]).tolist(), comm=self.comm)
+                    fsel[di] = linds
+
+                    # load data from all files
+                    st = 0
+                    for fi, fh in enumerate(self.infiles):
+                        num_ts = fh[name].shape[0]
+                        if self.num_infiles == 1:
+                            et = st + last_stop - first_start
+                            fsel[ti] = slice(first_start, last_stop)
+                        elif self.num_infiles > 1:
+                            if fi == 0:
+                                et = st + (num_ts - first_start)
+                                fsel[ti] = slice(fist_start, None)
+                            elif fi == self.num_infiles-1:
+                                et = st + last_stop
+                                fsel[ti] = slice(0, last_stop)
+                            else:
+                                et = st + num_ts
+                                fsel[ti] = slice(0, None)
+
+                        msel[ti] = slice(st, et)
+                        st = et
+                        if np.prod(self[name].local_data[msel].shape) > 0:
+                            fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
+                            self[name].local_data[msel] = fh[name][tuple(fsel)]
+
             else:
-                st = 0
-                # every proc has to read from all files
-                for fi, fh in enumerate(self.infiles):
-                    num_ts = fh[name].shape[0]
-                    if self.num_infiles == 1:
-                        et = st + last_stop - first_start
-                        main_data_select[0] = slice(first_start, last_stop)
-                    elif self.num_infiles > 1:
-                        if fi == 0:
-                            et = st + (num_ts - first_start)
-                            main_data_select[0] = slice(first_start, None)
-                        elif fi == self.num_infiles-1:
-                            et = st + last_stop
-                            main_data_select[0] = slice(0, last_stop)
-                        else:
-                            et = st + num_ts
+                if self.main_data_dist_axis == 0:
+                    raise RuntimeError('Something wrong happened, this would never occur')
+                else:
+                    # load data from the first file as a distributed dataset
+                    linds = mpiutil.mpilist(np.arange(shp[di]).tolist(), comm=self.comm)
+                    fsel[di] = linds
+                    if np.prod(self[name].local_data.shape) > 0:
+                        fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
+                        self[name].local_data[:] = self.infiles[0][name][tuple(fsel)]
 
-                    if np.prod(self[name].local_data[st:et].shape) > 0:
-                        # only read in data if non-empty, may get error otherwise
-                        # main_data_select = [  ( _to_slice_obj(lst) if isinstance(lst, list) else lst ) for lst in main_data_select ]
-                        self[name].local_data[st:et] = fh[name][tuple(main_data_select)] # h5py need the explicit tuple conversion
-                    st = et
-
-        # for other main_time_ordered_datasets
-        elif name in self.main_time_ordered_datasets.keys():
-            time_axis = self.main_time_ordered_datasets[name].index(0)
-            if self.main_data_dist_axis == 0:
-                # distribute it along the first axis as the main data
-                self.create_dataset(name, shape=dset_shape, dtype=dset_type, distributed=True, distributed_axis=time_axis)
-                # copy attrs of this dset
-                memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
-                st = 0
-                for fi, start, stop in infiles_map:
-                    et = st + (stop - start)
-                    fh = self.infiles[fi]
-                    if np.prod(self[name].local_data[st:et].shape) > 0:
-                        self[name].local_data[st:et] = fh[name][start:stop]
-                    st = et
-            else:
-                # as the distributed axis of the main data is not the time axis,
-                # these main_time_ordered_datasets should also not distributed along time axis,
-                # so here load it as common datasets
-                self.create_dataset(name, shape=dset_shape, dtype=dset_type)
-                # copy attrs of this dset
-                memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
-                st = 0
-                for fi, fh in enumerate(self.infiles):
-                    num_ts = fh[name].shape[0]
-                    if self.num_infiles == 1:
-                        et = st + last_stop - first_start
-                        main_data_select[0] = slice(first_start, last_stop)
-                    elif self.num_infiles > 1:
-                        if fi == 0:
-                            et = st + (num_ts - first_start)
-                            sel = slice(fist_start, None)
-                        elif fi == self.num_infiles-1:
-                            et = st + last_stop
-                            sel = slice(0, last_stop)
-                        else:
-                            et = st + num_ts
-                            sel = slice(0, None)
-
-                    if np.prod(self[name][st:et].shape) > 0:
-                        self[name][st:et] = fh[name][sel] # not a distributed dataset
-                    st = et
-
-        # for non main_time_ordered_datasets
         else:
-            # for other time ordered data that are not main_time_ordered_datasets,
-            # always distribute them along the first axis no matter what self.main_data_dist_axis is
-            time_axis = self.time_ordered_datasets[name].index(0)
-            self.create_dataset(name, shape=dset_shape, dtype=dset_type, distributed=True, distributed_axis=time_axis)
+            # load as a common dataset
+            # create a common dataset to hold the data to be load
+            self.create_dataset(name, shape=shp, dtype=dset_type)
             # copy attrs of this dset
             memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
-            st = 0
-            for fi, start, stop in infiles_map:
-                et = st + (stop - start)
-                fh = self.infiles[fi]
-                if np.prod(self[name].local_data[st:et].shape) > 0:
-                    self[name].local_data[st:et] = fh[name][start:stop]
-                st = et
 
-    def _load_a_dataset(self, name):
-        ### load a dataset (either a commmon or a time ordered)
+            if 0 in axes:
+                # load data from all files
+                st = 0
+                for fi, fh in enumerate(self.infiles):
+                    num_ts = fh[name].shape[0]
+                    if self.num_infiles == 1:
+                        et = st + last_stop - first_start
+                        fsel[ti] = slice(first_start, last_stop)
+                    elif self.num_infiles > 1:
+                        if fi == 0:
+                            et = st + (num_ts - first_start)
+                            fsel[ti] = slice(fist_start, None)
+                        elif fi == self.num_infiles-1:
+                            et = st + last_stop
+                            fsel[ti] = slice(0, last_stop)
+                        else:
+                            et = st + num_ts
+                            fsel[ti] = slice(0, None)
+
+                    msel[ti] = slice(st, et)
+                    st = et
+                    if np.prod(self[name][msel].shape) > 0:
+                        fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
+                        self[name][msel] = fh[name][tuple(fsel)] # not a distributed dataset
+
+            else:
+                # load data from the first file
+                if np.prod(self[name][:].shape) > 0:
+                    fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
+                    self[name][:] = self.infiles[0][name][tuple(fsel)] # not a distributed dataset
+
+
+    def _load_a_time_ordered_dataset(self, name):
+        ### load a time ordered dataset (except those also in main_axes_ordered_datasets) from all files
         if self.num_infiles == 0:
             warnings.warn('No input file')
             return
 
-        if name in self.time_ordered_datasets.keys():
-            self._load_a_tod_dataset(name)
+        dset_shape, dset_type, infiles_map = self._get_input_info(name, 0, None)
+        axes = self.time_ordered_datasets[name]
+        ti = axes.index(0) # index of 0 axis
+        fsel = [ slice(0, None, None) for i in dset_shape ] # for data in file
+        msel = [ slice(0, None, None) for i in dset_shape ] # for data in memory
+
+        if self.main_data_dist_axis == 0:
+            # load data as a distributed dataset
+            # create a distributed dataset to hold the data to be load
+            self.create_dataset(name, shape=dset_shape, dtype=dset_type, distributed=True, distributed_axis=ti)
+            # copy attrs of this dset
+            memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
+
+            # load data from all files as a distributed dataset
+            st = 0
+            for fi, start, stop in infiles_map:
+                et = st + (stop - start)
+                fsel[ti] = slice(start, stop)
+                msel[ti] = slice(st, et)
+                st = et
+                fh = self.infiles[fi]
+                if np.prod(self[name].local_data[msel].shape) > 0:
+                    # only read in data if non-empty, may get error otherwise
+                    fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
+                    self[name].local_data[msel] = fh[name][tuple(fsel)]
+        else:
+            # load data as a common dataset
+            # create a common dataset to hold the data to be load
+            self.create_dataset(name, shape=dset_shape, dtype=dset_type)
+            # copy attrs of this dset
+            memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
+
+            # load data from all files as a common dataset
+            st = 0
+            for fi, fh in enumerate(self.infiles):
+                num_ts = fh[name].shape[0]
+                if self.num_infiles == 1:
+                    et = st + last_stop - first_start
+                    fsel[ti] = slice(first_start, last_stop)
+                elif self.num_infiles > 1:
+                    if fi == 0:
+                        et = st + (num_ts - first_start)
+                        fsel[ti] = slice(fist_start, None)
+                    elif fi == self.num_infiles-1:
+                        et = st + last_stop
+                        fsel[ti] = slice(0, last_stop)
+                    else:
+                        et = st + num_ts
+                        fsel[ti] = slice(0, None)
+
+                msel[ti] = slice(st, et)
+                st = et
+                if np.prod(self[name][msel].shape) > 0:
+                    fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
+                    self[name][msel] = fh[name][tuple(fsel)] # not a distributed dataset
+
+
+
+
+    # def _load_a_tod_dataset(self, name):
+    #     ### load a time ordered dataset from all files, distributed along the first axis
+    #     if self.num_infiles == 0:
+    #         warnings.warn('No input file')
+    #         return
+
+    #     def _to_slice_obj(lst):
+    #         ### convert a list to a slice object if possible
+    #         if len(lst) == 0:
+    #             return slice(0, 0)
+    #         elif len(lst) == 1:
+    #             return slice(lst[0], lst[0]+1)
+    #         else:
+    #             d = np.diff(lst)
+    #             if np.all(d == d[0]):
+    #                 return slice(lst[0], lst[-1]+d[0], d[0])
+    #             else:
+    #                 return lst
+
+    #     if name in self.main_time_ordered_datasets.keys():
+    #         dset_shape, dset_type, infiles_map = self._get_input_info(name, self.main_data_start, self.main_data_stop)
+    #         first_start = mpiutil.bcast(infiles_map[0][1], root=0, comm=self.comm) # start form the first file
+    #         last_stop = mpiutil.bcast(infiles_map[-1][2], root=self.nproc-1, comm=self.comm) # stop from the last file
+    #     else:
+    #         dset_shape, dset_type, infiles_map = self._get_input_info(name, 0, None)
+
+    #     # for main data
+    #     if name == self.main_data_name:
+    #         main_data_select = self.main_data_select[:] # copy here to not change self.main_data_select
+    #         new_dset_shape = (dset_shape[0],)
+    #         for axis in xrange(1, len(dset_shape)): # exclude the first axis
+    #             tmp = np.arange(dset_shape[axis])
+    #             sel = tmp[main_data_select[axis]]
+    #             new_dset_shape += (len(sel),)
+    #             if axis == self.main_data_dist_axis:
+    #                 main_data_select[axis] = mpiutil.mpilist(sel, method='con', comm=self.comm).tolist() # must have tolist as a single number numpy array index will reduce one axis in h5py slice
+
+    #             # convert list to slice object if possible
+    #             main_data_select = [  ( _to_slice_obj(lst) if isinstance(lst, list) else lst ) for lst in main_data_select ]
+
+    #         self.create_dataset(name, shape=new_dset_shape, dtype=dset_type, distributed=True, distributed_axis=self.main_data_dist_axis)
+    #         # copy attrs of this dset
+    #         memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
+
+    #         if self.main_data_dist_axis == 0:
+    #             st = 0
+    #             for fi, start, stop in infiles_map:
+    #                 main_data_select[0] = slice(start, stop)
+    #                 et = st + (stop - start)
+    #                 fh = self.infiles[fi]
+    #                 if np.prod(self[name].local_data[st:et].shape) > 0:
+    #                     # only read in data if non-empty, may get error otherwise
+    #                     # main_data_select = [  ( _to_slice_obj(lst) if isinstance(lst, list) else lst ) for lst in main_data_select ]
+    #                     self[name].local_data[st:et] = fh[name][tuple(main_data_select)]
+    #                 st = et
+    #         # need to take special care when dist_axis != 0
+    #         else:
+    #             st = 0
+    #             # every proc has to read from all files
+    #             for fi, fh in enumerate(self.infiles):
+    #                 num_ts = fh[name].shape[0]
+    #                 if self.num_infiles == 1:
+    #                     et = st + last_stop - first_start
+    #                     main_data_select[0] = slice(first_start, last_stop)
+    #                 elif self.num_infiles > 1:
+    #                     if fi == 0:
+    #                         et = st + (num_ts - first_start)
+    #                         main_data_select[0] = slice(first_start, None)
+    #                     elif fi == self.num_infiles-1:
+    #                         et = st + last_stop
+    #                         main_data_select[0] = slice(0, last_stop)
+    #                     else:
+    #                         et = st + num_ts
+
+    #                 if np.prod(self[name].local_data[st:et].shape) > 0:
+    #                     # only read in data if non-empty, may get error otherwise
+    #                     # main_data_select = [  ( _to_slice_obj(lst) if isinstance(lst, list) else lst ) for lst in main_data_select ]
+    #                     self[name].local_data[st:et] = fh[name][tuple(main_data_select)] # h5py need the explicit tuple conversion
+    #                 st = et
+
+    #     # for other main_time_ordered_datasets
+    #     elif name in self.main_time_ordered_datasets.keys():
+    #         time_axis = self.main_time_ordered_datasets[name].index(0)
+    #         if self.main_data_dist_axis == 0:
+    #             # distribute it along the first axis as the main data
+    #             self.create_dataset(name, shape=dset_shape, dtype=dset_type, distributed=True, distributed_axis=time_axis)
+    #             # copy attrs of this dset
+    #             memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
+    #             st = 0
+    #             for fi, start, stop in infiles_map:
+    #                 et = st + (stop - start)
+    #                 fh = self.infiles[fi]
+    #                 if np.prod(self[name].local_data[st:et].shape) > 0:
+    #                     self[name].local_data[st:et] = fh[name][start:stop]
+    #                 st = et
+    #         else:
+    #             # as the distributed axis of the main data is not the time axis,
+    #             # these main_time_ordered_datasets should also not distributed along time axis,
+    #             # so here load it as common datasets
+    #             self.create_dataset(name, shape=dset_shape, dtype=dset_type)
+    #             # copy attrs of this dset
+    #             memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
+    #             st = 0
+    #             for fi, fh in enumerate(self.infiles):
+    #                 num_ts = fh[name].shape[0]
+    #                 if self.num_infiles == 1:
+    #                     et = st + last_stop - first_start
+    #                     main_data_select[0] = slice(first_start, last_stop)
+    #                 elif self.num_infiles > 1:
+    #                     if fi == 0:
+    #                         et = st + (num_ts - first_start)
+    #                         sel = slice(fist_start, None)
+    #                     elif fi == self.num_infiles-1:
+    #                         et = st + last_stop
+    #                         sel = slice(0, last_stop)
+    #                     else:
+    #                         et = st + num_ts
+    #                         sel = slice(0, None)
+
+    #                 if np.prod(self[name][st:et].shape) > 0:
+    #                     self[name][st:et] = fh[name][sel] # not a distributed dataset
+    #                 st = et
+
+    #     # for non main_time_ordered_datasets
+    #     else:
+    #         # for other time ordered data that are not main_time_ordered_datasets,
+    #         # always distribute them along the first axis no matter what self.main_data_dist_axis is
+    #         time_axis = self.time_ordered_datasets[name].index(0)
+    #         self.create_dataset(name, shape=dset_shape, dtype=dset_type, distributed=True, distributed_axis=time_axis)
+    #         # copy attrs of this dset
+    #         memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
+    #         st = 0
+    #         for fi, start, stop in infiles_map:
+    #             et = st + (stop - start)
+    #             fh = self.infiles[fi]
+    #             if np.prod(self[name].local_data[st:et].shape) > 0:
+    #                 self[name].local_data[st:et] = fh[name][start:stop]
+    #             st = et
+
+    def _load_a_dataset(self, name):
+        ### load a dataset (either a commmon or a main axis ordered or a time ordered)
+        if self.num_infiles == 0:
+            warnings.warn('No input file')
+            return
+
+        if name in self.main_axes_ordered_datasets.keys():
+            self._load_a_main_axes_ordered_dataset(name)
+        elif name in self.time_ordered_datasets.keys():
+            self._load_a_time_ordered_dataset(name)
         else:
             self._load_a_common_dataset(name)
 
-
-    def load_common(self):
-        """Load common attributes and datasets from the first file.
-
-        This supposes that all common data are the same as that in the first file.
-        """
+    def load_common_attrs(self):
+        """Load common attributes from the first file."""
         if self.num_infiles == 0:
             warnings.warn('No input file')
             return
@@ -581,10 +784,72 @@ class BasicTod(memh5.MemDiskGroup):
         for attr_name in fh.attrs.iterkeys():
             if attr_name not in self.time_ordered_attrs and attr_name != 'hints':
                 self._load_a_common_attribute(attr_name)
+
+    def load_time_ordered_attrs(self):
+        """Load time ordered attributes from all files."""
+        if self.num_infiles == 0:
+            warnings.warn('No input file')
+            return
+
+        fh = self.infiles[0]
+        for attr_name in fh.attrs.iterkeys():
+            if attr_name in self.time_ordered_attrs:
+                self._load_a_time_ordered_attribute(attr_name)
+
+    def load_common_datasets(self):
+        """Load common datasets from the first file."""
+        if self.num_infiles == 0:
+            warnings.warn('No input file')
+            return
+
+        fh = self.infiles[0]
         # read in top level common datasets
         for dset_name in fh.iterkeys():
-            if dset_name not in self.time_ordered_datasets.keys():
+            if (dset_name not in self.main_axes_ordered_datasets.keys()) and (dset_name not in self.time_ordered_datasets.keys()):
                 self._load_a_common_dataset(dset_name)
+
+    def load_time_ordered_datasets(self):
+        """Load time ordered datasets (excepts those also in main_axes_ordered_datasets) from all files."""
+        if self.num_infiles == 0:
+            warnings.warn('No input file')
+            return
+
+        fh = self.infiles[0]
+        for dset_name in fh.iterkeys():
+            if (dset_name in self.time_ordered_datasets.keys()) and (not dset_name in self.main_axes_ordered_datasets.keys()):
+                self._load_a_time_ordered_dataset(dset_name)
+
+    def load_main_axes_ordered_data(self):
+        """Load main axes ordered dataset."""
+        if self.num_infiles == 0:
+            warnings.warn('No input file')
+            return
+
+        fh = self.infiles[0]
+        for dset_name in fh.iterkeys():
+            if dset_name in self.main_axes_ordered_datasets.keys():
+                self._load_a_main_axes_ordered_dataset(dset_name)
+
+    # def load_common(self):
+    #     """Load common attributes and common datasets from the first file.
+
+    #     This supposes that all common data are the same as that in the first file.
+    #     """
+    #     if self.num_infiles == 0:
+    #         warnings.warn('No input file')
+    #         return
+
+    #     fh = self.infiles[0]
+    #     # load in top level common attrs
+    #     for attr_name in fh.attrs.iterkeys():
+    #         if attr_name not in self.time_ordered_attrs and attr_name != 'hints':
+    #             self._load_a_common_attribute(attr_name)
+
+    #     # load in top level common datasets
+    #     for dset_name in fh.iterkeys():
+    #         # if dset_name not in self.time_ordered_datasets.keys():
+    #         if dset_name not in self.main_axes_ordered_datasets.keys():
+    #             self._load_a_common_dataset(dset_name)
 
     def load_main_data(self):
         """Load main data from all files."""
@@ -592,33 +857,18 @@ class BasicTod(memh5.MemDiskGroup):
             warnings.warn('No input file')
             return
 
-        self._load_a_tod_dataset(self.main_data_name)
+        self._load_a_main_axes_ordered_dataset(self.main_data_name)
 
-    def load_tod_excl_main_data(self):
-        """Load time ordered attributes and datasets (exclude the main data) from all files."""
+    def load_main_axes_excl_main_data(self):
+        """Load main axes ordered datasets (exclude the main data)."""
         if self.num_infiles == 0:
             warnings.warn('No input file')
             return
 
-        # load time ordered attributes
         fh = self.infiles[0]
-        for attr_name in fh.attrs.iterkeys():
-            if attr_name in self.time_ordered_attrs:
-                self._load_a_tod_attribute(attr_name)
-
-        # load time ordered datasets
         for dset_name in fh.iterkeys():
-            if dset_name in self.time_ordered_datasets.keys() and dset_name != self.main_data_name:
+            if dset_name in self.main_axes_ordered_datasets.keys() and dset_name != self.main_data_name:
                 self._load_a_tod_dataset(dset_name)
-
-    def load_time_ordered(self):
-        """Load time ordered attributes and datasets from all files."""
-        if self.num_infiles == 0:
-            warnings.warn('No input file')
-            return
-
-        self.load_main_data()
-        self.load_tod_excl_main_data()
 
     def load_all(self):
         """Load all attributes and datasets from files."""
@@ -626,9 +876,15 @@ class BasicTod(memh5.MemDiskGroup):
             warnings.warn('No input file')
             return
 
-        self.load_main_data()
-        self.load_common()
-        self.load_tod_excl_main_data()
+        fh = self.infiles[0]
+        # load in top level attrs
+        for attr_name in fh.attrs.iterkeys():
+            if attr_name != 'hints':
+                self._load_an_attribute(attr_name)
+
+        # load in top level datasets
+        for dset_name in fh.iterkeys():
+            self._load_a_dataset(dset_name)
 
 
     def _del_an_attribute(self, name):
