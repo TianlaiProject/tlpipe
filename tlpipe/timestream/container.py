@@ -386,18 +386,12 @@ class BasicTod(memh5.MemDiskGroup):
 
     def _load_a_common_attribute(self, name):
         ### load a common attribute from the first file
-        if self.num_infiles == 0:
-            warnings.warn('No input file')
-            return
 
         fh = self.infiles[0]
         self.attrs[name] = fh.attrs[name]
 
     def _load_a_time_ordered_attribute(self, name):
         ### load a time ordered attribute from all the file
-        if self.num_infiles == 0:
-            warnings.warn('No input file')
-            return
 
         self.attrs[name] = []
         for fh in mpiutil.mpilist(self.infiles, method='con', comm=self.comm):
@@ -409,9 +403,6 @@ class BasicTod(memh5.MemDiskGroup):
 
     def _load_an_attribute(self, name):
         ### load an attribute (either a commmon or a time ordered)
-        if self.num_infiles == 0:
-            warnings.warn('No input file')
-            return
 
         if name in self.time_ordered_attrs:
             self._load_a_time_ordered_attribute(name)
@@ -420,9 +411,6 @@ class BasicTod(memh5.MemDiskGroup):
 
     def _load_a_common_dataset(self, name):
         ### load a common dataset from the first file
-        if self.num_infiles == 0:
-            warnings.warn('No input file')
-            return
 
         fh = self.infiles[0]
         dset = fh[name]
@@ -434,9 +422,6 @@ class BasicTod(memh5.MemDiskGroup):
         ### load a main_axes_ordered_dataset from the first file if it is not time
         ### ordered, else from all files, distribute the data along
         ### self.main_data_dist_axis if data has this axis
-        if self.num_infiles == 0:
-            warnings.warn('No input file')
-            return
 
         if name in self.main_time_ordered_datasets.keys():
             dset_shape, dset_type, infiles_map = self._get_input_info(name, self.main_data_start, self.main_data_stop)
@@ -557,9 +542,6 @@ class BasicTod(memh5.MemDiskGroup):
 
     def _load_a_time_ordered_dataset(self, name):
         ### load a time ordered dataset (except those also in main_axes_ordered_datasets) from all files
-        if self.num_infiles == 0:
-            warnings.warn('No input file')
-            return
 
         dset_shape, dset_type, infiles_map = self._get_input_info(name, 0, None)
         axes = self.time_ordered_datasets[name]
@@ -619,9 +601,6 @@ class BasicTod(memh5.MemDiskGroup):
 
     def _load_a_dataset(self, name):
         ### load a dataset (either a commmon or a main axis ordered or a time ordered)
-        if self.num_infiles == 0:
-            warnings.warn('No input file')
-            return
 
         if name in self.main_axes_ordered_datasets.keys():
             self._load_a_main_axes_ordered_dataset(name)
@@ -705,7 +684,7 @@ class BasicTod(memh5.MemDiskGroup):
         fh = self.infiles[0]
         for dset_name in fh.iterkeys():
             if dset_name in self.main_axes_ordered_datasets.keys() and dset_name != self.main_data_name:
-                self._load_a_tod_dataset(dset_name)
+                self._load_a_main_axes_ordered_dataset(dset_name)
 
     def load_all(self):
         """Load all attributes and datasets from files."""
