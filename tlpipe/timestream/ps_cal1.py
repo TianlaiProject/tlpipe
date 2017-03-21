@@ -52,6 +52,7 @@ class PsCal(tod_task.TaskTimestream):
                     'fig_name': 'gain/gain',
                     'save_gain': False,
                     'gain_file': 'gain/gain.hdf5',
+                    'temperature_convert': False,
                   }
 
     prefix = 'pc_'
@@ -68,6 +69,7 @@ class PsCal(tod_task.TaskTimestream):
         tag_output_iter = self.params['tag_output_iter']
         save_gain = self.params['save_gain']
         gain_file = self.params['gain_file']
+        temperature_convert = self.params['temperature_convert']
 
         ts.redistribute('baseline')
 
@@ -361,6 +363,12 @@ class PsCal(tod_task.TaskTimestream):
                     else:
                         # mask the un-calibrated vis
                         ts.local_vis_mask[:, fi, pi, bi] = True
+
+        # convert vis from intensity unit to temperature unit in K
+        if temperature_convert:
+            factor = 1.0e-26 * (const.c**2 / (2 * const.k_B * (1.0e6*freq)**2)) # NOTE: 1Jy = 1.0e-26 W m^-2 Hz^-1
+            ts.local_vis[:] *= factor[np.newaxis, :, np.newaxis, np.newaxis]
+            ts.vis.attrs['unit'] = 'K'
 
         # save gain to file
         if mpiutil.rank0 and save_gain:
