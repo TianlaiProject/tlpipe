@@ -354,8 +354,8 @@ class PsCal(tod_task.TaskTimestream):
         for fi in range(nf):
             for pi in [pol.index('xx'), pol.index('yy')]:
                 for bi, (fd1, fd2) in enumerate(ts['blorder'].local_data):
-                    g1 = gain[fi, pi, fd1-1]
-                    g2 = gain[fi, pi, fd2-1]
+                    g1 = gain[fi, pi, feedno.index(fd1)]
+                    g2 = gain[fi, pi, feedno.index(fd2)]
                     if np.isfinite(g1) and np.isfinite(g2):
                         ts.local_vis[:, fi, pi, bi] /= (g1 * np.conj(g2))
                     else:
