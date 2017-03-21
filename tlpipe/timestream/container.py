@@ -479,7 +479,7 @@ class BasicTod(memh5.MemDiskGroup):
 
                 else:
                     # load data from all files as a distributed dataset
-                    linds = mpiutil.mpilist(np.arange(shp[di]).tolist(), comm=self.comm)
+                    linds = mpiutil.mpilist(np.arange(dset_shape[di])[fsel[di]].tolist(), comm=self.comm)
                     fsel[di] = linds
 
                     # load data from all files
@@ -492,7 +492,7 @@ class BasicTod(memh5.MemDiskGroup):
                         elif self.num_infiles > 1:
                             if fi == 0:
                                 et = st + (num_ts - first_start)
-                                fsel[ti] = slice(fist_start, None)
+                                fsel[ti] = slice(first_start, None)
                             elif fi == self.num_infiles-1:
                                 et = st + last_stop
                                 fsel[ti] = slice(0, last_stop)
@@ -511,7 +511,7 @@ class BasicTod(memh5.MemDiskGroup):
                     raise RuntimeError('Something wrong happened, this would never occur')
                 else:
                     # load data from the first file as a distributed dataset
-                    linds = mpiutil.mpilist(np.arange(shp[di]).tolist(), comm=self.comm)
+                    linds = mpiutil.mpilist(np.arange(dset_shape[di])[fsel[di]].tolist(), comm=self.comm)
                     fsel[di] = linds
                     if np.prod(self[name].local_data.shape) > 0:
                         fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
@@ -535,7 +535,7 @@ class BasicTod(memh5.MemDiskGroup):
                     elif self.num_infiles > 1:
                         if fi == 0:
                             et = st + (num_ts - first_start)
-                            fsel[ti] = slice(fist_start, None)
+                            fsel[ti] = slice(first_start, None)
                         elif fi == self.num_infiles-1:
                             et = st + last_stop
                             fsel[ti] = slice(0, last_stop)
@@ -604,7 +604,7 @@ class BasicTod(memh5.MemDiskGroup):
                 elif self.num_infiles > 1:
                     if fi == 0:
                         et = st + (num_ts - first_start)
-                        fsel[ti] = slice(fist_start, None)
+                        fsel[ti] = slice(first_start, None)
                     elif fi == self.num_infiles-1:
                         et = st + last_stop
                         fsel[ti] = slice(0, last_stop)
@@ -732,7 +732,7 @@ class BasicTod(memh5.MemDiskGroup):
     #                 elif self.num_infiles > 1:
     #                     if fi == 0:
     #                         et = st + (num_ts - first_start)
-    #                         sel = slice(fist_start, None)
+    #                         sel = slice(first_start, None)
     #                     elif fi == self.num_infiles-1:
     #                         et = st + last_stop
     #                         sel = slice(0, last_stop)
