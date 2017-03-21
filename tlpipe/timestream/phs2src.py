@@ -111,4 +111,4 @@ class Phs2src(tod_task.TaskTimestream):
         # aa.sim_cache(cat.get_crds('eq', ncrd=3)) # for compute bm_response and sim
         uij = aa.gen_uvw(i, j, src='z').squeeze() # (rj - ri)/lambda
 
-        vis[:] = vis / np.exp(-2.0J * np.pi * np.dot(s_top, uij))[:, np.newaxis], vis_mask
+        vis[:] = vis / np.exp(-2.0J * np.pi * np.dot(s_top, uij))[:, np.newaxis]
