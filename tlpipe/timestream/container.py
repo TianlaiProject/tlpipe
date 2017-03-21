@@ -703,102 +703,6 @@ class BasicTod(memh5.MemDiskGroup):
             self._load_a_dataset(dset_name)
 
 
-    def _del_an_attribute(self, name):
-        ### delete an attribute
-        try:
-            del self.attrs[name]
-        except KeyError:
-            pass
-
-    def _del_a_dataset(self, name):
-        ### delete a dataset
-        try:
-            del self[name]
-        except KeyError:
-            pass
-
-    def _reload_a_common_attribute(self, name):
-        ### reload a common attribute from the first file
-        self._del_an_attribute(name)
-        self._load_a_common_attribute(name)
-
-    def _reload_a_tod_attribute(self, name):
-        ### reload a time ordered attribute from all the file
-        self._del_an_attribute(name)
-        self._load_a_tod_attribute(name)
-
-    def _reload_an_attribute(self, name):
-        ### reload an attribute (either a commmon or a time ordered)
-        self._del_an_attribute(name)
-        self._load_an_attribute(name)
-
-    def _reload_a_common_dataset(self, name):
-        ### reload a common dataset from the first file
-        self._del_a_dataset(name)
-        self._load_a_common_dataset(name)
-
-    def _reload_a_tod_dataset(self, name):
-        ### reload a time ordered dataset from all files, distributed along the first axis
-        self._del_a_dataset(name)
-        self._load_a_tod_dataset(name)
-
-    def _reload_a_dataset(self, name):
-        ### reload a dataset (either a commmon or a time ordered)
-        self._del_a_dataset(name)
-        self._load_a_dataset(name)
-
-
-    def reload_common(self):
-        """Reload common attributes and datasets from the first file.
-
-        This supposes that all common data are the same as that in the first file.
-        """
-        # delete top level common attrs
-        attrs_keys = list(self.attrs.iterkeys()) # copy dict as it will change during iteration
-        for attr_name in attrs_keys:
-            if attr_name not in self.time_ordered_attrs:
-                self._del_an_attribute(attr_name)
-
-        # delete top level common datasets
-        dset_keys = list(self.iterkeys())
-        for dset_name in dset_keys:
-            if dset_name not in self.time_ordered_datasets.keys():
-                self._del_a_dataset(dset_name)
-
-        self.load_common()
-
-    def reload_main_data(self):
-        """Reload main data from all files."""
-        self._del_a_dataset(self.main_data_name)
-        self.load_main_data()
-
-    def reload_tod_excl_main_data(self):
-        """Reload time ordered attributes and datasets (exclude the main data) from all files."""
-        # load time ordered attributes
-        attrs_keys = list(self.attrs.iterkeys())
-        for attr_name in attrs_keys:
-            if attr_name in self.time_ordered_attrs:
-                self._del_an_attribute(attr_name)
-
-        # load time ordered datasets
-        dset_keys = list(self.iterkeys())
-        for dset_name in dset_keys:
-            if dset_name in self.time_ordered_datasets.keys() and dset_name != self.main_data_name:
-                self._del_a_dataset(dset_name)
-
-        self.load_tod_excl_main_data()
-
-    def reload_time_ordered(self):
-        """Reload time ordered attributes and datasets from all files."""
-        self.reload_main_data()
-        self.reload_tod_excl_main_data()
-
-    def reload_all(self):
-        """Reload all attributes and datasets from files."""
-        self.reload_common()
-        self.reload_time_ordered()
-
-
     def group_name_allowed(self, name):
         """No groups are exposed to the user. Returns ``False``."""
         return False
@@ -813,9 +717,9 @@ class BasicTod(memh5.MemDiskGroup):
         parent_name, name = posixpath.split(name)
         return True if parent_name == '/' else False
 
-    def attrs_name_allowed(self, name):
-        """Whether to allow the access of the given root level attribute."""
-        return True if name not in self.time_ordered_attrs else False
+    # def attrs_name_allowed(self, name):
+    #     """Whether to allow the access of the given root level attribute."""
+    #     return True if name not in self.time_ordered_attrs else False
 
 
     def create_time_ordered_dataset(self, name, data, axis_order=(0,), recreate=False, copy_attrs=False):
