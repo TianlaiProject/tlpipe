@@ -142,185 +142,6 @@ class TimestreamCommon(container.BasicTod):
         raise NotImplementedError('feed_select not implemented in this base class')
 
 
-    # def _load_a_special_common_dataset(self, name, axis_name):
-    #     ### load a common dataset that need to take specail care
-    #     ### this dataset need to be distributed along axis_name if axis_name
-    #     ### is just self.main_data_dist_axis
-    #     dset = self.infiles[0][name]
-    #     axis = self.main_data_axes.index(axis_name)
-    #     tmp = np.arange(dset.shape[0])
-    #     sel = tmp[self.main_data_select[axis]].tolist()
-    #     data = dset[sel]
-    #     # if axis_name is just the distributed axis, load dataset distributed
-    #     if axis == self.main_data_dist_axis:
-    #         data  = mpiarray.MPIArray.from_numpy_array(data, axis=self.main_axes_ordered_datasets[name].index(axis))
-    #     self.create_dataset(name, data=data)
-    #     # copy attrs of this dset
-    #     memh5.copyattrs(dset.attrs, self[name].attrs)
-
-    # def _load_a_common_dataset(self, name):
-    #     ### load a common dataset from the first file
-    #     if name in self.freq_ordered_datasets.keys():
-    #         self._load_a_special_common_dataset(name, 'frequency')
-    #     elif name in self.bl_ordered_datasets.keys():
-    #         self._load_a_special_common_dataset(name, 'baseline')
-    #     elif name == 'feedno' and not self._feed_select is None:
-    #         self.create_dataset(name, data=self._feed_select)
-    #         memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
-    #     elif name in self.feed_ordered_datasets.keys() and not self._feed_select is None:
-    #         fh = self.infiles[0]
-    #         feedno = fh['feedno'][:].tolist()
-    #         feed_inds = [ feedno.index(fd) for fd in self._feed_select ]
-    #         feed_axis = self.feed_ordered_datasets[name].index(0)
-    #         slc = [slice(0, None)] * (feed_axis + 1)
-    #         slc[feed_axis] = feed_inds
-    #         self.create_dataset(name, data=fh[name][tuple(slc)])
-    #         memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
-    #     else:
-    #         super(TimestreamCommon, self)._load_a_common_dataset(name)
-
-
-    # def load_common(self):
-    #     """Load common attributes and datasets from the first file.
-
-    #     This supposes that all common data are the same as that in the first file.
-    #     """
-
-    #     super(TimestreamCommon, self).load_common()
-
-    #     if 'freq' not in self.iterkeys():
-    #         # generate frequency points
-    #         freq_start = self.attrs['freqstart']
-    #         freq_step = self.attrs['freqstep']
-    #         nfreq = self.attrs['nfreq']
-    #         freq = np.array([ freq_start + i*freq_step for i in xrange(nfreq)], dtype=np.float32)
-    #         freq_axis = self.main_data_axes.index('frequency')
-    #         freq = freq[self.main_data_select[freq_axis]]
-
-    #         # if frequency is just the distributed axis, load freq distributed
-    #         if 'frequency' == self.main_data_axes[self.main_data_dist_axis]:
-    #             freq = mpiarray.MPIArray.from_numpy_array(freq)
-    #         self.create_freq_ordered_dataset('freq', data=freq)
-    #         # create attrs of this dset
-    #         self['freq'].attrs["unit"] = 'MHz'
-
-    # def load_main_data(self):
-    #     """Load main data from all files and create its mask array if it does not exist."""
-    #     super(TimestreamCommon, self).load_main_data()
-
-    #     if 'vis_mask' not in self.iterkeys():
-    #         # create the mask array
-    #         vis_mask = np.where(np.isfinite(self.main_data.local_data), False, True)
-    #         vis_mask = mpiarray.MPIArray.wrap(vis_mask, axis=self.main_data_dist_axis)
-    #         axis_order = self.main_axes_ordered_datasets[self.main_data_name]
-    #         vis_mask = self.create_main_axis_ordered_dataset(axis_order, 'vis_mask', vis_mask, axis_order)
-
-    # def load_tod_excl_main_data(self):
-    #     """Load time ordered attributes and datasets (exclude the main data) from all files."""
-
-    #     super(TimestreamCommon, self).load_tod_excl_main_data()
-
-    #     if 'sec1970' not in self.iterkeys():
-    #         # generate sec1970
-    #         int_time = self.infiles[0].attrs['inttime']
-    #         sec1970s = []
-    #         nts = []
-    #         for fh in mpiutil.mpilist(self.infiles, method='con', comm=self.comm):
-    #             sec1970s.append(fh.attrs['sec1970'])
-    #             nts.append(fh[self.main_data_name].shape[0])
-    #         sec1970 = np.zeros(sum(nts), dtype=np.float64) # precision float32 is not enough
-    #         cum_nts = np.cumsum([0] + nts)
-    #         for idx, (nt, sec) in enumerate(zip(nts, sec1970s)):
-    #             sec1970[cum_nts[idx]:cum_nts[idx+1]] = np.array([ sec + i*int_time for i in xrange(nt)], dtype=np.float64) # precision float32 is not enough
-    #         # gather local sec1970
-    #         sec1970 = mpiutil.gather_array(sec1970, root=None, comm=self.comm)
-    #         # select the corresponding section
-    #         sec1970 = sec1970[self.main_data_start:self.main_data_stop][self.main_data_select[0]]
-
-    #         # if time is just the distributed axis, load sec1970 distributed
-    #         if 'time' == self.main_data_axes[self.main_data_dist_axis]:
-    #             sec1970 = mpiarray.MPIArray.from_numpy_array(sec1970)
-    #         self.create_main_time_ordered_dataset('sec1970', data=sec1970)
-    #         # create attrs of this dset
-    #         self['sec1970'].attrs["unit"] = 'second'
-    #         # determine if it is continuous in time
-    #         sec_diff = np.diff(sec1970)
-    #         break_inds = np.where(sec_diff>1.5*int_time)[0]
-    #         if len(break_inds) > 0:
-    #             self['sec1970'].attrs["continuous"] = False
-    #             self['sec1970'].attrs["break_inds"] = break_inds + 1
-    #         else:
-    #             self['sec1970'].attrs["continuous"] = True
-
-    #         # generate julian date
-    #         jul_date = np.array([ date_util.get_juldate(datetime.fromtimestamp(s), tzone=self.infiles[0].attrs['timezone']) for s in sec1970 ], dtype=np.float64) # precision float32 is not enough
-    #         if 'time' == self.main_data_axes[self.main_data_dist_axis]:
-    #             jul_date = mpiarray.MPIArray.wrap(jul_date, axis=0)
-    #         # if time is just the distributed axis, load jul_date distributed
-    #         self.create_main_time_ordered_dataset('jul_date', data=jul_date)
-    #         # create attrs of this dset
-    #         self['jul_date'].attrs["unit"] = 'day'
-
-    #         # generate local time in hour from 0 to 24.0
-    #         def _hour(t):
-    #             return t.hour + t.minute/60.0 + t.second/3600.0 + t.microsecond/3.6e8
-    #         local_hour = np.array([ _hour(datetime.fromtimestamp(s).time()) for s in sec1970 ], dtype=np.float64)
-    #         if 'time' == self.main_data_axes[self.main_data_dist_axis]:
-    #             local_hour = mpiarray.MPIArray.wrap(local_hour, axis=0)
-    #         # if time is just the distributed axis, load local_hour distributed
-    #         self.create_main_time_ordered_dataset('local_hour', data=local_hour)
-    #         # create attrs of this dset
-    #         self['local_hour'].attrs["unit"] = 'hour'
-
-    #         # generate az, alt
-    #         az_alt = np.zeros((self['sec1970'].local_data.shape[0], 2), dtype=np.float32) # radians
-    #         if self.is_dish:
-    #             # antpointing = rt['antpointing'][-1, :, :] # degree
-    #             # pointingtime = rt['pointingtime'][-1, :, :] # degree
-    #             az_alt[:, 0] = 0.0 # az
-    #             az_alt[:, 1] = np.pi/2 # alt
-    #         elif self.is_cylinder:
-    #             az_alt[:, 0] = np.pi/2 # az
-    #             az_alt[:, 1] = np.pi/2 # alt
-    #         else:
-    #             raise RuntimeError('Unknown antenna type %s' % self.attrs['telescope'])
-
-    #         # generate ra, dec of the antenna pointing
-    #         aa = self.array
-    #         ra_dec = np.zeros_like(az_alt) # radians
-    #         for ti in xrange(az_alt.shape[0]):
-    #             az, alt = az_alt[ti]
-    #             az, alt = ephem.degrees(az), ephem.degrees(alt)
-    #             aa.set_jultime(self['jul_date'].local_data[ti])
-    #             ra_dec[ti] = aa.radec_of(az, alt) # in radians, a point in the sky above the observer
-
-    #         if self.main_data_dist_axis == 0:
-    #             az_alt = mpiarray.MPIArray.wrap(az_alt, axis=0)
-    #             ra_dec = mpiarray.MPIArray.wrap(ra_dec, axis=0)
-    #         # if time is just the distributed axis, create distributed datasets
-    #         self.create_main_time_ordered_dataset('az_alt', data=az_alt)
-    #         self['az_alt'].attrs['unit'] = 'radian'
-    #         self.create_main_time_ordered_dataset('ra_dec', data=ra_dec)
-    #         self['ra_dec'].attrs['unit'] = 'radian'
-
-    #         # determin if it is the same pointing
-    #         if self.main_data_dist_axis == 0:
-    #             az_alt = az_alt.local_array
-    #             ra_dec = ra_dec.local_array
-    #         # gather local az_alt
-    #         az_alt = mpiutil.gather_array(az_alt, root=None, comm=self.comm)
-    #         if np.allclose(az_alt[:, 0], az_alt[0, 0]) and np.allclose(az_alt[:, 1], az_alt[0, 1]):
-    #             self['az_alt'].attrs['same_pointing'] = True
-    #         else:
-    #             self['az_alt'].attrs['same_pointing'] = False
-    #         # determin if it is the same dec
-    #         # gather local ra_dec
-    #         ra_dec = mpiutil.gather_array(ra_dec, root=None, comm=self.comm)
-    #         if np.allclose(ra_dec[:, 1], ra_dec[0, 1]):
-    #             self['ra_dec'].attrs['same_dec'] = True
-    #         else:
-    #             self['ra_dec'].attrs['same_dec'] = False
-
     def _load_a_common_dataset(self, name):
         ### load a common dataset from the first file
         if name == 'feedno' and not self._feed_select is None:
@@ -337,7 +158,6 @@ class TimestreamCommon(container.BasicTod):
             memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
         else:
             super(TimestreamCommon, self)._load_a_common_dataset(name)
-
 
 
     def load_all(self):
@@ -469,9 +289,6 @@ class TimestreamCommon(container.BasicTod):
             self.create_freq_ordered_dataset('freq', data=freq)
             # create attrs of this dset
             self['freq'].attrs["unit"] = 'MHz'
-
-
-
 
 
     @property

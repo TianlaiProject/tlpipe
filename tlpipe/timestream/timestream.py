@@ -120,14 +120,6 @@ class Timestream(timestream_common.TimestreamCommon):
         self._feed_select = feeds
 
 
-    # def _load_a_common_dataset(self, name):
-    #     ### load a common dataset from the first file
-    #     if name in self.pol_ordered_datasets.keys():
-    #         self._load_a_special_common_dataset(name, 'polarization')
-    #     else:
-    #         super(Timestream, self)._load_a_common_dataset(name)
-
-
     @property
     def pol(self):
         """Return the pol dataset for convenient use."""
