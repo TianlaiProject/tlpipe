@@ -173,6 +173,22 @@ class TimestreamCommon(container.BasicTod):
             axis_order = self.main_axes_ordered_datasets[self.main_data_name]
             vis_mask = self.create_main_axis_ordered_dataset(axis_order, 'vis_mask', vis_mask, axis_order)
 
+        if 'freq' not in self.iterkeys():
+            # generate frequency points
+            freq_start = self.attrs['freqstart']
+            freq_step = self.attrs['freqstep']
+            nfreq = self.attrs['nfreq']
+            freq = np.array([ freq_start + i*freq_step for i in xrange(nfreq)], dtype=np.float32)
+            freq_axis = self.main_data_axes.index('frequency')
+            freq = freq[self.main_data_select[freq_axis]]
+
+            # if frequency is just the distributed axis, load freq distributed
+            if 'frequency' == self.main_data_axes[self.main_data_dist_axis]:
+                freq = mpiarray.MPIArray.from_numpy_array(freq)
+            self.create_freq_ordered_dataset('freq', data=freq)
+            # create attrs of this dset
+            self['freq'].attrs["unit"] = 'MHz'
+
         if 'sec1970' not in self.iterkeys():
             # generate sec1970
             int_time = self.infiles[0].attrs['inttime']
@@ -273,22 +289,6 @@ class TimestreamCommon(container.BasicTod):
                 self['ra_dec'].attrs['same_dec'] = True
             else:
                 self['ra_dec'].attrs['same_dec'] = False
-
-        if 'freq' not in self.iterkeys():
-            # generate frequency points
-            freq_start = self.attrs['freqstart']
-            freq_step = self.attrs['freqstep']
-            nfreq = self.attrs['nfreq']
-            freq = np.array([ freq_start + i*freq_step for i in xrange(nfreq)], dtype=np.float32)
-            freq_axis = self.main_data_axes.index('frequency')
-            freq = freq[self.main_data_select[freq_axis]]
-
-            # if frequency is just the distributed axis, load freq distributed
-            if 'frequency' == self.main_data_axes[self.main_data_dist_axis]:
-                freq = mpiarray.MPIArray.from_numpy_array(freq)
-            self.create_freq_ordered_dataset('freq', data=freq)
-            # create attrs of this dset
-            self['freq'].attrs["unit"] = 'MHz'
 
 
     @property
