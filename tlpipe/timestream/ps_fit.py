@@ -111,7 +111,7 @@ class PsFit(tod_task.TaskTimestream):
 
     Its solution is
 
-    .. math:: G_{ij} = \\frac{V_{ij}^{\\text{obs} \\dagger} V_{ij}^{\\text{sim}}}{V_{ij}^{\\text{sim} \\dagger} V_{ij}^{\\text{sim}}}
+    .. math:: G_{ij} = \\frac{V_{ij}^{\\text{sim} \\dagger} V_{ij}^{\\text{obs}}}{V_{ij}^{\\text{sim} \\dagger} V_{ij}^{\\text{sim}}}
 
     """
 
