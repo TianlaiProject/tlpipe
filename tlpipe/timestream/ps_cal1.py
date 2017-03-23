@@ -135,6 +135,11 @@ class PsCal(tod_task.TaskTimestream):
         if end_ind > ts.vis.shape[0]:
             raise RuntimeError('end_ind: %d > %d' % (end_ind, ts.vis.shape[0]))
 
+        ############################################
+        # if ts.is_cylinder:
+        #     ts.local_vis[:] = ts.local_vis.conj() # now for cylinder array
+        ############################################
+
         nt = end_ind - start_ind
         t_inds = range(start_ind, end_ind)
         freq = ts.freq[:]
@@ -165,6 +170,7 @@ class PsCal(tod_task.TaskTimestream):
 
         # construct visibility matrix for a single time, freq, pol
         Vmat = np.zeros((nfeed, nfeed), dtype=ts.vis.dtype)
+        Sc = s.get_jys()
         for ii, (ti, fi, pi) in enumerate(tfp_linds):
             # when noise on, just pass
             if 'ns_on' in ts.iterkeys() and ts['ns_on'][ti]:
@@ -172,7 +178,7 @@ class PsCal(tod_task.TaskTimestream):
             # aa.set_jultime(ts['jul_date'][ti])
             # s.compute(aa)
             # get fluxes vs. freq of the calibrator
-            Sc = s.get_jys()
+            # Sc = s.get_jys()
             # get the topocentric coordinate of the calibrator at the current time
             # s_top = s.get_crds('top', ncrd=3)
             # aa.sim_cache(cat.get_crds('eq', ncrd=3)) # for compute bm_response and sim
@@ -346,7 +352,7 @@ class PsCal(tod_task.TaskTimestream):
                     Ae = An * exp_factor
                     Gi = Gain[li:hi, fi, pi, idx]
                     # compute gain for this feed
-                    lgain[ii, idx] = np.dot(Gi[inds].conj(), Ae[inds]) / np.dot(Ae[inds].conj(), Ae[inds])
+                    lgain[ii, idx] = np.dot(Ae[inds].conj(), Gi[inds]) / np.dot(Ae[inds].conj(), Ae[inds])
 
         # gather local gain
         gain = mpiutil.gather_array(lgain, axis=0, root=None, comm=ts.comm)
