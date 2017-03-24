@@ -68,27 +68,29 @@ class Timestream(timestream_common.TimestreamCommon):
         """
         self.data_select('polarization', value)
 
-    def feed_select(self, value=(0, None), corr='all'):
-        """Select data to be loaded from inputs files corresponding to the specified feeds.
+    def subset_polarization_select(self, value):
+        """Select a subset of the data along the polarization axis.
 
         Parameters
         ----------
-        value : tuple or list, optional
+        value : tuple or list
             If a tuple, which will be created as a slice(start, stop, step) object,
-            so it can have one to three elements (integers or None); if a list,
-            feed No. in this list will be selected. Default (0, None) select all.
-        corr : 'all', 'auto' or 'cross', optional
-            Correlation type. 'auto' for auto-correlations, 'cross' for
-            cross-correlations, 'all' for all correlations. Default 'all'.
+            so it can have one to three elements (integers or None); if a list, its
+            elements must be strictly increasing non-negative integers, data in
+            these positions will be selected.
 
         """
+        self.subset_select('polarization', value)
+
+    def _inner_feed_select(self, data_source, value=(0, None), corr='all'):
+        # inner method to select data corresponding to the specified feeds
 
         if value == (0, None) and corr == 'all':
             # select all, no need to do anything
             return
 
-        # get feed info from the first input file
-        feedno = self.infiles[0]['feedno'][:].tolist()
+        # get feed info from data_source
+        feedno = data_source['feedno'][:].tolist()
 
         if isinstance(value, tuple):
             feeds = np.array(feedno[slice(*value)])
@@ -107,17 +109,57 @@ class Timestream(timestream_common.TimestreamCommon):
         else:
             raise ValueError('Unknown correlation type %s' % corr)
 
-        # get blorder info from the first input file
-        blorder = self.infiles[0]['blorder']
+        # get blorder info from data_source
+        blorder = data_source['blorder']
         blorder = [ set(bl) for bl in blorder ]
 
         # baseline indices
         indices = { blorder.index(bl) for bl in bls }
         indices = sorted(list(indices))
 
-        self.data_select('baseline', indices)
+        return indices, feeds
 
-        self._feed_select = feeds
+    def feed_select(self, value=(0, None), corr='all'):
+        """Select data to be loaded from inputs files corresponding to the specified feeds.
+
+        Parameters
+        ----------
+        value : tuple or list, optional
+            If a tuple, which will be created as a slice(start, stop, step) object,
+            so it can have one to three elements (integers or None); if a list,
+            feed No. in this list will be selected. Default (0, None) select all.
+        corr : 'all', 'auto' or 'cross', optional
+            Correlation type. 'auto' for auto-correlations, 'cross' for
+            cross-correlations, 'all' for all correlations. Default 'all'.
+
+        """
+
+        results = self._inner_feed_select(self.infiles[0], value, corr)
+        if results is not None:
+            indices, feeds = results
+            self.data_select('baseline', indices)
+            self._feed_select = feeds
+
+    def subset_feed_select(self, value=(0, None), corr='all'):
+        """Select a subset of the data corresponding to the specified feeds.
+
+        Parameters
+        ----------
+        value : tuple or list, optional
+            If a tuple, which will be created as a slice(start, stop, step) object,
+            so it can have one to three elements (integers or None); if a list,
+            feed No. in this list will be selected. Default (0, None) select all.
+        corr : 'all', 'auto' or 'cross', optional
+            Correlation type. 'auto' for auto-correlations, 'cross' for
+            cross-correlations, 'all' for all correlations. Default 'all'.
+
+        """
+
+        results = self._inner_feed_select(self, value, corr)
+        if results is not None:
+            indices, feeds = results
+            self.subset_select('baseline', indices)
+            self._subset_feed_select = feeds
 
 
     @property

@@ -49,6 +49,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
 
 
     _channel_select = None
+    _subset_channel_select = None
 
     # def channel_select(self, value=(0, None), corr='all'):
     #     """Select data to be loaded from inputs files corresponding to the specified channels.
@@ -96,27 +97,15 @@ class RawTimestream(timestream_common.TimestreamCommon):
 
     #     self.data_select('baseline', indices)
 
-    def feed_select(self, value=(0, None), corr='all'):
-        """Select data to be loaded from inputs files corresponding to the specified feeds.
-
-        Parameters
-        ----------
-        value : tuple or list, optional
-            If a tuple, which will be created as a slice(start, stop, step) object,
-            so it can have one to three elements (integers or None); if a list,
-            feed No. in this list will be selected. Default (0, None) select all.
-        corr : 'all', 'auto' or 'cross', optional
-            Correlation type. 'auto' for auto-correlations, 'cross' for
-            cross-correlations, 'all' for all correlations. Default 'all'.
-
-        """
+    def _inner_feed_select(self, data_source, value=(0, None), corr='all'):
+        # inner method to select data corresponding to the specified feeds
 
         if value == (0, None) and corr == 'all':
             # select all, no need to do anything
             return
 
-        # get feed info from the first input file
-        feedno = self.infiles[0]['feedno'][:].tolist()
+        # get feed info from data_source
+        feedno = data_source['feedno'][:].tolist()
 
         if isinstance(value, tuple):
             feeds = np.array(feedno[slice(*value)])
@@ -125,8 +114,8 @@ class RawTimestream(timestream_common.TimestreamCommon):
         else:
             raise ValueError('Unsupported data selection %s' % value)
 
-        # get channo info from the first input file
-        channo = self.infiles[0]['channo'][:]
+        # get channo info from data source
+        channo = data_source['channo'][:]
         # get corresponding channel_pairs
         channel_pairs = []
         if corr == 'auto':
@@ -146,18 +135,62 @@ class RawTimestream(timestream_common.TimestreamCommon):
         else:
             raise ValueError('Unknown correlation type %s' % corr)
 
-        # get blorder info from the first input file
-        blorder = self.infiles[0]['blorder']
+        # get blorder info from data_source
+        blorder = data_source['blorder']
         blorder = [ set(bl) for bl in blorder ]
 
         # channel pair indices
         indices = { blorder.index(chp) for chp in channel_pairs }
         indices = sorted(list(indices))
 
-        self.data_select('baseline', indices)
+        # selected channels corresponding to feeds
+        channels = np.array([ channo[feedno.index(fd)] for fd in feeds ])
 
-        self._feed_select = feeds
-        self._channel_select = np.array([ channo[feedno.index(fd)] for fd in feeds ])
+        return indices, feeds, channels
+
+    def feed_select(self, value=(0, None), corr='all'):
+        """Select data to be loaded from inputs files corresponding to the specified feeds.
+
+        Parameters
+        ----------
+        value : tuple or list, optional
+            If a tuple, which will be created as a slice(start, stop, step) object,
+            so it can have one to three elements (integers or None); if a list,
+            feed No. in this list will be selected. Default (0, None) select all.
+        corr : 'all', 'auto' or 'cross', optional
+            Correlation type. 'auto' for auto-correlations, 'cross' for
+            cross-correlations, 'all' for all correlations. Default 'all'.
+
+        """
+
+        results = self._inner_feed_select(self.infiles[0], value, corr)
+        if results is not None:
+            indices, feeds, channels = results
+            self.data_select('baseline', indices)
+            self._feed_select = feeds
+            self._channel_select = channels
+
+    def subset_feed_select(self, value=(0, None), corr='all'):
+        """Select a subset of the data corresponding to the specified feeds.
+
+        Parameters
+        ----------
+        value : tuple or list, optional
+            If a tuple, which will be created as a slice(start, stop, step) object,
+            so it can have one to three elements (integers or None); if a list,
+            feed No. in this list will be selected. Default (0, None) select all.
+        corr : 'all', 'auto' or 'cross', optional
+            Correlation type. 'auto' for auto-correlations, 'cross' for
+            cross-correlations, 'all' for all correlations. Default 'all'.
+
+        """
+
+        results = self._inner_feed_select(self, value, corr)
+        if results is not None:
+            indices, feeds, channels = results
+            self.subset_select('baseline', indices)
+            self._subset_feed_select = feeds
+            self._subset_channel_select = channels
 
 
     def _load_a_common_dataset(self, name):
@@ -368,3 +401,12 @@ class RawTimestream(timestream_common.TimestreamCommon):
             self.redistribute(original_dist_axis)
 
         return ts
+
+
+    def _copy_a_common_dataset(self, name, other):
+        ### copy a common dataset from `other` to self
+        if name == 'channo' and not other._subset_channel_select is None:
+            self.create_dataset(name, data=other._subset_channel_select)
+            memh5.copyattrs(other[name].attrs, self[name].attrs)
+        else:
+            super(RawTimestream, self)._copy_a_common_dataset(name, other)

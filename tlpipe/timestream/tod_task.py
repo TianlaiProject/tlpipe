@@ -92,6 +92,7 @@ class TaskTimestream(OneAndOne):
                     self._Tod_class = Timestream
                 else:
                     raise ValueError('Invaid input %s, need either a RawTimestream or Timestream object' % tod)
+                tod = self.subset_select(tod)
 
         return super(TaskTimestream, self).read_process_write(tod)
 
@@ -123,6 +124,16 @@ class TaskTimestream(OneAndOne):
         if self._Tod_class == Timestream:
             tod.polarization_select(self.params['pol_select'])
         tod.feed_select(self.params['feed_select'], self.params['corr'])
+
+        return tod
+
+    def subset_select(self, tod):
+        """Data subset select."""
+        tod.subset_time_select(self.params['time_select'])
+        tod.subset_frequency_select(self.params['freq_select'])
+        if self._Tod_class == Timestream:
+            tod.subset_polarization_select(self.params['pol_select'])
+        tod.subset_feed_select(self.params['feed_select'], self.params['corr'])
 
         return tod
 

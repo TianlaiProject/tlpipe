@@ -155,6 +155,7 @@ class BasicTod(memh5.MemDiskGroup):
         self.main_data_dist_axis = check_axis(dist_axis, self.main_data_axes)
 
         self.main_data_select = [ slice(0, None, None) for i in self._main_data_axes_ ]
+        self.subset_data_select = [ slice(0, None, None) for i in self._main_data_axes_ ]
 
     def __del__(self):
         """Closes the opened file handlers."""
@@ -351,6 +352,19 @@ class BasicTod(memh5.MemDiskGroup):
             raise ValueError('Attribute time_ordered_attrs must be a set of strings')
 
 
+    def _data_select(self, var, axis, value):
+        # inner method for data select
+        if isinstance(value, tuple):
+            var[axis] = slice(*value)
+        elif isinstance(value, list):
+            if sorted(value) != value:
+                raise TypeError("Indexing elements must be in increasing order")
+            if value[0] < 0:
+                raise TypeError("Indexing elements must be non-negative integers")
+            var[axis] = value
+        else:
+            raise ValueError('Unsupported data selection %s' % value)
+
     def data_select(self, axis, value):
         """Select data to be loaded from input files along the specified axis.
 
@@ -372,16 +386,24 @@ class BasicTod(memh5.MemDiskGroup):
         if axis == 0:
             if value != (0, None):
                 raise NotImplementedError('Select data to be loaded along the first axis is not implemented yet')
-        if isinstance(value, tuple):
-            self.main_data_select[axis] = slice(*value)
-        elif isinstance(value, list):
-            if sorted(value) != value:
-                raise TypeError("Indexing elements must be in increasing order")
-            if value[0] < 0:
-                raise TypeError("Indexing elements must be non-negative integers")
-            self.main_data_select[axis] = value
-        else:
-            raise ValueError('Unsupported data selection %s' % value)
+        self._data_select(self.main_data_select, axis, value)
+
+    def subset_select(self, axis, value):
+        """Select a subset of the data along the specified axis.
+
+        Parameters
+        ----------
+        axis : string or integer
+            The distribute axis.
+        value : tuple or list
+            If a tuple, which will be created as a slice(start, stop, step) object,
+            so it can have one to three elements (integers or None); if a list, its
+            elements must be strictly increasing non-negative integers, data in
+            these positions will be selected.
+
+        """
+        axis = check_axis(axis, self.main_data_axes)
+        self._data_select(self.subset_data_select, axis, value)
 
 
     def _load_a_common_attribute(self, name):
@@ -1311,3 +1333,99 @@ class BasicTod(memh5.MemDiskGroup):
 
         """
         self.data_operate(func, op_axis=None, axis_vals=0, full_data=False, copy_data=copy_data, keep_dist_axis=False, **kwargs)
+
+
+    def _copy_a_common_attribute(self, name, other):
+        # copy a common attribute from `other` to self
+        self.attrs[name] = deepcopy(other.attrs[name])
+
+    def _copy_a_time_ordered_attribute(self, name, other):
+        # copy a time ordered attribute from `other` to self
+        self.attrs[name] = deepcopy(other.attrs[name])
+
+    def _copy_an_attribute(self, name, other):
+        # copy an attribute (either a commmon or a time ordered) from `other` to self
+        if name in self.time_ordered_attrs:
+            self._copy_a_time_ordered_attribute(name, other)
+        else:
+            self._copy_a_common_attribute(name, other)
+
+    def _copy_a_common_dataset(self, name, other):
+        ### copy a common dataset from `other` to self
+        self.create_dataset(name, data=other[name].data.copy())
+        memh5.copyattrs(other[name].attrs, self[name].attrs)
+
+    def _copy_a_main_axes_ordered_dataset(self, name, other):
+        ### copy a main_axes_ordered_dataset from `other` to self
+        axes = list(self.main_axes_ordered_datasets[name])
+        axes = axes + [None] * (len(other[name].shape) - len(axes)) # complete the un-write axes
+        sel = [ ( other.subset_data_select[a] if a is not None else slice(0, None, None) ) for a in axes ] # for data in file
+        shp = [ len(np.arange(ni)[si]) for (ni, si) in zip(other[name].shape, sel) ]
+        if not self.main_data_dist_axis in axes:
+            # common data set
+            self.create_dataset(name, data=other[name].data[sel].copy())
+            memh5.copyattrs(other[name].attrs, self[name].attrs)
+        else:
+            # distributed data set
+            di = axes.index(self.main_data_dist_axis) # index of dist axis
+            # create a distributed dataset to hold the sub data set
+            self.create_dataset(name, shape=shp, dtype=other[name].dtype, distributed=True, distributed_axis=di)
+            # copy attrs of this dset
+            memh5.copyattrs(other[name].attrs, self[name].attrs)
+
+            # get start and end of the local data along axis di
+            s = other[name].data.local_offset[di]
+            e = s + other[name].data.local_shape[di]
+            # get indices of the data corresponding to the sub data set
+            sub_inds = np.arange(other[name].shape[di])[sel[di]]
+            # split indices for each process
+            ns, ss, es = mpiutil.split_all(len(sub_inds), comm=self.comm)
+            # gather data to make each process to have its own data
+            for ri, (si, ei) in enumerate(zip(ss, es)):
+                linds = np.intersect1d(sub_inds[si:ei], np.arange(s, e))
+                sel[di] = (linds - s).tolist()
+                sel = [  ( _to_slice_obj(sl) if isinstance(sl, list) else sl ) for sl in sel ]
+                ldata = mpiutil.gather_array(other[name].local_data[sel], axis=di, root=ri, comm=self.comm)
+                if ri == mpiutil.rank:
+                    self[name].local_data[:] = ldata
+
+    def _copy_a_time_ordered_dataset(self, name, other):
+        ### copy a time ordered dataset (except those also in main_axes_ordered_datasets) from `other` to self
+        self.create_dataset(name, data=other[name].data.copy())
+        memh5.copyattrs(other[name].attrs, self[name].attrs)
+
+    def _copy_a_dataset(self, name, other):
+        ### copy a dataset (either a commmon or a main axis ordered or a time ordered) from `other` to self
+        if name in self.main_axes_ordered_datasets.keys():
+            self._copy_a_main_axes_ordered_dataset(name, other)
+        elif name in self.time_ordered_datasets.keys():
+            self._copy_a_time_ordered_dataset(name, other)
+        else:
+            self._copy_a_common_dataset(name, other)
+
+
+    def subset(self):
+        """Return a subset of the data as a new data container."""
+
+        shp = self.main_data.shape
+        new_shp = tuple([ len(np.arange(a)[s]) for (a, s) in zip(shp, self.subset_data_select) ])
+        if shp == new_shp:
+            return self.copy()
+
+        # create a new container to hold the data subset
+        cont = self.__class__(dist_axis=self.main_data_dist_axis, comm=self.comm)
+
+        # set hints
+        hint_keys = [ key for key in self.__class__.__dict__.keys() if re.match(self.hints_pattern, key) ]
+        for key in hint_keys:
+            setattr(cont, key, getattr(self, key))
+
+        # copy attrs
+        for name in self.attrs.iterkeys():
+            cont._copy_an_attribute(name, self)
+
+        # copy datasets
+        for name in self.iterkeys():
+            cont._copy_a_dataset(name, self)
+
+        return cont

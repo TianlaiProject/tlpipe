@@ -93,6 +93,20 @@ class TimestreamCommon(container.BasicTod):
         """
         self.data_select('time', value)
 
+    def subset_time_select(self, value):
+        """Select a subset of the data along the time axis.
+
+        Parameters
+        ----------
+        value : tuple or list
+            If a tuple, which will be created as a slice(start, stop, step) object,
+            so it can have one to three elements (integers or None); if a list, its
+            elements must be strictly increasing non-negative integers, data in
+            these positions will be selected.
+
+        """
+        self.subset_select('time', value)
+
     def frequency_select(self, value):
         """Select data to be loaded from input files along the frequency axis.
 
@@ -107,7 +121,22 @@ class TimestreamCommon(container.BasicTod):
         """
         self.data_select('frequency', value)
 
+    def subset_frequency_select(self, value):
+        """Select a subset of the data along the frequency axis.
+
+        Parameters
+        ----------
+        value : tuple or list
+            If a tuple, which will be created as a slice(start, stop, step) object,
+            so it can have one to three elements (integers or None); if a list, its
+            elements must be strictly increasing non-negative integers, data in
+            these positions will be selected.
+
+        """
+        self.subset_select('frequency', value)
+
     _feed_select = None
+    _subset_feed_select = None
 
     # def baseline_select(self, value):
     #     """Select data to be loaded from input files along the baseline axis.
@@ -122,6 +151,20 @@ class TimestreamCommon(container.BasicTod):
 
     #     """
     #     self.data_select('baseline', value)
+
+    # def subset_baseline_select(self, value):
+    #     """Select a subset of the data along the baseline axis.
+
+    #     Parameters
+    #     ----------
+    #     value : tuple or list
+    #         If a tuple, which will be created as a slice(start, stop, step) object,
+    #         so it can have one to three elements (integers or None); if a list, its
+    #         elements must be strictly increasing non-negative integers, data in
+    #         these positions will be selected.
+
+    #     """
+    #     self.subset_select('baseline', value)
 
 
     def feed_select(self, value=(0, None), corr='all'):
@@ -141,6 +184,23 @@ class TimestreamCommon(container.BasicTod):
 
         raise NotImplementedError('feed_select not implemented in this base class')
 
+    def subset_feed_select(self, value=(0, None), corr='all'):
+        """Select a subset of the data corresponding to the specified feeds.
+
+        Parameters
+        ----------
+        value : tuple or list, optional
+            If a tuple, which will be created as a slice(start, stop, step) object,
+            so it can have one to three elements (integers or None); if a list,
+            feed No. in this list will be selected. Default (0, None) select all.
+        corr : 'all', 'auto' or 'cross', optional
+            Correlation type. 'auto' for auto-correlations, 'cross' for
+            cross-correlations, 'all' for all correlations. Default 'all'.
+
+        """
+
+        raise NotImplementedError('subset_feed_select not implemented in this base class')
+
 
     def _load_a_common_dataset(self, name):
         ### load a common dataset from the first file
@@ -152,10 +212,10 @@ class TimestreamCommon(container.BasicTod):
             feedno = fh['feedno'][:].tolist()
             feed_inds = [ feedno.index(fd) for fd in self._feed_select ]
             feed_axis = self.feed_ordered_datasets[name].index(0)
-            slc = [slice(0, None)] * (feed_axis + 1)
+            slc = [slice(0, None)] * len(fh[name].shape)
             slc[feed_axis] = feed_inds
             self.create_dataset(name, data=fh[name][tuple(slc)])
-            memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
+            memh5.copyattrs(fh[name].attrs, self[name].attrs)
         else:
             super(TimestreamCommon, self)._load_a_common_dataset(name)
 
@@ -969,3 +1029,20 @@ class TimestreamCommon(container.BasicTod):
 
         """
         self.data_operate(func, op_axis=('frequency', 'baseline'), axis_vals=(self.freq, self.bl), full_data=full_data, copy_data=copy_data, keep_dist_axis=keep_dist_axis, **kwargs)
+
+
+    def _copy_a_common_dataset(self, name, other):
+        ### copy a common dataset from `other` to self
+        if name == 'feedno' and not other._subset_feed_select is None:
+            self.create_dataset(name, data=other._subset_feed_select)
+            memh5.copyattrs(other[name].attrs, self[name].attrs)
+        elif name in self.feed_ordered_datasets.keys() and not other._subset_feed_select is None:
+            feedno = other['feedno'][:].tolist()
+            feed_inds = [ feedno.index(fd) for fd in other._subset_feed_select ]
+            feed_axis = self.feed_ordered_datasets[name].index(0)
+            slc = [slice(0, None)] * len(other[name].shape)
+            slc[feed_axis] = feed_inds
+            self.create_dataset(name, data=other[name][tuple(slc)])
+            memh5.copyattrs(other[name].attrs, self[name].attrs)
+        else:
+            super(TimestreamCommon, self)._copy_a_common_dataset(name, other)
