@@ -206,8 +206,8 @@ class PsCal(tod_task.TaskTimestream):
 
             # Eigen decomposition
             # Vmat = np.where(np.isfinite(Vmat), Vmat, 0)
-            V0, S = rpca_decomp.decompose(Vmat, max_iter=100, threshold='hard', debug=True)
-            # V0, S = rpca_decomp.decompose(Vmat, max_iter=100, threshold='soft', debug=True)
+            V0, S = rpca_decomp.decompose(Vmat, max_iter=100, threshold='hard', tol=1.0e-6, debug=False)
+            # V0, S = rpca_decomp.decompose(Vmat, max_iter=100, threshold='soft', tol=1.0e-6, debug=False)
 
             # plot
             if plot_figs:
@@ -303,7 +303,7 @@ class PsCal(tod_task.TaskTimestream):
         Gain = Gain.reshape(nt, nf, 2, nfeed)
 
         # choose data slice near the transit time
-        c = nt/2 + 1 # center ind
+        c = nt/2 # center ind
         li = max(0, c - 100)
         hi = min(nt, c + 100 + 1)
         x = np.arange(li, hi)
