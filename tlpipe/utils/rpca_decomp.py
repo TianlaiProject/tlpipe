@@ -40,7 +40,8 @@ def decompose(V, rank=1, lmbda=None, threshold='hard', max_iter=100, tol=1.0e-8,
 
     if lmbda is None:
         # lmbda = MAD(V)
-        lmbda = max(1.0, 2 * np.log(d)**0.5) * min(MAD(V), np.std(V))
+        # lmbda = max(1.0, 2 * np.log(d)**0.5) * min(MAD(V), np.std(V))
+        lmbda = max(1.0, 2 * np.log10(d)**0.5) * min(MAD(V), np.std(V))
         fixed_lmbda = False
         if debug:
             print 'lmbda:', lmbda
@@ -74,7 +75,8 @@ def decompose(V, rank=1, lmbda=None, threshold='hard', max_iter=100, tol=1.0e-8,
         if not fixed_lmbda and it >= 1:
             # lmbda = 5.0 * np.std(N)
             # use the universal threshold: sigma * (2 * log(d*d))**0.5
-            lmbda = max(1.0, 2 * np.log(d)**0.5) * min(MAD(N), np.std(N))
+            # lmbda = max(1.0, 2 * np.log(d)**0.5) * min(MAD(N), np.std(N))
+            lmbda = max(1.0, 2 * np.log10(d)**0.5) * min(MAD(N), np.std(N))
             if debug:
                 print 'lmbda:', lmbda
 
