@@ -54,6 +54,7 @@ class Accum(tod_task.TaskTimestream):
             weight = mpiarray.MPIArray.wrap(weight, axis=self.data.main_data_dist_axis)
             axis_order = self.data.main_axes_ordered_datasets[self.data.main_data_name]
             self.data.create_main_axis_ordered_dataset(axis_order, 'weight', weight, axis_order)
+            self.data.attrs['ndays'] = 1 # record number of days accumulated
         else:
             # make they are distributed along the same axis
             ts.redistribute(self.data.main_data_dist_axis)
@@ -81,6 +82,7 @@ class Accum(tod_task.TaskTimestream):
             self.data.local_vis[:] += ts.local_vis # accumulate vis
             self.data['weight'].local_data[:] += np.logical_not(ts.local_vis_mask).astype(np.int16) # update weight
             self.data.local_vis_mask[:] = np.where(self.data['weight'].local_data != 0, False, True) # update mask
+            self.data.attrs['ndays'] += 1
 
 
         return super(Accum, self).process(self.data)
