@@ -99,7 +99,7 @@ class MapMaking(tod_task.TaskTimestream):
         freq = ts.freq
         freqs = ts.freq.data.to_numpy_array(root=None) # MHz
         band_width = ts.attrs['freqstep'] # MHz
-        ndays = 1
+        ndays = ts.attrs['ndays']
         feeds = ts['feedno'][:]
         az, alt = ts['az_alt'][0]
         az = np.degrees(az)
@@ -111,7 +111,9 @@ class MapMaking(tod_task.TaskTimestream):
             dish_width = ts.attrs['dishdiam']
             tel = tl_dish.TlUnpolarisedDishArray(lat, lon, freqs, band_width, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin, dish_width, feedpos, pointing)
         elif ts.is_cylinder:
-            factor = 1.2 # suppose an illumination efficiency, keep same with that in timestream_common
+            # factor = 1.2 # suppose an illumination efficiency, keep same with that in timestream_common
+            factor = 0.79 # for xx
+            # factor = 0.88 # for yy
             cyl_width = factor * ts.attrs['cywid']
             tel = tl_cylinder.TlUnpolarisedCylinder(lat, lon, freqs, band_width, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin, cyl_width, feedpos)
         else:
