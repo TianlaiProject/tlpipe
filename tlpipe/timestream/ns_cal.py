@@ -70,6 +70,7 @@ class NsCal(tod_task.TaskTimestream):
                     'freq_excl': [],
                     'rotate_xdate': False, # True to rotate xaxis date ticks, else half the number of date ticks
                     'feed_no': False, # True to use feed number (true baseline) else use channel no
+                    'order_bl': True, # True to make small feed no first
                   }
 
     prefix = 'nc_'
@@ -111,6 +112,7 @@ class NsCal(tod_task.TaskTimestream):
         fig_prefix = self.params['fig_name']
         rotate_xdate = self.params['rotate_xdate']
         feed_no = self.params['feed_no']
+        order_bl = self.params['order_bl']
         tag_output_iter = self.params['tag_output_iter']
         iteration = self.iteration
         bls_plt = kwargs['bls_plt']
@@ -243,6 +245,10 @@ class NsCal(tod_task.TaskTimestream):
             ax_val = np.array([ datetime.fromtimestamp(sec) for sec in rt['sec1970'][:] ])
             xlabel = '%s' % ax_val[0].date()
             ax_val = mdates.date2num(ax_val)
+            if order_bl and (bl[0] > bl[1]):
+                # negate phase as for the conj of vis
+                all_phase = np.where(np.isfinite(all_phase), -all_phase, np.nan)
+                phase = np.where(np.isfinite(phase), -phase, np.nan)
             if phs_only:
                 ax.plot(ax_val, all_phase)
                 ax.plot(ax_val[valid_inds], phase, 'ro')
@@ -275,6 +281,8 @@ class NsCal(tod_task.TaskTimestream):
             if feed_no:
                 pol = rt['bl_pol'].local_data[li[1]]
                 bl = tuple(rt['true_blorder'].local_data[li[1]])
+                if order_bl and (bl[0] > bl[1]):
+                    bl = (bl[1], bl[0])
                 fig_name = '%s_%f_%d_%d_%s.png' % (fig_prefix, fbl[0], bl[0], bl[1], rt.pol_dict[pol])
             else:
                 fig_name = '%s_%f_%d_%d.png' % (fig_prefix, fbl[0], fbl[1][0], fbl[1][1])

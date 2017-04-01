@@ -39,6 +39,7 @@ class Plot(tod_task.TaskTimestream):
                     'fig_name': 'int/int',
                     'rotate_xdate': False, # True to rotate xaxis date ticks, else half the number of date ticks
                     'feed_no': False, # True to use feed number (true baseline) else use channel no
+                    'order_bl': True, # True to make small feed no first
                   }
 
     prefix = 'pit_'
@@ -67,6 +68,7 @@ class Plot(tod_task.TaskTimestream):
         fig_prefix = self.params['fig_name']
         rotate_xdate = self.params['rotate_xdate']
         feed_no = self.params['feed_no']
+        order_bl = self.params['order_bl']
         tag_output_iter = self.params['tag_output_iter']
         iteration= self.iteration
 
@@ -80,6 +82,9 @@ class Plot(tod_task.TaskTimestream):
             if feed_no:
                 pol = ts['bl_pol'].local_data[li]
                 bl = tuple(ts['true_blorder'].local_data[li])
+                if order_bl and (bl[0] > bl[1]):
+                    bl = (bl[1], bl[0])
+                    vis = vis.conj()
         else:
             raise ValueError('Need either a RawTimestream or Timestream')
 
