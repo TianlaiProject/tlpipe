@@ -54,12 +54,12 @@ class Interpolate(surface_fit.SurfaceFitMethod):
         for ri in xrange(height):
             on = np.where(self.vis_mask[ri])[0] # masked inds
             off = np.where(np.logical_not(self.vis_mask[ri]))[0] # un-masked inds
-            if len(off) <= max(self.order, self.mask_ratio*width):
+            if len(off) <= max(self.order + 1, self.mask_ratio*width):
                 if len(off) == 0:
                     self._background[ri] = 0 # fill 0 if all has been masked
                 else:
-                    self._background[ri, on] = self.vis[ri, on]
-                    self._background[ri, off] = np.median(self.vis[ri, off])
+                    self._background[ri, on] = np.median(self.vis[ri, off])
+                    self._background[ri, off] = self.vis[ri, off]
             else:
                 itp = InterpolatedUnivariateSpline(off, self.vis[ri, off])
                 self._background[ri] = itp(np.arange(width))
@@ -72,12 +72,12 @@ class Interpolate(surface_fit.SurfaceFitMethod):
         for ci in xrange(width):
             on = np.where(self.vis_mask[:, ci])[0] # masked inds
             off = np.where(np.logical_not(self.vis_mask[:, ci]))[0] # un-masked inds
-            if len(off) <= max(self.order, self.mask_ratio*height):
+            if len(off) <= max(self.order + 1, self.mask_ratio*height):
                 if len(off) == 0:
                     self._background[:, ci] = 0 # fill 0 if all has been masked
                 else:
-                    self._background[on, ci] = self.vis[on, ci]
-                    self._background[off, ci] = np.median(self.vis[off, ci])
+                    self._background[on, ci] = np.median(self.vis[off, ci])
+                    self._background[off, ci] = self.vis[off, ci]
             else:
                 itp = InterpolatedUnivariateSpline(off, self.vis[off, ci])
                 self._background[:, ci] = itp(np.arange(height))
