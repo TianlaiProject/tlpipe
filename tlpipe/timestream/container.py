@@ -460,7 +460,7 @@ class BasicTod(memh5.MemDiskGroup):
             di = axes.index(self.main_data_dist_axis) # index of dist axis
         fsel = [ ( self.main_data_select[a] if a is not None else slice(0, None, None) ) for a in axes ] # for data in file
         msel = [ slice(0, None, None) ] # for data in memory
-        shp = [ len(np.arange(ni)[si]) for (ni, si) in zip(dset_shape, fsel) ]
+        shp = tuple([ len(np.arange(ni)[si]) for (ni, si) in zip(dset_shape, fsel) ])
 
         if self.main_data_dist_axis in axes:
             # load as a distributed dataset
