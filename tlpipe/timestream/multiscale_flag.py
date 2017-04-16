@@ -73,13 +73,14 @@ class Flag(tod_task.TaskTimestream):
         background1 = background.copy()
 
         nt, nf = background.shape
-        for fi in range(nf):
-            background[:, fi] = multiscale.median_wavelet_smooth(background[:, fi], level=4)
-        for ti in range(nt):
-            if fb[0] == fb[1]:
-                background[ti, :] = multiscale.median_wavelet_smooth(background[ti, :], level=2)
-            else:
-                background[ti, :] = multiscale.median_wavelet_smooth(background[ti, :], level=3)
+        # for fi in range(nf):
+        #     background[:, fi] = multiscale.median_wavelet_smooth(background[:, fi], level=4)
+        # for ti in range(nt):
+        #     if fb[0] == fb[1]:
+        #         background[ti, :] = multiscale.median_wavelet_smooth(background[ti, :], level=2)
+        #     else:
+        #         background[ti, :] = multiscale.median_wavelet_smooth(background[ti, :], level=3)
+        background[:] = multiscale.median_wavelet_smooth(background, level=2)
 
         # sum-threshold
         # vis_diff = vis_abs - background
