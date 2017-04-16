@@ -8,12 +8,19 @@ Inheritance diagram
 
 """
 
+from os import path
+import logging
 import h5py
 from timestream_common import TimestreamCommon
 from raw_timestream import RawTimestream
 from timestream import Timestream
 from tlpipe.utils.path_util import input_path, output_path
 from tlpipe.pipeline.pipeline import OneAndOne
+from caput import mpiutil
+
+
+# Set the module logger.
+logger = logging.getLogger(__name__)
 
 
 class TaskTimestream(OneAndOne):
@@ -75,6 +82,14 @@ class TaskTimestream(OneAndOne):
                     input_files = input_path(self.input_files, iteration=self.iteration)
                 else:
                     input_files = self.input_files
+                # ensure all input_files are exist
+                for infile in input_files:
+                    if not path.exists(infile):
+                        if mpiutil.rank0:
+                            msg = 'Missing input file %s, will stop then...' % infile
+                            logger.info(msg)
+                        self.stop_iteration(True)
+                        return None
                 # see 'vis' dataset from the first input file
                 with h5py.File(input_files[0], 'r') as f:
                     vis_shp = f['vis'].shape
