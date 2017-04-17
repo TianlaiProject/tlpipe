@@ -72,7 +72,7 @@ class Flag(tod_task.TaskTimestream):
         background = itp.fit()
         background1 = background.copy()
 
-        nt, nf = background.shape
+        # nt, nf = background.shape
         # for fi in range(nf):
         #     background[:, fi] = multiscale.median_wavelet_smooth(background[:, fi], level=4)
         # for ti in range(nt):
