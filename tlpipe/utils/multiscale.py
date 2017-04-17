@@ -142,3 +142,36 @@ def median_wavelet_smooth(a, level=None, scale=2, tau=5.0, phi=_phi):
 
 def median_wavelet_detrend(a, level=None, scale=2, tau=5.0, phi=_phi):
     return a - median_wavelet_smooth(a, level, scale, tau, phi)
+
+
+def multiscale_median_flag(a, level=None, scale=2, tau=5.0, return_mask=True):
+
+    if level == None:
+        level = int(np.ceil(np.log2(np.min(input_image.shape))))
+
+    if return_mask:
+        mask = np.zeros_like(a, dtype=bool)
+
+    if level <= 0:
+        if return_mask:
+            return a, mask
+        else:
+            return a
+
+    for li in xrange(level):
+        if li > 0:
+            scale *= 2
+        approx = median_filter(a, 2*scale+1)
+        w = a - approx
+        th = tau * MAD(w)
+        # th = tau * MAD(w[w!=0])
+        inds = np.where(np.abs(w) > th)[0]
+        if return_mask:
+            mask[inds] = True
+        w[inds] = np.sign(w[inds]) * th
+        a = approx + w
+
+    if return_mask:
+        return a, mask
+    else:
+        return a
