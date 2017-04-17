@@ -14,7 +14,7 @@ from scipy.interpolate import InterpolatedUnivariateSpline
 import tod_task
 from raw_timestream import RawTimestream
 from timestream import Timestream
-from sg_filter import savitzky_golay
+from tlpipe.utils.sg_filter import savitzky_golay
 from tlpipe.utils.path_util import output_path
 import tlpipe.plot
 import matplotlib.pyplot as plt
