@@ -178,8 +178,7 @@ class BasicTod(memh5.MemDiskGroup):
             with h5py.File(fh, 'r') as f:
                 num_ts.append(f[dset_name].shape[0])
 
-        if self.comm is not None:
-            num_ts = list(itertools.chain(*self.comm.allgather(num_ts)))
+        num_ts = mpiutil.gather_list(num_ts, comm=self.comm)
         nt = sum(num_ts) # total length of the first axis along different files
 
         tmp_start = start if start >=0 else start + nt
@@ -257,8 +256,7 @@ class BasicTod(memh5.MemDiskGroup):
         for fh in mpiutil.mpilist(self.infiles, method='con', comm=self.comm):
             num_ts.append(fh[dset_name].shape[0])
 
-        if self.comm is not None:
-            num_ts = list(itertools.chain(*self.comm.allgather(num_ts)))
+        num_ts = mpiutil.gather_list(num_ts, comm=self.comm)
         if stop is None:
             stop = sum(num_ts) # total length of the first axis along different files
         infiles_map = self._gen_files_map(num_ts, start, stop)
@@ -420,8 +418,7 @@ class BasicTod(memh5.MemDiskGroup):
             self.attrs[name].append(fh.attrs[name])
 
         # gather time ordered attrs
-        if self.comm is not None:
-            self.attrs[name] = list(itertools.chain(*self.comm.allgather(self.attrs[name])))
+        self.attrs[name] = mpiutil.gather_list(self.attrs[name], comm=self.comm)
 
     def _load_an_attribute(self, name):
         ### load an attribute (either a commmon or a time ordered)

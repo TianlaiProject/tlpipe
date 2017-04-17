@@ -8,7 +8,6 @@ Inheritance diagram
 
 """
 
-import itertools
 import numpy as np
 import tod_task
 from raw_timestream import RawTimestream
@@ -79,10 +78,8 @@ class Detect(tod_task.TaskTimestream):
 
 
         # gather list
-        comm = mpiutil.world
-        if comm is not None:
-            problematic_bls = list(itertools.chain(*comm.allgather(problematic_bls)))
-            bad_bls = list(itertools.chain(*comm.allgather(bad_bls)))
+        problematic_bls = mpiutil.gather_list(problematic_bls, comm=ts.comm)
+        bad_bls = mpiutil.gather_list(bad_bls, comm=ts.comm)
 
         # try to find bad channels or feeds
         if isinstance(ts, RawTimestream):
