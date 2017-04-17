@@ -1,6 +1,6 @@
 import abc
 import numpy as np
-from winsorized_stats import winsorized_mean_and_std, winsorized_mode
+from tlpipe.utils.robust_stats import winsorized_mean_and_std, winsorized_mode
 
 
 class CombinatorialThreshold(object):
