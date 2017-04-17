@@ -1,14 +1,11 @@
 import numpy as np
 from scipy.ndimage import convolve1d
 from scipy.ndimage import median_filter
+from robust_stats import MAD
 
 
 # default spline wavelet scaling function
 _phi = np.array([1.0/16, 1.0/4, 3.0/8, 1.0/4, 1.0/16])
-
-
-def MAD(a):
-    return np.median(np.abs(a - np.median(a))) / 0.6745
 
 
 def up_sampling(a):

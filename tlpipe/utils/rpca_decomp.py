@@ -1,9 +1,6 @@
 import numpy as np
 from scipy import linalg as la
-
-
-def MAD(a):
-    return np.median(np.abs(a - np.median(a))) / 0.6745
+from robust_stats import MAD
 
 
 def l0_norm(a):
