@@ -10,10 +10,10 @@ Inheritance diagram
 
 import warnings
 import numpy as np
-import tod_task
+import timestream_task
 
 
-class Average(tod_task.TaskTimestream):
+class Average(timestream_task.TimestreamTask):
     """Average the accumulated data by dividing its weight.
 
     This task works for the accelerated data returned by task

@@ -8,16 +8,16 @@ Inheritance diagram
 
 """
 
-import tod_task
+import timestream_task
 
 
-class Rt2ts(tod_task.TaskTimestream):
+class Rt2ts(timestream_task.TimestreamTask):
     """Convert RawTimestream to Timestream.
 
     This converts the current data which is held in a
-    :class:`~tlpipe.timestream.raw_timestream.RawTimestream` container
+    :class:`~tlpipe.container.raw_timestream.RawTimestream` container
     to data held in a
-    :class:`~tlpipe.timestream.timestream.Timestream` container.
+    :class:`~tlpipe.container.timestream.Timestream` container.
 
     By doing so, the original mixed *polarization* and *baseline* will be
     separated, which will be more convenient for the following processing.

@@ -9,13 +9,13 @@ Inheritance diagram
 """
 
 import numpy as np
-import tod_task
-from timestream import Timestream
+import timestream_task
+from tlpipe.container.timestream import Timestream
 from tlpipe.core import constants as const
 from caput import mpiarray
 
 
-class ReOrder(tod_task.TaskTimestream):
+class ReOrder(timestream_task.TimestreamTask):
     """Re-order data to have longitude from 0 to 2pi.
 
     By doing this, data of different days can be accumulated and averaged.

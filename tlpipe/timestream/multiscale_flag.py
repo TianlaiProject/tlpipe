@@ -9,16 +9,16 @@ Inheritance diagram
 """
 
 import numpy as np
-import tod_task
-from raw_timestream import RawTimestream
-from timestream import Timestream
+import timestream_task
+from tlpipe.container.raw_timestream import RawTimestream
+from tlpipe.container.timestream import Timestream
 from tlpipe.rfi import interpolate
 from tlpipe.rfi import sum_threshold
 from tlpipe.utils import multiscale
 from tlpipe.utils.path_util import output_path
 
 
-class Flag(tod_task.TaskTimestream):
+class Flag(timestream_task.TimestreamTask):
     """RFI flagging.
 
     RFI flagging by using the SumThreshold method.

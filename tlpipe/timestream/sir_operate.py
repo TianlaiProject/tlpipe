@@ -9,11 +9,11 @@ Inheritance diagram
 """
 
 import numpy as np
-import tod_task
+import timestream_task
 from tlpipe.rfi import sir_operator
 
 
-class Sir(tod_task.TaskTimestream):
+class Sir(timestream_task.TimestreamTask):
     """RFI flagging by applying the SIR (Scale-Invariant Rank) operator.
 
     The scale-invariant rank (SIR) operator is a one-dimensional mathematical

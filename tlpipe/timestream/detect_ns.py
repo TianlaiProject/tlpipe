@@ -11,14 +11,13 @@ Inheritance diagram
 import warnings
 from collections import Counter
 import numpy as np
-import tod_task
-
-from raw_timestream import RawTimestream
+import timestream_task
+from tlpipe.container.raw_timestream import RawTimestream
 from caput import mpiutil
 from caput import mpiarray
 
 
-class Detect(tod_task.TaskTimestream):
+class Detect(timestream_task.TimestreamTask):
     """Detect noise source signal.
 
     This task automatically finds out the time points that the noise source

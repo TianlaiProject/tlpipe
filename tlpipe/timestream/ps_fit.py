@@ -12,8 +12,8 @@ import os
 import numpy as np
 import ephem
 import aipy as a
-import tod_task
-from timestream import Timestream
+import timestream_task
+from tlpipe.container.timestream import Timestream
 from caput import mpiutil
 from tlpipe.utils.path_util import output_path
 from tlpipe.core import constants as const
@@ -102,7 +102,7 @@ def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit
     return gain, si
 
 
-class PsFit(tod_task.TaskTimestream):
+class PsFit(timestream_task.TimestreamTask):
     """Calibration by strong point source fitting.
 
     This works by minimize

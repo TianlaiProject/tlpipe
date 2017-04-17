@@ -11,16 +11,16 @@ Inheritance diagram
 import warnings
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
-import tod_task
-from raw_timestream import RawTimestream
-from timestream import Timestream
+import timestream_task
+from tlpipe.container.raw_timestream import RawTimestream
+from tlpipe.container.timestream import Timestream
 from tlpipe.utils.sg_filter import savitzky_golay
 from tlpipe.utils.path_util import output_path
 import tlpipe.plot
 import matplotlib.pyplot as plt
 
 
-class Flag(tod_task.TaskTimestream):
+class Flag(timestream_task.TimestreamTask):
     """Line RFI flagging.
 
     This task flags the line RFI along time (then frequency) by first integrate

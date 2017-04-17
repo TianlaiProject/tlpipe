@@ -10,12 +10,12 @@ Inheritance diagram
 
 import numpy as np
 import aipy as a
-import tod_task
+import timestream_task
 from tlpipe.core import constants as const
 from caput import mpiutil
 
 
-class PsSub(tod_task.TaskTimestream):
+class PsSub(timestream_task.TimestreamTask):
     """Subtract simulated strong point sources signal from the visibilities.
 
     .. note::

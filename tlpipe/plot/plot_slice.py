@@ -10,22 +10,22 @@ Inheritance diagram
 
 from datetime import datetime
 import numpy as np
-from tlpipe.timestream import tod_task
-from tlpipe.timestream.raw_timestream import RawTimestream
-from tlpipe.timestream.timestream import Timestream
+from tlpipe.timestream import timestream_task
+from tlpipe.container.raw_timestream import RawTimestream
+from tlpipe.container.timestream import Timestream
 from tlpipe.utils.path_util import output_path
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.ticker import MaxNLocator, AutoMinorLocator
 
 
-class Plot(tod_task.TaskTimestream):
+class Plot(timestream_task.TimestreamTask):
     """Plot time or frequency slices.
 
     This task plots a given number of time (or frequency) slice of the visibility
     for each baseline (and also each polarization if the input data is a
-    :class:`~tlpipe.timestream.timestream.Timestream` instead of a
-    :class:`~tlpipe.timestream.raw_timestream.RawTimestream`).
+    :class:`~tlpipe.container.timestream.Timestream` instead of a
+    :class:`~tlpipe.container.raw_timestream.RawTimestream`).
 
     """
 

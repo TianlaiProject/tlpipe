@@ -11,14 +11,13 @@ Inheritance diagram
 import numpy as np
 import ephem
 import aipy as a
+import timestream_task
 import tod_task
-import timestream
-
-from caput import mpiutil
 from tlpipe.utils.date_util import get_ephdate
+from caput import mpiutil
 
 
-class Phs2zen(tod_task.TaskTimestream):
+class Phs2zen(timestream_task.TimestreamTask):
     """Phase the source-phased visibility data to the zenith
 
     The phasing is done by multiply the visibility by the reference phase of

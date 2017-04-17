@@ -10,15 +10,14 @@ Inheritance diagram
 
 import warnings
 import numpy as np
-import tod_task
-from timestream import Timestream
-
+import timestream_task
+from tlpipe.container.timestream import Timestream
 from caput import mpiutil
 from caput import mpiarray
 from tlpipe.utils.np_util import unique, average
 
 
-class Rebin(tod_task.TaskTimestream):
+class Rebin(timestream_task.TimestreamTask):
     """Rebin the frequency channels.
 
     This task rebins the data along the frequency by merging (and average)

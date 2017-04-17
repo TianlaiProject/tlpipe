@@ -9,13 +9,13 @@ Inheritance diagram
 """
 
 import numpy as np
-import tod_task
-from raw_timestream import RawTimestream
-from timestream import Timestream
+import timestream_task
+from tlpipe.container.raw_timestream import RawTimestream
+from tlpipe.container.timestream import Timestream
 from caput import mpiutil
 
 
-class Detect(tod_task.TaskTimestream):
+class Detect(timestream_task.TimestreamTask):
     """Bad/Exceptional visibility values detect.
 
     This task does a simple bad/exceptional values detection by mask those
@@ -96,7 +96,7 @@ class Detect(tod_task.TaskTimestream):
                 bad_chs[ch1] += 1
                 bad_chs[ch2] += 1
 
-            num_chs = len(ts['channo'].flatten())
+            num_chs = len(ts['channo'][:].flatten())
             pchs = []
             bchs = []
             for ch, val in bad_chs.iteritems():
@@ -128,7 +128,7 @@ class Detect(tod_task.TaskTimestream):
                 bad_feeds[pol][fd1] += 1
                 bad_feeds[pol][fd2] += 1
 
-            num_feeds = len(ts['feedno'])
+            num_feeds = len(ts['feedno'][:])
             pfeeds = []
             bfeeds = []
             for pol, d in bad_feeds.iteritems():

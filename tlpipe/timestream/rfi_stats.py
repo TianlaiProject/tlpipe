@@ -10,7 +10,7 @@ Inheritance diagram
 
 from datetime import datetime
 import numpy as np
-import tod_task
+import timestream_task
 from tlpipe.utils.path_util import output_path
 import tlpipe.plot
 import matplotlib.pyplot as plt
@@ -19,7 +19,7 @@ from matplotlib.ticker import MaxNLocator, AutoMinorLocator
 from caput import mpiutil
 
 
-class Stats(tod_task.TaskTimestream):
+class Stats(timestream_task.TimestreamTask):
     """RFI statistics.
 
     Analysis of RFI distributions along time and frequency.

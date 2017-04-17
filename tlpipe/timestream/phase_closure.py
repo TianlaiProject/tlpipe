@@ -14,7 +14,7 @@ import numpy as np
 from scipy import optimize
 import h5py
 import aipy as a
-import tod_task
+import timestream_task
 from caput import mpiutil
 from tlpipe.utils.path_util import output_path
 import tlpipe.plot
@@ -49,7 +49,7 @@ def f(x, a, b, c):
     return a * np.exp(-(x - b)**2.0 / (2 * c**2))
 
 
-class Closure(tod_task.TaskTimestream):
+class Closure(timestream_task.TimestreamTask):
     """Check the phase closure relation.
 
     The closure phase of the visibility for feeds :math:`i,j,k` is

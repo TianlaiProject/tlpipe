@@ -11,9 +11,9 @@ Inheritance diagram
 from datetime import datetime
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
-from tlpipe.timestream import tod_task
-from tlpipe.timestream.raw_timestream import RawTimestream
-from tlpipe.timestream.timestream import Timestream
+from tlpipe.timestream import timestream_task
+from tlpipe.container.raw_timestream import RawTimestream
+from tlpipe.container.timestream import Timestream
 from tlpipe.utils.path_util import output_path
 from tlpipe.utils import hist_eq
 import matplotlib.pyplot as plt
@@ -21,14 +21,14 @@ import matplotlib.dates as mdates
 from matplotlib.ticker import MaxNLocator, AutoMinorLocator
 
 
-class Plot(tod_task.TaskTimestream):
+class Plot(timestream_task.TimestreamTask):
     """Waterfall plot for Timestream.
 
     This task plots the waterfall (i.e., visibility as a function of time
     and frequency) of the visibility
     for each baseline (and also each polarization if the input data is a
-    :class:`~tlpipe.timestream.timestream.Timestream` instead of a
-    :class:`~tlpipe.timestream.raw_timestream.RawTimestream`).
+    :class:`~tlpipe.container.timestream.Timestream` instead of a
+    :class:`~tlpipe.container.raw_timestream.RawTimestream`).
 
     """
 

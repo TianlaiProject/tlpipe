@@ -8,10 +8,10 @@ Inheritance diagram
 
 """
 
-import tod_task
+import timestream_task
 
 
-class Subdata(tod_task.TaskTimestream):
+class Subdata(timestream_task.TimestreamTask):
     """Choose a subset of the data in the data container.
 
     You can use this task to choose a subset of time, frequency, polarization

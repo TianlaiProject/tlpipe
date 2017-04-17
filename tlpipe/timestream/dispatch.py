@@ -11,13 +11,13 @@ Inheritance diagram
 import itertools
 import numpy as np
 import h5py
-import tod_task
+import timestream_task
 from tlpipe.core import constants as const
 
 from caput import mpiutil
 
 
-class Dispatch(tod_task.TaskTimestream):
+class Dispatch(timestream_task.TimestreamTask):
     """Dispatch data.
 
     This task will (maybe iteratively) load data from the input data files
@@ -25,7 +25,7 @@ class Dispatch(tod_task.TaskTimestream):
     selection). If work iteratively, data will be iteratively loaded according
     to the time unit set in the input pipe file, and the loaded data (contained
     in a data container which is a
-    :class:`~tlpipe.timestream.raw_timestream.RawTimestream` object) will be
+    :class:`~tlpipe.container.raw_timestream.RawTimestream` object) will be
     dispatched to other tasks to be further processed.
 
     .. note::
@@ -261,6 +261,6 @@ class Dispatch(tod_task.TaskTimestream):
 
     def process(self, rt):
         """Return loaded data as a
-        :class:`~tlpipe.timestream.raw_timestream.RawTimestream` object."""
+        :class:`~tlpipe.container.raw_timestream.RawTimestream` object."""
 
         return super(Dispatch, self).process(rt)

@@ -9,13 +9,13 @@ Inheritance diagram
 """
 
 import numpy as np
-import tod_task
-from timestream import Timestream
+import timestream_task
+from tlpipe.container.timestream import Timestream
 from caput import mpiutil
 from caput import mpiarray
 
 
-class Accum(tod_task.TaskTimestream):
+class Accum(timestream_task.TimestreamTask):
     """Accumulate data.
 
     This task accumulates data abserved in different (sidereal) days

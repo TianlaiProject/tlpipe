@@ -10,12 +10,12 @@ Inheritance diagram
 
 import warnings
 import numpy as np
-import tod_task
-from raw_timestream import RawTimestream
-from timestream import Timestream
+import timestream_task
+from tlpipe.container.raw_timestream import RawTimestream
+from tlpipe.container.timestream import Timestream
 
 
-class Flag(tod_task.TaskTimestream):
+class Flag(timestream_task.TimestreamTask):
     """Exceptional values flagging along the frequency axis.
 
     This task does a very simple flagging by masking data points whose

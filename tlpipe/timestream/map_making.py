@@ -13,8 +13,8 @@ import numpy as np
 from scipy.linalg import eigh
 import h5py
 import aipy as a
-import tod_task
-from timestream import Timestream
+import timestream_task
+from tlpipe.container.timestream import Timestream
 
 from caput import mpiutil
 from caput import mpiarray
@@ -27,7 +27,7 @@ from tlpipe.map.drift.core import beamtransfer
 from tlpipe.map.drift.pipeline import timestream
 
 
-class MapMaking(tod_task.TaskTimestream):
+class MapMaking(timestream_task.TimestreamTask):
     """Initialize telescope array, average the timestream and do the map-making.
 
     This task calls the submodule :mod:`~tlpipe.map.drift` which uses the m-mode

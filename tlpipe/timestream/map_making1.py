@@ -13,7 +13,7 @@ import numpy as np
 from scipy.linalg import eigh
 import h5py
 import aipy as a
-import tod_task
+import timestream_task
 
 from caput import mpiutil
 from caput import mpiarray
@@ -26,7 +26,7 @@ from tlpipe.map.fmmode.core import beamtransfer
 from tlpipe.map.fmmode.pipeline import timestream
 
 
-class MapMaking(tod_task.TaskTimestream):
+class MapMaking(timestream_task.TimestreamTask):
     """Initialize telescope array, average the timestream and do the map-making."""
 
     params_init = {

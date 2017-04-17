@@ -9,11 +9,11 @@ Inheritance diagram
 """
 
 import numpy as np
-import tod_task
-from timestream import Timestream
+import timestream_task
+from tlpipe.container.timestream import Timestream
 
 
-class Combine(tod_task.TaskTimestream):
+class Combine(timestream_task.TimestreamTask):
     """Combine RFI masks of all four polarizations.
 
     If a sample in one polarization is flagged, the sample will be flagged

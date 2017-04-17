@@ -16,8 +16,8 @@ from scipy import optimize
 import ephem
 import h5py
 import aipy as a
-import tod_task
-from timestream import Timestream
+import timestream_task
+from tlpipe.container.timestream import Timestream
 from tlpipe.core import constants as const
 
 from caput import mpiutil
@@ -35,7 +35,7 @@ def fc(x, a, b, c, d):
     return a * np.sinc(c * (x - b)) + d
 
 
-class PsCal(tod_task.TaskTimestream):
+class PsCal(timestream_task.TimestreamTask):
     """Calibration using a strong point source.
 
     The calibration is done by using the Eigen-decomposition method.

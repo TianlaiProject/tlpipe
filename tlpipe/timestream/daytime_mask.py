@@ -9,10 +9,10 @@ Inheritance diagram
 """
 
 import numpy as np
-import tod_task
+import timestream_task
 
 
-class Mask(tod_task.TaskTimestream):
+class Mask(timestream_task.TimestreamTask):
     """Daytime data mask."""
 
     params_init = {

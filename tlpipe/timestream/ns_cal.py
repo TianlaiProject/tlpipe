@@ -12,8 +12,8 @@ import os
 from datetime import datetime
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
-import tod_task
-from raw_timestream import RawTimestream
+import timestream_task
+from tlpipe.container.raw_timestream import RawTimestream
 from tlpipe.utils.path_util import output_path
 import tlpipe.plot
 import matplotlib.pyplot as plt
@@ -21,7 +21,7 @@ import matplotlib.dates as mdates
 from matplotlib.ticker import MaxNLocator, AutoMinorLocator
 
 
-class NsCal(tod_task.TaskTimestream):
+class NsCal(timestream_task.TimestreamTask):
     """Relative phase calibration using the noise source signal.
 
     The noise source can be viewed as a near-field source, its visibility
