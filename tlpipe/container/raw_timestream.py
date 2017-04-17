@@ -4,7 +4,7 @@
 Inheritance diagram
 -------------------
 
-.. inheritance-diagram:: tlpipe.timestream.container.BasicTod tlpipe.timestream.timestream_common.TimestreamCommon RawTimestream tlpipe.timestream.timestream.Timestream
+.. inheritance-diagram:: tlpipe.container.container.BasicTod tlpipe.container.timestream_common.TimestreamCommon RawTimestream tlpipe.container.timestream.Timestream
    :parts: 2
 
 """
