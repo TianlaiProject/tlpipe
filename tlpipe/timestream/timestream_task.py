@@ -1,9 +1,9 @@
-"""Base pipeline tasks for time ordered data opteration.
+"""Base pipeline task for operating on timestream objects.
 
 Inheritance diagram
 -------------------
 
-.. inheritance-diagram:: tlpipe.pipeline.pipeline.TaskBase tlpipe.pipeline.pipeline.OneAndOne TaskTimestream
+.. inheritance-diagram:: tlpipe.pipeline.pipeline.TaskBase tlpipe.pipeline.pipeline.OneAndOne TimestreamTask
    :parts: 2
 
 """
@@ -11,9 +11,9 @@ Inheritance diagram
 from os import path
 import logging
 import h5py
-from timestream_common import TimestreamCommon
-from raw_timestream import RawTimestream
-from timestream import Timestream
+from tlpipe.container.timestream_common import TimestreamCommon
+from tlpipe.container.raw_timestream import RawTimestream
+from tlpipe.container.timestream import Timestream
 from tlpipe.utils.path_util import input_path, output_path
 from tlpipe.pipeline.pipeline import OneAndOne
 from caput import mpiutil
@@ -23,7 +23,7 @@ from caput import mpiutil
 logger = logging.getLogger(__name__)
 
 
-class TaskTimestream(OneAndOne):
+class TimestreamTask(OneAndOne):
     """Task that provides raw timestream or timestream IO and data selection operations.
 
     Provides the methods `read_input`, `read_output` and `write_output` for
@@ -31,8 +31,8 @@ class TaskTimestream(OneAndOne):
 
     This is usually used as a direct base class as those tasks that operates on
     timestream data (can be data held in both
-    :class:`~tlpipe.timestream.raw_timestream.RawTimestream` and
-    :class:`~tlpipe.timestream.timestream.Timestream`), which can determine which
+    :class:`~tlpipe.container.raw_timestream.RawTimestream` and
+    :class:`~tlpipe.container.timestream.Timestream`), which can determine which
     data container the data is being held from the *input* or from data stored in
     the input data files.
 
@@ -109,7 +109,7 @@ class TaskTimestream(OneAndOne):
                     raise ValueError('Invaid input %s, need either a RawTimestream or Timestream object' % tod)
                 tod = self.subset_select(tod)
 
-        return super(TaskTimestream, self).read_process_write(tod)
+        return super(TimestreamTask, self).read_process_write(tod)
 
     def read_input(self):
         """Method for reading time ordered data input."""
