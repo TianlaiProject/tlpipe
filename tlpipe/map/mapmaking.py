@@ -1,10 +1,10 @@
 """Module to do the map-making."""
 
 from caput import mpiutil
-from tlpipe.pipeline.pipeline import SingleBase
+from tlpipe.pipeline.pipeline import OneAndOne
 
 
-class MapMaking(SingleBase):
+class MapMaking(OneAndOne):
     """Class to do the map-making."""
 
     prefix = 'mp_'

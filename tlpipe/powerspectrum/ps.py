@@ -1,10 +1,10 @@
 """Module to estimate the power spectrum."""
 
 from caput import mpiutil
-from tlpipe.pipeline.pipeline import SingleBase
+from tlpipe.pipeline.pipeline import OneAndOne
 
 
-class Ps(SingleBase):
+class Ps(OneAndOne):
     """Module to estimate the power spectrum."""
 
     prefix = 'ps_'

@@ -1,10 +1,10 @@
 """Module to subtract the foreground."""
 
 from caput import mpiutil
-from tlpipe.pipeline.pipeline import SingleBase
+from tlpipe.pipeline.pipeline import OneAndOne
 
 
-class FgSub(SingleBase):
+class FgSub(OneAndOne):
     """Class to subtract the foreground."""
 
     prefix = 'fg_'

@@ -1,10 +1,10 @@
 """Module to do the calibration."""
 
 from caput import mpiutil
-from tlpipe.pipeline.pipeline import SingleBase
+from tlpipe.pipeline.pipeline import OneAndOne
 
 
-class Calibration(SingleBase):
+class Calibration(OneAndOne):
     """Class to do the calibration."""
 
     prefix = 'cal_'
