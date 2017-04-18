@@ -19,6 +19,7 @@ def up_sampling(a):
 
 
 def convolve(a, phi):
+    """Convolve `a` along each axis sequentially by `phi`."""
     for ax in xrange(a.ndim):
         a = convolve1d(a, phi, axis=ax, mode='reflect')
 
@@ -62,10 +63,12 @@ def starlet_transform(a, level=None, gen2=False, approx_only=False, phi=_phi):
 
 
 def starlet_smooth(a, level=None, phi=_phi):
+    """Return the smooth component of the first generation starlet transform."""
     return starlet_transform(a, level=level, gen2=False, approx_only=True, phi=phi)[0]
 
 
 def starlet_detrend(a, level=None, phi=_phi):
+    """Return the detrended component (i.e., smooth component being subtracted) of the first generation starlet transfrom."""
     return a - starlet_smooth(a, level, phi)
 
 
@@ -94,10 +97,12 @@ def multiscale_median_transform(a, level=None, scale=2, approx_only=False):
 
 
 def multiscale_median_smooth(a, level=None, scale=2):
+    """Return the smooth component of the multiscale median transform."""
     return multiscale_median_transform(a, level=level, scale=scale, approx_only=True)[0]
 
 
 def multiscale_median_detrend(a, level=None, scale=2):
+    """Return the detrended component (i.e., smooth component being subtracted) of the multiscale median transfrom."""
     return a - multiscale_median_smooth(a, level, scale)
 
 
@@ -134,10 +139,12 @@ def median_wavelet_transform(a, level=None, scale=2, tau=5.0, approx_only=False,
 
 
 def median_wavelet_smooth(a, level=None, scale=2, tau=5.0, phi=_phi):
+    """Return the smooth component of the median-wavelet transform."""
     return median_wavelet_transform(a, level=level, scale=scale, tau=tau, approx_only=True, phi=phi)[0]
 
 
 def median_wavelet_detrend(a, level=None, scale=2, tau=5.0, phi=_phi):
+    """Return the detrended component (i.e., smooth component being subtracted) of the median-wavelet transfrom."""
     return a - median_wavelet_smooth(a, level, scale, tau, phi)
 
 

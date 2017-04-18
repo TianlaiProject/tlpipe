@@ -4,18 +4,22 @@ from robust_stats import MAD
 
 
 def l0_norm(a):
+    """Return the :math:`l_0`-norm (i.e., number of non-zero elements) of an array."""
     return len(np.where(a.flatten() != 0.0)[0])
 
 
 def l1_norm(a):
+    """Return the :math:`l_1`-norm of an array."""
     return np.sum(np.abs(a))
 
 
 def truncate(a, lmbda):
+    """Hard thresholding operator, which works for both real and complex array."""
     return a * (np.abs(a) > lmbda)
 
 
 def sign(a):
+    """Sign of an array, which works for both real and complex array."""
     if np.isrealobj(a):
         return np.sign(a)
     else:
@@ -23,10 +27,12 @@ def sign(a):
 
 
 def shrink(a, lmbda):
+    """Soft thresholding operator, which works for both real and complex array."""
     return sign(a) * np.maximum(np.abs(a) - lmbda, 0.0) # work for both real and complex
 
 
 def decompose(V, rank=1, lmbda=None, threshold='hard', max_iter=100, tol=1.0e-8, check_hermitian=False, debug=False):
+    """Fixed-rank stable principal component decomposition of an Hermitian matrix."""
 
     if check_hermitian:
         if not np.allclose(V, V.T.conj()):

@@ -38,11 +38,36 @@ def fc(x, a, b, c, d):
 class PsCal(timestream_task.TimestreamTask):
     """Calibration using a strong point source.
 
-    The calibration is done by using the Eigen-decomposition method.
+    The observed visibility of a strong point source with flux :math:`S_c` is
 
-    May be more explain to this...
+    .. math:: V_{ij} &= g_i g_j^* A_i(\\hat{\\boldsymbol{n}}_0) A_j^*(\\hat{\\boldsymbol{n}}_0) S_c e^{2 \\pi i \\hat{\\boldsymbol{n}}_0 \\cdot (\\vec{\\boldsymbol{u}}_i - \\vec{\\boldsymbol{u}}_j)} \\\\
+                     &= S_c \\cdot g_i A_i(\\hat{\\boldsymbol{n}}_0) e^{2 \\pi i \\hat{\\boldsymbol{n}}_0 \\cdot \\vec{\\boldsymbol{u}}_i} \\cdot (g_j A_j(\\hat{\\boldsymbol{n}}_0) e^{2 \\pi i \\hat{\\boldsymbol{n}}_0 \\cdot \\vec{\\boldsymbol{u}}_j})^* \\\\
+                     &= S_c \\cdot G_i G_j^*,
+
+    where :math:`G_i = g_i A_i(\\hat{\\boldsymbol{n}}_0) e^{2 \\pi i \\hat{\\boldsymbol{n}}_0 \\cdot \\vec{\\boldsymbol{u}}_i}`.
+
+    In the presence of outliers and noise, we have
+
+    .. math:: \\frac{V_{ij}}{S_c} = G_i G_j^* + S_{ij} + n_{ij}.
+
+    Written in matrix form, it is
+
+    .. math:: \\frac{\\boldsymbol{\\mathbf{V}}}{S_c} = \\boldsymbol{\\mathbf{V}}_0 + \\boldsymbol{\\mathbf{S}} + \\boldsymbol{\\mathbf{N}},
+
+    where :math:`\\boldsymbol{\\mathbf{V}}_0 = \\boldsymbol{\\mathbf{G}} \\boldsymbol{\\mathbf{G}}^H`
+    is a rank 1 matrix represents the visibilities of the strong point source,
+    :math:`\\boldsymbol{\\mathbf{S}}` is a sparse matrix whose elements are outliers
+    or misssing values, and :math:`\\boldsymbol{\\mathbf{N}}` is a matrix with dense
+    small elements represents the noise.
+
+    By solve the optimization problem
+
+    .. math:: \\min_{V_0, S} \\frac{1}{2} \| V_0 + S - V \|_F^2 + \\lambda \| S \|_0
+
+    we can get :math:`V_0`, :math:`S` and :math:`N` and solve the gain.
 
     """
+
 
     params_init = {
                     'calibrator': 'cyg',
