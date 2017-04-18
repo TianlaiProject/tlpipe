@@ -86,16 +86,18 @@ class Flag(timestream_task.TimestreamTask):
 
             # flage RFI
             diff = abs_vis1 - smooth
-            mean = np.mean(diff)
-            std = np.std(diff)
-            inds = np.where(np.abs(diff - mean) > sigma*std)[0]
+            median = np.median(diff)
+            abs_diff = np.abs(diff - median)
+            mad = np.median(abs_diff) / 0.6745
+            inds = np.where(abs_diff > sigma*mad)[0] # masked inds
             if len(inds) == 0:
                 break
 
         diff = abs_vis - smooth
-        mean = np.mean(diff)
-        std = np.std(diff)
-        inds = np.where(np.abs(diff - mean) > sigma*std)[0] # masked inds
+        median = np.median(diff)
+        abs_diff = np.abs(diff - median)
+        mad = np.median(abs_diff) / 0.6745
+        inds = np.where(abs_diff > sigma*mad)[0] # masked inds
         # Addtional threshold
         # inds1 = np.where(np.abs(diff[inds]) > 1.0e-2*np.abs(smooth[inds]))[0]
         # inds = inds[inds1]

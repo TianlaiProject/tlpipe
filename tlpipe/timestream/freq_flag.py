@@ -59,7 +59,8 @@ class Flag(timestream_task.TimestreamTask):
 
         vis_abs = np.abs(np.ma.array(vis, mask=vis_mask))
         if vis_abs.count() >= freq_points:
-            mean = np.ma.mean(vis_abs)
-            std = np.ma.std(vis_abs)
-            inds = np.where(np.abs(vis_abs - mean) > sigma*std)[0] # masked inds
+            median = np.ma.median(vis_abs)
+            abs_diff = np.abs(vis_abs - median)
+            mad = np.ma.median(abs_diff) / 0.6745
+            inds = np.where(abs_diff > sigma*mad)[0] # masked inds
             vis_mask[inds] = True # set mask
