@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Timestream.is_same_pointing
+=============================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. autoattribute:: Timestream.is_same_pointing

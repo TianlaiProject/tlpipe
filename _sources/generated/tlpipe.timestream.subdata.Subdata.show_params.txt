@@ -1,0 +1,6 @@
+tlpipe.timestream.subdata.Subdata.show_params
+=============================================
+
+.. currentmodule:: tlpipe.timestream.subdata
+
+.. automethod:: Subdata.show_params

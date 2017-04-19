@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Timestream.delete_a_dataset
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. automethod:: Timestream.delete_a_dataset

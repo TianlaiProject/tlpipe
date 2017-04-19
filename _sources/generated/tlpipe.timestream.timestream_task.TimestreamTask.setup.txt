@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamTask.setup
+======================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: TimestreamTask.setup

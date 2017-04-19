@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.Timestream.local_pol
+=============================================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. autoattribute:: Timestream.local_pol

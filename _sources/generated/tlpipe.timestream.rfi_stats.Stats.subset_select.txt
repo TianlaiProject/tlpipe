@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.Stats.subset_select
+===============================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. automethod:: Stats.subset_select

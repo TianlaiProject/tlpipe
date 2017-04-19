@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Timestream.to_disk
+===============================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: Timestream.to_disk

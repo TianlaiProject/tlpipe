@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Timestream.masked_vis
+==================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. autoattribute:: Timestream.masked_vis

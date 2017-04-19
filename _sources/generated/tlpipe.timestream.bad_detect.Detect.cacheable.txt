@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Detect.cacheable
+=============================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. autoattribute:: Detect.cacheable

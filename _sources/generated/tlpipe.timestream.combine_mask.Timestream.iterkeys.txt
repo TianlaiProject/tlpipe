@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Timestream.iterkeys
+==================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. automethod:: Timestream.iterkeys

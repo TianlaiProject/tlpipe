@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamTask.read_input
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: TimestreamTask.read_input

@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.RawTimestream.flush
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: RawTimestream.flush

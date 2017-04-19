@@ -1,0 +1,6 @@
+tlpipe.container.raw_timestream.RawTimestream.load_time_ordered_attrs
+=====================================================================
+
+.. currentmodule:: tlpipe.container.raw_timestream
+
+.. automethod:: RawTimestream.load_time_ordered_attrs

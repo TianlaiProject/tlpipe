@@ -46,6 +46,7 @@ tlpipe.timestream.dispatch.Dispatch
       ~Dispatch.setup
       ~Dispatch.show_params
       ~Dispatch.stop_iteration
+      ~Dispatch.subset_select
       ~Dispatch.write_output
    
    

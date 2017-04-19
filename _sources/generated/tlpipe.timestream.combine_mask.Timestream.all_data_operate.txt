@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Timestream.all_data_operate
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. automethod:: Timestream.all_data_operate

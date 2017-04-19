@@ -1,0 +1,6 @@
+tlpipe.container.container.BasicTod.copy
+========================================
+
+.. currentmodule:: tlpipe.container.container
+
+.. automethod:: BasicTod.copy

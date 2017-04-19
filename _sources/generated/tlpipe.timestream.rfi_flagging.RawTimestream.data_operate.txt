@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.RawTimestream.data_operate
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. automethod:: RawTimestream.data_operate

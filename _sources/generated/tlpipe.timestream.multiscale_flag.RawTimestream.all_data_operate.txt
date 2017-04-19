@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.RawTimestream.all_data_operate
+================================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: RawTimestream.all_data_operate

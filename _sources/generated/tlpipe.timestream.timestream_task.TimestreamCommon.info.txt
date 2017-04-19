@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamCommon.info
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: TimestreamCommon.info

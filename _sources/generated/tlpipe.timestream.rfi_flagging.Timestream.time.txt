@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.Timestream.time
+==============================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. autoattribute:: Timestream.time

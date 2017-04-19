@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.Timestream.bl_data_operate
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. automethod:: Timestream.bl_data_operate

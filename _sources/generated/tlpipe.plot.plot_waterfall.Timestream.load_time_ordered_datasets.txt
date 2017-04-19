@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Timestream.load_time_ordered_datasets
+================================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: Timestream.load_time_ordered_datasets

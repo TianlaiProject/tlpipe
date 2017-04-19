@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.RawTimestream.apply_mask
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: RawTimestream.apply_mask

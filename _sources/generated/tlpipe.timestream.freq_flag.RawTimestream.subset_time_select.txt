@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.RawTimestream.subset_time_select
+============================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: RawTimestream.subset_time_select

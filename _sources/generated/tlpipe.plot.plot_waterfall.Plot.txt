@@ -47,6 +47,7 @@ tlpipe.plot.plot_waterfall.Plot
       ~Plot.setup
       ~Plot.show_params
       ~Plot.stop_iteration
+      ~Plot.subset_select
       ~Plot.write_output
    
    

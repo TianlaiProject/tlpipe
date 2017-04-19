@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamCommon.is_same_pointing
+===================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. autoattribute:: TimestreamCommon.is_same_pointing

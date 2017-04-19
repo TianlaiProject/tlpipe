@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Flag.params_init
+==================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. autoattribute:: Flag.params_init

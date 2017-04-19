@@ -1,0 +1,6 @@
+tlpipe.timestream.sir_operate.Sir.stop_iteration
+================================================
+
+.. currentmodule:: tlpipe.timestream.sir_operate
+
+.. automethod:: Sir.stop_iteration

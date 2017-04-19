@@ -1,0 +1,6 @@
+tlpipe.timestream.subdata.Subdata.cacheable
+===========================================
+
+.. currentmodule:: tlpipe.timestream.subdata
+
+.. autoattribute:: Subdata.cacheable

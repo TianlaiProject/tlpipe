@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Timestream.subset_select
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: Timestream.subset_select

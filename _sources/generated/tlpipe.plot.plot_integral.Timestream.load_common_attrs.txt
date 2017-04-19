@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.load_common_attrs
+======================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Timestream.load_common_attrs

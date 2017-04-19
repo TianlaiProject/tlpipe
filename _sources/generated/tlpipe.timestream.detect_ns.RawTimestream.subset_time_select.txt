@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.RawTimestream.subset_time_select
+============================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: RawTimestream.subset_time_select

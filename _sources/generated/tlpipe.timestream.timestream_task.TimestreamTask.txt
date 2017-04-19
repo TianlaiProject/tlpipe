@@ -1,0 +1,52 @@
+tlpipe.timestream.timestream_task.TimestreamTask
+================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. autoclass:: TimestreamTask
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~TimestreamTask.cacheable
+      ~TimestreamTask.embarrassingly_parallelizable
+      ~TimestreamTask.history
+      ~TimestreamTask.iteration
+      ~TimestreamTask.params_init
+      ~TimestreamTask.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~TimestreamTask.cast_input
+      ~TimestreamTask.copy_input
+      ~TimestreamTask.data_select
+      ~TimestreamTask.finish
+      ~TimestreamTask.next
+      ~TimestreamTask.process
+      ~TimestreamTask.read_input
+      ~TimestreamTask.read_output
+      ~TimestreamTask.read_process_write
+      ~TimestreamTask.restart_iteration
+      ~TimestreamTask.setup
+      ~TimestreamTask.show_params
+      ~TimestreamTask.stop_iteration
+      ~TimestreamTask.subset_select
+      ~TimestreamTask.write_output
+   
+   

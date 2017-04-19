@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Timestream.stokes2lin
+==================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: Timestream.stokes2lin

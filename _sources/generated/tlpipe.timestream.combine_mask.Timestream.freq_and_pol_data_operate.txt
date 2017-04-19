@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Timestream.freq_and_pol_data_operate
+===================================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. automethod:: Timestream.freq_and_pol_data_operate

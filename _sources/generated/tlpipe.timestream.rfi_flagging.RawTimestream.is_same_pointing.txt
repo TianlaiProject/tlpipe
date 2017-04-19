@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.RawTimestream.is_same_pointing
+=============================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. autoattribute:: RawTimestream.is_same_pointing

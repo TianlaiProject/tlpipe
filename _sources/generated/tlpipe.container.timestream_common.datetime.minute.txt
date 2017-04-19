@@ -1,0 +1,6 @@
+tlpipe.container.timestream_common.datetime.minute
+==================================================
+
+.. currentmodule:: tlpipe.container.timestream_common
+
+.. autoattribute:: datetime.minute

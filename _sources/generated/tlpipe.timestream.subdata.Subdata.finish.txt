@@ -1,0 +1,6 @@
+tlpipe.timestream.subdata.Subdata.finish
+========================================
+
+.. currentmodule:: tlpipe.timestream.subdata
+
+.. automethod:: Subdata.finish

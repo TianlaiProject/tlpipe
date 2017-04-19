@@ -46,6 +46,7 @@ tlpipe.timestream.daytime_mask.Mask
       ~Mask.setup
       ~Mask.show_params
       ~Mask.stop_iteration
+      ~Mask.subset_select
       ~Mask.write_output
    
    

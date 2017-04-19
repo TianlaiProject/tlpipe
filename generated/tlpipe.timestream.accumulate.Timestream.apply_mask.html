@@ -35,7 +35,7 @@
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="tlpipe 0.1 documentation" href="../index.html"/>
         <link rel="up" title="tlpipe.timestream.accumulate.Timestream" href="tlpipe.timestream.accumulate.Timestream.html"/>
-        <link rel="next" title="tlpipe.timestream.accumulate.Timestream.attrs_name_allowed" href="tlpipe.timestream.accumulate.Timestream.attrs_name_allowed.html"/>
+        <link rel="next" title="tlpipe.timestream.accumulate.Timestream.bl_data_operate" href="tlpipe.timestream.accumulate.Timestream.bl_data_operate.html"/>
         <link rel="prev" title="tlpipe.timestream.accumulate.Timestream.all_data_operate" href="tlpipe.timestream.accumulate.Timestream.all_data_operate.html"/> 
 
   
@@ -92,7 +92,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-iterative-pipeline">Non-iterative pipeline</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../tutor.html#iterative-pipeline">Iterative pipeline</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-trivial-control-flow">Non-trivial control flow</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../tutor.html#executing-several-times-a-same-task">Executing several times a same task</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#execute-several-times-a-same-task">Execute several times a same task</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../tutor.html#save-intermediate-data">Save intermediate data</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../tutor.html#recovery-from-intermediate-data">Recovery from intermediate data</a></li>
 </ul>
@@ -173,32 +173,35 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1 current"><a class="reference internal" href="../timestream.html"><code class="docutils literal"><span class="pre">timestream</span></code> &#8211; Timestream data containers and operating tasks</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../timestream.html#data-containers">Data containers</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.container.html">tlpipe.timestream.container</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.container.check_axis.html">tlpipe.timestream.container.check_axis</a></li>
-<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.container.deepcopy.html">tlpipe.timestream.container.deepcopy</a></li>
-<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.container.ensure_file_list.html">tlpipe.timestream.container.ensure_file_list</a></li>
-<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.container.BasicTod.html">tlpipe.timestream.container.BasicTod</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../container.html"><code class="docutils literal"><span class="pre">container</span></code> &#8211; Timestream data containers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../container.html#data-containers">Data containers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.container.container.html">tlpipe.container.container</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.container.container.check_axis.html">tlpipe.container.container.check_axis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.container.container.deepcopy.html">tlpipe.container.container.deepcopy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.container.container.ensure_file_list.html">tlpipe.container.container.ensure_file_list</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.container.container.BasicTod.html">tlpipe.container.container.BasicTod</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.timestream_common.html">tlpipe.timestream.timestream_common</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.timestream_common.html#inheritance-diagram">Inheritance diagram</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.container.timestream_common.html">tlpipe.container.timestream_common</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.container.timestream_common.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.raw_timestream.html">tlpipe.timestream.raw_timestream</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.raw_timestream.html#inheritance-diagram">Inheritance diagram</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.container.raw_timestream.html">tlpipe.container.raw_timestream</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.container.raw_timestream.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.timestream.html">tlpipe.timestream.timestream</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.timestream.html#inheritance-diagram">Inheritance diagram</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.container.timestream.html">tlpipe.container.timestream</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.container.timestream.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../timestream.html"><code class="docutils literal"><span class="pre">timestream</span></code> &#8211; Timestream operating tasks</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../timestream.html#timestream-base-task">Timestream base task</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.tod_task.html">tlpipe.timestream.tod_task</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.tod_task.html#inheritance-diagram">Inheritance diagram</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.timestream_task.html">tlpipe.timestream.timestream_task</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.timestream_task.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
 </ul>
@@ -212,6 +215,10 @@
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.detect_ns.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.rfi_flagging.html">tlpipe.timestream.rfi_flagging</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.rfi_flagging.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.line_rfi.html">tlpipe.timestream.line_rfi</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.line_rfi.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
@@ -222,6 +229,30 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.freq_flag.html">tlpipe.timestream.freq_flag</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.freq_flag.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.multiscale_flag.html">tlpipe.timestream.multiscale_flag</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.multiscale_flag.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.combine_mask.html">tlpipe.timestream.combine_mask</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.combine_mask.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.sir_operate.html">tlpipe.timestream.sir_operate</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.sir_operate.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.rfi_stats.html">tlpipe.timestream.rfi_stats</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.rfi_stats.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.subdata.html">tlpipe.timestream.subdata</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.subdata.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.bad_detect.html">tlpipe.timestream.bad_detect</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.bad_detect.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ns_cal.html">tlpipe.timestream.ns_cal</a><ul>
@@ -282,14 +313,6 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.map_making.html">tlpipe.timestream.map_making</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.map_making.html#inheritance-diagram">Inheritance diagram</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../timestream.html#utilities">Utilities</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.sg_filter.html">tlpipe.timestream.sg_filter</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.sg_filter.factorial.html">tlpipe.timestream.sg_filter.factorial</a></li>
-<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.sg_filter.savitzky_golay.html">tlpipe.timestream.sg_filter.savitzky_golay</a></li>
 </ul>
 </li>
 </ul>
@@ -360,15 +383,6 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../rfi.html#utilities">Utilities</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.winsorized_stats.html">tlpipe.rfi.winsorized_stats</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.winsorized_stats.winsorize.html">tlpipe.rfi.winsorized_stats.winsorize</a></li>
-<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.winsorized_stats.winsorized_mean_and_std.html">tlpipe.rfi.winsorized_stats.winsorized_mean_and_std</a></li>
-<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.winsorized_stats.winsorized_mode.html">tlpipe.rfi.winsorized_stats.winsorized_mode</a></li>
-</ul>
-</li>
-</ul>
-</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../cal.html"><code class="docutils literal"><span class="pre">cal</span></code> &#8211; Calibration</a></li>
@@ -390,10 +404,6 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="tlpipe.plot.plot_waterfall.html">tlpipe.plot.plot_waterfall</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_waterfall.html#inheritance-diagram">Inheritance diagram</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="tlpipe.plot.plot_gain.html">tlpipe.plot.plot_gain</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_gain.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
 </ul>
@@ -420,6 +430,51 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.pickle_util.html">tlpipe.utils.pickle_util</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.pickle_util.get_value.html">tlpipe.utils.pickle_util.get_value</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.robust_stats.html">tlpipe.utils.robust_stats</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.robust_stats.MAD.html">tlpipe.utils.robust_stats.MAD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.robust_stats.mad.html">tlpipe.utils.robust_stats.mad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.robust_stats.winsorize.html">tlpipe.utils.robust_stats.winsorize</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.robust_stats.winsorized_mean_and_std.html">tlpipe.utils.robust_stats.winsorized_mean_and_std</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.robust_stats.winsorized_mode.html">tlpipe.utils.robust_stats.winsorized_mode</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.sg_filter.html">tlpipe.utils.sg_filter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.sg_filter.factorial.html">tlpipe.utils.sg_filter.factorial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.sg_filter.savitzky_golay.html">tlpipe.utils.sg_filter.savitzky_golay</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.rpca_decomp.html">tlpipe.utils.rpca_decomp</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.MAD.html">tlpipe.utils.rpca_decomp.MAD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.decompose.html">tlpipe.utils.rpca_decomp.decompose</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.l0_norm.html">tlpipe.utils.rpca_decomp.l0_norm</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.l1_norm.html">tlpipe.utils.rpca_decomp.l1_norm</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.shrink.html">tlpipe.utils.rpca_decomp.shrink</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.sign.html">tlpipe.utils.rpca_decomp.sign</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.truncate.html">tlpipe.utils.rpca_decomp.truncate</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.multiscale.html">tlpipe.utils.multiscale</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.MAD.html">tlpipe.utils.multiscale.MAD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.convolve.html">tlpipe.utils.multiscale.convolve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.convolve1d.html">tlpipe.utils.multiscale.convolve1d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.median_filter.html">tlpipe.utils.multiscale.median_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.median_wavelet_detrend.html">tlpipe.utils.multiscale.median_wavelet_detrend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.median_wavelet_smooth.html">tlpipe.utils.multiscale.median_wavelet_smooth</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.median_wavelet_transform.html">tlpipe.utils.multiscale.median_wavelet_transform</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.multiscale_median_detrend.html">tlpipe.utils.multiscale.multiscale_median_detrend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.multiscale_median_flag.html">tlpipe.utils.multiscale.multiscale_median_flag</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.multiscale_median_smooth.html">tlpipe.utils.multiscale.multiscale_median_smooth</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.multiscale_median_transform.html">tlpipe.utils.multiscale.multiscale_median_transform</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.starlet_detrend.html">tlpipe.utils.multiscale.starlet_detrend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.starlet_smooth.html">tlpipe.utils.multiscale.starlet_smooth</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.starlet_transform.html">tlpipe.utils.multiscale.starlet_transform</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.up_sampling.html">tlpipe.utils.multiscale.up_sampling</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.hist_eq.html">tlpipe.utils.hist_eq</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.hist_eq.hist_eq.html">tlpipe.utils.hist_eq.hist_eq</a></li>
 </ul>
 </li>
 </ul>
@@ -450,7 +505,7 @@
   <ul class="wy-breadcrumbs">
     <li><a href="../index.html">Docs</a> &raquo;</li>
       
-          <li><a href="../timestream.html"><code class="docutils literal"><span class="pre">timestream</span></code> &#8211; Timestream data containers and operating tasks</a> &raquo;</li>
+          <li><a href="../timestream.html"><code class="docutils literal"><span class="pre">timestream</span></code> &#8211; Timestream operating tasks</a> &raquo;</li>
       
           <li><a href="tlpipe.timestream.accumulate.html">tlpipe.timestream.accumulate</a> &raquo;</li>
       
@@ -473,7 +528,7 @@
 <h1>tlpipe.timestream.accumulate.Timestream.apply_mask<a class="headerlink" href="#tlpipe-timestream-accumulate-timestream-apply-mask" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
 <dt id="tlpipe.timestream.accumulate.Timestream.apply_mask">
-<code class="descclassname">Timestream.</code><code class="descname">apply_mask</code><span class="sig-paren">(</span><em>fill_val=(nan+nanj)</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/timestream/timestream_common.py#L348"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.accumulate.Timestream.apply_mask" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">Timestream.</code><code class="descname">apply_mask</code><span class="sig-paren">(</span><em>fill_val=(nan+nanj)</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/container/timestream_common.py#L377"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.accumulate.Timestream.apply_mask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Applying <cite>vis_mask</cite> to <cite>vis</cite> with the <cite>fill_val</cite>.</p>
 <p>NOTE: This is a non-invertible operation to the dataset <cite>vis</cite>, as its
 values corresponding to True of <cite>vis_mask</cite> will be replaced by <cite>fill_val</cite>
@@ -488,7 +543,7 @@ and lost. Usually you may prefer to use <a class="reference internal" href="tlpi
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="tlpipe.timestream.accumulate.Timestream.attrs_name_allowed.html" class="btn btn-neutral float-right" title="tlpipe.timestream.accumulate.Timestream.attrs_name_allowed" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="tlpipe.timestream.accumulate.Timestream.bl_data_operate.html" class="btn btn-neutral float-right" title="tlpipe.timestream.accumulate.Timestream.bl_data_operate" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="tlpipe.timestream.accumulate.Timestream.all_data_operate.html" class="btn btn-neutral" title="tlpipe.timestream.accumulate.Timestream.all_data_operate" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>

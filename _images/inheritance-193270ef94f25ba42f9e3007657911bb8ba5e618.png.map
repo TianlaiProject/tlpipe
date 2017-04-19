@@ -1,0 +1,6 @@
+<map id="inheritance30b559d8f1" name="inheritance30b559d8f1">
+<area shape="rect" id="node1" href="tlpipe.pipeline.pipeline.OneAndOne.html#tlpipe.pipeline.pipeline.OneAndOne" target="_top" title="Base class for tasks that have (at most) one input and one output." alt="" coords="53,83,211,111"/>
+<area shape="rect" id="node5" href="tlpipe.timestream.timestream_task.TimestreamTask.html#tlpipe.timestream.timestream_task.TimestreamTask" target="_top" title="Task that provides raw timestream or timestream IO and data selection operations." alt="" coords="5,161,259,189"/>
+<area shape="rect" id="node2" href="tlpipe.pipeline.pipeline.TaskBase.html#tlpipe.pipeline.pipeline.TaskBase" target="_top" title="Base class for all pipeline tasks." alt="" coords="63,6,201,34"/>
+<area shape="rect" id="node4" href="tlpipe.timestream.re_order.ReOrder.html#tlpipe.timestream.re_order.ReOrder" target="_top" title="Re&#45;order data to have longitude from 0 to 2pi." alt="" coords="64,238,200,266"/>
+</map>

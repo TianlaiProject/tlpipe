@@ -1,0 +1,6 @@
+tlpipe.container.timestream_common.datetime.fromordinal
+=======================================================
+
+.. currentmodule:: tlpipe.container.timestream_common
+
+.. automethod:: datetime.fromordinal

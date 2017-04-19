@@ -1,0 +1,6 @@
+tlpipe.container.timestream.Timestream.subset
+=============================================
+
+.. currentmodule:: tlpipe.container.timestream
+
+.. automethod:: Timestream.subset

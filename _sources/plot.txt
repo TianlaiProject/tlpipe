@@ -14,4 +14,3 @@ Plotting tasks
    plot_integral
    plot_slice
    plot_waterfall
-   plot_gain

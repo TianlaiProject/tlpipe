@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.Timestream.time_data_operate
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. automethod:: Timestream.time_data_operate

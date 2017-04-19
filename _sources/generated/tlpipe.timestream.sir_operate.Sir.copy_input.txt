@@ -1,0 +1,6 @@
+tlpipe.timestream.sir_operate.Sir.copy_input
+============================================
+
+.. currentmodule:: tlpipe.timestream.sir_operate
+
+.. automethod:: Sir.copy_input

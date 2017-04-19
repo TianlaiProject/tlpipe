@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.RawTimestream.subset
+===================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. automethod:: RawTimestream.subset

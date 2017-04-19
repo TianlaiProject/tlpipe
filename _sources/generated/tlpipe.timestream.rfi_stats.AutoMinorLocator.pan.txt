@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.AutoMinorLocator.pan
+================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. automethod:: AutoMinorLocator.pan

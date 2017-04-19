@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.datetime.timetz
+===========================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. automethod:: datetime.timetz

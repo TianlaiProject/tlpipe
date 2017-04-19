@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.RawTimestream.load_main_axes_ordered_data
+===========================================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: RawTimestream.load_main_axes_ordered_data

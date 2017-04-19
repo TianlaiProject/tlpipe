@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.RawTimestream.is_continuous
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. autoattribute:: RawTimestream.is_continuous

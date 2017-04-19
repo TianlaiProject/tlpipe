@@ -1,0 +1,53 @@
+tlpipe.timestream.sir_operate.Sir
+=================================
+
+.. currentmodule:: tlpipe.timestream.sir_operate
+
+.. autoclass:: Sir
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Sir.cacheable
+      ~Sir.embarrassingly_parallelizable
+      ~Sir.history
+      ~Sir.iteration
+      ~Sir.params_init
+      ~Sir.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Sir.cast_input
+      ~Sir.copy_input
+      ~Sir.data_select
+      ~Sir.finish
+      ~Sir.next
+      ~Sir.operate
+      ~Sir.process
+      ~Sir.read_input
+      ~Sir.read_output
+      ~Sir.read_process_write
+      ~Sir.restart_iteration
+      ~Sir.setup
+      ~Sir.show_params
+      ~Sir.stop_iteration
+      ~Sir.subset_select
+      ~Sir.write_output
+   
+   

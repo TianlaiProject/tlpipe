@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.Timestream.add_history
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. automethod:: Timestream.add_history

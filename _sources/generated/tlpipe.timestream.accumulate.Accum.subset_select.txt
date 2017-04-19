@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Accum.subset_select
+================================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Accum.subset_select

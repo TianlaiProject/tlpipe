@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.MapMaking.subset_select
+====================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: MapMaking.subset_select

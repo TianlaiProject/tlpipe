@@ -1,0 +1,6 @@
+tlpipe.utils.rpca_decomp.truncate
+=================================
+
+.. currentmodule:: tlpipe.utils.rpca_decomp
+
+.. autofunction:: truncate

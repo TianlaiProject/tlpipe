@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.Timestream.subset_polarization_select
+=================================================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. automethod:: Timestream.subset_polarization_select

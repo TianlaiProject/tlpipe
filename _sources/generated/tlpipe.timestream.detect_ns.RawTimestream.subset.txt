@@ -1,0 +1,6 @@
+tlpipe.timestream.detect_ns.RawTimestream.subset
+================================================
+
+.. currentmodule:: tlpipe.timestream.detect_ns
+
+.. automethod:: RawTimestream.subset

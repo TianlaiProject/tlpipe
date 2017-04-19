@@ -1,0 +1,27 @@
+tlpipe.timestream.bad_detect
+============================
+
+.. automodule:: tlpipe.timestream.bad_detect
+
+   
+   
+   
+
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      Detect
+      RawTimestream
+      Timestream
+   
+   
+
+
+   
+   
+   

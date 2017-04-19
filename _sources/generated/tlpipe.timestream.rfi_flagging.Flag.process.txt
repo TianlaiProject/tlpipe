@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.Flag.process
+===========================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. automethod:: Flag.process

@@ -1,0 +1,6 @@
+tlpipe.timestream.sir_operate.Sir.show_params
+=============================================
+
+.. currentmodule:: tlpipe.timestream.sir_operate
+
+.. automethod:: Sir.show_params

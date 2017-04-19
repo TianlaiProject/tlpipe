@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.Timestream.copy
+=================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: Timestream.copy

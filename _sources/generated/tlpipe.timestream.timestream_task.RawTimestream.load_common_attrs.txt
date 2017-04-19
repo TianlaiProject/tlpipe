@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.RawTimestream.load_common_attrs
+=================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: RawTimestream.load_common_attrs

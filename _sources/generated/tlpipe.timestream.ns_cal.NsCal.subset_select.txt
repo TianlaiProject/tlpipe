@@ -1,0 +1,6 @@
+tlpipe.timestream.ns_cal.NsCal.subset_select
+============================================
+
+.. currentmodule:: tlpipe.timestream.ns_cal
+
+.. automethod:: NsCal.subset_select

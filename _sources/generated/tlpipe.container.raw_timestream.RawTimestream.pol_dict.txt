@@ -1,0 +1,6 @@
+tlpipe.container.raw_timestream.RawTimestream.pol_dict
+======================================================
+
+.. currentmodule:: tlpipe.container.raw_timestream
+
+.. autoattribute:: RawTimestream.pol_dict

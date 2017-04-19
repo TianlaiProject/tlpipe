@@ -10,8 +10,8 @@ tlpipe.timestream.ps_cal
    .. autosummary::
       :toctree:
    
-      cal
-      eigh
+      fc
+      fg
       output_path
    
    
@@ -25,6 +25,7 @@ tlpipe.timestream.ps_cal
       :toctree:
    
       PsCal
+      Timestream
    
    
 

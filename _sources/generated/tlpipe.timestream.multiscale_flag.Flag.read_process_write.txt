@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Flag.read_process_write
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: Flag.read_process_write

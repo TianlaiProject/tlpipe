@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Timestream.local_pol
+======================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. autoattribute:: Timestream.local_pol

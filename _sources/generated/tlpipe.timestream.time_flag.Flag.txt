@@ -47,6 +47,7 @@ tlpipe.timestream.time_flag.Flag
       ~Flag.setup
       ~Flag.show_params
       ~Flag.stop_iteration
+      ~Flag.subset_select
       ~Flag.write_output
    
    

@@ -1,0 +1,6 @@
+tlpipe.utils.multiscale.starlet_transform
+=========================================
+
+.. currentmodule:: tlpipe.utils.multiscale
+
+.. autofunction:: starlet_transform

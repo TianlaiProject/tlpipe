@@ -1,0 +1,35 @@
+tlpipe.timestream.rfi_stats
+===========================
+
+.. automodule:: tlpipe.timestream.rfi_stats
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      output_path
+   
+   
+
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      AutoMinorLocator
+      MaxNLocator
+      Stats
+      datetime
+   
+   
+
+
+   
+   
+   

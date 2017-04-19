@@ -1,0 +1,6 @@
+tlpipe.container.container.BasicTod.subset_select
+=================================================
+
+.. currentmodule:: tlpipe.container.container
+
+.. automethod:: BasicTod.subset_select

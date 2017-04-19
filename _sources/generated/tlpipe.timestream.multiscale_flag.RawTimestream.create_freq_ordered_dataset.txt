@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.RawTimestream.create_freq_ordered_dataset
+===========================================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: RawTimestream.create_freq_ordered_dataset

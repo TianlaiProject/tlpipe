@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Combine.data_select
+==================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. automethod:: Combine.data_select

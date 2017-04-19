@@ -1,0 +1,6 @@
+tlpipe.container.timestream_common.datetime.astimezone
+======================================================
+
+.. currentmodule:: tlpipe.container.timestream_common
+
+.. automethod:: datetime.astimezone

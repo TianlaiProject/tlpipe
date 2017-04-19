@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.RawTimestream.subset_select
+=====================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: RawTimestream.subset_select

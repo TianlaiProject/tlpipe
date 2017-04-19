@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.datetime.tzinfo
+===========================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. autoattribute:: datetime.tzinfo

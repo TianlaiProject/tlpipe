@@ -1,0 +1,52 @@
+tlpipe.timestream.subdata.Subdata
+=================================
+
+.. currentmodule:: tlpipe.timestream.subdata
+
+.. autoclass:: Subdata
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Subdata.cacheable
+      ~Subdata.embarrassingly_parallelizable
+      ~Subdata.history
+      ~Subdata.iteration
+      ~Subdata.params_init
+      ~Subdata.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Subdata.cast_input
+      ~Subdata.copy_input
+      ~Subdata.data_select
+      ~Subdata.finish
+      ~Subdata.next
+      ~Subdata.process
+      ~Subdata.read_input
+      ~Subdata.read_output
+      ~Subdata.read_process_write
+      ~Subdata.restart_iteration
+      ~Subdata.setup
+      ~Subdata.show_params
+      ~Subdata.stop_iteration
+      ~Subdata.subset_select
+      ~Subdata.write_output
+   
+   

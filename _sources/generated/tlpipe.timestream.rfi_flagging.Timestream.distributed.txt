@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.Timestream.distributed
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. autoattribute:: Timestream.distributed

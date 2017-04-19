@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.RawTimestream.ondisk
+=================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. autoattribute:: RawTimestream.ondisk

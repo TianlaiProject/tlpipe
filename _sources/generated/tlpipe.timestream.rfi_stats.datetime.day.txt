@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.datetime.day
+========================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. autoattribute:: datetime.day

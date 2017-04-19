@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Timestream.is_cylinder
+===================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. autoattribute:: Timestream.is_cylinder

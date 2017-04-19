@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.RawTimestream.is_dish
+==================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. autoattribute:: RawTimestream.is_dish

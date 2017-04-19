@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.Timestream.freq_and_bl_data_operate
+============================================================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. automethod:: Timestream.freq_and_bl_data_operate

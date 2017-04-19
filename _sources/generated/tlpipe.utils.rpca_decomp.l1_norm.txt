@@ -1,0 +1,6 @@
+tlpipe.utils.rpca_decomp.l1_norm
+================================
+
+.. currentmodule:: tlpipe.utils.rpca_decomp
+
+.. autofunction:: l1_norm

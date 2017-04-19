@@ -1,0 +1,6 @@
+tlpipe.timestream.sir_operate.Sir.cast_input
+============================================
+
+.. currentmodule:: tlpipe.timestream.sir_operate
+
+.. automethod:: Sir.cast_input

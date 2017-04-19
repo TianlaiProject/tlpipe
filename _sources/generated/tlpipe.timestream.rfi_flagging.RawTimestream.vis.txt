@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.RawTimestream.vis
+================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. autoattribute:: RawTimestream.vis

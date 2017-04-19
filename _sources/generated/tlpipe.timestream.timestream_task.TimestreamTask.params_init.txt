@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamTask.params_init
+============================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. autoattribute:: TimestreamTask.params_init

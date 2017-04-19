@@ -1,0 +1,6 @@
+tlpipe.container.container.BasicTod.create_group
+================================================
+
+.. currentmodule:: tlpipe.container.container
+
+.. automethod:: BasicTod.create_group

@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamTask.cacheable
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. autoattribute:: TimestreamTask.cacheable

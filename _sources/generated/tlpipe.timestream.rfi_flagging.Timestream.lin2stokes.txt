@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.Timestream.lin2stokes
+====================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. automethod:: Timestream.lin2stokes

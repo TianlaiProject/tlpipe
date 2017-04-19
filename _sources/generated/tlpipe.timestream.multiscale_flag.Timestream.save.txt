@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Timestream.save
+=================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: Timestream.save

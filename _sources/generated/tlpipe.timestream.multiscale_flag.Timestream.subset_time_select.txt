@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Timestream.subset_time_select
+===============================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: Timestream.subset_time_select

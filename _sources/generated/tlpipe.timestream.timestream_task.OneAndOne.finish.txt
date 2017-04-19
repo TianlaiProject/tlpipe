@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.OneAndOne.finish
+==================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: OneAndOne.finish

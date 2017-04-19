@@ -1,0 +1,6 @@
+tlpipe.container.raw_timestream.RawTimestream.create_bl_ordered_dataset
+=======================================================================
+
+.. currentmodule:: tlpipe.container.raw_timestream
+
+.. automethod:: RawTimestream.create_bl_ordered_dataset

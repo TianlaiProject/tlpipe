@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.load_common_attrs
+========================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Timestream.load_common_attrs

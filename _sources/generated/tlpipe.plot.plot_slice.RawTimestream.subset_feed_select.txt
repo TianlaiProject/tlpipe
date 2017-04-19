@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.RawTimestream.subset_feed_select
+=======================================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: RawTimestream.subset_feed_select

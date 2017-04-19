@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.Timestream.delete_an_attribute
+================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: Timestream.delete_an_attribute

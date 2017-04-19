@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Detect.prefix
+==========================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. autoattribute:: Detect.prefix

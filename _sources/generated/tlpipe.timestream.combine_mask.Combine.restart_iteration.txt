@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Combine.restart_iteration
+========================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. automethod:: Combine.restart_iteration

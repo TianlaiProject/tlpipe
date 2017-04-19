@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.load_main_axes_excl_main_data
+=====================================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: Timestream.load_main_axes_excl_main_data

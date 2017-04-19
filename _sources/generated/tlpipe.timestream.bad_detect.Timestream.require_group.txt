@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Timestream.require_group
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: Timestream.require_group

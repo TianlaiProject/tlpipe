@@ -47,6 +47,7 @@ tlpipe.plot.plot_integral.Plot
       ~Plot.setup
       ~Plot.show_params
       ~Plot.stop_iteration
+      ~Plot.subset_select
       ~Plot.write_output
    
    

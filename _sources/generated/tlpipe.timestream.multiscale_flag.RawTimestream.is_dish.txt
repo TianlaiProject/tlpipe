@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.RawTimestream.is_dish
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. autoattribute:: RawTimestream.is_dish

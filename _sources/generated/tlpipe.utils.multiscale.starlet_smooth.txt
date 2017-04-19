@@ -1,0 +1,6 @@
+tlpipe.utils.multiscale.starlet_smooth
+======================================
+
+.. currentmodule:: tlpipe.utils.multiscale
+
+.. autofunction:: starlet_smooth

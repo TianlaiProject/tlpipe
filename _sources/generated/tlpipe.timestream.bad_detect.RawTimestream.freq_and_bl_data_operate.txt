@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.RawTimestream.freq_and_bl_data_operate
+===================================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: RawTimestream.freq_and_bl_data_operate

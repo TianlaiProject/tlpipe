@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.Timestream.load_main_axes_excl_main_data
+=================================================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: Timestream.load_main_axes_excl_main_data

@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.RawTimestream.pol_dict
+========================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. autoattribute:: RawTimestream.pol_dict

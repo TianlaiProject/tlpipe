@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.Timestream.create_time_and_bl_ordered_dataset
+============================================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. automethod:: Timestream.create_time_and_bl_ordered_dataset

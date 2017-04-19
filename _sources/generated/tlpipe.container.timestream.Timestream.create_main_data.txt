@@ -1,0 +1,6 @@
+tlpipe.container.timestream.Timestream.create_main_data
+=======================================================
+
+.. currentmodule:: tlpipe.container.timestream
+
+.. automethod:: Timestream.create_main_data

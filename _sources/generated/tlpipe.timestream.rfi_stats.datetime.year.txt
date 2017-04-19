@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.datetime.year
+=========================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. autoattribute:: datetime.year

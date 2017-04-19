@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Timestream.check_status
+======================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. automethod:: Timestream.check_status

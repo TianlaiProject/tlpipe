@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Combine.read_output
+==================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. automethod:: Combine.read_output

@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Timestream.main_time_ordered_datasets
+==================================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. autoattribute:: Timestream.main_time_ordered_datasets

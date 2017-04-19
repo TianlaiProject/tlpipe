@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.RawTimestream.load_time_ordered_attrs
+==================================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: RawTimestream.load_time_ordered_attrs

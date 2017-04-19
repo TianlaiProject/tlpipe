@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Timestream.load_main_axes_ordered_data
+=====================================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. automethod:: Timestream.load_main_axes_ordered_data

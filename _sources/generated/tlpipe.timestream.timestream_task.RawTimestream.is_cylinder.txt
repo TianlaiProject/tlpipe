@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.RawTimestream.is_cylinder
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. autoattribute:: RawTimestream.is_cylinder

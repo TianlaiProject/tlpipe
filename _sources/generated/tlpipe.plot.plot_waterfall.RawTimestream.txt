@@ -68,7 +68,6 @@ tlpipe.plot.plot_waterfall.RawTimestream
       ~RawTimestream.add_history
       ~RawTimestream.all_data_operate
       ~RawTimestream.apply_mask
-      ~RawTimestream.attrs_name_allowed
       ~RawTimestream.bl_data_operate
       ~RawTimestream.check_status
       ~RawTimestream.close
@@ -108,20 +107,23 @@ tlpipe.plot.plot_waterfall.RawTimestream
       ~RawTimestream.itervalues
       ~RawTimestream.keys
       ~RawTimestream.load_all
-      ~RawTimestream.load_common
+      ~RawTimestream.load_common_attrs
+      ~RawTimestream.load_common_datasets
+      ~RawTimestream.load_main_axes_excl_main_data
+      ~RawTimestream.load_main_axes_ordered_data
       ~RawTimestream.load_main_data
-      ~RawTimestream.load_time_ordered
-      ~RawTimestream.load_tod_excl_main_data
+      ~RawTimestream.load_time_ordered_attrs
+      ~RawTimestream.load_time_ordered_datasets
       ~RawTimestream.redistribute
-      ~RawTimestream.reload_all
-      ~RawTimestream.reload_common
-      ~RawTimestream.reload_main_data
-      ~RawTimestream.reload_time_ordered
-      ~RawTimestream.reload_tod_excl_main_data
       ~RawTimestream.require_dataset
       ~RawTimestream.require_group
       ~RawTimestream.save
       ~RawTimestream.separate_pol_and_bl
+      ~RawTimestream.subset
+      ~RawTimestream.subset_feed_select
+      ~RawTimestream.subset_frequency_select
+      ~RawTimestream.subset_select
+      ~RawTimestream.subset_time_select
       ~RawTimestream.time_and_bl_data_operate
       ~RawTimestream.time_and_freq_data_operate
       ~RawTimestream.time_data_operate

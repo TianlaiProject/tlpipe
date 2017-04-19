@@ -1,0 +1,31 @@
+tlpipe.utils.rpca_decomp
+========================
+
+.. automodule:: tlpipe.utils.rpca_decomp
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      MAD
+      decompose
+      l0_norm
+      l1_norm
+      shrink
+      sign
+      truncate
+   
+   
+
+
+   
+   
+   
+
+
+   
+   
+   

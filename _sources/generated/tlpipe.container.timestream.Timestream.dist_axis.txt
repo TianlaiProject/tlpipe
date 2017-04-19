@@ -1,0 +1,6 @@
+tlpipe.container.timestream.Timestream.dist_axis
+================================================
+
+.. currentmodule:: tlpipe.container.timestream
+
+.. autoattribute:: Timestream.dist_axis

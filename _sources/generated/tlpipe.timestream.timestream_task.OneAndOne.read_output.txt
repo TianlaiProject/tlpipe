@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.OneAndOne.read_output
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: OneAndOne.read_output

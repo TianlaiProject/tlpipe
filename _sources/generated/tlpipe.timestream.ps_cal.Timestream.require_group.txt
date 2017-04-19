@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.Timestream.require_group
+=================================================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. automethod:: Timestream.require_group

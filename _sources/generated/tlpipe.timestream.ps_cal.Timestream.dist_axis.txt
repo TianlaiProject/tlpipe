@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.Timestream.dist_axis
+=============================================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. autoattribute:: Timestream.dist_axis

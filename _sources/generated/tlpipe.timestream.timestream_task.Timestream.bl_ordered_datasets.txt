@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.Timestream.bl_ordered_datasets
+================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. autoattribute:: Timestream.bl_ordered_datasets

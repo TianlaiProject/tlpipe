@@ -1,0 +1,6 @@
+tlpipe.utils.multiscale.convolve
+================================
+
+.. currentmodule:: tlpipe.utils.multiscale
+
+.. autofunction:: convolve

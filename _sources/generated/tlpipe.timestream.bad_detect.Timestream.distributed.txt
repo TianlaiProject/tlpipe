@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Timestream.distributed
+===================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. autoattribute:: Timestream.distributed

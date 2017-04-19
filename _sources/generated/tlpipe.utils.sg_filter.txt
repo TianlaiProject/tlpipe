@@ -1,0 +1,26 @@
+tlpipe.utils.sg_filter
+======================
+
+.. automodule:: tlpipe.utils.sg_filter
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      factorial
+      savitzky_golay
+   
+   
+
+
+   
+   
+   
+
+
+   
+   
+   

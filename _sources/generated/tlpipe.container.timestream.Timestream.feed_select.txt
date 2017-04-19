@@ -1,0 +1,6 @@
+tlpipe.container.timestream.Timestream.feed_select
+==================================================
+
+.. currentmodule:: tlpipe.container.timestream
+
+.. automethod:: Timestream.feed_select

@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Detect.setup
+=========================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: Detect.setup

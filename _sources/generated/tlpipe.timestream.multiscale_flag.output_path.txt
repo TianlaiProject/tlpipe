@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.output_path
+=============================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. autofunction:: output_path

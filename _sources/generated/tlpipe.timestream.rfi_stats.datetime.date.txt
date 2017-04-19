@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.datetime.date
+=========================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. automethod:: datetime.date

@@ -1,0 +1,6 @@
+tlpipe.container.container.deepcopy
+===================================
+
+.. currentmodule:: tlpipe.container.container
+
+.. autofunction:: deepcopy

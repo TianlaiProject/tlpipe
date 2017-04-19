@@ -1,0 +1,6 @@
+tlpipe.timestream.subdata.Subdata.embarrassingly_parallelizable
+===============================================================
+
+.. currentmodule:: tlpipe.timestream.subdata
+
+.. autoattribute:: Subdata.embarrassingly_parallelizable

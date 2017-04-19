@@ -1,0 +1,6 @@
+tlpipe.utils.multiscale.multiscale_median_detrend
+=================================================
+
+.. currentmodule:: tlpipe.utils.multiscale
+
+.. autofunction:: multiscale_median_detrend

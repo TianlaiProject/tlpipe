@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.MaxNLocator.set_axis
+================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. automethod:: MaxNLocator.set_axis

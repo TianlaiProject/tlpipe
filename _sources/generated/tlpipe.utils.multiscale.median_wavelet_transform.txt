@@ -1,0 +1,6 @@
+tlpipe.utils.multiscale.median_wavelet_transform
+================================================
+
+.. currentmodule:: tlpipe.utils.multiscale
+
+.. autofunction:: median_wavelet_transform

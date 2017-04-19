@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.Flag.cast_input
+==============================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. automethod:: Flag.cast_input

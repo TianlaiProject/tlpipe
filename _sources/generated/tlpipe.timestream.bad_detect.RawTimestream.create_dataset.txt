@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.RawTimestream.create_dataset
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: RawTimestream.create_dataset

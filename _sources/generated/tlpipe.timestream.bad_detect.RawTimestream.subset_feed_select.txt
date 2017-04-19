@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.RawTimestream.subset_feed_select
+=============================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: RawTimestream.subset_feed_select

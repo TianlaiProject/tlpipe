@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Timestream.require_group
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: Timestream.require_group

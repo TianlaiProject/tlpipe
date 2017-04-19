@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.Timestream.freq
+==============================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. autoattribute:: Timestream.freq

@@ -1,0 +1,6 @@
+tlpipe.container.container.check_axis
+=====================================
+
+.. currentmodule:: tlpipe.container.container
+
+.. autofunction:: check_axis

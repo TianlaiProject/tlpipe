@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Timestream.add_history
+===================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: Timestream.add_history

@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.load_time_ordered_attrs
+==============================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Timestream.load_time_ordered_attrs

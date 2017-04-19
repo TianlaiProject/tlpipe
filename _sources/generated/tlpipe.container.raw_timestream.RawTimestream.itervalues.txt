@@ -1,0 +1,6 @@
+tlpipe.container.raw_timestream.RawTimestream.itervalues
+========================================================
+
+.. currentmodule:: tlpipe.container.raw_timestream
+
+.. automethod:: RawTimestream.itervalues

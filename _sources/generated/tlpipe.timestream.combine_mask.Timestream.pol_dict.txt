@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Timestream.pol_dict
+==================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. autoattribute:: Timestream.pol_dict

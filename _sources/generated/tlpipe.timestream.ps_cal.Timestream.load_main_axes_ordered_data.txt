@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.Timestream.load_main_axes_ordered_data
+===============================================================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. automethod:: Timestream.load_main_axes_ordered_data

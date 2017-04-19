@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Timestream.from_group
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: Timestream.from_group

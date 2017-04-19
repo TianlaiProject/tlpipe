@@ -1,0 +1,6 @@
+tlpipe.utils.multiscale.median_filter
+=====================================
+
+.. currentmodule:: tlpipe.utils.multiscale
+
+.. autofunction:: median_filter

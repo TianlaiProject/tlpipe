@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.RawTimestream.local_vis
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. autoattribute:: RawTimestream.local_vis

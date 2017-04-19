@@ -1,0 +1,6 @@
+tlpipe.timestream.average.Average.subset_select
+===============================================
+
+.. currentmodule:: tlpipe.timestream.average
+
+.. automethod:: Average.subset_select

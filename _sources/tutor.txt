@@ -160,17 +160,18 @@ The final input pipe file looks like :download:`download <examples/plot\_wf.pipe
 Iterative pipeline
 ^^^^^^^^^^^^^^^^^^
 
-To make the pipeline iteratively run for several days data, you should set the
+To make the pipeline iteratively run for several days data, or more than one
+group (treat a list of files as a separate group) of data, you should set the
 parameter `iterable` of each task you want to iterate to *True*, and optionally
 specify an iteration number. If no iteration number is specified, the pipeline
 will iteratively run until all input data has been processed. Take again the
 above waterfall plot as an example, suppose you want to iteratively plot the
-waterfall of 2 days data, the input pipe file *plot_wf_iter.pipe*
-:download:`download <examples/plot\_wf\_iter.pipe>` is like:
+waterfall of 2 days data, or two separate groups of data, the input pipe file
+*plot_wf_iter.pipe* :download:`download <examples/plot\_wf\_iter.pipe>` is like:
 
    .. literalinclude:: examples/plot_wf_iter.pipe
       :language: python
-      :emphasize-lines: 27, 28, 38, 46
+      :emphasize-lines: 20, 25, 35, 36, 46, 54
       :linenos:
 
 .. note::
@@ -216,7 +217,7 @@ waterfall, just as follows shown in *plot_wf_nontrivial.pipe*
    all those processes. One can refer to the real data analysis pipeline
    input files in the package's *input* directory.
 
-Executing several times a same task
+Execute several times a same task
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Special care need to be taken when executing several times a same task. Since

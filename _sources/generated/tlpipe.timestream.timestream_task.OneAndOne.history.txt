@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.OneAndOne.history
+===================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. autoattribute:: OneAndOne.history

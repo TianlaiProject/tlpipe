@@ -46,6 +46,7 @@ tlpipe.timestream.re_order.ReOrder
       ~ReOrder.setup
       ~ReOrder.show_params
       ~ReOrder.stop_iteration
+      ~ReOrder.subset_select
       ~ReOrder.write_output
    
    

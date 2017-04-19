@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Timestream.all_data_operate
+========================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: Timestream.all_data_operate

@@ -1,0 +1,6 @@
+tlpipe.timestream.subdata.Subdata.copy_input
+============================================
+
+.. currentmodule:: tlpipe.timestream.subdata
+
+.. automethod:: Subdata.copy_input

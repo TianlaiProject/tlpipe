@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.RawTimestream.vis
+==============================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. autoattribute:: RawTimestream.vis

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.RawTimestream.load_main_axes_excl_main_data
+==================================================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: RawTimestream.load_main_axes_excl_main_data

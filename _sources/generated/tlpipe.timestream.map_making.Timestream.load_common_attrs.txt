@@ -1,0 +1,6 @@
+tlpipe.timestream.map_making.Timestream.load_common_attrs
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.map_making
+
+.. automethod:: Timestream.load_common_attrs

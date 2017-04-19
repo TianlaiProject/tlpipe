@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.Timestream.apply_mask
+==============================================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. automethod:: Timestream.apply_mask

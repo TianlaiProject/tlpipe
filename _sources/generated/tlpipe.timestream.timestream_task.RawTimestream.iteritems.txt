@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.RawTimestream.iteritems
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: RawTimestream.iteritems

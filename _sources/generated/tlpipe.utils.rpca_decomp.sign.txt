@@ -1,0 +1,6 @@
+tlpipe.utils.rpca_decomp.sign
+=============================
+
+.. currentmodule:: tlpipe.utils.rpca_decomp
+
+.. autofunction:: sign

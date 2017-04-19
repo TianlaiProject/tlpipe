@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Timestream.create_main_axis_ordered_dataset
+=============================================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: Timestream.create_main_axis_ordered_dataset

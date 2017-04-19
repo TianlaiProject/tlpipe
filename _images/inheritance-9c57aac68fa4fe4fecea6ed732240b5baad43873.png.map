@@ -1,0 +1,6 @@
+<map id="inheritancee43dc9f6c3" name="inheritancee43dc9f6c3">
+<area shape="rect" id="node1" href="tlpipe.pipeline.pipeline.OneAndOne.html#tlpipe.pipeline.pipeline.OneAndOne" target="_top" title="Base class for tasks that have (at most) one input and one output." alt="" coords="53,83,211,111"/>
+<area shape="rect" id="node5" href="tlpipe.timestream.timestream_task.TimestreamTask.html#tlpipe.timestream.timestream_task.TimestreamTask" target="_top" title="Task that provides raw timestream or timestream IO and data selection operations." alt="" coords="5,161,259,189"/>
+<area shape="rect" id="node2" href="tlpipe.pipeline.pipeline.TaskBase.html#tlpipe.pipeline.pipeline.TaskBase" target="_top" title="Base class for all pipeline tasks." alt="" coords="63,6,201,34"/>
+<area shape="rect" id="node4" href="tlpipe.timestream.ps_fit.PsFit.html#tlpipe.timestream.ps_fit.PsFit" target="_top" title="Calibration by strong point source fitting." alt="" coords="84,238,180,266"/>
+</map>

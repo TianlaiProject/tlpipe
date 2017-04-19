@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.Timestream.subset_frequency_select
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: Timestream.subset_frequency_select

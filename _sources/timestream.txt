@@ -2,19 +2,8 @@
 
 .. currentmodule:: tlpipe.timestream
 
-:mod:`timestream` -- Timestream data containers and operating tasks
-===================================================================
-
-Data containers
----------------
-
-.. autosummary::
-   :toctree: generated/
-
-   container
-   timestream_common
-   raw_timestream
-   timestream
+:mod:`timestream` -- Timestream operating tasks
+===============================================
 
 Timestream base task
 --------------------
@@ -22,7 +11,7 @@ Timestream base task
 .. autosummary::
    :toctree: generated/
 
-   tod_task
+   timestream_task
 
 Operating tasks
 ---------------
@@ -32,9 +21,16 @@ Operating tasks
 
    dispatch
    detect_ns
+   rfi_flagging
    line_rfi
    time_flag
    freq_flag
+   multiscale_flag
+   combine_mask
+   sir_operate
+   rfi_stats
+   subdata
+   bad_detect
    ns_cal
    rt2ts
    ps_fit
@@ -50,11 +46,3 @@ Operating tasks
    average
    freq_rebin
    map_making
-
-Utilities
----------
-
-.. autosummary::
-   :toctree: generated/
-
-   sg_filter

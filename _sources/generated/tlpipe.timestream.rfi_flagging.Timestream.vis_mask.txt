@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.Timestream.vis_mask
+==================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. autoattribute:: Timestream.vis_mask

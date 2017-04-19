@@ -1,0 +1,6 @@
+tlpipe.container.container.BasicTod.group_name_allowed
+======================================================
+
+.. currentmodule:: tlpipe.container.container
+
+.. automethod:: BasicTod.group_name_allowed

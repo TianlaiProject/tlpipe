@@ -1,0 +1,6 @@
+tlpipe.timestream.phase_closure.Closure.subset_select
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.phase_closure
+
+.. automethod:: Closure.subset_select

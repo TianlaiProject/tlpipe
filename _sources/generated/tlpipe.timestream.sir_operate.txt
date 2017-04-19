@@ -1,0 +1,25 @@
+tlpipe.timestream.sir_operate
+=============================
+
+.. automodule:: tlpipe.timestream.sir_operate
+
+   
+   
+   
+
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      Sir
+   
+   
+
+
+   
+   
+   

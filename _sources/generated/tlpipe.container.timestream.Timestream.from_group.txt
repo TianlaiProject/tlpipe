@@ -1,0 +1,6 @@
+tlpipe.container.timestream.Timestream.from_group
+=================================================
+
+.. currentmodule:: tlpipe.container.timestream
+
+.. automethod:: Timestream.from_group

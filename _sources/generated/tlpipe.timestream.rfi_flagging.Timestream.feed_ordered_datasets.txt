@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.Timestream.feed_ordered_datasets
+===============================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. autoattribute:: Timestream.feed_ordered_datasets

@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Timestream.is_continuous
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. autoattribute:: Timestream.is_continuous

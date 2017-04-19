@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.AutoMinorLocator.raise_if_exceeds
+=============================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. automethod:: AutoMinorLocator.raise_if_exceeds

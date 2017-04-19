@@ -1,0 +1,6 @@
+tlpipe.timestream.subdata.Subdata.data_select
+=============================================
+
+.. currentmodule:: tlpipe.timestream.subdata
+
+.. automethod:: Subdata.data_select

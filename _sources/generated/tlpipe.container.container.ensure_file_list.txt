@@ -1,0 +1,6 @@
+tlpipe.container.container.ensure_file_list
+===========================================
+
+.. currentmodule:: tlpipe.container.container
+
+.. autofunction:: ensure_file_list

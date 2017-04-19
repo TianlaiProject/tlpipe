@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.datetime.utctimetuple
+=================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. automethod:: datetime.utctimetuple

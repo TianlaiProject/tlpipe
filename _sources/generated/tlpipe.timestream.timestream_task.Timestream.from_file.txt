@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.Timestream.from_file
+======================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: Timestream.from_file

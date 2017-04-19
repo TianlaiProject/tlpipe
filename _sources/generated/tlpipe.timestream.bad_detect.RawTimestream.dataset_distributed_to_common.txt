@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.RawTimestream.dataset_distributed_to_common
+========================================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: RawTimestream.dataset_distributed_to_common

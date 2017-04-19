@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.Timestream.info
+========================================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. automethod:: Timestream.info

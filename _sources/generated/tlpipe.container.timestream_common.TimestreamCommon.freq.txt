@@ -1,0 +1,6 @@
+tlpipe.container.timestream_common.TimestreamCommon.freq
+========================================================
+
+.. currentmodule:: tlpipe.container.timestream_common
+
+.. autoattribute:: TimestreamCommon.freq

@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.Timestream.attrs
+==================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. autoattribute:: Timestream.attrs

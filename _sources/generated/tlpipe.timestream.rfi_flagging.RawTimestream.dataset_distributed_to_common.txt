@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.RawTimestream.dataset_distributed_to_common
+==========================================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. automethod:: RawTimestream.dataset_distributed_to_common

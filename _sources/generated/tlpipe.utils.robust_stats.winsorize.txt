@@ -1,0 +1,6 @@
+tlpipe.utils.robust_stats.winsorize
+===================================
+
+.. currentmodule:: tlpipe.utils.robust_stats
+
+.. autofunction:: winsorize

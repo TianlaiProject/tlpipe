@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Combine.subset_select
+====================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. automethod:: Combine.subset_select

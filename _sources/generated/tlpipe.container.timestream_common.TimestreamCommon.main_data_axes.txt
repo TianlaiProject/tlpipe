@@ -1,0 +1,6 @@
+tlpipe.container.timestream_common.TimestreamCommon.main_data_axes
+==================================================================
+
+.. currentmodule:: tlpipe.container.timestream_common
+
+.. autoattribute:: TimestreamCommon.main_data_axes

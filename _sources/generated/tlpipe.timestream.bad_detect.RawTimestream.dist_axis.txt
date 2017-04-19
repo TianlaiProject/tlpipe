@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.RawTimestream.dist_axis
+====================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. autoattribute:: RawTimestream.dist_axis

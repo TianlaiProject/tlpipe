@@ -1,0 +1,151 @@
+tlpipe.timestream.bad_detect.Timestream
+=======================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. autoclass:: Timestream
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Timestream.array
+      ~Timestream.attrs
+      ~Timestream.bl
+      ~Timestream.bl_ordered_datasets
+      ~Timestream.comm
+      ~Timestream.dist_axis
+      ~Timestream.dist_axis_name
+      ~Timestream.distributed
+      ~Timestream.feed_ordered_datasets
+      ~Timestream.file
+      ~Timestream.freq
+      ~Timestream.freq_ordered_datasets
+      ~Timestream.history
+      ~Timestream.is_continuous
+      ~Timestream.is_cylinder
+      ~Timestream.is_dish
+      ~Timestream.is_same_dec
+      ~Timestream.is_same_pointing
+      ~Timestream.local_bl
+      ~Timestream.local_freq
+      ~Timestream.local_pol
+      ~Timestream.local_time
+      ~Timestream.local_vis
+      ~Timestream.local_vis_mask
+      ~Timestream.main_axes_ordered_datasets
+      ~Timestream.main_data
+      ~Timestream.main_data_axes
+      ~Timestream.main_data_name
+      ~Timestream.main_time_ordered_datasets
+      ~Timestream.masked_vis
+      ~Timestream.name
+      ~Timestream.ondisk
+      ~Timestream.parent
+      ~Timestream.pol
+      ~Timestream.pol_dict
+      ~Timestream.pol_ordered_datasets
+      ~Timestream.time
+      ~Timestream.time_ordered_attrs
+      ~Timestream.time_ordered_datasets
+      ~Timestream.vis
+      ~Timestream.vis_mask
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Timestream.add_history
+      ~Timestream.all_data_operate
+      ~Timestream.apply_mask
+      ~Timestream.bl_data_operate
+      ~Timestream.check_status
+      ~Timestream.close
+      ~Timestream.copy
+      ~Timestream.create_bl_ordered_dataset
+      ~Timestream.create_dataset
+      ~Timestream.create_feed_ordered_dataset
+      ~Timestream.create_freq_and_bl_ordered_dataset
+      ~Timestream.create_freq_ordered_dataset
+      ~Timestream.create_group
+      ~Timestream.create_main_axis_ordered_dataset
+      ~Timestream.create_main_data
+      ~Timestream.create_main_time_ordered_dataset
+      ~Timestream.create_pol_ordered_dataset
+      ~Timestream.create_time_and_bl_ordered_dataset
+      ~Timestream.create_time_and_freq_ordered_dataset
+      ~Timestream.create_time_ordered_dataset
+      ~Timestream.data_operate
+      ~Timestream.data_select
+      ~Timestream.dataset_common_to_distributed
+      ~Timestream.dataset_distributed_to_common
+      ~Timestream.dataset_name_allowed
+      ~Timestream.delete_a_dataset
+      ~Timestream.delete_an_attribute
+      ~Timestream.feed_select
+      ~Timestream.flush
+      ~Timestream.freq_and_bl_data_operate
+      ~Timestream.freq_and_pol_data_operate
+      ~Timestream.freq_data_operate
+      ~Timestream.freq_pol_and_bl_data_operate
+      ~Timestream.frequency_select
+      ~Timestream.from_file
+      ~Timestream.from_group
+      ~Timestream.get
+      ~Timestream.group_name_allowed
+      ~Timestream.info
+      ~Timestream.items
+      ~Timestream.iteritems
+      ~Timestream.iterkeys
+      ~Timestream.itervalues
+      ~Timestream.keys
+      ~Timestream.lin2stokes
+      ~Timestream.load_all
+      ~Timestream.load_common_attrs
+      ~Timestream.load_common_datasets
+      ~Timestream.load_main_axes_excl_main_data
+      ~Timestream.load_main_axes_ordered_data
+      ~Timestream.load_main_data
+      ~Timestream.load_time_ordered_attrs
+      ~Timestream.load_time_ordered_datasets
+      ~Timestream.pol_and_bl_data_operate
+      ~Timestream.pol_data_operate
+      ~Timestream.polarization_select
+      ~Timestream.redistribute
+      ~Timestream.require_dataset
+      ~Timestream.require_group
+      ~Timestream.save
+      ~Timestream.stokes2lin
+      ~Timestream.subset
+      ~Timestream.subset_feed_select
+      ~Timestream.subset_frequency_select
+      ~Timestream.subset_polarization_select
+      ~Timestream.subset_select
+      ~Timestream.subset_time_select
+      ~Timestream.time_and_bl_data_operate
+      ~Timestream.time_and_freq_data_operate
+      ~Timestream.time_and_pol_data_operate
+      ~Timestream.time_data_operate
+      ~Timestream.time_freq_and_bl_data_operate
+      ~Timestream.time_freq_and_pol_data_operate
+      ~Timestream.time_pol_and_bl_data_operate
+      ~Timestream.time_select
+      ~Timestream.to_disk
+      ~Timestream.to_files
+      ~Timestream.to_memory
+      ~Timestream.values
+   
+   

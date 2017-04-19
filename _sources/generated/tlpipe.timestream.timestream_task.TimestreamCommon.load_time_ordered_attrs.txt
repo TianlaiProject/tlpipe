@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamCommon.load_time_ordered_attrs
+==========================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: TimestreamCommon.load_time_ordered_attrs

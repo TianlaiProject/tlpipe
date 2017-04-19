@@ -1,0 +1,6 @@
+tlpipe.timestream.subdata.Subdata.iteration
+===========================================
+
+.. currentmodule:: tlpipe.timestream.subdata
+
+.. autoattribute:: Subdata.iteration

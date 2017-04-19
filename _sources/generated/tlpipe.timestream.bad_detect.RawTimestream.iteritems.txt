@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.RawTimestream.iteritems
+====================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: RawTimestream.iteritems

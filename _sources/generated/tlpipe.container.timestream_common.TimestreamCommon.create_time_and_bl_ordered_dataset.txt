@@ -1,0 +1,6 @@
+tlpipe.container.timestream_common.TimestreamCommon.create_time_and_bl_ordered_dataset
+======================================================================================
+
+.. currentmodule:: tlpipe.container.timestream_common
+
+.. automethod:: TimestreamCommon.create_time_and_bl_ordered_dataset

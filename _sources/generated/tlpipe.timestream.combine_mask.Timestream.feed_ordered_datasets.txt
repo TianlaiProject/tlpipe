@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Timestream.feed_ordered_datasets
+===============================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. autoattribute:: Timestream.feed_ordered_datasets

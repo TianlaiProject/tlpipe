@@ -47,6 +47,7 @@ tlpipe.timestream.phs2zen.Phs2zen
       ~Phs2zen.setup
       ~Phs2zen.show_params
       ~Phs2zen.stop_iteration
+      ~Phs2zen.subset_select
       ~Phs2zen.write_output
    
    

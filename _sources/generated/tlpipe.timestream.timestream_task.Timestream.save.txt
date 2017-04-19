@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.Timestream.save
+=================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: Timestream.save

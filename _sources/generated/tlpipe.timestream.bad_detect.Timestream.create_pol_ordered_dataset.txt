@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Timestream.create_pol_ordered_dataset
+==================================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: Timestream.create_pol_ordered_dataset

@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.RawTimestream.attrs
+================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. autoattribute:: RawTimestream.attrs

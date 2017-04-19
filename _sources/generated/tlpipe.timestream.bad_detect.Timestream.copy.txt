@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Timestream.copy
+============================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: Timestream.copy

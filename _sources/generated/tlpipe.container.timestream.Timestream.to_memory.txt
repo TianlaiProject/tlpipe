@@ -1,0 +1,6 @@
+tlpipe.container.timestream.Timestream.to_memory
+================================================
+
+.. currentmodule:: tlpipe.container.timestream
+
+.. automethod:: Timestream.to_memory

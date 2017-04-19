@@ -1,0 +1,53 @@
+tlpipe.timestream.combine_mask.Combine
+======================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. autoclass:: Combine
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Combine.cacheable
+      ~Combine.embarrassingly_parallelizable
+      ~Combine.history
+      ~Combine.iteration
+      ~Combine.params_init
+      ~Combine.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Combine.cast_input
+      ~Combine.combine
+      ~Combine.copy_input
+      ~Combine.data_select
+      ~Combine.finish
+      ~Combine.next
+      ~Combine.process
+      ~Combine.read_input
+      ~Combine.read_output
+      ~Combine.read_process_write
+      ~Combine.restart_iteration
+      ~Combine.setup
+      ~Combine.show_params
+      ~Combine.stop_iteration
+      ~Combine.subset_select
+      ~Combine.write_output
+   
+   

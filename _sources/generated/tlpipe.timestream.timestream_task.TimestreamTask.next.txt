@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamTask.next
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: TimestreamTask.next

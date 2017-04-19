@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Timestream.feed_select
+===================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: Timestream.feed_select

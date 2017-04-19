@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamCommon.delete_a_dataset
+===================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: TimestreamCommon.delete_a_dataset

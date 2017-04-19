@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.RawTimestream.history
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. autoattribute:: RawTimestream.history

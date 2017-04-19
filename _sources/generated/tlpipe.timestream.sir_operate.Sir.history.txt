@@ -1,0 +1,6 @@
+tlpipe.timestream.sir_operate.Sir.history
+=========================================
+
+.. currentmodule:: tlpipe.timestream.sir_operate
+
+.. autoattribute:: Sir.history

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.RawTimestream.load_time_ordered_attrs
+============================================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: RawTimestream.load_time_ordered_attrs

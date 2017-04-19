@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Timestream.dist_axis
+===================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. autoattribute:: Timestream.dist_axis

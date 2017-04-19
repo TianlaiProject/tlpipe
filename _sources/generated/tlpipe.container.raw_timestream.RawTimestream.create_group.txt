@@ -1,0 +1,6 @@
+tlpipe.container.raw_timestream.RawTimestream.create_group
+==========================================================
+
+.. currentmodule:: tlpipe.container.raw_timestream
+
+.. automethod:: RawTimestream.create_group

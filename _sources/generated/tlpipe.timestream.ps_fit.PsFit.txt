@@ -46,6 +46,7 @@ tlpipe.timestream.ps_fit.PsFit
       ~PsFit.setup
       ~PsFit.show_params
       ~PsFit.stop_iteration
+      ~PsFit.subset_select
       ~PsFit.write_output
    
    

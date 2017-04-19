@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Timestream.load_common_attrs
+==============================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: Timestream.load_common_attrs

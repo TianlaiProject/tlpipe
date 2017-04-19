@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.RawTimestream.create_main_axis_ordered_dataset
+================================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: RawTimestream.create_main_axis_ordered_dataset

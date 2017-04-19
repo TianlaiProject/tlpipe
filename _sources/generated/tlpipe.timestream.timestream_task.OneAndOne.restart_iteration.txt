@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.OneAndOne.restart_iteration
+=============================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: OneAndOne.restart_iteration

@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.Timestream.delete_an_attribute
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. automethod:: Timestream.delete_an_attribute

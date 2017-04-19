@@ -1,0 +1,6 @@
+tlpipe.timestream.subdata.Subdata.cast_input
+============================================
+
+.. currentmodule:: tlpipe.timestream.subdata
+
+.. automethod:: Subdata.cast_input

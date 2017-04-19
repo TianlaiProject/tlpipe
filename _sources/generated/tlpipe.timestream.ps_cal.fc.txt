@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.fc
+===========================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. autofunction:: fc

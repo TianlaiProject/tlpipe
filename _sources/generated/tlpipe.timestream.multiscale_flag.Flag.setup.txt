@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Flag.setup
+============================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: Flag.setup

@@ -1,0 +1,39 @@
+tlpipe.utils.multiscale
+=======================
+
+.. automodule:: tlpipe.utils.multiscale
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      MAD
+      convolve
+      convolve1d
+      median_filter
+      median_wavelet_detrend
+      median_wavelet_smooth
+      median_wavelet_transform
+      multiscale_median_detrend
+      multiscale_median_flag
+      multiscale_median_smooth
+      multiscale_median_transform
+      starlet_detrend
+      starlet_smooth
+      starlet_transform
+      up_sampling
+   
+   
+
+
+   
+   
+   
+
+
+   
+   
+   

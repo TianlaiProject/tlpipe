@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.OneAndOne.next
+================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: OneAndOne.next

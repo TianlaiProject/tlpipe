@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamTask.write_output
+=============================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: TimestreamTask.write_output

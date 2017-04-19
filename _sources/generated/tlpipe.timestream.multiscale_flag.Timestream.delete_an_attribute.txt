@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Timestream.delete_an_attribute
+================================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: Timestream.delete_an_attribute

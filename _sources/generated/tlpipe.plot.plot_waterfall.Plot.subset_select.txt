@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.Plot.subset_select
+=============================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: Plot.subset_select

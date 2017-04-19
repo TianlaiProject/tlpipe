@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Detect.history
+===========================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. autoattribute:: Detect.history

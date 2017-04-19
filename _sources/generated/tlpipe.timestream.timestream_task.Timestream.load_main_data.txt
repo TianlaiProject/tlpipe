@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.Timestream.load_main_data
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: Timestream.load_main_data

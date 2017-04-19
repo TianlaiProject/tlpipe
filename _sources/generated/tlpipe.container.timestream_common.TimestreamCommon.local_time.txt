@@ -1,0 +1,6 @@
+tlpipe.container.timestream_common.TimestreamCommon.local_time
+==============================================================
+
+.. currentmodule:: tlpipe.container.timestream_common
+
+.. autoattribute:: TimestreamCommon.local_time

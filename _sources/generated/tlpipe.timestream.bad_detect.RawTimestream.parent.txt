@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.RawTimestream.parent
+=================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. autoattribute:: RawTimestream.parent

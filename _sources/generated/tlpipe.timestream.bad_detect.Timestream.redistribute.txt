@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Timestream.redistribute
+====================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: Timestream.redistribute

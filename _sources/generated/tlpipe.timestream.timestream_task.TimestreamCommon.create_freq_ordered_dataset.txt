@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamCommon.create_freq_ordered_dataset
+==============================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: TimestreamCommon.create_freq_ordered_dataset

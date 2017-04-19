@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.OneAndOne.show_params
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: OneAndOne.show_params

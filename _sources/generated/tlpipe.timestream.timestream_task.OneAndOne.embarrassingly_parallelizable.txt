@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.OneAndOne.embarrassingly_parallelizable
+=========================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. autoattribute:: OneAndOne.embarrassingly_parallelizable

@@ -1,0 +1,6 @@
+tlpipe.timestream.sir_operate.Sir.params_init
+=============================================
+
+.. currentmodule:: tlpipe.timestream.sir_operate
+
+.. autoattribute:: Sir.params_init

@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Timestream.subset_polarization_select
+==================================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: Timestream.subset_polarization_select

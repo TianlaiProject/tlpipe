@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.RawTimestream.iteritems
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: RawTimestream.iteritems

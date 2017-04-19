@@ -1,0 +1,6 @@
+tlpipe.timestream.subdata.Subdata.read_input
+============================================
+
+.. currentmodule:: tlpipe.timestream.subdata
+
+.. automethod:: Subdata.read_input

@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamCommon.pol_dict
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. autoattribute:: TimestreamCommon.pol_dict

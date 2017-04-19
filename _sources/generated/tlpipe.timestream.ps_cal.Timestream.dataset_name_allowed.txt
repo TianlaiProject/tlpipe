@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.Timestream.dataset_name_allowed
+========================================================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. automethod:: Timestream.dataset_name_allowed

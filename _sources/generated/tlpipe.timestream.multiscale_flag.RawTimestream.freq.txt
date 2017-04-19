@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.RawTimestream.freq
+====================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. autoattribute:: RawTimestream.freq

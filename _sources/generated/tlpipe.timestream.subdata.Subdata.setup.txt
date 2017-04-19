@@ -1,0 +1,6 @@
+tlpipe.timestream.subdata.Subdata.setup
+=======================================
+
+.. currentmodule:: tlpipe.timestream.subdata
+
+.. automethod:: Subdata.setup

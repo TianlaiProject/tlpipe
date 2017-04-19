@@ -1,0 +1,6 @@
+tlpipe.container.container.BasicTod.load_time_ordered_datasets
+==============================================================
+
+.. currentmodule:: tlpipe.container.container
+
+.. automethod:: BasicTod.load_time_ordered_datasets

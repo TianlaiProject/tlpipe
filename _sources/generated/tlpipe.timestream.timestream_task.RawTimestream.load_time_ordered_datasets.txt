@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.RawTimestream.load_time_ordered_datasets
+==========================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: RawTimestream.load_time_ordered_datasets

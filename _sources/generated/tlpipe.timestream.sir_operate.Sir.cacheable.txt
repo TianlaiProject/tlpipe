@@ -1,0 +1,6 @@
+tlpipe.timestream.sir_operate.Sir.cacheable
+===========================================
+
+.. currentmodule:: tlpipe.timestream.sir_operate
+
+.. autoattribute:: Sir.cacheable

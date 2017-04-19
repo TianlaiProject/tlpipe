@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.Timestream.file
+========================================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. autoattribute:: Timestream.file

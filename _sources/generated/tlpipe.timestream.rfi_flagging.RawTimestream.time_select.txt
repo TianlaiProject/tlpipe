@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.RawTimestream.time_select
+========================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. automethod:: RawTimestream.time_select

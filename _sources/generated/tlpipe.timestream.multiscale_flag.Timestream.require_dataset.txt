@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Timestream.require_dataset
+============================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: Timestream.require_dataset

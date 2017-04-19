@@ -1,0 +1,6 @@
+tlpipe.plot.plot_slice.Timestream.subset_frequency_select
+=========================================================
+
+.. currentmodule:: tlpipe.plot.plot_slice
+
+.. automethod:: Timestream.subset_frequency_select

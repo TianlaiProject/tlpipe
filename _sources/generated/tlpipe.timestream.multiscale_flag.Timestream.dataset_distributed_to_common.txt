@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Timestream.dataset_distributed_to_common
+==========================================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: Timestream.dataset_distributed_to_common

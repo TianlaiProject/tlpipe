@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Timestream.iterkeys
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: Timestream.iterkeys

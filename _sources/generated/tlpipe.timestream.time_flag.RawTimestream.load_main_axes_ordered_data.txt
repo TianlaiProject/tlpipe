@@ -1,0 +1,6 @@
+tlpipe.timestream.time_flag.RawTimestream.load_main_axes_ordered_data
+=====================================================================
+
+.. currentmodule:: tlpipe.timestream.time_flag
+
+.. automethod:: RawTimestream.load_main_axes_ordered_data

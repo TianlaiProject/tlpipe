@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamCommon.dist_axis_name
+=================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. autoattribute:: TimestreamCommon.dist_axis_name

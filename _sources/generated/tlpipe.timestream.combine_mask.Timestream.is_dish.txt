@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Timestream.is_dish
+=================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. autoattribute:: Timestream.is_dish

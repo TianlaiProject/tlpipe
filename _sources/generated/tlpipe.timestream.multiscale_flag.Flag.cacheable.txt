@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Flag.cacheable
+================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. autoattribute:: Flag.cacheable

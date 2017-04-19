@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamCommon.dataset_common_to_distributed
+================================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: TimestreamCommon.dataset_common_to_distributed

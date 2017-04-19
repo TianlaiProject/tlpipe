@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Timestream.freq_ordered_datasets
+=============================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. autoattribute:: Timestream.freq_ordered_datasets

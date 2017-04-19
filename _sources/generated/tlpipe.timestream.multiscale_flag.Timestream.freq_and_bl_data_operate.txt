@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Timestream.freq_and_bl_data_operate
+=====================================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: Timestream.freq_and_bl_data_operate

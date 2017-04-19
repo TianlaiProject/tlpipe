@@ -1,0 +1,6 @@
+tlpipe.container.timestream.Timestream.local_vis
+================================================
+
+.. currentmodule:: tlpipe.container.timestream
+
+.. autoattribute:: Timestream.local_vis

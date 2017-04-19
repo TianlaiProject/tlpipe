@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Timestream.load_common_attrs
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. automethod:: Timestream.load_common_attrs

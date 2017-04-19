@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.MaxNLocator.default_params
+======================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. autoattribute:: MaxNLocator.default_params

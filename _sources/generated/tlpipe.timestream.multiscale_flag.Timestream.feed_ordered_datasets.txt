@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Timestream.feed_ordered_datasets
+==================================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. autoattribute:: Timestream.feed_ordered_datasets

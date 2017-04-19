@@ -1,0 +1,6 @@
+tlpipe.timestream.subdata.Subdata.write_output
+==============================================
+
+.. currentmodule:: tlpipe.timestream.subdata
+
+.. automethod:: Subdata.write_output

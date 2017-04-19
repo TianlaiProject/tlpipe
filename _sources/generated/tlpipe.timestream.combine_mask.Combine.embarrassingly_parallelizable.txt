@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Combine.embarrassingly_parallelizable
+====================================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. autoattribute:: Combine.embarrassingly_parallelizable

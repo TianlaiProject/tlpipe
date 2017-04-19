@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Flag.stop_iteration
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: Flag.stop_iteration

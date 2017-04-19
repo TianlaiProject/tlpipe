@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Combine.cacheable
+================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. autoattribute:: Combine.cacheable

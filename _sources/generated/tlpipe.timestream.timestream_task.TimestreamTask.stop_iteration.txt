@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamTask.stop_iteration
+===============================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: TimestreamTask.stop_iteration

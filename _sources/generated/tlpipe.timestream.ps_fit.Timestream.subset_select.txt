@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.Timestream.subset_select
+=================================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: Timestream.subset_select

@@ -1,0 +1,6 @@
+tlpipe.timestream.re_order.Timestream.load_common_attrs
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.re_order
+
+.. automethod:: Timestream.load_common_attrs

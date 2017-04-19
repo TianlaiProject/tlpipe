@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.Timestream.require_group
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. automethod:: Timestream.require_group

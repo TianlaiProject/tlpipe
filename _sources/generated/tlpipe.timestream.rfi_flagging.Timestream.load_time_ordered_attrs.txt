@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.Timestream.load_time_ordered_attrs
+=================================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. automethod:: Timestream.load_time_ordered_attrs

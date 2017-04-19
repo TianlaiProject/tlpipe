@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.Stats.finish
+========================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. automethod:: Stats.finish

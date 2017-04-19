@@ -1,0 +1,6 @@
+tlpipe.container.container.BasicTod.require_group
+=================================================
+
+.. currentmodule:: tlpipe.container.container
+
+.. automethod:: BasicTod.require_group

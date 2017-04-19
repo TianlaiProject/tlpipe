@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.Timestream.to_disk
+====================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: Timestream.to_disk

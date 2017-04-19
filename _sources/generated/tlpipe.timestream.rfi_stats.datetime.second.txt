@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.datetime.second
+===========================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. autoattribute:: datetime.second

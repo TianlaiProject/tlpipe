@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.RawTimestream.time_select
+======================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: RawTimestream.time_select

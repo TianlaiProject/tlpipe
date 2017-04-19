@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Timestream.bl
+===============================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. autoattribute:: Timestream.bl

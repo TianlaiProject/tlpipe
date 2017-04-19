@@ -1,0 +1,52 @@
+tlpipe.timestream.rfi_stats.Stats
+=================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. autoclass:: Stats
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Stats.cacheable
+      ~Stats.embarrassingly_parallelizable
+      ~Stats.history
+      ~Stats.iteration
+      ~Stats.params_init
+      ~Stats.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Stats.cast_input
+      ~Stats.copy_input
+      ~Stats.data_select
+      ~Stats.finish
+      ~Stats.next
+      ~Stats.process
+      ~Stats.read_input
+      ~Stats.read_output
+      ~Stats.read_process_write
+      ~Stats.restart_iteration
+      ~Stats.setup
+      ~Stats.show_params
+      ~Stats.stop_iteration
+      ~Stats.subset_select
+      ~Stats.write_output
+   
+   

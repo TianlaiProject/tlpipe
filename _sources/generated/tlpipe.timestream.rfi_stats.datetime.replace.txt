@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.datetime.replace
+============================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. automethod:: datetime.replace

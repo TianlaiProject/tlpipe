@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_fit.Timestream.load_common_attrs
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.ps_fit
+
+.. automethod:: Timestream.load_common_attrs

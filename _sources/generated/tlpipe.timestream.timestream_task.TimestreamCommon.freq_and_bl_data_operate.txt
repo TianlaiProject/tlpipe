@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamCommon.freq_and_bl_data_operate
+===========================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: TimestreamCommon.freq_and_bl_data_operate

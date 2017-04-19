@@ -1,0 +1,6 @@
+tlpipe.timestream.sir_operate.Sir.embarrassingly_parallelizable
+===============================================================
+
+.. currentmodule:: tlpipe.timestream.sir_operate
+
+.. autoattribute:: Sir.embarrassingly_parallelizable

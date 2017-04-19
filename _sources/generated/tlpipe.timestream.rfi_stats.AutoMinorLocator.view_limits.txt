@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.AutoMinorLocator.view_limits
+========================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. automethod:: AutoMinorLocator.view_limits

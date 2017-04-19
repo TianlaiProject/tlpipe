@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.datetime.month
+==========================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. autoattribute:: datetime.month

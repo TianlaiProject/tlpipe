@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Timestream.info
+============================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: Timestream.info

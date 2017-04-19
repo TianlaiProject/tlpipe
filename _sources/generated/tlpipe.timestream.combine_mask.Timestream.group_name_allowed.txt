@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Timestream.group_name_allowed
+============================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. automethod:: Timestream.group_name_allowed

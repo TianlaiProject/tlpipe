@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.Timestream.create_pol_ordered_dataset
+==============================================================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. automethod:: Timestream.create_pol_ordered_dataset

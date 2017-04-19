@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.RawTimestream.apply_mask
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: RawTimestream.apply_mask

@@ -1,0 +1,6 @@
+tlpipe.container.raw_timestream.RawTimestream.main_data
+=======================================================
+
+.. currentmodule:: tlpipe.container.raw_timestream
+
+.. autoattribute:: RawTimestream.main_data

@@ -1,0 +1,34 @@
+tlpipe.timestream.multiscale_flag
+=================================
+
+.. automodule:: tlpipe.timestream.multiscale_flag
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      output_path
+   
+   
+
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      Flag
+      RawTimestream
+      Timestream
+   
+   
+
+
+   
+   
+   

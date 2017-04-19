@@ -1,0 +1,6 @@
+tlpipe.timestream.dispatch.Dispatch.subset_select
+=================================================
+
+.. currentmodule:: tlpipe.timestream.dispatch
+
+.. automethod:: Dispatch.subset_select

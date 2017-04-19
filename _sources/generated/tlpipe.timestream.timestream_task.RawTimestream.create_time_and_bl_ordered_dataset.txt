@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.RawTimestream.create_time_and_bl_ordered_dataset
+==================================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: RawTimestream.create_time_and_bl_ordered_dataset

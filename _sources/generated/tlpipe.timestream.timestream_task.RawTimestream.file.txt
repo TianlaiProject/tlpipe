@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.RawTimestream.file
+====================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. autoattribute:: RawTimestream.file

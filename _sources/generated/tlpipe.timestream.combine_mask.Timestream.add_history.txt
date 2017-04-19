@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Timestream.add_history
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. automethod:: Timestream.add_history

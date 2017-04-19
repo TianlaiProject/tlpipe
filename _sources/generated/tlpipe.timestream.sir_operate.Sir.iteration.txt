@@ -1,0 +1,6 @@
+tlpipe.timestream.sir_operate.Sir.iteration
+===========================================
+
+.. currentmodule:: tlpipe.timestream.sir_operate
+
+.. autoattribute:: Sir.iteration

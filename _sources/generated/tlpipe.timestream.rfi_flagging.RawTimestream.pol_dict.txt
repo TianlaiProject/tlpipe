@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.RawTimestream.pol_dict
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. autoattribute:: RawTimestream.pol_dict

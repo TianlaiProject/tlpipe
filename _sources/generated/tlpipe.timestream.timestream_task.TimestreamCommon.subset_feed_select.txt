@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamCommon.subset_feed_select
+=====================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: TimestreamCommon.subset_feed_select

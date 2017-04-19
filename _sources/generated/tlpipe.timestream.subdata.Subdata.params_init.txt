@@ -1,0 +1,6 @@
+tlpipe.timestream.subdata.Subdata.params_init
+=============================================
+
+.. currentmodule:: tlpipe.timestream.subdata
+
+.. autoattribute:: Subdata.params_init

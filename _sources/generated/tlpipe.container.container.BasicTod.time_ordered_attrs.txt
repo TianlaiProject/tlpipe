@@ -1,0 +1,6 @@
+tlpipe.container.container.BasicTod.time_ordered_attrs
+======================================================
+
+.. currentmodule:: tlpipe.container.container
+
+.. autoattribute:: BasicTod.time_ordered_attrs

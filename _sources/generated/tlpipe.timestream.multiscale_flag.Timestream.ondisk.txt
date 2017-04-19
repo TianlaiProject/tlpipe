@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Timestream.ondisk
+===================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. autoattribute:: Timestream.ondisk

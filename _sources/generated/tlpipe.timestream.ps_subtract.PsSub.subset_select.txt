@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_subtract.PsSub.subset_select
+=================================================
+
+.. currentmodule:: tlpipe.timestream.ps_subtract
+
+.. automethod:: PsSub.subset_select

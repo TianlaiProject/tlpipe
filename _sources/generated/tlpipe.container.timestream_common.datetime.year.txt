@@ -1,0 +1,6 @@
+tlpipe.container.timestream_common.datetime.year
+================================================
+
+.. currentmodule:: tlpipe.container.timestream_common
+
+.. autoattribute:: datetime.year

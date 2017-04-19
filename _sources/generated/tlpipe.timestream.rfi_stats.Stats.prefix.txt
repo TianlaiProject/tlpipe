@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.Stats.prefix
+========================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. autoattribute:: Stats.prefix

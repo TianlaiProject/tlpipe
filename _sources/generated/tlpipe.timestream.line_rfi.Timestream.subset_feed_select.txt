@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Timestream.subset_feed_select
+========================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: Timestream.subset_feed_select

@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.Timestream.is_same_dec
+===============================================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. autoattribute:: Timestream.is_same_dec

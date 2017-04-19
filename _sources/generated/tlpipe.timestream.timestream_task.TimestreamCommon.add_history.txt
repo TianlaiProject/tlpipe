@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamCommon.add_history
+==============================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: TimestreamCommon.add_history

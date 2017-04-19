@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.Timestream.subset_frequency_select
+====================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: Timestream.subset_frequency_select

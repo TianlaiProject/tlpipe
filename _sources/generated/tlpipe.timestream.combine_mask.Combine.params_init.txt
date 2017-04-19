@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Combine.params_init
+==================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. autoattribute:: Combine.params_init

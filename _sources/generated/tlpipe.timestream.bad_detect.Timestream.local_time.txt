@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Timestream.local_time
+==================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. autoattribute:: Timestream.local_time

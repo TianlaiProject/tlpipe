@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.AutoMinorLocator.create_dummy_axis
+==============================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. automethod:: AutoMinorLocator.create_dummy_axis

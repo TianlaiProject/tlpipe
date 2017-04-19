@@ -46,6 +46,7 @@ tlpipe.timestream.rt2ts.Rt2ts
       ~Rt2ts.setup
       ~Rt2ts.show_params
       ~Rt2ts.stop_iteration
+      ~Rt2ts.subset_select
       ~Rt2ts.write_output
    
    

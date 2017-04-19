@@ -1,0 +1,6 @@
+tlpipe.utils.multiscale.MAD
+===========================
+
+.. currentmodule:: tlpipe.utils.multiscale
+
+.. autofunction:: MAD

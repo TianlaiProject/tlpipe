@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_flag.Timestream.load_main_axes_excl_main_data
+====================================================================
+
+.. currentmodule:: tlpipe.timestream.freq_flag
+
+.. automethod:: Timestream.load_main_axes_excl_main_data

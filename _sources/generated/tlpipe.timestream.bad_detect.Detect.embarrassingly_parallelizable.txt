@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Detect.embarrassingly_parallelizable
+=================================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. autoattribute:: Detect.embarrassingly_parallelizable

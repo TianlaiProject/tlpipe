@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.Timestream.is_dish
+===========================================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. autoattribute:: Timestream.is_dish

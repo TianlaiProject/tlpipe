@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Timestream.group_name_allowed
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: Timestream.group_name_allowed

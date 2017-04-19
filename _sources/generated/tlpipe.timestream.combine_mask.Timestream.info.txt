@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Timestream.info
+==============================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. automethod:: Timestream.info

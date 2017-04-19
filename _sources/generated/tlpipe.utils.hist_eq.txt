@@ -1,0 +1,25 @@
+tlpipe.utils.hist_eq
+====================
+
+.. automodule:: tlpipe.utils.hist_eq
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      hist_eq
+   
+   
+
+
+   
+   
+   
+
+
+   
+   
+   

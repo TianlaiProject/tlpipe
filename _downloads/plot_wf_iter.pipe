@@ -13,8 +13,16 @@ pipe_logging = 'notset'
 
 
 import glob
-data_dir = 'dir/to/data' # your data directory
-files = sorted(glob.glob(data_dir+'/*.hdf5')) # at least 2 days data files as a list
+data_dir1 = 'dir1/to/data' # your data directory
+data_dir2 = 'dir2/to/data' # your data directory
+
+###  one way
+files = sorted(glob.glob(data_dir1+'/*.hdf5')) # more than 1 day's data files as a list
+
+### or another way
+group1 = sorted(glob.glob(data_dir1+'/*.hdf5'))
+group2 = sorted(glob.glob(data_dir2+'/*.hdf5'))
+files = [ group1, group2 ] # or two groups of data, each as a list of data files
 
 
 # data selection

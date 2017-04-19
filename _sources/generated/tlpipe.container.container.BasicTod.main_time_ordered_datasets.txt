@@ -1,0 +1,6 @@
+tlpipe.container.container.BasicTod.main_time_ordered_datasets
+==============================================================
+
+.. currentmodule:: tlpipe.container.container
+
+.. autoattribute:: BasicTod.main_time_ordered_datasets

@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.OneAndOne.cacheable
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. autoattribute:: OneAndOne.cacheable

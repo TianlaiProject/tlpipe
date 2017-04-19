@@ -71,7 +71,6 @@ tlpipe.plot.plot_waterfall.Timestream
       ~Timestream.add_history
       ~Timestream.all_data_operate
       ~Timestream.apply_mask
-      ~Timestream.attrs_name_allowed
       ~Timestream.bl_data_operate
       ~Timestream.check_status
       ~Timestream.close
@@ -115,23 +114,27 @@ tlpipe.plot.plot_waterfall.Timestream
       ~Timestream.keys
       ~Timestream.lin2stokes
       ~Timestream.load_all
-      ~Timestream.load_common
+      ~Timestream.load_common_attrs
+      ~Timestream.load_common_datasets
+      ~Timestream.load_main_axes_excl_main_data
+      ~Timestream.load_main_axes_ordered_data
       ~Timestream.load_main_data
-      ~Timestream.load_time_ordered
-      ~Timestream.load_tod_excl_main_data
+      ~Timestream.load_time_ordered_attrs
+      ~Timestream.load_time_ordered_datasets
       ~Timestream.pol_and_bl_data_operate
       ~Timestream.pol_data_operate
       ~Timestream.polarization_select
       ~Timestream.redistribute
-      ~Timestream.reload_all
-      ~Timestream.reload_common
-      ~Timestream.reload_main_data
-      ~Timestream.reload_time_ordered
-      ~Timestream.reload_tod_excl_main_data
       ~Timestream.require_dataset
       ~Timestream.require_group
       ~Timestream.save
       ~Timestream.stokes2lin
+      ~Timestream.subset
+      ~Timestream.subset_feed_select
+      ~Timestream.subset_frequency_select
+      ~Timestream.subset_polarization_select
+      ~Timestream.subset_select
+      ~Timestream.subset_time_select
       ~Timestream.time_and_bl_data_operate
       ~Timestream.time_and_freq_data_operate
       ~Timestream.time_and_pol_data_operate

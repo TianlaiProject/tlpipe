@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Detect.read_process_write
+======================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: Detect.read_process_write

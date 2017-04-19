@@ -1,0 +1,6 @@
+tlpipe.plot.plot_integral.Timestream.subset_feed_select
+=======================================================
+
+.. currentmodule:: tlpipe.plot.plot_integral
+
+.. automethod:: Timestream.subset_feed_select

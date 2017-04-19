@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.RawTimestream.dataset_name_allowed
+====================================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: RawTimestream.dataset_name_allowed

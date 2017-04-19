@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Detect.params_init
+===============================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. autoattribute:: Detect.params_init

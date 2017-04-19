@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.Timestream.subset_polarization_select
+====================================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. automethod:: Timestream.subset_polarization_select

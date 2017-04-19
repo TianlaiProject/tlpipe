@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Timestream.load_all
+================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: Timestream.load_all

@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.Timestream.save
+==============================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. automethod:: Timestream.save

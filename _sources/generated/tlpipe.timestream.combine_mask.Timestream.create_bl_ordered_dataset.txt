@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Timestream.create_bl_ordered_dataset
+===================================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. automethod:: Timestream.create_bl_ordered_dataset

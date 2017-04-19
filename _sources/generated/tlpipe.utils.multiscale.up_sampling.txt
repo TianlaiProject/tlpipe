@@ -1,0 +1,6 @@
+tlpipe.utils.multiscale.up_sampling
+===================================
+
+.. currentmodule:: tlpipe.utils.multiscale
+
+.. autofunction:: up_sampling

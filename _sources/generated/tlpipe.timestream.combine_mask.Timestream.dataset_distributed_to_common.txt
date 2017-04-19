@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Timestream.dataset_distributed_to_common
+=======================================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. automethod:: Timestream.dataset_distributed_to_common

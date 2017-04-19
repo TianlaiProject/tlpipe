@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Timestream.save
+==============================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. automethod:: Timestream.save

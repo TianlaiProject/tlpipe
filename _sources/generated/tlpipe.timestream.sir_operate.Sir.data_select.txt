@@ -1,0 +1,6 @@
+tlpipe.timestream.sir_operate.Sir.data_select
+=============================================
+
+.. currentmodule:: tlpipe.timestream.sir_operate
+
+.. automethod:: Sir.data_select

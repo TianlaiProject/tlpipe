@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamTask.read_process_write
+===================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: TimestreamTask.read_process_write

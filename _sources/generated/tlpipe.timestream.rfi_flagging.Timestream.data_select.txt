@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.Timestream.data_select
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. automethod:: Timestream.data_select

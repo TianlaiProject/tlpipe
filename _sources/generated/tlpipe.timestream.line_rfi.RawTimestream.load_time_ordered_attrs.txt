@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.RawTimestream.load_time_ordered_attrs
+================================================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: RawTimestream.load_time_ordered_attrs

@@ -1,0 +1,6 @@
+tlpipe.timestream.accumulate.Timestream.load_main_axes_ordered_data
+===================================================================
+
+.. currentmodule:: tlpipe.timestream.accumulate
+
+.. automethod:: Timestream.load_main_axes_ordered_data

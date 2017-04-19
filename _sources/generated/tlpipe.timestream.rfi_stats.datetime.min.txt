@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.datetime.min
+========================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. autoattribute:: datetime.min

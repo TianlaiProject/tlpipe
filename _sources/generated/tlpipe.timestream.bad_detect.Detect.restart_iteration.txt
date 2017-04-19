@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Detect.restart_iteration
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: Detect.restart_iteration

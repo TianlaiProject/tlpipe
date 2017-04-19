@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.Timestream.flush
+==================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: Timestream.flush

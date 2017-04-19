@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.RawTimestream.local_time
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. autoattribute:: RawTimestream.local_time

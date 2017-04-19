@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Flag.cast_input
+=================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: Flag.cast_input

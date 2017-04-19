@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.RawTimestream.to_memory
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: RawTimestream.to_memory

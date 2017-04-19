@@ -1,0 +1,6 @@
+tlpipe.timestream.sir_operate.Sir.subset_select
+===============================================
+
+.. currentmodule:: tlpipe.timestream.sir_operate
+
+.. automethod:: Sir.subset_select

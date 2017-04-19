@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.RawTimestream.is_same_dec
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. autoattribute:: RawTimestream.is_same_dec

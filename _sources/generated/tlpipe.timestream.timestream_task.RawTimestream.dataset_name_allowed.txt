@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.RawTimestream.dataset_name_allowed
+====================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: RawTimestream.dataset_name_allowed

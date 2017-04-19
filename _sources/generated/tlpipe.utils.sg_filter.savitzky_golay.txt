@@ -1,0 +1,6 @@
+tlpipe.utils.sg_filter.savitzky_golay
+=====================================
+
+.. currentmodule:: tlpipe.utils.sg_filter
+
+.. autofunction:: savitzky_golay

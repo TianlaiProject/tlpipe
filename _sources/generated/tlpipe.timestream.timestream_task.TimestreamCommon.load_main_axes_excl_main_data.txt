@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamCommon.load_main_axes_excl_main_data
+================================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: TimestreamCommon.load_main_axes_excl_main_data

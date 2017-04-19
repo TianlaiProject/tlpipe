@@ -1,0 +1,52 @@
+tlpipe.timestream.bad_detect.Detect
+===================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. autoclass:: Detect
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Detect.cacheable
+      ~Detect.embarrassingly_parallelizable
+      ~Detect.history
+      ~Detect.iteration
+      ~Detect.params_init
+      ~Detect.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Detect.cast_input
+      ~Detect.copy_input
+      ~Detect.data_select
+      ~Detect.finish
+      ~Detect.next
+      ~Detect.process
+      ~Detect.read_input
+      ~Detect.read_output
+      ~Detect.read_process_write
+      ~Detect.restart_iteration
+      ~Detect.setup
+      ~Detect.show_params
+      ~Detect.stop_iteration
+      ~Detect.subset_select
+      ~Detect.write_output
+   
+   

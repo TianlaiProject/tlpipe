@@ -1,0 +1,6 @@
+tlpipe.utils.hist_eq.hist_eq
+============================
+
+.. currentmodule:: tlpipe.utils.hist_eq
+
+.. autofunction:: hist_eq

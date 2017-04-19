@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.RawTimestream.load_common_attrs
+==========================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: RawTimestream.load_common_attrs

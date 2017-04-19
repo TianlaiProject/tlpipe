@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.RawTimestream.apply_mask
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. automethod:: RawTimestream.apply_mask

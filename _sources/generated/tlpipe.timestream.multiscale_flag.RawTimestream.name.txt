@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.RawTimestream.name
+====================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. autoattribute:: RawTimestream.name

@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.RawTimestream.check_status
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: RawTimestream.check_status

@@ -1,0 +1,6 @@
+tlpipe.timestream.subdata.Subdata.prefix
+========================================
+
+.. currentmodule:: tlpipe.timestream.subdata
+
+.. autoattribute:: Subdata.prefix

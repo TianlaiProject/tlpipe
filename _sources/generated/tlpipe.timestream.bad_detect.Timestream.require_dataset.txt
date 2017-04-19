@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Timestream.require_dataset
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: Timestream.require_dataset

@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.fg
+===========================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. autofunction:: fg

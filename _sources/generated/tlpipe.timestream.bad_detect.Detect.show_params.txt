@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Detect.show_params
+===============================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: Detect.show_params

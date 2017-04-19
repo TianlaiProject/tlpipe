@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamCommon.require_dataset
+==================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: TimestreamCommon.require_dataset

@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.Flag.copy_input
+==============================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. automethod:: Flag.copy_input

@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.Stats.data_select
+=============================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. automethod:: Stats.data_select

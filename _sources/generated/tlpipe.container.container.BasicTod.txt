@@ -1,0 +1,95 @@
+tlpipe.container.container.BasicTod
+===================================
+
+.. currentmodule:: tlpipe.container.container
+
+.. autoclass:: BasicTod
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~BasicTod.attrs
+      ~BasicTod.comm
+      ~BasicTod.dist_axis
+      ~BasicTod.dist_axis_name
+      ~BasicTod.distributed
+      ~BasicTod.file
+      ~BasicTod.history
+      ~BasicTod.main_axes_ordered_datasets
+      ~BasicTod.main_data
+      ~BasicTod.main_data_axes
+      ~BasicTod.main_data_name
+      ~BasicTod.main_time_ordered_datasets
+      ~BasicTod.name
+      ~BasicTod.ondisk
+      ~BasicTod.parent
+      ~BasicTod.time_ordered_attrs
+      ~BasicTod.time_ordered_datasets
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~BasicTod.add_history
+      ~BasicTod.all_data_operate
+      ~BasicTod.check_status
+      ~BasicTod.close
+      ~BasicTod.copy
+      ~BasicTod.create_dataset
+      ~BasicTod.create_group
+      ~BasicTod.create_main_axis_ordered_dataset
+      ~BasicTod.create_main_data
+      ~BasicTod.create_main_time_ordered_dataset
+      ~BasicTod.create_time_ordered_dataset
+      ~BasicTod.data_operate
+      ~BasicTod.data_select
+      ~BasicTod.dataset_common_to_distributed
+      ~BasicTod.dataset_distributed_to_common
+      ~BasicTod.dataset_name_allowed
+      ~BasicTod.delete_a_dataset
+      ~BasicTod.delete_an_attribute
+      ~BasicTod.flush
+      ~BasicTod.from_file
+      ~BasicTod.from_group
+      ~BasicTod.get
+      ~BasicTod.group_name_allowed
+      ~BasicTod.info
+      ~BasicTod.items
+      ~BasicTod.iteritems
+      ~BasicTod.iterkeys
+      ~BasicTod.itervalues
+      ~BasicTod.keys
+      ~BasicTod.load_all
+      ~BasicTod.load_common_attrs
+      ~BasicTod.load_common_datasets
+      ~BasicTod.load_main_axes_excl_main_data
+      ~BasicTod.load_main_axes_ordered_data
+      ~BasicTod.load_main_data
+      ~BasicTod.load_time_ordered_attrs
+      ~BasicTod.load_time_ordered_datasets
+      ~BasicTod.redistribute
+      ~BasicTod.require_dataset
+      ~BasicTod.require_group
+      ~BasicTod.save
+      ~BasicTod.subset
+      ~BasicTod.subset_select
+      ~BasicTod.to_disk
+      ~BasicTod.to_files
+      ~BasicTod.to_memory
+      ~BasicTod.values
+   
+   

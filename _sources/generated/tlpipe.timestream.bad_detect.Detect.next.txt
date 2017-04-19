@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Detect.next
+========================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: Detect.next

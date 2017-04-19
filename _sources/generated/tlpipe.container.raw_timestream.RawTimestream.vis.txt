@@ -1,0 +1,6 @@
+tlpipe.container.raw_timestream.RawTimestream.vis
+=================================================
+
+.. currentmodule:: tlpipe.container.raw_timestream
+
+.. autoattribute:: RawTimestream.vis

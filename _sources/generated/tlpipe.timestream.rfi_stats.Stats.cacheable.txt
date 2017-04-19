@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.Stats.cacheable
+===========================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. autoattribute:: Stats.cacheable

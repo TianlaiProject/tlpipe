@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.RawTimestream.separate_pol_and_bl
+===================================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: RawTimestream.separate_pol_and_bl

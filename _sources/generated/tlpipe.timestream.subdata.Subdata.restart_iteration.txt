@@ -1,0 +1,6 @@
+tlpipe.timestream.subdata.Subdata.restart_iteration
+===================================================
+
+.. currentmodule:: tlpipe.timestream.subdata
+
+.. automethod:: Subdata.restart_iteration

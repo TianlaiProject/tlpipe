@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Timestream.load_main_axes_ordered_data
+===================================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: Timestream.load_main_axes_ordered_data

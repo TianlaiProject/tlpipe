@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.RawTimestream.main_data_name
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. autoattribute:: RawTimestream.main_data_name

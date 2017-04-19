@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.OneAndOne.setup
+=================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: OneAndOne.setup

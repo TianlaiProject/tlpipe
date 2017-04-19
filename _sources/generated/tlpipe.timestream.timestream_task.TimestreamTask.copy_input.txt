@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamTask.copy_input
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: TimestreamTask.copy_input

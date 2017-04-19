@@ -1,0 +1,6 @@
+tlpipe.container.timestream.Timestream.bl_data_operate
+======================================================
+
+.. currentmodule:: tlpipe.container.timestream
+
+.. automethod:: Timestream.bl_data_operate

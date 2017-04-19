@@ -47,6 +47,7 @@ tlpipe.timestream.ns_cal.NsCal
       ~NsCal.setup
       ~NsCal.show_params
       ~NsCal.stop_iteration
+      ~NsCal.subset_select
       ~NsCal.write_output
    
    

@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.RawTimestream.parent
+======================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. autoattribute:: RawTimestream.parent

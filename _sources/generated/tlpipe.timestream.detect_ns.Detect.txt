@@ -46,6 +46,7 @@ tlpipe.timestream.detect_ns.Detect
       ~Detect.setup
       ~Detect.show_params
       ~Detect.stop_iteration
+      ~Detect.subset_select
       ~Detect.write_output
    
    

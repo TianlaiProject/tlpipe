@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.RawTimestream.check_status
+============================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: RawTimestream.check_status

@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.subset_feed_select
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Timestream.subset_feed_select

@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.RawTimestream.group_name_allowed
+===============================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. automethod:: RawTimestream.group_name_allowed

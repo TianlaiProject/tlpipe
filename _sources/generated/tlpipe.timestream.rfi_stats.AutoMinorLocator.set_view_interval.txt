@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.AutoMinorLocator.set_view_interval
+==============================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. automethod:: AutoMinorLocator.set_view_interval

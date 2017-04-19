@@ -1,0 +1,6 @@
+tlpipe.timestream.freq_rebin.Timestream.load_main_axes_ordered_data
+===================================================================
+
+.. currentmodule:: tlpipe.timestream.freq_rebin
+
+.. automethod:: Timestream.load_main_axes_ordered_data

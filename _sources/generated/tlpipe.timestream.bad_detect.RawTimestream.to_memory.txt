@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.RawTimestream.to_memory
+====================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: RawTimestream.to_memory

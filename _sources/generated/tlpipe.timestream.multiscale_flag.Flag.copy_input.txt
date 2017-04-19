@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Flag.copy_input
+=================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. automethod:: Flag.copy_input

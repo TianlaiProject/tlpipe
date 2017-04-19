@@ -1,0 +1,6 @@
+tlpipe.container.container.BasicTod.name
+========================================
+
+.. currentmodule:: tlpipe.container.container
+
+.. autoattribute:: BasicTod.name

@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Timestream.main_data_axes
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. autoattribute:: Timestream.main_data_axes

@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamCommon.load_common_datasets
+=======================================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: TimestreamCommon.load_common_datasets

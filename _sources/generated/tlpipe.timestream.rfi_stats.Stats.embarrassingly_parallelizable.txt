@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.Stats.embarrassingly_parallelizable
+===============================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. autoattribute:: Stats.embarrassingly_parallelizable

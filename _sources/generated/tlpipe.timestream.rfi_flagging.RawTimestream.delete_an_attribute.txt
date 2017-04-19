@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.RawTimestream.delete_an_attribute
+================================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. automethod:: RawTimestream.delete_an_attribute

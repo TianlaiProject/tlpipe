@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_stats.Stats.params_init
+=============================================
+
+.. currentmodule:: tlpipe.timestream.rfi_stats
+
+.. autoattribute:: Stats.params_init

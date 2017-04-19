@@ -1,0 +1,6 @@
+tlpipe.timestream.combine_mask.Combine.read_process_write
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.combine_mask
+
+.. automethod:: Combine.read_process_write

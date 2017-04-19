@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamTask.subset_select
+==============================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: TimestreamTask.subset_select

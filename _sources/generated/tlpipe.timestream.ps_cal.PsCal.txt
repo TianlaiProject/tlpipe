@@ -46,6 +46,7 @@ tlpipe.timestream.ps_cal.PsCal
       ~PsCal.setup
       ~PsCal.show_params
       ~PsCal.stop_iteration
+      ~PsCal.subset_select
       ~PsCal.write_output
    
    

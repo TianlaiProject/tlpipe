@@ -1,0 +1,6 @@
+tlpipe.container.timestream_common.datetime.tzinfo
+==================================================
+
+.. currentmodule:: tlpipe.container.timestream_common
+
+.. autoattribute:: datetime.tzinfo

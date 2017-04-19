@@ -1,0 +1,53 @@
+tlpipe.timestream.multiscale_flag.Flag
+======================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. autoclass:: Flag
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Flag.cacheable
+      ~Flag.embarrassingly_parallelizable
+      ~Flag.history
+      ~Flag.iteration
+      ~Flag.params_init
+      ~Flag.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Flag.cast_input
+      ~Flag.copy_input
+      ~Flag.data_select
+      ~Flag.finish
+      ~Flag.flag
+      ~Flag.next
+      ~Flag.process
+      ~Flag.read_input
+      ~Flag.read_output
+      ~Flag.read_process_write
+      ~Flag.restart_iteration
+      ~Flag.setup
+      ~Flag.show_params
+      ~Flag.stop_iteration
+      ~Flag.subset_select
+      ~Flag.write_output
+   
+   

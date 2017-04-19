@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.TimestreamTask.show_params
+============================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: TimestreamTask.show_params

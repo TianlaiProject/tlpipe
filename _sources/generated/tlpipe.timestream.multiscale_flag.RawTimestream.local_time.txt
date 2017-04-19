@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.RawTimestream.local_time
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. autoattribute:: RawTimestream.local_time

@@ -1,0 +1,6 @@
+tlpipe.container.timestream.Timestream.items
+============================================
+
+.. currentmodule:: tlpipe.container.timestream
+
+.. automethod:: Timestream.items

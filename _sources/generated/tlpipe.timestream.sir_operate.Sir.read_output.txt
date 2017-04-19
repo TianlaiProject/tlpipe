@@ -1,0 +1,6 @@
+tlpipe.timestream.sir_operate.Sir.read_output
+=============================================
+
+.. currentmodule:: tlpipe.timestream.sir_operate
+
+.. automethod:: Sir.read_output

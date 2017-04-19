@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.RawTimestream.create_main_data
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: RawTimestream.create_main_data

@@ -1,0 +1,6 @@
+tlpipe.timestream.multiscale_flag.Timestream.masked_vis
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.multiscale_flag
+
+.. autoattribute:: Timestream.masked_vis

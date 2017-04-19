@@ -1,0 +1,6 @@
+tlpipe.container.container.BasicTod.redistribute
+================================================
+
+.. currentmodule:: tlpipe.container.container
+
+.. automethod:: BasicTod.redistribute

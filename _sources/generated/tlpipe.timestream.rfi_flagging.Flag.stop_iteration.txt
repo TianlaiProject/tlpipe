@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.Flag.stop_iteration
+==================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. automethod:: Flag.stop_iteration

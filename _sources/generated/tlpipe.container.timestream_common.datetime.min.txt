@@ -1,0 +1,6 @@
+tlpipe.container.timestream_common.datetime.min
+===============================================
+
+.. currentmodule:: tlpipe.container.timestream_common
+
+.. autoattribute:: datetime.min

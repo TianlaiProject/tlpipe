@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.RawTimestream.history
+====================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. autoattribute:: RawTimestream.history

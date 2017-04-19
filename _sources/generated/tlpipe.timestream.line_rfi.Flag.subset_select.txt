@@ -1,0 +1,6 @@
+tlpipe.timestream.line_rfi.Flag.subset_select
+=============================================
+
+.. currentmodule:: tlpipe.timestream.line_rfi
+
+.. automethod:: Flag.subset_select

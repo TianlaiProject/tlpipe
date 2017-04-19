@@ -1,0 +1,6 @@
+tlpipe.timestream.rfi_flagging.Timestream.from_file
+===================================================
+
+.. currentmodule:: tlpipe.timestream.rfi_flagging
+
+.. automethod:: Timestream.from_file

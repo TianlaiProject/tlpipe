@@ -1,0 +1,6 @@
+tlpipe.timestream.timestream_task.RawTimestream.to_memory
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.timestream_task
+
+.. automethod:: RawTimestream.to_memory

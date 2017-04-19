@@ -1,0 +1,6 @@
+tlpipe.plot.plot_waterfall.RawTimestream.subset_select
+======================================================
+
+.. currentmodule:: tlpipe.plot.plot_waterfall
+
+.. automethod:: RawTimestream.subset_select

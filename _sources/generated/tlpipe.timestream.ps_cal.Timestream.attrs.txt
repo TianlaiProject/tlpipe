@@ -1,0 +1,6 @@
+tlpipe.timestream.ps_cal.Timestream.attrs
+=========================================
+
+.. currentmodule:: tlpipe.timestream.ps_cal
+
+.. autoattribute:: Timestream.attrs

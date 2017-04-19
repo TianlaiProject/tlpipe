@@ -1,0 +1,29 @@
+tlpipe.utils.robust_stats
+=========================
+
+.. automodule:: tlpipe.utils.robust_stats
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      MAD
+      mad
+      winsorize
+      winsorized_mean_and_std
+      winsorized_mode
+   
+   
+
+
+   
+   
+   
+
+
+   
+   
+   

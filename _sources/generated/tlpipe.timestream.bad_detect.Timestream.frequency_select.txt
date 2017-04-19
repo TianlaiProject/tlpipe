@@ -1,0 +1,6 @@
+tlpipe.timestream.bad_detect.Timestream.frequency_select
+========================================================
+
+.. currentmodule:: tlpipe.timestream.bad_detect
+
+.. automethod:: Timestream.frequency_select
