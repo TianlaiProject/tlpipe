@@ -12,7 +12,6 @@ import numpy as np
 import ephem
 import aipy as a
 import timestream_task
-import tod_task
 from tlpipe.utils.date_util import get_ephdate
 from caput import mpiutil
 
