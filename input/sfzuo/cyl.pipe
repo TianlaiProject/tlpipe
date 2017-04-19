@@ -10,6 +10,8 @@ pipe_tasks = []
 pipe_outdir = './output/'
 pipe_logging = 'notset'
 # pipe_logging = 'info'
+pipe_timing = True
+pipe_flush = True
 
 
 import glob
@@ -23,18 +25,20 @@ files2 = sorted(glob.glob(data_dir2+'/*.hdf5'))
 files3 = sorted(glob.glob(data_dir3+'/*.hdf5'))
 files4 = sorted(glob.glob(data_dir4+'/*.hdf5'))
 files5 = sorted(glob.glob(data_dir5+'/*.hdf5'))
-files = files1 + files2 + files3 + files4 + files5
+files = files2
 
 
 from tlpipe.timestream import dispatch
 pipe_tasks.append(dispatch.Dispatch)
 ### parameters for Dispatch
 dp_input_files = files
-dp_freq_select = (500, 505)
-dp_feed_select = [11, 12, 13, 14, 42, 43, 44, 45, 74, 75, 76, 78]
+dp_freq_select = (495, 510)
+# dp_feed_select = [1, 16, 31, 32, 49, 63, 64, 80, 96]
+# dp_feed_select = [11, 12, 18, 42, 43, 44, 45, 74, 75, 76, 78]
+# dp_extra_inttime = 0
 dp_exclude_bad = False
-dp_iterable = True
-dp_iter_num = 5
+# dp_iterable = True
+dp_iter_num = 1
 dp_tag_input_iter = False
 dp_out = 'dp'
 
@@ -43,162 +47,104 @@ pipe_tasks.append(detect_ns.Detect)
 ### parameters for Detect
 dt_in = dp_out
 # dt_feed = 1
-dt_iterable = True
+# dt_iterable = True
+dt_mask_near = 0
+# dt_mask_near = 1
 dt_out = 'dt'
 
-from tlpipe.plot import plot_slice
-pipe_tasks.append(plot_slice.Plot)
-### parameters for Plot
-psl_in = dt_out
-psl_iterable = True
-psl_plot_type = 'freq'
-psl_slices = 10
-psl_flag_mask = True
-psl_flag_ns = True
-psl_fig_name = 'slice_freq/slice'
-psl_out = 'psl'
-
-from tlpipe.plot import plot_integral
-pipe_tasks.append(plot_integral.Plot)
-### parameters for Plot
-pit_in = dt_out
-pit_iterable = True
-pit_integral = 'freq'
-# pit_bl_incl = [(i, i) for i in range(1, 193)]
-pit_flag_mask = True
-pit_flag_ns = True
-# pit_flag_ns = False
-pit_fig_name = 'int/int'
-pit_out = 'pit'
-
-from tlpipe.plot import plot_waterfall
-pipe_tasks.append(plot_waterfall.Plot)
-### parameters for Plot
-pwf_in = dt_out
-pwf_iterable = True
-pwf_flag_ns = True
-pwf_fig_name = 'rvis/vis'
-pwf_out = 'pwf'
-
-from tlpipe.timestream import line_rfi
-# pipe_tasks.append(line_rfi.Flag)
+from tlpipe.timestream import rfi_flagging
+pipe_tasks.append(rfi_flagging.Flag)
 ### parameters for Flag
-lf_in = dt_out
-lf_iterable = True
-lf_freq_window = 15
-lf_freq_sigma = 2.0
-lf_time_window = 15
-lf_time_sigma = 5.0
-lf_plot_fit = True
-# lf_plot_fit = False
-lf_freq_fig_name = 'rfi_freq/rfi'
-lf_time_fig_name = 'rfi_time/rfi'
-lf_out = 'lf'
+rf_in = dt_out
+# rf_iterable = True
+rf_first_threshold = 6.0
+rf_tk_size = 1.0
+rf_fk_size = 3.0
+rf_out = 'rf'
 
-from tlpipe.timestream import time_flag
-pipe_tasks.append(time_flag.Flag)
-### parameters for Flag
-tf_in = dt_out
-tf_iterable = True
-tf_out = 'tf'
+from tlpipe.timestream import subdata
+pipe_tasks.append(subdata.Subdata)
+### parameters for Subdata
+sd_in = rf_out
+sd_freq_select = (7, 9)
+# sd_iterable = True
+sd_out = 'sd'
+
+from tlpipe.timestream import bad_detect
+pipe_tasks.append(bad_detect.Detect)
+### parameters for Detect
+bd_in = sd_out
+# bd_iterable = True
+bd_out = 'bd'
 
 from tlpipe.timestream import ns_cal
 pipe_tasks.append(ns_cal.NsCal)
 ### parameters for NsCal
-# nc_in = dt_out
-nc_in = tf_out
-nc_iterable = True
-nc_plot_phs = True
-nc_fig_name = 'phs/phs_change'
+nc_in = bd_out
+# nc_iterable = True
+nc_phs_only = True
+nc_plot_gain = False
+# nc_feed_no = True
 nc_out = 'nc'
+
+from tlpipe.timestream import bad_detect
+pipe_tasks.append((bad_detect.Detect, 'bd1_'))
+### parameters for Detect
+bd1_in = nc_out
+# bd1_iterable = True
+bd1_out = 'bd1'
 
 from tlpipe.timestream import rt2ts
 pipe_tasks.append(rt2ts.Rt2ts)
 ### parameters for Rt2ts
-r2t_in = nc_out
-# r2t_in = dt_out
-r2t_iterable = True
+r2t_in = bd1_out
+# r2t_iterable = True
 r2t_out = 'r2t'
 
-from tlpipe.timestream import ps_fit
-pipe_tasks.append(ps_fit.PsFit)
-### parameters for PsFit
-pf_in = r2t_out
-pf_iterable = True
-pf_calibrator = 'cas'
-pf_shift = 120
-pf_plot_fit = True
-pf_fig_name = 'fit/fit'
-pf_output_files = [ 'ps_fit/file_%d.hdf5' %i for i in range(1, 7) ]
-pf_out = 'pf'
+from tlpipe.timestream import ps_cal
+pipe_tasks.append(ps_cal.PsCal)
+### parameters for PsCal
+pc_in = r2t_out
+# r2t_iterable = True
+# pc_calibrator = 'cas'
+pc_calibrator = 'cyg'
+pc_span = 1200
+pc_plot_figs = False
+pc_save_gain = True
+pc_temperature_convert = True
+pc_out = 'pc'
 
-from tlpipe.timestream import time_flag
-pipe_tasks.append((time_flag.Flag, 'tf1_'))
-### parameters for Flag
-tf1_in = pf_out
-tf1_iterable = True
-tf1_out = 'tf1'
+from tlpipe.timestream import bad_detect
+pipe_tasks.append((bad_detect.Detect, 'bd2_'))
+### parameters for Detect
+bd2_in = pc_out
+# bd2_iterable = True
+bd2_output_files = [ 'ps_cal/file_%d.hdf5' %i for i in range(1, 7) ]
+bd2_out = 'bd2'
 
-from tlpipe.timestream import freq_flag
-pipe_tasks.append(freq_flag.Flag)
-### parameters for Flag
-ff_in = tf1_out
-ff_iterable = True
-ff_out = 'ff'
-
-from tlpipe.plot import plot_slice
-pipe_tasks.append((plot_slice.Plot, 'psl1_'))
+from tlpipe.plot import plot_waterfall
+# pipe_tasks.append(plot_waterfall.Plot)
 ### parameters for Plot
-psl1_in = ff_out
-psl1_iterable = True
-psl1_plot_type = 'freq'
-psl1_slices = 10
-psl1_flag_mask = True
-psl1_flag_ns = True
-psl1_fig_name = 'slice_freq1/slice'
-psl1_out = 'psl1'
-
-from tlpipe.timestream import phase_closure
-pipe_tasks.append((phase_closure.Closure, 'pcl1_'))
-### parameters for Closure
-pcl1_in = ff_out
-pcl1_iterable = True
-pcl1_file_name = 'closure1/closure'
-pcl1_fig_name = 'closure1/closure'
-# pcl1_gauss_fit = True
-pcl1_out = 'pcl1'
-
-from tlpipe.timestream import ps_subtract
-# pipe_tasks.append(ps_subtract.PsSub)
-### parameters for PsSub
-ps_in = pf_out
-ps_input_files = pf_output_files
-# ps_ps = 'cas'
-ps_iter_num = 1
-ps_out = 'ps'
-
-from tlpipe.timestream import daytime_mask
-# pipe_tasks.append(daytime_mask.Mask)
-### parameters for Mask
-dm_in = ff_out
-dm_iterable = True
-dm_out = 'dm'
+pwf_in = bd2_out
+# pwf_iterable = True
+pwf_flag_mask = True
+pwf_flag_ns = True
+pwf_fig_name = 'vis_pc/vis'
+pwf_out = 'pwf'
 
 from tlpipe.timestream import re_order
 pipe_tasks.append(re_order.ReOrder)
 ### parameters for ReOrder
-ro_in = ff_out
-ro_iterable = True
-ro_output_files = [ 're_order/file_%d.hdf5' %i for i in range(1, 7) ]
+ro_in = bd2_out
+# ro_iterable = True
 ro_out = 'ro'
 
 from tlpipe.timestream import accumulate
 pipe_tasks.append(accumulate.Accum)
 ### parameters for Accum
 ac_in = ro_out
-ac_iterable = True
+# ac_iterable = True
 ac_check = False
-ac_output_files = [ 'accumulate/file_%d.hdf5' %i for i in range(1, 7) ]
 ac_out = 'ac'
 
 from tlpipe.timestream import barrier
@@ -212,40 +158,19 @@ av_in = ac_out
 av_output_files = [ 'average/file_%d.hdf5' %i for i in range(1, 7) ]
 av_out = 'av'
 
-from tlpipe.plot import plot_waterfall
-pipe_tasks.append((plot_waterfall.Plot, 'pwf2_'))
-### parameters for Plot
-pwf2_in = av_out
-pwf2_tag_output_iter = False
-pwf2_flag_mask = True
-pwf2_flag_ns = True
-pwf2_fig_name = 'vis_av/vis'
-pwf2_out = 'pwf2'
-
-from tlpipe.timestream import freq_rebin
-# pipe_tasks.append(freq_rebin.Rebin)
-### parameters for Rebin
-rb_in = av_out
-rb_input_files = av_output_files
-rb_bin_number = 1
-rb_out = 'rb'
-
-
 from tlpipe.timestream import map_making
 pipe_tasks.append(map_making.MapMaking)
 ### parameters for MapMaking
-# mm_in = ro_out
-# mm_in = rb_out
 mm_in = av_out
-# mm_input_files = av_output_files
-mm_iter_num = 1
+mm_input_files = av_output_files
+mm_feed_select = list(set(range(1, 97)) - set([28, 50, 72, 79]))
 mm_mask_daytime = False
 # mm_mask_time_range = [6.5, 24.0]
-# mm_bl_range = [14.0, 1.0e7] # use long baselines only
+mm_bl_range = [14.0, 1.0e7] # use long baselines only
 mm_auto_correlations = False
 mm_pol = 'xx'
 mm_noise_weight = False
 # mm_noise_weight = True
-# mm_dirty_map = True
-mm_dirty_map = False
+mm_dirty_map = True
+# mm_dirty_map = False
 mm_out = 'mm'
