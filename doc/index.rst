@@ -52,6 +52,7 @@ Reference
    core
    kiyopy
    pipeline
+   container
    timestream
    rfi
    cal

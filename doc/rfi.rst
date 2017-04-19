@@ -37,11 +37,3 @@ Mathematical morphological methods
 
    dilate_operator
    sir_operator
-
-Utilities
----------
-
-.. autosummary::
-   :toctree: generated/
-
-   winsorized_stats
