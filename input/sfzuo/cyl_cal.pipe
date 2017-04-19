@@ -1,0 +1,172 @@
+# -*- mode: python; -*-
+
+# input file for pipeline manager
+# execute this pipeline by either command of the following two:
+# tlpipe dir/to/cyl_cal.pipe
+# mpiexec -n N tlpipe dir/to/cyl_cal.pipe
+
+
+pipe_tasks = []
+pipe_outdir = './output_cal/'
+pipe_logging = 'notset'
+# pipe_logging = 'info'
+pipe_timing = True
+pipe_flush = True
+
+
+import glob
+data_dir1 = '/node3_disk/disk1/20160927201537_122hrhdf5_part1'
+data_dir2 = '/node3_disk/disk2/20160927201537_122hrhdf5_part2'
+data_dir3 = '/node3_disk/disk3/20160927201537_122hrhdf5_part3'
+data_dir4 = '/node3_disk/disk4/20160927201537_122hrhdf5_part4'
+data_dir5 = '/node3_disk/disk5/20160927201537_122hrhdf5_part5'
+files1 = sorted(glob.glob(data_dir1+'/*.hdf5'))
+files2 = sorted(glob.glob(data_dir2+'/*.hdf5'))
+files3 = sorted(glob.glob(data_dir3+'/*.hdf5'))
+files4 = sorted(glob.glob(data_dir4+'/*.hdf5'))
+files5 = sorted(glob.glob(data_dir5+'/*.hdf5'))
+# files = files1 + files2 + files3 + files4 + files5
+# files = files1 + files2 + files3
+# files = [ files1[:3],  files2[:5], files3[:4] ]
+# files = files1[:3]
+# files = files1[96]
+# files = files1[:10]
+# files = files1
+# files = files1[-20:-10] # for cyg A
+# files = files2[:10] # for cas A
+files = files2[123:133] # for cyg A
+# files = files2
+# files = files1[-2:] + files2[:12]
+# files = files2[10:11]
+
+
+from tlpipe.timestream import dispatch
+pipe_tasks.append(dispatch.Dispatch)
+### parameters for Dispatch
+dp_input_files = files
+dp_freq_select = (495, 510)
+# dp_freq_select = (400, 600)
+# dp_freq_select = (216, 792) # all used freqs
+# dp_feed_select = [11, 12, 13, 14]
+# dp_feed_select = [11, 12, 13, 14, 42, 43, 44, 45, 74, 75, 76, 78]
+# dp_feed_select = [11, 12, 18, 42, 43, 44, 45, 74, 75, 76, 78]
+# dp_extra_inttime = 0
+dp_exclude_bad = False
+# dp_iterable = True
+dp_iter_num = 1
+dp_tag_input_iter = False
+dp_out = 'dp'
+
+from tlpipe.timestream import detect_ns
+pipe_tasks.append(detect_ns.Detect)
+### parameters for Detect
+dt_in = dp_out
+# dt_feed = 1
+# dt_iterable = True
+dt_mask_near = 0
+# dt_mask_near = 1
+dt_out = 'dt'
+
+from tlpipe.timestream import rfi_flagging
+pipe_tasks.append(rfi_flagging.Flag)
+### parameters for Flag
+rf_in = dt_out
+# rf_iterable = True
+rf_first_threshold = 6.0
+# rf_flag_direction = ('time',)
+rf_tk_size = 1.0
+rf_fk_size = 3.0
+# rf_distribution = 'Gaussian'
+rf_out = 'rf'
+
+from tlpipe.timestream import subdata
+pipe_tasks.append(subdata.Subdata)
+### parameters for Subdata
+sd_in = rf_out
+sd_freq_select = (7, 9)
+# sd_iterable = True
+sd_out = 'sd'
+
+from tlpipe.timestream import bad_detect
+pipe_tasks.append(bad_detect.Detect)
+### parameters for Detect
+bd_in = sd_out
+# bd_iterable = True
+bd_out = 'bd'
+
+from tlpipe.timestream import ns_cal
+pipe_tasks.append(ns_cal.NsCal)
+### parameters for NsCal
+nc_in = bd_out
+# nc_iterable = True
+nc_phs_only = True
+nc_plot_gain = False
+# nc_feed_no = True
+nc_out = 'nc'
+
+from tlpipe.timestream import bad_detect
+pipe_tasks.append((bad_detect.Detect, 'bd1_'))
+### parameters for Detect
+bd1_in = nc_out
+# bd1_iterable = True
+bd1_out = 'bd1'
+
+from tlpipe.timestream import rt2ts
+pipe_tasks.append(rt2ts.Rt2ts)
+### parameters for Rt2ts
+r2t_in = bd1_out
+# r2t_iterable = True
+r2t_out = 'r2t'
+
+from tlpipe.timestream import ps_cal
+pipe_tasks.append(ps_cal.PsCal)
+### parameters for PsCal
+pc_in = r2t_out
+# r2t_iterable = True
+# pc_calibrator = 'cas'
+pc_calibrator = 'cyg'
+pc_span = 1200
+pc_plot_figs = False
+pc_save_gain = True
+pc_temperature_convert = True
+# pc_show_info = True
+pc_out = 'pc'
+
+from tlpipe.timestream import bad_detect
+pipe_tasks.append((bad_detect.Detect, 'bd2_'))
+### parameters for Detect
+bd2_in = pc_out
+# bd2_iterable = True
+bd2_out = 'bd2'
+
+
+from tlpipe.plot import plot_waterfall
+pipe_tasks.append(plot_waterfall.Plot)
+### parameters for Plot
+pwf_in = bd2_out
+# pwf_iterable = True
+pwf_flag_mask = True
+pwf_flag_ns = True
+pwf_fig_name = 'vis_pc/vis'
+# pwf_show_info = True
+pwf_out = 'pwf'
+
+from tlpipe.timestream import phs2src
+pipe_tasks.append(phs2src.Phs2src)
+### parameters for Phs2src
+p2s_in = bd2_out
+# p2s_iterable = True
+p2s_source = 'cyg'
+# p2s_show_info = True
+p2s_out = 'p2s'
+
+from tlpipe.plot import plot_waterfall
+pipe_tasks.append((plot_waterfall.Plot, 'pwf1_'))
+### parameters for Plot
+pwf1_in = p2s_out
+# pwf1_iterable = True
+pwf1_flag_mask = True
+pwf1_flag_ns = True
+pwf1_fig_name = 'vis_phs2src/vis'
+# pwf1_show_info = True
+pwf1_out = 'pwf1'
