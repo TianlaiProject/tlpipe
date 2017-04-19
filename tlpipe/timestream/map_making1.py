@@ -78,7 +78,8 @@ class MapMaking(timestream_task.TimestreamTask):
         lon = 0.0
         # lon = np.degrees(ts['ra_dec'][0, 0]) # the first ra
         freqs = ts.freq.data.to_numpy_array(root=None)
-        ndays = 1
+        band_width = ts.attrs['freqstep'] # MHz
+        ndays = ts.attrs['ndays']
         feeds = ts['feedno'][:]
         az, alt = ts['az_alt'][0]
         az = np.degrees(az)
@@ -90,7 +91,10 @@ class MapMaking(timestream_task.TimestreamTask):
             dish_width = ts.attrs['dishdiam']
             tel = tl_dish.TlUnpolarisedDishArray(lat, lon, freqs, beam_theta_range, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, dish_width, feedpos, pointing)
         elif ts.is_cylinder:
-            cyl_width = ts.attrs['cywid']
+            # factor = 1.2 # suppose an illumination efficiency, keep same with that in timestream_common
+            factor = 0.79 # for xx
+            # factor = 0.88 # for yy
+            cyl_width = factor * ts.attrs['cywid']
             tel = tl_cylinder.TlUnpolarisedCylinder(lat, lon, freqs, beam_theta_range, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, cyl_width, feedpos)
         else:
             raise RuntimeError('Unknown array type %s' % ts.attrs['telescope'])
