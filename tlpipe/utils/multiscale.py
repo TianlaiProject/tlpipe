@@ -37,7 +37,7 @@ def starlet_transform(a, level=None, gen2=False, approx_only=False, phi=_phi):
     """
 
     if level == None:
-        level = int(np.ceil(np.log2(np.min(input_image.shape))))
+        level = int(np.ceil(np.log2(np.min(a.shape))))
 
     if level <= 0:
         return [ a ]
@@ -76,7 +76,7 @@ def multiscale_median_transform(a, level=None, scale=2, approx_only=False):
     """Multiscale median transform."""
 
     if level == None:
-        level = int(np.ceil(np.log2(np.min(input_image.shape))))
+        level = int(np.ceil(np.log2(np.min(a.shape))))
 
     if level <= 0:
         return [ a ]
@@ -110,7 +110,7 @@ def median_wavelet_transform(a, level=None, scale=2, tau=5.0, approx_only=False,
     """Median-wavelet transfrom."""
 
     if level == None:
-        level = int(np.ceil(np.log2(np.min(input_image.shape))))
+        level = int(np.ceil(np.log2(np.min(a.shape))))
 
     if level <= 0:
         return [ a ]
@@ -151,7 +151,7 @@ def median_wavelet_detrend(a, level=None, scale=2, tau=5.0, phi=_phi):
 def multiscale_median_flag(a, level=None, scale=2, tau=5.0, return_mask=True):
 
     if level == None:
-        level = int(np.ceil(np.log2(np.min(input_image.shape))))
+        level = int(np.ceil(np.log2(np.min(a.shape))))
 
     if return_mask:
         mask = np.zeros_like(a, dtype=bool)
