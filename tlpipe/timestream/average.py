@@ -16,7 +16,7 @@ import timestream_task
 class Average(timestream_task.TimestreamTask):
     """Average the accumulated data by dividing its weight.
 
-    This task works for the accelerated data returned by task
+    This task works for the accumulated data returned by task
     :class:`~tlpipe.timestream.accumulate.Accum`.
 
     """
