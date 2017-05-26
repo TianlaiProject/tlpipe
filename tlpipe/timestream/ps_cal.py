@@ -229,10 +229,16 @@ class PsCal(timestream_task.TimestreamTask):
             if mask_cnt > 0.3 * nfeed**2:
                 continue
 
-            # Eigen decomposition
+            # set invalid val to 0
             # Vmat = np.where(np.isfinite(Vmat), Vmat, 0)
-            V0, S = rpca_decomp.decompose(Vmat, max_iter=100, threshold='hard', tol=1.0e-6, debug=False)
-            # V0, S = rpca_decomp.decompose(Vmat, max_iter=100, threshold='soft', tol=1.0e-6, debug=False)
+
+            # initialize the outliers
+            med = np.median(Vmat.real) + 1.0J * np.median(Vmat.imag)
+            diff = Vmat - med
+            S0 = np.where(np.abs(diff)>3.0*rpca_decomp.MAD(Vmat), diff, 0)
+            # stable PCA decomposition
+            V0, S = rpca_decomp.decompose(Vmat, rank=1, S=S0, max_iter=100, threshold='hard', tol=1.0e-6, debug=False)
+            # V0, S = rpca_decomp.decompose(Vmat, rank=1, S=S0, max_iter=100, threshold='soft', tol=1.0e-6, debug=False)
 
             # plot
             if plot_figs:

@@ -1,6 +1,23 @@
 import numpy as np
 from scipy import linalg as la
-from robust_stats import MAD
+
+
+def mad(a):
+    """Median absolute deviation. Works for both real and complex array."""
+
+    def madr(x):
+        """Median absolute deviation of a real array."""
+        return np.median(np.abs(x - np.median(x)))
+
+    if np.isrealobj(a):
+        return madr(a)
+    else:
+        return np.sqrt(madr(a.real)**2 + madr(a.imag)**2)
+
+def MAD(a):
+    """Median absolute deviation divides 0.6745."""
+    return mad(a) / 0.6745
+
 
 
 def l0_norm(a):
@@ -31,67 +48,73 @@ def shrink(a, lmbda):
     return sign(a) * np.maximum(np.abs(a) - lmbda, 0.0) # work for both real and complex
 
 
-def decompose(V, rank=1, lmbda=None, threshold='hard', max_iter=100, tol=1.0e-8, check_hermitian=False, debug=False):
-    """Fixed-rank stable principal component decomposition of an Hermitian matrix."""
+def decompose(M, rank=1, S=None, lmbda=None, threshold='hard', max_iter=100, tol=1.0e-8, check_hermitian=False, debug=False):
+    """Stable principal component decomposition of an Hermitian matrix."""
 
     if check_hermitian:
-        if not np.allclose(V, V.T.conj()):
-            raise ValueError('V must be a Hermitian matrix')
-
-    d = V.shape[0]
-    VF= la.norm(V, ord='fro')
+        if not np.allclose(M, M.T.conj()):
+            raise ValueError('M must be a Hermitian matrix')
 
     if lmbda is None:
-        # lmbda = MAD(V)
-        # lmbda = max(1.0, 2 * np.log(d)**0.5) * min(MAD(V), np.std(V))
-        lmbda = max(1.0, 2 * np.log10(d)**0.5) * min(MAD(V), np.std(V))
         fixed_lmbda = False
-        if debug:
-            print 'lmbda:', lmbda
     else:
         fixed_lmbda = True
 
-    N_old = np.zeros_like(V)
-    # initialize S to be the outliers
     if threshold == 'hard':
-        S = truncate(V, lmbda)
+        hard  = True
     elif threshold == 'soft':
-        S = shrink(V, lmbda)
+        hard = False
     else:
         raise ValueError('Unknown thresholding method: %s' % threshold)
 
+    if (S is None) or (S.shape != M.shape):
+        # initialize S as zero
+        S = np.zeros_like(M)
+    else:
+        S = S.astype(M.dtype)
+
+    S_old = S
+    L_old = np.zeros_like(M)
+
+    d = M.shape[0]
+    MF= la.norm(M, ord='fro')
+
     for it in xrange(max_iter):
         # compute only the largest rank eigen values and vectors, which is faster
-        s, U = la.eigh(V - S, eigvals=(d-rank, d-1))
-        # threshold s to make V0 Hermitian positive semidefinite
-        # V0 = np.dot(U[:, -rank:]*np.maximum(s[-rank:], 0), U[:, -rank:].T.conj())
-        V0 = np.dot(U*np.maximum(s, 0), U.T.conj())
+        s, U = la.eigh(M - S, eigvals=(d-rank, d-1))
+        # threshold s to make L Hermitian positive semidefinite
+        # L = np.dot(U[:, -rank:]*np.maximum(s[-rank:], 0), U[:, -rank:].T.conj())
+        L = np.dot(U*np.maximum(s, 0), U.T.conj())
 
-        res = V - V0
-        N = res - S
-        tol1 = la.norm(N_old - N, ord='fro') / VF
+        res = M - L
+
+        if not fixed_lmbda:
+            # the universal threshold: sigma * (2 * log(d*d))**0.5
+            th = (2.0 * np.log10(d * d))**0.5 * MAD(res)
+            if hard: # hard-thresholding
+                lmbda = 2**0.5 * th
+            else: # soft-thresholding
+                lmbda = th
+
+            if debug:
+                print 'lmbda:', lmbda
+
+        # compute new S
+        if hard:
+            S = truncate(res, lmbda)
+        else:
+            S = shrink(res, lmbda)
+
+        tol1 = (la.norm(L - L_old, ord='fro') + la.norm(S - S_old, ord='fro')) / MF
         if tol1 < tol:
             if debug:
                 print 'Converge when iteration: %d with tol: %g < %g' % (it, tol1, tol)
             break
 
-        if not fixed_lmbda and it >= 1:
-            # lmbda = 5.0 * np.std(N)
-            # use the universal threshold: sigma * (2 * log(d*d))**0.5
-            # lmbda = max(1.0, 2 * np.log(d)**0.5) * min(MAD(N), np.std(N))
-            lmbda = max(1.0, 2 * np.log10(d)**0.5) * min(MAD(N), np.std(N))
-            if debug:
-                print 'lmbda:', lmbda
-
-        # compute new S
-        if threshold == 'hard':
-            S = truncate(res, lmbda)
-        elif threshold == 'soft':
-            S = shrink(res, lmbda)
-
-        N_old = N
+        L_old = L
+        S_old = S
 
     else:
         print 'Exit with max_iter: %d, tol: %g >= %g' % (it, tol1, tol)
 
-    return V0, S
+    return L, S
