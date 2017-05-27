@@ -10,6 +10,7 @@ Inheritance diagram
 
 import re
 import itertools
+import warnings
 import numpy as np
 from scipy import linalg as la
 from scipy import optimize
@@ -319,6 +320,8 @@ class PsCal(timestream_task.TimestreamTask):
                 plt.plot(feedno, np.abs(g), 'r-', label='abs')
                 plt.plot(feedno, np.abs(g), 'ro')
                 plt.xlim(feedno[0]-1, feedno[-1]+1)
+                yl, yh = plt.ylim()
+                plt.ylim(yl, yh+(yh-yl)/5)
                 plt.xlabel('Feed number')
                 plt.legend()
                 fig_name = '%s_ants_%d_%d_%s.png' % (fig_prefix, ind, fi, ts.pol_dict[pi])
@@ -359,7 +362,11 @@ class PsCal(timestream_task.TimestreamTask):
             median = np.ma.median(data, axis=0)
             abs_diff = np.ma.abs(data - median[np.newaxis, :])
             mad = np.ma.median(abs_diff, axis=0) / 0.6745
-            data = np.where(abs_diff>3.0*mad[np.newaxis, :], np.nan, data)
+            with warnings.catch_warnings():
+                warnings.filterwarnings('ignore', 'invalid value encountered in greater')
+                warnings.filterwarnings('ignore', 'invalid value encountered in greater_equal')
+                warnings.filterwarnings('ignore', 'invalid value encountered in absolute')
+                data = np.where(abs_diff>3.0*mad[np.newaxis, :], np.nan, data)
             # gaussian/sinc fit
             for idx in range(nfeed):
                 y = data[idx]
