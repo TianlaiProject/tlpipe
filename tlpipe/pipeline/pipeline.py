@@ -38,7 +38,7 @@ used as the input parameters for this task.
 The actual work for the task is specified by over-ridding any of the
 :meth:`~TaskBase.setup`, :meth:`~TaskBase.next` or
 :meth:`~TaskBase.finish` methods (:meth:`~TaskBase.__init__` may also be
-implemented`).  These are executed in order, with :meth:`~TaskBask.next`
+implemented`).  These are executed in order, with :meth:`~TaskBase.next`
 possibly being executed many times.  Iteration of :meth:`next` is halted by
 raising a :exc:`PipelineStopIteration`.  Here is a example of a somewhat
 trivial but fully implemented task:
