@@ -1,0 +1,16 @@
+# -*- mode: python; -*-
+
+# input file for pipeline manager
+# execute this pipeline by either command of the following two:
+# tlpipe dir/to/general_task.pipe
+# mpiexec -n N tlpipe dir/to/general_task.pipe
+
+
+pipe_tasks = []
+pipe_outdir = './output/'
+
+
+from tlpipe.timestream import general_task
+pipe_tasks.append(general_task.GeneralTask)
+### parameters for GeneralTask
+gt_task_param = 'new_val'

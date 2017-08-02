@@ -108,7 +108,12 @@
 </li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../guide.html">Developer&#8217;s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide.html">Developer&#8217;s guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guide.html#write-a-general-task">Write a general task</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide.html#write-a-task-to-process-timestream-data">Write a task to process timestream data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide.html#use-data-operate-functions-in-timestream-tasks">Use data operate functions in timestream tasks</a></li>
+</ul>
+</li>
 </ul>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../core.html"><code class="docutils literal"><span class="pre">core</span></code> &#8211; Core functionalities</a><ul>
@@ -450,6 +455,7 @@
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.decompose.html">tlpipe.utils.rpca_decomp.decompose</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.l0_norm.html">tlpipe.utils.rpca_decomp.l0_norm</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.l1_norm.html">tlpipe.utils.rpca_decomp.l1_norm</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.mad.html">tlpipe.utils.rpca_decomp.mad</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.shrink.html">tlpipe.utils.rpca_decomp.shrink</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.sign.html">tlpipe.utils.rpca_decomp.sign</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.truncate.html">tlpipe.utils.rpca_decomp.truncate</a></li>
@@ -539,10 +545,10 @@ approaches, such as moving averages techniques.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>y</strong> (<em>array_like, shape (N,)</em>) &#8211; the values of the time history of the signal.</li>
-<li><strong>window_size</strong> (<em>int</em>) &#8211; the length of the window. Must be an odd integer number.</li>
-<li><strong>order</strong> (<em>int</em>) &#8211; the order of the polynomial used in the filtering.
+<li><strong>window_size</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; the length of the window. Must be an odd integer number.</li>
+<li><strong>order</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; the order of the polynomial used in the filtering.
 Must be less then <cite>window_size</cite> - 1.</li>
-<li><strong>deriv</strong> (<em>int</em>) &#8211; the order of the derivative to compute (default = 0 means only smoothing)</li>
+<li><strong>deriv</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; the order of the derivative to compute (default = 0 means only smoothing)</li>
 </ul>
 </td>
 </tr>

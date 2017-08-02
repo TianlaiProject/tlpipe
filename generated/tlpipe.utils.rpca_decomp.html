@@ -108,7 +108,12 @@
 </li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../guide.html">Developer&#8217;s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide.html">Developer&#8217;s guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guide.html#write-a-general-task">Write a general task</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide.html#write-a-task-to-process-timestream-data">Write a task to process timestream data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide.html#use-data-operate-functions-in-timestream-tasks">Use data operate functions in timestream tasks</a></li>
+</ul>
+</li>
 </ul>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../core.html"><code class="docutils literal"><span class="pre">core</span></code> &#8211; Core functionalities</a><ul>
@@ -450,6 +455,7 @@
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.decompose.html">tlpipe.utils.rpca_decomp.decompose</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.l0_norm.html">tlpipe.utils.rpca_decomp.l0_norm</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.l1_norm.html">tlpipe.utils.rpca_decomp.l1_norm</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.mad.html">tlpipe.utils.rpca_decomp.mad</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.shrink.html">tlpipe.utils.rpca_decomp.shrink</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.sign.html">tlpipe.utils.rpca_decomp.sign</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.truncate.html">tlpipe.utils.rpca_decomp.truncate</a></li>
@@ -532,8 +538,8 @@
 <tr class="row-odd"><td><a class="reference internal" href="tlpipe.utils.rpca_decomp.MAD.html#tlpipe.utils.rpca_decomp.MAD" title="tlpipe.utils.rpca_decomp.MAD"><code class="xref py py-obj docutils literal"><span class="pre">MAD</span></code></a>(a)</td>
 <td>Median absolute deviation divides 0.6745.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="tlpipe.utils.rpca_decomp.decompose.html#tlpipe.utils.rpca_decomp.decompose" title="tlpipe.utils.rpca_decomp.decompose"><code class="xref py py-obj docutils literal"><span class="pre">decompose</span></code></a>(V[,&nbsp;rank,&nbsp;lmbda,&nbsp;threshold,&nbsp;...])</td>
-<td>Fixed-rank stable principal component decomposition of an Hermitian matrix.</td>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.utils.rpca_decomp.decompose.html#tlpipe.utils.rpca_decomp.decompose" title="tlpipe.utils.rpca_decomp.decompose"><code class="xref py py-obj docutils literal"><span class="pre">decompose</span></code></a>(M[,&nbsp;rank,&nbsp;S,&nbsp;lmbda,&nbsp;threshold,&nbsp;...])</td>
+<td>Stable principal component decomposition of an Hermitian matrix.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="tlpipe.utils.rpca_decomp.l0_norm.html#tlpipe.utils.rpca_decomp.l0_norm" title="tlpipe.utils.rpca_decomp.l0_norm"><code class="xref py py-obj docutils literal"><span class="pre">l0_norm</span></code></a>(a)</td>
 <td>Return the <span class="math">\(l_0\)</span>-norm (i.e., number of non-zero elements) of an array.</td>
@@ -541,13 +547,16 @@
 <tr class="row-even"><td><a class="reference internal" href="tlpipe.utils.rpca_decomp.l1_norm.html#tlpipe.utils.rpca_decomp.l1_norm" title="tlpipe.utils.rpca_decomp.l1_norm"><code class="xref py py-obj docutils literal"><span class="pre">l1_norm</span></code></a>(a)</td>
 <td>Return the <span class="math">\(l_1\)</span>-norm of an array.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="tlpipe.utils.rpca_decomp.shrink.html#tlpipe.utils.rpca_decomp.shrink" title="tlpipe.utils.rpca_decomp.shrink"><code class="xref py py-obj docutils literal"><span class="pre">shrink</span></code></a>(a,&nbsp;lmbda)</td>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.utils.rpca_decomp.mad.html#tlpipe.utils.rpca_decomp.mad" title="tlpipe.utils.rpca_decomp.mad"><code class="xref py py-obj docutils literal"><span class="pre">mad</span></code></a>(a)</td>
+<td>Median absolute deviation.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.utils.rpca_decomp.shrink.html#tlpipe.utils.rpca_decomp.shrink" title="tlpipe.utils.rpca_decomp.shrink"><code class="xref py py-obj docutils literal"><span class="pre">shrink</span></code></a>(a,&nbsp;lmbda)</td>
 <td>Soft thresholding operator, which works for both real and complex array.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="tlpipe.utils.rpca_decomp.sign.html#tlpipe.utils.rpca_decomp.sign" title="tlpipe.utils.rpca_decomp.sign"><code class="xref py py-obj docutils literal"><span class="pre">sign</span></code></a>(a)</td>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.utils.rpca_decomp.sign.html#tlpipe.utils.rpca_decomp.sign" title="tlpipe.utils.rpca_decomp.sign"><code class="xref py py-obj docutils literal"><span class="pre">sign</span></code></a>(a)</td>
 <td>Sign of an array, which works for both real and complex array.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="tlpipe.utils.rpca_decomp.truncate.html#tlpipe.utils.rpca_decomp.truncate" title="tlpipe.utils.rpca_decomp.truncate"><code class="xref py py-obj docutils literal"><span class="pre">truncate</span></code></a>(a,&nbsp;lmbda)</td>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.utils.rpca_decomp.truncate.html#tlpipe.utils.rpca_decomp.truncate" title="tlpipe.utils.rpca_decomp.truncate"><code class="xref py py-obj docutils literal"><span class="pre">truncate</span></code></a>(a,&nbsp;lmbda)</td>
 <td>Hard thresholding operator, which works for both real and complex array.</td>
 </tr>
 </tbody>

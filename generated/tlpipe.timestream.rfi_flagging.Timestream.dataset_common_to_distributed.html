@@ -108,7 +108,12 @@
 </li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../guide.html">Developer&#8217;s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide.html">Developer&#8217;s guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guide.html#write-a-general-task">Write a general task</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide.html#write-a-task-to-process-timestream-data">Write a task to process timestream data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide.html#use-data-operate-functions-in-timestream-tasks">Use data operate functions in timestream tasks</a></li>
+</ul>
+</li>
 </ul>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../core.html"><code class="docutils literal"><span class="pre">core</span></code> &#8211; Core functionalities</a><ul>
@@ -450,6 +455,7 @@
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.decompose.html">tlpipe.utils.rpca_decomp.decompose</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.l0_norm.html">tlpipe.utils.rpca_decomp.l0_norm</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.l1_norm.html">tlpipe.utils.rpca_decomp.l1_norm</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.mad.html">tlpipe.utils.rpca_decomp.mad</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.shrink.html">tlpipe.utils.rpca_decomp.shrink</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.sign.html">tlpipe.utils.rpca_decomp.sign</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.truncate.html">tlpipe.utils.rpca_decomp.truncate</a></li>
@@ -528,14 +534,14 @@
 <h1>tlpipe.timestream.rfi_flagging.Timestream.dataset_common_to_distributed<a class="headerlink" href="#tlpipe-timestream-rfi-flagging-timestream-dataset-common-to-distributed" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
 <dt id="tlpipe.timestream.rfi_flagging.Timestream.dataset_common_to_distributed">
-<code class="descclassname">Timestream.</code><code class="descname">dataset_common_to_distributed</code><span class="sig-paren">(</span><em>name</em>, <em>distributed_axis=0</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/../../caput/caput/memh5.py#L1309"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.rfi_flagging.Timestream.dataset_common_to_distributed" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">Timestream.</code><code class="descname">dataset_common_to_distributed</code><span class="sig-paren">(</span><em>name</em>, <em>distributed_axis=0</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/../../../../../../../opt/python-2.7.5-mkl/lib/python2.7/site-packages/caput-0.3.0-py2.7.egg/caput/memh5.py#L1309"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.rfi_flagging.Timestream.dataset_common_to_distributed" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert a common dataset to a distributed one.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>name</strong> (<em>string</em>) &#8211; Dataset name.</li>
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/2/library/string.html#module-string" title="(in Python v2.7)"><em>string</em></a>) &#8211; Dataset name.</li>
 <li><strong>distributed_axis</strong> (<em>int, optional</em>) &#8211; Axis to distribute the data over.</li>
 </ul>
 </td>

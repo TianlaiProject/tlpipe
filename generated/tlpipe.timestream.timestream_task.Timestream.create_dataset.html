@@ -108,7 +108,12 @@
 </li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../guide.html">Developer&#8217;s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide.html">Developer&#8217;s guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guide.html#write-a-general-task">Write a general task</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide.html#write-a-task-to-process-timestream-data">Write a task to process timestream data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide.html#use-data-operate-functions-in-timestream-tasks">Use data operate functions in timestream tasks</a></li>
+</ul>
+</li>
 </ul>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../core.html"><code class="docutils literal"><span class="pre">core</span></code> &#8211; Core functionalities</a><ul>
@@ -450,6 +455,7 @@
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.decompose.html">tlpipe.utils.rpca_decomp.decompose</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.l0_norm.html">tlpipe.utils.rpca_decomp.l0_norm</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.l1_norm.html">tlpipe.utils.rpca_decomp.l1_norm</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.mad.html">tlpipe.utils.rpca_decomp.mad</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.shrink.html">tlpipe.utils.rpca_decomp.shrink</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.sign.html">tlpipe.utils.rpca_decomp.sign</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.truncate.html">tlpipe.utils.rpca_decomp.truncate</a></li>
@@ -528,7 +534,7 @@
 <h1>tlpipe.timestream.timestream_task.Timestream.create_dataset<a class="headerlink" href="#tlpipe-timestream-timestream-task-timestream-create-dataset" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
 <dt id="tlpipe.timestream.timestream_task.Timestream.create_dataset">
-<code class="descclassname">Timestream.</code><code class="descname">create_dataset</code><span class="sig-paren">(</span><em>name</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/../../caput/caput/memh5.py#L1292"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.timestream_task.Timestream.create_dataset" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">Timestream.</code><code class="descname">create_dataset</code><span class="sig-paren">(</span><em>name</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/../../../../../../../opt/python-2.7.5-mkl/lib/python2.7/site-packages/caput-0.3.0-py2.7.egg/caput/memh5.py#L1292"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.timestream_task.Timestream.create_dataset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create and return a new dataset.</p>
 <p>All parameters are passed through to the <a class="reference internal" href="#tlpipe.timestream.timestream_task.Timestream.create_dataset" title="tlpipe.timestream.timestream_task.Timestream.create_dataset"><code class="xref py py-meth docutils literal"><span class="pre">create_dataset()</span></code></a> method of
 the underlying storage, whether it be an <code class="xref py py-class docutils literal"><span class="pre">h5py.Group</span></code> or a

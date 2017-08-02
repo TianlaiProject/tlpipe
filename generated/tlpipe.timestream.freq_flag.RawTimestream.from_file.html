@@ -108,7 +108,12 @@
 </li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../guide.html">Developer&#8217;s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide.html">Developer&#8217;s guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guide.html#write-a-general-task">Write a general task</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide.html#write-a-task-to-process-timestream-data">Write a task to process timestream data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide.html#use-data-operate-functions-in-timestream-tasks">Use data operate functions in timestream tasks</a></li>
+</ul>
+</li>
 </ul>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../core.html"><code class="docutils literal"><span class="pre">core</span></code> &#8211; Core functionalities</a><ul>
@@ -450,6 +455,7 @@
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.decompose.html">tlpipe.utils.rpca_decomp.decompose</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.l0_norm.html">tlpipe.utils.rpca_decomp.l0_norm</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.l1_norm.html">tlpipe.utils.rpca_decomp.l1_norm</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.mad.html">tlpipe.utils.rpca_decomp.mad</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.shrink.html">tlpipe.utils.rpca_decomp.shrink</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.sign.html">tlpipe.utils.rpca_decomp.sign</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.truncate.html">tlpipe.utils.rpca_decomp.truncate</a></li>
@@ -528,7 +534,7 @@
 <h1>tlpipe.timestream.freq_flag.RawTimestream.from_file<a class="headerlink" href="#tlpipe-timestream-freq-flag-rawtimestream-from-file" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
 <dt id="tlpipe.timestream.freq_flag.RawTimestream.from_file">
-<code class="descclassname">RawTimestream.</code><code class="descname">from_file</code><span class="sig-paren">(</span><em>file_</em>, <em>ondisk=False</em>, <em>distributed=False</em>, <em>comm=None</em>, <em>detect_subclass=True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/../../caput/caput/memh5.py#L1185"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.freq_flag.RawTimestream.from_file" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">RawTimestream.</code><code class="descname">from_file</code><span class="sig-paren">(</span><em>file_</em>, <em>ondisk=False</em>, <em>distributed=False</em>, <em>comm=None</em>, <em>detect_subclass=True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/../../../../../../../opt/python-2.7.5-mkl/lib/python2.7/site-packages/caput-0.3.0-py2.7.egg/caput/memh5.py#L1185"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.freq_flag.RawTimestream.from_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create data object from analysis hdf5 file, store in memory or on disk.</p>
 <p>If <em>ondisk</em> is True, do not load into memory but store data in h5py objects
 that remain associated with the file on disk. This is almost identical
@@ -542,7 +548,7 @@ the additional keyword arguments.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>file</strong> (string or <code class="xref py py-class docutils literal"><span class="pre">h5py.Group</span></code> object) &#8211; File with the hdf5 data. File must be compatible with memh5 objects.</li>
-<li><strong>ondisk</strong> (<em>bool</em>) &#8211; Whether the data should be stored in-place in <em>file_</em> or should be copied
+<li><strong>ondisk</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) &#8211; Whether the data should be stored in-place in <em>file_</em> or should be copied
 into memory.</li>
 <li><strong>distributed</strong> (<em>boolean, optional</em>) &#8211; Allow the container to hold distributed datasets.</li>
 <li><strong>comm</strong> (<em>MPI.Comm, optional</em>) &#8211; MPI Communicator to distributed over. If not set, use <code class="xref py py-obj docutils literal"><span class="pre">MPI.COMM_WORLD</span></code>.</li>

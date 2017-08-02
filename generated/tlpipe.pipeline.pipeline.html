@@ -108,7 +108,12 @@
 </li>
 </ul>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../guide.html">Developer&#8217;s guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../guide.html">Developer&#8217;s guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guide.html#write-a-general-task">Write a general task</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide.html#write-a-task-to-process-timestream-data">Write a task to process timestream data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide.html#use-data-operate-functions-in-timestream-tasks">Use data operate functions in timestream tasks</a></li>
+</ul>
+</li>
 </ul>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../core.html"><code class="docutils literal"><span class="pre">core</span></code> &#8211; Core functionalities</a><ul>
@@ -450,6 +455,7 @@
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.decompose.html">tlpipe.utils.rpca_decomp.decompose</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.l0_norm.html">tlpipe.utils.rpca_decomp.l0_norm</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.l1_norm.html">tlpipe.utils.rpca_decomp.l1_norm</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.mad.html">tlpipe.utils.rpca_decomp.mad</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.shrink.html">tlpipe.utils.rpca_decomp.shrink</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.sign.html">tlpipe.utils.rpca_decomp.sign</a></li>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.truncate.html">tlpipe.utils.rpca_decomp.truncate</a></li>
@@ -553,7 +559,7 @@ used as the input parameters for this task.</p>
 <p>The actual work for the task is specified by over-ridding any of the
 <a class="reference internal" href="tlpipe.pipeline.pipeline.TaskBase.setup.html#tlpipe.pipeline.pipeline.TaskBase.setup" title="tlpipe.pipeline.pipeline.TaskBase.setup"><code class="xref py py-meth docutils literal"><span class="pre">setup()</span></code></a>, <a class="reference internal" href="tlpipe.pipeline.pipeline.TaskBase.next.html#tlpipe.pipeline.pipeline.TaskBase.next" title="tlpipe.pipeline.pipeline.TaskBase.next"><code class="xref py py-meth docutils literal"><span class="pre">next()</span></code></a> or
 <a class="reference internal" href="tlpipe.pipeline.pipeline.TaskBase.finish.html#tlpipe.pipeline.pipeline.TaskBase.finish" title="tlpipe.pipeline.pipeline.TaskBase.finish"><code class="xref py py-meth docutils literal"><span class="pre">finish()</span></code></a> methods (<a class="reference internal" href="tlpipe.pipeline.pipeline.TaskBase.html#tlpipe.pipeline.pipeline.TaskBase.__init__" title="tlpipe.pipeline.pipeline.TaskBase.__init__"><code class="xref py py-meth docutils literal"><span class="pre">__init__()</span></code></a> may also be
-implemented`).  These are executed in order, with <code class="xref py py-meth docutils literal"><span class="pre">next()</span></code>
+implemented`).  These are executed in order, with <a class="reference internal" href="tlpipe.pipeline.pipeline.TaskBase.next.html#tlpipe.pipeline.pipeline.TaskBase.next" title="tlpipe.pipeline.pipeline.TaskBase.next"><code class="xref py py-meth docutils literal"><span class="pre">next()</span></code></a>
 possibly being executed many times.  Iteration of <code class="xref py py-meth docutils literal"><span class="pre">next()</span></code> is halted by
 raising a <a class="reference internal" href="tlpipe.pipeline.pipeline.PipelineStopIteration.html#tlpipe.pipeline.pipeline.PipelineStopIteration" title="tlpipe.pipeline.pipeline.PipelineStopIteration"><code class="xref py py-exc docutils literal"><span class="pre">PipelineStopIteration</span></code></a>.  Here is a example of a somewhat
 trivial but fully implemented task:</p>

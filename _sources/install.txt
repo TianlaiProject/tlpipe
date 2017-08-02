@@ -58,7 +58,7 @@ It should also be installable directly with `pip` using the command ::
 
 
 .. _GitHub: https://github.com/KeepSafe/aiohttp
-.. _h5py: http:/www.h5py.org/
+.. _h5py: http://www.h5py.org/
 .. _healpy: https://pypi.python.org/pypi/healpy
 .. _pyephem: http://rhodesmill.org/pyephem/
 .. _numpy: http://www.numpy.org/
