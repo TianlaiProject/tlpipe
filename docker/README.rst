@@ -21,6 +21,12 @@ You can create and run a docker container from the created docker image as ::
 
    $ docker run -it --name tlpipe tlpipe /bin/bash
 
+or if you have already created the tlpipe container, run it as ::
+
+   $ docker start tlpipe
+   $ docker attach tlpipe
+
+
 More info
 =========
 
