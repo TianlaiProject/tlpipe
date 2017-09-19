@@ -1,0 +1,35 @@
+# -*- mode: python; -*-
+
+# input file for pipeline manager
+# execute this pipeline by either command of the following two:
+# tlpipe dir/to/ts_task.pipe
+# mpiexec -n N tlpipe dir/to/ts_task.pipe
+
+
+pipe_tasks = []
+pipe_outdir = './output/'
+pipe_logging = 'notset'
+# pipe_logging = 'info'
+pipe_timing = True
+pipe_flush = True
+
+
+import glob
+data_dir = 'dir/to/data' # your data directory
+files = sorted(glob.glob(data_dir+'/*.hdf5')) # all data files as a list
+
+
+# data selection
+from tlpipe.timestream import dispatch
+pipe_tasks.append(dispatch.Dispatch)
+### parameters for Dispatch
+dp_input_files = files # data files as list
+dp_freq_select = (500, 510) # frequency indices, from 500 to 510
+dp_feed_select = [1, 2, 32, 33] # feed no. as a list
+dp_out = 'dp'
+
+from tlpipe.timestream import ts_task
+pipe_tasks.append(ts_task.TsTask)
+### parameters for TsTask
+tt_in = dp_out
+tt_out = 'tt'
