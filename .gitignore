@@ -22,6 +22,11 @@ lib
 lib64
 __pycache__
 
+# doc realted
+doc/_build
+doc/generated
+gh-pages
+
 # Installer logs
 pip-log.txt
 
