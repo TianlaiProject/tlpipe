@@ -133,22 +133,24 @@ class Plot(timestream_task.TimestreamTask):
             duration = (ax_val[-1] - ax_val[0])
             dt = duration / len(ax_val)
             ext = max(0.05*duration, 5*dt)
+            axarr[2].set_xlim([ax_val[0]-ext, ax_val[-1]+ext])
+            axarr[2].xaxis_date()
+            date_format = mdates.DateFormatter('%H:%M')
+            axarr[2].xaxis.set_major_formatter(date_format)
+            if rotate_xdate:
+                # set the x-axis tick labels to diagonal so it fits better
+                f.autofmt_xdate()
+            else:
+                # reduce the number of tick locators
+                locator = MaxNLocator(nbins=6)
+                axarr[2].xaxis.set_major_locator(locator)
+                axarr[2].xaxis.set_minor_locator(AutoMinorLocator(2))
         elif integral == 'time':
             bw = (ax_val[-1] - ax_val[0])
             df = bw / len(ax_val)
             ext = max(0.05*bw, df)
-        axarr[2].set_xlim([ax_val[0]-ext, ax_val[-1]+ext])
-        axarr[2].xaxis_date()
-        date_format = mdates.DateFormatter('%H:%M')
-        axarr[2].xaxis.set_major_formatter(date_format)
-        if rotate_xdate:
-            # set the x-axis tick labels to diagonal so it fits better
-            f.autofmt_xdate()
-        else:
-            # reduce the number of tick locators
-            locator = MaxNLocator(nbins=6)
-            axarr[2].xaxis.set_major_locator(locator)
-            axarr[2].xaxis.set_minor_locator(AutoMinorLocator(2))
+            axarr[2].set_xlim([ax_val[0]-ext, ax_val[-1]+ext])
+
         axarr[2].set_xlabel(xlabel)
 
         if feed_no:
