@@ -63,6 +63,7 @@ class NsCal(timestream_task.TimestreamTask):
                     'num_mean': 5, # use the mean of num_mean signals
                     'phs_only': True, # phase cal only
                     'plot_gain': False, # plot the gain change
+                    'phs_unit': 'radian', # or degree
                     'fig_name': 'ns_cal/gain_change',
                     'bl_incl': 'all', # or a list of include (bl1, bl2)
                     'bl_excl': [],
@@ -109,6 +110,7 @@ class NsCal(timestream_task.TimestreamTask):
         num_mean = self.params['num_mean']
         phs_only = self.params['phs_only']
         plot_gain = self.params['plot_gain']
+        phs_unit = self.params['phs_unit']
         fig_prefix = self.params['fig_name']
         rotate_xdate = self.params['rotate_xdate']
         feed_no = self.params['feed_no']
@@ -249,6 +251,12 @@ class NsCal(timestream_task.TimestreamTask):
                 # negate phase as for the conj of vis
                 all_phase = np.where(np.isfinite(all_phase), -all_phase, np.nan)
                 phase = np.where(np.isfinite(phase), -phase, np.nan)
+            if phs_unit == 'degree': # default to radians
+                all_phase = np.degrees(all_phase)
+                phase = np.degrees(phase)
+                ylabel = r'$\Delta \phi$ / degree'
+            else:
+                ylabel = r'$\Delta \phi$ / radian'
             if phs_only:
                 ax.plot(ax_val, all_phase)
                 ax.plot(ax_val[valid_inds], phase, 'ro')
@@ -276,7 +284,7 @@ class NsCal(timestream_task.TimestreamTask):
                 ax1.xaxis.set_major_locator(locator)
                 ax1.xaxis.set_minor_locator(AutoMinorLocator(2))
             ax1.set_xlabel(xlabel)
-            ax1.set_ylabel(r'$\Delta \phi$ / radian')
+            ax1.set_ylabel(ylabel)
 
             if feed_no:
                 pol = rt['bl_pol'].local_data[li[1]]
