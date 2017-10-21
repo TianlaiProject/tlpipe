@@ -8,6 +8,7 @@ Inheritance diagram
 
 """
 
+import sys, traceback
 from os import path
 import logging
 import h5py
@@ -48,6 +49,7 @@ class TimestreamTask(OneAndOne):
                     'exclude': [],
                     'check_status': True,
                     'libver': 'latest',
+                    'output_failed_continue': False, # continue to run if output to files failed
                     'time_select': (0, None),
                     'freq_select': (0, None),
                     'pol_select': (0, None), # only useful for ts
@@ -171,10 +173,20 @@ class TimestreamTask(OneAndOne):
         exclude = self.params['exclude']
         check_status = self.params['check_status']
         libver = self.params['libver']
+        output_failed_continue = self.params['output_failed_continue']
         tag_output_iter = self.params['tag_output_iter']
 
         if self.iterable and tag_output_iter:
             output_files = output_path(self.output_files, relative=False, iteration=self.iteration)
         else:
             output_files = self.output_files
-        output.to_files(output_files, exclude, check_status, libver)
+
+        try:
+            output.to_files(output_files, exclude, check_status, libver)
+        except Exception as e:
+            if output_failed_continue:
+                msg = 'Process %d writing output to files failed...' % mpiutil.rank
+                logger.warning(msg)
+                traceback.print_exc(file=sys.stdout)
+            else:
+                raise e
