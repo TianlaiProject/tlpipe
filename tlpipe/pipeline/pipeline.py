@@ -666,6 +666,7 @@ class TaskBase(object):
                     'requires': None,
                     'in': None,
                     'out': None,
+                    'timing': False, # timing the executing of next()
                   }
 
     prefix = 'tb_'
@@ -934,7 +935,14 @@ class TaskBase(object):
                     msg = "Task %s calling 'next()'." % self.__class__.__name__
                     if mpiutil.rank0:
                         logger.debug(msg)
+                    if self.params['timing']:
+                        stime = datetime.datetime.now()
                     out = self.next(*args)
+                    if self.params['timing']:
+                        etime = datetime.datetime.now()
+                        if mpiutil.rank0:
+                            msg = 'Executing time of %s.next(): %s' % (self.__class__.__name__, etime - stime)
+                            logger.info(msg)
                     return out
                 except PipelineStopIteration:
                     # Finished iterating `next()`.
@@ -1056,6 +1064,7 @@ class OneAndOne(TaskBase):
                     'iter_start': 0,
                     'iter_step': 1,
                     'iter_num': None, # number of iterations
+                    'process_timing': False, # timing the executing of process()
                   }
 
     prefix = 'ob_'
@@ -1183,12 +1192,26 @@ class OneAndOne(TaskBase):
             if not input is None:
                 # This should never happen.  Just here to catch bugs.
                 raise RuntimeError("Somehow `input` was set")
+            if self.params['process_timing']:
+                stime = datetime.datetime.now()
             output = self.process()
+            if self.params['process_timing']:
+                etime = datetime.datetime.now()
+                if mpiutil.rank0:
+                    msg = 'Executing time of %s.process(): %s' % (self.__class__.__name__, etime - stime)
+                    logger.info(msg)
         else:
             if input is None:
                 output = None
             else:
+                if self.params['process_timing']:
+                    stime = datetime.datetime.now()
                 output = self.process(input)
+                if self.params['process_timing']:
+                    etime = datetime.datetime.now()
+                    if mpiutil.rank0:
+                        msg = 'Executing time of %s.process(): %s' % (self.__class__.__name__, etime - stime)
+                        logger.info(msg)
 
         # Write output if needed.
         if output is not None and len(self.output_files) != 0:
