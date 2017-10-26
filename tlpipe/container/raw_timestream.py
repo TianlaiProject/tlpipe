@@ -352,8 +352,9 @@ class RawTimestream(timestream_common.TimestreamCommon):
         # copy attrs of this dset
         memh5.copyattrs(self['blorder'].attrs, ts['blorder'].attrs)
         # other bl ordered dataset
-        if len(set(self.bl_ordered_datasets.keys()) - {'vis', 'vis_mask', 'blorder', 'true_blorder', 'bl_pol'}) > 0:
-            raise RuntimeError('Should not have other bl_ordered_datasets %s' % (set(self.bl_ordered_datasets.keys()) - {'vis', 'vis_mask', 'blorder'}))
+        other_bl_dset = set(self.bl_ordered_datasets.keys()) - {'vis', 'vis_mask', 'blorder', 'true_blorder', 'bl_pol'}
+        if len(other_bl_dset) > 0:
+            raise RuntimeError('Should not have other bl_ordered_datasets %s' % other_bl_dset)
 
         # copy other attrs
         for attrs_name, attrs_value in self.attrs.iteritems():
