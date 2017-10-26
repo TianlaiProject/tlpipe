@@ -12,6 +12,8 @@ import os
 from datetime import datetime
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
+import h5py
+from caput import mpiutil
 from caput import mpiarray
 import timestream_task
 from tlpipe.container.raw_timestream import RawTimestream
@@ -63,6 +65,8 @@ class NsCal(timestream_task.TimestreamTask):
     params_init = {
                     'num_mean': 5, # use the mean of num_mean signals
                     'phs_only': True, # phase cal only
+                    'save_gain': False,
+                    'gain_file': 'ns_cal/gain.hdf5',
                     'plot_gain': False, # plot the gain change
                     'phs_unit': 'radian', # or degree
                     'fig_name': 'ns_cal/gain_change',
@@ -88,6 +92,9 @@ class NsCal(timestream_task.TimestreamTask):
 
         num_mean = self.params['num_mean']
         phs_only = self.params['phs_only']
+        save_gain = self.params['save_gain']
+        tag_output_iter = self.params['tag_output_iter']
+        gain_file = self.params['gain_file']
         bl_incl = self.params['bl_incl']
         bl_excl = self.params['bl_excl']
         freq_incl = self.params['freq_incl']
@@ -109,23 +116,24 @@ class NsCal(timestream_task.TimestreamTask):
         if inds[-1]+2 > nt-1: # no on data in the end to use
             inds = inds[:-1]
 
-        num_inds = len(inds)
-        shp = (num_inds,)+rt.local_vis.shape[1:]
-        dtype = rt.local_vis.dtype
-        # create dataset to record ns_cal_time_inds
-        rt.create_time_ordered_dataset('ns_cal_time_inds', inds)
-        # create dataset to record ns_cal_phase
-        ns_cal_phase = np.empty(shp, dtype=dtype)
-        ns_cal_phase[:] = np.nan
-        ns_cal_phase = mpiarray.MPIArray.wrap(ns_cal_phase, axis=2, comm=rt.comm)
-        rt.create_freq_and_bl_ordered_dataset('ns_cal_phase', ns_cal_phase, axis_order=(None, 1, 2))
-        rt['ns_cal_phase'].attrs['unit'] = 'radians'
-        if not phs_only:
-            # create dataset to record ns_cal_amp
-            ns_cal_amp = np.empty(shp, dtype=dtype)
-            ns_cal_amp[:] = np.nan
-            ns_cal_amp = mpiarray.MPIArray.wrap(ns_cal_amp, axis=2, comm=rt.comm)
-            rt.create_freq_and_bl_ordered_dataset('ns_cal_amp', ns_cal_amp, axis_order=(None, 1, 2))
+        if save_gain:
+            num_inds = len(inds)
+            shp = (num_inds,)+rt.local_vis.shape[1:]
+            dtype = rt.local_vis.real.dtype
+            # create dataset to record ns_cal_time_inds
+            rt.create_time_ordered_dataset('ns_cal_time_inds', inds)
+            # create dataset to record ns_cal_phase
+            ns_cal_phase = np.empty(shp, dtype=dtype)
+            ns_cal_phase[:] = np.nan
+            ns_cal_phase = mpiarray.MPIArray.wrap(ns_cal_phase, axis=2, comm=rt.comm)
+            rt.create_freq_and_bl_ordered_dataset('ns_cal_phase', ns_cal_phase, axis_order=(None, 1, 2))
+            rt['ns_cal_phase'].attrs['unit'] = 'radians'
+            if not phs_only:
+                # create dataset to record ns_cal_amp
+                ns_cal_amp = np.empty(shp, dtype=dtype)
+                ns_cal_amp[:] = np.nan
+                ns_cal_amp = mpiarray.MPIArray.wrap(ns_cal_amp, axis=2, comm=rt.comm)
+                rt.create_freq_and_bl_ordered_dataset('ns_cal_amp', ns_cal_amp, axis_order=(None, 1, 2))
 
         if bl_incl == 'all':
             bls_plt = [ tuple(bl) for bl in rt.bl ]
@@ -137,7 +145,44 @@ class NsCal(timestream_task.TimestreamTask):
         else:
             freq_plt = [ fi for fi in freq_incl if not fi in freq_excl ]
 
-        rt.freq_and_bl_data_operate(self.cal, full_data=True, keep_dist_axis=False, num_mean=num_mean, bls_plt=bls_plt, freq_plt=freq_plt)
+        rt.freq_and_bl_data_operate(self.cal, full_data=True, keep_dist_axis=False, num_mean=num_mean, inds=inds, bls_plt=bls_plt, freq_plt=freq_plt)
+
+        if save_gain:
+            # gather bl_order to rank0
+            bl_order = mpiutil.gather_array(rt['blorder'].local_data, axis=0, root=0, comm=rt.comm)
+            # gather ns_cal_phase / ns_cal_amp to rank 0
+            ns_cal_phase = mpiutil.gather_array(rt['ns_cal_phase'].local_data, axis=2, root=0, comm=rt.comm)
+            phs_unit = rt['ns_cal_phase'].attrs['unit']
+            rt.delete_a_dataset('ns_cal_phase')
+            if not phs_only:
+                ns_cal_amp = mpiutil.gather_array(rt['ns_cal_amp'].local_data, axis=2, root=0, comm=rt.comm)
+                rt.delete_a_dataset('ns_cal_amp')
+
+            if tag_output_iter:
+                gain_file = output_path(gain_file, iteration=self.iteration)
+            else:
+                gain_file = output_path(gain_file)
+            if mpiutil.rank0:
+                with h5py.File(gain_file, 'w') as f:
+                    # save time
+                    f.create_dataset('time', data=rt['jul_date'][:])
+                    f['time'].attrs['unit'] = 'Julian date'
+                    # save freq
+                    f.create_dataset('freq', data=rt['freq'][:])
+                    f['freq'].attrs['unit'] = rt['freq'].attrs['unit']
+                    # save bl
+                    f.create_dataset('bl_order', data=bl_order)
+                    # save ns_cal_time_inds
+                    f.create_dataset('ns_cal_time_inds', data=rt['ns_cal_time_inds'][:])
+                    # save ns_cal_phase
+                    f.create_dataset('ns_cal_phase', data=ns_cal_phase)
+                    f['ns_cal_phase'].attrs['unit'] = phs_unit
+                    f['ns_cal_phase'].attrs['dim'] = '(time, freq, bl)'
+                    if not phs_only:
+                        # save ns_cal_amp
+                        f.create_dataset('ns_cal_amp', data=ns_cal_amp)
+
+            rt.delete_a_dataset('ns_cal_time_inds')
 
         return super(NsCal, self).process(rt)
 
@@ -145,6 +190,7 @@ class NsCal(timestream_task.TimestreamTask):
         """Function that does the actual cal."""
 
         phs_only = self.params['phs_only']
+        save_gain = self.params['save_gain']
         plot_gain = self.params['plot_gain']
         phs_unit = self.params['phs_unit']
         fig_prefix = self.params['fig_name']
@@ -154,6 +200,7 @@ class NsCal(timestream_task.TimestreamTask):
         tag_output_iter = self.params['tag_output_iter']
         iteration = self.iteration
         num_mean = kwargs['num_mean']
+        inds = kwargs['inds']
         bls_plt = kwargs['bls_plt']
         freq_plt = kwargs['freq_plt']
 
@@ -168,8 +215,6 @@ class NsCal(timestream_task.TimestreamTask):
         # on_time = rt['ns_on'].attrs['on_time']
         # off_time = rt['ns_on'].attrs['off_time']
         period = rt['ns_on'].attrs['period']
-
-        inds = rt['ns_cal_time_inds'][:]
 
         # the calculated phase and amp will be at the ind just 1 before ns ON (i.e., at the ind of the last ns OFF)
         valid_inds = []
@@ -189,11 +234,13 @@ class NsCal(timestream_task.TimestreamTask):
                 valid_inds.append(ind)
                 diff = np.mean(vis[ind+2:upper]) - np.ma.mean(off_sec)
                 phs = np.angle(diff) # in radians
-                rt['ns_cal_phase'].local_data[ii, lfi, lbi] = phs
+                if save_gain:
+                    rt['ns_cal_phase'].local_data[ii, lfi, lbi] = phs
                 phase.append( phs ) # in radians
                 if not phs_only:
                     amp_ = np.abs(diff)
-                    rt['ns_cal_amp'].local_data[ii, lfi, lbi] = amp_
+                    if save_gain:
+                        rt['ns_cal_amp'].local_data[ii, lfi, lbi] = amp_
                     amp.append( amp_ )
 
         # not enough valid data to do the ns_cal
