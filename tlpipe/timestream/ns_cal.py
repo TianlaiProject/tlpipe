@@ -12,6 +12,7 @@ import os
 from datetime import datetime
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
+from caput import mpiarray
 import timestream_task
 from tlpipe.container.raw_timestream import RawTimestream
 from tlpipe.utils.path_util import output_path
@@ -83,12 +84,48 @@ class NsCal(timestream_task.TimestreamTask):
         if not 'ns_on' in rt.iterkeys():
             raise RuntimeError('No noise source info, can not do noise source calibration')
 
-        rt.redistribute('time')
+        rt.redistribute('baseline')
 
+        num_mean = self.params['num_mean']
+        phs_only = self.params['phs_only']
         bl_incl = self.params['bl_incl']
         bl_excl = self.params['bl_excl']
         freq_incl = self.params['freq_incl']
         freq_excl = self.params['freq_excl']
+
+        nt = rt.local_vis.shape[0]
+        on_time = rt['ns_on'].attrs['on_time']
+        num_mean = min(num_mean, on_time-2)
+        if num_mean <= 0:
+            raise RuntimeError('Do not have enough noise on time samples to do the ns_cal')
+        ns_on = rt['ns_on'][:]
+        ns_on = np.where(ns_on, 1, 0)
+        diff_ns = np.diff(ns_on)
+        inds = np.where(diff_ns==1)[0] # NOTE: these are inds just 1 before the first ON
+        # if inds[0]-num_mean < 0:
+        if inds[0]-1 < 0: # no off data in the beginning to use
+            inds = inds[1:]
+        # if inds[-1]+num_mean+1 > len(ns_on)-1:
+        if inds[-1]+2 > nt-1: # no on data in the end to use
+            inds = inds[:-1]
+
+        num_inds = len(inds)
+        shp = (num_inds,)+rt.local_vis.shape[1:]
+        dtype = rt.local_vis.dtype
+        # create dataset to record ns_cal_time_inds
+        rt.create_time_ordered_dataset('ns_cal_time_inds', inds)
+        # create dataset to record ns_cal_phase
+        ns_cal_phase = np.empty(shp, dtype=dtype)
+        ns_cal_phase[:] = np.nan
+        ns_cal_phase = mpiarray.MPIArray.wrap(ns_cal_phase, axis=2, comm=rt.comm)
+        rt.create_freq_and_bl_ordered_dataset('ns_cal_phase', ns_cal_phase, axis_order=(None, 1, 2))
+        rt['ns_cal_phase'].attrs['unit'] = 'radians'
+        if not phs_only:
+            # create dataset to record ns_cal_amp
+            ns_cal_amp = np.empty(shp, dtype=dtype)
+            ns_cal_amp[:] = np.nan
+            ns_cal_amp = mpiarray.MPIArray.wrap(ns_cal_amp, axis=2, comm=rt.comm)
+            rt.create_freq_and_bl_ordered_dataset('ns_cal_amp', ns_cal_amp, axis_order=(None, 1, 2))
 
         if bl_incl == 'all':
             bls_plt = [ tuple(bl) for bl in rt.bl ]
@@ -100,14 +137,13 @@ class NsCal(timestream_task.TimestreamTask):
         else:
             freq_plt = [ fi for fi in freq_incl if not fi in freq_excl ]
 
-        rt.freq_and_bl_data_operate(self.cal, full_data=True, keep_dist_axis=False, bls_plt=bls_plt, freq_plt=freq_plt)
+        rt.freq_and_bl_data_operate(self.cal, full_data=True, keep_dist_axis=False, num_mean=num_mean, bls_plt=bls_plt, freq_plt=freq_plt)
 
         return super(NsCal, self).process(rt)
 
     def cal(self, vis, vis_mask, li, gi, fbl, rt, **kwargs):
         """Function that does the actual cal."""
 
-        num_mean = self.params['num_mean']
         phs_only = self.params['phs_only']
         plot_gain = self.params['plot_gain']
         phs_unit = self.params['phs_unit']
@@ -117,38 +153,30 @@ class NsCal(timestream_task.TimestreamTask):
         order_bl = self.params['order_bl']
         tag_output_iter = self.params['tag_output_iter']
         iteration = self.iteration
+        num_mean = kwargs['num_mean']
         bls_plt = kwargs['bls_plt']
         freq_plt = kwargs['freq_plt']
 
         if np.prod(vis.shape) == 0 :
             return
 
+        lfi, lbi = li # local freq and bl index
         fi = gi[0] # freq idx for this cal
         bl = tuple(fbl[1]) # bl for this cal
 
         nt = vis.shape[0]
-        on_time = rt['ns_on'].attrs['on_time']
-        off_time = rt['ns_on'].attrs['off_time']
+        # on_time = rt['ns_on'].attrs['on_time']
+        # off_time = rt['ns_on'].attrs['off_time']
         period = rt['ns_on'].attrs['period']
-        num_mean = min(num_mean, on_time-2)
-        if num_mean <= 0:
-            raise RuntimeError('Do not have enough noise on time samples to do the ns_cal')
-        ns_on = rt['ns_on'][:]
-        ns_on = np.where(ns_on, 1, 0)
-        diff_ns = np.diff(ns_on)
-        inds = np.where(diff_ns==1)[0]
-        # if inds[0]-num_mean < 0:
-        if inds[0]-1 < 0: # no off data in the beginning to use
-            inds = inds[1:]
-        # if inds[-1]+num_mean+1 > len(ns_on)-1:
-        if inds[-1]+2 > nt-1: # no on data in the end to use
-            inds = inds[:-1]
 
+        inds = rt['ns_cal_time_inds'][:]
+
+        # the calculated phase and amp will be at the ind just 1 before ns ON (i.e., at the ind of the last ns OFF)
         valid_inds = []
         phase = []
         if not phs_only:
             amp = []
-        for ind in inds:
+        for ii, ind in enumerate(inds):
             # drop the first and the last ind, as it may lead to exceptional vals
             if ind == inds[0] or ind == inds[-1]:
                 continue
@@ -160,10 +188,13 @@ class NsCal(timestream_task.TimestreamTask):
                 upper = ind + 2 + num_mean
                 valid_inds.append(ind)
                 diff = np.mean(vis[ind+2:upper]) - np.ma.mean(off_sec)
-                phase.append( np.angle(diff) ) # in radians
+                phs = np.angle(diff) # in radians
+                rt['ns_cal_phase'].local_data[ii, lfi, lbi] = phs
+                phase.append( phs ) # in radians
                 if not phs_only:
-                    amp.append( np.abs(diff) )
-
+                    amp_ = np.abs(diff)
+                    rt['ns_cal_amp'].local_data[ii, lfi, lbi] = amp_
+                    amp.append( amp_ )
 
         # not enough valid data to do the ns_cal
         num_valid = len(valid_inds)
