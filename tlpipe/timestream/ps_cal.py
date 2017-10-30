@@ -76,6 +76,10 @@ class PsCal(timestream_task.TimestreamTask):
                     'span': 60, # second
                     'plot_figs': False,
                     'fig_name': 'gain/gain',
+                    'save_src_vis': False, # save the extracted calibrator visibility
+                    'src_vis_file': 'src_vis/src_vis.hdf5',
+                    'subtract_src': False, # subtract vis of the calibrator from data
+                    'apply_gain': True,
                     'save_gain': False,
                     'gain_file': 'gain/gain.hdf5',
                     'temperature_convert': False,
@@ -93,6 +97,10 @@ class PsCal(timestream_task.TimestreamTask):
         plot_figs = self.params['plot_figs']
         fig_prefix = self.params['fig_name']
         tag_output_iter = self.params['tag_output_iter']
+        save_src_vis = self.params['save_src_vis']
+        src_vis_file = self.params['src_vis_file']
+        subtract_src = self.params['subtract_src']
+        apply_gain = self.params['apply_gain']
         save_gain = self.params['save_gain']
         gain_file = self.params['gain_file']
         temperature_convert = self.params['temperature_convert']
@@ -191,8 +199,11 @@ class PsCal(timestream_task.TimestreamTask):
         del tfp_inds
         del lvis
         del lvis_mask
-        lGain = np.empty((len(tfp_linds), nfeed), dtype=np.complex128)
+        lGain = np.empty((len(tfp_linds), nfeed), dtype=ts.vis.dtype)
         lGain[:] = complex(np.nan, np.nan)
+        if save_src_vis or subtract_src:
+            lsrc_vis = np.empty((len(tfp_linds), nfeed, nfeed), dtype=ts.vis.dtype)
+            lsrc_vis[:] = complex(np.nan, np.nan)
 
         # construct visibility matrix for a single time, freq, pol
         Vmat = np.zeros((nfeed, nfeed), dtype=ts.vis.dtype)
@@ -240,6 +251,8 @@ class PsCal(timestream_task.TimestreamTask):
             # stable PCA decomposition
             V0, S = rpca_decomp.decompose(Vmat, rank=1, S=S0, max_iter=100, threshold='hard', tol=1.0e-6, debug=False)
             # V0, S = rpca_decomp.decompose(Vmat, rank=1, S=S0, max_iter=100, threshold='soft', tol=1.0e-6, debug=False)
+            if save_src_vis or subtract_src:
+                lsrc_vis[ii] = V0
 
             # plot
             if plot_figs:
@@ -334,7 +347,39 @@ class PsCal(timestream_task.TimestreamTask):
 
         # gather Gain from each processes
         Gain = mpiutil.gather_array(lGain, axis=0, root=None, comm=ts.comm)
+        del lGain
         Gain = Gain.reshape(nt, nf, 2, nfeed)
+
+        # gather src_vis from each processes
+        if save_src_vis or subtract_src:
+            src_vis = mpiutil.gather_array(lsrc_vis, axis=0, root=None, comm=ts.comm)
+            del lsrc_vis
+            src_vis = src_vis.reshape(nt, nf, 2, nfeed, nfeed)
+            # subtract vis of calibrator from data
+            if subtract_src:
+                for pi in [pol.index('xx'), pol.index('yy')]:
+                    for bi, (fd1, fd2) in enumerate(ts.local_bl):
+                        b1, b2 = feedno.index(fd1), feedno.index(fd2)
+                        ts.local_vis[start_ind:end_ind, :, pi, bi] -= src_vis[:, :, pi, b1, b2]
+            # save src_vis to file
+            if mpiutil.rank0 and save_src_vis:
+                if tag_output_iter:
+                    src_vis_file = output_path(src_vis_file, iteration=self.iteration)
+                else:
+                    src_vis_file = output_path(src_vis_file)
+                with h5py.File(src_vis_file, 'w') as f:
+                    # save src_vis
+                    dset = f.create_dataset('src_vis', data=src_vis)
+                    dset.attrs['dim'] = 'time, freq, pol, feed, feed'
+                    dset.attrs['time'] = ts.time[start_ind:end_ind]
+                    dset.attrs['freq'] = freq
+                    dset.attrs['pol'] = np.array(['xx', 'yy'])
+                    dset.attrs['feed'] = np.array(feedno)
+
+            mpiutil.barrier()
+
+            del src_vis
+
 
         # choose data slice near the transit time
         c = nt/2 # center ind
@@ -394,25 +439,21 @@ class PsCal(timestream_task.TimestreamTask):
 
         # gather local gain
         gain = mpiutil.gather_array(lgain, axis=0, root=None, comm=ts.comm)
+        del lgain
         gain = gain.reshape(nf, 2, nfeed)
 
         # apply gain to vis
-        for fi in range(nf):
-            for pi in [pol.index('xx'), pol.index('yy')]:
-                for bi, (fd1, fd2) in enumerate(ts['blorder'].local_data):
-                    g1 = gain[fi, pi, feedno.index(fd1)]
-                    g2 = gain[fi, pi, feedno.index(fd2)]
-                    if np.isfinite(g1) and np.isfinite(g2):
-                        ts.local_vis[:, fi, pi, bi] /= (g1 * np.conj(g2))
-                    else:
-                        # mask the un-calibrated vis
-                        ts.local_vis_mask[:, fi, pi, bi] = True
-
-        # convert vis from intensity unit to temperature unit in K
-        if temperature_convert:
-            factor = 1.0e-26 * (const.c**2 / (2 * const.k_B * (1.0e6*freq)**2)) # NOTE: 1Jy = 1.0e-26 W m^-2 Hz^-1
-            ts.local_vis[:] *= factor[np.newaxis, :, np.newaxis, np.newaxis]
-            ts.vis.attrs['unit'] = 'K'
+        if apply_gain:
+            for fi in range(nf):
+                for pi in [pol.index('xx'), pol.index('yy')]:
+                    for bi, (fd1, fd2) in enumerate(ts['blorder'].local_data):
+                        g1 = gain[fi, pi, feedno.index(fd1)]
+                        g2 = gain[fi, pi, feedno.index(fd2)]
+                        if np.isfinite(g1) and np.isfinite(g2):
+                            ts.local_vis[:, fi, pi, bi] /= (g1 * np.conj(g2))
+                        else:
+                            # mask the un-calibrated vis
+                            ts.local_vis_mask[:, fi, pi, bi] = True
 
         # save gain to file
         if mpiutil.rank0 and save_gain:
@@ -434,6 +475,15 @@ class PsCal(timestream_task.TimestreamTask):
                 gain.attrs['freq'] = freq
                 gain.attrs['pol'] = np.array(['xx', 'yy'])
                 gain.attrs['feed'] = np.array(feedno)
+
+        mpiutil.barrier()
+        del gain
+
+        # convert vis from intensity unit to temperature unit in K
+        if temperature_convert:
+            factor = 1.0e-26 * (const.c**2 / (2 * const.k_B * (1.0e6*freq)**2)) # NOTE: 1Jy = 1.0e-26 W m^-2 Hz^-1
+            ts.local_vis[:] *= factor[np.newaxis, :, np.newaxis, np.newaxis]
+            ts.vis.attrs['unit'] = 'K'
 
 
         return super(PsCal, self).process(ts)
