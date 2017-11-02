@@ -14,6 +14,7 @@ from scipy.linalg import eigh
 import h5py
 import aipy as a
 import timestream_task
+from tlpipe.container.timestream import Timestream
 
 from caput import mpiutil
 from caput import mpiarray
@@ -53,6 +54,8 @@ class MapMaking(timestream_task.TimestreamTask):
 
     def process(self, ts):
 
+        assert isinstance(ts, Timestream), '%s only works for Timestream object' % self.__class__.__name__
+
         mask_daytime = self.params['mask_daytime']
         mask_time_range = self.params['mask_time_range']
         beam_theta_range = self.params['beam_theta_range']
@@ -71,16 +74,22 @@ class MapMaking(timestream_task.TimestreamTask):
         input_maps = self.params['input_maps']
         add_noise = self.params['add_noise']
 
-        ts.redistribute('frequency')
+        ts.redistribute('baseline')
 
         lat = ts.attrs['sitelat']
         # lon = ts.attrs['sitelon']
         lon = 0.0
         # lon = np.degrees(ts['ra_dec'][0, 0]) # the first ra
-        freqs = ts.freq.data.to_numpy_array(root=None)
+        freqs = ts.freq[:] # MHz
+        nfreq = freqs.shape[0]
         band_width = ts.attrs['freqstep'] # MHz
-        ndays = ts.attrs['ndays']
+        try:
+            ndays = ts.attrs['ndays']
+        except KeyError:
+            ndays = 1
         feeds = ts['feedno'][:]
+        bl_order = mpiutil.gather_array(ts.local_bl, axis=0, root=None, comm=ts.comm)
+        bls = [ tuple(bl) for bl in bl_order ]
         az, alt = ts['az_alt'][0]
         az = np.degrees(az)
         alt = np.degrees(alt)
@@ -136,6 +145,8 @@ class MapMaking(timestream_task.TimestreamTask):
                 vis[idx] = average(np.ma.array(ts.local_vis[inds], mask=ts.local_vis_mask[inds]), axis=0, weights=weight) # time mean
                 # phi[idx] = np.average(ts['ra_dec'][:, 0][inds], axis=0, weights=weight)
 
+            del ts # no longer need ts
+
             if pol == 'xx':
                 vis = vis[:, :, 0, :]
             elif pol == 'yy':
@@ -147,12 +158,15 @@ class MapMaking(timestream_task.TimestreamTask):
             else:
                 raise ValueError('Invalid pol: %s' % pol)
 
+            # redistribute vis to time axis
+            vis = mpiarray.MPIArray.wrap(vis, axis=2).redistribute(0).local_array
+
             allpairs = tel.allpairs
             redundancy = tel.redundancy
+            nrd = len(redundancy)
 
             # reorder bls according to allpairs
             vis_tmp = np.zeros_like(vis)
-            bls = [ tuple(bl) for bl in ts['blorder'][:] ]
             for ind, (a1, a2) in enumerate(allpairs):
                 try:
                     b_ind = bls.index((feeds[a1], feeds[a2]))
@@ -161,17 +175,18 @@ class MapMaking(timestream_task.TimestreamTask):
                     b_ind = bls.index((feeds[a2], feeds[a1]))
                     vis_tmp[:, :, ind] = vis[:, :, b_ind].conj()
 
+            del vis
+
             # average over redundancy
-            vis_stream = np.zeros(vis.shape[:-1]+(len(redundancy),), dtype=vis_tmp.dtype)
+            vis_stream = np.zeros(vis_tmp.shape[:-1]+(nrd,), dtype=vis_tmp.dtype)
             red_bin = np.cumsum(np.insert(redundancy, 0, 0)) # redundancy bin
             # average over redundancy
-            for ind in xrange(len(redundancy)):
+            for ind in xrange(nrd):
                 vis_stream[:, :, ind] = np.sum(vis_tmp[:, :, red_bin[ind]:red_bin[ind+1]], axis=2) / redundancy[ind]
 
-            del vis
             del vis_tmp
 
-            vis_stream = mpiarray.MPIArray.wrap(vis_stream, axis=1)
+            vis_stream = mpiarray.MPIArray.wrap(vis_stream, axis=0)
             vis_h5 = memh5.MemGroup(distributed=True)
             vis_h5.create_dataset('/timestream', data=vis_stream)
             vis_h5.create_dataset('/phi', data=phi)
