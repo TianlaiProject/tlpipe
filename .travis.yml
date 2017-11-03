@@ -10,10 +10,10 @@ addons:
             - openmpi-bin
 install:
     - "pip install -r requirements.txt"
-    - "pip install -e .[mpi]"
     - "pip install -e git+https://github.com/zuoshifan/cora.git#egg=cora"
     - "pip install -e git+https://github.com/zuoshifan/caput.git@zuo/develop#egg=caput"
     - "pip install -e git+https://github.com/zuoshifan/aipy.git@zuo/develop#egg=aipy"
+    - "pip install -e .[mpi]"
 # script:
     # - "sphinx-build -b html -d _build/doctrees   . _build/html"
     # - "cd ~; nosetests tlpipe"
