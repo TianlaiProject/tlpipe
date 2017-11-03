@@ -8,12 +8,12 @@ addons:
         sources:
             - ubuntu-toolchain-r-test
         packages:
-            - g++-4.9
+            - g++-4.6
             - libhdf5-dev
             - libopenmpi-dev
             - openmpi-bin
         env:
-         - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
+         - MATRIX_EVAL="CC=gcc-4.6 && CXX=g++-4.6"
 
 before_install:
     - eval "${MATRIX_EVAL}"
