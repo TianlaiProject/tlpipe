@@ -5,4 +5,3 @@ h5py
 healpy
 pyephem
 cython
-mpi4py

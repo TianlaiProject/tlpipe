@@ -6,9 +6,11 @@ addons:
     apt:
         packages:
             - libhdf5-dev
-            - mpich
+            - libopenmpi-dev
+            - openmpi-bin
 install:
     - "pip install -r requirements.txt"
+    - "pip install -e .[mpi]"
     - "pip install -e git+https://github.com/zuoshifan/cora.git#egg=cora"
     - "pip install -e git+https://github.com/zuoshifan/caput.git@zuo/develop#egg=caput"
     - "pip install -e git+https://github.com/zuoshifan/aipy.git@zuo/develop#egg=aipy"
