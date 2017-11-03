@@ -3,26 +3,22 @@ os: linux
 python:
     - 2.7
 
+before_install:
+  - sudo apt-get update -q
+  - sudo pip install -U pip
+
 addons:
     apt:
-        sources:
-            - ubuntu-toolchain-r-test
         packages:
-            - g++-4.6
             - libhdf5-dev
             - libopenmpi-dev
             - openmpi-bin
-        env:
-         - MATRIX_EVAL="CC=gcc-4.6 && CXX=g++-4.6"
-
-before_install:
-    - eval "${MATRIX_EVAL}"
 
 install:
     - "pip install -r requirements.txt"
     - "pip install -e git+https://github.com/zuoshifan/cora.git#egg=cora"
-    - "pip install -e git+https://github.com/zuoshifan/caput.git@zuo/develop#egg=caput"
     - "pip install -e git+https://github.com/zuoshifan/aipy.git@zuo/develop#egg=aipy"
+    - "pip install -e git+https://github.com/zuoshifan/caput.git@zuo/develop#egg=caput"
     - "pip install -e .[mpi]"
 
 # script:
