@@ -5,14 +5,10 @@ python:
 addons:
     apt:
         packages:
-            # - libhdf5-serial-dev
-            # - libopenmpi-dev
-            # - openmpi-bin
+            - libhdf5-dev
+            - mpich
 install:
-    # - "pip install -r requirements.txt"
-    # - "pip install -e .[mpi]"
-    # - "pip install -e .[skyfield]"
-    # - "pip install -r doc/requirements.txt"
-script:
-    - "sphinx-build -b html -d _build/doctrees   . _build/html"
+    - "pip install -r requirements.txt"
+# script:
+    # - "sphinx-build -b html -d _build/doctrees   . _build/html"
     # - "cd ~; nosetests tlpipe"
