@@ -31,6 +31,7 @@ Operating tasks
    rfi_stats
    subdata
    bad_detect
+   delay_transfrom
    ns_cal
    rt2ts
    ps_fit
