@@ -76,11 +76,24 @@ class Detect(timestream_task.TimestreamTask):
             pdf = np.where(df>0, df, 0)
             pinds = np.where(pdf>pdf.mean() + sigma*pdf.std())[0]
             pinds = pinds + 1
+            pinds1 = [pinds[0]]
+            for pi in pinds[1:]:
+                if pi - pinds1[-1] > 1:
+                    pinds1.append(pi)
+            pinds = np.array(pinds1)
             pT = Counter(np.diff(pinds)).most_common(1)[0][0] # period of pinds
+
             ndf = np.where(df<0, df, 0)
             ninds = np.where(ndf<ndf.mean() - sigma*ndf.std())[0]
             ninds = ninds + 1
+            ninds = ninds[::-1]
+            ninds1 = [ninds[0]]
+            for ni in ninds[1:]:
+                if ni - ninds1[-1] < -1:
+                    ninds1.append(ni)
+            ninds = np.array(ninds1[::-1])
             nT = Counter(np.diff(ninds)).most_common(1)[0][0] # period of ninds
+
             if pT != nT: # failed to detect correct period
                 if mpiutil.rank0:
                     warnings.warn('Failed to detect correct period for auto-correlation of Channel: %d, positive T %d != negative T %d, does not use it' % (this_chan, pT, nT))
