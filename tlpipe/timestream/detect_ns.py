@@ -27,7 +27,7 @@ class Detect(timestream_task.TimestreamTask):
     """
 
     params_init = {
-                    'feed': None, # use this feed
+                    'channel': None, # use auto-correlation of this channel
                     'sigma': 3.0,
                     'mask_near': 1, # how many extra near ns_on int_time to be masked
                   }
@@ -38,34 +38,37 @@ class Detect(timestream_task.TimestreamTask):
 
         assert isinstance(rt, RawTimestream), '%s only works for RawTimestream object currently' % self.__class__.__name__
 
-        feed = self.params['feed']
+        channel = self.params['channel']
         sigma = self.params['sigma']
         mask_near = max(0, int(self.params['mask_near']))
 
         rt.redistribute(0) # make time the dist axis
 
         auto_inds = np.where(rt.bl[:, 0]==rt.bl[:, 1])[0].tolist() # inds for auto-correlations
-        feeds = [ rt.bl[ai, 0] for ai in auto_inds ] # all chosen feeds
-        if feed is not None:
-            if feed in feeds:
-                bl_ind = auto_inds[feeds.index(feed)]
+        channels = [ rt.bl[ai, 0] for ai in auto_inds ] # all chosen channels
+        if channel is not None:
+            if channel in channels:
+                bl_ind = auto_inds[channels.index(channel)]
             else:
                 bl_ind = auto_inds[0]
                 if mpiutil.rank0:
-                    print 'Warning: Required feed %d doen not in the data, use feed %d instead' % (feed, rt.bl[bl_ind, 0])
+                    print 'Warning: Required channel %d doen not in the data, use channel %d instead' % (channel, rt.bl[bl_ind, 0])
         else:
             bl_ind = auto_inds[0]
-        # move the chosen feed to the first
+        # move the chosen channel to the first
         auto_inds.remove(bl_ind)
         auto_inds = [bl_ind] + auto_inds
 
         for bl_ind in auto_inds:
+            this_chan = rt.bl[bl_ind, 0] # channel of this bl_ind
             vis = np.ma.array(rt.local_vis[:, :, bl_ind].real, mask=rt.local_vis_mask[:, :, bl_ind])
             cnt = vis.count() # number of not masked vals
             total_cnt = mpiutil.allreduce(cnt)
             vis_shp = rt.vis.shape
             ratio = float(total_cnt) / np.prod((vis_shp[0], vis_shp[1])) # ratio of un-maksed vals
             if ratio < 0.5: # too many masked vals
+                if mpiutil.rank0:
+                    warnings.warn('Too many masked values for auto-correlation of Channel: %d, does not use it' % this_chan)
                 continue
 
             tt_mean = mpiutil.gather_array(np.ma.mean(vis, axis=-1).filled(0), root=None)
@@ -79,6 +82,8 @@ class Detect(timestream_task.TimestreamTask):
             ninds = ninds + 1
             nT = Counter(np.diff(ninds)).most_common(1)[0][0] # period of ninds
             if pT != nT: # failed to detect correct period
+                if mpiutil.rank0:
+                    warnings.warn('Failed to detect correct period for auto-correlation of Channel: %d, positive T %d != negative T %d, does not use it' % (this_chan, pT, nT))
                 continue
             else:
                 period = pT
@@ -89,6 +94,8 @@ class Detect(timestream_task.TimestreamTask):
             off_time = Counter(-dinds[dinds<0] % period).most_common(1)[0][0]
 
             if period != on_time + off_time: # incorrect detect
+                if mpiutil.rank0:
+                    warnings.warn('Incorrect detect for auto-correlation of Channel: %d, period %d != on_time %d + off_time %d, does not use it' % (this_chan, period, on_time, off_time))
                 continue
             else:
                 if 'noisesource' in rt.iterkeys():
@@ -98,9 +105,12 @@ class Detect(timestream_task.TimestreamTask):
                         true_on_time = np.round((stop - start)/int_time)
                         true_period = np.round(cycle / int_time)
                         if on_time != true_on_time and period != true_period: # inconsistant with the record in the data
+                            if mpiutil.rank0:
+                                warnings.warn('Detected noise source info is inconsistant with the record in the data for auto-correlation of Channel: %d: on_time %d != record_on_time %d, period != record_period %d, does not use it' % (this_chan, on_time, true_on_time, period, true_period))
                             continue
                     elif rt['noisesource'].shape[0] >= 2: # more than 1 noise source
-                        warnings.warn('More than 1 noise source, do not know how to deal with this currently')
+                        if mpiutil.rank0:
+                            warnings.warn('More than 1 noise source, do not know how to deal with this currently')
 
                 # break if succeed
                 break
