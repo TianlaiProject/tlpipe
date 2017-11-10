@@ -166,8 +166,12 @@ class Detect(timestream_task.TimestreamTask):
                 new_on_inds = new_on_inds + (on_inds-i).tolist() + (on_inds+i).tolist()
             new_on_inds = np.unique(new_on_inds)
 
-            start = rt.vis_mask.local_offset[0]
-            end = start + rt.vis_mask.local_shape[0]
+            if rt['vis_maks'].distributed:
+                start = rt.vis_mask.local_offset[0]
+                end = start + rt.vis_mask.local_shape[0]
+            else:
+                start = 0
+                end = rt.vis_mask.shape[0]
             global_inds = np.arange(start, end).tolist()
             new_on_inds = np.intersect1d(new_on_inds, global_inds)
             local_on_inds = [ global_inds.index(i) for i in new_on_inds ]

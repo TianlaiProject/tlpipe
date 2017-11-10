@@ -806,7 +806,11 @@ class TimestreamCommon(container.BasicTod):
             if full_data:
                 original_dist_axis = self.main_data_dist_axis
                 self.redistribute(axis)
-            for lind, gind in self.main_data.data.enumerate(axis):
+            if self.main_data.distributed:
+                lgind = self.main_data.data.enumerate(axis)
+            else:
+                lgind = enumerate(range(self.main_data.data.shape[axis]))
+            for lind, gind in lgind:
                 data_sel[axis] = lind
                 if isinstance(axis_vals, memh5.MemDataset):
                     # use the new dataset which may be different from axis_vals if it is redistributed
@@ -832,8 +836,12 @@ class TimestreamCommon(container.BasicTod):
                     # choose the longest axis in axes as the new dist axis
                     new_dist_axis = axes[np.argmax(axes_len)]
                     self.redistribute(new_dist_axis)
-            linds = [ [ li for (li, gi) in self.main_data.data.enumerate(axis) ] for axis in axes ]
-            ginds = [ [ gi for (li, gi) in self.main_data.data.enumerate(axis) ] for axis in axes ]
+            if self.main_data.distributed:
+                lgind = [ self.main_data.data.enumerate(axis) for axis in axes ]
+            else:
+                lgind = [ enumerate(range(self.main_data.data.shape[axis])) for axis in axes ]
+            linds = [ [ li for (li, gi) in lg ] for lg in lgind ]
+            ginds = [ [ gi for (li, gi) in lg ] for lg in lgind ]
             n_axes = len(axes)
             for lind, gind in zip(itertools.product(*linds), itertools.product(*ginds)):
                 axis_val = ()

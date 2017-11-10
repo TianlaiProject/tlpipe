@@ -52,17 +52,19 @@ class ReOrder(timestream_task.TimestreamTask):
         nt1 = min(num_int, nt-ind)
 
         # for vis
-        vis = np.zeros((num_int,)+ts['vis'].local_shape[1:], dtype=ts['vis'].dtype)
+        vis = np.zeros((num_int,)+ts.local_vis.shape[1:], dtype=ts['vis'].dtype)
         vis[:nt1] = ts.local_vis[ind:ind+nt1]
         # vis[nt1:] = complex(np.nan, np.nan) # mask the completed data
-        vis = mpiarray.MPIArray.wrap(vis, axis=ts['vis'].distributed_axis)
+        if not ts['vis'].distributed_axis is None:
+            vis = mpiarray.MPIArray.wrap(vis, axis=ts['vis'].distributed_axis)
         ts.create_main_data(vis, recreate=True, copy_attrs=True)
 
         # for vis_mask
-        vis_mask = np.ones((num_int,)+ts['vis_mask'].local_shape[1:], dtype=ts['vis_mask'].dtype) # initialize as masked
+        vis_mask = np.ones((num_int,)+ts.local_vis_mask.shape[1:], dtype=ts['vis_mask'].dtype) # initialize as masked
         vis_mask[:nt1] = ts.local_vis_mask[ind:ind+nt1]
         # vis_mask[nt1:] = True # mask the completed data
-        vis_mask = mpiarray.MPIArray.wrap(vis_mask, axis=ts['vis'].distributed_axis)
+        if not ts['vis'].distributed_axis is None:
+            vis_mask = mpiarray.MPIArray.wrap(vis_mask, axis=ts['vis'].distributed_axis)
         axis_order = ts.main_axes_ordered_datasets[ts.main_data_name]
         ts.create_main_axis_ordered_dataset(axis_order, 'vis_mask', vis_mask, axis_order, recreate=True, copy_attrs=True)
 

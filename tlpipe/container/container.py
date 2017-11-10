@@ -998,6 +998,10 @@ class BasicTod(memh5.MemDiskGroup):
 
         """
 
+        # no MPI, datasets are not distributed
+        if self.comm is None:
+            return
+
         axis = check_axis(dist_axis, self.main_data_axes)
 
         if axis == self.main_data_dist_axis:
@@ -1044,7 +1048,7 @@ class BasicTod(memh5.MemDiskGroup):
                 val = self.main_axes_ordered_datasets[name]
                 if self.main_data_dist_axis in val:
                     dist_axis = val.index(self.main_data_dist_axis)
-                    if not dset.distributed or dset.distributed_axis != dist_axis:
+                    if self.comm and (not dset.distributed or dset.distributed_axis != dist_axis):
                         raise RuntimeError('Dataset %s should be distributed along axis %d when %s is the distributed axis' % (name, dist_axis, self.main_data_axes[self.main_data_dist_axis]))
                 else:
                     if dset.distributed:
@@ -1054,8 +1058,7 @@ class BasicTod(memh5.MemDiskGroup):
             elif name in self.time_ordered_datasets.keys():
                 val = self.time_ordered_datasets[name]
                 if self.main_data_dist_axis == 0:
-                    if not (dset.distributed and dset.distributed_axis == val.index(0)):
-                        print name, type(dset), val
+                    if self.comm and not (dset.distributed and dset.distributed_axis == val.index(0)):
                         raise RuntimeError('Dataset %s should be distributed along axis %d when %s is the distributed axis' % (name, val.index(0), self.main_data_axes[self.main_data_dist_axis]))
                 else:
                     if not dset.common:
@@ -1154,9 +1157,9 @@ class BasicTod(memh5.MemDiskGroup):
                         f.create_dataset(dset_name, data=dset, shape=dset.shape, dtype=dset.dtype)
                     # initialize time ordered datasets
                     else:
-                        nt = dset.global_shape[0]
+                        nt = dset.shape[0]
                         lt, et, st = mpiutil.split_m(nt, num_outfiles)
-                        lshape = (lt[fi],) + dset.global_shape[1:]
+                        lshape = (lt[fi],) + dset.shape[1:]
                         f.create_dataset(dset_name, lshape, dtype=dset.dtype)
                         f[dset_name][:] = np.array(0.0).astype(dset.dtype)
 
@@ -1260,7 +1263,11 @@ class BasicTod(memh5.MemDiskGroup):
             if full_data:
                 original_dist_axis = self.main_data_dist_axis
                 self.redistribute(axis)
-            for lind, gind in self.main_data.data.enumerate(axis):
+            if self.main_data.distributed:
+                lgind = self.main_data.data.enumerate(axis)
+            else:
+                lgind = enumerate(range(self.main_data.data.shape[axis]))
+            for lind, gind in lgind:
                 data_sel[axis] = lind
                 if isinstance(axis_vals, memh5.MemDataset):
                     # use the new dataset which may be different from axis_vals if it is redistributed
@@ -1286,8 +1293,12 @@ class BasicTod(memh5.MemDiskGroup):
                     # choose the longest axis in axes as the new dist axis
                     new_dist_axis = axes[np.argmax(axes_len)]
                     self.redistribute(new_dist_axis)
-            linds = [ [ li for (li, gi) in self.main_data.data.enumerate(axis) ] for axis in axes ]
-            ginds = [ [ gi for (li, gi) in self.main_data.data.enumerate(axis) ] for axis in axes ]
+            if self.main_data.distributed:
+                lgind = [ self.main_data.data.enumerate(axis) for axis in axes ]
+            else:
+                lgind = [ enumerate(range(self.main_data.data.shape[axis])) for axis in axes ]
+            linds = [ [ li for (li, gi) in lg ] for lg in lgind ]
+            ginds = [ [ gi for (li, gi) in lg ] for lg in lgind ]
             n_axes = len(axes)
             for lind, gind in zip(itertools.product(*linds), itertools.product(*ginds)):
                 axis_val = ()
@@ -1371,8 +1382,12 @@ class BasicTod(memh5.MemDiskGroup):
             memh5.copyattrs(other[name].attrs, self[name].attrs)
 
             # get start and end of the local data along axis di
-            s = other[name].data.local_offset[di]
-            e = s + other[name].data.local_shape[di]
+            if other[name].distributed:
+                s = other[name].data.local_offset[di]
+                e = s + other[name].data.local_shape[di]
+            else:
+                s = 0
+                e = other[name].shape[di]
             # get indices of the data corresponding to the sub data set
             sub_inds = np.arange(other[name].shape[di])[sel[di]]
             # split indices for each process
