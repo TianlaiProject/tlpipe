@@ -243,6 +243,7 @@ class MapMaking(timestream_task.TimestreamTask):
                     try:
                         with h5py.File(tstream._ffile(fi), 'r+') as f:
                             f['/timestream'][:, s:e] = vis_stream[:, fi, :].T
+                        break
                     except IOError:
                         time.sleep(0.5)
                         continue
