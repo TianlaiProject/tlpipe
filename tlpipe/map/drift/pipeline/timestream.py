@@ -281,7 +281,9 @@ class Timestream(object):
             alm = np.zeros((nbin, self.telescope.num_pol_sky, self.telescope.lmax + 1,
                             self.telescope.lmax + 1), dtype=np.complex128)
 
-            for mi in range(self.telescope.mmax + 1):
+            mlist = range(1 if self.no_m_zero else 0, self.telescope.mmax + 1)
+
+            for mi in mlist:
 
                 alm[..., mi] = alm_list[mi]
 
@@ -314,7 +316,9 @@ class Timestream(object):
             alm = np.zeros((self.telescope.nfreq, self.telescope.num_pol_sky, self.telescope.lmax + 1,
                             self.telescope.lmax + 1), dtype=np.complex128)
 
-            for mi in range(self.telescope.mmax + 1):
+            mlist = range(1 if self.no_m_zero else 0, self.telescope.mmax + 1)
+
+            for mi in mlist:
 
                 alm[..., mi] = alm_list[mi]
 

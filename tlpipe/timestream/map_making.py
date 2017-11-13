@@ -49,6 +49,7 @@ class MapMaking(timestream_task.TimestreamTask):
                     'noise_weight': True,
                     'ts_dir': 'map/ts',
                     'ts_name': 'ts',
+                    'no_m_zero': True,
                     'simulate': False,
                     'input_maps': [],
                     'add_noise': True,
@@ -79,6 +80,7 @@ class MapMaking(timestream_task.TimestreamTask):
         noise_weight = self.params['noise_weight']
         ts_dir = output_path(self.params['ts_dir'])
         ts_name = self.params['ts_name']
+        no_m_zero = self.params['no_m_zero']
         simulate = self.params['simulate']
         input_maps = self.params['input_maps']
         add_noise = self.params['add_noise']
@@ -203,7 +205,7 @@ class MapMaking(timestream_task.TimestreamTask):
             tstream = timestream.simulate(bt, ts_dir, ts_name, input_maps, ndays, add_noise=add_noise)
         else:
             # timestream and map-making
-            tstream = timestream.Timestream(ts_dir, ts_name, bt)
+            tstream = timestream.Timestream(ts_dir, ts_name, bt, no_m_zero)
             for fi in mpiutil.mpilist(range(nfreq)):
                 # Make directory if required
                 if not os.path.exists(tstream._fdir(fi)):
