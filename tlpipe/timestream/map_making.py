@@ -9,6 +9,7 @@ Inheritance diagram
 """
 
 import os
+import time
 import numpy as np
 from scipy.linalg import eigh
 import h5py
@@ -238,9 +239,18 @@ class MapMaking(timestream_task.TimestreamTask):
             # write vis_stream to files
             num, s, e = mpiutil.split_local(phi_size)
             for fi in xrange(nfreq):
-                with h5py.File(tstream._ffile(fi), 'r+') as f:
-                    f['/timestream'][:, s:e] = vis_stream[:, fi, :].T
+                for i in range(10):
+                    try:
+                        with h5py.File(tstream._ffile(fi), 'r+') as f:
+                            f['/timestream'][:, s:e] = vis_stream[:, fi, :].T
+                    except IOError:
+                        time.sleep(0.5)
+                        continue
+                else:
+                    raise RuntimeError('Could not open file: %s...' % tstream._ffile(fi))
+
             del vis_stream
+            mpiutil.barrier()
 
         tstream.generate_mmodes()
         nside = hputil.nside_for_lmax(tel.lmax, accuracy_boost=tel.accuracy_boost)
