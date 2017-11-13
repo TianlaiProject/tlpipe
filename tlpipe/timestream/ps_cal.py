@@ -202,8 +202,16 @@ class PsCal(timestream_task.TimestreamTask):
         lGain = np.empty((len(tfp_linds), nfeed), dtype=ts.vis.dtype)
         lGain[:] = complex(np.nan, np.nan)
         if save_src_vis or subtract_src:
+            # save calibrator src vis
             lsrc_vis = np.empty((len(tfp_linds), nfeed, nfeed), dtype=ts.vis.dtype)
             lsrc_vis[:] = complex(np.nan, np.nan)
+            if save_src_vis:
+                # save sky vis
+                lsky_vis = np.empty((len(tfp_linds), nfeed, nfeed), dtype=ts.vis.dtype)
+                lsky_vis[:] = complex(np.nan, np.nan)
+                # save outlier vis
+                lotl_vis = np.empty((len(tfp_linds), nfeed, nfeed), dtype=ts.vis.dtype)
+                lotl_vis[:] = complex(np.nan, np.nan)
 
         # construct visibility matrix for a single time, freq, pol
         Vmat = np.zeros((nfeed, nfeed), dtype=ts.vis.dtype)
@@ -237,6 +245,9 @@ class PsCal(timestream_task.TimestreamTask):
                         else:
                             Vmat[i, j] = np.conj(this_vis[ii, bi] / Sc[fi]) # xx, yy
 
+            if save_src_vis:
+                lsky_vis[ii] = Vmat
+
             # if too many masks
             if mask_cnt > 0.3 * nfeed**2:
                 continue
@@ -253,6 +264,8 @@ class PsCal(timestream_task.TimestreamTask):
             # V0, S = rpca_decomp.decompose(Vmat, rank=1, S=S0, max_iter=100, threshold='soft', tol=1.0e-6, debug=False)
             if save_src_vis or subtract_src:
                 lsrc_vis[ii] = V0
+                if save_src_vis:
+                    lotl_vis[ii] = S
 
             # plot
             if plot_figs:
@@ -355,6 +368,13 @@ class PsCal(timestream_task.TimestreamTask):
             src_vis = mpiutil.gather_array(lsrc_vis, axis=0, root=None, comm=ts.comm)
             del lsrc_vis
             src_vis = src_vis.reshape(nt, nf, 2, nfeed, nfeed)
+            if save_src_vis:
+                sky_vis = mpiutil.gather_array(lsky_vis, axis=0, root=None, comm=ts.comm)
+                del lsky_vis
+                otl_vis = mpiutil.gather_array(lotl_vis, axis=0, root=None, comm=ts.comm)
+                del lotl_vis
+                sky_vis = sky_vis.reshape(nt, nf, 2, nfeed, nfeed)
+                otl_vis = otl_vis.reshape(nt, nf, 2, nfeed, nfeed)
             # subtract vis of calibrator from data
             if subtract_src:
                 for pi in [pol.index('xx'), pol.index('yy')]:
@@ -369,12 +389,15 @@ class PsCal(timestream_task.TimestreamTask):
                     src_vis_file = output_path(src_vis_file)
                 with h5py.File(src_vis_file, 'w') as f:
                     # save src_vis
-                    dset = f.create_dataset('src_vis', data=src_vis)
-                    dset.attrs['dim'] = 'time, freq, pol, feed, feed'
-                    dset.attrs['time'] = ts.time[start_ind:end_ind]
-                    dset.attrs['freq'] = freq
-                    dset.attrs['pol'] = np.array(['xx', 'yy'])
-                    dset.attrs['feed'] = np.array(feedno)
+                    f.create_dataset('sky_vis', data=sky_vis)
+                    f.create_dataset('src_vis', data=src_vis)
+                    f.create_dataset('outlier_vis', data=otl_vis)
+                    f.attrs['calibrator'] = calibrator
+                    f.attrs['dim'] = 'time, freq, pol, feed, feed'
+                    f.attrs['time'] = ts.time[start_ind:end_ind]
+                    f.attrs['freq'] = freq
+                    f.attrs['pol'] = np.array(['xx', 'yy'])
+                    f.attrs['feed'] = np.array(feedno)
 
             mpiutil.barrier()
 
@@ -463,20 +486,23 @@ class PsCal(timestream_task.TimestreamTask):
                 gain_file = output_path(gain_file)
             with h5py.File(gain_file, 'w') as f:
                 # save Gain
-                Gain = f.create_dataset('Gain', data=Gain)
-                Gain.attrs['dim'] = 'time, freq, pol, feed'
-                Gain.attrs['time'] = ts.time[start_ind:end_ind]
-                Gain.attrs['freq'] = freq
-                Gain.attrs['pol'] = np.array(['xx', 'yy'])
-                Gain.attrs['feed'] = np.array(feedno)
+                dset = f.create_dataset('Gain', data=Gain)
+                dset.attrs['calibrator'] = calibrator
+                dset.attrs['dim'] = 'time, freq, pol, feed'
+                dset.attrs['time'] = ts.time[start_ind:end_ind]
+                dset.attrs['freq'] = freq
+                dset.attrs['pol'] = np.array(['xx', 'yy'])
+                dset.attrs['feed'] = np.array(feedno)
                 # save gain
-                gain = f.create_dataset('gain', data=gain)
-                gain.attrs['dim'] = 'freq, pol, feed'
-                gain.attrs['freq'] = freq
-                gain.attrs['pol'] = np.array(['xx', 'yy'])
-                gain.attrs['feed'] = np.array(feedno)
+                dset = f.create_dataset('gain', data=gain)
+                dset.attrs['calibrator'] = calibrator
+                dset.attrs['dim'] = 'freq, pol, feed'
+                dset.attrs['freq'] = freq
+                dset.attrs['pol'] = np.array(['xx', 'yy'])
+                dset.attrs['feed'] = np.array(feedno)
 
         mpiutil.barrier()
+        del Gain
         del gain
 
         # convert vis from intensity unit to temperature unit in K
