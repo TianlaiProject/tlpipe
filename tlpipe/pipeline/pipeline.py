@@ -1042,6 +1042,10 @@ class DoNothing(TaskBase):
         pass
 
 
+class _DryRun(object):
+    pass
+
+
 class OneAndOne(TaskBase):
     """Base class for tasks that have (at most) one input and one output.
 
@@ -1064,6 +1068,7 @@ class OneAndOne(TaskBase):
                     'iter_start': 0,
                     'iter_step': 1,
                     'iter_num': None, # number of iterations
+                    'dry_run_time': 0, # dry run for this number of times
                     'process_timing': False, # timing the executing of process()
                   }
 
@@ -1084,6 +1089,7 @@ class OneAndOne(TaskBase):
             self.iter_num = self.params['iter_num']
         self._iter_cnt = 0 # inner iter counter
         self._iter_stop = False # inner state
+        self.dry_run_time = self.params['dry_run_time']
 
         # Inspect the `process` method to see how many arguments it takes.
         pro_argspec = inspect.getargspec(self.process)
@@ -1157,6 +1163,13 @@ class OneAndOne(TaskBase):
 
         if self.stop_iteration():
             raise PipelineStopIteration()
+
+        if self._iter_cnt < self.dry_run_time:
+            self._iter_cnt += 1
+            return _DryRun()
+
+        if isinstance(input, _DryRun):
+            input = None
 
         if input:
             if self.params['copy']:
