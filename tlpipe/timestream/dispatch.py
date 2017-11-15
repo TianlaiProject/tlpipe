@@ -55,6 +55,8 @@ class Dispatch(timestream_task.TimestreamTask):
         # group state
         self.grp_cnt = 0
         self.next_grp = True
+        self.abs_start = None
+        self.abs_stop = None
 
         # int time for later use
         self.int_time = None
@@ -172,8 +174,8 @@ class Dispatch(timestream_task.TimestreamTask):
 
         ngrp = len(self.input_grps)
 
-        if self.next_grp:
-            if mpiutil.rank0 and ngrp > 1:
+        if self.next_grp and ngrp > 1:
+            if mpiutil.rank0:
                 print 'Start file group %d of %d...' % (self.grp_cnt, ngrp)
             self.restart_iteration() # re-start iteration for each group
             self.next_grp = False
