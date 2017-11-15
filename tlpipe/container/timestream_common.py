@@ -837,9 +837,9 @@ class TimestreamCommon(container.BasicTod):
                     new_dist_axis = axes[np.argmax(axes_len)]
                     self.redistribute(new_dist_axis)
             if self.main_data.distributed:
-                lgind = [ self.main_data.data.enumerate(axis) for axis in axes ]
+                lgind = [ list(self.main_data.data.enumerate(axis)) for axis in axes ]
             else:
-                lgind = [ enumerate(range(self.main_data.data.shape[axis])) for axis in axes ]
+                lgind = [ list(enumerate(range(self.main_data.data.shape[axis]))) for axis in axes ]
             linds = [ [ li for (li, gi) in lg ] for lg in lgind ]
             ginds = [ [ gi for (li, gi) in lg ] for lg in lgind ]
             n_axes = len(axes)
