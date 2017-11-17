@@ -1,32 +1,28 @@
 class Progress(object):
 
     def __init__(self, length, step=None, prog_msg = None):
-        self.length = length
-        self.step = step
         if not prog_msg is None:
             self.msg = prog_msg
         else:
             self.msg = 'Progress: %d of ' +  ('%d...' % length)
 
-    def show(self, cnt):
-        if not self.step is None:
-            if cnt % self.step == 0:
-                print self.msg % cnt
-        else:
-            if self.length < 10:
-                print self.msg % cnt
-            elif self.length < 10000:
-                _step, _res = self.length / 10, self.length % 10
-                if _res != 0:
-                    _step += 1
-                if cnt % _step == 0:
-                    print self.msg % cnt
+        if step is None:
+            if length < 10:
+                step = 1
+            elif length < 10000:
+                step = length / 10
             else:
-                _step, _res = self.length / 100, self.length % 100
-                if _res != 0:
-                    _step += 1
-                if cnt % _step == 0:
-                    print self.msg % cnt
+                step = length / 100
+
+        if length <= 0:
+            self.cnts = []
+        else:
+            num = length / step + 1
+            self.cnts = [ i * step for i in range(num) ]
+
+    def show(self, cnt):
+        if cnt in self.cnts:
+            print self.msg % cnt
 
 
 if __name__ == '__main__':
