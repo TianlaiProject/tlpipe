@@ -51,7 +51,10 @@ class Flag(timestream_task.TimestreamTask):
             elif isinstance(ts, Timestream):
                 func = ts.freq_pol_and_bl_data_operate
 
-            func(self.flag, full_data=True, keep_dist_axis=False)
+            show_progress = self.params['show_progress']
+            progress_step = self.params['progress_step']
+
+            func(self.flag, full_data=True, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False)
         else:
             warnings.warn('Not enough time points to do the smoothing')
 

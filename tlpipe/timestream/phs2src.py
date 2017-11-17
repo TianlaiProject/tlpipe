@@ -84,7 +84,10 @@ class Phs2src(timestream_task.TimestreamTask):
             print 'Phase to source %s.' % source
 
 
-        ts.time_and_bl_data_operate(self.phs, aa=aa, s=s)
+        show_progress = self.params['show_progress']
+        progress_step = self.params['progress_step']
+
+        ts.time_and_bl_data_operate(self.phs, show_progress=show_progress, progress_step=progress_step, aa=aa, s=s)
 
         return super(Phs2src, self).process(ts)
 

@@ -31,7 +31,10 @@ class Combine(timestream_task.TimestreamTask):
         if ts.dist_axis_name == 'polarization':
             ts.redistribute('baseline')
 
-        ts.bl_data_operate(self.combine)
+        show_progress = self.params['show_progress']
+        progress_step = self.params['progress_step']
+
+        ts.bl_data_operate(self.combine, show_progress=show_progress, progress_step=progress_step,)
 
         return super(Combine, self).process(ts)
 

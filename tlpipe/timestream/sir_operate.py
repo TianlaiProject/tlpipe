@@ -32,7 +32,10 @@ class Sir(timestream_task.TimestreamTask):
 
         ts.redistribute('baseline')
 
-        ts.bl_data_operate(self.operate, full_data=True, keep_dist_axis=False)
+        show_progress = self.params['show_progress']
+        progress_step = self.params['progress_step']
+
+        ts.bl_data_operate(self.operate, full_data=True, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False)
 
         return super(Sir, self).process(ts)
 

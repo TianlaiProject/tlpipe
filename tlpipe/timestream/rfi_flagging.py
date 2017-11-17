@@ -32,8 +32,8 @@ class Flag(timestream_task.TimestreamTask):
                     'sensitivity': 1.0,
                     'min_connected': 1,
                     'flag_direction': ('time', 'freq'),
-                    'tk_size': 1.0,
-                    'fk_size': 3.0,
+                    'tk_size': 1.0, # 128.0 for dish
+                    'fk_size': 3.0, # 2.0 for dish
                     'threshold_num': 2, # number of threshold
                   }
 
@@ -48,7 +48,10 @@ class Flag(timestream_task.TimestreamTask):
         elif isinstance(ts, Timestream):
             func = ts.pol_and_bl_data_operate
 
-        func(self.flag, full_data=True, keep_dist_axis=False)
+        show_progress = self.params['show_progress']
+        progress_step = self.params['progress_step']
+
+        func(self.flag, full_data=True, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False)
 
         return super(Flag, self).process(ts)
 

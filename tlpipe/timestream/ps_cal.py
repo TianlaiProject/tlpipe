@@ -23,6 +23,7 @@ from tlpipe.core import constants as const
 
 from caput import mpiutil
 from tlpipe.utils.path_util import output_path
+from tlpipe.utils import progress
 from tlpipe.utils import rpca_decomp
 import tlpipe.plot
 import matplotlib.pyplot as plt
@@ -104,6 +105,8 @@ class PsCal(timestream_task.TimestreamTask):
         save_gain = self.params['save_gain']
         gain_file = self.params['gain_file']
         temperature_convert = self.params['temperature_convert']
+        show_progress = self.params['show_progress']
+        progress_step = self.params['progress_step']
 
         ts.redistribute('baseline')
 
@@ -199,24 +202,29 @@ class PsCal(timestream_task.TimestreamTask):
         del tfp_inds
         del lvis
         del lvis_mask
-        lGain = np.empty((len(tfp_linds), nfeed), dtype=ts.vis.dtype)
+        tfp_len = len(tfp_linds)
+        lGain = np.empty((tfp_len, nfeed), dtype=ts.vis.dtype)
         lGain[:] = complex(np.nan, np.nan)
         if save_src_vis or subtract_src:
             # save calibrator src vis
-            lsrc_vis = np.empty((len(tfp_linds), nfeed, nfeed), dtype=ts.vis.dtype)
+            lsrc_vis = np.empty((tfp_len, nfeed, nfeed), dtype=ts.vis.dtype)
             lsrc_vis[:] = complex(np.nan, np.nan)
             if save_src_vis:
                 # save sky vis
-                lsky_vis = np.empty((len(tfp_linds), nfeed, nfeed), dtype=ts.vis.dtype)
+                lsky_vis = np.empty((tfp_len, nfeed, nfeed), dtype=ts.vis.dtype)
                 lsky_vis[:] = complex(np.nan, np.nan)
                 # save outlier vis
-                lotl_vis = np.empty((len(tfp_linds), nfeed, nfeed), dtype=ts.vis.dtype)
+                lotl_vis = np.empty((tfp_len, nfeed, nfeed), dtype=ts.vis.dtype)
                 lotl_vis[:] = complex(np.nan, np.nan)
 
         # construct visibility matrix for a single time, freq, pol
         Vmat = np.zeros((nfeed, nfeed), dtype=ts.vis.dtype)
         Sc = s.get_jys()
+        if show_progress and mpiutil.rank0:
+            pg = progress.Progress(tfp_len, step=progress_step)
         for ii, (ti, fi, pi) in enumerate(tfp_linds):
+            if show_progress and mpiutil.rank0:
+                pg.show(ii)
             # when noise on, just pass
             if 'ns_on' in ts.iterkeys() and ts['ns_on'][ti]:
                 continue
@@ -357,6 +365,8 @@ class PsCal(timestream_task.TimestreamTask):
                     fig_name = output_path(fig_name)
                 plt.savefig(fig_name)
                 plt.close()
+
+        del tfp_linds
 
         # gather Gain from each processes
         Gain = mpiutil.gather_array(lGain, axis=0, root=None, comm=ts.comm)

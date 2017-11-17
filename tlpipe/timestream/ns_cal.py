@@ -145,7 +145,10 @@ class NsCal(timestream_task.TimestreamTask):
         else:
             freq_plt = [ fi for fi in freq_incl if not fi in freq_excl ]
 
-        rt.freq_and_bl_data_operate(self.cal, full_data=True, keep_dist_axis=False, num_mean=num_mean, inds=inds, bls_plt=bls_plt, freq_plt=freq_plt)
+        show_progress = self.params['show_progress']
+        progress_step = self.params['progress_step']
+
+        rt.freq_and_bl_data_operate(self.cal, full_data=True, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False, num_mean=num_mean, inds=inds, bls_plt=bls_plt, freq_plt=freq_plt)
 
         if save_gain:
             # gather bl_order to rank0

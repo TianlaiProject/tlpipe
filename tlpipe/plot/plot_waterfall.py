@@ -8,6 +8,7 @@ Inheritance diagram
 
 """
 
+# import pytz
 from datetime import datetime
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
@@ -20,6 +21,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.ticker import MaxNLocator, AutoMinorLocator
 
+# tz = pytz.timezone('Asia/Shanghai')
 
 class Plot(timestream_task.TimestreamTask):
     """Waterfall plot for Timestream.
@@ -63,7 +65,10 @@ class Plot(timestream_task.TimestreamTask):
         elif isinstance(ts, Timestream):
             func = ts.pol_and_bl_data_operate
 
-        func(self.plot, full_data=True, keep_dist_axis=False)
+        show_progress = self.params['show_progress']
+        progress_step = self.params['progress_step']
+
+        func(self.plot, full_data=True, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False)
 
         return super(Plot, self).process(ts)
 
@@ -187,6 +192,7 @@ class Plot(timestream_task.TimestreamTask):
             # format datetime string
             # date_format = mdates.DateFormatter('%y/%m/%d %H:%M')
             date_format = mdates.DateFormatter('%H:%M')
+            # date_format = mdates.DateFormatter('%H:%M', tz=pytz.timezone('Asia/Shanghai'))
             if transpose:
                 ax.xaxis.set_major_formatter(date_format)
             else:

@@ -12,6 +12,7 @@ import h5py
 from caput import mpiarray
 from caput import memh5
 from caput import mpiutil
+from tlpipe.utils import progress
 
 
 def _to_slice_obj(lst):
@@ -1211,7 +1212,7 @@ class BasicTod(memh5.MemDiskGroup):
 
 
 
-    def data_operate(self, func, op_axis=None, axis_vals=0, full_data=False, copy_data=False, keep_dist_axis=False, **kwargs):
+    def data_operate(self, func, op_axis=None, axis_vals=0, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
         """A basic data operation interface.
 
         You can use this method to do some constrained operations to the main data
@@ -1244,6 +1245,12 @@ class BasicTod(memh5.MemDiskGroup):
         copy_data : bool, optional
             If True, `func` will operate on a copy of the data, so changes will
             have no impact on the data the container holds. Default False.
+        show_progress : bool, optional
+            If True, some progress info will show during the executing.
+            Default False.
+        progress_step : int or None
+            Show progress info every this number of steps. If None, appropriate
+            progress step will be chosen automatically. Default None.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original dist axis if the
             dist axis has changed during the operation. Default False.
@@ -1267,7 +1274,13 @@ class BasicTod(memh5.MemDiskGroup):
                 lgind = self.main_data.data.enumerate(axis)
             else:
                 lgind = enumerate(range(self.main_data.data.shape[axis]))
+            if show_progress:
+                pg = progress.Progress(len(lgind), step=progress_step)
+            cnt = 0
             for lind, gind in lgind:
+                if mpiutil.rank0:
+                    pg.show(cnt)
+                cnt += 1
                 data_sel[axis] = lind
                 if isinstance(axis_vals, memh5.MemDataset):
                     # use the new dataset which may be different from axis_vals if it is redistributed
@@ -1299,8 +1312,14 @@ class BasicTod(memh5.MemDiskGroup):
                 lgind = [ list(enumerate(range(self.main_data.data.shape[axis]))) for axis in axes ]
             linds = [ [ li for (li, gi) in lg ] for lg in lgind ]
             ginds = [ [ gi for (li, gi) in lg ] for lg in lgind ]
-            n_axes = len(axes)
-            for lind, gind in zip(itertools.product(*linds), itertools.product(*ginds)):
+            lgind = zip(itertools.product(*linds), itertools.product(*ginds))
+            if show_progress:
+                pg = progress.Progress(len(lgind), step=progress_step)
+            cnt = 0
+            for lind, gind in lgind:
+                if mpiutil.rank0:
+                    pg.show(cnt)
+                cnt += 1
                 axis_val = ()
                 for ai, axis in enumerate(axes):
                     data_sel[axis] = lind[ai]

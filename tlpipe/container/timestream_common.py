@@ -20,6 +20,7 @@ from caput import memh5
 from tlpipe.core import tl_array
 from tlpipe.core import constants as const
 from tlpipe.utils import date_util
+from tlpipe.utils import progress
 
 
 class TimestreamCommon(container.BasicTod):
@@ -750,7 +751,7 @@ class TimestreamCommon(container.BasicTod):
             raise RuntimeError('Not all feed_ordered_datasets have an aligned feed axis')
 
 
-    def data_operate(self, func, op_axis=None, axis_vals=0, full_data=False, copy_data=False, keep_dist_axis=False, **kwargs):
+    def data_operate(self, func, op_axis=None, axis_vals=0, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
         """An overload data operation interface.
 
         This overloads the method in its super class :class:`container.BasicTod`
@@ -787,6 +788,12 @@ class TimestreamCommon(container.BasicTod):
         copy_data : bool, optional
             If True, `func` will operate on a copy of the data, so changes will
             have no impact on the data the container holds. Default False.
+        show_progress : bool, optional
+            If True, some progress info will show during the executing.
+            Default False.
+        progress_step : int or None
+            Show progress info every this number of steps. If None, appropriate
+            progress step will be chosen automatically. Default None.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original dist axis if the
             dist axis has changed during the operation. Default False.
@@ -807,10 +814,16 @@ class TimestreamCommon(container.BasicTod):
                 original_dist_axis = self.main_data_dist_axis
                 self.redistribute(axis)
             if self.main_data.distributed:
-                lgind = self.main_data.data.enumerate(axis)
+                lgind = list(self.main_data.data.enumerate(axis))
             else:
-                lgind = enumerate(range(self.main_data.data.shape[axis]))
+                lgind = list(enumerate(range(self.main_data.data.shape[axis])))
+            if show_progress:
+                pg = progress.Progress(len(lgind), step=progress_step)
+            cnt = 0
             for lind, gind in lgind:
+                if mpiutil.rank0:
+                    pg.show(cnt)
+                cnt += 1
                 data_sel[axis] = lind
                 if isinstance(axis_vals, memh5.MemDataset):
                     # use the new dataset which may be different from axis_vals if it is redistributed
@@ -842,8 +855,14 @@ class TimestreamCommon(container.BasicTod):
                 lgind = [ list(enumerate(range(self.main_data.data.shape[axis]))) for axis in axes ]
             linds = [ [ li for (li, gi) in lg ] for lg in lgind ]
             ginds = [ [ gi for (li, gi) in lg ] for lg in lgind ]
-            n_axes = len(axes)
-            for lind, gind in zip(itertools.product(*linds), itertools.product(*ginds)):
+            lgind = zip(itertools.product(*linds), itertools.product(*ginds))
+            if show_progress:
+                pg = progress.Progress(len(lgind), step=progress_step)
+            cnt = 0
+            for lind, gind in lgind:
+                if mpiutil.rank0:
+                    pg.show(cnt)
+                cnt += 1
                 axis_val = ()
                 for ai, axis in enumerate(axes):
                     data_sel[axis] = lind[ai]
@@ -885,7 +904,7 @@ class TimestreamCommon(container.BasicTod):
         """
         self.data_operate(func, op_axis=None, axis_vals=0, full_data=False, copy_data=copy_data, keep_dist_axis=False, **kwargs)
 
-    def time_data_operate(self, func, full_data=False, copy_data=False, keep_dist_axis=False, **kwargs):
+    def time_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
         """Data operation along the time axis.
 
         Parameters
@@ -901,6 +920,12 @@ class TimestreamCommon(container.BasicTod):
         copy_data : bool, optional
             If True, `func` will operate on a copy of the data, so changes will
             have no impact on the data the container holds. Default False.
+        show_progress : bool, optional
+            If True, some progress info will show during the executing.
+            Default False.
+        progress_step : int or None
+            Show progress info every this number of steps. If None, appropriate
+            progress step will be chosen automatically. Default None.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
@@ -908,9 +933,9 @@ class TimestreamCommon(container.BasicTod):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis='time', axis_vals=self.time, full_data=full_data, copy_data=copy_data, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis='time', axis_vals=self.time, full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, **kwargs)
 
-    def freq_data_operate(self, func, full_data=False, copy_data=False, keep_dist_axis=False, **kwargs):
+    def freq_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
         """Data operation along the frequency axis.
 
         Parameters
@@ -926,6 +951,12 @@ class TimestreamCommon(container.BasicTod):
         copy_data : bool, optional
             If True, `func` will operate on a copy of the data, so changes will
             have no impact on the data the container holds. Default False.
+        show_progress : bool, optional
+            If True, some progress info will show during the executing.
+            Default False.
+        progress_step : int or None
+            Show progress info every this number of steps. If None, appropriate
+            progress step will be chosen automatically. Default None.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
@@ -933,9 +964,9 @@ class TimestreamCommon(container.BasicTod):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis='frequency', axis_vals=self.freq, full_data=full_data, copy_data=copy_data, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis='frequency', axis_vals=self.freq, full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, **kwargs)
 
-    def bl_data_operate(self, func, full_data=False, copy_data=False, keep_dist_axis=False, **kwargs):
+    def bl_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
         """Data operation along the baseline axis.
 
         Parameters
@@ -951,6 +982,12 @@ class TimestreamCommon(container.BasicTod):
         copy_data : bool, optional
             If True, `func` will operate on a copy of the data, so changes will
             have no impact on the data the container holds. Default False.
+        show_progress : bool, optional
+            If True, some progress info will show during the executing.
+            Default False.
+        progress_step : int or None
+            Show progress info every this number of steps. If None, appropriate
+            progress step will be chosen automatically. Default None.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
@@ -958,9 +995,9 @@ class TimestreamCommon(container.BasicTod):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis='baseline', axis_vals=self.bl, full_data=full_data, copy_data=copy_data, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis='baseline', axis_vals=self.bl, full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, **kwargs)
 
-    def time_and_freq_data_operate(self, func, full_data=False, copy_data=False, keep_dist_axis=False, **kwargs):
+    def time_and_freq_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
         """Data operation along the time and frequency axis.
 
         Parameters
@@ -977,6 +1014,12 @@ class TimestreamCommon(container.BasicTod):
         copy_data : bool, optional
             If True, `func` will operate on a copy of the data, so changes will
             have no impact on the data the container holds. Default False.
+        show_progress : bool, optional
+            If True, some progress info will show during the executing.
+            Default False.
+        progress_step : int or None
+            Show progress info every this number of steps. If None, appropriate
+            progress step will be chosen automatically. Default None.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
@@ -984,9 +1027,9 @@ class TimestreamCommon(container.BasicTod):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=('time', 'frequency'), axis_vals=(self.time, self.freq), full_data=full_data, copy_data=copy_data, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis=('time', 'frequency'), axis_vals=(self.time, self.freq), full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, **kwargs)
 
-    def time_and_bl_data_operate(self, func, full_data=False, copy_data=False, keep_dist_axis=False, **kwargs):
+    def time_and_bl_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
         """Data operation along the time and baseline axis.
 
         Parameters
@@ -1003,6 +1046,12 @@ class TimestreamCommon(container.BasicTod):
         copy_data : bool, optional
             If True, `func` will operate on a copy of the data, so changes will
             have no impact on the data the container holds. Default False.
+        show_progress : bool, optional
+            If True, some progress info will show during the executing.
+            Default False.
+        progress_step : int or None
+            Show progress info every this number of steps. If None, appropriate
+            progress step will be chosen automatically. Default None.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
@@ -1010,9 +1059,9 @@ class TimestreamCommon(container.BasicTod):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=('time', 'baseline'), axis_vals=(self.time, self.bl), full_data=full_data, copy_data=copy_data, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis=('time', 'baseline'), axis_vals=(self.time, self.bl), full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, **kwargs)
 
-    def freq_and_bl_data_operate(self, func, full_data=False, copy_data=False, keep_dist_axis=False, **kwargs):
+    def freq_and_bl_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
         """Data operation along the frequency and baseline axis.
 
         Parameters
@@ -1029,6 +1078,12 @@ class TimestreamCommon(container.BasicTod):
         copy_data : bool, optional
             If True, `func` will operate on a copy of the data, so changes will
             have no impact on the data the container holds. Default False.
+        show_progress : bool, optional
+            If True, some progress info will show during the executing.
+            Default False.
+        progress_step : int or None
+            Show progress info every this number of steps. If None, appropriate
+            progress step will be chosen automatically. Default None.
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original axis if the dist
             axis has changed during the operation. Default False.
@@ -1036,7 +1091,7 @@ class TimestreamCommon(container.BasicTod):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=('frequency', 'baseline'), axis_vals=(self.freq, self.bl), full_data=full_data, copy_data=copy_data, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis=('frequency', 'baseline'), axis_vals=(self.freq, self.bl), full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, **kwargs)
 
 
     def _copy_a_common_dataset(self, name, other):
