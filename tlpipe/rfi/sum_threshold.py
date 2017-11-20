@@ -11,6 +11,7 @@ Inheritance diagram
 import warnings
 import numpy as np
 import combinatorial_threshold
+from _sum_threshold import threshold_len1, hthreshold, vthreshold
 
 
 class SumThreshold(combinatorial_threshold.CombinatorialThreshold):
@@ -36,47 +37,9 @@ class SumThreshold(combinatorial_threshold.CombinatorialThreshold):
             return
 
         if length == 1:
-            for y in xrange(height):
-
-                # if all have been masked, continue
-                if self.vis_mask[y].all():
-                    continue
-
-                for x in xrange(width):
-                    if (not self.vis_mask[y, x]) and (np.abs(self.vis[y, x]) > threshold):
-                        self.vis_mask[y, x] = True
+            threshold_len1(self.vis, self.vis_mask, height, width, threshold)
         elif length > 1:
-            tmp_mask = self.vis_mask.copy()
-            for y in xrange(height):
-
-                # if all have been masked, continue
-                if self.vis_mask[y].all():
-                    continue
-
-                sm, cnt, left, right = 0, 0, 0, 0
-                for right in xrange(length-1):
-                    if not self.vis_mask[y, right]:
-                        sm += self.vis[y, right]
-                        cnt += 1
-
-                while(right < width):
-                    # add the sample at the right
-                    if not self.vis_mask[y, right]:
-                        sm += self.vis[y, right]
-                        cnt += 1
-                    # check
-                    if (cnt > 0) and (np.abs(sm / cnt) > threshold):
-                        tmp_mask[y, left:left+length] = True
-                    # subtract the sample at the left
-                    if not self.vis_mask[y, left]:
-                        sm -= self.vis[y, left]
-                        cnt -= 1
-
-                    left += 1
-                    right += 1
-
-            # set to the new mask
-            self.vis_mask[:] = tmp_mask
+            hthreshold(self.vis, self.vis_mask, height, width, length, threshold)
 
     def vertical_sum_threshold(self, length, threshold):
 
@@ -86,47 +49,9 @@ class SumThreshold(combinatorial_threshold.CombinatorialThreshold):
             return
 
         if length == 1:
-            for x in xrange(width):
-
-                # if all have been masked, continue
-                if self.vis_mask[:, x].all():
-                    continue
-
-                for y in xrange(height):
-                    if (not self.vis_mask[y, x]) and (np.abs(self.vis[y, x]) > threshold):
-                        self.vis_mask[y, x] = True
+            threshold_len1(self.vis, self.vis_mask, height, width, threshold)
         elif length > 1:
-            tmp_mask = self.vis_mask.copy()
-            for x in xrange(width):
-
-                # if all have been masked, continue
-                if self.vis_mask[:, x].all():
-                    continue
-
-                sm, cnt, top, bottom = 0, 0, 0, 0
-                for bottom in xrange(length-1):
-                    if not self.vis_mask[bottom, x]:
-                        sm += self.vis[bottom, x]
-                        cnt += 1
-
-                while(bottom < height):
-                    # add the sample at the bottom
-                    if not self.vis_mask[bottom, x]:
-                        sm += self.vis[bottom, x]
-                        cnt += 1
-                    # check
-                    if (cnt > 0) and (np.abs(sm / cnt) > threshold):
-                        tmp_mask[top:top+length, x] = True
-                    # subtract the sample at the top
-                    if not self.vis_mask[top, x]:
-                        sm -= self.vis[top, x]
-                        cnt -= 1
-
-                    top += 1
-                    bottom += 1
-
-            # set to the new mask
-            self.vis_mask[:] = tmp_mask
+            vthreshold(self.vis, self.vis_mask, height, width, length, threshold)
 
     def execute_threshold(self, factor, direction):
         for direct in direction:
