@@ -821,7 +821,7 @@ class TimestreamCommon(container.BasicTod):
                 pg = progress.Progress(len(lgind), step=progress_step)
             cnt = 0
             for lind, gind in lgind:
-                if mpiutil.rank0:
+                if show_progress and mpiutil.rank0:
                     pg.show(cnt)
                 cnt += 1
                 data_sel[axis] = lind
@@ -860,7 +860,7 @@ class TimestreamCommon(container.BasicTod):
                 pg = progress.Progress(len(lgind), step=progress_step)
             cnt = 0
             for lind, gind in lgind:
-                if mpiutil.rank0:
+                if show_progress and mpiutil.rank0:
                     pg.show(cnt)
                 cnt += 1
                 axis_val = ()
