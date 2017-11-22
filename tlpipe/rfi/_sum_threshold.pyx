@@ -1,7 +1,10 @@
 import numpy as np
 cimport numpy as np
+from cython cimport boundscheck, wraparound
 
 
+@boundscheck(False)
+@wraparound(False)
 def threshold_len1(float[:, :] vis, np.ndarray[np.uint8_t, cast=True, ndim=2] vis_mask, int height, int width, float threshold):
     cdef int x, y
 
@@ -11,6 +14,8 @@ def threshold_len1(float[:, :] vis, np.ndarray[np.uint8_t, cast=True, ndim=2] vi
                 vis_mask[y, x] = True
 
 
+@boundscheck(False)
+@wraparound(False)
 def hthreshold(float[:, :] vis, np.ndarray[np.uint8_t, cast=True, ndim=2] vis_mask, int height, int width, int length, float threshold):
     cdef int x, y
     cdef int cnt, left, right
@@ -54,6 +59,9 @@ def hthreshold(float[:, :] vis, np.ndarray[np.uint8_t, cast=True, ndim=2] vis_ma
     # set to the new mask
     vis_mask[:] = tmp_mask
 
+
+@boundscheck(False)
+@wraparound(False)
 def vthreshold(float[:, :] vis, np.ndarray[np.uint8_t, cast=True, ndim=2] vis_mask, int height, int width, int length, float threshold):
     cdef int x, y
     cdef int cnt, top, bottom
