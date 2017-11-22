@@ -11,6 +11,7 @@ Inheritance diagram
 import re
 import itertools
 import warnings
+import time
 import numpy as np
 from scipy import linalg as la
 from scipy import optimize
@@ -22,6 +23,7 @@ from tlpipe.container.timestream import Timestream
 from tlpipe.core import constants as const
 
 from caput import mpiutil
+from caput import mpiarray
 from tlpipe.utils.path_util import output_path
 from tlpipe.utils import progress
 from tlpipe.utils import rpca_decomp
@@ -108,10 +110,15 @@ class PsCal(timestream_task.TimestreamTask):
         show_progress = self.params['show_progress']
         progress_step = self.params['progress_step']
 
+        pol_type = ts['pol'].attrs['pol_type']
+        if pol_type != 'linear':
+            raise RuntimeError('Can not do ps_cal for pol_type: %s' % pol_type)
+
         ts.redistribute('baseline')
 
         feedno = ts['feedno'][:].tolist()
-        pol = [ ts.pol_dict[p] for p in ts['pol'][:] ]
+        pol = [ ts.pol_dict[p] for p in ts['pol'][:] ] # as string
+        gain_pd = {'xx': 0, 'yy': 1,    0: 'xx', 1: 'yy'} # for gain related op
         bl = mpiutil.gather_array(ts.local_bl[:], root=None, comm=ts.comm)
         bls = [ tuple(b) for b in bl ]
         # # antpointing = np.radians(ts['antpointing'][-1, :, :]) # radians
@@ -286,7 +293,7 @@ class PsCal(timestream_task.TimestreamTask):
                 plt.subplot(122)
                 plt.imshow(Vmat.imag, aspect='equal', origin='lower', interpolation='nearest')
                 plt.colorbar(shrink=1.0)
-                fig_name = '%s_V_%d_%d_%s.png' % (fig_prefix, ind, fi, ts.pol_dict[pi])
+                fig_name = '%s_V_%d_%d_%s.png' % (fig_prefix, ind, fi, pol[pi])
                 if tag_output_iter:
                     fig_name = output_path(fig_name, iteration=self.iteration)
                 else:
@@ -301,7 +308,7 @@ class PsCal(timestream_task.TimestreamTask):
                 plt.subplot(122)
                 plt.imshow(V0.imag, aspect='equal', origin='lower', interpolation='nearest')
                 plt.colorbar(shrink=1.0)
-                fig_name = '%s_V0_%d_%d_%s.png' % (fig_prefix, ind, fi, ts.pol_dict[pi])
+                fig_name = '%s_V0_%d_%d_%s.png' % (fig_prefix, ind, fi, pol[pi])
                 if tag_output_iter:
                     fig_name = output_path(fig_name, iteration=self.iteration)
                 else:
@@ -316,7 +323,7 @@ class PsCal(timestream_task.TimestreamTask):
                 plt.subplot(122)
                 plt.imshow(S.imag, aspect='equal', origin='lower', interpolation='nearest')
                 plt.colorbar(shrink=1.0)
-                fig_name = '%s_S_%d_%d_%s.png' % (fig_prefix, ind, fi, ts.pol_dict[pi])
+                fig_name = '%s_S_%d_%d_%s.png' % (fig_prefix, ind, fi, pol[pi])
                 if tag_output_iter:
                     fig_name = output_path(fig_name, iteration=self.iteration)
                 else:
@@ -332,7 +339,7 @@ class PsCal(timestream_task.TimestreamTask):
                 plt.subplot(122)
                 plt.imshow(N.imag, aspect='equal', origin='lower', interpolation='nearest')
                 plt.colorbar(shrink=1.0)
-                fig_name = '%s_N_%d_%d_%s.png' % (fig_prefix, ind, fi, ts.pol_dict[pi])
+                fig_name = '%s_N_%d_%d_%s.png' % (fig_prefix, ind, fi, pol[pi])
                 if tag_output_iter:
                     fig_name = output_path(fig_name, iteration=self.iteration)
                 else:
@@ -358,7 +365,7 @@ class PsCal(timestream_task.TimestreamTask):
                 plt.ylim(yl, yh+(yh-yl)/5)
                 plt.xlabel('Feed number')
                 plt.legend()
-                fig_name = '%s_ants_%d_%d_%s.png' % (fig_prefix, ind, fi, ts.pol_dict[pi])
+                fig_name = '%s_ants_%d_%d_%s.png' % (fig_prefix, ind, fi, pol[pi])
                 if tag_output_iter:
                     fig_name = output_path(fig_name, iteration=self.iteration)
                 else:
@@ -366,42 +373,29 @@ class PsCal(timestream_task.TimestreamTask):
                 plt.savefig(fig_name)
                 plt.close()
 
-        del tfp_linds
 
-        # gather Gain from each processes
-        Gain = mpiutil.gather_array(lGain, axis=0, root=None, comm=ts.comm)
-        del lGain
-        Gain = Gain.reshape(nt, nf, 2, nfeed)
+        # subtract the vis of calibrator from self.vis
+        if subtract_src:
+            for ii, (ti, fi, pi) in enumerate(tfp_linds):
+                for bi, (fd1, fd2) in enumerate(ts.local_bl):
+                    b1, b2 = feedno.index(fd1), feedno.index(fd2)
+                    ts.local_vis[ti, fi, pi, bi] -= lsrc_vis[ii, b1, b2]
 
-        # gather src_vis from each processes
-        if save_src_vis or subtract_src:
-            src_vis = mpiutil.gather_array(lsrc_vis, axis=0, root=None, comm=ts.comm)
+        if not save_src_vis:
             del lsrc_vis
-            src_vis = src_vis.reshape(nt, nf, 2, nfeed, nfeed)
-            if save_src_vis:
-                sky_vis = mpiutil.gather_array(lsky_vis, axis=0, root=None, comm=ts.comm)
-                del lsky_vis
-                otl_vis = mpiutil.gather_array(lotl_vis, axis=0, root=None, comm=ts.comm)
-                del lotl_vis
-                sky_vis = sky_vis.reshape(nt, nf, 2, nfeed, nfeed)
-                otl_vis = otl_vis.reshape(nt, nf, 2, nfeed, nfeed)
-            # subtract vis of calibrator from data
-            if subtract_src:
-                for pi in [pol.index('xx'), pol.index('yy')]:
-                    for bi, (fd1, fd2) in enumerate(ts.local_bl):
-                        b1, b2 = feedno.index(fd1), feedno.index(fd2)
-                        ts.local_vis[start_ind:end_ind, :, pi, bi] -= src_vis[:, :, pi, b1, b2]
-            # save src_vis to file
-            if mpiutil.rank0 and save_src_vis:
-                if tag_output_iter:
-                    src_vis_file = output_path(src_vis_file, iteration=self.iteration)
-                else:
-                    src_vis_file = output_path(src_vis_file)
+        else:
+            if tag_output_iter:
+                src_vis_file = output_path(src_vis_file, iteration=self.iteration)
+            else:
+                src_vis_file = output_path(src_vis_file)
+            # create file and allocate space first by rank0
+            if mpiutil.rank0:
                 with h5py.File(src_vis_file, 'w') as f:
-                    # save src_vis
-                    f.create_dataset('sky_vis', data=sky_vis)
-                    f.create_dataset('src_vis', data=src_vis)
-                    f.create_dataset('outlier_vis', data=otl_vis)
+                    # allocate space
+                    shp = (nt, nf, 2, nfeed, nfeed)
+                    f.create_dataset('sky_vis', shp, dtype=lsky_vis.dtype)
+                    f.create_dataset('src_vis', shp, dtype=lsrc_vis.dtype)
+                    f.create_dataset('outlier_vis', shp, dtype=lotl_vis.dtype)
                     f.attrs['calibrator'] = calibrator
                     f.attrs['dim'] = 'time, freq, pol, feed, feed'
                     f.attrs['time'] = ts.time[start_ind:end_ind]
@@ -411,8 +405,41 @@ class PsCal(timestream_task.TimestreamTask):
 
             mpiutil.barrier()
 
-            del src_vis
+            # write data to file
+            for i in range(10):
+                try:
+                    with h5py.File(src_vis_file, 'r+') as f:
+                        for ii, (ti, fi, pi) in enumerate(tfp_linds):
+                            ti_ = ti-start_ind
+                            pi_ = gain_pd[pol[pi]]
+                            f['sky_vis'][ti_, fi, pi_] = lsky_vis[ii]
+                            f['src_vis'][ti_, fi, pi_] = lsrc_vis[ii]
+                            f['outlier_vis'][ti_, fi, pi_] = lotl_vis[ii]
+                    break
+                except IOError:
+                    time.sleep(0.5)
+                    continue
+            else:
+                raise RuntimeError('Could not open file: %s...' % src_vis_file)
 
+            del lsrc_vis
+            del lsky_vis
+            del lotl_vis
+
+            mpiutil.barrier()
+
+        del tfp_linds
+
+        # flag outliers in lGain along each feed
+        lG_abs = np.abs(lGain)
+        median = np.ma.median(lG_abs, axis=1)
+        abs_diff = np.ma.abs(lG_abs - median[:, np.newaxis])
+        mad = np.ma.median(abs_diff, axis=1) / 0.6745
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore', 'invalid value encountered in greater')
+            warnings.filterwarnings('ignore', 'invalid value encountered in greater_equal')
+            warnings.filterwarnings('ignore', 'invalid value encountered in absolute')
+            lG_abs = np.where(abs_diff>3.0*mad[:, np.newaxis], np.nan, lG_abs)
 
         # choose data slice near the transit time
         c = nt/2 # center ind
@@ -429,46 +456,43 @@ class PsCal(timestream_task.TimestreamTask):
         # get the positions of feeds
         feedpos = ts['feedpos'][:]
 
+        # wrap and redistribute Gain and flagged G_abs
+        Gain = mpiarray.MPIArray.wrap(lGain, axis=0, comm=ts.comm)
+        Gain = Gain.redistribute(axis=1).reshape(nt, nf, 2, None).redistribute(axis=0).reshape(None, nf*2*nfeed).redistribute(axis=1)
+        G_abs = mpiarray.MPIArray.wrap(lG_abs, axis=0, comm=ts.comm)
+        G_abs = G_abs.redistribute(axis=1).reshape(nt, nf, 2, None).redistribute(axis=0).reshape(None, nf*2*nfeed).redistribute(axis=1)
+
+        fpd_inds = list(itertools.product(range(nf), range(2), range(nfeed))) # only for xx and yy
+        fpd_linds = mpiutil.mpilist(fpd_inds)
+        del fpd_inds
         # create data to save the solved gain for each feed
-        local_fp_inds = mpiutil.mpilist(list(itertools.product(range(nf), range(2))))
-        lgain = np.zeros((len(local_fp_inds), nfeed), dtype=Gain.dtype) # gain for each feed
+        lgain = np.zeros((len(fpd_linds),), dtype=Gain.dtype) # gain for each feed
         lgain[:] = complex(np.nan, np.nan)
-
-        for ii, (fi, pi) in enumerate(local_fp_inds):
-            data = np.abs(Gain[li:hi, fi, pi, :]).T
-            # flag outliers
-            median = np.ma.median(data, axis=0)
-            abs_diff = np.ma.abs(data - median[np.newaxis, :])
-            mad = np.ma.median(abs_diff, axis=0) / 0.6745
-            with warnings.catch_warnings():
-                warnings.filterwarnings('ignore', 'invalid value encountered in greater')
-                warnings.filterwarnings('ignore', 'invalid value encountered in greater_equal')
-                warnings.filterwarnings('ignore', 'invalid value encountered in absolute')
-                data = np.where(abs_diff>3.0*mad[np.newaxis, :], np.nan, data)
+        for ii, (fi, pi, di) in enumerate(fpd_linds):
             # gaussian/sinc fit
-            for idx in range(nfeed):
-                y = data[idx]
-                inds = np.where(np.isfinite(y))[0]
-                if len(inds) > 0.75 * len(y):
-                    # get the best estimate of the central val
-                    cval = y[inds[np.argmin(np.abs(inds-c))]]
-                    try:
-                        # gaussian fit
-                        # popt, pcov = optimize.curve_fit(fg, x[inds], y[inds], p0=(cval, c, 90, 0))
-                        # sinc function seems fit better
-                        popt, pcov = optimize.curve_fit(fc, x[inds], y[inds], p0=(cval, c, 1.0e-2, 0))
-                        # print 'popt:', popt
-                    except RuntimeError:
-                        print 'curve_fit failed for fi = %d, pol = %s, feed = %d' % (fi, ['xx', 'yy'][pi], feedno[idx])
-                        continue
+            y = G_abs.local_array[li:hi, ii]
+            inds = np.where(np.isfinite(y))[0]
+            if len(inds) >= max(4, 0.75 * len(y)): # min 4 for curve_fit
+                # get the best estimate of the central val
+                cval = y[inds[np.argmin(np.abs(inds-c))]]
+                try:
+                    # gaussian fit
+                    # popt, pcov = optimize.curve_fit(fg, x[inds], y[inds], p0=(cval, c, 90, 0))
+                    # sinc function seems fit better
+                    popt, pcov = optimize.curve_fit(fc, x[inds], y[inds], p0=(cval, c, 1.0e-2, 0))
+                    # print 'popt:', popt
+                except Exception:
+                    print 'curve_fit failed for fi = %d, pol = %s, feed = %d' % (fi, gain_pd[pi], feedno[fi])
+                    continue
 
-                    An = y / fc(popt[1], *popt) # the beam profile
-                    ui = (feedpos[idx] - feedpos[0]) * (1.0e6*freq[fi]) / const.c # position of this feed (relative to the first feed) in unit of wavelength
-                    exp_factor = np.exp(2.0J * np.pi * np.dot(n0, ui))
-                    Ae = An * exp_factor
-                    Gi = Gain[li:hi, fi, pi, idx]
-                    # compute gain for this feed
-                    lgain[ii, idx] = np.dot(Ae[inds].conj(), Gi[inds]) / np.dot(Ae[inds].conj(), Ae[inds])
+                An = y / fc(popt[1], *popt) # the beam profile
+                ui = (feedpos[di] - feedpos[0]) * (1.0e6*freq[fi]) / const.c # position of this feed (relative to the first feed) in unit of wavelength
+                exp_factor = np.exp(2.0J * np.pi * np.dot(n0, ui))
+                Ae = An * exp_factor
+                Gi = Gain.local_array[li:hi, ii]
+                # compute gain for this feed
+                lgain[ii] = np.dot(Ae[inds].conj(), Gi[inds]) / np.dot(Ae[inds].conj(), Ae[inds])
+
 
         # gather local gain
         gain = mpiutil.gather_array(lgain, axis=0, root=None, comm=ts.comm)
@@ -479,9 +503,10 @@ class PsCal(timestream_task.TimestreamTask):
         if apply_gain:
             for fi in range(nf):
                 for pi in [pol.index('xx'), pol.index('yy')]:
+                    pi_ = gain_pd[pol[pi]]
                     for bi, (fd1, fd2) in enumerate(ts['blorder'].local_data):
-                        g1 = gain[fi, pi, feedno.index(fd1)]
-                        g2 = gain[fi, pi, feedno.index(fd2)]
+                        g1 = gain[fi, pi_, feedno.index(fd1)]
+                        g2 = gain[fi, pi_, feedno.index(fd2)]
                         if np.isfinite(g1) and np.isfinite(g2):
                             ts.local_vis[:, fi, pi, bi] /= (g1 * np.conj(g2))
                         else:
@@ -489,31 +514,49 @@ class PsCal(timestream_task.TimestreamTask):
                             ts.local_vis_mask[:, fi, pi, bi] = True
 
         # save gain to file
-        if mpiutil.rank0 and save_gain:
+        if save_gain:
             if tag_output_iter:
                 gain_file = output_path(gain_file, iteration=self.iteration)
             else:
                 gain_file = output_path(gain_file)
-            with h5py.File(gain_file, 'w') as f:
-                # save Gain
-                dset = f.create_dataset('Gain', data=Gain)
-                dset.attrs['calibrator'] = calibrator
-                dset.attrs['dim'] = 'time, freq, pol, feed'
-                dset.attrs['time'] = ts.time[start_ind:end_ind]
-                dset.attrs['freq'] = freq
-                dset.attrs['pol'] = np.array(['xx', 'yy'])
-                dset.attrs['feed'] = np.array(feedno)
-                # save gain
-                dset = f.create_dataset('gain', data=gain)
-                dset.attrs['calibrator'] = calibrator
-                dset.attrs['dim'] = 'freq, pol, feed'
-                dset.attrs['freq'] = freq
-                dset.attrs['pol'] = np.array(['xx', 'yy'])
-                dset.attrs['feed'] = np.array(feedno)
+            if mpiutil.rank0:
+                with h5py.File(gain_file, 'w') as f:
+                    # allocate space for Gain
+                    dset = f.create_dataset('Gain', (nt, nf, 2, nfeed), dtype=Gain.dtype)
+                    dset.attrs['calibrator'] = calibrator
+                    dset.attrs['dim'] = 'time, freq, pol, feed'
+                    dset.attrs['time'] = ts.time[start_ind:end_ind]
+                    dset.attrs['freq'] = freq
+                    dset.attrs['pol'] = np.array(['xx', 'yy'])
+                    dset.attrs['feed'] = np.array(feedno)
+                    # save gain
+                    dset = f.create_dataset('gain', data=gain)
+                    dset.attrs['calibrator'] = calibrator
+                    dset.attrs['dim'] = 'freq, pol, feed'
+                    dset.attrs['freq'] = freq
+                    dset.attrs['pol'] = np.array(['xx', 'yy'])
+                    dset.attrs['feed'] = np.array(feedno)
 
-        mpiutil.barrier()
-        del Gain
-        del gain
+            mpiutil.barrier()
+            del gain
+
+            # save Gain
+            for i in range(10):
+                try:
+                    with h5py.File(gain_file, 'r+') as f:
+                        for ii, (fi, pi, di) in enumerate(fpd_linds):
+                            f['Gain'][:, fi, pi, di] = Gain.local_array[:, ii]
+                    break
+                except IOError:
+                    time.sleep(0.5)
+                    continue
+            else:
+                raise RuntimeError('Could not open file: %s...' % src_vis_file)
+
+            del Gain
+
+            mpiutil.barrier()
+
 
         # convert vis from intensity unit to temperature unit in K
         if temperature_convert:
