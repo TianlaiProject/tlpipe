@@ -241,8 +241,12 @@ class MapMaking(timestream_task.TimestreamTask):
             for fi in xrange(nfreq):
                 for i in range(10):
                     try:
-                        with h5py.File(tstream._ffile(fi), 'r+') as f:
-                            f['/timestream'][:, s:e] = vis_stream[:, fi, :].T
+                        # NOTE: if write simultaneously, will loss data with processes distributed in several nodes
+                        for ri in xrange(mpiutil.size):
+                            if ri == mpiutil.rank:
+                                with h5py.File(tstream._ffile(fi), 'r+') as f:
+                                    f['/timestream'][:, s:e] = vis_stream[:, fi, :].T
+                            mpiutil.barrier()
                         break
                     except IOError:
                         time.sleep(0.5)

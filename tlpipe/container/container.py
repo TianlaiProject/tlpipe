@@ -1177,6 +1177,7 @@ class BasicTod(memh5.MemDiskGroup):
                 dset_shape, dset_type, outfiles_map = self._get_output_info(dset_name, num_outfiles)
 
                 st = 0
+                # NOTE: if write simultaneously, will loss data with processes distributed in several nodes
                 for ri in xrange(self.nproc):
                     if ri == self.rank:
                         for fi, start, stop in outfiles_map:
