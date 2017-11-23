@@ -24,6 +24,7 @@ from tlpipe.core import constants as const
 
 from caput import mpiutil
 from caput import mpiarray
+from caput import memh5
 from tlpipe.utils.path_util import output_path
 from tlpipe.utils import progress
 from tlpipe.utils import rpca_decomp
@@ -393,45 +394,23 @@ class PsCal(timestream_task.TimestreamTask):
                     src_vis_file = output_path(src_vis_file, iteration=self.iteration)
                 else:
                     src_vis_file = output_path(src_vis_file)
-                # create file and allocate space first by rank0
-                if mpiutil.rank0:
-                    with h5py.File(src_vis_file, 'w') as f:
-                        # allocate space
-                        shp = (nt, nf, 2, nfeed, nfeed)
-                        f.create_dataset('sky_vis', shp, dtype=lsky_vis.dtype)
-                        f.create_dataset('src_vis', shp, dtype=lsrc_vis.dtype)
-                        f.create_dataset('outlier_vis', shp, dtype=lotl_vis.dtype)
-                        f.attrs['calibrator'] = calibrator
-                        f.attrs['dim'] = 'time, freq, pol, feed, feed'
-                        f.attrs['time'] = ts.time[start_ind:end_ind]
-                        f.attrs['freq'] = freq
-                        f.attrs['pol'] = np.array(['xx', 'yy'])
-                        f.attrs['feed'] = np.array(feedno)
 
-                mpiutil.barrier()
+                # create a memh5 object and save data to file
+                vis_h5 = memh5.MemGroup(distributed=True, comm=ts.comm)
+                vis_h5.create_dataset('sky_vis', data=mpiarray.MPIArray.wrap(lsky_vis, axis=0))
+                vis_h5.create_dataset('src_vis', data=mpiarray.MPIArray.wrap(lsrc_vis, axis=0))
+                vis_h5.create_dataset('outlier_vis', data=mpiarray.MPIArray.wrap(lotl_vis, axis=0))
+                vis_h5.attrs['calibrator'] = calibrator
+                vis_h5.attrs['dim'] = 'time, freq, pol, feed, feed'
+                vis_h5.attrs['time'] = ts.time[start_ind:end_ind]
+                vis_h5.attrs['freq'] = freq
+                vis_h5.attrs['pol'] = np.array(['xx', 'yy'])
+                vis_h5.attrs['feed'] = np.array(feedno)
 
-                # write data to file
-                for i in range(10):
-                    try:
-                        with h5py.File(src_vis_file, 'r+') as f:
-                            for ii, (ti, fi, pi) in enumerate(tfp_linds):
-                                ti_ = ti-start_ind
-                                pi_ = gain_pd[pol[pi]]
-                                f['sky_vis'][ti_, fi, pi_] = lsky_vis[ii]
-                                f['src_vis'][ti_, fi, pi_] = lsrc_vis[ii]
-                                f['outlier_vis'][ti_, fi, pi_] = lotl_vis[ii]
-                        break
-                    except IOError:
-                        time.sleep(0.5)
-                        continue
-                else:
-                    raise RuntimeError('Could not open file: %s...' % src_vis_file)
+                vis_h5.to_hdf5(src_vis_file, hints=False)
 
-                del lsrc_vis
-                del lsky_vis
-                del lotl_vis
+                del vis_h5
 
-                mpiutil.barrier()
 
             if apply_gain or save_gain:
                 # flag outliers in lGain along each feed
@@ -461,10 +440,7 @@ class PsCal(timestream_task.TimestreamTask):
                 feedpos = ts['feedpos'][:]
 
                 # wrap and redistribute Gain and flagged G_abs
-                if save_gain:
-                    Gain = mpiarray.MPIArray.wrap(lGain.copy(), axis=0, comm=ts.comm)
-                else:
-                    Gain = mpiarray.MPIArray.wrap(lGain, axis=0, comm=ts.comm)
+                Gain = mpiarray.MPIArray.wrap(lGain, axis=0, comm=ts.comm)
                 Gain = Gain.redistribute(axis=1).reshape(nt, nf, 2, None).redistribute(axis=0).reshape(None, nf*2*nfeed).redistribute(axis=1)
                 G_abs = mpiarray.MPIArray.wrap(lG_abs, axis=0, comm=ts.comm)
                 G_abs = G_abs.redistribute(axis=1).reshape(nt, nf, 2, None).redistribute(axis=0).reshape(None, nf*2*nfeed).redistribute(axis=1)
@@ -526,42 +502,26 @@ class PsCal(timestream_task.TimestreamTask):
                         gain_file = output_path(gain_file, iteration=self.iteration)
                     else:
                         gain_file = output_path(gain_file)
-                    if mpiutil.rank0:
-                        with h5py.File(gain_file, 'w') as f:
-                            # allocate space for Gain
-                            dset = f.create_dataset('Gain', (nt, nf, 2, nfeed), dtype=Gain.dtype)
-                            dset.attrs['calibrator'] = calibrator
-                            dset.attrs['dim'] = 'time, freq, pol, feed'
-                            dset.attrs['time'] = ts.time[start_ind:end_ind]
-                            dset.attrs['freq'] = freq
-                            dset.attrs['pol'] = np.array(['xx', 'yy'])
-                            dset.attrs['feed'] = np.array(feedno)
-                            # save gain
-                            dset = f.create_dataset('gain', data=gain)
-                            dset.attrs['calibrator'] = calibrator
-                            dset.attrs['dim'] = 'freq, pol, feed'
-                            dset.attrs['freq'] = freq
-                            dset.attrs['pol'] = np.array(['xx', 'yy'])
-                            dset.attrs['feed'] = np.array(feedno)
 
-                    mpiutil.barrier()
+                    # create a memh5 object and save data to file
+                    gain_h5 = memh5.MemGroup(distributed=True, comm=ts.comm)
+                    dset = gain_h5.create_dataset('Gain', data=mpiarray.MPIArray.wrap(lGain, axis=0))
+                    dset.attrs['calibrator'] = calibrator
+                    dset.attrs['dim'] = 'time, freq, pol, feed'
+                    dset.attrs['time'] = ts.time[start_ind:end_ind]
+                    dset.attrs['freq'] = freq
+                    dset.attrs['pol'] = np.array(['xx', 'yy'])
+                    dset.attrs['feed'] = np.array(feedno)
+                    dset = gain_h5.create_dataset('gain', data=gain)
+                    dset.attrs['calibrator'] = calibrator
+                    dset.attrs['dim'] = 'freq, pol, feed'
+                    dset.attrs['freq'] = freq
+                    dset.attrs['pol'] = np.array(['xx', 'yy'])
+                    dset.attrs['feed'] = np.array(feedno)
 
-                    # save Gain
-                    for i in range(10):
-                        try:
-                            with h5py.File(gain_file, 'r+') as f:
-                                for ii, (ti, fi, pi) in enumerate(tfp_linds):
-                                    ti_ = ti-start_ind
-                                    pi_ = gain_pd[pol[pi]]
-                                    f['Gain'][ti_, fi, pi_] = lGain[ii]
-                            break
-                        except IOError:
-                            time.sleep(0.5)
-                            continue
-                    else:
-                        raise RuntimeError('Could not open file: %s...' % src_vis_file)
+                    gain_h5.to_hdf5(gain_file, hints=False)
 
-                    mpiutil.barrier()
+                    del gain_h5
 
 
         # convert vis from intensity unit to temperature unit in K
