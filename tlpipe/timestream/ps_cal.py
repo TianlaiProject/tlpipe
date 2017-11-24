@@ -272,7 +272,7 @@ class PsCal(timestream_task.TimestreamTask):
                     continue
 
                 # set invalid val to 0
-                # Vmat = np.where(np.isfinite(Vmat), Vmat, 0)
+                Vmat = np.where(np.isfinite(Vmat), Vmat, 0)
 
                 # initialize the outliers
                 med = np.median(Vmat.real) + 1.0J * np.median(Vmat.imag)
@@ -490,7 +490,7 @@ class PsCal(timestream_task.TimestreamTask):
                             popt, pcov = optimize.curve_fit(fc, x[inds], y[inds], p0=(cval, c, 1.0e-2, 0))
                             # print 'popt:', popt
                         except Exception:
-                            print 'curve_fit failed for fi = %d, pol = %s, feed = %d' % (fi, gain_pd[pi], feedno[fi])
+                            print 'curve_fit failed for fi = %d, pol = %s, feed = %d' % (fi, gain_pd[pi], feedno[di])
                             continue
 
                         An = y / fc(popt[1], *popt) # the beam profile
