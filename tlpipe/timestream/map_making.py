@@ -19,6 +19,7 @@ from tlpipe.container.timestream import Timestream
 
 from caput import mpiutil
 from caput import mpiarray
+from caput import memh5
 from cora.util import hputil
 from tlpipe.utils.np_util import unique, average
 from tlpipe.utils.path_util import output_path
@@ -212,12 +213,24 @@ class MapMaking(timestream_task.TimestreamTask):
                 if not os.path.exists(tstream._fdir(fi)):
                     os.makedirs(tstream._fdir(fi))
 
+            # create memh5 object and write data to temporary file
+            vis_h5 = memh5.MemGroup(distributed=True)
+            vis_h5.create_dataset('/timestream', data=mpiarray.MPIArray.wrap(vis_stream, axis=0))
+            tmp_file = tstream._fdir(0)+'/vis_stream_temp.hdf5'
+            vis_h5.to_hdf5(tmp_file, hints=False)
+            del vis_h5
+
+            # reorgonize data as need for tstream
+            for fi in mpiutil.mpilist(range(nfreq)):
+                # read the needed data from the temporary file
+                with h5py.File(tmp_file, 'r') as f:
+                    vis_fi = f['/timestream'][:, fi, :]
                 # Write file contents
                 with h5py.File(tstream._ffile(fi), 'w') as f:
                     # Timestream data
                     # allocate space for vis_stream
                     shp = (nrd, phi_size)
-                    f.create_dataset('/timestream', shp, dtype=vis_stream.dtype)
+                    f.create_dataset('/timestream', data=vis_fi.T)
                     f.create_dataset('/phi', data=phi)
 
                     # Telescope layout data
@@ -236,26 +249,30 @@ class MapMaking(timestream_task.TimestreamTask):
 
             mpiutil.barrier()
 
-            # write vis_stream to files
-            num, s, e = mpiutil.split_local(phi_size)
-            for fi in xrange(nfreq):
-                for i in range(10):
-                    try:
-                        # NOTE: if write simultaneously, will loss data with processes distributed in several nodes
-                        for ri in xrange(mpiutil.size):
-                            if ri == mpiutil.rank:
-                                with h5py.File(tstream._ffile(fi), 'r+') as f:
-                                    f['/timestream'][:, s:e] = vis_stream[:, fi, :].T
-                            mpiutil.barrier()
-                        break
-                    except IOError:
-                        time.sleep(0.5)
-                        continue
-                else:
-                    raise RuntimeError('Could not open file: %s...' % tstream._ffile(fi))
+            # remove temp file
+            if mpiutil.rank0:
+                os.remove(tmp_file)
 
-            del vis_stream
-            mpiutil.barrier()
+            # # write vis_stream to files
+            # num, s, e = mpiutil.split_local(phi_size)
+            # for fi in xrange(nfreq):
+            #     for i in range(10):
+            #         try:
+            #             # NOTE: if write simultaneously, will loss data with processes distributed in several nodes
+            #             for ri in xrange(mpiutil.size):
+            #                 if ri == mpiutil.rank:
+            #                     with h5py.File(tstream._ffile(fi), 'r+') as f:
+            #                         f['/timestream'][:, s:e] = vis_stream[:, fi, :].T
+            #                 mpiutil.barrier()
+            #             break
+            #         except IOError:
+            #             time.sleep(0.5)
+            #             continue
+            #     else:
+            #         raise RuntimeError('Could not open file: %s...' % tstream._ffile(fi))
+
+            # del vis_stream
+            # mpiutil.barrier()
 
         tstream.generate_mmodes()
         nside = hputil.nside_for_lmax(tel.lmax, accuracy_boost=tel.accuracy_boost)
