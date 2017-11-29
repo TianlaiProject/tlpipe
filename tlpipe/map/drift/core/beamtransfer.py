@@ -733,7 +733,8 @@ class BeamTransfer(object):
         # to have a maximum of 4 GB in memory at any one time
         fbsize = self.telescope.num_pol_sky * (self.telescope.lmax+1) * (2*self.telescope.mmax+1) * 16.0
 
-        nodemem = 3.0 * 2**30.0
+        # nodemem = 3.0 * 2**30.0
+        nodemem = 1.0 * 2**30.0
 
         num_fb_per_node = int(nodemem / fbsize)
         num_fb_per_chunk = num_fb_per_node * mpiutil.size
