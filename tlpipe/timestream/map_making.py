@@ -220,7 +220,7 @@ class MapMaking(timestream_task.TimestreamTask):
             vis_h5.to_hdf5(tmp_file, hints=False)
             del vis_h5
 
-            # reorgonize data as need for tstream
+            # re-organize data as need for tstream
             for fi in mpiutil.mpilist(range(nfreq)):
                 # read the needed data from the temporary file
                 with h5py.File(tmp_file, 'r') as f:
@@ -252,27 +252,6 @@ class MapMaking(timestream_task.TimestreamTask):
             # remove temp file
             if mpiutil.rank0:
                 os.remove(tmp_file)
-
-            # # write vis_stream to files
-            # num, s, e = mpiutil.split_local(phi_size)
-            # for fi in xrange(nfreq):
-            #     for i in range(10):
-            #         try:
-            #             # NOTE: if write simultaneously, will loss data with processes distributed in several nodes
-            #             for ri in xrange(mpiutil.size):
-            #                 if ri == mpiutil.rank:
-            #                     with h5py.File(tstream._ffile(fi), 'r+') as f:
-            #                         f['/timestream'][:, s:e] = vis_stream[:, fi, :].T
-            #                 mpiutil.barrier()
-            #             break
-            #         except IOError:
-            #             time.sleep(0.5)
-            #             continue
-            #     else:
-            #         raise RuntimeError('Could not open file: %s...' % tstream._ffile(fi))
-
-            # del vis_stream
-            # mpiutil.barrier()
 
         tstream.generate_mmodes()
         nside = hputil.nside_for_lmax(tel.lmax, accuracy_boost=tel.accuracy_boost)
