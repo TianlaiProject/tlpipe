@@ -941,7 +941,7 @@ class TaskBase(object):
                     if self.params['timing']:
                         etime = datetime.datetime.now()
                         if mpiutil.rank0:
-                            msg = 'Executing time of %s.next(): %s' % (self.__class__.__name__, etime - stime)
+                            msg = 'Executing time of %s.next(): %s [ %s - %s ]' % (self.__class__.__name__, etime - stime, stime, etime)
                             logger.info(msg)
                     return out
                 except PipelineStopIteration:
@@ -1211,7 +1211,7 @@ class OneAndOne(TaskBase):
             if self.params['process_timing']:
                 etime = datetime.datetime.now()
                 if mpiutil.rank0:
-                    msg = 'Executing time of %s.process(): %s' % (self.__class__.__name__, etime - stime)
+                    msg = 'Executing time of %s.process(): %s [ %s - %s ]' % (self.__class__.__name__, etime - stime, stime, etime)
                     logger.info(msg)
         else:
             if input is None:
@@ -1223,7 +1223,7 @@ class OneAndOne(TaskBase):
                 if self.params['process_timing']:
                     etime = datetime.datetime.now()
                     if mpiutil.rank0:
-                        msg = 'Executing time of %s.process(): %s' % (self.__class__.__name__, etime - stime)
+                        msg = 'Executing time of %s.process(): %s [ %s - %s ]' % (self.__class__.__name__, etime - stime, stime, etime)
                         logger.info(msg)
 
         # Write output if needed.
