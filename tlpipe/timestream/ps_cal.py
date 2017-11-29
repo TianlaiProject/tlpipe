@@ -10,7 +10,6 @@ Inheritance diagram
 
 import re
 import itertools
-import warnings
 import time
 import numpy as np
 from scipy import linalg as la
@@ -439,15 +438,16 @@ class PsCal(timestream_task.TimestreamTask):
 
             if apply_gain or save_gain:
                 # flag outliers in lGain along each feed
-                lG_abs = np.ma.abs(lGain)
-                median = np.ma.median(lG_abs, axis=1)
-                abs_diff = np.ma.abs(lG_abs - median[:, np.newaxis])
-                mad = np.ma.median(abs_diff, axis=1) / 0.6745
-                with warnings.catch_warnings():
-                    warnings.filterwarnings('ignore', 'invalid value encountered in greater')
-                    warnings.filterwarnings('ignore', 'invalid value encountered in greater_equal')
-                    warnings.filterwarnings('ignore', 'invalid value encountered in absolute')
-                    lG_abs = np.where(abs_diff>3.0*mad[:, np.newaxis], np.nan, lG_abs)
+                lG_abs = np.empty_like(lGain, dtype=lGain.real.dtype)
+                lG_abs[:] = np.nan
+                for i in range(lGain.shape[0]):
+                    valid_inds = np.where(np.isfinite(lGain[i]))[0]
+                    if len(valid_inds) > 3:
+                        vabs = np.abs(lGain[i, valid_inds])
+                        vmed = np.median(vabs)
+                        vabs_diff = np.abs(vabs - vmed)
+                        vmad = np.median(vabs_diff) / 0.6745
+                        lG_abs[i, valid_inds] = np.where(vabs_diff>3.0*vmad, np.nan, vabs)
 
                 # choose data slice near the transit time
                 c = nt/2 # center ind
