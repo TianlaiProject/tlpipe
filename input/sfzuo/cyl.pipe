@@ -32,7 +32,7 @@ from tlpipe.timestream import dispatch
 pipe_tasks.append(dispatch.Dispatch)
 ### parameters for Dispatch
 dp_input_files = files
-dp_freq_select = (495, 510)
+dp_freq_select = (483, 583)
 # dp_feed_select = [1, 16, 31, 32, 49, 63, 64, 80, 96]
 # dp_feed_select = [11, 12, 18, 42, 43, 44, 45, 74, 75, 76, 78]
 # dp_extra_inttime = 0
@@ -57,6 +57,8 @@ pipe_tasks.append(rfi_flagging.Flag)
 ### parameters for Flag
 rf_in = dt_out
 # rf_iterable = True
+rf_show_progress = True
+rf_process_timing = True
 rf_first_threshold = 6.0
 rf_tk_size = 1.0
 rf_fk_size = 3.0
@@ -66,7 +68,7 @@ from tlpipe.timestream import subdata
 pipe_tasks.append(subdata.Subdata)
 ### parameters for Subdata
 sd_in = rf_out
-sd_freq_select = (7, 9)
+sd_freq_select = (40, 60)
 # sd_iterable = True
 sd_out = 'sd'
 
@@ -82,8 +84,11 @@ pipe_tasks.append(ns_cal.NsCal)
 ### parameters for NsCal
 nc_in = bd_out
 # nc_iterable = True
+nc_show_progress = True
+nc_process_timing = True
 nc_phs_only = True
 nc_plot_gain = False
+nc_save_gain = True
 # nc_feed_no = True
 nc_out = 'nc'
 
@@ -106,11 +111,16 @@ pipe_tasks.append(ps_cal.PsCal)
 ### parameters for PsCal
 pc_in = r2t_out
 # r2t_iterable = True
+pc_show_progress = True
+pc_process_timing = True
 # pc_calibrator = 'cas'
 pc_calibrator = 'cyg'
+pc_catalog = 'misc,helm'
 pc_span = 1200
 pc_plot_figs = False
+pc_save_src_vis = True
 pc_save_gain = True
+pc_apply_gain = True
 pc_temperature_convert = True
 pc_out = 'pc'
 

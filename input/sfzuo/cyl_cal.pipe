@@ -72,6 +72,8 @@ pipe_tasks.append(rfi_flagging.Flag)
 ### parameters for Flag
 rf_in = dt_out
 # rf_iterable = True
+rf_show_progress = True
+rf_process_timing = True
 rf_first_threshold = 6.0
 # rf_flag_direction = ('time',)
 rf_tk_size = 1.0
@@ -99,8 +101,11 @@ pipe_tasks.append(ns_cal.NsCal)
 ### parameters for NsCal
 nc_in = bd_out
 # nc_iterable = True
+nc_show_progress = True
+nc_process_timing = True
 nc_phs_only = True
 nc_plot_gain = False
+nc_save_gain = True
 # nc_feed_no = True
 nc_out = 'nc'
 
@@ -123,11 +128,16 @@ pipe_tasks.append(ps_cal.PsCal)
 ### parameters for PsCal
 pc_in = r2t_out
 # r2t_iterable = True
+pc_show_progress = True
+pc_process_timing = True
 # pc_calibrator = 'cas'
 pc_calibrator = 'cyg'
+pc_catalog = 'misc,helm'
 pc_span = 1200
 pc_plot_figs = False
+pc_save_src_vis = True
 pc_save_gain = True
+pc_apply_gain = True
 pc_temperature_convert = True
 # pc_show_info = True
 pc_out = 'pc'
@@ -156,7 +166,7 @@ pipe_tasks.append(phs2src.Phs2src)
 ### parameters for Phs2src
 p2s_in = bd2_out
 # p2s_iterable = True
-p2s_source = 'cyg'
+p2s_source = pc_calibrator
 # p2s_show_info = True
 p2s_out = 'p2s'
 

@@ -105,6 +105,8 @@ pipe_tasks.append(rfi_flagging.Flag)
 ### parameters for Flag
 rf_in = dt_out
 # rf_iterable = True
+rf_show_progress = True
+rf_process_timing = True
 rf_first_threshold = 6.0
 rf_tk_size = 1.0
 rf_fk_size = 3.0
