@@ -19,6 +19,7 @@ install:
     - "pip install git+https://github.com/zuoshifan/cora.git"
     - "pip install git+https://github.com/zuoshifan/aipy.git@zuo/develop"
     - "pip install git+https://github.com/zuoshifan/caput.git@zuo/develop"
+    - "pip install -e .[cython]"
     - "pip install -e .[mpi]"
 
 # script:

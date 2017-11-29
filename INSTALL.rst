@@ -21,20 +21,21 @@ required:
     * caput_\ , Cluster Astronomical Python Utilities;
     * cora_\ , A package for simulating skies for 21cm Intensity Mapping;
     * aipy_\, Astronomical Interferometry in PYthon;
+    * cython_\, An static compiler for Python, *optional;
     * mpi4py_\ , MPI for Python, *optional*.
 
 .. note:: ``tlpipe`` can work without MPI support, in which case, only a single
    process is invoked, but in order to process large amounts of data in parallel
    and distributed manner, mpi4py_ is needed.
 
-Installation guid
------------------
+Installation guide
+------------------
 
 After you have successfully installed the prerequisites, do the following.
 
 First clone this package ::
 
-    $ git clone git@github.com:TianlaiProject/tlpipe.git
+    $ git clone https://github.com/TianlaiProject/tlpipe.git
 
 Then change to the top directory of this package, install it by the usual
 methods, either the standard ::
@@ -47,13 +48,13 @@ or to develop the package ::
 
 It should also be installable directly with `pip` using the command ::
 
-    $ pip install [-e] git+ssh://git@github.com/TianlaiProject/tlpipe
+    $ pip install [-e] git+https://github.com/TianlaiProject/tlpipe.git
 
 .. note:: If you have installed ``tlpipe`` in the
    `develop <http://setuptools.readthedocs.io/en/latest/setuptools.html#development-mode>`_
    mode, you doesn't need to re-install the package every time after you have
-   changed its code. This is useful when you are the developer of the package
-   or you want to do some development/contributions to the package.
+   changed its (pure python) code. This is useful when you are the developer
+   of the package or you want to do some development/contributions to the package.
 
 
 
@@ -63,9 +64,10 @@ It should also be installable directly with `pip` using the command ::
 .. _pyephem: http://rhodesmill.org/pyephem/
 .. _numpy: http://www.numpy.org/
 .. _scipy: https://www.scipy.org
+.. _matplotlib: http://matplotlib.org
 .. _caput: https://github.com/zuoshifan/caput/tree/zuo/develop
 .. _cora: https://github.com/zuoshifan/cora
 .. _aipy: https://github.com/zuoshifan/aipy/tree/zuo/develop
+.. _cython: http://cython.org
 .. _mpi4py: http://mpi4py.readthedocs.io/en/stable/
-.. _matplotlib: http://matplotlib.org
 .. _Freenode: http://freenode.net

@@ -58,6 +58,7 @@ setup(
     package_data = {},
     scripts = ['scripts/tlpipe', 'scripts/h5info'],
     extras_require={
+        'cython': ['cython'],
         'mpi': ['mpi4py>=1.3'],
     },
 
