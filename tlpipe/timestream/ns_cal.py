@@ -230,7 +230,7 @@ class NsCal(timestream_task.TimestreamTask):
                 continue
 
             lower = ind - num_mean
-            off_sec = np.ma.array(vis[lower:ind], mask=vis_mask[lower:ind])
+            off_sec = np.ma.array(vis[lower:ind], mask=(~np.isfinite(vis[lower:ind]))&vis_mask[lower:ind])
             # if off_sec.count() > 0: # not all data in this section are masked
             if off_sec.count() >= max(2, num_mean/2): # more valid sample to make stable
                 upper = ind + 2 + num_mean
@@ -278,7 +278,7 @@ class NsCal(timestream_task.TimestreamTask):
         itp_pairs = []
         for it in itp_inds:
             # itp_pairs.append((max(0, it[0]-off_time), min(nt, it[-1]+period)))
-            itp_pairs.append((max(0, it[0]-5), min(nt, it[-1]))) # not to out interpolate two much, which may lead to very inaccurate values
+            itp_pairs.append((max(0, it[0]-5), min(nt, it[-1]+5))) # not to out interpolate two much, which may lead to very inaccurate values
 
         # get mask pairs
         mask_pairs = []
