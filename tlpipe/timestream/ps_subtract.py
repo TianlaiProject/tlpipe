@@ -26,7 +26,7 @@ class PsSub(timestream_task.TimestreamTask):
 
     params_init = {
                     'ps': 'cas,cyg', # may also 'hyd', 'her', 'crab', 'vir'
-                    'catalog': 'misc,helm',
+                    'catalog': 'misc', # or helm,nvss
                     'span': 3600.0, # second
                   }
 

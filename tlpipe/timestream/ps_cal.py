@@ -74,7 +74,7 @@ class PsCal(timestream_task.TimestreamTask):
 
     params_init = {
                     'calibrator': 'cyg',
-                    'catalog': 'misc,helm,nvss',
+                    'catalog': 'misc', # or helm,nvss
                     'span': 60, # second
                     'plot_figs': False,
                     'fig_name': 'gain/gain',

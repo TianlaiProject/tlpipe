@@ -117,7 +117,7 @@ class PsFit(timestream_task.TimestreamTask):
 
     params_init = {
                     'calibrator': 'cas',
-                    'catalog': 'misc,helm',
+                    'catalog': 'misc', # or helm,nvss
                     'span': 1200.0, # second
                     'shift': 600.0, # second
                     'plot_fit': False, # plot the smoothing fit

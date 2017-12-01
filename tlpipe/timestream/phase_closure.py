@@ -60,7 +60,7 @@ class Closure(timestream_task.TimestreamTask):
 
     params_init = {
                     'calibrator': 'cas',
-                    'catalog': 'misc,helm',
+                    'catalog': 'misc', # or helm,nvss
                     'file_name': 'closure/closure',
                     'plot_closure': True,
                     'fig_name': 'closure/closure',

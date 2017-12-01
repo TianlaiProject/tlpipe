@@ -31,7 +31,7 @@ class Phs2zen(timestream_task.TimestreamTask):
 
     params_init = {
                     'source': 'cyg', # <src_name> or <ra XX[:XX:xx]>_<dec XX[:XX:xx]> or <time y/m/d h:m:s> (array pointing of this local time)
-                    'catalog': 'misc,helm,nvss',
+                    'catalog': 'misc', # or helm,nvss
                   }
 
     prefix = 'p2z_'
