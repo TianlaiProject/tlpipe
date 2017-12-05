@@ -287,7 +287,8 @@ class BeamTransfer(object):
         mpiutil.barrier()
 
         if self.telescope is None:
-            print "Attempting to read telescope from disk..."
+            if mpiutil.rank0:
+                print "Attempting to read telescope from disk..."
 
             try:
                 f = open(self._picklefile, 'r')

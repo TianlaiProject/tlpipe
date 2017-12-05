@@ -93,7 +93,7 @@ class TlDishArray(object):
 
         self.dish_width = dish_width
         self.ants = len(feedpos)
-        self._feedpos = feedpos[:, :2]
+        self.feedpos = feedpos[:, :2]
         self.pointing = pointing
 
 
@@ -118,7 +118,7 @@ class TlDishArray(object):
 
         # return pos
 
-        return self._feedpos
+        return self.feedpos
 
 
     _point_direction = None
