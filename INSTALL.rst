@@ -58,7 +58,6 @@ It should also be installable directly with `pip` using the command ::
 
 
 
-.. _GitHub: https://github.com/KeepSafe/aiohttp
 .. _h5py: http://www.h5py.org/
 .. _healpy: https://pypi.python.org/pypi/healpy
 .. _pyephem: http://rhodesmill.org/pyephem/
@@ -66,8 +65,7 @@ It should also be installable directly with `pip` using the command ::
 .. _scipy: https://www.scipy.org
 .. _matplotlib: http://matplotlib.org
 .. _caput: https://github.com/zuoshifan/caput/tree/zuo/develop
-.. _cora: https://github.com/zuoshifan/cora
+.. _cora: https://github.com/radiocosmology/cora.git
 .. _aipy: https://github.com/zuoshifan/aipy/tree/zuo/develop
 .. _cython: http://cython.org
 .. _mpi4py: http://mpi4py.readthedocs.io/en/stable/
-.. _Freenode: http://freenode.net

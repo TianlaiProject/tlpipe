@@ -49,7 +49,8 @@ RUN pip install cython
 RUN apt-get -yqq install git
 
 # install cora
-RUN pip install git+https://github.com/zuoshifan/cora.git
+# RUN pip install git+https://github.com/zuoshifan/cora.git
+RUN pip install git+https://github.com/radiocosmology/cora.git
 
 # install aipy
 RUN pip install git+https://github.com/zuoshifan/aipy.git@zuo/develop
