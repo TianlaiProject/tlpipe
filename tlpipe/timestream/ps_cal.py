@@ -75,6 +75,7 @@ class PsCal(timestream_task.TimestreamTask):
     params_init = {
                     'calibrator': 'cyg',
                     'catalog': 'misc', # or helm,nvss
+                    'vis_conj': False, # if True, conjugate the vis first
                     'span': 60, # second
                     'plot_figs': False,
                     'fig_name': 'gain/gain',
@@ -95,6 +96,7 @@ class PsCal(timestream_task.TimestreamTask):
 
         calibrator = self.params['calibrator']
         catalog = self.params['catalog']
+        vis_conj = self.params['vis_conj']
         span = self.params['span']
         plot_figs = self.params['plot_figs']
         fig_prefix = self.params['fig_name']
@@ -179,10 +181,8 @@ class PsCal(timestream_task.TimestreamTask):
             if end_ind > ts.vis.shape[0]:
                 raise RuntimeError('end_ind: %d > %d' % (end_ind, ts.vis.shape[0]))
 
-            ############################################
-            # if ts.is_cylinder:
-            #     ts.local_vis[:] = ts.local_vis.conj() # now for cylinder array
-            ############################################
+            if vis_conj:
+                ts.local_vis[:] = ts.local_vis.conj()
 
             nt = end_ind - start_ind
             t_inds = range(start_ind, end_ind)
@@ -451,8 +451,10 @@ class PsCal(timestream_task.TimestreamTask):
 
                 # choose data slice near the transit time
                 c = nt/2 # center ind
-                li = max(0, c - 100)
-                hi = min(nt, c + 100 + 1)
+                # li = max(0, c - 100)
+                # hi = min(nt, c + 100 + 1)
+                li = max(0, c - 150)
+                hi = min(nt, c + 150 + 1)
                 x = np.arange(li, hi)
                 # compute s_top for this time range
                 n0 = np.zeros(((hi-li), 3))
