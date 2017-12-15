@@ -1011,6 +1011,42 @@ class BeamTransfer(object):
 
 
 
+    def psf_dirty(self, theta, phi, nside=None, no_m_zero=False):
+        """PSF at location (theta, phi) of the dirty map."""
+
+        assert self.telescope.num_pol_sky == 1, 'Can only compute un-pol PSF currently'
+
+        import healpy as hp
+        from cora.util import hputil
+
+        tel = self.telescope
+        if nside is None:
+            nside = hputil.nside_for_lmax(tel.lmax, accuracy_boost=tel.accuracy_boost)
+        # map that has a single point source at (theta, phi)
+        ps = np.zeros((1, 12*nside**2))
+        pix = hp.ang2pix(nside, theta, phi)
+        ps[:, pix] = 1.0
+
+        # spherical transform the map to alm
+        alm = hputil.sphtrans_sky(ps, lmax=tel.lmax)
+        del ps
+
+        # compute a_psf
+        a_psf = np.zeros((tel.nfreq, 1, tel.lmax+1, tel.lmax+1), dtype=np.complex128)
+        for mi in xrange(tel.mmax+1):
+            beam = self.beam_m(mi)
+            beam = beam.reshape(tel.nfreq, self.ntel, self.nsky)
+            for fi in xrange(tel.nfreq):
+                B = beam[fi]
+                a_psf[fi, 0, :, mi] = np.dot(B.T.conj(), np.dot(B, alm[0, :, mi]))
+
+        del alm
+        del beam
+
+        if no_m_zero:
+            a_psf[:, 0] = 0
+
+        return hputil.sphtrans_inv_sky(a_psf, nside)
 
 
 
