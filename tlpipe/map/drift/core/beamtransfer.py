@@ -1140,7 +1140,13 @@ class BeamTransfer(object):
         vec = vec.reshape((nfreq, self.ntel))
 
         for fi in xrange(nfreq):
-            vecb[fi] = tk.tk(beam[fi], vec[fi], th=1.0e-1)
+            # vecb[fi] = tk.tk(beam[fi], vec[fi], th=1.0e-1)
+            eps = 0.01
+            print 'tk with eps = ', eps
+            B = beam[fi]
+            BB = np.dot(B.T.conj(), B)
+            np.fill_diagonal(BB, eps + np.diag(BB))
+            vecb[fi] = np.dot(la.pinv(BB), np.dot(B.T.conj(), vec[fi]))
 
         return vecb
 
