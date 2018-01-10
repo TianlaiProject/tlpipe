@@ -226,7 +226,7 @@ class TimestreamCommon(container.BasicTod):
 
         super(TimestreamCommon, self).load_all()
 
-        # create some new necessary datasets is they do not already exist in file
+        # create some new necessary datasets if they do not already exist in file
         if 'vis_mask' not in self.iterkeys():
             # create the mask array
             vis_mask = np.where(np.isfinite(self.local_vis), False, True)
