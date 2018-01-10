@@ -150,7 +150,8 @@ class PsCal(timestream_task.TimestreamTask):
             tz = re.search(pattern, ts.attrs['timezone']).group()
             tz = int(tz)
             local_next_transit = ephem.Date(next_transit + tz * ephem.hour) # plus 8h to get Beijing time
-            if transit_time > ts['jul_date'][-1]:
+            # if transit_time > ts['jul_date'][-1]:
+            if transit_time > max(ts['jul_date'][-1], ts['jul_date'][:].max()):
                 raise RuntimeError('Data does not contain local transit time %s of source %s' % (local_next_transit, calibrator))
 
             # the first transit index
