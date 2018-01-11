@@ -13,7 +13,6 @@ import itertools
 import time
 import numpy as np
 from scipy import linalg as la
-from scipy import optimize
 import ephem
 import h5py
 import aipy as a
@@ -373,10 +372,18 @@ class PsCal(timestream_task.TimestreamTask):
 
             # subtract the vis of calibrator from self.vis
             if subtract_src:
-                for ii, (ti, fi, pi) in enumerate(tfp_linds):
-                    for bi, (fd1, fd2) in enumerate(ts.local_bl):
-                        b1, b2 = feedno.index(fd1), feedno.index(fd2)
-                        ts.local_vis[ti, fi, pi, bi] -= lsrc_vis[ii, b1, b2]
+                nbl = len(bls)
+                lv = np.zeros((lsrc_vis.shape[0], nbl), dtype=lsrc_vis.dtype)
+                for bi, (fd1, fd2) in enumerate(bls):
+                    b1, b2 = feedno.index(fd1), feedno.index(fd2)
+                    lv[:, bi] = lsrc_vis[:, b1, b2]
+                lv = mpiarray.MPIArray.wrap(lv, axis=0, comm=ts.comm)
+                lv = lv.redistribute(axis=1).local_array.reshape(nt, nf, 2, -1)
+                ts.local_vis[start_ind:end_ind, :, pol.index('xx')] -= lv[:, :, 0]
+                ts.local_vis[start_ind:end_ind, :, pol.index('yy')] -= lv[:, :, 1]
+
+                del lv
+
 
             if not save_src_vis:
                 del lsrc_vis
