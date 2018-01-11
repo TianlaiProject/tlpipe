@@ -30,14 +30,6 @@ import tlpipe.plot
 import matplotlib.pyplot as plt
 
 
-# Equation for Gaussian
-def fg(x, a, b, c, d):
-    return a * np.exp(-(x - b)**2.0 / (2 * c**2)) + d
-
-def fc(x, a, b, c, d):
-    return a * np.sinc(c * (x - b)) + d
-
-
 class PsCal(timestream_task.TimestreamTask):
     """Calibration using a strong point source.
 
@@ -454,7 +446,6 @@ class PsCal(timestream_task.TimestreamTask):
                 c = nt/2 # center ind
                 li = max(0, c - 10)
                 hi = min(nt, c + 10 + 1)
-                x = np.arange(li, hi)
                 # compute s_top for this time range
                 n0 = np.zeros(((hi-li), 3))
                 for ti, jt in enumerate(ts.time[start_ind:end_ind][li:hi]):
@@ -489,11 +480,18 @@ class PsCal(timestream_task.TimestreamTask):
                         ef = exp_factor
                         Gi = Gain.local_array[li:hi, ii]
                         e_phs = np.dot(ef[inds].conj(), Gi[inds]/y[inds]) / len(inds)
-                        if np.abs(np.abs(e_phs) - 1.0) < 0.01:
+                        ea = np.abs(e_phs)
+                        if np.abs(ea - 1.0) < 0.01:
                             # compute gain for this feed
                             lgain[ii] = mag * e_phs
                         else:
-                            print '%d, %d, %d: maybe wrong abs(e_phs):' % (fi, pi, di), np.abs(e_phs)
+                            e_phs_conj = np.dot(ef[inds], Gi[inds]/y[inds]) / len(inds)
+                            eac = np.abs(e_phs_conj)
+                            if eac < ea:
+                                if np.abs(eac - 1.0) < 0.01:
+                                    print '%d, %d, %d: may need to be conjugated' % (fi, pi, di)
+                            else:
+                                print '%d, %d, %d: maybe wrong abs(e_phs):' % (fi, pi, di), ea
 
 
                 # gather local gain
@@ -565,9 +563,13 @@ class PsCal(timestream_task.TimestreamTask):
 
         # convert vis from intensity unit to temperature unit in K
         if temperature_convert:
-            factor = 1.0e-26 * (const.c**2 / (2 * const.k_B * (1.0e6*freq)**2)) # NOTE: 1Jy = 1.0e-26 W m^-2 Hz^-1
-            ts.local_vis[:] *= factor[np.newaxis, :, np.newaxis, np.newaxis]
-            ts.vis.attrs['unit'] = 'K'
+            if 'unit' in ts.vis.attrs.keys() and ts.vis.attrs['unit'] == 'K':
+                if mpiutil.rank0:
+                    print 'vis is already in unit K, do nothing...'
+            else:
+                factor = 1.0e-26 * (const.c**2 / (2 * const.k_B * (1.0e6*freq)**2)) # NOTE: 1Jy = 1.0e-26 W m^-2 Hz^-1
+                ts.local_vis[:] *= factor[np.newaxis, :, np.newaxis, np.newaxis]
+                ts.vis.attrs['unit'] = 'K'
 
 
         return super(PsCal, self).process(ts)
