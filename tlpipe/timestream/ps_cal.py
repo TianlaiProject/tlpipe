@@ -452,10 +452,8 @@ class PsCal(timestream_task.TimestreamTask):
 
                 # choose data slice near the transit time
                 c = nt/2 # center ind
-                # li = max(0, c - 100)
-                # hi = min(nt, c + 100 + 1)
-                li = max(0, c - 150)
-                hi = min(nt, c + 150 + 1)
+                li = max(0, c - 10)
+                hi = min(nt, c + 10 + 1)
                 x = np.arange(li, hi)
                 # compute s_top for this time range
                 n0 = np.zeros(((hi-li), 3))
@@ -480,29 +478,22 @@ class PsCal(timestream_task.TimestreamTask):
                 lgain = np.zeros((len(fpd_linds),), dtype=Gain.dtype) # gain for each feed
                 lgain[:] = complex(np.nan, np.nan)
                 for ii, (fi, pi, di) in enumerate(fpd_linds):
-                    # gaussian/sinc fit
                     y = G_abs.local_array[li:hi, ii]
                     inds = np.where(np.isfinite(y))[0]
-                    if len(inds) >= max(4, 0.75 * len(y)): # min 4 for curve_fit
-                        # get the best estimate of the central val
-                        cval = y[inds[np.argmin(np.abs(inds-c))]]
-                        try:
-                            # gaussian fit
-                            # popt, pcov = optimize.curve_fit(fg, x[inds], y[inds], p0=(cval, c, 90, 0))
-                            # sinc function seems fit better
-                            popt, pcov = optimize.curve_fit(fc, x[inds], y[inds], p0=(cval, c, 1.0e-2, 0))
-                            # print 'popt:', popt
-                        except Exception:
-                            print 'curve_fit failed for fi = %d, pol = %s, feed = %d' % (fi, gain_pd[pi], feedno[di])
-                            continue
-
-                        An = y / fc(popt[1], *popt) # the beam profile
+                    if len(inds) >= max(4, 0.5 * len(y)):
+                        # get the approximate magnitude by averaging the central G_abs
+                        mag = np.mean(y[inds])
+                        # solve phase by least square fit
                         ui = (feedpos[di] - feedpos[0]) * (1.0e6*freq[fi]) / const.c # position of this feed (relative to the first feed) in unit of wavelength
                         exp_factor = np.exp(2.0J * np.pi * np.dot(n0, ui))
-                        Ae = An * exp_factor
+                        ef = exp_factor
                         Gi = Gain.local_array[li:hi, ii]
-                        # compute gain for this feed
-                        lgain[ii] = np.dot(Ae[inds].conj(), Gi[inds]) / np.dot(Ae[inds].conj(), Ae[inds])
+                        e_phs = np.dot(ef[inds].conj(), Gi[inds]/y[inds]) / len(inds)
+                        if np.abs(np.abs(e_phs) - 1.0) < 0.01:
+                            # compute gain for this feed
+                            lgain[ii] = mag * e_phs
+                        else:
+                            print '%d, %d, %d: maybe wrong abs(e_phs):' % (fi, pi, di), np.abs(e_phs)
 
 
                 # gather local gain
