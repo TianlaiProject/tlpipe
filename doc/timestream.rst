@@ -36,6 +36,7 @@ Operating tasks
    rt2ts
    ps_fit
    ps_cal
+   temperature_convert
    phs2src
    phs2zen
    phase_closure
