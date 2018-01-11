@@ -255,14 +255,14 @@ class PsCal(timestream_task.TimestreamTask):
                                 mask_cnt += 1
                                 Vmat[i, j] = 0
                             else:
-                                Vmat[i, j] = this_vis[ii, bi] / Sc[fi] # xx, yy
+                                Vmat[i, j] = this_vis[ii, bi] # xx, yy
                         except ValueError:
                             bi = bls.index((aj, ai))
                             if this_vis_mask[ii, bi] and not np.isfinite(this_vis[ii, bi]):
                                 mask_cnt += 1
                                 Vmat[i, j] = 0
                             else:
-                                Vmat[i, j] = np.conj(this_vis[ii, bi] / Sc[fi]) # xx, yy
+                                Vmat[i, j] = np.conj(this_vis[ii, bi]) # xx, yy
 
                 if save_src_vis:
                     lsky_vis[ii] = Vmat
@@ -352,7 +352,7 @@ class PsCal(timestream_task.TimestreamTask):
                     plt.close()
 
                 if apply_gain or save_gain:
-                    e, U = la.eigh(V0, eigvals=(nfeed-1, nfeed-1))
+                    e, U = la.eigh(V0 / Sc[fi], eigvals=(nfeed-1, nfeed-1))
                     g = U[:, -1] * e[-1]**0.5
                     lGain[ii] = g
 
