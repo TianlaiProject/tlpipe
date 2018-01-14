@@ -36,8 +36,8 @@ class MapMaking(timestream_task.TimestreamTask):
     """
 
     params_init = {
-                    'mask_daytime': True,
-                    'mask_time_range': [6.0, 22.0], # hour
+                    'mask_daytime': False,
+                    'mask_time_range': [8.0, 19.5], # hour
                     'beam_theta_range': [0.0, 135.0],
                     'tsys': 50.0,
                     'accuracy_boost': 1.0,
