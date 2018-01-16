@@ -30,6 +30,7 @@ class Accum(timestream_task.TimestreamTask):
 
     params_init = {
                     'check': True, # check data alignment before accumulate
+                    'load_data': None, # load data from disk first and accumulate to it if not None but a list of files
                   }
 
     prefix = 'ac_'
@@ -42,8 +43,14 @@ class Accum(timestream_task.TimestreamTask):
         assert isinstance(ts, Timestream), '%s only works for Timestream object' % self.__class__.__name__
 
         check = self.params['check']
+        load_data = self.params['load_data']
 
         # ts.redistribute('baseline')
+
+        # load data from disk if load_data is set
+        if (self.data is None) and (not load_data is None):
+            self.data = Timestream(load_data, mode='r', start=0, stop=None, dist_axis=ts.main_data_dist_axis, use_hints=True, comm=ts.comm)
+            self.data.load_all()
 
         if self.data is None:
             self.data = ts
