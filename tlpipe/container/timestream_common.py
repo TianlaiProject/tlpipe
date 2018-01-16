@@ -9,8 +9,11 @@ Inheritance diagram
 
 """
 
+import re
+import pickle
 import itertools
 import numpy as np
+import h5py
 import ephem
 from datetime import datetime
 import container
@@ -749,6 +752,130 @@ class TimestreamCommon(container.BasicTod):
         num = len(set(lens))
         if num != 0 and num != 1:
             raise RuntimeError('Not all feed_ordered_datasets have an aligned feed axis')
+
+    def to_files(self, outfiles, exclude=[], check_status=True, write_hints=True, libver='latest', chunk_vis=True, chunk_shape=None, chunk_size=64):
+        """Save the data hold in this container to files.
+
+        Parameters
+        ----------
+        outfiles : string or list of strings
+             File name or a list of file names that data will be saved into.
+        exclude : list of strings, optional
+            Attributes and datasets in this list will be excluded when save to
+            files. Default is an empty list, so all data will be saved.
+        check_status : bool, optional
+            Whether to check data consistency before save to files. Default True.
+        write_hints : bool, optional
+            If True, will write hint class attributes as a 'hints' attribute to
+            files, which will be used to re-construct this class when reading data
+            from the saved files. Default True.
+        libver : 'latest' or 'earliest', optional
+            HDF5 library version settings. 'latest' means that HDF5 will always use
+            the newest version of these structures without particular concern for
+            backwards compatibility, can be performance advantages. The 'earliest'
+            option means that HDF5 will make a best effort to be backwards
+            compatible. Default is 'latest'.
+        chunk_vis : bool, optional
+            If True, dataset 'vis' and 'vis_mask' in the saved files will be
+            chunked. Default True.
+        chunk_shape : None or tuple
+            The chunk shape to use for dataset 'vis' and 'vis_mask'. If None,
+            the chunk shape will be determined by `chunk_size`. Default None.
+        chunk_size : integer
+            If `chunk_shape` is None, then dataset 'vis' and 'vis_mask' will be
+            chunked to be approximately this size in unit KB.
+
+        """
+
+        outfiles = container.ensure_file_list(outfiles)
+        num_outfiles = len(outfiles)
+
+        # first redistribute main_time_ordered_datasets to the first axis
+        if self.main_data_dist_axis != 0:
+            self.redistribute(0)
+
+        # check data is consistent before save
+        if check_status:
+            self.check_status()
+
+        # get the appropriate chunk for vis
+        if chunk_vis:
+            if not chunk_shape is None:
+                chunk_shape = tuple(chunk_shape)
+                assert len(chunk_shape) == len(self.vis.shape), 'Invalid chunk_shape %s for vis shape %s' % (chunk_shape, self.vis.shape)
+            else:
+                if len(self.vis.shape) == 3:
+                    num_freq = self.vis.shape[1]
+                    num_pol = 1
+                elif len(self.vis.shape) == 4:
+                    num_freq = self.vis.shape[1]
+                    num_pol = self.vis.shape[2]
+                else:
+                    raise RuntimeError('Unknown shape %s of vis' % self.vis.shape)
+
+                tc = chunk_size * 2**10 / (self.local_vis.itemsize * num_freq * num_pol)
+                chunk_shape = (tc, num_freq, num_pol, 1)
+
+        # split output files among procs
+        for fi, outfile in enumerate(mpiutil.mpilist(outfiles, method='con', comm=self.comm)):
+            # first write top level common attrs and datasets to file
+            with h5py.File(outfile, 'w', libver=libver) as f:
+
+                # write hints if required
+                if write_hints:
+                    hint_keys = [ key for key in self.__class__.__dict__.keys() if re.match(self.hints_pattern, key) ]
+                    hint_dict = { key: getattr(self, key) for key in hint_keys }
+                    f.attrs['hints'] = pickle.dumps(hint_dict)
+
+                # write top level common attrs
+                for attrs_name, attrs_value in self.attrs.iteritems():
+                    if attrs_name in exclude:
+                        continue
+                    if attrs_name not in self.time_ordered_attrs:
+                        f.attrs[attrs_name] = self.attrs[attrs_name]
+
+
+                for dset_name, dset in self.iteritems():
+                    if dset_name in exclude:
+                        continue
+                    # write top level common datasets
+                    if dset_name not in self.time_ordered_datasets.keys():
+                        f.create_dataset(dset_name, data=dset, shape=dset.shape, dtype=dset.dtype)
+                    # initialize time ordered datasets
+                    else:
+                        nt = dset.shape[0]
+                        lt, et, st = mpiutil.split_m(nt, num_outfiles)
+                        lshape = (lt[fi],) + dset.shape[1:]
+                        if chunk_vis and dset_name in ('vis', 'vis_mask'):
+                            f.create_dataset(dset_name, lshape, dtype=dset.dtype, chunks=chunk_shape)
+                        else:
+                            f.create_dataset(dset_name, lshape, dtype=dset.dtype)
+
+                    # copy attrs of this dset
+                    memh5.copyattrs(dset.attrs, f[dset_name].attrs)
+
+        mpiutil.barrier(comm=self.comm)
+
+        # then write time ordered datasets
+        for dset_name, dset in self.iteritems():
+            if dset_name in exclude:
+                continue
+            if dset_name in self.time_ordered_datasets.keys():
+                dset_shape, dset_type, outfiles_map = self._get_output_info(dset_name, num_outfiles)
+
+                st = 0
+                # NOTE: if write simultaneously, will loss data with processes distributed in several nodes
+                for ri in xrange(self.nproc):
+                    if ri == self.rank:
+                        for fi, start, stop in outfiles_map:
+
+                            et = st + (stop - start)
+                            with h5py.File(outfiles[fi], 'r+', libver=libver) as f:
+                                f[dset_name][start:stop] = self[dset_name].local_data[st:et]
+                            st = et
+                    mpiutil.barrier(comm=self.comm)
+
+                # mpiutil.barrier(comm=self.comm)
 
 
     def data_operate(self, func, op_axis=None, axis_vals=0, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
