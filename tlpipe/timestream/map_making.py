@@ -56,10 +56,11 @@ class MapMaking(timestream_task.TimestreamTask):
                     'input_maps': [],
                     'add_noise': True,
                     'dirty_map': False,
-                    'nbin': None, # use this if multi-freq synthisize
-                    'method': 'svd',
+                    'nbin': None, # use this if multi-freq synthesize
+                    'method': 'svd', # or tk
                     'normalize': True, # only used for dirty map-making
                     'threshold': 1.0e3, # only used for dirty map-making
+                    'epsilon': 0.01, # regularization parameter for tk
                   }
 
     prefix = 'mm_'
@@ -90,6 +91,7 @@ class MapMaking(timestream_task.TimestreamTask):
         method = self.params['method']
         normalize = self.params['normalize']
         threshold = self.params['threshold']
+        eps = self.params['epsilon']
 
         if use_existed_beam:
             # load the saved telescope from disk
@@ -281,7 +283,7 @@ class MapMaking(timestream_task.TimestreamTask):
         if dirty_map:
             tstream.mapmake_full(nside, 'map_full_dirty.hdf5', nbin, dirty=True, method=method, normalize=normalize, threshold=threshold)
         else:
-            tstream.mapmake_full(nside, 'map_full.hdf5', nbin, dirty=False, method=method, normalize=normalize, threshold=threshold)
+            tstream.mapmake_full(nside, 'map_full.hdf5', nbin, dirty=False, method=method, normalize=normalize, threshold=threshold, eps=eps)
 
         # ts.add_history(self.history)
 

@@ -1098,10 +1098,9 @@ class BeamTransfer(object):
             Sky vector to return.
         """
 
-        ibeam, W1 = self.invbeam_m(mi, nbin)
-
-        nbin = self.nfreq if nbin is None else nbin
         n, s, e = mpiutil.split_m(self.nfreq, nbin)
+
+        ibeam, W1 = self.invbeam_m(mi, nbin)
 
         vecb = np.zeros((nbin, self.telescope.num_pol_sky, self.telescope.lmax + 1), dtype=np.complex128)
         vec = vec.reshape((self.nfreq, self.ntel))
@@ -1114,7 +1113,7 @@ class BeamTransfer(object):
 
     project_vector_backward = project_vector_telescope_to_sky
 
-    def project_vector_telescope_to_sky_tk(self, mi, vec, nbin=None):
+    def project_vector_telescope_to_sky_tk(self, mi, vec, nbin=None, eps=0.01):
         """Invert a vector from the telescope space onto the sky using
         the Tikhonov regularization method. This is the map-making process.
 
@@ -1135,18 +1134,20 @@ class BeamTransfer(object):
 
         nfreq = self.nfreq
         beam = beam.reshape((nfreq, self.ntel, self.nsky))
+        # beam = beam[:, 0].reshape((nfreq, -1, self.nsky)) # positive m only
 
-        vecb = np.zeros((nfreq, self.telescope.num_pol_sky, self.telescope.lmax + 1), dtype=np.complex128)
+        n, s, e = mpiutil.split_m(nfreq, nbin)
+
+        vecb = np.zeros((nbin, self.telescope.num_pol_sky, self.telescope.lmax + 1), dtype=np.complex128)
         vec = vec.reshape((nfreq, self.ntel))
+        # vec = vec[:, 0] # positive m only
 
-        for fi in xrange(nfreq):
-            # vecb[fi] = tk.tk(beam[fi], vec[fi], th=1.0e-1)
-            eps = 0.01
-            print 'tk with eps = ', eps
-            B = beam[fi]
+        for bi in xrange(nbin):
+            B = beam[s[bi]:e[bi]].reshape(-1, self.nsky)
             BB = np.dot(B.T.conj(), B)
             np.fill_diagonal(BB, eps + np.diag(BB))
-            vecb[fi] = np.dot(la.pinv(BB), np.dot(B.T.conj(), vec[fi]))
+            vec1 = vec[s[bi]:e[bi]].reshape(-1)
+            vecb[bi] = np.dot(la.pinv(BB), np.dot(B.T.conj(), vec1))
 
         return vecb
 

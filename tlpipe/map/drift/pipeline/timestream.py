@@ -243,11 +243,16 @@ class Timestream(object):
 
     #======== Make map from uncleaned stream ============
 
-    def mapmake_full(self, nside, mapname, nbin=None, dirty=False, method='svd', normalize=True, threshold=1.0e3):
+    def mapmake_full(self, nside, mapname, nbin=None, dirty=False, method='svd', normalize=True, threshold=1.0e3, eps=0.01):
 
         nfreq = self.telescope.nfreq
-        if nbin is not None and (nbin <= 0 or nbin >= nfreq): # invalid nbin
-            nbin = None
+        if nbin is None:
+            nbin = nfreq
+        else:
+            if (nbin < 1 or nbin > nfreq): # invalid nbin
+                nbin = nfreq
+            else:
+                nbin = int(nbin)
 
         def _make_alm(mi):
 
@@ -260,7 +265,7 @@ class Timestream(object):
                 if method == 'svd':
                     sphmode = self.beamtransfer.project_vector_telescope_to_sky(mi, mmode, nbin)
                 elif method == 'tk':
-                    sphmode = self.beamtransfer.project_vector_telescope_to_sky_tk(mi, mmode, nbin)
+                    sphmode = self.beamtransfer.project_vector_telescope_to_sky_tk(mi, mmode, nbin, eps=eps)
                 else:
                     raise ValueError('Unknown map-making method %s' % method)
 
@@ -271,12 +276,8 @@ class Timestream(object):
         if mpiutil.rank0:
 
             # get center freq of each bin
-            if nbin is not None:
-                n, s, e = mpiutil.split_m(nfreq, nbin)
-                cfreqs = np.array([ self.beamtransfer.telescope.frequencies[(s[i]+e[i])/2] for i in range(nbin) ])
-            else:
-                nbin = nfreq
-                cfreqs = self.beamtransfer.telescope.frequencies
+            n, s, e = mpiutil.split_m(nfreq, nbin)
+            cfreqs = np.array([ self.beamtransfer.telescope.frequencies[(s[i]+e[i])/2] for i in range(nbin) ])
 
             alm = np.zeros((nbin, self.telescope.num_pol_sky, self.telescope.lmax + 1,
                             self.telescope.lmax + 1), dtype=np.complex128)
