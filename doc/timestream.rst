@@ -36,6 +36,7 @@ Operating tasks
    rt2ts
    ps_fit
    ps_cal
+   apply_gain
    temperature_convert
    phs2src
    phs2zen
