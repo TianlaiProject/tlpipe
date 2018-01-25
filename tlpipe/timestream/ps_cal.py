@@ -386,7 +386,8 @@ class PsCal(timestream_task.TimestreamTask):
 
 
             if not save_src_vis:
-                del lsrc_vis
+                if subtract_src:
+                    del lsrc_vis
             else:
                 if tag_output_iter:
                     src_vis_file = output_path(src_vis_file, iteration=self.iteration)
