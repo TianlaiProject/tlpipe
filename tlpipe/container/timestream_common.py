@@ -814,7 +814,10 @@ class TimestreamCommon(container.BasicTod):
                     raise RuntimeError('Unknown shape %s of vis' % self.vis.shape)
 
                 tc = chunk_size * 2**10 / (self.local_vis.itemsize * num_freq * num_pol)
-                chunk_shape = (tc, num_freq, num_pol, 1)
+                if len(self.vis.shape) == 3:
+                    chunk_shape = (tc, num_freq, 1)
+                else:
+                    chunk_shape = (tc, num_freq, num_pol, 1)
 
         # split output files among procs
         for fi, outfile in enumerate(mpiutil.mpilist(outfiles, method='con', comm=self.comm)):
