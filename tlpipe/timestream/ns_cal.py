@@ -249,6 +249,7 @@ class NsCal(timestream_task.TimestreamTask):
         # not enough valid data to do the ns_cal
         num_valid = len(valid_inds)
         if num_valid <= 3:
+            print 'Only have %d valid points, mask all for fi = %d, bl = (%d, %d)...' % (num_valid, fbl[0], fbl[1][0], fbl[1][1])
             vis_mask[:] = True # mask the vis as no ns_cal has done
             return
 
