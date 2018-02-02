@@ -132,7 +132,6 @@ pc_show_progress = True
 pc_process_timing = True
 # pc_calibrator = 'cas'
 pc_calibrator = 'cyg'
-pc_catalog = 'misc,helm'
 pc_span = 1200
 pc_plot_figs = False
 pc_save_src_vis = True

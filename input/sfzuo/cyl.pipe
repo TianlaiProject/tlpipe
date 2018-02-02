@@ -107,27 +107,66 @@ r2t_in = bd1_out
 r2t_out = 'r2t'
 
 from tlpipe.timestream import ps_cal
-pipe_tasks.append(ps_cal.PsCal)
+pipe_tasks.append((ps_cal.PsCal, 'pc1_'))
 ### parameters for PsCal
-pc_in = r2t_out
-# r2t_iterable = True
-pc_show_progress = True
-pc_process_timing = True
-# pc_calibrator = 'cas'
-pc_calibrator = 'cyg'
-pc_catalog = 'misc,helm'
-pc_span = 1200
-pc_plot_figs = False
-pc_save_src_vis = True
-pc_save_gain = True
-pc_apply_gain = True
-pc_temperature_convert = True
-pc_out = 'pc'
+pc1_in = r2t_out
+# pc1_iterable = True
+pc1_show_progress = True
+pc1_process_timing = True
+pc1_calibrator = 'cas'
+pc1_span = 1200
+pc1_plot_figs = False
+pc1_save_src_vis = True
+pc1_src_vis_file = 'src_vis/%s_vis.hdf5' % pc1_calibrator
+pc1_subtract_src = True
+pc1_apply_gain = False
+pc1_save_gain = True
+pc1_gain_file = 'gain/%s_gain.hdf5' % pc1_calibrator
+pc1_temperature_convert = False
+pc1_out = 'pc1'
+
+from tlpipe.timestream import ps_cal
+pipe_tasks.append((ps_cal.PsCal, 'pc2_'))
+### parameters for PsCal
+pc2_in = pc1_out
+# pc2_iterable = True
+pc2_show_progress = True
+pc2_process_timing = True
+pc2_calibrator = 'crab'
+pc2_span = 1200
+pc2_plot_figs = False
+pc2_save_src_vis = True
+pc2_src_vis_file = 'src_vis/%s_vis.hdf5' % pc2_calibrator
+pc2_subtract_src = True
+pc2_apply_gain = False
+pc2_save_gain = True
+pc2_gain_file = 'gain/%s_gain.hdf5' % pc2_calibrator
+pc2_temperature_convert = False
+pc2_out = 'pc2'
+
+from tlpipe.timestream import ps_cal
+pipe_tasks.append((ps_cal.PsCal, 'pc3_'))
+### parameters for PsCal
+pc3_in = pc2_out
+# pc3_iterable = True
+pc3_show_progress = True
+pc3_process_timing = True
+pc3_calibrator = 'cyg'
+pc3_span = 1200
+pc3_plot_figs = False
+pc3_save_src_vis = True
+pc3_src_vis_file = 'src_vis/%s_vis.hdf5' % pc3_calibrator
+pc3_subtract_src = True
+pc3_apply_gain = True
+pc3_save_gain = True
+pc3_gain_file = 'gain/%s_gain.hdf5' % pc3_calibrator
+pc3_temperature_convert = True
+pc3_out = 'pc3'
 
 from tlpipe.timestream import bad_detect
 pipe_tasks.append((bad_detect.Detect, 'bd2_'))
 ### parameters for Detect
-bd2_in = pc_out
+bd2_in = pc3_out
 # bd2_iterable = True
 bd2_output_files = [ 'ps_cal/file_%d.hdf5' %i for i in range(1, 7) ]
 bd2_out = 'bd2'
@@ -173,14 +212,16 @@ pipe_tasks.append(map_making.MapMaking)
 ### parameters for MapMaking
 mm_in = av_out
 mm_input_files = av_output_files
-mm_feed_select = list(set(range(1, 97)) - set([28, 50, 72, 79]))
+# mm_feed_select = list(set(range(1, 97)) - set([28, 50, 72, 79]))
 mm_mask_daytime = False
 # mm_mask_time_range = [6.5, 24.0]
-mm_bl_range = [14.0, 1.0e7] # use long baselines only
+# mm_bl_range = [14.0, 1.0e7] # use long baselines only
 mm_auto_correlations = False
 mm_pol = 'xx'
 mm_noise_weight = False
 # mm_noise_weight = True
-mm_dirty_map = True
-# mm_dirty_map = False
+# mm_dirty_map = True
+mm_dirty_map = False
+mm_method = 'tk'
+mm_epsilon = 0.01
 mm_out = 'mm'
