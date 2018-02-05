@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.ondisk
+===================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: Timestream.ondisk

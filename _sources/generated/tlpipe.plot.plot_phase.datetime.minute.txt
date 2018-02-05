@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.datetime.minute
+======================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autoattribute:: datetime.minute

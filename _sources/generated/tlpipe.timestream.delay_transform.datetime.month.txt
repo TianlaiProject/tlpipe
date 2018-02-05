@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.datetime.month
+================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: datetime.month

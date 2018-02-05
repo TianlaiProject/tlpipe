@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.datetime.now
+==============================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: datetime.now

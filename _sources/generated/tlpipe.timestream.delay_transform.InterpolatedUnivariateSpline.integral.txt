@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.InterpolatedUnivariateSpline.integral
+=======================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: InterpolatedUnivariateSpline.integral

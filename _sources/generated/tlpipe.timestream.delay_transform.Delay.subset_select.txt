@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Delay.subset_select
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Delay.subset_select

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.datetime.min
+===================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autoattribute:: datetime.min

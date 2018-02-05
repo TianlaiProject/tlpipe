@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.iteritems
+======================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Timestream.iteritems

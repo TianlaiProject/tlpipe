@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.AutoMinorLocator.set_view_interval
+====================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: AutoMinorLocator.set_view_interval

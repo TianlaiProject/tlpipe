@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Delay.params_init
+===================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: Delay.params_init

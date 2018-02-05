@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.subset_feed_select
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Timestream.subset_feed_select

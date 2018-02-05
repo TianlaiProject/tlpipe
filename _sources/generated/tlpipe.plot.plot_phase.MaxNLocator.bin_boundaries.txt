@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.MaxNLocator.bin_boundaries
+=================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: MaxNLocator.bin_boundaries

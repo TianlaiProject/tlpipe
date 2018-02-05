@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.time_and_freq_data_operate
+=======================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Timestream.time_and_freq_data_operate

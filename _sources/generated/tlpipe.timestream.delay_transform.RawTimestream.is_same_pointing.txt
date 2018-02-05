@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.RawTimestream.is_same_pointing
+================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: RawTimestream.is_same_pointing

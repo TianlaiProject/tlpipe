@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.load_all
+================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Timestream.load_all

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.RawTimestream.delete_an_attribute
+========================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: RawTimestream.delete_an_attribute

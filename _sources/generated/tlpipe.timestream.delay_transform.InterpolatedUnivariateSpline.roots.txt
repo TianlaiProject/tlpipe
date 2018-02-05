@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.InterpolatedUnivariateSpline.roots
+====================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: InterpolatedUnivariateSpline.roots

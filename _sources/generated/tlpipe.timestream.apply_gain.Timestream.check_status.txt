@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.check_status
+====================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Timestream.check_status

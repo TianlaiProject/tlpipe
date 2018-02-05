@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.AutoMinorLocator.set_bounds
+=============================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: AutoMinorLocator.set_bounds

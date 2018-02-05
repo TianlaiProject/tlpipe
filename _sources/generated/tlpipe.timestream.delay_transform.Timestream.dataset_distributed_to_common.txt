@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.dataset_distributed_to_common
+==========================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Timestream.dataset_distributed_to_common

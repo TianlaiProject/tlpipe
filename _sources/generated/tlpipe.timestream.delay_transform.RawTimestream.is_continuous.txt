@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.RawTimestream.is_continuous
+=============================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: RawTimestream.is_continuous

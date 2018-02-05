@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.InterpolatedUnivariateSpline.integral
+============================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: InterpolatedUnivariateSpline.integral

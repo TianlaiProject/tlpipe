@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.RawTimestream.attrs
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: RawTimestream.attrs

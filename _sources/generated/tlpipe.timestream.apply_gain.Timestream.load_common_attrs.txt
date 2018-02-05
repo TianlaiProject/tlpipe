@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.load_common_attrs
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Timestream.load_common_attrs

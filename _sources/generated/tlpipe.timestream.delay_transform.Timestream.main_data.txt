@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.main_data
+======================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: Timestream.main_data

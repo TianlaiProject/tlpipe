@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Apply.restart_iteration
+====================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Apply.restart_iteration

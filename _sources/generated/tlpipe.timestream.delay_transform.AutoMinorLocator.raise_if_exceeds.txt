@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.AutoMinorLocator.raise_if_exceeds
+===================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: AutoMinorLocator.raise_if_exceeds

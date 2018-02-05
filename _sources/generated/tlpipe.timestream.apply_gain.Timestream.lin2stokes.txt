@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.lin2stokes
+==================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Timestream.lin2stokes

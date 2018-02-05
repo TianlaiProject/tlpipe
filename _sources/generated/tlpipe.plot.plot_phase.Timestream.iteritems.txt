@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.Timestream.iteritems
+===========================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: Timestream.iteritems

@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.RawTimestream.main_axes_ordered_datasets
+==========================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: RawTimestream.main_axes_ordered_datasets

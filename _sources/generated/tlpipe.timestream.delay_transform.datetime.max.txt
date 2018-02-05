@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.datetime.max
+==============================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: datetime.max

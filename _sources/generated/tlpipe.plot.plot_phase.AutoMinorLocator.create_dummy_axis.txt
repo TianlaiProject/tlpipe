@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.AutoMinorLocator.create_dummy_axis
+=========================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: AutoMinorLocator.create_dummy_axis

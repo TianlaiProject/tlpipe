@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.RawTimestream.create_time_ordered_dataset
+===========================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: RawTimestream.create_time_ordered_dataset

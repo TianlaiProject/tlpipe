@@ -1,0 +1,53 @@
+tlpipe.timestream.delay_transform.Delay
+=======================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoclass:: Delay
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Delay.cacheable
+      ~Delay.embarrassingly_parallelizable
+      ~Delay.history
+      ~Delay.iteration
+      ~Delay.params_init
+      ~Delay.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Delay.cast_input
+      ~Delay.copy_input
+      ~Delay.data_select
+      ~Delay.finish
+      ~Delay.next
+      ~Delay.process
+      ~Delay.read_input
+      ~Delay.read_output
+      ~Delay.read_process_write
+      ~Delay.restart_iteration
+      ~Delay.setup
+      ~Delay.show_params
+      ~Delay.stop_iteration
+      ~Delay.subset_select
+      ~Delay.transform
+      ~Delay.write_output
+   
+   

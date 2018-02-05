@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.dist_axis
+======================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: Timestream.dist_axis

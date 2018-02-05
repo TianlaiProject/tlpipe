@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.RawTimestream.subset
+======================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: RawTimestream.subset

@@ -1,0 +1,6 @@
+tlpipe.timestream.temperature_convert.Convert.embarrassingly_parallelizable
+===========================================================================
+
+.. currentmodule:: tlpipe.timestream.temperature_convert
+
+.. autoattribute:: Convert.embarrassingly_parallelizable

@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.RawTimestream.masked_vis
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: RawTimestream.masked_vis

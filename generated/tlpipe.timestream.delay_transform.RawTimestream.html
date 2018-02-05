@@ -1,0 +1,965 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>tlpipe.timestream.delay_transform.RawTimestream &mdash; tlpipe 0.1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="tlpipe 0.1 documentation" href="../index.html"/>
+        <link rel="up" title="tlpipe.timestream.delay_transform" href="tlpipe.timestream.delay_transform.html"/>
+        <link rel="next" title="tlpipe.timestream.delay_transform.RawTimestream.array" href="tlpipe.timestream.delay_transform.RawTimestream.array.html"/>
+        <link rel="prev" title="tlpipe.timestream.delay_transform.MaxNLocator.zoom" href="tlpipe.timestream.delay_transform.MaxNLocator.zoom.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-nav-search">
+        
+
+        
+          <a href="../index.html" class="icon icon-home"> tlpipe
+        
+
+        
+        </a>
+
+        
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+        
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        
+          
+          
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Introduction</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#python-version">Python version</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#installation-guide">Installation guide</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutor.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#prepare-for-the-input-pipe-file">Prepare for the input pipe file</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-iterative-pipeline">Non-iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#iterative-pipeline">Iterative pipeline</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#non-trivial-control-flow">Non-trivial control flow</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#execute-several-times-a-same-task">Execute several times a same task</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#save-intermediate-data">Save intermediate data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#recovery-from-intermediate-data">Recovery from intermediate data</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#run-the-pipeline">Run the pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#single-process-run">Single process run</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../tutor.html#multiple-processes-run">Multiple processes run</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#pipeline-products-and-intermediate-results">Pipeline products and intermediate results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../tutor.html#other-excutable-commands">Other excutable commands</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../guide.html">Developer&#8217;s guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../guide.html#write-a-general-task">Write a general task</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide.html#write-a-task-to-process-timestream-data">Write a task to process timestream data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../guide.html#use-data-operate-functions-in-timestream-tasks">Use data operate functions in timestream tasks</a></li>
+</ul>
+</li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../core.html"><code class="docutils literal"><span class="pre">core</span></code> &#8211; Core functionalities</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../core.html#constants">Constants</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.core.constants.html">tlpipe.core.constants</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.core.constants.html#constants">Constants</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../core.html#tianlai-array-model">Tianlai array model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.core.tl_array.html">tlpipe.core.tl_array</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.core.tl_array.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../kiyopy.html"><code class="docutils literal"><span class="pre">kiyopy</span></code> &#8211; Kiyoshi Masui&#8217;s paramter parsing package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../kiyopy.html#pameter-parser">Pameter parser</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.kiyopy.parse_ini.html">tlpipe.kiyopy.parse_ini</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.parse_ini.parse.html">tlpipe.kiyopy.parse_ini.parse</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.parse_ini.parse_dict.html">tlpipe.kiyopy.parse_ini.parse_dict</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.parse_ini.write_params.html">tlpipe.kiyopy.parse_ini.write_params</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../kiyopy.html#custom-exceptions">Custom exceptions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.kiyopy.custom_exceptions.html">tlpipe.kiyopy.custom_exceptions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.custom_exceptions.DataError.html">tlpipe.kiyopy.custom_exceptions.DataError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.custom_exceptions.FileParameterTypeError.html">tlpipe.kiyopy.custom_exceptions.FileParameterTypeError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.custom_exceptions.NextIteration.html">tlpipe.kiyopy.custom_exceptions.NextIteration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.custom_exceptions.ParameterFileError.html">tlpipe.kiyopy.custom_exceptions.ParameterFileError</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../kiyopy.html#utilities">Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.kiyopy.utils.html">tlpipe.kiyopy.utils</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.utils.abbreviate_file_path.html">tlpipe.kiyopy.utils.abbreviate_file_path</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.utils.mkdir_p.html">tlpipe.kiyopy.utils.mkdir_p</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.kiyopy.utils.mkparents.html">tlpipe.kiyopy.utils.mkparents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../pipeline.html"><code class="docutils literal"><span class="pre">pipeline</span></code> &#8211; Pipeline control and tasks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../pipeline.html#pipeline">Pipeline</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.pipeline.pipeline.html">tlpipe.pipeline.pipeline</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.pipeline.pipeline.html#basic-tasks">Basic Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.pipeline.pipeline.html#pipeline-configuration">Pipeline Configuration</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.pipeline.pipeline.html#execution-order">Execution Order</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.pipeline.pipeline.html#advanced-tasks">Advanced Tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.pipeline.pipeline.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../container.html"><code class="docutils literal"><span class="pre">container</span></code> &#8211; Timestream data containers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../container.html#data-containers">Data containers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.container.container.html">tlpipe.container.container</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.container.container.check_axis.html">tlpipe.container.container.check_axis</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.container.container.deepcopy.html">tlpipe.container.container.deepcopy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.container.container.ensure_file_list.html">tlpipe.container.container.ensure_file_list</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.container.container.BasicTod.html">tlpipe.container.container.BasicTod</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.container.timestream_common.html">tlpipe.container.timestream_common</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.container.timestream_common.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.container.raw_timestream.html">tlpipe.container.raw_timestream</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.container.raw_timestream.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.container.timestream.html">tlpipe.container.timestream</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.container.timestream.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../timestream.html"><code class="docutils literal"><span class="pre">timestream</span></code> &#8211; Timestream operating tasks</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../timestream.html#timestream-base-task">Timestream base task</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.timestream_task.html">tlpipe.timestream.timestream_task</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.timestream_task.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="reference internal" href="../timestream.html#operating-tasks">Operating tasks</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.dispatch.html">tlpipe.timestream.dispatch</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.dispatch.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.detect_ns.html">tlpipe.timestream.detect_ns</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.detect_ns.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.rfi_flagging.html">tlpipe.timestream.rfi_flagging</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.rfi_flagging.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.line_rfi.html">tlpipe.timestream.line_rfi</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.line_rfi.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.time_flag.html">tlpipe.timestream.time_flag</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.time_flag.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.freq_flag.html">tlpipe.timestream.freq_flag</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.freq_flag.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.multiscale_flag.html">tlpipe.timestream.multiscale_flag</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.multiscale_flag.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.combine_mask.html">tlpipe.timestream.combine_mask</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.combine_mask.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.sir_operate.html">tlpipe.timestream.sir_operate</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.sir_operate.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.rfi_stats.html">tlpipe.timestream.rfi_stats</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.rfi_stats.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.subdata.html">tlpipe.timestream.subdata</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.subdata.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.bad_detect.html">tlpipe.timestream.bad_detect</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.bad_detect.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="reference internal" href="tlpipe.timestream.delay_transform.html">tlpipe.timestream.delay_transform</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="tlpipe.timestream.delay_transform.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ns_cal.html">tlpipe.timestream.ns_cal</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ns_cal.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.rt2ts.html">tlpipe.timestream.rt2ts</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.rt2ts.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ps_fit.html">tlpipe.timestream.ps_fit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ps_fit.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ps_cal.html">tlpipe.timestream.ps_cal</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ps_cal.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.apply_gain.html">tlpipe.timestream.apply_gain</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.apply_gain.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.temperature_convert.html">tlpipe.timestream.temperature_convert</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.temperature_convert.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.phs2src.html">tlpipe.timestream.phs2src</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.phs2src.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.phs2zen.html">tlpipe.timestream.phs2zen</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.phs2zen.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.phase_closure.html">tlpipe.timestream.phase_closure</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.phase_closure.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ps_subtract.html">tlpipe.timestream.ps_subtract</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ps_subtract.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.daytime_mask.html">tlpipe.timestream.daytime_mask</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.daytime_mask.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.re_order.html">tlpipe.timestream.re_order</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.re_order.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.accumulate.html">tlpipe.timestream.accumulate</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.accumulate.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.barrier.html">tlpipe.timestream.barrier</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.barrier.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.average.html">tlpipe.timestream.average</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.average.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.freq_rebin.html">tlpipe.timestream.freq_rebin</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.freq_rebin.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.map_making.html">tlpipe.timestream.map_making</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.map_making.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../rfi.html"><code class="docutils literal"><span class="pre">rfi</span></code> &#8211; RFI flagging methods</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../rfi.html#surface-fitting-methods">Surface fitting methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.surface_fit.html">tlpipe.rfi.surface_fit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.surface_fit.SurfaceFitMethod.html">tlpipe.rfi.surface_fit.SurfaceFitMethod</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.local_fit.html">tlpipe.rfi.local_fit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.local_fit.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.local_average_fit.html">tlpipe.rfi.local_average_fit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.local_average_fit.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.local_median_fit.html">tlpipe.rfi.local_median_fit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.local_median_fit.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.local_minimum_fit.html">tlpipe.rfi.local_minimum_fit</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.local_minimum_fit.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.gaussian_filter.html">tlpipe.rfi.gaussian_filter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.gaussian_filter.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.interpolate.html">tlpipe.rfi.interpolate</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.interpolate.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../rfi.html#combinatorial-thresholding-methods">Combinatorial thresholding methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.combinatorial_threshold.html">tlpipe.rfi.combinatorial_threshold</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.combinatorial_threshold.winsorized_mean_and_std.html">tlpipe.rfi.combinatorial_threshold.winsorized_mean_and_std</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.combinatorial_threshold.winsorized_mode.html">tlpipe.rfi.combinatorial_threshold.winsorized_mode</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.combinatorial_threshold.CombinatorialThreshold.html">tlpipe.rfi.combinatorial_threshold.CombinatorialThreshold</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.var_threshold.html">tlpipe.rfi.var_threshold</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.var_threshold.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.sum_threshold.html">tlpipe.rfi.sum_threshold</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.sum_threshold.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../rfi.html#mathematical-morphological-methods">Mathematical morphological methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.dilate_operator.html">tlpipe.rfi.dilate_operator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.dilate_operator.dilate1d.html">tlpipe.rfi.dilate_operator.dilate1d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.dilate_operator.horizontal_dilate.html">tlpipe.rfi.dilate_operator.horizontal_dilate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.dilate_operator.vertical_dilate.html">tlpipe.rfi.dilate_operator.vertical_dilate</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.rfi.sir_operator.html">tlpipe.rfi.sir_operator</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.sir_operator.horizontal_sir.html">tlpipe.rfi.sir_operator.horizontal_sir</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.sir_operator.sir1d.html">tlpipe.rfi.sir_operator.sir1d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.rfi.sir_operator.vertical_sir.html">tlpipe.rfi.sir_operator.vertical_sir</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../cal.html"><code class="docutils literal"><span class="pre">cal</span></code> &#8211; Calibration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../map.html"><code class="docutils literal"><span class="pre">map</span></code> &#8211; Map-making</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../map.html#driftscan-map-making">Driftscan map-making</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../foreground.html"><code class="docutils literal"><span class="pre">foreground</span></code> &#8211; Foreground subtraction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ps.html"><code class="docutils literal"><span class="pre">ps</span></code> &#8211; Power spectrum estimation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../plot.html"><code class="docutils literal"><span class="pre">plot</span></code> &#8211; Tasks for plottting</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../plot.html#plotting-tasks">Plotting tasks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.plot.plot_integral.html">tlpipe.plot.plot_integral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_integral.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.plot.plot_slice.html">tlpipe.plot.plot_slice</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_slice.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.plot.plot_waterfall.html">tlpipe.plot.plot_waterfall</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_waterfall.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.plot.plot_phase.html">tlpipe.plot.plot_phase</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_phase.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../utils.html"><code class="docutils literal"><span class="pre">utils</span></code> &#8211; Utility functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../utils.html#utilities">Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.date_util.html">tlpipe.utils.date_util</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.date_util.get_ephdate.html">tlpipe.utils.date_util.get_ephdate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.date_util.get_juldate.html">tlpipe.utils.date_util.get_juldate</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.np_util.html">tlpipe.utils.np_util</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.np_util.average.html">tlpipe.utils.np_util.average</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.np_util.unique.html">tlpipe.utils.np_util.unique</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.path_util.html">tlpipe.utils.path_util</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.path_util.input_path.html">tlpipe.utils.path_util.input_path</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.path_util.iter_path.html">tlpipe.utils.path_util.iter_path</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.path_util.output_path.html">tlpipe.utils.path_util.output_path</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.pickle_util.html">tlpipe.utils.pickle_util</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.pickle_util.get_value.html">tlpipe.utils.pickle_util.get_value</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.robust_stats.html">tlpipe.utils.robust_stats</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.robust_stats.MAD.html">tlpipe.utils.robust_stats.MAD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.robust_stats.mad.html">tlpipe.utils.robust_stats.mad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.robust_stats.winsorize.html">tlpipe.utils.robust_stats.winsorize</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.robust_stats.winsorized_mean_and_std.html">tlpipe.utils.robust_stats.winsorized_mean_and_std</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.robust_stats.winsorized_mode.html">tlpipe.utils.robust_stats.winsorized_mode</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.sg_filter.html">tlpipe.utils.sg_filter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.sg_filter.factorial.html">tlpipe.utils.sg_filter.factorial</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.sg_filter.savitzky_golay.html">tlpipe.utils.sg_filter.savitzky_golay</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.rpca_decomp.html">tlpipe.utils.rpca_decomp</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.MAD.html">tlpipe.utils.rpca_decomp.MAD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.decompose.html">tlpipe.utils.rpca_decomp.decompose</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.l0_norm.html">tlpipe.utils.rpca_decomp.l0_norm</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.l1_norm.html">tlpipe.utils.rpca_decomp.l1_norm</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.mad.html">tlpipe.utils.rpca_decomp.mad</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.shrink.html">tlpipe.utils.rpca_decomp.shrink</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.sign.html">tlpipe.utils.rpca_decomp.sign</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.rpca_decomp.truncate.html">tlpipe.utils.rpca_decomp.truncate</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.multiscale.html">tlpipe.utils.multiscale</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.MAD.html">tlpipe.utils.multiscale.MAD</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.convolve.html">tlpipe.utils.multiscale.convolve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.convolve1d.html">tlpipe.utils.multiscale.convolve1d</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.median_filter.html">tlpipe.utils.multiscale.median_filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.median_wavelet_detrend.html">tlpipe.utils.multiscale.median_wavelet_detrend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.median_wavelet_smooth.html">tlpipe.utils.multiscale.median_wavelet_smooth</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.median_wavelet_transform.html">tlpipe.utils.multiscale.median_wavelet_transform</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.multiscale_median_detrend.html">tlpipe.utils.multiscale.multiscale_median_detrend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.multiscale_median_flag.html">tlpipe.utils.multiscale.multiscale_median_flag</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.multiscale_median_smooth.html">tlpipe.utils.multiscale.multiscale_median_smooth</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.multiscale_median_transform.html">tlpipe.utils.multiscale.multiscale_median_transform</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.starlet_detrend.html">tlpipe.utils.multiscale.starlet_detrend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.starlet_smooth.html">tlpipe.utils.multiscale.starlet_smooth</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.starlet_transform.html">tlpipe.utils.multiscale.starlet_transform</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.multiscale.up_sampling.html">tlpipe.utils.multiscale.up_sampling</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.utils.hist_eq.html">tlpipe.utils.hist_eq</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.utils.hist_eq.hist_eq.html">tlpipe.utils.hist_eq.hist_eq</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          
+        
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">tlpipe</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../timestream.html"><code class="docutils literal"><span class="pre">timestream</span></code> &#8211; Timestream operating tasks</a> &raquo;</li>
+      
+          <li><a href="tlpipe.timestream.delay_transform.html">tlpipe.timestream.delay_transform</a> &raquo;</li>
+      
+    <li>tlpipe.timestream.delay_transform.RawTimestream</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/generated/tlpipe.timestream.delay_transform.RawTimestream.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document">
+            
+  <div class="section" id="tlpipe-timestream-delay-transform-rawtimestream">
+<h1>tlpipe.timestream.delay_transform.RawTimestream<a class="headerlink" href="#tlpipe-timestream-delay-transform-rawtimestream" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="tlpipe.timestream.delay_transform.RawTimestream">
+<em class="property">class </em><code class="descclassname">tlpipe.timestream.delay_transform.</code><code class="descname">RawTimestream</code><span class="sig-paren">(</span><em>files=None</em>, <em>mode='r'</em>, <em>start=0</em>, <em>stop=None</em>, <em>dist_axis=0</em>, <em>use_hints=True</em>, <em>comm=None</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/container/raw_timestream.py#L20"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.delay_transform.RawTimestream" title="Permalink to this definition">¶</a></dt>
+<dd><p>Container class for the raw timestream data.</p>
+<p>The raw timestream data are raw visibilities (the main data) and other data
+and meta data saved in HDF5 files which are recorded from the correlator.</p>
+<p>:param Same as <code class="xref py py-class docutils literal"><span class="pre">container.BasicTod</span></code>.:</p>
+<p class="rubric">Attributes</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.array.html#tlpipe.timestream.delay_transform.RawTimestream.array" title="tlpipe.timestream.delay_transform.RawTimestream.array"><code class="xref py py-obj docutils literal"><span class="pre">array</span></code></a></td>
+<td>Return either a dish array or a cylinder array instance.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.attrs.html#tlpipe.timestream.delay_transform.RawTimestream.attrs" title="tlpipe.timestream.delay_transform.RawTimestream.attrs"><code class="xref py py-obj docutils literal"><span class="pre">attrs</span></code></a></td>
+<td>Attributes attached to this object.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.bl.html#tlpipe.timestream.delay_transform.RawTimestream.bl" title="tlpipe.timestream.delay_transform.RawTimestream.bl"><code class="xref py py-obj docutils literal"><span class="pre">bl</span></code></a></td>
+<td>Return the blorder dataset for convenient use.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.bl_ordered_datasets.html#tlpipe.timestream.delay_transform.RawTimestream.bl_ordered_datasets" title="tlpipe.timestream.delay_transform.RawTimestream.bl_ordered_datasets"><code class="xref py py-obj docutils literal"><span class="pre">bl_ordered_datasets</span></code></a></td>
+<td>Baseline ordered datasets.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.comm.html#tlpipe.timestream.delay_transform.RawTimestream.comm" title="tlpipe.timestream.delay_transform.RawTimestream.comm"><code class="xref py py-obj docutils literal"><span class="pre">comm</span></code></a></td>
+<td>Reference to the MPI communicator.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.dist_axis.html#tlpipe.timestream.delay_transform.RawTimestream.dist_axis" title="tlpipe.timestream.delay_transform.RawTimestream.dist_axis"><code class="xref py py-obj docutils literal"><span class="pre">dist_axis</span></code></a></td>
+<td>Convenience for self.main_data_dist_axis.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.dist_axis_name.html#tlpipe.timestream.delay_transform.RawTimestream.dist_axis_name" title="tlpipe.timestream.delay_transform.RawTimestream.dist_axis_name"><code class="xref py py-obj docutils literal"><span class="pre">dist_axis_name</span></code></a></td>
+<td>Name of self.main_data_dist_axis.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.distributed.html#tlpipe.timestream.delay_transform.RawTimestream.distributed" title="tlpipe.timestream.delay_transform.RawTimestream.distributed"><code class="xref py py-obj docutils literal"><span class="pre">distributed</span></code></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.feed_ordered_datasets.html#tlpipe.timestream.delay_transform.RawTimestream.feed_ordered_datasets" title="tlpipe.timestream.delay_transform.RawTimestream.feed_ordered_datasets"><code class="xref py py-obj docutils literal"><span class="pre">feed_ordered_datasets</span></code></a></td>
+<td>Feed ordered datasets.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.file.html#tlpipe.timestream.delay_transform.RawTimestream.file" title="tlpipe.timestream.delay_transform.RawTimestream.file"><code class="xref py py-obj docutils literal"><span class="pre">file</span></code></a></td>
+<td>Not a file at all but the top most <code class="xref py py-class docutils literal"><span class="pre">MemGroup</span></code> of the tree.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.freq.html#tlpipe.timestream.delay_transform.RawTimestream.freq" title="tlpipe.timestream.delay_transform.RawTimestream.freq"><code class="xref py py-obj docutils literal"><span class="pre">freq</span></code></a></td>
+<td>Return the freq dataset for convenient use.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.freq_ordered_datasets.html#tlpipe.timestream.delay_transform.RawTimestream.freq_ordered_datasets" title="tlpipe.timestream.delay_transform.RawTimestream.freq_ordered_datasets"><code class="xref py py-obj docutils literal"><span class="pre">freq_ordered_datasets</span></code></a></td>
+<td>Frequency ordered datasets.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.history.html#tlpipe.timestream.delay_transform.RawTimestream.history" title="tlpipe.timestream.delay_transform.RawTimestream.history"><code class="xref py py-obj docutils literal"><span class="pre">history</span></code></a></td>
+<td>The analysis history for this data.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.is_continuous.html#tlpipe.timestream.delay_transform.RawTimestream.is_continuous" title="tlpipe.timestream.delay_transform.RawTimestream.is_continuous"><code class="xref py py-obj docutils literal"><span class="pre">is_continuous</span></code></a></td>
+<td>Data is observed continuous in time?</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.is_cylinder.html#tlpipe.timestream.delay_transform.RawTimestream.is_cylinder" title="tlpipe.timestream.delay_transform.RawTimestream.is_cylinder"><code class="xref py py-obj docutils literal"><span class="pre">is_cylinder</span></code></a></td>
+<td>True if data is get from cylinder array.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.is_dish.html#tlpipe.timestream.delay_transform.RawTimestream.is_dish" title="tlpipe.timestream.delay_transform.RawTimestream.is_dish"><code class="xref py py-obj docutils literal"><span class="pre">is_dish</span></code></a></td>
+<td>True if data is get from dish array.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.is_same_dec.html#tlpipe.timestream.delay_transform.RawTimestream.is_same_dec" title="tlpipe.timestream.delay_transform.RawTimestream.is_same_dec"><code class="xref py py-obj docutils literal"><span class="pre">is_same_dec</span></code></a></td>
+<td>Data is observed for the same declination in the sky?</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.is_same_pointing.html#tlpipe.timestream.delay_transform.RawTimestream.is_same_pointing" title="tlpipe.timestream.delay_transform.RawTimestream.is_same_pointing"><code class="xref py py-obj docutils literal"><span class="pre">is_same_pointing</span></code></a></td>
+<td>The antenna array is in the same pointing in az, alt?</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.local_bl.html#tlpipe.timestream.delay_transform.RawTimestream.local_bl" title="tlpipe.timestream.delay_transform.RawTimestream.local_bl"><code class="xref py py-obj docutils literal"><span class="pre">local_bl</span></code></a></td>
+<td>A convenience for bl.local_data.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.local_freq.html#tlpipe.timestream.delay_transform.RawTimestream.local_freq" title="tlpipe.timestream.delay_transform.RawTimestream.local_freq"><code class="xref py py-obj docutils literal"><span class="pre">local_freq</span></code></a></td>
+<td>A convenience for freq.local_data.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.local_time.html#tlpipe.timestream.delay_transform.RawTimestream.local_time" title="tlpipe.timestream.delay_transform.RawTimestream.local_time"><code class="xref py py-obj docutils literal"><span class="pre">local_time</span></code></a></td>
+<td>A convenience for time.local_data.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.local_vis.html#tlpipe.timestream.delay_transform.RawTimestream.local_vis" title="tlpipe.timestream.delay_transform.RawTimestream.local_vis"><code class="xref py py-obj docutils literal"><span class="pre">local_vis</span></code></a></td>
+<td>A convenience for vis.local_data.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.local_vis_mask.html#tlpipe.timestream.delay_transform.RawTimestream.local_vis_mask" title="tlpipe.timestream.delay_transform.RawTimestream.local_vis_mask"><code class="xref py py-obj docutils literal"><span class="pre">local_vis_mask</span></code></a></td>
+<td>A convenience for vis_mask.local_data.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.main_axes_ordered_datasets.html#tlpipe.timestream.delay_transform.RawTimestream.main_axes_ordered_datasets" title="tlpipe.timestream.delay_transform.RawTimestream.main_axes_ordered_datasets"><code class="xref py py-obj docutils literal"><span class="pre">main_axes_ordered_datasets</span></code></a></td>
+<td>Datasets that have axis aligned with the main data.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.main_data.html#tlpipe.timestream.delay_transform.RawTimestream.main_data" title="tlpipe.timestream.delay_transform.RawTimestream.main_data"><code class="xref py py-obj docutils literal"><span class="pre">main_data</span></code></a></td>
+<td>The main data in the container which is a convenience for self[self.main_data_name].</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.main_data_axes.html#tlpipe.timestream.delay_transform.RawTimestream.main_data_axes" title="tlpipe.timestream.delay_transform.RawTimestream.main_data_axes"><code class="xref py py-obj docutils literal"><span class="pre">main_data_axes</span></code></a></td>
+<td>Axes of the main data.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.main_data_name.html#tlpipe.timestream.delay_transform.RawTimestream.main_data_name" title="tlpipe.timestream.delay_transform.RawTimestream.main_data_name"><code class="xref py py-obj docutils literal"><span class="pre">main_data_name</span></code></a></td>
+<td>Main data in the data container.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.main_time_ordered_datasets.html#tlpipe.timestream.delay_transform.RawTimestream.main_time_ordered_datasets" title="tlpipe.timestream.delay_transform.RawTimestream.main_time_ordered_datasets"><code class="xref py py-obj docutils literal"><span class="pre">main_time_ordered_datasets</span></code></a></td>
+<td>Datasets that have the first axis aligned with the main data.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.masked_vis.html#tlpipe.timestream.delay_transform.RawTimestream.masked_vis" title="tlpipe.timestream.delay_transform.RawTimestream.masked_vis"><code class="xref py py-obj docutils literal"><span class="pre">masked_vis</span></code></a></td>
+<td>Return a copy of the masked <cite>vis</cite>.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.name.html#tlpipe.timestream.delay_transform.RawTimestream.name" title="tlpipe.timestream.delay_transform.RawTimestream.name"><code class="xref py py-obj docutils literal"><span class="pre">name</span></code></a></td>
+<td>String giving the full path to this entry.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.ondisk.html#tlpipe.timestream.delay_transform.RawTimestream.ondisk" title="tlpipe.timestream.delay_transform.RawTimestream.ondisk"><code class="xref py py-obj docutils literal"><span class="pre">ondisk</span></code></a></td>
+<td>Whether the data is stored on disk as opposed to in memory.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.parent.html#tlpipe.timestream.delay_transform.RawTimestream.parent" title="tlpipe.timestream.delay_transform.RawTimestream.parent"><code class="xref py py-obj docutils literal"><span class="pre">parent</span></code></a></td>
+<td>Parent <code class="xref py py-class docutils literal"><span class="pre">MemGroup</span></code> that contains this group.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.pol_dict.html#tlpipe.timestream.delay_transform.RawTimestream.pol_dict" title="tlpipe.timestream.delay_transform.RawTimestream.pol_dict"><code class="xref py py-obj docutils literal"><span class="pre">pol_dict</span></code></a></td>
+<td>A dict maps polarization code to integer.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.time.html#tlpipe.timestream.delay_transform.RawTimestream.time" title="tlpipe.timestream.delay_transform.RawTimestream.time"><code class="xref py py-obj docutils literal"><span class="pre">time</span></code></a></td>
+<td>Return the jul_date dataset for convenient use.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.time_ordered_attrs.html#tlpipe.timestream.delay_transform.RawTimestream.time_ordered_attrs" title="tlpipe.timestream.delay_transform.RawTimestream.time_ordered_attrs"><code class="xref py py-obj docutils literal"><span class="pre">time_ordered_attrs</span></code></a></td>
+<td>Attributes that are different in different files.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.time_ordered_datasets.html#tlpipe.timestream.delay_transform.RawTimestream.time_ordered_datasets" title="tlpipe.timestream.delay_transform.RawTimestream.time_ordered_datasets"><code class="xref py py-obj docutils literal"><span class="pre">time_ordered_datasets</span></code></a></td>
+<td>Time ordered datasets.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.vis.html#tlpipe.timestream.delay_transform.RawTimestream.vis" title="tlpipe.timestream.delay_transform.RawTimestream.vis"><code class="xref py py-obj docutils literal"><span class="pre">vis</span></code></a></td>
+<td>Return the main data for convenient use.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.vis_mask.html#tlpipe.timestream.delay_transform.RawTimestream.vis_mask" title="tlpipe.timestream.delay_transform.RawTimestream.vis_mask"><code class="xref py py-obj docutils literal"><span class="pre">vis_mask</span></code></a></td>
+<td>A convenience for self[&#8216;vis_mask&#8217;].</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="tlpipe.timestream.delay_transform.RawTimestream.__init__">
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>files=None</em>, <em>mode='r'</em>, <em>start=0</em>, <em>stop=None</em>, <em>dist_axis=0</em>, <em>use_hints=True</em>, <em>comm=None</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/container/container.py#L133"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.delay_transform.RawTimestream.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<p class="rubric">Methods</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.add_history.html#tlpipe.timestream.delay_transform.RawTimestream.add_history" title="tlpipe.timestream.delay_transform.RawTimestream.add_history"><code class="xref py py-obj docutils literal"><span class="pre">add_history</span></code></a>([history])</td>
+<td>Create a new history entry.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.all_data_operate.html#tlpipe.timestream.delay_transform.RawTimestream.all_data_operate" title="tlpipe.timestream.delay_transform.RawTimestream.all_data_operate"><code class="xref py py-obj docutils literal"><span class="pre">all_data_operate</span></code></a>(func[,&nbsp;copy_data])</td>
+<td>Operation to the whole <cite>vis</cite> and <cite>vis_mask</cite>.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.apply_mask.html#tlpipe.timestream.delay_transform.RawTimestream.apply_mask" title="tlpipe.timestream.delay_transform.RawTimestream.apply_mask"><code class="xref py py-obj docutils literal"><span class="pre">apply_mask</span></code></a>([fill_val])</td>
+<td>Applying <cite>vis_mask</cite> to <cite>vis</cite> with the <cite>fill_val</cite>.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.bl_data_operate.html#tlpipe.timestream.delay_transform.RawTimestream.bl_data_operate" title="tlpipe.timestream.delay_transform.RawTimestream.bl_data_operate"><code class="xref py py-obj docutils literal"><span class="pre">bl_data_operate</span></code></a>(func[,&nbsp;full_data,&nbsp;...])</td>
+<td>Data operation along the baseline axis.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.check_status.html#tlpipe.timestream.delay_transform.RawTimestream.check_status" title="tlpipe.timestream.delay_transform.RawTimestream.check_status"><code class="xref py py-obj docutils literal"><span class="pre">check_status</span></code></a>()</td>
+<td>Check that data hold in this container is consistent.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.close.html#tlpipe.timestream.delay_transform.RawTimestream.close" title="tlpipe.timestream.delay_transform.RawTimestream.close"><code class="xref py py-obj docutils literal"><span class="pre">close</span></code></a>()</td>
+<td>Close underlying hdf5 file if on disk.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.copy.html#tlpipe.timestream.delay_transform.RawTimestream.copy" title="tlpipe.timestream.delay_transform.RawTimestream.copy"><code class="xref py py-obj docutils literal"><span class="pre">copy</span></code></a>()</td>
+<td>Return a deep copy of this container.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.create_bl_ordered_dataset.html#tlpipe.timestream.delay_transform.RawTimestream.create_bl_ordered_dataset" title="tlpipe.timestream.delay_transform.RawTimestream.create_bl_ordered_dataset"><code class="xref py py-obj docutils literal"><span class="pre">create_bl_ordered_dataset</span></code></a>(name,&nbsp;data[,&nbsp;...])</td>
+<td>Create a baseline ordered dataset.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.create_dataset.html#tlpipe.timestream.delay_transform.RawTimestream.create_dataset" title="tlpipe.timestream.delay_transform.RawTimestream.create_dataset"><code class="xref py py-obj docutils literal"><span class="pre">create_dataset</span></code></a>(name,&nbsp;\*args,&nbsp;\*\*kwargs)</td>
+<td>Create and return a new dataset.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.create_feed_ordered_dataset.html#tlpipe.timestream.delay_transform.RawTimestream.create_feed_ordered_dataset" title="tlpipe.timestream.delay_transform.RawTimestream.create_feed_ordered_dataset"><code class="xref py py-obj docutils literal"><span class="pre">create_feed_ordered_dataset</span></code></a>(name,&nbsp;data[,&nbsp;...])</td>
+<td>Create a feed ordered dataset.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.create_freq_and_bl_ordered_dataset.html#tlpipe.timestream.delay_transform.RawTimestream.create_freq_and_bl_ordered_dataset" title="tlpipe.timestream.delay_transform.RawTimestream.create_freq_and_bl_ordered_dataset"><code class="xref py py-obj docutils literal"><span class="pre">create_freq_and_bl_ordered_dataset</span></code></a>(name,&nbsp;data)</td>
+<td>Create a frequency and baseline ordered dataset.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.create_freq_ordered_dataset.html#tlpipe.timestream.delay_transform.RawTimestream.create_freq_ordered_dataset" title="tlpipe.timestream.delay_transform.RawTimestream.create_freq_ordered_dataset"><code class="xref py py-obj docutils literal"><span class="pre">create_freq_ordered_dataset</span></code></a>(name,&nbsp;data[,&nbsp;...])</td>
+<td>Create a frequency ordered dataset.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.create_group.html#tlpipe.timestream.delay_transform.RawTimestream.create_group" title="tlpipe.timestream.delay_transform.RawTimestream.create_group"><code class="xref py py-obj docutils literal"><span class="pre">create_group</span></code></a>(name)</td>
+<td>Create and return a new group.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.create_main_axis_ordered_dataset.html#tlpipe.timestream.delay_transform.RawTimestream.create_main_axis_ordered_dataset" title="tlpipe.timestream.delay_transform.RawTimestream.create_main_axis_ordered_dataset"><code class="xref py py-obj docutils literal"><span class="pre">create_main_axis_ordered_dataset</span></code></a>(axis,&nbsp;name,&nbsp;...)</td>
+<td>Create a <cite>axis_name</cite> ordered dataset.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.create_main_data.html#tlpipe.timestream.delay_transform.RawTimestream.create_main_data" title="tlpipe.timestream.delay_transform.RawTimestream.create_main_data"><code class="xref py py-obj docutils literal"><span class="pre">create_main_data</span></code></a>(data[,&nbsp;recreate,&nbsp;copy_attrs])</td>
+<td>Create or recreate a main dataset.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.create_main_time_ordered_dataset.html#tlpipe.timestream.delay_transform.RawTimestream.create_main_time_ordered_dataset" title="tlpipe.timestream.delay_transform.RawTimestream.create_main_time_ordered_dataset"><code class="xref py py-obj docutils literal"><span class="pre">create_main_time_ordered_dataset</span></code></a>(name,&nbsp;data)</td>
+<td>Create a main type time ordered dataset.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.create_time_and_bl_ordered_dataset.html#tlpipe.timestream.delay_transform.RawTimestream.create_time_and_bl_ordered_dataset" title="tlpipe.timestream.delay_transform.RawTimestream.create_time_and_bl_ordered_dataset"><code class="xref py py-obj docutils literal"><span class="pre">create_time_and_bl_ordered_dataset</span></code></a>(name,&nbsp;data)</td>
+<td>Create a time and baseline ordered dataset.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.create_time_and_freq_ordered_dataset.html#tlpipe.timestream.delay_transform.RawTimestream.create_time_and_freq_ordered_dataset" title="tlpipe.timestream.delay_transform.RawTimestream.create_time_and_freq_ordered_dataset"><code class="xref py py-obj docutils literal"><span class="pre">create_time_and_freq_ordered_dataset</span></code></a>(name,&nbsp;data)</td>
+<td>Create a time and frequency ordered dataset.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.create_time_ordered_dataset.html#tlpipe.timestream.delay_transform.RawTimestream.create_time_ordered_dataset" title="tlpipe.timestream.delay_transform.RawTimestream.create_time_ordered_dataset"><code class="xref py py-obj docutils literal"><span class="pre">create_time_ordered_dataset</span></code></a>(name,&nbsp;data[,&nbsp;...])</td>
+<td>Create a time ordered dataset.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.data_operate.html#tlpipe.timestream.delay_transform.RawTimestream.data_operate" title="tlpipe.timestream.delay_transform.RawTimestream.data_operate"><code class="xref py py-obj docutils literal"><span class="pre">data_operate</span></code></a>(func[,&nbsp;op_axis,&nbsp;axis_vals,&nbsp;...])</td>
+<td>An overload data operation interface.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.data_select.html#tlpipe.timestream.delay_transform.RawTimestream.data_select" title="tlpipe.timestream.delay_transform.RawTimestream.data_select"><code class="xref py py-obj docutils literal"><span class="pre">data_select</span></code></a>(axis,&nbsp;value)</td>
+<td>Select data to be loaded from input files along the specified axis.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.dataset_common_to_distributed.html#tlpipe.timestream.delay_transform.RawTimestream.dataset_common_to_distributed" title="tlpipe.timestream.delay_transform.RawTimestream.dataset_common_to_distributed"><code class="xref py py-obj docutils literal"><span class="pre">dataset_common_to_distributed</span></code></a>(name[,&nbsp;...])</td>
+<td>Convert a common dataset to a distributed one.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.dataset_distributed_to_common.html#tlpipe.timestream.delay_transform.RawTimestream.dataset_distributed_to_common" title="tlpipe.timestream.delay_transform.RawTimestream.dataset_distributed_to_common"><code class="xref py py-obj docutils literal"><span class="pre">dataset_distributed_to_common</span></code></a>(name)</td>
+<td>Convert a distributed dataset to a common one.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.dataset_name_allowed.html#tlpipe.timestream.delay_transform.RawTimestream.dataset_name_allowed" title="tlpipe.timestream.delay_transform.RawTimestream.dataset_name_allowed"><code class="xref py py-obj docutils literal"><span class="pre">dataset_name_allowed</span></code></a>(name)</td>
+<td>Datasets may only be created and accessed in the root level group.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.delete_a_dataset.html#tlpipe.timestream.delay_transform.RawTimestream.delete_a_dataset" title="tlpipe.timestream.delay_transform.RawTimestream.delete_a_dataset"><code class="xref py py-obj docutils literal"><span class="pre">delete_a_dataset</span></code></a>(name)</td>
+<td>Delete a dataset and also remove it from the hint if it is in it.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.delete_an_attribute.html#tlpipe.timestream.delay_transform.RawTimestream.delete_an_attribute" title="tlpipe.timestream.delay_transform.RawTimestream.delete_an_attribute"><code class="xref py py-obj docutils literal"><span class="pre">delete_an_attribute</span></code></a>(name)</td>
+<td>Delete an attribute and also remove it from the hint if it is in it.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.feed_select.html#tlpipe.timestream.delay_transform.RawTimestream.feed_select" title="tlpipe.timestream.delay_transform.RawTimestream.feed_select"><code class="xref py py-obj docutils literal"><span class="pre">feed_select</span></code></a>([value,&nbsp;corr])</td>
+<td>Select data to be loaded from inputs files corresponding to the specified feeds.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.flush.html#tlpipe.timestream.delay_transform.RawTimestream.flush" title="tlpipe.timestream.delay_transform.RawTimestream.flush"><code class="xref py py-obj docutils literal"><span class="pre">flush</span></code></a>()</td>
+<td>Flush the buffers of the underlying hdf5 file if on disk.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.freq_and_bl_data_operate.html#tlpipe.timestream.delay_transform.RawTimestream.freq_and_bl_data_operate" title="tlpipe.timestream.delay_transform.RawTimestream.freq_and_bl_data_operate"><code class="xref py py-obj docutils literal"><span class="pre">freq_and_bl_data_operate</span></code></a>(func[,&nbsp;full_data,&nbsp;...])</td>
+<td>Data operation along the frequency and baseline axis.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.freq_data_operate.html#tlpipe.timestream.delay_transform.RawTimestream.freq_data_operate" title="tlpipe.timestream.delay_transform.RawTimestream.freq_data_operate"><code class="xref py py-obj docutils literal"><span class="pre">freq_data_operate</span></code></a>(func[,&nbsp;full_data,&nbsp;...])</td>
+<td>Data operation along the frequency axis.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.frequency_select.html#tlpipe.timestream.delay_transform.RawTimestream.frequency_select" title="tlpipe.timestream.delay_transform.RawTimestream.frequency_select"><code class="xref py py-obj docutils literal"><span class="pre">frequency_select</span></code></a>(value)</td>
+<td>Select data to be loaded from input files along the frequency axis.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.from_file.html#tlpipe.timestream.delay_transform.RawTimestream.from_file" title="tlpipe.timestream.delay_transform.RawTimestream.from_file"><code class="xref py py-obj docutils literal"><span class="pre">from_file</span></code></a>(file_[,&nbsp;ondisk,&nbsp;distributed,&nbsp;...])</td>
+<td>Create data object from analysis hdf5 file, store in memory or on disk.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.from_group.html#tlpipe.timestream.delay_transform.RawTimestream.from_group" title="tlpipe.timestream.delay_transform.RawTimestream.from_group"><code class="xref py py-obj docutils literal"><span class="pre">from_group</span></code></a>([data_group,&nbsp;detect_subclass])</td>
+<td>Create data object from a given group.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.get.html#tlpipe.timestream.delay_transform.RawTimestream.get" title="tlpipe.timestream.delay_transform.RawTimestream.get"><code class="xref py py-obj docutils literal"><span class="pre">get</span></code></a>((k[,d])&nbsp;-&gt;&nbsp;D[k]&nbsp;if&nbsp;k&nbsp;in&nbsp;D,&nbsp;...)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.group_name_allowed.html#tlpipe.timestream.delay_transform.RawTimestream.group_name_allowed" title="tlpipe.timestream.delay_transform.RawTimestream.group_name_allowed"><code class="xref py py-obj docutils literal"><span class="pre">group_name_allowed</span></code></a>(name)</td>
+<td>No groups are exposed to the user.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.info.html#tlpipe.timestream.delay_transform.RawTimestream.info" title="tlpipe.timestream.delay_transform.RawTimestream.info"><code class="xref py py-obj docutils literal"><span class="pre">info</span></code></a>()</td>
+<td>List basic information of the data hold by this container.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.items.html#tlpipe.timestream.delay_transform.RawTimestream.items" title="tlpipe.timestream.delay_transform.RawTimestream.items"><code class="xref py py-obj docutils literal"><span class="pre">items</span></code></a>(()&nbsp;-&gt;&nbsp;list&nbsp;of&nbsp;D&#8217;s&nbsp;(key,&nbsp;value)&nbsp;pairs,&nbsp;...)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.iteritems.html#tlpipe.timestream.delay_transform.RawTimestream.iteritems" title="tlpipe.timestream.delay_transform.RawTimestream.iteritems"><code class="xref py py-obj docutils literal"><span class="pre">iteritems</span></code></a>(()&nbsp;-&gt;&nbsp;an&nbsp;iterator&nbsp;over&nbsp;the&nbsp;(key,&nbsp;...)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.iterkeys.html#tlpipe.timestream.delay_transform.RawTimestream.iterkeys" title="tlpipe.timestream.delay_transform.RawTimestream.iterkeys"><code class="xref py py-obj docutils literal"><span class="pre">iterkeys</span></code></a>(()&nbsp;-&gt;&nbsp;an&nbsp;iterator&nbsp;over&nbsp;the&nbsp;keys&nbsp;of&nbsp;D)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.itervalues.html#tlpipe.timestream.delay_transform.RawTimestream.itervalues" title="tlpipe.timestream.delay_transform.RawTimestream.itervalues"><code class="xref py py-obj docutils literal"><span class="pre">itervalues</span></code></a>(...)</td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.keys.html#tlpipe.timestream.delay_transform.RawTimestream.keys" title="tlpipe.timestream.delay_transform.RawTimestream.keys"><code class="xref py py-obj docutils literal"><span class="pre">keys</span></code></a>(()&nbsp;-&gt;&nbsp;list&nbsp;of&nbsp;D&#8217;s&nbsp;keys)</td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.load_all.html#tlpipe.timestream.delay_transform.RawTimestream.load_all" title="tlpipe.timestream.delay_transform.RawTimestream.load_all"><code class="xref py py-obj docutils literal"><span class="pre">load_all</span></code></a>()</td>
+<td>Load all attributes and datasets from files.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.load_common_attrs.html#tlpipe.timestream.delay_transform.RawTimestream.load_common_attrs" title="tlpipe.timestream.delay_transform.RawTimestream.load_common_attrs"><code class="xref py py-obj docutils literal"><span class="pre">load_common_attrs</span></code></a>()</td>
+<td>Load common attributes from the first file.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.load_common_datasets.html#tlpipe.timestream.delay_transform.RawTimestream.load_common_datasets" title="tlpipe.timestream.delay_transform.RawTimestream.load_common_datasets"><code class="xref py py-obj docutils literal"><span class="pre">load_common_datasets</span></code></a>()</td>
+<td>Load common datasets from the first file.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.load_main_axes_excl_main_data.html#tlpipe.timestream.delay_transform.RawTimestream.load_main_axes_excl_main_data" title="tlpipe.timestream.delay_transform.RawTimestream.load_main_axes_excl_main_data"><code class="xref py py-obj docutils literal"><span class="pre">load_main_axes_excl_main_data</span></code></a>()</td>
+<td>Load main axes ordered datasets (exclude the main data).</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.load_main_axes_ordered_data.html#tlpipe.timestream.delay_transform.RawTimestream.load_main_axes_ordered_data" title="tlpipe.timestream.delay_transform.RawTimestream.load_main_axes_ordered_data"><code class="xref py py-obj docutils literal"><span class="pre">load_main_axes_ordered_data</span></code></a>()</td>
+<td>Load main axes ordered dataset.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.load_main_data.html#tlpipe.timestream.delay_transform.RawTimestream.load_main_data" title="tlpipe.timestream.delay_transform.RawTimestream.load_main_data"><code class="xref py py-obj docutils literal"><span class="pre">load_main_data</span></code></a>()</td>
+<td>Load main data from all files.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.load_time_ordered_attrs.html#tlpipe.timestream.delay_transform.RawTimestream.load_time_ordered_attrs" title="tlpipe.timestream.delay_transform.RawTimestream.load_time_ordered_attrs"><code class="xref py py-obj docutils literal"><span class="pre">load_time_ordered_attrs</span></code></a>()</td>
+<td>Load time ordered attributes from all files.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.load_time_ordered_datasets.html#tlpipe.timestream.delay_transform.RawTimestream.load_time_ordered_datasets" title="tlpipe.timestream.delay_transform.RawTimestream.load_time_ordered_datasets"><code class="xref py py-obj docutils literal"><span class="pre">load_time_ordered_datasets</span></code></a>()</td>
+<td>Load time ordered datasets (excepts those also in main_axes_ordered_datasets) from all files.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.redistribute.html#tlpipe.timestream.delay_transform.RawTimestream.redistribute" title="tlpipe.timestream.delay_transform.RawTimestream.redistribute"><code class="xref py py-obj docutils literal"><span class="pre">redistribute</span></code></a>(dist_axis)</td>
+<td>Redistribute the main time ordered dataset along a specified axis.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.require_dataset.html#tlpipe.timestream.delay_transform.RawTimestream.require_dataset" title="tlpipe.timestream.delay_transform.RawTimestream.require_dataset"><code class="xref py py-obj docutils literal"><span class="pre">require_dataset</span></code></a>(name,&nbsp;shape,&nbsp;dtype,&nbsp;\*\*kwargs)</td>
+<td>Require a dataset to exist, create if it doesn&#8217;t.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.require_group.html#tlpipe.timestream.delay_transform.RawTimestream.require_group" title="tlpipe.timestream.delay_transform.RawTimestream.require_group"><code class="xref py py-obj docutils literal"><span class="pre">require_group</span></code></a>(name)</td>
+<td>Require a group to exist, create if it doesn&#8217;t.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.save.html#tlpipe.timestream.delay_transform.RawTimestream.save" title="tlpipe.timestream.delay_transform.RawTimestream.save"><code class="xref py py-obj docutils literal"><span class="pre">save</span></code></a>(filename,&nbsp;\*\*kwargs)</td>
+<td>Save data to hdf5 file.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.separate_pol_and_bl.html#tlpipe.timestream.delay_transform.RawTimestream.separate_pol_and_bl" title="tlpipe.timestream.delay_transform.RawTimestream.separate_pol_and_bl"><code class="xref py py-obj docutils literal"><span class="pre">separate_pol_and_bl</span></code></a>([keep_dist_axis])</td>
+<td>Separate baseline axis to polarization and baseline.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.subset.html#tlpipe.timestream.delay_transform.RawTimestream.subset" title="tlpipe.timestream.delay_transform.RawTimestream.subset"><code class="xref py py-obj docutils literal"><span class="pre">subset</span></code></a>()</td>
+<td>Return a subset of the data as a new data container.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.subset_feed_select.html#tlpipe.timestream.delay_transform.RawTimestream.subset_feed_select" title="tlpipe.timestream.delay_transform.RawTimestream.subset_feed_select"><code class="xref py py-obj docutils literal"><span class="pre">subset_feed_select</span></code></a>([value,&nbsp;corr])</td>
+<td>Select a subset of the data corresponding to the specified feeds.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.subset_frequency_select.html#tlpipe.timestream.delay_transform.RawTimestream.subset_frequency_select" title="tlpipe.timestream.delay_transform.RawTimestream.subset_frequency_select"><code class="xref py py-obj docutils literal"><span class="pre">subset_frequency_select</span></code></a>(value)</td>
+<td>Select a subset of the data along the frequency axis.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.subset_select.html#tlpipe.timestream.delay_transform.RawTimestream.subset_select" title="tlpipe.timestream.delay_transform.RawTimestream.subset_select"><code class="xref py py-obj docutils literal"><span class="pre">subset_select</span></code></a>(axis,&nbsp;value)</td>
+<td>Select a subset of the data along the specified axis.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.subset_time_select.html#tlpipe.timestream.delay_transform.RawTimestream.subset_time_select" title="tlpipe.timestream.delay_transform.RawTimestream.subset_time_select"><code class="xref py py-obj docutils literal"><span class="pre">subset_time_select</span></code></a>(value)</td>
+<td>Select a subset of the data along the time axis.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.time_and_bl_data_operate.html#tlpipe.timestream.delay_transform.RawTimestream.time_and_bl_data_operate" title="tlpipe.timestream.delay_transform.RawTimestream.time_and_bl_data_operate"><code class="xref py py-obj docutils literal"><span class="pre">time_and_bl_data_operate</span></code></a>(func[,&nbsp;full_data,&nbsp;...])</td>
+<td>Data operation along the time and baseline axis.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.time_and_freq_data_operate.html#tlpipe.timestream.delay_transform.RawTimestream.time_and_freq_data_operate" title="tlpipe.timestream.delay_transform.RawTimestream.time_and_freq_data_operate"><code class="xref py py-obj docutils literal"><span class="pre">time_and_freq_data_operate</span></code></a>(func[,&nbsp;...])</td>
+<td>Data operation along the time and frequency axis.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.time_data_operate.html#tlpipe.timestream.delay_transform.RawTimestream.time_data_operate" title="tlpipe.timestream.delay_transform.RawTimestream.time_data_operate"><code class="xref py py-obj docutils literal"><span class="pre">time_data_operate</span></code></a>(func[,&nbsp;full_data,&nbsp;...])</td>
+<td>Data operation along the time axis.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.time_select.html#tlpipe.timestream.delay_transform.RawTimestream.time_select" title="tlpipe.timestream.delay_transform.RawTimestream.time_select"><code class="xref py py-obj docutils literal"><span class="pre">time_select</span></code></a>(value)</td>
+<td>Select data to be loaded from input files along the time axis.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.to_disk.html#tlpipe.timestream.delay_transform.RawTimestream.to_disk" title="tlpipe.timestream.delay_transform.RawTimestream.to_disk"><code class="xref py py-obj docutils literal"><span class="pre">to_disk</span></code></a>(filename,&nbsp;\*\*kwargs)</td>
+<td>Return a version of this data that lives on disk.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.to_files.html#tlpipe.timestream.delay_transform.RawTimestream.to_files" title="tlpipe.timestream.delay_transform.RawTimestream.to_files"><code class="xref py py-obj docutils literal"><span class="pre">to_files</span></code></a>(outfiles[,&nbsp;exclude,&nbsp;check_status,&nbsp;...])</td>
+<td>Save the data hold in this container to files.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.to_memory.html#tlpipe.timestream.delay_transform.RawTimestream.to_memory" title="tlpipe.timestream.delay_transform.RawTimestream.to_memory"><code class="xref py py-obj docutils literal"><span class="pre">to_memory</span></code></a>()</td>
+<td>Return a version of this data that lives in memory.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.timestream.delay_transform.RawTimestream.values.html#tlpipe.timestream.delay_transform.RawTimestream.values" title="tlpipe.timestream.delay_transform.RawTimestream.values"><code class="xref py py-obj docutils literal"><span class="pre">values</span></code></a>(()&nbsp;-&gt;&nbsp;list&nbsp;of&nbsp;D&#8217;s&nbsp;values)</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tlpipe.timestream.delay_transform.RawTimestream.array.html" class="btn btn-neutral float-right" title="tlpipe.timestream.delay_transform.RawTimestream.array" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="tlpipe.timestream.delay_transform.MaxNLocator.zoom.html" class="btn btn-neutral" title="tlpipe.timestream.delay_transform.MaxNLocator.zoom" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Shifan Zuo.
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.MaxNLocator.default_params
+=================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autoattribute:: MaxNLocator.default_params

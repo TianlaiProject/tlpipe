@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.parent
+==============================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. autoattribute:: Timestream.parent

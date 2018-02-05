@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.local_bl
+================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. autoattribute:: Timestream.local_bl

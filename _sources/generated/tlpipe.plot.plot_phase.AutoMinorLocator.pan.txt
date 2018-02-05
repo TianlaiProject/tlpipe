@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.AutoMinorLocator.pan
+===========================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: AutoMinorLocator.pan

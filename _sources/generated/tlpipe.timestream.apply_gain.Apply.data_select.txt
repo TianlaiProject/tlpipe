@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Apply.data_select
+==============================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Apply.data_select

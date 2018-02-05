@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.Timestream.load_main_axes_excl_main_data
+===============================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: Timestream.load_main_axes_excl_main_data

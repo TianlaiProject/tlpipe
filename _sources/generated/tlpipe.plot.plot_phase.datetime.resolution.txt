@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.datetime.resolution
+==========================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autoattribute:: datetime.resolution

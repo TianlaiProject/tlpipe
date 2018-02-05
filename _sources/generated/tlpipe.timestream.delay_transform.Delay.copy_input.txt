@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Delay.copy_input
+==================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Delay.copy_input

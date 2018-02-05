@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.create_bl_ordered_dataset
+======================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Timestream.create_bl_ordered_dataset

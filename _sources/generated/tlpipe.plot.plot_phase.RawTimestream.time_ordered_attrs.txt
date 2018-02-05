@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.RawTimestream.time_ordered_attrs
+=======================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autoattribute:: RawTimestream.time_ordered_attrs

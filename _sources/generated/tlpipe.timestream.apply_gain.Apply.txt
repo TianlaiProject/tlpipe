@@ -1,0 +1,52 @@
+tlpipe.timestream.apply_gain.Apply
+==================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. autoclass:: Apply
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Apply.cacheable
+      ~Apply.embarrassingly_parallelizable
+      ~Apply.history
+      ~Apply.iteration
+      ~Apply.params_init
+      ~Apply.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Apply.cast_input
+      ~Apply.copy_input
+      ~Apply.data_select
+      ~Apply.finish
+      ~Apply.next
+      ~Apply.process
+      ~Apply.read_input
+      ~Apply.read_output
+      ~Apply.read_process_write
+      ~Apply.restart_iteration
+      ~Apply.setup
+      ~Apply.show_params
+      ~Apply.stop_iteration
+      ~Apply.subset_select
+      ~Apply.write_output
+   
+   

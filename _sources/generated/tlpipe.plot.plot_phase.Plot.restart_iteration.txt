@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.Plot.restart_iteration
+=============================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: Plot.restart_iteration

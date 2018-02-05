@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.RawTimestream.vis
+========================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autoattribute:: RawTimestream.vis

@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.MaxNLocator.autoscale
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: MaxNLocator.autoscale

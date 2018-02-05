@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.is_same_dec
+========================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: Timestream.is_same_dec

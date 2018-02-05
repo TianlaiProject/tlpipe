@@ -1,0 +1,6 @@
+tlpipe.timestream.temperature_convert.Convert.cacheable
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.temperature_convert
+
+.. autoattribute:: Convert.cacheable

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.Timestream.is_same_pointing
+==================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autoattribute:: Timestream.is_same_pointing

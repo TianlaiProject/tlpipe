@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.RawTimestream.subset_frequency_select
+=======================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: RawTimestream.subset_frequency_select

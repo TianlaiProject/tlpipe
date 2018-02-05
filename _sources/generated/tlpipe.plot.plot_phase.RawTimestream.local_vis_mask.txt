@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.RawTimestream.local_vis_mask
+===================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autoattribute:: RawTimestream.local_vis_mask

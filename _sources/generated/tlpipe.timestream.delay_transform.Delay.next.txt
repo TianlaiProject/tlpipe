@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Delay.next
+============================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Delay.next

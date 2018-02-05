@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.RawTimestream.from_group
+===============================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: RawTimestream.from_group

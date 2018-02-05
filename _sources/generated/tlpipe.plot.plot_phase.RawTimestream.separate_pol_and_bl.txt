@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.RawTimestream.separate_pol_and_bl
+========================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: RawTimestream.separate_pol_and_bl

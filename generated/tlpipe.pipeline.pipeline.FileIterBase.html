@@ -82,7 +82,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../install.html#python-version">Python version</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../install.html#prerequisites">Prerequisites</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../install.html#installation-guid">Installation guid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#installation-guide">Installation guide</a></li>
 </ul>
 </li>
 </ul>
@@ -260,6 +260,10 @@
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.bad_detect.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.delay_transform.html">tlpipe.timestream.delay_transform</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.delay_transform.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ns_cal.html">tlpipe.timestream.ns_cal</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ns_cal.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
@@ -274,6 +278,14 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ps_cal.html">tlpipe.timestream.ps_cal</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ps_cal.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.apply_gain.html">tlpipe.timestream.apply_gain</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.apply_gain.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.temperature_convert.html">tlpipe.timestream.temperature_convert</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.temperature_convert.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.phs2src.html">tlpipe.timestream.phs2src</a><ul>
@@ -411,6 +423,10 @@
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_waterfall.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.plot.plot_phase.html">tlpipe.plot.plot_phase</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_phase.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -532,7 +548,7 @@
 <h1>tlpipe.pipeline.pipeline.FileIterBase<a class="headerlink" href="#tlpipe-pipeline-pipeline-fileiterbase" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="tlpipe.pipeline.pipeline.FileIterBase">
-<em class="property">class </em><code class="descclassname">tlpipe.pipeline.pipeline.</code><code class="descname">FileIterBase</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L1251"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.pipeline.pipeline.FileIterBase" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">tlpipe.pipeline.pipeline.</code><code class="descname">FileIterBase</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L1287"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.pipeline.pipeline.FileIterBase" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base class for iterating tasks over input files.</p>
 <p>Tasks inheriting from this class should override <a class="reference internal" href="tlpipe.pipeline.pipeline.FileIterBase.process.html#tlpipe.pipeline.pipeline.FileIterBase.process" title="tlpipe.pipeline.pipeline.FileIterBase.process"><code class="xref py py-meth docutils literal"><span class="pre">process()</span></code></a> and
 optionally <a class="reference internal" href="tlpipe.pipeline.pipeline.FileIterBase.setup.html#tlpipe.pipeline.pipeline.FileIterBase.setup" title="tlpipe.pipeline.pipeline.FileIterBase.setup"><code class="xref py py-meth docutils literal"><span class="pre">setup()</span></code></a>, <a class="reference internal" href="tlpipe.pipeline.pipeline.FileIterBase.finish.html#tlpipe.pipeline.pipeline.FileIterBase.finish" title="tlpipe.pipeline.pipeline.FileIterBase.finish"><code class="xref py py-meth docutils literal"><span class="pre">finish()</span></code></a>, <a class="reference internal" href="tlpipe.pipeline.pipeline.FileIterBase.read_input.html#tlpipe.pipeline.pipeline.FileIterBase.read_input" title="tlpipe.pipeline.pipeline.FileIterBase.read_input"><code class="xref py py-meth docutils literal"><span class="pre">read_input()</span></code></a>,
@@ -567,7 +583,7 @@ optionally <a class="reference internal" href="tlpipe.pipeline.pipeline.FileIter
 </table>
 <dl class="method">
 <dt id="tlpipe.pipeline.pipeline.FileIterBase.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L1267"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.pipeline.pipeline.FileIterBase.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L1303"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.pipeline.pipeline.FileIterBase.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>

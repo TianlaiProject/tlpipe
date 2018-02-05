@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.RawTimestream.freq_ordered_datasets
+=====================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: RawTimestream.freq_ordered_datasets

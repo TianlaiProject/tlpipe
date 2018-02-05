@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.pol_data_operate
+=============================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Timestream.pol_data_operate

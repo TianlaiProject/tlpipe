@@ -1,0 +1,6 @@
+tlpipe.timestream.temperature_convert.Convert.read_output
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.temperature_convert
+
+.. automethod:: Convert.read_output

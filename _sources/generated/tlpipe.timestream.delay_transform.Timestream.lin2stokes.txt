@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.lin2stokes
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Timestream.lin2stokes

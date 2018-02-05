@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.RawTimestream.feed_select
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: RawTimestream.feed_select

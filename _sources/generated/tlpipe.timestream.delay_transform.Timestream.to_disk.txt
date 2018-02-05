@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.to_disk
+====================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Timestream.to_disk

@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Apply.iteration
+============================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. autoattribute:: Apply.iteration

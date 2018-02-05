@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.output_path
+==================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autofunction:: output_path

@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.InterpolatedUnivariateSpline.get_residual
+===========================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: InterpolatedUnivariateSpline.get_residual

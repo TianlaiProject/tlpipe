@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.Timestream.subset_time_select
+====================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: Timestream.subset_time_select

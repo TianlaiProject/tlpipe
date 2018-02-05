@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.create_main_axis_ordered_dataset
+=============================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Timestream.create_main_axis_ordered_dataset

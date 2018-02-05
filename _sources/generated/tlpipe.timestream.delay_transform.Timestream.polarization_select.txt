@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.polarization_select
+================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Timestream.polarization_select

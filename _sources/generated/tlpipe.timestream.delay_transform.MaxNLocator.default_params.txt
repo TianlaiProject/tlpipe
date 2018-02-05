@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.MaxNLocator.default_params
+============================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: MaxNLocator.default_params

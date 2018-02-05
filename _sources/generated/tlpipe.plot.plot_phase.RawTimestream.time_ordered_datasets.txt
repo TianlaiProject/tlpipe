@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.RawTimestream.time_ordered_datasets
+==========================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autoattribute:: RawTimestream.time_ordered_datasets

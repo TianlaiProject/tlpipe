@@ -1,0 +1,6 @@
+tlpipe.rfi.sum_threshold.vthreshold
+===================================
+
+.. currentmodule:: tlpipe.rfi.sum_threshold
+
+.. autofunction:: vthreshold

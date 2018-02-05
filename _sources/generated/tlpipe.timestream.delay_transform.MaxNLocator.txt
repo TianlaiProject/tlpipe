@@ -1,0 +1,48 @@
+tlpipe.timestream.delay_transform.MaxNLocator
+=============================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoclass:: MaxNLocator
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~MaxNLocator.MAXTICKS
+      ~MaxNLocator.axis
+      ~MaxNLocator.default_params
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~MaxNLocator.autoscale
+      ~MaxNLocator.bin_boundaries
+      ~MaxNLocator.create_dummy_axis
+      ~MaxNLocator.pan
+      ~MaxNLocator.raise_if_exceeds
+      ~MaxNLocator.refresh
+      ~MaxNLocator.set_axis
+      ~MaxNLocator.set_bounds
+      ~MaxNLocator.set_data_interval
+      ~MaxNLocator.set_params
+      ~MaxNLocator.set_view_interval
+      ~MaxNLocator.tick_values
+      ~MaxNLocator.view_limits
+      ~MaxNLocator.zoom
+   
+   

@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.create_main_axis_ordered_dataset
+========================================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Timestream.create_main_axis_ordered_dataset

@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.AutoMinorLocator.tick_values
+==============================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: AutoMinorLocator.tick_values

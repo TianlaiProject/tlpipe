@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.Timestream.create_pol_ordered_dataset
+============================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: Timestream.create_pol_ordered_dataset

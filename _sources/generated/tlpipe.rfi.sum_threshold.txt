@@ -5,6 +5,15 @@ tlpipe.rfi.sum_threshold
 
    
    
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      hthreshold
+      threshold_len1
+      vthreshold
+   
    
 
 

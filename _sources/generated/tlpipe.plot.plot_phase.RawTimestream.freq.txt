@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.RawTimestream.freq
+=========================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autoattribute:: RawTimestream.freq

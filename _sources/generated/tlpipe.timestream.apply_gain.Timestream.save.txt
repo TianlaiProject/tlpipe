@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.save
+============================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Timestream.save

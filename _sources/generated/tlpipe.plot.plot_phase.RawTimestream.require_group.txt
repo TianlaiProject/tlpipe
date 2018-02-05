@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.RawTimestream.require_group
+==================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: RawTimestream.require_group

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.RawTimestream.distributed
+================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autoattribute:: RawTimestream.distributed

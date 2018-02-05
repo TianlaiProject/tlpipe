@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.flush
+=============================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Timestream.flush

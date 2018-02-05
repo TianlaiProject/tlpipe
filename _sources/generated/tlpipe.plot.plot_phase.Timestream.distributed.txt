@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.Timestream.distributed
+=============================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autoattribute:: Timestream.distributed

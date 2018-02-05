@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.RawTimestream.parent
+======================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: RawTimestream.parent

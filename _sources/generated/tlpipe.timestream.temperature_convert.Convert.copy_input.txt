@@ -1,0 +1,6 @@
+tlpipe.timestream.temperature_convert.Convert.copy_input
+========================================================
+
+.. currentmodule:: tlpipe.timestream.temperature_convert
+
+.. automethod:: Convert.copy_input

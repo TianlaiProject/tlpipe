@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.Plot.cacheable
+=====================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autoattribute:: Plot.cacheable

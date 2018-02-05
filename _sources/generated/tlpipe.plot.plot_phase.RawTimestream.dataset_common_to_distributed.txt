@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.RawTimestream.dataset_common_to_distributed
+==================================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: RawTimestream.dataset_common_to_distributed

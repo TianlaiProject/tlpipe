@@ -82,7 +82,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../install.html#python-version">Python version</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../install.html#prerequisites">Prerequisites</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../install.html#installation-guid">Installation guid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#installation-guide">Installation guide</a></li>
 </ul>
 </li>
 </ul>
@@ -260,6 +260,10 @@
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.bad_detect.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.delay_transform.html">tlpipe.timestream.delay_transform</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.delay_transform.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
 <li class="toctree-l3 current"><a class="reference internal" href="tlpipe.timestream.ns_cal.html">tlpipe.timestream.ns_cal</a><ul class="current">
 <li class="toctree-l4 current"><a class="reference internal" href="tlpipe.timestream.ns_cal.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
@@ -274,6 +278,14 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ps_cal.html">tlpipe.timestream.ps_cal</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ps_cal.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.apply_gain.html">tlpipe.timestream.apply_gain</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.apply_gain.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.temperature_convert.html">tlpipe.timestream.temperature_convert</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.temperature_convert.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.phs2src.html">tlpipe.timestream.phs2src</a><ul>
@@ -411,6 +423,10 @@
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_waterfall.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.plot.plot_phase.html">tlpipe.plot.plot_phase</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_phase.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -532,7 +548,7 @@
 <h1>tlpipe.timestream.ns_cal.NsCal<a class="headerlink" href="#tlpipe-timestream-ns-cal-nscal" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="tlpipe.timestream.ns_cal.NsCal">
-<em class="property">class </em><code class="descclassname">tlpipe.timestream.ns_cal.</code><code class="descname">NsCal</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/timestream/ns_cal.py#L24"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.ns_cal.NsCal" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">tlpipe.timestream.ns_cal.</code><code class="descname">NsCal</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/timestream/ns_cal.py#L27"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.ns_cal.NsCal" title="Permalink to this definition">¶</a></dt>
 <dd><p>Relative phase calibration using the noise source signal.</p>
 <p>The noise source can be viewed as a near-field source, its visibility
 can be expressed as</p>
@@ -588,7 +604,7 @@ visibility, we can do</p>
 </table>
 <dl class="method">
 <dt id="tlpipe.timestream.ns_cal.NsCal.__init__">
-<code class="descname">__init__</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L1064"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.ns_cal.NsCal.__init__" title="Permalink to this definition">¶</a></dt>
+<code class="descname">__init__</code><span class="sig-paren">(</span><em>parameter_file_or_dict=None</em>, <em>feedback=2</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/pipeline/pipeline.py#L1078"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.ns_cal.NsCal.__init__" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p class="rubric">Methods</p>

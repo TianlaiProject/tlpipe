@@ -81,7 +81,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#python-version">Python version</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#installation-guid">Installation guid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-guide">Installation guide</a></li>
 </ul>
 </li>
 </ul>
@@ -259,6 +259,10 @@
 <li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.bad_detect.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.delay_transform.html">tlpipe.timestream.delay_transform</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.delay_transform.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.ns_cal.html">tlpipe.timestream.ns_cal</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.ns_cal.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
@@ -273,6 +277,14 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.ps_cal.html">tlpipe.timestream.ps_cal</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.ps_cal.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.apply_gain.html">tlpipe.timestream.apply_gain</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.apply_gain.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.temperature_convert.html">tlpipe.timestream.temperature_convert</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.temperature_convert.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.phs2src.html">tlpipe.timestream.phs2src</a><ul>
@@ -410,6 +422,10 @@
 <li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.plot.plot_waterfall.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.plot.plot_phase.html">tlpipe.plot.plot_phase</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.plot.plot_phase.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -543,8 +559,9 @@ required:</p>
 <li><a class="reference external" href="https://www.scipy.org">scipy</a>, The fundamental package for scientific computing with Python;</li>
 <li><a class="reference external" href="http://matplotlib.org">matplotlib</a>, A python 2D plotting library;</li>
 <li><a class="reference external" href="https://github.com/zuoshifan/caput/tree/zuo/develop">caput</a>, Cluster Astronomical Python Utilities;</li>
-<li><a class="reference external" href="https://github.com/zuoshifan/cora">cora</a>, A package for simulating skies for 21cm Intensity Mapping;</li>
+<li><a class="reference external" href="https://github.com/radiocosmology/cora.git">cora</a>, A package for simulating skies for 21cm Intensity Mapping;</li>
 <li><a class="reference external" href="https://github.com/zuoshifan/aipy/tree/zuo/develop">aipy</a>, Astronomical Interferometry in PYthon;</li>
+<li><a class="reference external" href="http://cython.org">cython</a>, An static compiler for Python, <a href="#id1"><span class="problematic" id="id2">*</span></a>optional;</li>
 <li><a class="reference external" href="http://mpi4py.readthedocs.io/en/stable/">mpi4py</a>, MPI for Python, <em>optional</em>.</li>
 </ul>
 </div></blockquote>
@@ -555,11 +572,11 @@ process is invoked, but in order to process large amounts of data in parallel
 and distributed manner, <a class="reference external" href="http://mpi4py.readthedocs.io/en/stable/">mpi4py</a> is needed.</p>
 </div>
 </div>
-<div class="section" id="installation-guid">
-<h2>Installation guid<a class="headerlink" href="#installation-guid" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="installation-guide">
+<h2>Installation guide<a class="headerlink" href="#installation-guide" title="Permalink to this headline">¶</a></h2>
 <p>After you have successfully installed the prerequisites, do the following.</p>
 <p>First clone this package</p>
-<div class="highlight-default"><div class="highlight"><pre>$ git clone git@github.com:TianlaiProject/tlpipe.git
+<div class="highlight-default"><div class="highlight"><pre>$ git clone https://github.com/TianlaiProject/tlpipe.git
 </pre></div>
 </div>
 <p>Then change to the top directory of this package, install it by the usual
@@ -572,7 +589,7 @@ methods, either the standard</p>
 </pre></div>
 </div>
 <p>It should also be installable directly with <cite>pip</cite> using the command</p>
-<div class="highlight-default"><div class="highlight"><pre>$ pip install [-e] git+ssh://git@github.com/TianlaiProject/tlpipe
+<div class="highlight-default"><div class="highlight"><pre>$ pip install [-e] git+https://github.com/TianlaiProject/tlpipe.git
 </pre></div>
 </div>
 <div class="admonition note">
@@ -580,8 +597,8 @@ methods, either the standard</p>
 <p class="last">If you have installed <code class="docutils literal"><span class="pre">tlpipe</span></code> in the
 <a class="reference external" href="http://setuptools.readthedocs.io/en/latest/setuptools.html#development-mode">develop</a>
 mode, you doesn&#8217;t need to re-install the package every time after you have
-changed its code. This is useful when you are the developer of the package
-or you want to do some development/contributions to the package.</p>
+changed its (pure python) code. This is useful when you are the developer
+of the package or you want to do some development/contributions to the package.</p>
 </div>
 </div>
 </div>

@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Apply.copy_input
+=============================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Apply.copy_input

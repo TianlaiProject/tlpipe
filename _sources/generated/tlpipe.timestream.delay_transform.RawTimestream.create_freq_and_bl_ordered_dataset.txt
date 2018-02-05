@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.RawTimestream.create_freq_and_bl_ordered_dataset
+==================================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: RawTimestream.create_freq_and_bl_ordered_dataset

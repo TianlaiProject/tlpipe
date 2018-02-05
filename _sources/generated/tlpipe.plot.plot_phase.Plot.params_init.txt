@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.Plot.params_init
+=======================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autoattribute:: Plot.params_init

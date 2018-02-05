@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Apply.stop_iteration
+=================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Apply.stop_iteration

@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Apply.read_output
+==============================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Apply.read_output

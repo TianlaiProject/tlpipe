@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.AutoMinorLocator.create_dummy_axis
+====================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: AutoMinorLocator.create_dummy_axis

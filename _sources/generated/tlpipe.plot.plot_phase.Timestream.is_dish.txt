@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.Timestream.is_dish
+=========================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autoattribute:: Timestream.is_dish

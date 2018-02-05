@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Apply.prefix
+=========================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. autoattribute:: Apply.prefix

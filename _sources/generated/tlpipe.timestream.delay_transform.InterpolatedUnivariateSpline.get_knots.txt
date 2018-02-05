@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.InterpolatedUnivariateSpline.get_knots
+========================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: InterpolatedUnivariateSpline.get_knots

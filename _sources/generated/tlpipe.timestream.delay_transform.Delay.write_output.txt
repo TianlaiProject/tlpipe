@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Delay.write_output
+====================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Delay.write_output

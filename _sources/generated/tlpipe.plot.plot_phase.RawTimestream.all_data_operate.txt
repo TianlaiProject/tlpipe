@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.RawTimestream.all_data_operate
+=====================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: RawTimestream.all_data_operate

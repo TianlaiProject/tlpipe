@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.add_history
+========================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Timestream.add_history

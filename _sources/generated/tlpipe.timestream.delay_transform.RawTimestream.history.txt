@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.RawTimestream.history
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: RawTimestream.history

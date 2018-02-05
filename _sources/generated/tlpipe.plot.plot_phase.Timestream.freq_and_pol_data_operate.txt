@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.Timestream.freq_and_pol_data_operate
+===========================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: Timestream.freq_and_pol_data_operate

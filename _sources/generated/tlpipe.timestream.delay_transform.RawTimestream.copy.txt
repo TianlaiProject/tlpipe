@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.RawTimestream.copy
+====================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: RawTimestream.copy

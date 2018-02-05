@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.output_path
+=============================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autofunction:: output_path

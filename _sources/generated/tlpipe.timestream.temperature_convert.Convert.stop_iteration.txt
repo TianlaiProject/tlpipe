@@ -1,0 +1,6 @@
+tlpipe.timestream.temperature_convert.Convert.stop_iteration
+============================================================
+
+.. currentmodule:: tlpipe.timestream.temperature_convert
+
+.. automethod:: Convert.stop_iteration

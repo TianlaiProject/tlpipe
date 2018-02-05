@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.RawTimestream.apply_mask
+===============================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: RawTimestream.apply_mask

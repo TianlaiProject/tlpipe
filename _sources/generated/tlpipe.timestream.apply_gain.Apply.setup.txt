@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Apply.setup
+========================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Apply.setup

@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.freq_data_operate
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Timestream.freq_data_operate

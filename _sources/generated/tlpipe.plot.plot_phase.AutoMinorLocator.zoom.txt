@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.AutoMinorLocator.zoom
+============================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: AutoMinorLocator.zoom

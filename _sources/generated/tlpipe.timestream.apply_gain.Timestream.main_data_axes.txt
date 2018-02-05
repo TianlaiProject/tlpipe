@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.main_data_axes
+======================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. autoattribute:: Timestream.main_data_axes

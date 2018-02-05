@@ -81,7 +81,7 @@
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="install.html#python-version">Python version</a></li>
 <li class="toctree-l2"><a class="reference internal" href="install.html#prerequisites">Prerequisites</a></li>
-<li class="toctree-l2"><a class="reference internal" href="install.html#installation-guid">Installation guid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="install.html#installation-guide">Installation guide</a></li>
 </ul>
 </li>
 </ul>
@@ -259,6 +259,10 @@
 <li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.bad_detect.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.delay_transform.html">tlpipe.timestream.delay_transform</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.delay_transform.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.ns_cal.html">tlpipe.timestream.ns_cal</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.ns_cal.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
@@ -273,6 +277,14 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.ps_cal.html">tlpipe.timestream.ps_cal</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.ps_cal.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.apply_gain.html">tlpipe.timestream.apply_gain</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.apply_gain.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.temperature_convert.html">tlpipe.timestream.temperature_convert</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.timestream.temperature_convert.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.timestream.phs2src.html">tlpipe.timestream.phs2src</a><ul>
@@ -408,6 +420,10 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.plot.plot_waterfall.html">tlpipe.plot.plot_waterfall</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.plot.plot_waterfall.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="generated/tlpipe.plot.plot_phase.html">tlpipe.plot.plot_phase</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="generated/tlpipe.plot.plot_phase.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
 </ul>
@@ -583,49 +599,58 @@
 <tr class="row-even"><td><a class="reference internal" href="generated/tlpipe.timestream.bad_detect.html#module-tlpipe.timestream.bad_detect" title="tlpipe.timestream.bad_detect"><code class="xref py py-obj docutils literal"><span class="pre">bad_detect</span></code></a></td>
 <td>Bad/Exceptional visibility values detect.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/tlpipe.timestream.ns_cal.html#module-tlpipe.timestream.ns_cal" title="tlpipe.timestream.ns_cal"><code class="xref py py-obj docutils literal"><span class="pre">ns_cal</span></code></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/tlpipe.timestream.delay_transform.html#module-tlpipe.timestream.delay_transform" title="tlpipe.timestream.delay_transform"><code class="xref py py-obj docutils literal"><span class="pre">delay_transform</span></code></a></td>
+<td>Delay transform.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/tlpipe.timestream.ns_cal.html#module-tlpipe.timestream.ns_cal" title="tlpipe.timestream.ns_cal"><code class="xref py py-obj docutils literal"><span class="pre">ns_cal</span></code></a></td>
 <td>Relative phase calibration using the noise source signal.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/tlpipe.timestream.rt2ts.html#module-tlpipe.timestream.rt2ts" title="tlpipe.timestream.rt2ts"><code class="xref py py-obj docutils literal"><span class="pre">rt2ts</span></code></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/tlpipe.timestream.rt2ts.html#module-tlpipe.timestream.rt2ts" title="tlpipe.timestream.rt2ts"><code class="xref py py-obj docutils literal"><span class="pre">rt2ts</span></code></a></td>
 <td>Convert RawTimestream to Timestream.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/tlpipe.timestream.ps_fit.html#module-tlpipe.timestream.ps_fit" title="tlpipe.timestream.ps_fit"><code class="xref py py-obj docutils literal"><span class="pre">ps_fit</span></code></a></td>
+<tr class="row-even"><td><a class="reference internal" href="generated/tlpipe.timestream.ps_fit.html#module-tlpipe.timestream.ps_fit" title="tlpipe.timestream.ps_fit"><code class="xref py py-obj docutils literal"><span class="pre">ps_fit</span></code></a></td>
 <td>Calibration by strong point source fitting.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/tlpipe.timestream.ps_cal.html#module-tlpipe.timestream.ps_cal" title="tlpipe.timestream.ps_cal"><code class="xref py py-obj docutils literal"><span class="pre">ps_cal</span></code></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/tlpipe.timestream.ps_cal.html#module-tlpipe.timestream.ps_cal" title="tlpipe.timestream.ps_cal"><code class="xref py py-obj docutils literal"><span class="pre">ps_cal</span></code></a></td>
 <td>Calibration using a strong point source.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/tlpipe.timestream.phs2src.html#module-tlpipe.timestream.phs2src" title="tlpipe.timestream.phs2src"><code class="xref py py-obj docutils literal"><span class="pre">phs2src</span></code></a></td>
+<tr class="row-even"><td><a class="reference internal" href="generated/tlpipe.timestream.apply_gain.html#module-tlpipe.timestream.apply_gain" title="tlpipe.timestream.apply_gain"><code class="xref py py-obj docutils literal"><span class="pre">apply_gain</span></code></a></td>
+<td>Calibrate the visibility by divide the gain.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/tlpipe.timestream.temperature_convert.html#module-tlpipe.timestream.temperature_convert" title="tlpipe.timestream.temperature_convert"><code class="xref py py-obj docutils literal"><span class="pre">temperature_convert</span></code></a></td>
+<td>Convert visibility from intensity unit to temperature unit in K.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/tlpipe.timestream.phs2src.html#module-tlpipe.timestream.phs2src" title="tlpipe.timestream.phs2src"><code class="xref py py-obj docutils literal"><span class="pre">phs2src</span></code></a></td>
 <td>Phase the zenith-phased visibility data to a source.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/tlpipe.timestream.phs2zen.html#module-tlpipe.timestream.phs2zen" title="tlpipe.timestream.phs2zen"><code class="xref py py-obj docutils literal"><span class="pre">phs2zen</span></code></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/tlpipe.timestream.phs2zen.html#module-tlpipe.timestream.phs2zen" title="tlpipe.timestream.phs2zen"><code class="xref py py-obj docutils literal"><span class="pre">phs2zen</span></code></a></td>
 <td>Phase the source-phased visibility data to the zenith.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/tlpipe.timestream.phase_closure.html#module-tlpipe.timestream.phase_closure" title="tlpipe.timestream.phase_closure"><code class="xref py py-obj docutils literal"><span class="pre">phase_closure</span></code></a></td>
+<tr class="row-even"><td><a class="reference internal" href="generated/tlpipe.timestream.phase_closure.html#module-tlpipe.timestream.phase_closure" title="tlpipe.timestream.phase_closure"><code class="xref py py-obj docutils literal"><span class="pre">phase_closure</span></code></a></td>
 <td>Check the phase closure relation.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/tlpipe.timestream.ps_subtract.html#module-tlpipe.timestream.ps_subtract" title="tlpipe.timestream.ps_subtract"><code class="xref py py-obj docutils literal"><span class="pre">ps_subtract</span></code></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/tlpipe.timestream.ps_subtract.html#module-tlpipe.timestream.ps_subtract" title="tlpipe.timestream.ps_subtract"><code class="xref py py-obj docutils literal"><span class="pre">ps_subtract</span></code></a></td>
 <td>Subtract simulated strong point sources signal from the visibilities.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/tlpipe.timestream.daytime_mask.html#module-tlpipe.timestream.daytime_mask" title="tlpipe.timestream.daytime_mask"><code class="xref py py-obj docutils literal"><span class="pre">daytime_mask</span></code></a></td>
+<tr class="row-even"><td><a class="reference internal" href="generated/tlpipe.timestream.daytime_mask.html#module-tlpipe.timestream.daytime_mask" title="tlpipe.timestream.daytime_mask"><code class="xref py py-obj docutils literal"><span class="pre">daytime_mask</span></code></a></td>
 <td>Daytime data mask.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/tlpipe.timestream.re_order.html#module-tlpipe.timestream.re_order" title="tlpipe.timestream.re_order"><code class="xref py py-obj docutils literal"><span class="pre">re_order</span></code></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/tlpipe.timestream.re_order.html#module-tlpipe.timestream.re_order" title="tlpipe.timestream.re_order"><code class="xref py py-obj docutils literal"><span class="pre">re_order</span></code></a></td>
 <td>Re-order data to have longitude from 0 to 2pi.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/tlpipe.timestream.accumulate.html#module-tlpipe.timestream.accumulate" title="tlpipe.timestream.accumulate"><code class="xref py py-obj docutils literal"><span class="pre">accumulate</span></code></a></td>
+<tr class="row-even"><td><a class="reference internal" href="generated/tlpipe.timestream.accumulate.html#module-tlpipe.timestream.accumulate" title="tlpipe.timestream.accumulate"><code class="xref py py-obj docutils literal"><span class="pre">accumulate</span></code></a></td>
 <td>Accumulate data.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/tlpipe.timestream.barrier.html#module-tlpipe.timestream.barrier" title="tlpipe.timestream.barrier"><code class="xref py py-obj docutils literal"><span class="pre">barrier</span></code></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/tlpipe.timestream.barrier.html#module-tlpipe.timestream.barrier" title="tlpipe.timestream.barrier"><code class="xref py py-obj docutils literal"><span class="pre">barrier</span></code></a></td>
 <td>Barrier the iterative pipeline flow before executing its following tasks.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/tlpipe.timestream.average.html#module-tlpipe.timestream.average" title="tlpipe.timestream.average"><code class="xref py py-obj docutils literal"><span class="pre">average</span></code></a></td>
+<tr class="row-even"><td><a class="reference internal" href="generated/tlpipe.timestream.average.html#module-tlpipe.timestream.average" title="tlpipe.timestream.average"><code class="xref py py-obj docutils literal"><span class="pre">average</span></code></a></td>
 <td>Average the accumulated data by dividing its weight.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="generated/tlpipe.timestream.freq_rebin.html#module-tlpipe.timestream.freq_rebin" title="tlpipe.timestream.freq_rebin"><code class="xref py py-obj docutils literal"><span class="pre">freq_rebin</span></code></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="generated/tlpipe.timestream.freq_rebin.html#module-tlpipe.timestream.freq_rebin" title="tlpipe.timestream.freq_rebin"><code class="xref py py-obj docutils literal"><span class="pre">freq_rebin</span></code></a></td>
 <td>Rebin the frequency channels.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="generated/tlpipe.timestream.map_making.html#module-tlpipe.timestream.map_making" title="tlpipe.timestream.map_making"><code class="xref py py-obj docutils literal"><span class="pre">map_making</span></code></a></td>
+<tr class="row-even"><td><a class="reference internal" href="generated/tlpipe.timestream.map_making.html#module-tlpipe.timestream.map_making" title="tlpipe.timestream.map_making"><code class="xref py py-obj docutils literal"><span class="pre">map_making</span></code></a></td>
 <td>Initialize telescope array, average the timestream and do the map-making.</td>
 </tr>
 </tbody>

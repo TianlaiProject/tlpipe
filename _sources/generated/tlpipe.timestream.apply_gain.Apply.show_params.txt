@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Apply.show_params
+==============================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Apply.show_params

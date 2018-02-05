@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.datetime.min
+==============================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: datetime.min

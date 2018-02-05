@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.MaxNLocator.refresh
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: MaxNLocator.refresh

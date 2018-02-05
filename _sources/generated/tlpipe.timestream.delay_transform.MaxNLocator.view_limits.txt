@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.MaxNLocator.view_limits
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: MaxNLocator.view_limits

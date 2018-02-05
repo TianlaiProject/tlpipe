@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.datetime.weekday
+==================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: datetime.weekday

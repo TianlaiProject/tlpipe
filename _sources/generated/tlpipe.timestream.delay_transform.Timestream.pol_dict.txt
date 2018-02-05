@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.pol_dict
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: Timestream.pol_dict

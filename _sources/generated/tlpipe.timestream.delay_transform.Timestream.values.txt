@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.values
+===================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Timestream.values

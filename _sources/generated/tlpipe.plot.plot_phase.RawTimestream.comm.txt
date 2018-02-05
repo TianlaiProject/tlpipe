@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.RawTimestream.comm
+=========================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autoattribute:: RawTimestream.comm

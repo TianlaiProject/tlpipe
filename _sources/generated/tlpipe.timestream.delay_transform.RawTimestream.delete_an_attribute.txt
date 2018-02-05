@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.RawTimestream.delete_an_attribute
+===================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: RawTimestream.delete_an_attribute

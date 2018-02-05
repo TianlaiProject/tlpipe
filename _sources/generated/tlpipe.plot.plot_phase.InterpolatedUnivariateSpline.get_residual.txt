@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.InterpolatedUnivariateSpline.get_residual
+================================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: InterpolatedUnivariateSpline.get_residual

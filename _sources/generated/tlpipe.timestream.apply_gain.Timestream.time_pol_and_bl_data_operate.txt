@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.time_pol_and_bl_data_operate
+====================================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Timestream.time_pol_and_bl_data_operate

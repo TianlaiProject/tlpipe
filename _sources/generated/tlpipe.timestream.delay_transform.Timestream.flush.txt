@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.flush
+==================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Timestream.flush

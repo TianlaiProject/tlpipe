@@ -1,0 +1,6 @@
+tlpipe.timestream.temperature_convert.Convert.setup
+===================================================
+
+.. currentmodule:: tlpipe.timestream.temperature_convert
+
+.. automethod:: Convert.setup

@@ -1,0 +1,6 @@
+tlpipe.timestream.temperature_convert.Convert.subset_select
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.temperature_convert
+
+.. automethod:: Convert.subset_select

@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Delay.embarrassingly_parallelizable
+=====================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: Delay.embarrassingly_parallelizable

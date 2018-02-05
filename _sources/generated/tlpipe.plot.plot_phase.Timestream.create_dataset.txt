@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.Timestream.create_dataset
+================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: Timestream.create_dataset

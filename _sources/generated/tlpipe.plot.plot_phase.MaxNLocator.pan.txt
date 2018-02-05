@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.MaxNLocator.pan
+======================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: MaxNLocator.pan

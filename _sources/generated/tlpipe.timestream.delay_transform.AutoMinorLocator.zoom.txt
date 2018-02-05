@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.AutoMinorLocator.zoom
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: AutoMinorLocator.zoom

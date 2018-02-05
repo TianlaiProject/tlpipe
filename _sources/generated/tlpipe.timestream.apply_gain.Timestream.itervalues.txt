@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.itervalues
+==================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Timestream.itervalues

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.Timestream.save
+======================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: Timestream.save

@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.datetime.utctimetuple
+=======================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: datetime.utctimetuple

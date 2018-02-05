@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.vis_mask
+================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. autoattribute:: Timestream.vis_mask

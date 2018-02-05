@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Delay.restart_iteration
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Delay.restart_iteration

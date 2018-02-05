@@ -10,8 +10,6 @@ tlpipe.timestream.ps_cal
    .. autosummary::
       :toctree:
    
-      fc
-      fg
       output_path
    
    

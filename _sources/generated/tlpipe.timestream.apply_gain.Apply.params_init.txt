@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Apply.params_init
+==============================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. autoattribute:: Apply.params_init

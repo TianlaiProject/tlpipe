@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.feed_ordered_datasets
+==================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: Timestream.feed_ordered_datasets

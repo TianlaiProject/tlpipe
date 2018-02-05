@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.dataset_name_allowed
+============================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Timestream.dataset_name_allowed

@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.frequency_select
+=============================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Timestream.frequency_select

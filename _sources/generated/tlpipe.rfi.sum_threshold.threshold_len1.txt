@@ -1,0 +1,6 @@
+tlpipe.rfi.sum_threshold.threshold_len1
+=======================================
+
+.. currentmodule:: tlpipe.rfi.sum_threshold
+
+.. autofunction:: threshold_len1

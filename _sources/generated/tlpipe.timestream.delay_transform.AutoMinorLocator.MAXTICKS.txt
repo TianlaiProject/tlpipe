@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.AutoMinorLocator.MAXTICKS
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: AutoMinorLocator.MAXTICKS

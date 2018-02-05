@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.datetime.toordinal
+=========================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: datetime.toordinal

@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.RawTimestream.group_name_allowed
+==================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: RawTimestream.group_name_allowed

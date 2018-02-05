@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.local_vis
+======================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: Timestream.local_vis

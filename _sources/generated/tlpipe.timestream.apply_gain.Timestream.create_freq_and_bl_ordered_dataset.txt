@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.create_freq_and_bl_ordered_dataset
+==========================================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Timestream.create_freq_and_bl_ordered_dataset

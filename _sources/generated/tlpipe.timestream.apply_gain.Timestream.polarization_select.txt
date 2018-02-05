@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.polarization_select
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Timestream.polarization_select

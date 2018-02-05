@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.RawTimestream.dataset_name_allowed
+====================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: RawTimestream.dataset_name_allowed

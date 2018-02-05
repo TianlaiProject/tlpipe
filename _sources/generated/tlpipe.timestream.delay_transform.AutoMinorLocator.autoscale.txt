@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.AutoMinorLocator.autoscale
+============================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: AutoMinorLocator.autoscale

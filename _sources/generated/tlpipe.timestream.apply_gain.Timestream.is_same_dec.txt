@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.is_same_dec
+===================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. autoattribute:: Timestream.is_same_dec

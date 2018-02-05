@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.Timestream.file
+======================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autoattribute:: Timestream.file

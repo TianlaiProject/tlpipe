@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.RawTimestream.info
+====================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: RawTimestream.info

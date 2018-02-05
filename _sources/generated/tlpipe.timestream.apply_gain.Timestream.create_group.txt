@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.create_group
+====================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Timestream.create_group

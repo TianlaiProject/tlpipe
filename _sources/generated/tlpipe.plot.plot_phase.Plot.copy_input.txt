@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.Plot.copy_input
+======================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: Plot.copy_input

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.datetime.tzname
+======================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: datetime.tzname

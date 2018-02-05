@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.RawTimestream.check_status
+=================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: RawTimestream.check_status

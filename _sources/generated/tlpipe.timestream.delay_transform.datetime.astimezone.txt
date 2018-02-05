@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.datetime.astimezone
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: datetime.astimezone

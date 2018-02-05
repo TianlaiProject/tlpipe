@@ -31,10 +31,13 @@ Operating tasks
    rfi_stats
    subdata
    bad_detect
+   delay_transform
    ns_cal
    rt2ts
    ps_fit
    ps_cal
+   apply_gain
+   temperature_convert
    phs2src
    phs2zen
    phase_closure

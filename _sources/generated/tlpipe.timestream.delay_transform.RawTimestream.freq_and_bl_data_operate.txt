@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.RawTimestream.freq_and_bl_data_operate
+========================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: RawTimestream.freq_and_bl_data_operate

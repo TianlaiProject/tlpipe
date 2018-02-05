@@ -82,7 +82,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../install.html#python-version">Python version</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../install.html#prerequisites">Prerequisites</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../install.html#installation-guid">Installation guid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#installation-guide">Installation guide</a></li>
 </ul>
 </li>
 </ul>
@@ -260,6 +260,10 @@
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.bad_detect.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.delay_transform.html">tlpipe.timestream.delay_transform</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.delay_transform.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ns_cal.html">tlpipe.timestream.ns_cal</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ns_cal.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
@@ -274,6 +278,14 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ps_cal.html">tlpipe.timestream.ps_cal</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ps_cal.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.apply_gain.html">tlpipe.timestream.apply_gain</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.apply_gain.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.temperature_convert.html">tlpipe.timestream.temperature_convert</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.temperature_convert.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.phs2src.html">tlpipe.timestream.phs2src</a><ul>
@@ -411,6 +423,10 @@
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_waterfall.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.plot.plot_phase.html">tlpipe.plot.plot_phase</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_phase.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -534,7 +550,7 @@
 <h1>tlpipe.timestream.combine_mask.Timestream.time_freq_and_pol_data_operate<a class="headerlink" href="#tlpipe-timestream-combine-mask-timestream-time-freq-and-pol-data-operate" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
 <dt id="tlpipe.timestream.combine_mask.Timestream.time_freq_and_pol_data_operate">
-<code class="descclassname">Timestream.</code><code class="descname">time_freq_and_pol_data_operate</code><span class="sig-paren">(</span><em>func</em>, <em>full_data=False</em>, <em>copy_data=False</em>, <em>keep_dist_axis=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/container/timestream.py#L406"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.combine_mask.Timestream.time_freq_and_pol_data_operate" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">Timestream.</code><code class="descname">time_freq_and_pol_data_operate</code><span class="sig-paren">(</span><em>func</em>, <em>full_data=False</em>, <em>copy_data=False</em>, <em>show_progress=False</em>, <em>progress_step=None</em>, <em>keep_dist_axis=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/container/timestream.py#L430"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.combine_mask.Timestream.time_freq_and_pol_data_operate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Data operation along the time, frequency and polarization axis.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -551,6 +567,10 @@ redistributed along time or frequency or polarization axis which is
 longer. Default False.</li>
 <li><strong>copy_data</strong> (<em>bool, optional</em>) &#8211; If True, <cite>func</cite> will operate on a copy of the data, so changes will
 have no impact on the data the container holds. Default False.</li>
+<li><strong>show_progress</strong> (<em>bool, optional</em>) &#8211; If True, some progress info will show during the executing.
+Default False.</li>
+<li><strong>progress_step</strong> (<em>int or None</em>) &#8211; Show progress info every this number of steps. If None, appropriate
+progress step will be chosen automatically. Default None.</li>
 <li><strong>keep_dist_axis</strong> (<em>bool, optional</em>) &#8211; Whether to redistribute main data to the original axis if the dist
 axis has changed during the operation. Default False.</li>
 <li><strong>**kwargs</strong> (<em>any other arguments</em>) &#8211; Any other arguments that will passed to <cite>func</cite>.</li>

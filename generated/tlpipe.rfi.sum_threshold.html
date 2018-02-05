@@ -35,7 +35,7 @@
         <link rel="search" title="Search" href="../search.html"/>
     <link rel="top" title="tlpipe 0.1 documentation" href="../index.html"/>
         <link rel="up" title="rfi – RFI flagging methods" href="../rfi.html"/>
-        <link rel="next" title="tlpipe.rfi.sum_threshold.SumThreshold" href="tlpipe.rfi.sum_threshold.SumThreshold.html"/>
+        <link rel="next" title="tlpipe.rfi.sum_threshold.hthreshold" href="tlpipe.rfi.sum_threshold.hthreshold.html"/>
         <link rel="prev" title="tlpipe.rfi.var_threshold.VarThreshold.vertical_var_threshold" href="tlpipe.rfi.var_threshold.VarThreshold.vertical_var_threshold.html"/> 
 
   
@@ -82,7 +82,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../install.html#python-version">Python version</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../install.html#prerequisites">Prerequisites</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../install.html#installation-guid">Installation guid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#installation-guide">Installation guide</a></li>
 </ul>
 </li>
 </ul>
@@ -260,6 +260,10 @@
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.bad_detect.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.delay_transform.html">tlpipe.timestream.delay_transform</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.delay_transform.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ns_cal.html">tlpipe.timestream.ns_cal</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ns_cal.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
@@ -274,6 +278,14 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ps_cal.html">tlpipe.timestream.ps_cal</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ps_cal.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.apply_gain.html">tlpipe.timestream.apply_gain</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.apply_gain.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.temperature_convert.html">tlpipe.timestream.temperature_convert</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.temperature_convert.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.phs2src.html">tlpipe.timestream.phs2src</a><ul>
@@ -411,6 +423,10 @@
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_waterfall.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.plot.plot_phase.html">tlpipe.plot.plot_phase</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_phase.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -537,6 +553,24 @@
 <area shape="rect" id="node2" href="tlpipe.rfi.sum_threshold.SumThreshold.html#tlpipe.rfi.sum_threshold.SumThreshold" target="_top" title="The SumThreshold method." alt="" coords="5,83,120,111"/>
 <area shape="rect" id="node4" href="tlpipe.rfi.var_threshold.VarThreshold.html#tlpipe.rfi.var_threshold.VarThreshold" target="_top" title="The VarThreshold method." alt="" coords="144,83,251,111"/>
 </map>
+<p class="rubric">Functions</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.rfi.sum_threshold.hthreshold.html#tlpipe.rfi.sum_threshold.hthreshold" title="tlpipe.rfi.sum_threshold.hthreshold"><code class="xref py py-obj docutils literal"><span class="pre">hthreshold</span></code></a></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="tlpipe.rfi.sum_threshold.threshold_len1.html#tlpipe.rfi.sum_threshold.threshold_len1" title="tlpipe.rfi.sum_threshold.threshold_len1"><code class="xref py py-obj docutils literal"><span class="pre">threshold_len1</span></code></a></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="tlpipe.rfi.sum_threshold.vthreshold.html#tlpipe.rfi.sum_threshold.vthreshold" title="tlpipe.rfi.sum_threshold.vthreshold"><code class="xref py py-obj docutils literal"><span class="pre">vthreshold</span></code></a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Classes</p>
 <table border="1" class="longtable docutils">
 <colgroup>
@@ -558,7 +592,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="tlpipe.rfi.sum_threshold.SumThreshold.html" class="btn btn-neutral float-right" title="tlpipe.rfi.sum_threshold.SumThreshold" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="tlpipe.rfi.sum_threshold.hthreshold.html" class="btn btn-neutral float-right" title="tlpipe.rfi.sum_threshold.hthreshold" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="tlpipe.rfi.var_threshold.VarThreshold.vertical_var_threshold.html" class="btn btn-neutral" title="tlpipe.rfi.var_threshold.VarThreshold.vertical_var_threshold" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>

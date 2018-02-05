@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.add_history
+===================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Timestream.add_history

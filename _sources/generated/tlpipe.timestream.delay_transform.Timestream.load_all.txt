@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.load_all
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Timestream.load_all

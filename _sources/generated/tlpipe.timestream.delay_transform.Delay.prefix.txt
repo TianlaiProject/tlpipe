@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Delay.prefix
+==============================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: Delay.prefix

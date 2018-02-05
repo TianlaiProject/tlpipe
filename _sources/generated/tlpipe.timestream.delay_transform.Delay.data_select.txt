@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Delay.data_select
+===================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Delay.data_select

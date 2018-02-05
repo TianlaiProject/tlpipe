@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.subset
+==============================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Timestream.subset

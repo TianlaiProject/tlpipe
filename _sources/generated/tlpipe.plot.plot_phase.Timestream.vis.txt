@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.Timestream.vis
+=====================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autoattribute:: Timestream.vis

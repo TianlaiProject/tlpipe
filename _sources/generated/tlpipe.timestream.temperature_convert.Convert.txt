@@ -1,0 +1,52 @@
+tlpipe.timestream.temperature_convert.Convert
+=============================================
+
+.. currentmodule:: tlpipe.timestream.temperature_convert
+
+.. autoclass:: Convert
+
+   
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Convert.cacheable
+      ~Convert.embarrassingly_parallelizable
+      ~Convert.history
+      ~Convert.iteration
+      ~Convert.params_init
+      ~Convert.prefix
+   
+   
+
+
+   
+   .. automethod:: __init__
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+
+   
+      ~Convert.cast_input
+      ~Convert.copy_input
+      ~Convert.data_select
+      ~Convert.finish
+      ~Convert.next
+      ~Convert.process
+      ~Convert.read_input
+      ~Convert.read_output
+      ~Convert.read_process_write
+      ~Convert.restart_iteration
+      ~Convert.setup
+      ~Convert.show_params
+      ~Convert.stop_iteration
+      ~Convert.subset_select
+      ~Convert.write_output
+   
+   

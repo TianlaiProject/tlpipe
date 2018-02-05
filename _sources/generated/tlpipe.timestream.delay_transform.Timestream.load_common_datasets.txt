@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.load_common_datasets
+=================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Timestream.load_common_datasets

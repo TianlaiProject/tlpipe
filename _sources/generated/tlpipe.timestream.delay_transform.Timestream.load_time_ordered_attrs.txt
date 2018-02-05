@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.load_time_ordered_attrs
+====================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Timestream.load_time_ordered_attrs

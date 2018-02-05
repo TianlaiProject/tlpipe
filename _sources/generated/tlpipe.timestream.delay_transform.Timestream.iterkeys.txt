@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.iterkeys
+=====================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Timestream.iterkeys

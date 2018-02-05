@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.Plot.next
+================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: Plot.next

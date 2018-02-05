@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.input_path
+=======================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. autofunction:: input_path

@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.MaxNLocator.set_bounds
+========================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: MaxNLocator.set_bounds

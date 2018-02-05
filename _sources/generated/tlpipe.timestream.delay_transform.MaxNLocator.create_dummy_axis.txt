@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.MaxNLocator.create_dummy_axis
+===============================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: MaxNLocator.create_dummy_axis

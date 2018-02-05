@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.RawTimestream.create_time_and_freq_ordered_dataset
+=========================================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: RawTimestream.create_time_and_freq_ordered_dataset

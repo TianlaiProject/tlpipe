@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.group_name_allowed
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Timestream.group_name_allowed

@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.MaxNLocator.tick_values
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: MaxNLocator.tick_values

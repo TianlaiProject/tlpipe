@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.datetime.microsecond
+===========================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autoattribute:: datetime.microsecond

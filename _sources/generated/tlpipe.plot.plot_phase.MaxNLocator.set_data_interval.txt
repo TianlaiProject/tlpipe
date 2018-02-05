@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.MaxNLocator.set_data_interval
+====================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: MaxNLocator.set_data_interval

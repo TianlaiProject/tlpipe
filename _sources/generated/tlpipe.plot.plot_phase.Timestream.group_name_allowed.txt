@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.Timestream.group_name_allowed
+====================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: Timestream.group_name_allowed

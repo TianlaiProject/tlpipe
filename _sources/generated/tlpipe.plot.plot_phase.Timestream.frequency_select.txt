@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.Timestream.frequency_select
+==================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: Timestream.frequency_select

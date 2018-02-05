@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.RawTimestream.from_file
+==============================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: RawTimestream.from_file

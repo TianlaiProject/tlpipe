@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.redistribute
+====================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Timestream.redistribute

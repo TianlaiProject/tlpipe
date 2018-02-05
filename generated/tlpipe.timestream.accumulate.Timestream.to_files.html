@@ -82,7 +82,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../install.html">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../install.html#python-version">Python version</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../install.html#prerequisites">Prerequisites</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../install.html#installation-guid">Installation guid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../install.html#installation-guide">Installation guide</a></li>
 </ul>
 </li>
 </ul>
@@ -260,6 +260,10 @@
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.bad_detect.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.delay_transform.html">tlpipe.timestream.delay_transform</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.delay_transform.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ns_cal.html">tlpipe.timestream.ns_cal</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ns_cal.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
@@ -274,6 +278,14 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.ps_cal.html">tlpipe.timestream.ps_cal</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.ps_cal.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.apply_gain.html">tlpipe.timestream.apply_gain</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.apply_gain.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.temperature_convert.html">tlpipe.timestream.temperature_convert</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.timestream.temperature_convert.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="tlpipe.timestream.phs2src.html">tlpipe.timestream.phs2src</a><ul>
@@ -411,6 +423,10 @@
 <li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_waterfall.html#inheritance-diagram">Inheritance diagram</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="tlpipe.plot.plot_phase.html">tlpipe.plot.plot_phase</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tlpipe.plot.plot_phase.html#inheritance-diagram">Inheritance diagram</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -534,7 +550,7 @@
 <h1>tlpipe.timestream.accumulate.Timestream.to_files<a class="headerlink" href="#tlpipe-timestream-accumulate-timestream-to-files" title="Permalink to this headline">¶</a></h1>
 <dl class="method">
 <dt id="tlpipe.timestream.accumulate.Timestream.to_files">
-<code class="descclassname">Timestream.</code><code class="descname">to_files</code><span class="sig-paren">(</span><em>outfiles</em>, <em>exclude=[]</em>, <em>check_status=True</em>, <em>write_hints=True</em>, <em>libver='latest'</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/container/container.py#L1095"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.accumulate.Timestream.to_files" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">Timestream.</code><code class="descname">to_files</code><span class="sig-paren">(</span><em>outfiles</em>, <em>exclude=[]</em>, <em>check_status=True</em>, <em>write_hints=True</em>, <em>libver='latest'</em>, <em>chunk_vis=True</em>, <em>chunk_shape=None</em>, <em>chunk_size=64</em><span class="sig-paren">)</span><a class="reference external" href="https://github.com/TianlaiProject/tlpipe/blob/master/tlpipe/container/timestream_common.py#L756"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tlpipe.timestream.accumulate.Timestream.to_files" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save the data hold in this container to files.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -553,6 +569,12 @@ the newest version of these structures without particular concern for
 backwards compatibility, can be performance advantages. The &#8216;earliest&#8217;
 option means that HDF5 will make a best effort to be backwards
 compatible. Default is &#8216;latest&#8217;.</li>
+<li><strong>chunk_vis</strong> (<em>bool, optional</em>) &#8211; If True, dataset &#8216;vis&#8217; and &#8216;vis_mask&#8217; in the saved files will be
+chunked. Default True.</li>
+<li><strong>chunk_shape</strong> (<em>None or tuple</em>) &#8211; The chunk shape to use for dataset &#8216;vis&#8217; and &#8216;vis_mask&#8217;. If None,
+the chunk shape will be determined by <cite>chunk_size</cite>. Default None.</li>
+<li><strong>chunk_size</strong> (<em>integer</em>) &#8211; If <cite>chunk_shape</cite> is None, then dataset &#8216;vis&#8217; and &#8216;vis_mask&#8217; will be
+chunked to be approximately this size in unit KB.</li>
 </ul>
 </td>
 </tr>

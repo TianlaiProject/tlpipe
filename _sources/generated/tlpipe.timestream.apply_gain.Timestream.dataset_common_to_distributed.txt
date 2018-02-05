@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.dataset_common_to_distributed
+=====================================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Timestream.dataset_common_to_distributed

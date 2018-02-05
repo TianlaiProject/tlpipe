@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.delete_an_attribute
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. automethod:: Timestream.delete_an_attribute

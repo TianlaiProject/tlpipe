@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.MaxNLocator.tick_values
+==============================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: MaxNLocator.tick_values

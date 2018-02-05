@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.RawTimestream.close
+==========================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: RawTimestream.close

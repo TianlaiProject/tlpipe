@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.Timestream.masked_vis
+============================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autoattribute:: Timestream.masked_vis

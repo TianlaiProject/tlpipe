@@ -1,0 +1,6 @@
+tlpipe.timestream.temperature_convert.Convert.params_init
+=========================================================
+
+.. currentmodule:: tlpipe.timestream.temperature_convert
+
+.. autoattribute:: Convert.params_init

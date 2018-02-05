@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.datetime.isocalendar
+===========================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: datetime.isocalendar

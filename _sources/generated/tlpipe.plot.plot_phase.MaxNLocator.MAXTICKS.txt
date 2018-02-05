@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.MaxNLocator.MAXTICKS
+===========================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autoattribute:: MaxNLocator.MAXTICKS

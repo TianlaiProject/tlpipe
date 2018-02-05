@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Delay.cast_input
+==================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Delay.cast_input

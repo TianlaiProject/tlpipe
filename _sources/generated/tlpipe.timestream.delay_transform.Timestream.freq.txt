@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.freq
+=================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: Timestream.freq

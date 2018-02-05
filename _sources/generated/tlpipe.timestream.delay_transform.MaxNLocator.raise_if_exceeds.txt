@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.MaxNLocator.raise_if_exceeds
+==============================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: MaxNLocator.raise_if_exceeds

@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.InterpolatedUnivariateSpline.set_smoothing_factor
+========================================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: InterpolatedUnivariateSpline.set_smoothing_factor

@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.is_dish
+===============================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. autoattribute:: Timestream.is_dish

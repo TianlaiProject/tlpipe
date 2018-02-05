@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.datetime.strftime
+===================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: datetime.strftime

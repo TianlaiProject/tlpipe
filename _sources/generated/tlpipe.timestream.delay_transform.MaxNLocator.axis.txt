@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.MaxNLocator.axis
+==================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: MaxNLocator.axis

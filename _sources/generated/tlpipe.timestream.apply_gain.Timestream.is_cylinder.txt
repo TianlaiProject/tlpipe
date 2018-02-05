@@ -1,0 +1,6 @@
+tlpipe.timestream.apply_gain.Timestream.is_cylinder
+===================================================
+
+.. currentmodule:: tlpipe.timestream.apply_gain
+
+.. autoattribute:: Timestream.is_cylinder

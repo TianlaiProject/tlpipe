@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.to_memory
+======================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Timestream.to_memory

@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.RawTimestream.separate_pol_and_bl
+===================================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: RawTimestream.separate_pol_and_bl

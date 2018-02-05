@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.Timestream.require_group
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: Timestream.require_group

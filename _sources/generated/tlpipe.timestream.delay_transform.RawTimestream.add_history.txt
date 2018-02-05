@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.RawTimestream.add_history
+===========================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: RawTimestream.add_history

@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.RawTimestream.itervalues
+==========================================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. automethod:: RawTimestream.itervalues

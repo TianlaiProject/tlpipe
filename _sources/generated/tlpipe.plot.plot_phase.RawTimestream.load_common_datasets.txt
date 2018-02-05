@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.RawTimestream.load_common_datasets
+=========================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: RawTimestream.load_common_datasets

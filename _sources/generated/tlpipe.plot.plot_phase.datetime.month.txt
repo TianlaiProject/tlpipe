@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.datetime.month
+=====================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autoattribute:: datetime.month

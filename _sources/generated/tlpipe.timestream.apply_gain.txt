@@ -1,0 +1,33 @@
+tlpipe.timestream.apply_gain
+============================
+
+.. automodule:: tlpipe.timestream.apply_gain
+
+   
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+      :toctree:
+   
+      input_path
+   
+   
+
+
+   
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+      :toctree:
+   
+      Apply
+      Timestream
+   
+   
+
+
+   
+   
+   

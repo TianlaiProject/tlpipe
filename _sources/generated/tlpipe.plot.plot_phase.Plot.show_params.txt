@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.Plot.show_params
+=======================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: Plot.show_params

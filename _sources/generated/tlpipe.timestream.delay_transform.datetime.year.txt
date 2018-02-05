@@ -1,0 +1,6 @@
+tlpipe.timestream.delay_transform.datetime.year
+===============================================
+
+.. currentmodule:: tlpipe.timestream.delay_transform
+
+.. autoattribute:: datetime.year

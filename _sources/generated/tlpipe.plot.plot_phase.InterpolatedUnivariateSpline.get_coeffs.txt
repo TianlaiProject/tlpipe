@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.InterpolatedUnivariateSpline.get_coeffs
+==============================================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. automethod:: InterpolatedUnivariateSpline.get_coeffs

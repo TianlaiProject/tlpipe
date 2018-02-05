@@ -1,0 +1,6 @@
+tlpipe.plot.plot_phase.Timestream.dist_axis
+===========================================
+
+.. currentmodule:: tlpipe.plot.plot_phase
+
+.. autoattribute:: Timestream.dist_axis
