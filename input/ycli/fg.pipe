@@ -5,6 +5,9 @@
 # tlpipe dir/to/cyl.pipe
 # mpiexec -n N tlpipe dir/to/cyl.pipe
 
+import matplotlib
+matplotlib.use('TkAgg')
+
 
 pipe_tasks = []
 pipe_outdir = '/data/ycli/tianlai/output/'
@@ -12,18 +15,26 @@ pipe_logging = 'notset'
 # pipe_logging = 'info'
 
 
-#import glob
-#data_dir = '/tianlai/data/20160829182035_hdf5'
-## files = sorted(glob.glob(data_dir+'/*.hdf5'))[1:]
-## files = sorted(glob.glob(data_dir+'/*.hdf5'))[22:80]
-#files = sorted(glob.glob(data_dir+'/*.hdf5'))[15:80]
-## files = sorted(glob.glob(data_dir+'/*.hdf5'))[15:85]
-## files = sorted(glob.glob(data_dir+'/*.hdf5'))[43:57] # cas A
-## files = sorted(glob.glob(data_dir+'/*.hdf5'))[49:51] # cas A
-
-
-from tlpipe.foreground import foreground
-pipe_tasks.append(foreground.FgSub)
+#from tlpipe.foreground import foreground
+#pipe_tasks.append(foreground.FgSub)
+# for sfzuo
 fg_input_files = '/data/ycli/tianlai/map_full.hdf5'
+fg_wufq = False
+fg_output_files = 'map_full_result.hdf5'
+fg_mode_list = [0, 1, 2, 3, 4]
+
+# for wufq
+#fg_input_files = '/data/ycli/tianlai/one_sky_source.npz'
+#fg_wufq = True
+#fg_output_files = 'one_sky_source_result.hdf5'
+#fg_mode_list = [0, 10, 20]
 
 
+from tlpipe.powerspectrum import ps
+pipe_tasks.append(ps.Ps)
+ps_pstype = 'Cl'
+#ps_pstype = 'Pk'
+ps_lmax = 600
+ps_input_files = fg_output_files
+#ps_output_files = 'one_sky_source_psresult.hdf5'
+ps_output_files = 'map_full_psresult.hdf5'
