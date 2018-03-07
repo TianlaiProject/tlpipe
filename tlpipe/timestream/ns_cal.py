@@ -355,6 +355,7 @@ class NsCal(timestream_task.TimestreamTask):
             ext = max(0.05*duration, 5*dt)
             # if phs_unit == 'degree': # default to radians
             #     ax1.set_ylim([-180, 180])
+            #     ax1.set_yticks([-180, -120, -60, 0, 60, 120, 180])
             # else:
             #     ax1.set_ylim([-np.pi, np.pi])
             ax1.set_xlim([ax_val[0]-ext, ax_val[-1]+ext])
