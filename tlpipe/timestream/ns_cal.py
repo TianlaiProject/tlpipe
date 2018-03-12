@@ -64,6 +64,7 @@ class NsCal(timestream_task.TimestreamTask):
 
     params_init = {
                     'num_mean': 5, # use the mean of num_mean signals
+                    'unmasked_only': False, # cal for unmasked time points only
                     'phs_only': True, # phase cal only
                     'save_gain': False,
                     'gain_file': 'ns_cal/gain.hdf5',
@@ -192,6 +193,7 @@ class NsCal(timestream_task.TimestreamTask):
     def cal(self, vis, vis_mask, li, gi, fbl, rt, **kwargs):
         """Function that does the actual cal."""
 
+        unmasked_only = self.params['unmasked_only']
         phs_only = self.params['phs_only']
         save_gain = self.params['save_gain']
         plot_gain = self.params['plot_gain']
@@ -231,20 +233,25 @@ class NsCal(timestream_task.TimestreamTask):
 
             lower = ind - num_mean
             off_sec = np.ma.array(vis[lower:ind], mask=(~np.isfinite(vis[lower:ind]))&vis_mask[lower:ind])
-            # if off_sec.count() > 0: # not all data in this section are masked
-            if off_sec.count() >= max(2, num_mean/2): # more valid sample to make stable
-                upper = ind + 2 + num_mean
-                valid_inds.append(ind)
-                diff = np.mean(vis[ind+2:upper]) - np.ma.mean(off_sec)
-                phs = np.angle(diff) # in radians
+            if unmasked_only and off_sec.count() < max(2, num_mean/2): # more valid sample to make stable
+                continue
+
+            upper = ind + 2 + num_mean
+            valid_inds.append(ind)
+            if unmasked_only:
+                off_mean = np.ma.mean(off_sec)
+            else:
+                off_mean = np.mean(vis[lower:ind])
+            diff = np.mean(vis[ind+2:upper]) - off_mean
+            phs = np.angle(diff) # in radians
+            if save_gain:
+                rt['ns_cal_phase'].local_data[ii, lfi, lbi] = phs
+            phase.append( phs ) # in radians
+            if not phs_only:
+                amp_ = np.abs(diff)
                 if save_gain:
-                    rt['ns_cal_phase'].local_data[ii, lfi, lbi] = phs
-                phase.append( phs ) # in radians
-                if not phs_only:
-                    amp_ = np.abs(diff)
-                    if save_gain:
-                        rt['ns_cal_amp'].local_data[ii, lfi, lbi] = amp_
-                    amp.append( amp_ )
+                    rt['ns_cal_amp'].local_data[ii, lfi, lbi] = amp_
+                amp.append( amp_ )
 
         # not enough valid data to do the ns_cal
         num_valid = len(valid_inds)
