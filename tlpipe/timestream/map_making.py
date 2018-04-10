@@ -12,6 +12,7 @@ import os
 import time
 import numpy as np
 from scipy.linalg import eigh
+from scipy.interpolate import interp1d, Rbf
 import h5py
 import aipy as a
 import timestream_task
@@ -44,7 +45,9 @@ class MapMaking(timestream_task.TimestreamTask):
                     'l_boost': 1.0,
                     'bl_range': [0.0, 1.0e7],
                     'auto_correlations': False,
+                    'time_avg': 'avg', # or 'fft'
                     'pol': 'xx', # 'yy' or 'I'
+                    'interp': 'nearest', # 'rbf' or 'none'
                     'beam_dir': 'map/bt',
                     'use_existed_beam': False,
                     'gen_invbeam': True,
@@ -75,7 +78,9 @@ class MapMaking(timestream_task.TimestreamTask):
         l_boost = self.params['l_boost']
         bl_range = self.params['bl_range']
         auto_correlations = self.params['auto_correlations']
+        time_avg = self.params['time_avg']
         pol = self.params['pol']
+        interp = self.params['interp']
         beam_dir = output_path(self.params['beam_dir'])
         use_existed_beam = self.params['use_existed_beam']
         gen_inv = self.params['gen_invbeam']
@@ -139,46 +144,123 @@ class MapMaking(timestream_task.TimestreamTask):
                 raise RuntimeError('Unknown array type %s' % ts.attrs['telescope'])
 
             if not simulate:
-                # mask daytime data
-                if mask_daytime:
-                    day_inds = np.where(np.logical_and(ts['local_hour'][:]>=mask_time_range[0], ts['local_hour'][:]<=mask_time_range[1]))[0]
-                    ts.local_vis_mask[day_inds] = True # do not change vis directly
+                # select the corresponding vis and vis_mask
+                if pol == 'xx':
+                    local_vis = ts.local_vis[:, :, 0, :]
+                    local_vis_mask = ts.local_vis_mask[:, :, 0, :]
+                elif pol == 'yy':
+                    local_vis = ts.local_vis[:, :, 1, :]
+                    local_vis_mask = ts.local_vis_mask[:, :, 1, :]
+                elif pol == 'I':
+                    xx_vis = ts.local_vis[:, :, 0, :]
+                    xx_vis_mask = ts.local_vis_mask[:, :, 0, :]
+                    yy_vis = ts.local_vis[:, :, 1, :]
+                    yy_vis_mask = ts.local_vis_mask[:, :, 1, :]
+
+                    local_vis = np.zeros_like(xx_vis)
+                    for ti in xrange(local_vis.shape[0]):
+                        for fi in xrange(local_vis.shape[1]):
+                            for bi in xrange(local_vis.shape[2]):
+                                if xx_vis_mask[ti, fi, bi] != yy_vis_mask[ti, fi, bi]:
+                                    if xx_vis_mask[ti, fi, bi]:
+                                        local_vis[ti, fi, bi] = yy_vis[ti, fi, bi]
+                                    else:
+                                        local_vis[ti, fi, bi] = xx_vis[ti, fi, bi]
+                                else:
+                                    local_vis[ti, fi, bi] = 0.5 * (xx_vis[ti, fi, bi] + yy_vis[ti, fi, bi])
+                    local_vis_mask = xx_vis_mask | yy_vis_mask
+                else:
+                    raise ValueError('Invalid pol: %s' % pol)
+
+                if interp != 'none':
+                    for fi in xrange(local_vis.shape[1]):
+                        for bi in xrange(local_vis.shape[2]):
+                            # interpolate for local_vis
+                            true_inds = np.where(local_vis_mask[:, fi, bi])[0] # masked inds
+                            if len(true_inds) > 0:
+                                false_inds = np.where(~local_vis_mask[:, fi, bi])[0] # un-masked inds
+                                if len(false_inds) > 0.1 * local_vis.shape[0]:
+                # nearest interpolate for local_vis
+                                    if interp == 'nearest':
+                                        itp_real = interp1d(false_inds, local_vis[false_inds, fi, bi].real, kind='nearest', fill_value='extrapolate', assume_sorted=True)
+                                        itp_imag = interp1d(false_inds, local_vis[false_inds, fi, bi].imag, kind='nearest', fill_value='extrapolate', assume_sorted=True)
+                                    elif interp == 'rbf':
+                                        itp_real = Rbf(false_inds, local_vis[false_inds, fi, bi].real, smooth=10)
+                                        itp_imag = Rbf(false_inds, local_vis[false_inds, fi, bi].imag, smooth=10)
+                                    else:
+                                        raise ValueError('Unknown interpolation method: %s' % interp)
+                                    local_vis[true_inds, fi, bi] = itp_real(true_inds) + 1.0J * itp_imag(true_inds) # the interpolated vis
+                                else:
+                                    local_vis[:, fi, bi] = 0 # TODO: may need to take special care
 
                 # average data
                 nt = ts['sec1970'].shape[0]
                 phi_size = 2*tel.mmax + 1
-                nt_m = float(nt) / phi_size
-
-                # roll data to have phi=0 near the first
-                roll_len = np.int(np.around(0.5*nt_m))
-                ts.local_vis[:] = np.roll(ts.local_vis[:], roll_len, axis=0)
-                ts.local_vis_mask[:] = np.roll(ts.local_vis_mask[:], roll_len, axis=0)
-                ts['ra_dec'][:] = np.roll(ts['ra_dec'][:], roll_len, axis=0)
-
-                repeat_inds = np.repeat(np.arange(nt), phi_size)
-                num, start, end = mpiutil.split_m(nt*phi_size, phi_size)
 
                 # phi = np.zeros((phi_size,), dtype=ts['ra_dec'].dtype)
                 phi = np.linspace(0, 2*np.pi, phi_size, endpoint=False)
-                vis = np.zeros((phi_size,)+ts.local_vis.shape[1:], dtype=ts.vis.dtype)
-                # average over time
-                for idx in xrange(phi_size):
-                    inds, weight = unique(repeat_inds[start[idx]:end[idx]], return_counts=True)
-                    vis[idx] = average(np.ma.array(ts.local_vis[inds], mask=ts.local_vis_mask[inds]), axis=0, weights=weight) # time mean
-                    # phi[idx] = np.average(ts['ra_dec'][:, 0][inds], axis=0, weights=weight)
+                vis = np.zeros((phi_size,)+local_vis.shape[1:], dtype=local_vis.dtype)
+
+                if time_avg == 'avg':
+                    nt_m = float(nt) / phi_size
+                    # roll data to have phi=0 near the first
+                    roll_len = np.int(np.around(0.5*nt_m))
+                    local_vis[:] = np.roll(local_vis[:], roll_len, axis=0)
+                    if interp == 'none':
+                        local_vis_mask[:] = np.roll(local_vis_mask[:], roll_len, axis=0)
+                    # ts['ra_dec'][:] = np.roll(ts['ra_dec'][:], roll_len, axis=0)
+
+                    repeat_inds = np.repeat(np.arange(nt), phi_size)
+                    num, start, end = mpiutil.split_m(nt*phi_size, phi_size)
+
+                    # average over time
+                    for idx in xrange(phi_size):
+                        inds, weight = unique(repeat_inds[start[idx]:end[idx]], return_counts=True)
+                        if interp == 'none':
+                            vis[idx] = average(np.ma.array(local_vis[inds], mask=local_vis_mask[inds]), axis=0, weights=weight) # time mean
+                        else:
+                            vis[idx] = average(local_vis[inds], axis=0, weights=weight) # time mean
+                        # phi[idx] = np.average(ts['ra_dec'][:, 0][inds], axis=0, weights=weight)
+                elif time_avg == 'fft':
+                    if interp == 'none':
+                        raise ValueError('Can not do fft average without first interpolation')
+                    Vm = np.fft.fftshift(np.fft.fft(local_vis, axis=0), axes=0)
+                    vis[:] = np.fft.ifft(np.fft.ifftshift(Vm[nt/2-tel.mmax:nt/2+tel.mmax+1], axes=0), axis=0) / (1.0 * nt / phi_size)
+
+                    for fi in xrange(vis.shape[1]):
+                        for bi in xrange(vis.shape[2]):
+                            # plot local_vis and vis
+                            import matplotlib
+                            matplotlib.use('Agg')
+                            import matplotlib.pyplot as plt
+
+                            phi0 = np.linspace(0, 2*np.pi, nt, endpoint=False)
+                            phi1 = np.linspace(0, 2*np.pi, phi_size, endpoint=False)
+                            plt.figure()
+                            plt.subplot(211)
+                            plt.plot(phi0, local_vis[:, fi, bi].real, label='v0.real')
+                            plt.plot(phi1, vis[:, fi, bi].real, label='v1.real')
+                            plt.legend()
+                            plt.subplot(212)
+                            plt.plot(phi0, local_vis[:, fi, bi].imag, label='v0.imag')
+                            plt.plot(phi1, vis[:, fi, bi].imag, label='v1.imag')
+                            plt.legend()
+                            plt.savefig('vis_fft/vis_%d_%d.png' % (fi, bi))
+                            plt.close()
+
+                else:
+                    raise ValueError('Unknown time_avg: %s' % time_avg)
+
+                del local_vis
+                del local_vis_mask
+
+                # mask daytime data
+                if mask_daytime:
+                    day_or_night = np.where(ts['local_hour'][:]>=mask_time_range[0] & ts['local_hour'][:]<=mask_time_range[1], True, False)
+                    day_inds = np.where(np.repeat(day_or_night, phi_size).reshape(nt, phi_size).astype(np.int).sum(axis=1).astype(bool))[0]
+                    vis[day_inds] = 0
 
                 del ts # no longer need ts
-
-                if pol == 'xx':
-                    vis = vis[:, :, 0, :]
-                elif pol == 'yy':
-                    vis = vis[:, :, 1, :]
-                elif pol == 'I':
-                    vis = 0.5 * (vis[:, :, 0, :] + vis[:, :, 1, :])
-                elif pol == 'all':
-                    vis = np.sum(vis, axis=2) # sum over all pol
-                else:
-                    raise ValueError('Invalid pol: %s' % pol)
 
                 # redistribute vis to time axis
                 vis = mpiarray.MPIArray.wrap(vis, axis=2).redistribute(0).local_array
