@@ -50,7 +50,7 @@ class TimestreamTask(OneAndOne):
                     'check_status': True,
                     'write_hints': True,
                     'libver': 'latest',
-                    'chunk_vis': True, # chunk vis and vis_mask in saved files
+                    'chunk_vis': False, # chunk vis and vis_mask in saved files
                     'chunk_shape': None,
                     'chunk_size': 64, # KB
                     'output_failed_continue': False, # continue to run if output to files failed
