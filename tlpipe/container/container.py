@@ -445,8 +445,14 @@ class BasicTod(memh5.MemDiskGroup):
 
         if name in self.main_time_ordered_datasets.keys():
             dset_shape, dset_type, infiles_map = self._get_input_info(name, self.main_data_start, self.main_data_stop)
-            first_start = mpiutil.bcast(infiles_map[0][1], root=0, comm=self.comm) # start form the first file
-            last_stop = mpiutil.bcast(infiles_map[-1][2], root=self.nproc-1, comm=self.comm) # stop from the last file
+            if len(infiles_map) == 0:
+                first_start = 0
+                last_stop = 0
+            else:
+                first_start = infiles_map[0][1]
+                last_stop = infiles_map[-1][2]
+            first_start = mpiutil.bcast(first_start, root=0, comm=self.comm) # start form the first file
+            last_stop = mpiutil.bcast(last_stop, root=self.nproc-1, comm=self.comm) # stop from the last file
         else:
             dset_shape, dset_type = self.infiles[0][name].shape, self.infiles[0][name].dtype
 
