@@ -1,0 +1,92 @@
+# -*- mode: python; -*-
+
+# input file for pipeline manager
+# execute this pipeline by either command of the following two:
+# tlpipe dir/to/cyl_check.pipe
+# mpiexec -n N tlpipe dir/to/cyl_check.pipe
+
+
+pipe_tasks = []
+pipe_outdir = './output_check/'
+pipe_logging = 'notset'
+# pipe_logging = 'info'
+pipe_timing = True
+pipe_flush = True
+
+
+import glob
+data_dir = '/node5_disk/170903p1/20170903143217_p01/'
+files = sorted(glob.glob(data_dir+'/*.hdf5'))
+files = files[49:54]
+
+
+from tlpipe.timestream import dispatch
+pipe_tasks.append(dispatch.Dispatch)
+### parameters for Dispatch
+dp_input_files = files
+dp_freq_select = (500, 503)
+# dp_freq_select = (216, 792) # all used freqs
+dp_extra_inttime = 0
+dp_exclude_bad = False
+# dp_iterable = True
+dp_iter_num = 1
+dp_tag_input_iter = False
+dp_out = 'dp'
+
+
+from tlpipe.timestream import detect_ns
+pipe_tasks.append(detect_ns.Detect)
+### parameters for Detect
+dt_in = dp_out
+# dt_iterable = True
+dt_mask_near = 0
+dt_out = 'dt'
+
+from tlpipe.plot import plot_slice
+# pipe_tasks.append(plot_slice.Plot)
+### parameters for Plot
+psl_in = dt_out
+# psl_iterable = True
+psl_plot_type = 'freq'
+psl_flag_mask = True
+psl_flag_ns = True
+psl_slices = 1
+psl_feed_no = True
+psl_fig_name = 'slice/slice'
+psl_out = 'psl'
+
+from tlpipe.timestream import rt2ts
+pipe_tasks.append(rt2ts.Rt2ts)
+### parameters for Rt2ts
+# r2t_in = psl_out
+r2t_in = dt_out
+# r2t_iterable = True
+r2t_out = 'r2t'
+
+from tlpipe.timestream import ps_cal
+pipe_tasks.append(ps_cal.PsCal)
+### parameters for PsCal
+pc_in = r2t_out
+# r2t_iterable = True
+pc_show_progress = True
+pc_timing = True
+pc_process_timing = True
+# pc_calibrator = 'cas'
+pc_calibrator = 'cyg'
+# pc_calibrator = 'crab'
+# pc_vis_conj = True
+# pc_span = 1200
+pc_save_src_vis = True
+pc_subtract_src = False
+pc_plot_figs = False
+pc_save_gain = True
+pc_temperature_convert = False
+# pc_show_info = True
+pc_out = 'pc'
+
+from tlpipe.timestream import bad_detect
+pipe_tasks.append(bad_detect.Detect)
+### parameters for Detect
+bd_in = pc_out
+# bd_iterable = True
+bd_out = 'bd'
