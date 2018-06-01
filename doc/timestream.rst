@@ -49,3 +49,4 @@ Operating tasks
    average
    freq_rebin
    map_making
+   gen_beam
