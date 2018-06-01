@@ -476,6 +476,40 @@ class PsCal(timestream_task.TimestreamTask):
                 # create data to save the solved gain for each feed
                 lgain = np.zeros((len(fpd_linds),), dtype=Gain.dtype) # gain for each feed
                 lgain[:] = complex(np.nan, np.nan)
+
+                # check for conj
+                num_conj = 0
+                for ii, (fi, pi, di) in enumerate(fpd_linds):
+                    y = G_abs.local_array[li:hi, ii]
+                    inds = np.where(np.isfinite(y))[0]
+                    if len(inds) >= max(4, 0.5 * len(y)):
+                        # get the approximate magnitude by averaging the central G_abs
+                        # solve phase by least square fit
+                        ui = (feedpos[di] - feedpos[0]) * (1.0e6*freq[fi]) / const.c # position of this feed (relative to the first feed) in unit of wavelength
+                        exp_factor = np.exp(2.0J * np.pi * np.dot(n0, ui))
+                        ef = exp_factor
+                        Gi = Gain.local_array[li:hi, ii]
+                        e_phs = np.dot(ef[inds].conj(), Gi[inds]/y[inds]) / len(inds)
+                        ea = np.abs(e_phs)
+                        e_phs_conj = np.dot(ef[inds], Gi[inds]/y[inds]) / len(inds)
+                        eac = np.abs(e_phs_conj)
+                        if eac > ea:
+                            num_conj += 1
+                # reduce num_conj from all processes
+                num_conj = mpiutil.allreduce(num_conj, comm=ts.comm)
+                if num_conj > 0.5 * nfeed:
+                    if mpiutil.rank0:
+                        print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+                        print '!!!   Detect data should be their conjugate...   !!!'
+                        print '!!!   Correct it automatically...                !!!'
+                        print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+                    mpiutil.barrier()
+                    # correct vis
+                    ts.local_vis[:] = ts.local_vis.conj()
+                    # correct G
+                    Gain.local_array[:] = Gain.local_array.conj()
+
+                # solve for gain
                 for ii, (fi, pi, di) in enumerate(fpd_linds):
                     y = G_abs.local_array[li:hi, ii]
                     inds = np.where(np.isfinite(y))[0]
