@@ -495,7 +495,7 @@ class PsCal(timestream_task.TimestreamTask):
                         else:
                             e_phs_conj = np.dot(ef[inds], Gi[inds]/y[inds]) / len(inds)
                             eac = np.abs(e_phs_conj)
-                            if eac < ea:
+                            if eac > ea:
                                 if np.abs(eac - 1.0) < 0.01:
                                     print '%d, %d, %d: may need to be conjugated' % (fi, pi, di)
                             else:
