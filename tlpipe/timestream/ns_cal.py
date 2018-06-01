@@ -102,18 +102,14 @@ class NsCal(timestream_task.TimestreamTask):
         freq_excl = self.params['freq_excl']
 
         nt = rt.local_vis.shape[0]
-        on_time = rt['ns_on'].attrs['on_time']
-        num_mean = min(num_mean, on_time-2)
         if num_mean <= 0:
-            raise RuntimeError('Do not have enough noise on time samples to do the ns_cal')
+            raise RuntimeError('Invalid num_mean = %s' % num_mean)
         ns_on = rt['ns_on'][:]
         ns_on = np.where(ns_on, 1, 0)
         diff_ns = np.diff(ns_on)
         inds = np.where(diff_ns==1)[0] # NOTE: these are inds just 1 before the first ON
-        # if inds[0]-num_mean < 0:
         if inds[0]-1 < 0: # no off data in the beginning to use
             inds = inds[1:]
-        # if inds[-1]+num_mean+1 > len(ns_on)-1:
         if inds[-1]+2 > nt-1: # no on data in the end to use
             inds = inds[:-1]
 
@@ -217,7 +213,7 @@ class NsCal(timestream_task.TimestreamTask):
         bl = tuple(fbl[1]) # bl for this cal
 
         nt = vis.shape[0]
-        # on_time = rt['ns_on'].attrs['on_time']
+        on_time = rt['ns_on'].attrs['on_time']
         # off_time = rt['ns_on'].attrs['off_time']
         period = rt['ns_on'].attrs['period']
 
@@ -233,16 +229,16 @@ class NsCal(timestream_task.TimestreamTask):
 
             lower = ind - num_mean
             off_sec = np.ma.array(vis[lower:ind], mask=(~np.isfinite(vis[lower:ind]))&vis_mask[lower:ind])
+            if off_sec.count() == 0: # all are invalid values
+                continue
             if unmasked_only and off_sec.count() < max(2, num_mean/2): # more valid sample to make stable
                 continue
 
-            upper = ind + 2 + num_mean
+            upper = ind + 1 + on_time
             valid_inds.append(ind)
-            if unmasked_only:
-                off_mean = np.ma.mean(off_sec)
-            else:
-                off_mean = np.mean(vis[lower:ind])
-            diff = np.mean(vis[ind+2:upper]) - off_mean
+            off_mean = np.ma.mean(off_sec)
+            on_mean = np.mean(vis[ind+1:upper]) # mean for all on signals
+            diff = on_mean - off_mean
             phs = np.angle(diff) # in radians
             if save_gain:
                 rt['ns_cal_phase'].local_data[ii, lfi, lbi] = phs
