@@ -117,8 +117,8 @@ class Flag(timestream_task.TimestreamTask):
 
         if freq_flag:
             # time integration
-            tm_vis = np.ma.mean(np.ma.array(vis, mask=vis_mask), axis=0)
-            abs_vis = np.abs(tm_vis)
+            tm_vis = np.ma.mean(np.ma.array(vis, mask=vis_mask), axis=0) # masked array
+            abs_vis = np.ma.abs(tm_vis) # masked array
             if np.ma.count_masked(tm_vis) > 0: # has masked value
                 abs_vis_valid = abs_vis[~abs_vis.mask]
                 inds_valid = np.arange(nfreq)[~abs_vis.mask]
@@ -126,7 +126,7 @@ class Flag(timestream_task.TimestreamTask):
                 abs_vis_itp = itp(np.arange(nfreq))
                 abs_vis1 = abs_vis_itp.copy()
             else:
-                abs_vis1 = abs_vis.copy()
+                abs_vis1 = abs_vis.data.copy() # convert to ordinary array
 
             for cnt in xrange(10):
                 if cnt != 0:
@@ -170,7 +170,7 @@ class Flag(timestream_task.TimestreamTask):
         if time_flag:
             # freq integration
             fm_vis = np.ma.mean(np.ma.array(vis, mask=vis_mask), axis=1)
-            abs_vis = np.abs(fm_vis)
+            abs_vis = np.ma.abs(fm_vis)
             if np.ma.count_masked(fm_vis) > 0: # has masked value
                 abs_vis_valid = abs_vis[~abs_vis.mask]
                 inds_valid = np.arange(nt)[~abs_vis.mask]
@@ -178,7 +178,7 @@ class Flag(timestream_task.TimestreamTask):
                 abs_vis_itp = itp(np.arange(nt))
                 abs_vis1 = abs_vis_itp.copy()
             else:
-                abs_vis1 = abs_vis.copy()
+                abs_vis1 = abs_vis.data.copy()
 
             for cnt in xrange(10):
                 if cnt != 0:

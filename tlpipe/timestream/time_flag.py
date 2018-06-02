@@ -67,7 +67,7 @@ class Flag(timestream_task.TimestreamTask):
         time_window = self.params['time_window']
 
         nt = vis.shape[0]
-        abs_vis = np.abs(np.ma.array(vis, mask=vis_mask))
+        abs_vis = np.ma.abs(np.ma.array(vis, mask=vis_mask))
         # mask all if valid values less than the given threshold
         if abs_vis.count() < 0.1 * nt or abs_vis.count() <= 3:
             vis_mask[:] = True
@@ -80,7 +80,7 @@ class Flag(timestream_task.TimestreamTask):
             abs_vis_itp = itp(np.arange(nt))
             abs_vis1 = abs_vis_itp.copy()
         else:
-            abs_vis1 = abs_vis.copy()
+            abs_vis1 = abs_vis.data.copy()
 
         for cnt in xrange(10):
             if cnt != 0:

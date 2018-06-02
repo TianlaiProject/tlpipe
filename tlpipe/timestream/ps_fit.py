@@ -64,7 +64,7 @@ def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit
     # chi2 = chi2s[ind]
     si = shifts[ind]
     obs_data = np.ma.array(vis_obs[start_ind:end_ind], mask=vis_mask[start_ind:end_ind])
-    factor = np.max(np.ma.abs(obs_data)) / np.max(np.abs(vis_sim))
+    factor = np.ma.max(np.ma.abs(obs_data)) / np.max(np.abs(vis_sim))
     obs_data = obs_data / factor # make amp close to each other
     vis_cal = np.ma.array(vis_obs[start_ind+si:end_ind+si], mask=vis_mask[start_ind+si:end_ind+si]) / gain
     if si != 0 and mpiutil.rank0:
