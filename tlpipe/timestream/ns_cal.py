@@ -237,7 +237,12 @@ class NsCal(timestream_task.TimestreamTask):
             upper = ind + 1 + on_time
             valid_inds.append(ind)
             off_mean = np.ma.mean(off_sec)
-            on_mean = np.mean(vis[ind+1:upper]) # mean for all on signals
+            this_on = np.ma.masked_invalid(vis[ind+1:upper]) # all on signal
+            # just to avoid the case of all invalid on values
+            if this_on.count() > 0:
+                on_mean = np.ma.mean(this_on) # mean for all valid on signals
+            else:
+                continue
             diff = on_mean - off_mean
             phs = np.angle(diff) # in radians
             if save_gain:
