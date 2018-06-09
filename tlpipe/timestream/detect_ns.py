@@ -65,7 +65,7 @@ class Detect(timestream_task.TimestreamTask):
             cnt = vis.count() # number of not masked vals
             total_cnt = mpiutil.allreduce(cnt)
             vis_shp = rt.vis.shape
-            ratio = float(total_cnt) / np.prod((vis_shp[0], vis_shp[1])) # ratio of un-maksed vals
+            ratio = float(total_cnt) / np.prod((vis_shp[0], vis_shp[1])) # ratio of un-masked vals
             if ratio < 0.5: # too many masked vals
                 if mpiutil.rank0:
                     warnings.warn('Too many masked values for auto-correlation of Channel: %d, does not use it' % this_chan)
@@ -166,7 +166,7 @@ class Detect(timestream_task.TimestreamTask):
                 new_on_inds = new_on_inds + (on_inds-i).tolist() + (on_inds+i).tolist()
             new_on_inds = np.unique(new_on_inds)
 
-            if rt['vis_maks'].distributed:
+            if rt['vis_mask'].distributed:
                 start = rt.vis_mask.local_offset[0]
                 end = start + rt.vis_mask.local_shape[0]
             else:
