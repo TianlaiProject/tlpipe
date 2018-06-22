@@ -318,7 +318,7 @@ class BeamTransfer(object):
         return beam
 
 
-    @util.cache_last
+    # @util.cache_last
     def beam_m(self, mi, fi=None):
         """Fetch the beam transfer matrix for a given m.
 
@@ -341,7 +341,7 @@ class BeamTransfer(object):
 
     #====== Loading freq-ordered beams =================
 
-    @util.cache_last
+    # @util.cache_last
     def _load_beam_freq(self, fi, fullm=False):
 
         tel = self.telescope
@@ -362,7 +362,7 @@ class BeamTransfer(object):
         return beamf
 
 
-    @util.cache_last
+    # @util.cache_last
     def beam_freq(self, fi, fullm=False, single=False):
         """Fetch the beam transfer matrix for a given frequency.
 
@@ -474,7 +474,7 @@ class BeamTransfer(object):
 
     #====== SVD Beam loading ===========================
 
-    @util.cache_last
+    # @util.cache_last
     def beam_svd(self, mi, fi=None):
         """Fetch the SVD beam transfer matrix (S V^H) for a given m. This SVD beam
         transfer projects from the sky into the SVD basis.
@@ -507,7 +507,7 @@ class BeamTransfer(object):
         return bs
 
 
-    @util.cache_last
+    # @util.cache_last
     def invbeam_svd(self, mi, fi=None):
         """Fetch the SVD beam transfer matrix (S V^H) for a given m. This SVD beam
         transfer projects from the sky into the SVD basis.
@@ -540,7 +540,7 @@ class BeamTransfer(object):
         return ibs
 
 
-    @util.cache_last
+    # @util.cache_last
     def beam_ut(self, mi, fi=None):
         """Fetch the SVD beam transfer matrix (U^H) for a given m. This SVD beam
         transfer projects from the telescope space into the SVD basis.
@@ -573,7 +573,7 @@ class BeamTransfer(object):
         return bs
 
 
-    @util.cache_last
+    # @util.cache_last
     def beam_singularvalues(self, mi):
         """Fetch the vector of beam singular values for a given m.
 
