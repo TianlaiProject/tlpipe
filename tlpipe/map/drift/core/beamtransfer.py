@@ -814,7 +814,7 @@ class BeamTransfer(object):
 
             # Write out the current set of chunks into the m-files.
             # for lmi, mi in enumerate(range(sm, em)):
-            for lmi, mi in mpiutil.mpirange(self.telescope.mmax + 1, method='con'):
+            for lmi, mi in enumerate(mpiutil.mpirange(self.telescope.mmax + 1, method='con')):
 
                 # Open up correct m-file
                 with h5py.File(self._mfile(mi), 'r+') as mfile:
