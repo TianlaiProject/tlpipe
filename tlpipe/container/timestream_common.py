@@ -820,7 +820,7 @@ class TimestreamCommon(container.BasicTod):
                     chunk_shape = (tc, num_freq, num_pol, 1)
 
         # split output files among procs
-        for fi, outfile in enumerate(mpiutil.mpilist(outfiles, method='con', comm=self.comm)):
+        for fi, outfile in mpiutil.mpilist(list(enumerate(outfiles)), method='rand', comm=self.comm):
             # first write top level common attrs and datasets to file
             with h5py.File(outfile, 'w', libver=libver) as f:
 

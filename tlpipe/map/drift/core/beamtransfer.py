@@ -668,7 +668,7 @@ class BeamTransfer(object):
         ## Divide frequencies between MPI processes and calculate the beams
         ## for the baselines, then write out into separate files.
 
-        for fi in mpiutil.mpirange(self.nfreq):
+        for fi in mpiutil.mpirange(self.nfreq, method='rand'):
 
             if os.path.exists(self._ffile(fi)) and not regen:
                 print ("f index %i. File: %s exists. Skipping..." %
@@ -745,10 +745,10 @@ class BeamTransfer(object):
             print "Splitting into %i chunks...." % num_chunks
 
         # The local m sections
-        lm, sm, em = mpiutil.split_local(self.telescope.mmax+1)
+        # lm, sm, em = mpiutil.split_local(self.telescope.mmax+1)
 
         # Iterate over all m's and create the hdf5 files we will write into.
-        for mi in mpiutil.mpirange(self.telescope.mmax + 1):
+        for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
 
             if os.path.exists(self._mfile(mi)) and not regen:
                 print ("m index %i. File: %s exists. Skipping..." % (mi, (self._mfile(mi))))
@@ -813,7 +813,8 @@ class BeamTransfer(object):
             del fb_array
 
             # Write out the current set of chunks into the m-files.
-            for lmi, mi in enumerate(range(sm, em)):
+            # for lmi, mi in enumerate(range(sm, em)):
+            for lmi, mi in mpiutil.mpirange(self.telescope.mmax + 1, method='con'):
 
                 # Open up correct m-file
                 with h5py.File(self._mfile(mi), 'r+') as mfile:
@@ -847,7 +848,7 @@ class BeamTransfer(object):
 
         # For each `m` collect all the `m` sections from each frequency file,
         # and write them into a new `m` file. Use MPI if available.
-        for mi in mpiutil.mpirange(self.telescope.mmax + 1):
+        for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
 
             if os.path.exists(self._svdfile(mi)) and not regen:
                 print ("m index %i. File: %s exists. Skipping..." %
@@ -1525,7 +1526,7 @@ class BeamTransferTempSVD(BeamTransfer):
 
         # For each `m` collect all the `m` sections from each frequency file,
         # and write them into a new `m` file. Use MPI if available.
-        for mi in mpiutil.mpirange(self.telescope.mmax + 1):
+        for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
 
             if os.path.exists(self._svdfile(mi)) and not regen:
                 print ("m index %i. File: %s exists. Skipping..." %
@@ -1620,7 +1621,7 @@ class BeamTransferFullSVD(BeamTransfer):
 
         # For each `m` collect all the `m` sections from each frequency file,
         # and write them into a new `m` file. Use MPI if available.
-        for mi in mpiutil.mpirange(self.telescope.mmax + 1):
+        for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
 
             if os.path.exists(self._svdfile(mi)) and not regen:
                 print ("m index %i. File: %s exists. Skipping..." %

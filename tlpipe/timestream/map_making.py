@@ -308,7 +308,7 @@ class MapMaking(timestream_task.TimestreamTask):
                 if mpiutil.rank0:
                     print 'Use existed timestream_f files in %s' % parent_path
             else:
-                for fi in mpiutil.mpirange(nfreq):
+                for fi in mpiutil.mpirange(nfreq, method='rand'):
                     # Make directory if required
                     if not os.path.exists(tstream._fdir(fi)):
                         os.makedirs(tstream._fdir(fi))
@@ -322,9 +322,7 @@ class MapMaking(timestream_task.TimestreamTask):
 
                 # re-organize data as need for tstream
                 # make load even among nodes
-                for fi in mpiutil.mpirange(max(nfreq, mpiutil.size), method='rand'):
-                    if fi >= nfreq:
-                        continue
+                for fi in mpiutil.mpirange(nfreq, method='rand'):
                     # read the needed data from the temporary file
                     with h5py.File(tmp_file, 'r') as f:
                         vis_fi = f['/timestream'][:, fi, :]

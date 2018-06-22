@@ -222,7 +222,7 @@ class Timestream(object):
         """
 
         # Iterate over local m's, project mode and save to disk.
-        for mi in mpiutil.mpirange(self.telescope.mmax + 1):
+        for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
 
             if os.path.exists(self._svdfile(mi)):
                 print "File %s exists. Skipping..." % self._svdfile(mi)
@@ -271,7 +271,7 @@ class Timestream(object):
 
             return sphmode
 
-        alm_list = mpiutil.parallel_map(_make_alm, range(self.telescope.mmax + 1))
+        alm_list = mpiutil.parallel_map(_make_alm, range(self.telescope.mmax + 1), root=0, method='rand')
 
         if mpiutil.rank0:
 
@@ -310,7 +310,7 @@ class Timestream(object):
 
             return sphmode
 
-        alm_list = mpiutil.parallel_map(_make_alm, range(self.telescope.mmax + 1))
+        alm_list = mpiutil.parallel_map(_make_alm, range(self.telescope.mmax + 1), root=0, method='rand')
 
         if mpiutil.rank0:
 
@@ -369,7 +369,7 @@ class Timestream(object):
         kl = self.manager.kltransforms[self.klname]
 
         # Iterate over local m's, project mode and save to disk.
-        for mi in mpiutil.mpirange(self.telescope.mmax + 1):
+        for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
 
             if os.path.exists(self._klfile(mi)):
                 print "File %s exists. Skipping..." % self._klfile(mi)
@@ -422,7 +422,7 @@ class Timestream(object):
         kl = self.manager.kltransforms[self.klname]
 
         # Iterate over local m's, project mode and save to disk.
-        for mi in mpiutil.mpirange(self.telescope.mmax + 1):
+        for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
 
             evals = kl.evals_m(mi)
 
@@ -471,7 +471,7 @@ class Timestream(object):
 
             return sphmode
 
-        alm_list = mpiutil.parallel_map(_make_alm, range(self.telescope.mmax + 1))
+        alm_list = mpiutil.parallel_map(_make_alm, range(self.telescope.mmax + 1), root=0, method='rand')
 
         if mpiutil.rank0:
 

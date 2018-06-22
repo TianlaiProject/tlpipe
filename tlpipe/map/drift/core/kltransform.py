@@ -485,7 +485,7 @@ class KLTransform(config.Reader):
             print "======== Starting KL calculation ========"
 
         # Iterate list over MPI processes.
-        for mi in mpiutil.mpirange(self.telescope.mmax+1):
+        for mi in mpiutil.mpirange(self.telescope.mmax+1, method='rand'):
             if os.path.exists(self._evfile % mi) and not regen:
                 print "m index %i. File: %s exists. Skipping..." % (mi, (self._evfile % mi))
                 continue
