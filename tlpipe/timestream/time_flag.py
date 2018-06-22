@@ -63,6 +63,7 @@ class Flag(timestream_task.TimestreamTask):
     def flag(self, vis, vis_mask, li, gi, tbl, ts, **kwargs):
         """Function that does the actual flag."""
 
+        MASKRFI = 2
         sigma = self.params['sigma']
         time_window = self.params['time_window']
 
@@ -70,7 +71,7 @@ class Flag(timestream_task.TimestreamTask):
         abs_vis = np.ma.abs(np.ma.array(vis, mask=vis_mask))
         # mask all if valid values less than the given threshold
         if abs_vis.count() < 0.1 * nt or abs_vis.count() <= 3:
-            vis_mask[:] = True
+            vis_mask[:] |= MASKRFI 
             return
 
         if np.ma.count_masked(abs_vis) > 0: # has masked value
@@ -104,4 +105,4 @@ class Flag(timestream_task.TimestreamTask):
         # Addtional threshold
         # inds1 = np.where(np.abs(diff[inds]) > 1.0e-2*np.abs(smooth[inds]))[0]
         # inds = inds[inds1]
-        vis_mask[inds] = True # set mask
+        vis_mask[inds] = MASKRFI # set mask

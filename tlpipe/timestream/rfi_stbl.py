@@ -84,6 +84,9 @@ class RfiStbl(timestream_task.TimestreamTask):
         plot_dets = self.params['plot_dets']
         plot_sigs = self.params['plot_sigs']
         plot_map = self.params['plot_map']
+        MASKNOISE = 1
+        MASKRFI = 2
+        maskbad = np.uint8(255-MASKNOISE)
         siglim = (0.1,0.1)
         ns_on = ts['ns_on'][:]
         vis = ts['vis']
@@ -188,7 +191,7 @@ class RfiStbl(timestream_task.TimestreamTask):
 #
 
                 #Get absolute value of visibilities for this time x freq
-                msk = vis_mask[n1:n2,:,bl] >= 2
+                msk = (vis_mask[n1:n2,:,bl]&maskbad)!=0
                 #Copy to masked array temp
                 temp = np.ma.array(abs(vis[n1:n2,:,bl]),mask=msk)
                 #Average over frequency
@@ -203,10 +206,10 @@ class RfiStbl(timestream_task.TimestreamTask):
                  #Check for valid sigma
                 if sigt<=0.0 or sigt==np.ma.core.MaskedConstant:
                     #No.  Just mask everything and continue with next bl
-                    vis_mask[n1:n2,:,bl] |= 2
+                    vis_mask[n1:n2,:,bl] |= MASKRFI
                     continue
                 if ntmax<5:
-                    vis_mask[n1:n2,:,bl] |= 2
+                    vis_mask[n1:n2,:,bl] |= MASKRFI
                     continue
                 #print("sigt=",sigt,sigtpr,n1,n2,blorder[bl])
                 #ttol is the threshhold for rfi detection based of 
@@ -217,7 +220,7 @@ class RfiStbl(timestream_task.TimestreamTask):
 
                 for nt in range(1,ntmax-3):
                     if quad.mask[nt]:
-                        vis_mask[nt,:,bl] |= 2
+                        vis_mask[nt,:,bl] |= MASKRFI
                         continue
                        #Look for maximum slope change=minimum in quad
                     if quad[nt]>quad[nt+1]:
@@ -296,7 +299,7 @@ class RfiStbl(timestream_task.TimestreamTask):
                 tcount = tcount + 1
                 print("time=",n1+nt,"sumc=",sumc[nt],"sumw=",sumw[nt])
             #mask point fi+1 for all baselines
-                vis_mask[nt+n1,:,:] |= 2
+                vis_mask[nt+n1,:,:] |= MASKRFI
             tplt[n1:n2] = sumc[0:ntmax]
     
 #
@@ -309,7 +312,8 @@ class RfiStbl(timestream_task.TimestreamTask):
             fwid[:,:] = 0
        
             for bl in range(nbl):
-                msk = vis_mask[n1:n2,:,bl] >=2
+
+                msk = (vis_mask[n1:n2,:,bl]&maskbad)!=0
                 #Copy to masked array temp
                 temp = np.ma.array(abs(vis[n1:n2,:,bl]),mask=msk)
  
@@ -406,7 +410,7 @@ class RfiStbl(timestream_task.TimestreamTask):
                 fcount = fcount + 1
                 print("freq=",fi,"sumc=",sumc[fi],"sumw=",sumw[fi])
             #mask point fi+1 for all baselines
-                vis_mask[n1:n2,fi,:] = vis_mask[n1:n2,fi,:] | 2
+                vis_mask[n1:n2,fi,:] |= MASKRFI
 
 #Last - Look for brief increases in the visibility over a narrow range
 #  of time and frequency
@@ -426,7 +430,7 @@ class RfiStbl(timestream_task.TimestreamTask):
                     signif = -quad/sigmaq[:,bl]
   
                     for fi in range(1,nfpt-3):
-                        if vis_mask[nt+n1,fi+1,bl]>=2:
+                        if (vis_mask[nt+n1,fi+1,bl]&maskbad)!=0:
                             continue
                        #Look for maximum slope change=minimum in quad
                         if quad[fi]>quad[fi+1]:
@@ -486,7 +490,7 @@ class RfiStbl(timestream_task.TimestreamTask):
                     count = count + 1
                     print("time,freq=",n1+nt,fi,"sumc=",sumc[fi],"sumw=",sumw[fi])
                     #mask point (t,fi) for all baselines
-                    vis_mask[nt+n1,fi,:] = vis_mask[nt+n1,fi,:] | 2
+                    vis_mask[nt+n1,fi,:] |= MASKRFI
                 tfplt[nt+n1,:] = sumc[:]
 
         logger.info("Count of frequencies masked by rfi %i" % fcount)
@@ -521,8 +525,6 @@ class RfiStbl(timestream_task.TimestreamTask):
             plt.close('all')
 
             if plot_map:
-#        vis_mask[0:3600,10:11,0] = vis_mask[0:3600,10:11,0] | 2
-#        vis_mask[3200:3210,:,0] = vis_mask[3200:3210,:,0] | 2
                 mask_map = vis_mask[:,:,0].transpose(axes=[0,1])
                 plt.figure(figsize=[3,12],dpi=600)
                 plt.pcolormesh(mask_map)

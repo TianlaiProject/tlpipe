@@ -422,6 +422,7 @@ a gain for each feed such that the gain corrected visibilities will be
         plot_resp = self.params['plot_resp']
         plot_adj = self.params['plot_adj']
         plot_chisq = self.params['plot_chisq']
+        MASKNOCAL = 4
         #Baselines to plot
         bl_incl = self.params['bl_incl']
         #Baselines to exclude from plotting when bl_incl='all'
@@ -658,7 +659,7 @@ a gain for each feed such that the gain corrected visibilities will be
             #See if any bad epoch
             if bad > 0:
                     # Mask all times and baselines for this frequency
-                    rt.vis_mask[:,fi,:] = rt.vis_mask[:,fi,:] | 2
+                    rt.vis_mask[:,fi,:] = rt.vis_mask[:,fi,:] | MASKNOCAL
                     message = "Noise source calibration failed for fbin=%i" \
                       % (fi)
                     logger.debug(message)

@@ -204,6 +204,7 @@ class NsCal(timestream_task.TimestreamTask):
         inds = kwargs['inds']
         bls_plt = kwargs['bls_plt']
         freq_plt = kwargs['freq_plt']
+        MASKNOCAL = 4
 
         if np.prod(vis.shape) == 0 :
             return
@@ -228,7 +229,8 @@ class NsCal(timestream_task.TimestreamTask):
                 continue
 
             lower = ind - num_mean
-            off_sec = np.ma.array(vis[lower:ind], mask=(~np.isfinite(vis[lower:ind]))&vis_mask[lower:ind])
+
+            off_sec = np.ma.array(vis[lower:ind], mask=(~np.isfinite(vis[lower:ind]))&(vis_mask[lower:ind]!=0))
             if off_sec.count() == 0: # all are invalid values
                 continue
             if unmasked_only and off_sec.count() < max(2, num_mean/2): # more valid sample to make stable
@@ -258,7 +260,7 @@ class NsCal(timestream_task.TimestreamTask):
         num_valid = len(valid_inds)
         if num_valid <= 3:
             print 'Only have %d valid points, mask all for fi = %d, bl = (%d, %d)...' % (num_valid, fbl[0], fbl[1][0], fbl[1][1])
-            vis_mask[:] = True # mask the vis as no ns_cal has done
+            vis_mask[:] |= MASKNOCAL # mask the vis as no ns_cal has done
             return
 
         phase = np.unwrap(phase) # unwrap 2pi discontinuity
@@ -281,7 +283,7 @@ class NsCal(timestream_task.TimestreamTask):
         # if no such chunk, mask all the data
         num_itp = len(itp_inds)
         if num_itp == 0:
-            vis_mask[:] = True
+            vis_mask[:] |= MASKNOCAL
 
         # get itp pairs
         itp_pairs = []
@@ -301,7 +303,7 @@ class NsCal(timestream_task.TimestreamTask):
 
         # set mask for inds in mask_pairs
         for mp1, mp2 in mask_pairs:
-            vis_mask[mp1:mp2] = True
+            vis_mask[mp1:mp2] |= MASKNOCAL
 
         # interpolate for inds in itp_inds
         all_phase = np.array([np.nan]*nt)

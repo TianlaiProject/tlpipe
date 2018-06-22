@@ -232,7 +232,11 @@ class TimestreamCommon(container.BasicTod):
         # create some new necessary datasets if they do not already exist in file
         if 'vis_mask' not in self.iterkeys():
             # create the mask array
-            vis_mask = np.where(np.isfinite(self.local_vis), False, True)
+            #Change mask from true/false to integer
+            #vis_mask = np.where(np.isfinite(self.local_vis), False, True)
+            vis_mask = np.where(np.isfinite(self.local_vis), \
+                                    np.uint8(0),np.uint8(64))
+
             vis_mask = mpiarray.MPIArray.wrap(vis_mask, axis=self.main_data_dist_axis)
             axis_order = self.main_axes_ordered_datasets[self.main_data_name]
             vis_mask = self.create_main_axis_ordered_dataset(axis_order, 'vis_mask', vis_mask, axis_order)

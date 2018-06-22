@@ -101,6 +101,7 @@ class PsCal(timestream_task.TimestreamTask):
         temperature_convert = self.params['temperature_convert']
         show_progress = self.params['show_progress']
         progress_step = self.params['progress_step']
+        MASKNOCAL = 4
 
         if save_src_vis or subtract_src or apply_gain or save_gain:
             pol_type = ts['pol'].attrs['pol_type']
@@ -242,14 +243,14 @@ class PsCal(timestream_task.TimestreamTask):
                     for j, aj in enumerate(feedno):
                         try:
                             bi = bls.index((ai, aj))
-                            if this_vis_mask[ii, bi] and not np.isfinite(this_vis[ii, bi]):
+                            if this_vis_mask[ii, bi]!=0 and not np.isfinite(this_vis[ii, bi]):
                                 mask_cnt += 1
                                 Vmat[i, j] = 0
                             else:
                                 Vmat[i, j] = this_vis[ii, bi] # xx, yy
                         except ValueError:
                             bi = bls.index((aj, ai))
-                            if this_vis_mask[ii, bi] and not np.isfinite(this_vis[ii, bi]):
+                            if this_vis_mask[ii, bi]!=0 and not np.isfinite(this_vis[ii, bi]):
                                 mask_cnt += 1
                                 Vmat[i, j] = 0
                             else:
@@ -553,7 +554,7 @@ class PsCal(timestream_task.TimestreamTask):
                                     ts.local_vis[:, fi, pi, bi] /= (g1 * np.conj(g2))
                                 else:
                                     # mask the un-calibrated vis
-                                    ts.local_vis_mask[:, fi, pi, bi] = True
+                                    ts.local_vis_mask[:, fi, pi, bi] |= MASKNOCAL
 
                 # save gain to file
                 if save_gain:

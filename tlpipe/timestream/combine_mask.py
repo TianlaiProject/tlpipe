@@ -40,5 +40,4 @@ class Combine(timestream_task.TimestreamTask):
 
     def combine(self, vis, vis_mask, li, gi, tf, ts, **kwargs):
         """Function that does the combine operation."""
-
-        vis_mask[:] = np.sum(vis_mask, axis=2).astype(bool)[:, :, np.newaxis]
+        vis_mask[:] = np.bitwise_or(vis_mask, axis=2).astype(bool)[:, :, np.newaxis]

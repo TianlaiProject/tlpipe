@@ -29,11 +29,13 @@ import numpy as np
 
 def sir1d(mask, eta):
 
+    MASKRFI = 2
     if eta <= 0 or mask.all():
         return mask
 
     if eta >= 1:
-        return np.ones_like(mask)
+        mask |= MASKRFI
+        return mask
 
     size = len(mask)
 
@@ -46,9 +48,9 @@ def sir1d(mask, eta):
     # check mask condition
     for i in xrange(0, size):
         if np.max(M[i+1:]) >= np.min(M[:i+1]):
-            mask[i] = True
+            mask[i] |= MASKRFI
         else:
-            mask[i] = False
+            mask[i] = np.bitwise_and(mask[i],~MASKRFI)
 
     return mask
 

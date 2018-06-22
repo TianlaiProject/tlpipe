@@ -145,15 +145,15 @@ class MapMaking(timestream_task.TimestreamTask):
                 # select the corresponding vis and vis_mask
                 if pol == 'xx':
                     local_vis = ts.local_vis[:, :, 0, :]
-                    local_vis_mask = ts.local_vis_mask[:, :, 0, :]
+                    local_vis_mask = ts.local_vis_mask[:, :, 0, :]!=0
                 elif pol == 'yy':
                     local_vis = ts.local_vis[:, :, 1, :]
-                    local_vis_mask = ts.local_vis_mask[:, :, 1, :]
+                    local_vis_mask = ts.local_vis_mask[:, :, 1, :]!=0
                 elif pol == 'I':
                     xx_vis = ts.local_vis[:, :, 0, :]
-                    xx_vis_mask = ts.local_vis_mask[:, :, 0, :]
+                    xx_vis_mask = ts.local_vis_mask[:, :, 0, :]!=0
                     yy_vis = ts.local_vis[:, :, 1, :]
-                    yy_vis_mask = ts.local_vis_mask[:, :, 1, :]
+                    yy_vis_mask = ts.local_vis_mask[:, :, 1, :]!=0
 
                     local_vis = np.zeros_like(xx_vis)
                     for ti in xrange(local_vis.shape[0]):

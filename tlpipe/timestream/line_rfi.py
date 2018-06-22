@@ -100,6 +100,7 @@ class Flag(timestream_task.TimestreamTask):
         iteration = self.iteration
         freq_flag = kwargs.get('freq_flag')
         time_flag = kwargs.get('time_flag')
+        MASKRFI = 2
 
         time = ts.time[:]
         nt = len(time)
@@ -147,7 +148,7 @@ class Flag(timestream_task.TimestreamTask):
             abs_diff = np.abs(diff - median)
             mad = np.median(abs_diff) / 0.6745
             inds = np.where(abs_diff > freq_sigma*mad)[0] # masked inds
-            vis_mask[:, inds] = True # set mask
+            vis_mask[:, inds] |= MASKRFI # set mask
 
             if plot_fit:
                 plt.figure()
@@ -202,7 +203,7 @@ class Flag(timestream_task.TimestreamTask):
             # Addtional threshold
             # inds1 = np.where(np.abs(diff[inds]) > 1.0e-2*np.abs(smooth[inds]))[0]
             # inds = inds[inds1]
-            vis_mask[inds] = True # set mask
+            vis_mask[inds] |= MASKRFI # set mask
 
             if plot_fit:
                 plt.figure()

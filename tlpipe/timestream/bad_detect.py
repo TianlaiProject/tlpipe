@@ -35,20 +35,22 @@ class Detect(timestream_task.TimestreamTask):
         vis = ts.local_vis
         vis_mask = ts.local_vis_mask
 
+        MASKINVALID = 64
+
         # mask non-finite vis values
-        vis_mask[:] = np.where(np.isfinite(vis), vis_mask, True)
+        vis_mask[:] = np.where(np.isfinite(vis), vis_mask, vis_mask | MASKINVALID)
 
         # mask where the imaginary part of an auto-correlation is non-zero
         if isinstance(ts, RawTimestream):
             for bi, (fi, fj) in enumerate(ts.local_bl):
                 if fi == fj:
-                    vis_mask[..., bi] = np.where(vis[..., bi].imag == 0.0, vis_mask[..., bi], True)
+                    vis_mask[..., bi] = np.where(vis[..., bi].imag == 0.0, vis_mask[..., bi], vis_mask[..., bi] | MASKINVALID)
         elif isinstance(ts, Timestream):
             for bi, (fi, fj) in enumerate(ts.local_bl):
                 for pi, pol in enumerate(ts.local_pol):
                     pol = ts.pol_dict[pol]
                     if fi == fj and pol in ['xx', 'yy']:
-                        vis_mask[..., pi, bi] = np.where(vis[..., pi, bi].imag == 0.0, vis_mask[..., pi, bi], True)
+                        vis_mask[..., pi, bi] = np.where(vis[..., pi, bi].imag == 0.0, vis_mask[..., pi, bi], vis_mask[..., pi, bi] | MASKINVALID)
 
         # mask bl that have no signal
         problematic_bls = []
@@ -57,23 +59,24 @@ class Detect(timestream_task.TimestreamTask):
             bl = tuple(ts.local_bl[bi])
             if isinstance(ts, RawTimestream):
                 # create a copy of vis for this bi, and fill 0 in masked positions
-                vis1 = np.where(ts.local_vis_mask[..., bi], 0, ts.local_vis[..., bi])
+                vis1 = np.where(ts.local_vis_mask[..., bi]!=0, 0, ts.local_vis[..., bi])
                 if np.allclose(vis1, 0): # all zeros
-                    ts.local_vis_mask[..., bi] = True # mask all
+                    ts.local_vis_mask[..., bi] = ts.local_vis_mask[..., bi] | MASKINVALID  # mask all
                     bad_bls.append(bl)
                     problematic_bls.append(bl)
-                elif np.sum(ts.local_vis_mask[..., bi]) >= 0.5 * np.prod(ts.local_vis[..., bi].shape):
+
+                elif np.count_nonzero(ts.local_vis_mask[..., bi]) >= 0.5 * np.prod(ts.local_vis[..., bi].shape):
                     problematic_bls.append(bl)
             elif isinstance(ts, Timestream):
                 for pi, pol in enumerate(ts.local_pol):
                     pol = ts.pol_dict[pol]
                     # create a copy of vis for this bi, and fill 0 in masked positions
-                    vis1 = np.where(ts.local_vis_mask[..., pi, bi], 0, ts.local_vis[..., pi, bi])
+                    vis1 = np.where(ts.local_vis_mask[..., pi, bi]!=0, 0, ts.local_vis[..., pi, bi])
                     if np.allclose(vis1, 0): # all zeros
-                        ts.local_vis_mask[..., pi, bi] = True # mask all
+                        ts.local_vis_mask[..., pi, bi] |= MASKINVALID # mask all
                         bad_bls.append((bl, pol))
                         problematic_bls.append((bl, pol))
-                    elif np.sum(ts.local_vis_mask[..., pi, bi]) >= 0.5 * np.prod(ts.local_vis[..., pi, bi].shape):
+                    elif np.count_nonzero(ts.local_vis_mask[..., pi, bi]) >= 0.5 * np.prod(ts.local_vis[..., pi, bi].shape):
                         problematic_bls.append((bl, pol))
 
 
@@ -110,7 +113,7 @@ class Detect(timestream_task.TimestreamTask):
             # set mask for bad channels
             for bi, (ch1, ch2) in enumerate(ts.local_bl):
                 if ch1 in bchs or ch2 in bchs:
-                    ts.local_vis_mask[..., bi] = True
+                    ts.local_vis_mask[..., bi] |= MASKINVALID
 
         elif isinstance(ts, Timestream):
             problematic_feeds = {}
@@ -146,7 +149,7 @@ class Detect(timestream_task.TimestreamTask):
                 for pi, pol in enumerate(ts.local_pol):
                     pol = ts.pol_dict[pol]
                     if (fd1, pol) in bfeeds or (fd2, pol) in bfeeds:
-                        ts.local_vis_mask[..., pi, bi] = True
+                        ts.local_vis_mask[..., pi, bi] |= MASKINVALID
 
 
         if mpiutil.rank0:

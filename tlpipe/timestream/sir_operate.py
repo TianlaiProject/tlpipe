@@ -43,25 +43,27 @@ class Sir(timestream_task.TimestreamTask):
         """Function that does the actual operation."""
 
         eta = self.params['eta']
+        MASKNOISE = 1
+        MASKRFI = 2
 
         if vis_mask.ndim == 2:
             mask = vis_mask.copy()
             if 'ns_on' in ts.iterkeys():
-                mask[ts['ns_on'][:]] = False
+                mask[ts['ns_on'][:]] &= ~MASKNOISE
             mask = sir_operator.vertical_sir(mask, eta)
             # mask[ts['ns_on'][:]] = True
             vis_mask[:] = sir_operator.horizontal_sir(mask, eta)
             if 'ns_on' in ts.iterkeys():
-                mask[ts['ns_on'][:]] = True
+                mask[ts['ns_on'][:]] |= MASKNOISE
         elif vis_mask.ndim == 3:
             # This shold be done after the combination of all pols
             mask = vis_mask[:, :, 0].copy()
             if 'ns_on' in ts.iterkeys():
-                mask[ts['ns_on'][:]] = False
+                mask[ts['ns_on'][:]] &= ~MASKNOISE
             mask = sir_operator.vertical_sir(mask, eta)
             # mask[ts['ns_on'][:]] = True
             vis_mask[:] = sir_operator.horizontal_sir(mask, eta)[:, :, np.newaxis]
             if 'ns_on' in ts.iterkeys():
-                mask[ts['ns_on'][:]] = True
+                mask[ts['ns_on'][:]] |= MASKNOISE 
         else:
             raise RuntimeError('Invalid shape of vis_mask: %s' % vis_mask.shape)

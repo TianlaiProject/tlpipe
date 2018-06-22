@@ -41,7 +41,7 @@ class Detect(timestream_task.TimestreamTask):
         channel = self.params['channel']
         sigma = self.params['sigma']
         mask_near = max(0, int(self.params['mask_near']))
-
+        MASKNOISE = 1
         rt.redistribute(0) # make time the dist axis
 
         auto_inds = np.where(rt.bl[:, 0]==rt.bl[:, 1])[0].tolist() # inds for auto-correlations
@@ -157,7 +157,8 @@ class Detect(timestream_task.TimestreamTask):
 
         # set vis_mask corresponding to ns_on
         on_inds = np.where(rt['ns_on'].local_data[:])[0]
-        rt.local_vis_mask[on_inds] = True
+        # set mask bit for visibilities when noise source is on
+        rt.local_vis_mask[on_inds] |= MASKNOISE
 
         if mask_near > 0:
             on_inds = np.where(ns_on)[0]
@@ -175,6 +176,7 @@ class Detect(timestream_task.TimestreamTask):
             global_inds = np.arange(start, end).tolist()
             new_on_inds = np.intersect1d(new_on_inds, global_inds)
             local_on_inds = [ global_inds.index(i) for i in new_on_inds ]
-            rt.local_vis_mask[local_on_inds] = True # set mask using global slicing
+            # set mask bit for noise source on using global slicing
+            rt.local_vis_mask[local_on_inds] |= MASKNOISE
 
         return super(Detect, self).process(rt)

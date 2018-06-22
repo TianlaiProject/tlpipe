@@ -1,9 +1,9 @@
 0 Good data
-1 Noise source active
-2 RFI
-4 Invalid calibration
+1 Noise source active (MASKNOISE)
+2 RFI (MASKRFI)
+4 Invalid calibration (MASKNOCAL)
 8
 16
-32
-64 Invalid data (missing, INF, NAN)
-128
+32 Invalid average or rebinning (MASKNOAVE)
+64 Invalid data (missing, INF, NAN) (MASKINVALID)
+128  Mask for daytime data (MASKDAY)

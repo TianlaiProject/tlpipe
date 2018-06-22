@@ -27,6 +27,7 @@ class VarThreshold(combinatorial_threshold.CombinatorialThreshold):
 
     def horizontal_var_threshold(self, length, threshold):
 
+        MASKRFI = 2
         height, width = self.vis.shape
 
         if length > width:
@@ -38,10 +39,11 @@ class VarThreshold(combinatorial_threshold.CombinatorialThreshold):
             for x in xrange(width-length):
                 vis1 = np.ma.compressed(vis[y, x:x+length])
                 if vis1.size > 0 and (np.abs(vis1) > threshold).all():
-                    self.vis_mask[y, x:x+length] = True
+                    self.vis_mask[y, x:x+length] |= MASKRFI
 
     def vertical_var_threshold(self, length, threshold):
 
+        MASKRFI = 2
         height, width = self.vis.shape
 
         if length > height:
@@ -53,7 +55,7 @@ class VarThreshold(combinatorial_threshold.CombinatorialThreshold):
             for y in xrange(height-length):
                 vis1 = np.ma.compressed(vis[y:y+length, x])
                 if vis1.size > 0 and (np.abs(vis1) > threshold).all():
-                    self.vis_mask[y:y+length, x] = True
+                    self.vis_mask[y:y+length, x] |= MASKRFI
 
     def execute_threshold(self, factor, direction):
         for direct in direction:

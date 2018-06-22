@@ -60,7 +60,8 @@ class ReOrder(timestream_task.TimestreamTask):
         ts.create_main_data(vis, recreate=True, copy_attrs=True)
 
         # for vis_mask
-        vis_mask = np.ones((num_int,)+ts.local_vis_mask.shape[1:], dtype=ts['vis_mask'].dtype) # initialize as masked
+        MASKINVALID= 64
+        vis_mask = np.full((num_int,)+ts.local_vis_mask.shape[1:], MASKINVALID, dtype=ts['vis_mask'].dtype) # initialize as masked
         vis_mask[:nt1] = ts.local_vis_mask[ind:ind+nt1]
         # vis_mask[nt1:] = True # mask the completed data
         if not ts['vis'].distributed_axis is None:

@@ -35,8 +35,10 @@ class Rebin(timestream_task.TimestreamTask):
 
         assert isinstance(ts, Timestream), '%s only works for Timestream object' % self.__class__.__name__
 
-        bin_number = self.params['bin_number']
+        MASKNOAVE = 32
 
+        bin_number = self.params['bin_number']
+        
         ts.redistribute('baseline')
 
         nt = len(ts.time)
@@ -60,7 +62,10 @@ class Rebin(timestream_task.TimestreamTask):
                 vis[:, idx] = average(masked_vis, axis=1, weights=weight) # freq mean
                 # rebin vis_mask
                 valid_cnt = np.sum(np.logical_not(ts.local_vis_mask[:, inds]).astype(np.int16) * weight[:, np.newaxis, np.newaxis].astype(np.int16), axis=1) # use int16 to save memory
-                vis_mask[:, idx] = np.where(valid_cnt==0, True, False)
+                cmask = np.full(valid_cnt.shape,-1,dtype=vis_mask.dtype)
+                for i in inds:
+                    cmask[:] &= ts.local_vis_mask[:,i]
+                vis_mask[:, idx] = np.where(valid_cnt==0,MASKNOAVE|cmask,0)
                 del valid_cnt
 
             # create rebinned datasets

@@ -67,18 +67,21 @@ class Stats(timestream_task.TimestreamTask):
         nb = mpiutil.allreduce(lnb, comm=ts.comm)
 
         # un-mask ns-on positions
-        if 'ns_on' in ts.iterkeys():
-            vis_mask[ts['ns_on'][:]] = False
+#        if 'ns_on' in ts.iterkeys():
+#            vis_mask[ts['ns_on'][:]] = False
+#       maskrfi is 1 if rfi bit is set, otherwise 0
+        MASKRFI = 2
+        maskrfi = np.where(np.bitwise_and(vis_mask,MASKRFI),1,0)
 
         # statistics along time axis
-        time_mask = np.sum(vis_mask, axis=(1, 2)).reshape(-1, 1)
+        time_mask = np.sum(maskrfi, axis=(1, 2)).reshape(-1, 1)
         # gather local array to rank0
         time_mask = mpiutil.gather_array(time_mask, axis=1, root=0, comm=ts.comm)
         if mpiutil.rank0:
             time_mask = np.sum(time_mask, axis=1)
 
         # statistics along time axis
-        freq_mask = np.sum(vis_mask, axis=(0, 2)).reshape(-1, 1)
+        freq_mask = np.sum(maskrfi, axis=(0, 2)).reshape(-1, 1)
         # gather local array to rank0
         freq_mask = mpiutil.gather_array(freq_mask, axis=1, root=0, comm=ts.comm)
         if mpiutil.rank0:

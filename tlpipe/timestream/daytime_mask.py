@@ -24,9 +24,9 @@ class Mask(timestream_task.TimestreamTask):
     def process(self, ts):
 
         mask_time_range = self.params['mask_time_range']
-
+        MASKDAY = 128
         local_hour = ts['local_hour'].local_data
         day_inds = np.where(np.logical_and(local_hour>=mask_time_range[0], local_hour<=mask_time_range[1]))[0]
-        ts.local_vis_mask[day_inds] = True # do not change vis directly
+        ts.local_vis_mask[day_inds] |= MASKDAY # do not change vis directly
 
         return super(Mask, self).process(ts)
