@@ -1,0 +1,9 @@
+0 Good data
+1 Noise source active
+2 RFI
+4 Invalid calibration
+8
+16
+32
+64 Invalid data (missing, INF, NAN)
+128
