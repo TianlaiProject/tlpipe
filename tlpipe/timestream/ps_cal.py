@@ -497,7 +497,7 @@ class PsCal(timestream_task.TimestreamTask):
                             num_conj += 1
                 # reduce num_conj from all processes
                 num_conj = mpiutil.allreduce(num_conj, comm=ts.comm)
-                if num_conj > 0.5 * nfeed:
+                if num_conj > 0.5 * (nf * 2 * nfeed): # 2 for 2 pols
                     if mpiutil.rank0:
                         print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
                         print '!!!   Detect data should be their conjugate...   !!!'
