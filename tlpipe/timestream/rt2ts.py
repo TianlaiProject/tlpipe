@@ -26,12 +26,13 @@ class Rt2ts(timestream_task.TimestreamTask):
 
     params_init = {
                     'keep_dist_axis': False,
+                    'destroy_rt': True,
                   }
 
     prefix = 'r2t_'
 
     def process(self, rt):
 
-        ts = rt.separate_pol_and_bl(self.params['keep_dist_axis'])
+        ts = rt.separate_pol_and_bl(self.params['keep_dist_axis'], self.params['destroy_rt'])
 
         return super(Rt2ts, self).process(ts)

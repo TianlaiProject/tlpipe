@@ -928,8 +928,8 @@ class BasicTod(memh5.MemDiskGroup):
         else:
             warnings.warn('Attribute %s does not exist')
 
-        if name in self._time_ordered_attrs_.iterkeys():
-            del self._time_ordered_attrs_[name]
+        if name in self._time_ordered_attrs_:
+            self._time_ordered_attrs_.remove(name)
 
 
     @property
