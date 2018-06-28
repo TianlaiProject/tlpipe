@@ -153,10 +153,10 @@ class NsCal(timestream_task.TimestreamTask):
             # gather ns_cal_phase / ns_cal_amp to rank 0
             ns_cal_phase = mpiutil.gather_array(rt['ns_cal_phase'].local_data, axis=2, root=0, comm=rt.comm)
             phs_unit = rt['ns_cal_phase'].attrs['unit']
-            rt.delete_a_dataset('ns_cal_phase')
+            rt.delete_a_dataset('ns_cal_phase', reserve_hint=False)
             if not phs_only:
                 ns_cal_amp = mpiutil.gather_array(rt['ns_cal_amp'].local_data, axis=2, root=0, comm=rt.comm)
-                rt.delete_a_dataset('ns_cal_amp')
+                rt.delete_a_dataset('ns_cal_amp', reserve_hint=False)
 
             if tag_output_iter:
                 gain_file = output_path(gain_file, iteration=self.iteration)
@@ -182,7 +182,7 @@ class NsCal(timestream_task.TimestreamTask):
                         # save ns_cal_amp
                         f.create_dataset('ns_cal_amp', data=ns_cal_amp)
 
-            rt.delete_a_dataset('ns_cal_time_inds')
+            rt.delete_a_dataset('ns_cal_time_inds', reserve_hint=False)
 
         return super(NsCal, self).process(rt)
 

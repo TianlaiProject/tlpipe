@@ -39,7 +39,11 @@ def ensure_file_list(files):
     if memh5.is_group(files):
         files = [files]
     elif isinstance(files, basestring):
-        files = sorted(glob.glob(files))
+        fls = sorted(glob.glob(files))
+        if len(fls) == 0:
+            files = [ files ]
+        else:
+            files = fls
     elif hasattr(files, '__iter__'):
         # Copy the sequence and make sure it's mutable.
         files = list(files)
@@ -909,28 +913,45 @@ class BasicTod(memh5.MemDiskGroup):
         self.create_main_axis_ordered_dataset(0, name, data, axis_order, recreate, copy_attrs, check_align)
 
 
-    def delete_a_dataset(self, name):
-        """Delete a dataset and also remove it from the hint if it is in it."""
+    def delete_a_dataset(self, name, reserve_hint=True):
+        """Delete a dataset. If `reserve_hint` is False, also remove it from
+        the hint if it is in it.
+        """
         if name in self.iterkeys():
             del self[name]
         else:
             warnings.warn('Dataset %s does not exist')
 
-        if name in self._main_axes_ordered_datasets_.iterkeys():
-            del self._main_axes_ordered_datasets_[name]
-        if name in self._time_ordered_datasets_.iterkeys():
-            del self._time_ordered_datasets_[name]
+        if not reserve_hint:
+            if name in self._main_axes_ordered_datasets_.iterkeys():
+                del self._main_axes_ordered_datasets_[name]
+            if name in self._time_ordered_datasets_.iterkeys():
+                del self._time_ordered_datasets_[name]
 
-    def delete_an_attribute(self, name):
-        """Delete an attribute and also remove it from the hint if it is in it."""
+    def delete_an_attribute(self, name, reserve_hint=True):
+        """Delete an attribute. If `reserve_hint` is False, also remove it from
+        the hint if it is in it.
+        """
         if name in self.attrs.iterkeys():
             del self.attrs[name]
         else:
             warnings.warn('Attribute %s does not exist')
 
-        if name in self._time_ordered_attrs_:
-            self._time_ordered_attrs_.remove(name)
+        if not reserve_hint:
+            if name in self._time_ordered_attrs_:
+                self._time_ordered_attrs_.remove(name)
 
+    def empty(self, reserve_hints=True):
+        """Delete all datasets and attributes in this container. If
+        `reserve_hints` is False, also remove them from the hint if they are in it.
+        """
+        # delete attributes
+        attrs_keys = list(self.attrs.iterkeys())
+        for attrs_name in attrs_keys:
+            self.delete_an_attribute(attrs_name, reserve_hint=reserve_hints)
+        # delete datasets
+        for dset_name in self.iterkeys():
+            self.delete_a_dataset(dset_name, reserve_hint=reserve_hints)
 
     @property
     def history(self):

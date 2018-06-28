@@ -9,6 +9,8 @@ Inheritance diagram
 
 """
 
+import os
+import time
 import re
 import pickle
 import itertools
@@ -730,12 +732,15 @@ class TimestreamCommon(container.BasicTod):
         self.feed_ordered_datasets[name] = axis_order
 
 
-    def delete_a_dataset(self, name):
-        """Delete a dataset and also remove it from the hint if it is in it."""
-        super(TimestreamCommon, self).delete_a_dataset(name)
+    def delete_a_dataset(self, name, reserve_hint=True):
+        """Delete a dataset. If `reserve_hint` is False, also remove it from
+        the hint if it is in it.
+        """
+        super(TimestreamCommon, self).delete_a_dataset(name, reserve_hint=reserve_hint)
 
-        if name in self._feed_ordered_datasets_.iterkeys():
-            del self._feed_ordered_datasets_[name]
+        if not reserve_hint:
+            if name in self._feed_ordered_datasets_.iterkeys():
+                del self._feed_ordered_datasets_[name]
 
 
     def check_status(self):
@@ -873,6 +878,13 @@ class TimestreamCommon(container.BasicTod):
                         for fi, start, stop in outfiles_map:
 
                             et = st + (stop - start)
+                            for i in range(120):
+                                if os.path.isfile(outfiles[fi]):
+                                    break
+                                else:
+                                    time.sleep(0.5)
+                            else:
+                                raise RuntimeError('File %s does not exist' % outfiles[fi])
                             with h5py.File(outfiles[fi], 'r+', libver=libver) as f:
                                 f[dset_name][start:stop] = self[dset_name].local_data[st:et]
                             st = et

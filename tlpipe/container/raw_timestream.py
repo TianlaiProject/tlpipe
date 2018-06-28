@@ -9,6 +9,7 @@ Inheritance diagram
 
 """
 
+import re
 import itertools
 import numpy as np
 import timestream_common
@@ -421,6 +422,12 @@ class RawTimestream(timestream_common.TimestreamCommon):
 
             if destroy_self:
                 self.delete_a_dataset(dset_name)
+
+        # resume hints of self, error may happen if not do so
+        if destroy_self:
+            for key in self.__class__.__dict__.keys():
+                if re.match(self.hints_pattern, key):
+                    setattr(self, key, self.__class__.__dict__[key])
 
         # redistribute self to original axis
         if keep_dist_axis:
