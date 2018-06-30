@@ -308,7 +308,7 @@ class MapMaking(timestream_task.TimestreamTask):
                 if mpiutil.rank0:
                     print 'Use existed timestream_f files in %s' % parent_path
             else:
-                for fi in mpiutil.mpirange(nfreq, method='rand'):
+                for fi in mpiutil.mpirange(nfreq):
                     # Make directory if required
                     if not os.path.exists(tstream._fdir(fi)):
                         os.makedirs(tstream._fdir(fi))
