@@ -67,6 +67,7 @@ class PsCal(timestream_task.TimestreamTask):
                     'calibrator': 'cyg',
                     'catalog': 'misc', # or helm,nvss
                     'vis_conj': False, # if True, conjugate the vis first
+                    'zero_diag': False, # if True, fill 0 to the diagonal of vis matrix before SPCA
                     'span': 60, # second
                     'plot_figs': False,
                     'fig_name': 'gain/gain',
@@ -88,6 +89,7 @@ class PsCal(timestream_task.TimestreamTask):
         calibrator = self.params['calibrator']
         catalog = self.params['catalog']
         vis_conj = self.params['vis_conj']
+        zero_diag = self.params['zero_diag']
         span = self.params['span']
         plot_figs = self.params['plot_figs']
         fig_prefix = self.params['fig_name']
@@ -264,6 +266,10 @@ class PsCal(timestream_task.TimestreamTask):
 
                 # set invalid val to 0
                 Vmat = np.where(np.isfinite(Vmat), Vmat, 0)
+
+                # fill diagonal of Vmat to 0
+                if zero_diag:
+                    np.fill_diagonal(Vmat, 0)
 
                 # initialize the outliers
                 med = np.median(Vmat.real) + 1.0J * np.median(Vmat.imag)
