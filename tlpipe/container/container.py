@@ -1123,7 +1123,7 @@ class BasicTod(memh5.MemDiskGroup):
         return dset_shape, dset_type, outfiles_map
 
 
-    def to_files(self, outfiles, exclude=[], check_status=True, write_hints=True, libver='latest'):
+    def to_files(self, outfiles, exclude=[], check_status=True, write_hints=True, libver='earliest'):
         """Save the data hold in this container to files.
 
         Parameters
@@ -1144,7 +1144,7 @@ class BasicTod(memh5.MemDiskGroup):
             the newest version of these structures without particular concern for
             backwards compatibility, can be performance advantages. The 'earliest'
             option means that HDF5 will make a best effort to be backwards
-            compatible. Default is 'latest'.
+            compatible. Default is 'earliest'.
 
         """
 

@@ -758,7 +758,7 @@ class TimestreamCommon(container.BasicTod):
         if num != 0 and num != 1:
             raise RuntimeError('Not all feed_ordered_datasets have an aligned feed axis')
 
-    def to_files(self, outfiles, exclude=[], check_status=True, write_hints=True, libver='latest', chunk_vis=True, chunk_shape=None, chunk_size=64):
+    def to_files(self, outfiles, exclude=[], check_status=True, write_hints=True, libver='earliest', chunk_vis=True, chunk_shape=None, chunk_size=64):
         """Save the data hold in this container to files.
 
         Parameters
@@ -779,7 +779,7 @@ class TimestreamCommon(container.BasicTod):
             the newest version of these structures without particular concern for
             backwards compatibility, can be performance advantages. The 'earliest'
             option means that HDF5 will make a best effort to be backwards
-            compatible. Default is 'latest'.
+            compatible. Default is 'earliest'.
         chunk_vis : bool, optional
             If True, dataset 'vis' and 'vis_mask' in the saved files will be
             chunked. Default True.
