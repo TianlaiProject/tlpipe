@@ -733,24 +733,14 @@ def simulate(beamtransfer, outdir, tsname, maps=[], ndays=None, resolution=0, ad
     # Create timestream object
     tstream = Timestream(outdir, tsname, beamtransfer)
 
-    completed_file = tstream._tsdir + '/COMPLETED_TIMESTREAM'
-    if os.path.exists(completed_file):
-        if mpiutil.rank0:
-            print "******* timestream-files already generated ********"
-        mpiutil.barrier()
-        return tstream
-
     # Make directory if required
     try:
-        os.makedirs(tstream._tsdir)
+        os.makedirs(tstream.output_directory)
     except OSError:
          # directory exists
          pass
 
     if mpiutil.rank0:
-        # if not os.path.exists(tstream._tsdir):
-        #     os.makedirs(tstream._tsdir)
-
         tstream.save()
 
     ## Read in telescope system
@@ -847,27 +837,30 @@ def simulate(beamtransfer, outdir, tsname, maps=[], ndays=None, resolution=0, ad
     ## If we're simulating noise, create a realisation and add it to col_vis
     if ndays > 0:
 
-        # Fetch the noise powerspectrum
-        noise_ps = tel.noisepower(np.arange(tel.npairs)[:, np.newaxis], np.array(local_freq)[np.newaxis, :], ndays=ndays).reshape(tel.npairs, lfreq)[:, :, np.newaxis]
+        if lfreq > 0:
+            # Fetch the noise powerspectrum
+            noise_ps = tel.noisepower(np.arange(tel.npairs)[:, np.newaxis], np.array(local_freq)[np.newaxis, :], ndays=ndays).reshape(tel.npairs, lfreq)[:, :, np.newaxis]
 
 
-        # Seed random number generator to give consistent noise
-        if seed is not None:
-            # Must include rank such that we don't have massive power deficit from correlated noise
-            np.random.seed(seed + mpiutil.rank)
+            # Seed random number generator to give consistent noise
+            if seed is not None:
+                # Must include rank such that we don't have massive power deficit from correlated noise
+                np.random.seed(seed + mpiutil.rank)
 
-        # Create and weight complex noise coefficients
-        noise_vis = (np.array([1.0, 1.0J]) * np.random.standard_normal(col_vis.shape + (2,))).sum(axis=-1)
-        noise_vis *= (noise_ps / 2.0)**0.5
+            # Create and weight complex noise coefficients
+            noise_vis = (np.array([1.0, 1.0J]) * np.random.standard_normal(col_vis.shape + (2,))).sum(axis=-1)
+            noise_vis *= (noise_ps / 2.0)**0.5
 
-        # Reset RNG
-        if seed is not None:
-            np.random.seed()
+            # Reset RNG
+            if seed is not None:
+                np.random.seed()
 
-        # Add into main noise sims
-        col_vis += noise_vis
+            # Add into main noise sims
+            col_vis += noise_vis
 
-        del noise_vis
+            del noise_vis
+
+        mpiutil.barrier()
 
 
     # Fourier transform m-modes back to get timestream.
@@ -876,9 +869,6 @@ def simulate(beamtransfer, outdir, tsname, maps=[], ndays=None, resolution=0, ad
 
     # The time samples the visibility is calculated at
     tphi = np.linspace(0, 2*np.pi, ntime, endpoint=False)
-
-    # Create timestream object
-    tstream = Timestream(outdir, m)
 
     ## Iterate over the local frequencies and write them to disk.
     for lfi, fi in enumerate(local_freq):
