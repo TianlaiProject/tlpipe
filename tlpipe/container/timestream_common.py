@@ -17,7 +17,7 @@ import itertools
 import numpy as np
 import h5py
 import ephem
-from datetime import datetime
+from datetime import datetime, timedelta
 import container
 from caput import mpiutil
 from caput import mpiarray
@@ -287,8 +287,9 @@ class TimestreamCommon(container.BasicTod):
             else:
                 self['sec1970'].attrs["continuous"] = True
 
-            # generate julian date
-            jul_date = np.array([ date_util.get_juldate(datetime.fromtimestamp(s), tzone=self.infiles[0].attrs['timezone']) for s in sec1970 ], dtype=np.float64) # precision float32 is not enough
+            # generate julian date from sec1970 by getting python date/time
+            # and converting to julian date with util.get_juldate
+            jul_date = np.array([ date_util.get_juldate(datetime.utcfromtimestamp(s), tzone='UTC+00h') for s in sec1970 ], dtype=np.float64) # precision float32 is not enough
             if 'time' == self.main_data_axes[self.main_data_dist_axis]:
                 jul_date = mpiarray.MPIArray.wrap(jul_date, axis=0)
             # if time is just the distributed axis, load jul_date distributed
@@ -299,7 +300,7 @@ class TimestreamCommon(container.BasicTod):
             # generate local time in hour from 0 to 24.0
             def _hour(t):
                 return t.hour + t.minute/60.0 + t.second/3600.0 + t.microsecond/3.6e8
-            local_hour = np.array([ _hour(datetime.fromtimestamp(s).time()) for s in sec1970 ], dtype=np.float64)
+            local_hour = np.array([ _hour((datetime.utcfromtimestamp(s) + timedelta(hours=8)).time()) for s in sec1970 ], dtype=np.float64)
             if 'time' == self.main_data_axes[self.main_data_dist_axis]:
                 local_hour = mpiarray.MPIArray.wrap(local_hour, axis=0)
             # if time is just the distributed axis, load local_hour distributed

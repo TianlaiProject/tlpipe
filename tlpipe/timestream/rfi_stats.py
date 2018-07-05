@@ -8,7 +8,7 @@ Inheritance diagram
 
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy as np
 import timestream_task
 from tlpipe.utils.path_util import output_path
@@ -94,7 +94,7 @@ class Stats(timestream_task.TimestreamTask):
             # plot time_mask
             plt.figure()
             fig, ax = plt.subplots()
-            x_vals = np.array([ datetime.fromtimestamp(s) for s in ts['sec1970'][:] ])
+            x_vals = np.array([ (datetime.utcfromtimestamp(s) + timedelta(hours=8)) for s in ts['sec1970'][:] ])
             xlabel = '%s' % x_vals[0].date()
             x_vals = mdates.date2num(x_vals)
             ax.plot(x_vals, 100*time_mask/np.float(nf*nb))

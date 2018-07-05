@@ -9,7 +9,7 @@ Inheritance diagram
 """
 
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
 import h5py
@@ -334,7 +334,7 @@ class NsCal(timestream_task.TimestreamTask):
                 fig, ax = plt.subplots()
             else:
                 fig, ax = plt.subplots(2, sharex=True)
-            ax_val = np.array([ datetime.fromtimestamp(sec) for sec in rt['sec1970'][:] ])
+            ax_val = np.array([ (datetime.utcfromtimestamp(sec) + timedelta(hours=8)) for sec in rt['sec1970'][:] ])
             xlabel = '%s' % ax_val[0].date()
             ax_val = mdates.date2num(ax_val)
             if order_bl and (bl[0] > bl[1]):

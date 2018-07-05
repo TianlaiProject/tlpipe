@@ -9,7 +9,7 @@ Inheritance diagram
 """
 
 # import pytz
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
 from tlpipe.timestream import timestream_task
@@ -146,7 +146,7 @@ class Plot(timestream_task.TimestreamTask):
             y_aixs = ts['ra_dec'][:, 0]
             y_label = r'RA / radian'
         elif y_axis == 'time':
-            y_aixs = [ datetime.fromtimestamp(s) for s in (ts['sec1970'][0], ts['sec1970'][-1]) ]
+            y_aixs = [ (datetime.utcfromtimestamp(s) + timedelta(hours=8)) for s in (ts['sec1970'][0], ts['sec1970'][-1]) ]
             y_label = '%s' % y_aixs[0].date()
             # convert datetime objects to the correct format for matplotlib to work with
             y_aixs = mdates.date2num(y_aixs)
