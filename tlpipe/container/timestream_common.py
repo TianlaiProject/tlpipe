@@ -260,15 +260,13 @@ class TimestreamCommon(container.BasicTod):
             int_time = self.infiles[0].attrs['inttime']
             sec1970s = []
             nts = []
-            for fh in mpiutil.mpilist(self.infiles, method='con', comm=self.comm):
+            for fh in self.infiles:
                 sec1970s.append(fh.attrs['sec1970'])
                 nts.append(fh[self.main_data_name].shape[0])
             sec1970 = np.zeros(sum(nts), dtype=np.float64) # precision float32 is not enough
             cum_nts = np.cumsum([0] + nts)
             for idx, (nt, sec) in enumerate(zip(nts, sec1970s)):
                 sec1970[cum_nts[idx]:cum_nts[idx+1]] = np.array([ sec + i*int_time for i in xrange(nt)], dtype=np.float64) # precision float32 is not enough
-            # gather local sec1970
-            sec1970 = mpiutil.gather_array(sec1970, root=None, comm=self.comm)
             # select the corresponding section
             sec1970 = sec1970[self.main_data_start:self.main_data_stop][self.main_data_select[0]]
 
@@ -339,23 +337,41 @@ class TimestreamCommon(container.BasicTod):
             self.create_main_time_ordered_dataset('ra_dec', data=ra_dec)
             self['ra_dec'].attrs['unit'] = 'radian'
 
-            # determin if it is the same pointing
-            if self.main_data_dist_axis == 0:
+            # determin if it is the same pointing, the same dec
+            if 'time' == self.main_data_axes[self.main_data_dist_axis]:
                 az_alt = az_alt.local_array
                 ra_dec = ra_dec.local_array
-            # gather local az_alt
-            az_alt = mpiutil.gather_array(az_alt, root=None, comm=self.comm)
-            if np.allclose(az_alt[:, 0], az_alt[0, 0]) and np.allclose(az_alt[:, 1], az_alt[0, 1]):
-                self['az_alt'].attrs['same_pointing'] = True
+                az0 = mpiutil.bcast(az_alt[0, 0], root=0, comm=self.comm)
+                alt0 = mpiutil.bcast(az_alt[0, 1], root=0, comm=self.comm)
+                dec0 = mpiutil.bcast(ra_dec[0, 1], root=0, comm=self.comm)
+                if np.allclose(az_alt[:, 0], az0) and np.allclose(az_alt[:, 1], alt0):
+                    local_same_pointing = 1
+                else:
+                    local_same_pointing = 0
+                if np.allclose(ra_dec[:, 1], dec0):
+                    local_same_dec = 1
+                else:
+                    local_same_dec = 0
+                same_pointing = mpiutil.allreduce(local_same_pointing, op=mpiutil.MIN, comm=self.comm)
+                same_dec = mpiutil.allreduce(local_same_dec, op=mpiutil.MIN, comm=self.comm)
+                if same_pointing == 1:
+                    self['az_alt'].attrs['same_pointing'] = True
+                else:
+                    self['az_alt'].attrs['same_pointing'] = False
+                if same_dec == 1:
+                    self['ra_dec'].attrs['same_dec'] = True
+                else:
+                    self['ra_dec'].attrs['same_dec'] = False
             else:
-                self['az_alt'].attrs['same_pointing'] = False
-            # determin if it is the same dec
-            # gather local ra_dec
-            ra_dec = mpiutil.gather_array(ra_dec, root=None, comm=self.comm)
-            if np.allclose(ra_dec[:, 1], ra_dec[0, 1]):
-                self['ra_dec'].attrs['same_dec'] = True
-            else:
-                self['ra_dec'].attrs['same_dec'] = False
+                if np.allclose(az_alt[:, 0], az_alt[0, 0]) and np.allclose(az_alt[:, 1], az_alt[0, 1]):
+                    self['az_alt'].attrs['same_pointing'] = True
+                else:
+                    self['az_alt'].attrs['same_pointing'] = False
+
+                if np.allclose(ra_dec[:, 1], ra_dec[0, 1]):
+                    self['ra_dec'].attrs['same_dec'] = True
+                else:
+                    self['ra_dec'].attrs['same_dec'] = False
 
 
     @property
