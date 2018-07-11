@@ -243,7 +243,7 @@ class Timestream(object):
 
     #======== Make map from uncleaned stream ============
 
-    def mapmake_full(self, nside, mapname, nbin=None, dirty=False, method='svd', normalize=True, threshold=1.0e3, eps=0.01):
+    def mapmake_full(self, nside, mapname, nbin=None, dirty=False, method='svd', normalize=True, threshold=1.0e3, eps=0.01, prior_map_file=None):
 
         nfreq = self.telescope.nfreq
         if nbin is None:
@@ -253,6 +253,16 @@ class Timestream(object):
                 nbin = nfreq
             else:
                 nbin = int(nbin)
+
+        if prior_map_file is not None:
+            # read in the prior sky map
+            with h5py.File(prior_map_file, 'r') as f:
+                prior_map = f['map'][:] # shape (nbin, npol, npix)
+
+            # alm of the prior map
+            alm0 = hputil.sphtrans_sky(prior_map, lmax=self.telescope.lmax).reshape(nbin, self.telescope.num_pol_sky, self.telescope.lmax+1, self.telescope.lmax+1) # shape (nbin, npol, lmax+1, lmax+1)
+        else:
+            alm0 = None
 
         def _make_alm(mi):
 
@@ -265,7 +275,9 @@ class Timestream(object):
                 if method == 'svd':
                     sphmode = self.beamtransfer.project_vector_telescope_to_sky(mi, mmode, nbin)
                 elif method == 'tk':
-                    sphmode = self.beamtransfer.project_vector_telescope_to_sky_tk(mi, mmode, nbin, eps=eps)
+                    # sphmode = self.beamtransfer.project_vector_telescope_to_sky_tk(mi, mmode, nbin, eps=eps)
+                    mmode0 = alm0[:, :, :, mi] if alm0 is not None else None
+                    sphmode = self.beamtransfer.project_vector_telescope_to_sky_tk(mi, mmode, nbin, eps=eps, mmode0=mmode0)
                 else:
                     raise ValueError('Unknown map-making method %s' % method)
 

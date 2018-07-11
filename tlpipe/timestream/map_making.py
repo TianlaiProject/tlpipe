@@ -56,6 +56,7 @@ class MapMaking(timestream_task.TimestreamTask):
                     'no_m_zero': True,
                     'simulate': False,
                     'input_maps': [],
+                    'prior_map': None, # or 'prior.hdf5'
                     'add_noise': True,
                     'dirty_map': False,
                     'nbin': None, # use this if multi-freq synthesize
@@ -88,6 +89,7 @@ class MapMaking(timestream_task.TimestreamTask):
         no_m_zero = self.params['no_m_zero']
         simulate = self.params['simulate']
         input_maps = self.params['input_maps']
+        prior_map = self.params['prior_map']
         add_noise = self.params['add_noise']
         dirty_map = self.params['dirty_map']
         nbin = self.params['nbin']
@@ -297,7 +299,6 @@ class MapMaking(timestream_task.TimestreamTask):
 
         if simulate:
             ndays = 733
-            print ndays
             tstream = timestream.simulate(bt, ts_dir, ts_name, input_maps, ndays, add_noise=add_noise)
         else:
             # timestream and map-making
@@ -361,7 +362,7 @@ class MapMaking(timestream_task.TimestreamTask):
         if dirty_map:
             tstream.mapmake_full(nside, 'map_full_dirty.hdf5', nbin, dirty=True, method=method, normalize=normalize, threshold=threshold)
         else:
-            tstream.mapmake_full(nside, 'map_full.hdf5', nbin, dirty=False, method=method, normalize=normalize, threshold=threshold, eps=eps)
+            tstream.mapmake_full(nside, 'map_full.hdf5', nbin, dirty=False, method=method, normalize=normalize, threshold=threshold, eps=eps, prior_map_file=prior_map)
 
         # ts.add_history(self.history)
 

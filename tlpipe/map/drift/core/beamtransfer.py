@@ -1114,7 +1114,7 @@ class BeamTransfer(object):
 
     project_vector_backward = project_vector_telescope_to_sky
 
-    def project_vector_telescope_to_sky_tk(self, mi, vec, nbin=None, eps=0.01):
+    def project_vector_telescope_to_sky_tk(self, mi, vec, nbin=None, eps=0.01, mmode0=None):
         """Invert a vector from the telescope space onto the sky using
         the Tikhonov regularization method. This is the map-making process.
 
@@ -1137,6 +1137,10 @@ class BeamTransfer(object):
         beam = beam.reshape((nfreq, self.ntel, self.nsky))
         # beam = beam[:, 0].reshape((nfreq, -1, self.nsky)) # positive m only
 
+        # if prior mmode not None
+        if mmode0 is not None:
+            mmode0 = mmode0.reshape((nfreq, self.nsky))
+
         n, s, e = mpiutil.split_m(nfreq, nbin)
 
         vecb = np.zeros((nbin, self.telescope.num_pol_sky, self.telescope.lmax + 1), dtype=np.complex128)
@@ -1148,7 +1152,10 @@ class BeamTransfer(object):
             BB = np.dot(B.T.conj(), B)
             np.fill_diagonal(BB, eps + np.diag(BB))
             vec1 = vec[s[bi]:e[bi]].reshape(-1)
-            vecb[bi] = np.dot(la.pinv(BB), np.dot(B.T.conj(), vec1))
+            if mmode0 is not None:
+                vecb[bi] = np.dot(la.pinv(BB), np.dot(B.T.conj(), vec1) + eps * mmode0[bi])
+            else:
+                vecb[bi] = np.dot(la.pinv(BB), np.dot(B.T.conj(), vec1))
 
         return vecb
 
