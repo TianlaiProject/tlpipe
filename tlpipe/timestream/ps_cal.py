@@ -114,8 +114,7 @@ class PsCal(timestream_task.TimestreamTask):
             feedno = ts['feedno'][:].tolist()
             pol = [ ts.pol_dict[p] for p in ts['pol'][:] ] # as string
             gain_pd = {'xx': 0, 'yy': 1,    0: 'xx', 1: 'yy'} # for gain related op
-            bl = mpiutil.gather_array(ts.local_bl[:], root=None, comm=ts.comm)
-            bls = [ tuple(b) for b in bl ]
+            bls = mpiutil.gather_array(ts.local_bl[:], root=None, comm=ts.comm)
             # # antpointing = np.radians(ts['antpointing'][-1, :, :]) # radians
             # transitsource = ts['transitsource'][:]
             # transit_time = transitsource[-1, 0] # second, sec1970
@@ -205,24 +204,33 @@ class PsCal(timestream_task.TimestreamTask):
             del lvis_mask
             tfp_len = len(tfp_linds)
 
+            cnan = complex(np.nan, np.nan) # complex nan
             if save_src_vis or subtract_src:
                 # save calibrator src vis
-                lsrc_vis = np.empty((tfp_len, nfeed, nfeed), dtype=ts.vis.dtype)
-                lsrc_vis[:] = complex(np.nan, np.nan)
+                lsrc_vis = np.full((tfp_len, nfeed, nfeed), cnan, dtype=ts.vis.dtype)
                 if save_src_vis:
                     # save sky vis
-                    lsky_vis = np.empty((tfp_len, nfeed, nfeed), dtype=ts.vis.dtype)
-                    lsky_vis[:] = complex(np.nan, np.nan)
+                    lsky_vis = np.full((tfp_len, nfeed, nfeed), cnan, dtype=ts.vis.dtype)
                     # save outlier vis
-                    lotl_vis = np.empty((tfp_len, nfeed, nfeed), dtype=ts.vis.dtype)
-                    lotl_vis[:] = complex(np.nan, np.nan)
+                    lotl_vis = np.full((tfp_len, nfeed, nfeed), cnan, dtype=ts.vis.dtype)
 
             if apply_gain or save_gain:
-                lGain = np.empty((tfp_len, nfeed), dtype=ts.vis.dtype)
-                lGain[:] = complex(np.nan, np.nan)
+                lGain = np.full((tfp_len, nfeed), cnan, dtype=ts.vis.dtype)
+
+            # find indices mapping between Vmat and vis
+            # bis = range(nbl)
+            bis_conj = [] # indices that shold be conj
+            mis = [] # indices in the nfeed x nfeed matrix by flatten it to a vector
+            mis_conj = [] # indices (of conj vis) in the nfeed x nfeed matrix by flatten it to a vector
+            for bi, (ai, aj) in enumerate(bls):
+                ai, aj = ai - 1, aj - 1 # ai/aj starts from 1
+                mis.append(ai * nfeed + aj)
+                if ai != aj:
+                    bis_conj.append(bi)
+                    mis_conj.append(aj * nfeed + ai)
 
             # construct visibility matrix for a single time, freq, pol
-            Vmat = np.zeros((nfeed, nfeed), dtype=ts.vis.dtype)
+            Vmat = np.full((nfeed, nfeed), cnan, dtype=ts.vis.dtype)
             Sc = s.get_jys()
             if show_progress and mpiutil.rank0:
                 pg = progress.Progress(tfp_len, step=progress_step)
@@ -239,33 +247,18 @@ class PsCal(timestream_task.TimestreamTask):
                 # get the topocentric coordinate of the calibrator at the current time
                 # s_top = s.get_crds('top', ncrd=3)
                 # aa.sim_cache(cat.get_crds('eq', ncrd=3)) # for compute bm_response and sim
-                mask_cnt = 0
-                for i, ai in enumerate(feedno):
-                    for j, aj in enumerate(feedno):
-                        try:
-                            bi = bls.index((ai, aj))
-                            if this_vis_mask[ii, bi] and not np.isfinite(this_vis[ii, bi]):
-                                mask_cnt += 1
-                                Vmat[i, j] = 0
-                            else:
-                                Vmat[i, j] = this_vis[ii, bi] # xx, yy
-                        except ValueError:
-                            bi = bls.index((aj, ai))
-                            if this_vis_mask[ii, bi] and not np.isfinite(this_vis[ii, bi]):
-                                mask_cnt += 1
-                                Vmat[i, j] = 0
-                            else:
-                                Vmat[i, j] = np.conj(this_vis[ii, bi]) # xx, yy
+                Vmat.flat[mis] = np.ma.array(this_vis[ii], mask=this_vis_mask[ii]).filled(cnan)
+                Vmat.flat[mis_conj] = np.ma.array(this_vis[ii, bis_conj], mask=this_vis_mask[ii, bis_conj]).conj().filled(cnan)
 
                 if save_src_vis:
                     lsky_vis[ii] = Vmat
 
-                # if too many masks
-                if mask_cnt > 0.3 * nfeed**2:
-                    continue
-
                 # set invalid val to 0
-                Vmat = np.where(np.isfinite(Vmat), Vmat, 0)
+                invalid = ~np.isfinite(Vmat) # a bool array
+                # if too many masks
+                if np.where(invalid)[0].shape[0] > 0.3 * nfeed**2:
+                    continue
+                Vmat[invalid] = 0
 
                 # fill diagonal of Vmat to 0
                 if zero_diag:
@@ -445,8 +438,7 @@ class PsCal(timestream_task.TimestreamTask):
 
             if apply_gain or save_gain:
                 # flag outliers in lGain along each feed
-                lG_abs = np.empty_like(lGain, dtype=lGain.real.dtype)
-                lG_abs[:] = np.nan
+                lG_abs = np.full_like(lGain, np.nan, dtype=lGain.real.dtype)
                 for i in range(lGain.shape[0]):
                     valid_inds = np.where(np.isfinite(lGain[i]))[0]
                     if len(valid_inds) > 3:
@@ -480,8 +472,7 @@ class PsCal(timestream_task.TimestreamTask):
                 fpd_linds = mpiutil.mpilist(fpd_inds, method='con', comm=ts.comm)
                 del fpd_inds
                 # create data to save the solved gain for each feed
-                lgain = np.zeros((len(fpd_linds),), dtype=Gain.dtype) # gain for each feed
-                lgain[:] = complex(np.nan, np.nan)
+                lgain = np.full((len(fpd_linds),), cnan, dtype=Gain.dtype) # gain for each feed
 
                 # check for conj
                 num_conj = 0
