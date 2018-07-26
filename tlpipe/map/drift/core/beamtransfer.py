@@ -1152,10 +1152,15 @@ class BeamTransfer(object):
             BB = np.dot(B.T.conj(), B)
             np.fill_diagonal(BB, eps + np.diag(BB))
             vec1 = vec[s[bi]:e[bi]].reshape(-1)
+            try:
+                BBi = la.pinv(BB)
+            except np.linalg.linalg.LinAlgError:
+                print 'Compute pinv of BB failed for mi = %d, bi = %d' % (mi, bi)
+                continue
             if mmode0 is not None:
-                vecb[bi] = np.dot(la.pinv(BB), np.dot(B.T.conj(), vec1) + eps * mmode0[bi])
+                vecb[bi] = np.dot(BBi, np.dot(B.T.conj(), vec1) + eps * mmode0[bi])
             else:
-                vecb[bi] = np.dot(la.pinv(BB), np.dot(B.T.conj(), vec1))
+                vecb[bi] = np.dot(BBi, np.dot(B.T.conj(), vec1))
 
         return vecb
 
