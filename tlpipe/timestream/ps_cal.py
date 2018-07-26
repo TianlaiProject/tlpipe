@@ -168,11 +168,14 @@ class PsCal(timestream_task.TimestreamTask):
             start_ind = transit_ind - np.int(span / int_time)
             end_ind = transit_ind + np.int(span / int_time) + 1 # plus 1 to make transit_ind is at the center
 
-            # check if data contain this range
-            if start_ind < 0:
-                raise RuntimeError('start_ind: %d < 0' % start_ind)
-            if end_ind > ts.vis.shape[0]:
-                raise RuntimeError('end_ind: %d > %d' % (end_ind, ts.vis.shape[0]))
+            start_ind = max(0, start_ind)
+            end_ind = min(end_ind, ts.vis.shape[0])
+
+            # # check if data contain this range
+            # if start_ind < 0:
+            #     raise RuntimeError('start_ind: %d < 0' % start_ind)
+            # if end_ind > ts.vis.shape[0]:
+            #     raise RuntimeError('end_ind: %d > %d' % (end_ind, ts.vis.shape[0]))
 
             if vis_conj:
                 ts.local_vis[:] = ts.local_vis.conj()
@@ -402,7 +405,11 @@ class PsCal(timestream_task.TimestreamTask):
                         f.create_dataset('outlier_vis', shp, dtype=lotl_vis.dtype)
                         f.attrs['calibrator'] = calibrator
                         f.attrs['dim'] = 'time, freq, pol, feed, feed'
-                        f.attrs['time'] = ts.time[start_ind:end_ind]
+                        try:
+                            f.attrs['time'] = ts.time[start_ind:end_ind]
+                        except RuntimeError:
+                            f.create_dataset('time', data=ts.time[start_ind:end_ind])
+                            f.attrs['time'] = '/time'
                         f.attrs['freq'] = freq
                         f.attrs['pol'] = np.array(['xx', 'yy'])
                         f.attrs['feed'] = np.array(feedno)
@@ -449,9 +456,8 @@ class PsCal(timestream_task.TimestreamTask):
                         lG_abs[i, valid_inds] = np.where(vabs_diff>3.0*vmad, np.nan, vabs)
 
                 # choose data slice near the transit time
-                c = nt/2 # center ind
-                li = max(0, c - 10)
-                hi = min(nt, c + 10 + 1)
+                li = max(0, transit_ind - 10)
+                hi = min(nt, transit_ind + 10 + 1)
                 # compute s_top for this time range
                 n0 = np.zeros(((hi-li), 3))
                 for ti, jt in enumerate(ts.time[start_ind:end_ind][li:hi]):
@@ -564,7 +570,11 @@ class PsCal(timestream_task.TimestreamTask):
                             dset = f.create_dataset('Gain', (nt, nf, 2, nfeed), dtype=Gain.dtype)
                             dset.attrs['calibrator'] = calibrator
                             dset.attrs['dim'] = 'time, freq, pol, feed'
-                            dset.attrs['time'] = ts.time[start_ind:end_ind]
+                            try:
+                                dset.attrs['time'] = ts.time[start_ind:end_ind]
+                            except RuntimeError:
+                                f.create_dataset('time', data=ts.time[start_ind:end_ind])
+                                dset.attrs['time'] = '/time'
                             dset.attrs['freq'] = freq
                             dset.attrs['pol'] = np.array(['xx', 'yy'])
                             dset.attrs['feed'] = np.array(feedno)
