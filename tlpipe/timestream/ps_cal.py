@@ -76,6 +76,7 @@ class PsCal(timestream_task.TimestreamTask):
                     'subtract_src': False, # subtract vis of the calibrator from data
                     'apply_gain': True,
                     'save_gain': False,
+                    'save_phs_change': False,
                     'gain_file': 'gain/gain.hdf5',
                     'temperature_convert': False,
                   }
@@ -99,6 +100,7 @@ class PsCal(timestream_task.TimestreamTask):
         subtract_src = self.params['subtract_src']
         apply_gain = self.params['apply_gain']
         save_gain = self.params['save_gain']
+        save_phs_change = self.params['save_phs_change']
         gain_file = self.params['gain_file']
         temperature_convert = self.params['temperature_convert']
         show_progress = self.params['show_progress']
@@ -464,6 +466,12 @@ class PsCal(timestream_task.TimestreamTask):
                     aa.set_jultime(jt)
                     s.compute(aa)
                     n0[ti] = s.get_crds('top', ncrd=3)
+                if save_phs_change:
+                    n0t = np.zeros((nt, 3))
+                    for ti, jt in enumerate(ts.time[start_ind:end_ind]):
+                        aa.set_jultime(jt)
+                        s.compute(aa)
+                        n0t[ti] = s.get_crds('top', ncrd=3)
 
                 # get the positions of feeds
                 feedpos = ts['feedpos'][:]
@@ -479,6 +487,8 @@ class PsCal(timestream_task.TimestreamTask):
                 del fpd_inds
                 # create data to save the solved gain for each feed
                 lgain = np.full((len(fpd_linds),), cnan, dtype=Gain.dtype) # gain for each feed
+                if save_phs_change:
+                    lphs = np.full((nt, len(fpd_linds)), np.nan, dtype=Gain.real.dtype) # phase change with time for each feed
 
                 # check for conj
                 num_conj = 0
@@ -526,23 +536,30 @@ class PsCal(timestream_task.TimestreamTask):
                         Gi = Gain.local_array[li:hi, ii]
                         e_phs = np.dot(ef[inds].conj(), Gi[inds]/y[inds]) / len(inds)
                         ea = np.abs(e_phs)
-                        if np.abs(ea - 1.0) < 0.01:
+                        if np.abs(ea - 1.0) < 0.1:
                             # compute gain for this feed
                             lgain[ii] = mag * e_phs
+                            if save_phs_change:
+                                lphs[:, ii] = np.angle(np.exp(-2.0J * np.pi * np.dot(n0t, ui)) * Gain.local_array[:, ii])
                         else:
                             e_phs_conj = np.dot(ef[inds], Gi[inds]/y[inds]) / len(inds)
                             eac = np.abs(e_phs_conj)
                             if eac > ea:
                                 if np.abs(eac - 1.0) < 0.01:
-                                    print '%d, %d, %d: may need to be conjugated' % (fi, pi, di)
+                                    print 'feedno = %d, fi = %d, pol = %s: may need to be conjugated' % (feedno[di], fi, gain_pd[pi])
                             else:
-                                print '%d, %d, %d: maybe wrong abs(e_phs):' % (fi, pi, di), ea
+                                print 'feedno = %d, fi = %d, pol = %s: maybe wrong abs(e_phs): %s' % (feedno[di], fi, gain_pd[pi], ea)
 
 
                 # gather local gain
                 gain = mpiutil.gather_array(lgain, axis=0, root=None, comm=ts.comm)
                 del lgain
                 gain = gain.reshape(nf, 2, nfeed)
+                if save_phs_change:
+                    phs = mpiutil.gather_array(lphs, axis=1, root=0, comm=ts.comm)
+                    del lphs
+                    if mpiutil.rank0:
+                        phs = phs.reshape(nt, nf, 2, nfeed)
 
                 # apply gain to vis
                 if apply_gain:
@@ -585,6 +602,9 @@ class PsCal(timestream_task.TimestreamTask):
                             dset.attrs['freq'] = freq
                             dset.attrs['pol'] = np.array(['xx', 'yy'])
                             dset.attrs['feed'] = np.array(feedno)
+                            # save phs
+                            if save_phs_change:
+                                f.create_dataset('phs', data=phs)
 
                     mpiutil.barrier()
 
