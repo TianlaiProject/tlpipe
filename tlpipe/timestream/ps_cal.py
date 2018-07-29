@@ -349,6 +349,8 @@ class PsCal(timestream_task.TimestreamTask):
                 if apply_gain or save_gain:
                     e, U = la.eigh(V0 / Sc[fi], eigvals=(nfeed-1, nfeed-1))
                     g = U[:, -1] * e[-1]**0.5
+                    if g[0].real < 0:
+                        g *= -1.0 # make all g[0] phase 0, instead of pi
                     lGain[ii] = g
 
                     # plot Gain
@@ -458,8 +460,8 @@ class PsCal(timestream_task.TimestreamTask):
                         lG_abs[i, valid_inds] = np.where(vabs_diff>3.0*vmad, np.nan, vabs)
 
                 # choose data slice near the transit time
-                li = max(0, transit_ind - 10)
-                hi = min(nt, transit_ind + 10 + 1)
+                li = max(start_ind, transit_ind - 10) - start_ind
+                hi = min(end_ind, transit_ind + 10 + 1) - start_ind
                 # compute s_top for this time range
                 n0 = np.zeros(((hi-li), 3))
                 for ti, jt in enumerate(ts.time[start_ind:end_ind][li:hi]):
