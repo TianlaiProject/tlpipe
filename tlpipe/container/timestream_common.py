@@ -248,6 +248,14 @@ class TimestreamCommon(container.BasicTod):
             freq_axis = self.main_data_axes.index('frequency')
             freq = freq[self.main_data_select[freq_axis]]
 
+            # # frequency correction for the early observational data of cylinder array
+            # # correct freq only once here
+            # if self.is_cylinder:
+            #     # compare in Beijing time both
+            #     if datetime.strptime(self.attrs['obstime'][-1], "%Y/%m/%d %H:%M:%S.%f") < datetime.strptime('2018/06/06', "%Y/%m/%d"):
+            #         # cylinder data before June 6, 2018 needs to correct the frequency
+            #         freq += 0.9765625 # MHz
+
             # if frequency is just the distributed axis, load freq distributed
             if 'frequency' == self.main_data_axes[self.main_data_dist_axis]:
                 freq = mpiarray.MPIArray.from_numpy_array(freq)
