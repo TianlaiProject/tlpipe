@@ -1,0 +1,62 @@
+# -*- mode: python; -*-
+#
+
+import os
+
+from tlpipe.plot import plot_waterfall
+
+data_base = os.getenv('DATA_BASE')
+
+pipe_tasks = []
+pipe_outdir = data_base + 'meerkat/'
+pipe_logging = 'info'
+
+data_path = data_base + '/meerkat/raw/'
+
+# for the 1Hz data
+file_name = '1474580580'
+bad_time_list = [[3437, 3520]]
+bad_freq_list = [[None, 2190], [2473, 2548], [2696, 2704], [2900, None]]
+
+# # for the 20Hz data
+# file_name = '1474580092'
+# bad_time_list = [[0,  2064], [5664, None]]
+# bad_freq_list = [[None, 2190], [2473, 2548], [2696, 2704], [2900, None]]
+
+#bad_freq_list = [[300, 500], [820, 845], [1014, 1087], 
+#                 [1100, 2150], [2695, 2702], [2890, 3010],
+#                 [3190, 3710], [3900, None]]
+
+n_bins    = 20 
+mode_list = [0, 1, 2, 5]
+ps_method = 'lombscargle' #'fft'
+prewhiten = True
+
+main_data = 'vis_sub05modes' # vis, modes01, vis_sub01modes
+
+input_files = ['%s.h5'%file_name, ]
+
+# ===================================================================
+# ==                         for plot                              ==
+# ===================================================================
+
+
+pipe_tasks.append(plot_waterfall.PlotMeerKAT)
+
+
+# ===================================================================
+# ==             details for parameter defination                  ==
+# ===================================================================
+
+
+# waterfall plots
+#pkat_input_files = m2t_output_files
+pkat_input_files = ['svd/%s.h5'%file_name, ]
+#pkat_input_files = todsvd_output_files
+pkat_re_scale = 2.
+pkat_main_data = main_data
+#pkat_main_data = 'vis_sub00modes'
+pkat_fig_name = 'wf/%s'%file_name
+pkat_flag_mask = True
+
+

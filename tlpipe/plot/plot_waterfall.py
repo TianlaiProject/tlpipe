@@ -23,6 +23,7 @@ from matplotlib.ticker import MaxNLocator, AutoMinorLocator
 
 # tz = pytz.timezone('Asia/Shanghai')
 
+
 class Plot(timestream_task.TimestreamTask):
     """Waterfall plot for Timestream.
 
@@ -242,4 +243,142 @@ class Plot(timestream_task.TimestreamTask):
         else:
             fig_name = output_path(fig_name)
         plt.savefig(fig_name)
+        plt.close()
+
+class PlotMeerKAT(timestream_task.TimestreamTask):
+
+    params_init = {
+            'main_data' : 'vis',
+            'flag_mask' : True,
+            'flag_ns'   : False,
+            're_scale'  : None,
+            'vmin'      : None,
+            'vmax'      : None,
+            'fig_name'  : 'wf/',
+            }
+    prefix = 'pkat_'
+
+    def process(self, ts):
+
+        ts.main_data_name = self.params['main_data']
+
+        ts.redistribute('baseline')
+
+        func = ts.bl_data_operate
+
+        show_progress = self.params['show_progress']
+        progress_step = self.params['progress_step']
+
+        func(self.plot, full_data=True, show_progress=show_progress, 
+                progress_step=progress_step, keep_dist_axis=False)
+
+        return super(PlotMeerKAT, self).process(ts)
+
+
+    def plot(self, vis, vis_mask, li, gi, bl, ts, **kwargs):
+
+        vis = np.abs(vis)
+
+        flag_mask = self.params['flag_mask']
+        flag_ns   = self.params['flag_ns']
+        re_scale  = self.params['re_scale']
+        vmin      = self.params['vmin']
+        vmax      = self.params['vmax']
+        fig_prefix = self.params['fig_name']
+        main_data = self.params['main_data']
+
+        if flag_mask:
+            vis1 = np.ma.array(vis, mask=vis_mask)
+        elif flag_ns:
+            if 'ns_on' in ts.iterkeys():
+                vis1 = vis.copy()
+                on = np.where(ts['ns_on'][:])[0]
+                vis1[on] = complex(np.nan, np.nan)
+                #if not interpolate_ns:
+                #    vis1[on] = complex(np.nan, np.nan)
+                #else:
+                #    off = np.where(np.logical_not(ts['ns_on'][:]))[0]
+                #    for fi in xrange(vis1.shape[1]):
+                #        itp_real = InterpolatedUnivariateSpline(off, vis1[off, fi].real)
+                #        itp_imag= InterpolatedUnivariateSpline(off, vis1[off, fi].imag)
+                #        vis1[on, fi] = itp_real(on) + 1.0J * itp_imag(on)
+            else:
+                vis1 = vis
+        else:
+            vis1 = vis
+
+        y_axis = ts.freq[:] * 1.e-3
+        y_label = r'$\nu$ / GHz'
+        x_axis = [ datetime.fromtimestamp(s) for s in ts['sec1970']]
+        x_label = '%s' % x_axis[0].date()
+        # convert datetime objects to the correct format for matplotlib to work with
+        x_axis = mdates.date2num(x_axis)
+
+        bad_time = np.all(vis_mask, axis=(1, 2))
+        bad_freq = np.all(vis_mask, axis=(0, 2))
+
+        good_time_st = np.argwhere(~bad_time)[ 0, 0]
+        good_time_ed = np.argwhere(~bad_time)[-1, 0]
+        vis1 = vis1[good_time_st:good_time_ed, ...]
+        x_axis = x_axis[good_time_st:good_time_ed]
+
+        good_freq_st = np.argwhere(~bad_freq)[ 0, 0]
+        good_freq_ed = np.argwhere(~bad_freq)[-1, 0]
+        vis1 = vis1[:, good_freq_st:good_freq_ed, ...]
+        y_axis = y_axis[good_freq_st:good_freq_ed]
+
+
+        if re_scale is not None:
+            mean = np.ma.mean(vis1)
+            std  = np.ma.std(vis1)
+            print mean
+            vmax = mean + re_scale * std
+            vmin = mean - re_scale * std
+
+        fig  = plt.figure(figsize=(10, 6))
+        axhh = fig.add_axes([0.10, 0.52, 0.75, 0.40])
+        axvv = fig.add_axes([0.10, 0.10, 0.75, 0.40])
+        cax  = fig.add_axes([0.86, 0.20, 0.02, 0.60])
+
+        im = axhh.pcolormesh(x_axis, y_axis, vis1[:,:,0].T, vmax=vmax, vmin=vmin)
+        im = axvv.pcolormesh(x_axis, y_axis, vis1[:,:,1].T, vmax=vmax, vmin=vmin)
+
+        fig.colorbar(im, cax=cax, ax=axvv)
+
+        # format datetime string
+        # date_format = mdates.DateFormatter('%y/%m/%d %H:%M')
+        date_format = mdates.DateFormatter('%H:%M')
+        # date_format = mdates.DateFormatter('%H:%M', tz=pytz.timezone('Asia/Shanghai'))
+
+        ## reduce the number of tick locators
+        #locator = MaxNLocator(nbins=6)
+        #ax.xaxis.set_major_locator(locator)
+        #ax.xaxis.set_minor_locator(AutoMinorLocator(2))
+
+        axhh.xaxis.set_major_formatter(date_format)
+        axhh.set_xticklabels([])
+        axhh.set_ylabel(r'${\rm frequency\, [GHz]\, HH}$')
+        axhh.set_xlim(xmin=x_axis[0], xmax=x_axis[-1])
+        axhh.set_ylim(ymin=y_axis[0], ymax=y_axis[-1])
+        axhh.minorticks_on()
+        axhh.tick_params(length=4, width=1, direction='in')
+        axhh.tick_params(which='minor', length=2, width=1, direction='in')
+
+        axvv.xaxis.set_major_formatter(date_format)
+        #axvv.set_xlabel(r'$({\rm time} - {\rm UT}\quad %s\,) [{\rm hour}]$'%t_start)
+        axvv.set_xlabel(x_label)
+        axvv.set_ylabel(r'${\rm frequency\, [GHz]\, VV}$')
+        axvv.set_xlim(xmin=x_axis[0], xmax=x_axis[-1])
+        axvv.set_ylim(ymin=y_axis[0], ymax=y_axis[-1])
+        axvv.minorticks_on()
+        axvv.tick_params(length=4, width=1, direction='in')
+        axvv.tick_params(which='minor', length=2, width=1, direction='in')
+
+        fig.autofmt_xdate()
+
+        cax.set_ylabel(r'${\rm V}/{\rm V}_{\rm time median}$')
+
+        fig_name = '%s_%s_m%03d_x_m%03d.png' % (fig_prefix, main_data, bl[0]-1, bl[1]-1)
+        fig_name = output_path(fig_name)
+        plt.savefig(fig_name, formate='png', dpi=300)
         plt.close()

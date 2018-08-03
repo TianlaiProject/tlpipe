@@ -74,8 +74,10 @@ class TimestreamCommon(container.BasicTod):
         return self._feed_ordered_datasets_
 
 
-    _pol_dict = {0: 'xx', 1: 'yy', 2: 'xy', 3: 'yx', 4: 'I', 5: 'Q', 6: 'U', 7: 'V',
-                 'xx': 0, 'yy': 1, 'xy': 2, 'yx': 3, 'I': 4, 'Q': 5, 'U': 6, 'V':7}
+    #_pol_dict = {0: 'xx', 1: 'yy', 2: 'xy', 3: 'yx', 4: 'I', 5: 'Q', 6: 'U', 7: 'V',
+    #             'xx': 0, 'yy': 1, 'xy': 2, 'yx': 3, 'I': 4, 'Q': 5, 'U': 6, 'V':7}
+    _pol_dict = {0: 'hh', 1: 'vv', 2: 'hv', 3: 'vh', 4: 'I', 5: 'Q', 6: 'U', 7: 'V',
+                 'hh': 0, 'vv': 1, 'hv': 2, 'vh': 3, 'I': 4, 'Q': 5, 'U': 6, 'V':7}
 
     @property
     def pol_dict(self):
