@@ -300,6 +300,8 @@ class Timestream(object):
 
                 alm[..., mi] = alm_list[mi]
 
+                alm[:, :, 100:, 1] = 0
+
             skymap = hputil.sphtrans_inv_sky(alm, nside)
 
             with h5py.File(self.output_directory + '/' + mapname, 'w') as f:
