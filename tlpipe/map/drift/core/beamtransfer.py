@@ -1149,18 +1149,34 @@ class BeamTransfer(object):
 
         for bi in xrange(nbin):
             B = beam[s[bi]:e[bi]].reshape(-1, self.nsky)
-            BB = np.dot(B.T.conj(), B)
-            np.fill_diagonal(BB, eps + np.diag(BB))
+            BB = np.dot(B.T.conj(), B) # B^* B
+            np.fill_diagonal(BB, eps + np.diag(BB)) # (B^* B + eps I)
             vec1 = vec[s[bi]:e[bi]].reshape(-1)
             try:
-                BBi = la.pinv(BB)
+                BBi = la.pinv(BB) # (B^* B + eps I)^-1
             except np.linalg.linalg.LinAlgError:
                 print 'Compute pinv of BB failed for mi = %d, bi = %d' % (mi, bi)
                 continue
             if mmode0 is not None:
                 vecb[bi] = np.dot(BBi, np.dot(B.T.conj(), vec1) + eps * mmode0[bi])
             else:
-                vecb[bi] = np.dot(BBi, np.dot(B.T.conj(), vec1))
+                # vecb[bi] = np.dot(BBi, np.dot(B.T.conj(), vec1))
+
+                # BBi *= -eps # -eps (B^* B + eps I)^-1
+                # np.fill_diagonal(BBi, 1.0 + np.diag(BB))  # I - eps (B^* B + eps I)^-1
+                # vecb[bi] = np.dot(la.pinv(BBi), vecb[bi].flatten()) # [ I - eps (B^* B + eps I)^-1 ]^-1 a
+
+                # or
+                ahat = np.dot(BBi, np.dot(B.T.conj(), vec1))
+                BBi *= eps # eps (B^* B + eps I)^-1
+                # for _ in range(5):
+                #     vecb[bi] += np.dot(BBi, vecb[bi].flatten()) # a + eps (B^* B + eps I)^-1 a
+                Dahat = np.dot(BBi, ahat)
+                # D2ahat = np.dot(BBi, Dahat)
+                # D3ahat = np.dot(BBi, D2ahat)
+                # D4ahat = np.dot(BBi, D3ahat)
+                # D5ahat = np.dot(BBi, D4ahat)
+                vecb[bi] = ahat + Dahat # + D2ahat + D3ahat + D4ahat + D5ahat
 
         return vecb
 
