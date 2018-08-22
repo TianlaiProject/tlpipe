@@ -385,6 +385,8 @@ class PsCal(timestream_task.TimestreamTask):
                     lv[:, bi] = lsrc_vis[:, b1, b2]
                 lv = mpiarray.MPIArray.wrap(lv, axis=0, comm=ts.comm)
                 lv = lv.redistribute(axis=1).local_array.reshape(nt, nf, 2, -1)
+                if 'ns_on' in ts.iterkeys():
+                    lv[ts['ns_on'][:]] = 0 # avoid ns_on signal to become nan
                 ts.local_vis[start_ind:end_ind, :, pol.index('xx')] -= lv[:, :, 0]
                 ts.local_vis[start_ind:end_ind, :, pol.index('yy')] -= lv[:, :, 1]
 
