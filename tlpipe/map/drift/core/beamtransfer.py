@@ -1114,7 +1114,7 @@ class BeamTransfer(object):
 
     project_vector_backward = project_vector_telescope_to_sky
 
-    def project_vector_telescope_to_sky_tk(self, mi, vec, nbin=None, eps=0.01, mmode0=None):
+    def project_vector_telescope_to_sky_tk(self, mi, vec, nbin=None, eps=0.01, correct_order=0, mmode0=None):
         """Invert a vector from the telescope space onto the sky using
         the Tikhonov regularization method. This is the map-making process.
 
@@ -1168,15 +1168,13 @@ class BeamTransfer(object):
 
                 # or
                 ahat = np.dot(BBi, np.dot(B.T.conj(), vec1))
-                BBi *= eps # eps (B^* B + eps I)^-1
-                # for _ in range(5):
-                #     vecb[bi] += np.dot(BBi, vecb[bi].flatten()) # a + eps (B^* B + eps I)^-1 a
-                Dahat = np.dot(BBi, ahat)
-                # D2ahat = np.dot(BBi, Dahat)
-                # D3ahat = np.dot(BBi, D2ahat)
-                # D4ahat = np.dot(BBi, D3ahat)
-                # D5ahat = np.dot(BBi, D4ahat)
-                vecb[bi] = ahat + Dahat # + D2ahat + D3ahat + D4ahat + D5ahat
+                vecb[bi] = ahat # the zero-th order, no correction
+                if correct_order > 0:
+                    Delta = eps * BBi # eps (B^* B + eps I)^-1
+                    Da = ahat # to save the previous order Delta**(i-1) * ahat
+                    for i in range(1, correct_order+1):
+                        Da = np.dot(Delta, Da)
+                        vecb[bi] += Da # high order correction
 
         return vecb
 
