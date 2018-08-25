@@ -264,6 +264,9 @@ class PsCal(timestream_task.TimestreamTask):
                 if np.where(invalid)[0].shape[0] > 0.3 * nfeed**2:
                     continue
                 Vmat[invalid] = 0
+                # if all are zeros
+                if np.allclose(Vmat, 0.0):
+                    continue
 
                 # fill diagonal of Vmat to 0
                 if zero_diag:
