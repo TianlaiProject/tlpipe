@@ -110,7 +110,10 @@ class Timestream(timestream_common.TimestreamCommon):
             raise ValueError('Unknown correlation type %s' % corr)
 
         # get blorder info from data_source
-        blorder = data_source['blorder']
+        if isinstance(data_source['blorder'], memh5.MemDatasetDistributed):
+            blorder = data_source['blorder'].data.to_numpy_array(root=None)
+        else:
+            blorder = data_source['blorder']
         blorder = [ set(bl) for bl in blorder ]
 
         # baseline indices

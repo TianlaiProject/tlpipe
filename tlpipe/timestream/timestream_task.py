@@ -116,6 +116,7 @@ class TimestreamTask(OneAndOne):
                 else:
                     raise ValueError('Invaid input %s, need either a RawTimestream or Timestream object' % tod)
                 tod = self.subset_select(tod)
+                tod = tod.subset()
 
         return super(TimestreamTask, self).read_process_write(tod)
 
