@@ -227,8 +227,8 @@ class PsCal(timestream_task.TimestreamTask):
             bis_conj = [] # indices that shold be conj
             mis = [] # indices in the nfeed x nfeed matrix by flatten it to a vector
             mis_conj = [] # indices (of conj vis) in the nfeed x nfeed matrix by flatten it to a vector
-            for bi, (ai, aj) in enumerate(bls):
-                ai, aj = ai - 1, aj - 1 # ai/aj starts from 1
+            for bi, (fdi, fdj) in enumerate(bls):
+                ai, aj = feedno.index(fdi), feedno.index(fdj)
                 mis.append(ai * nfeed + aj)
                 if ai != aj:
                     bis_conj.append(bi)
