@@ -116,8 +116,8 @@ class TimestreamTask(OneAndOne):
                 else:
                     raise ValueError('Invaid input %s, need either a RawTimestream or Timestream object' % tod)
 
-                if not self.full_data_select():
-                    tod = self.subset_select(tod)
+                tod, full_data = self.subset_select(tod)
+                if not full_data:
                     tod = tod.subset(return_copy=False)
 
         return super(TimestreamTask, self).read_process_write(tod)
@@ -137,8 +137,7 @@ class TimestreamTask(OneAndOne):
             input_files = self.input_files
         tod = self._Tod_class(input_files, mode, start, stop, dist_axis)
 
-        if not self.full_data_select():
-            tod = self.data_select(tod)
+        tod, full_data = self.data_select(tod)
 
         tod.load_all()
 
@@ -161,23 +160,41 @@ class TimestreamTask(OneAndOne):
 
     def data_select(self, tod):
         """Data select."""
-        tod.time_select(self.params['time_select'])
-        tod.frequency_select(self.params['freq_select'])
-        if self._Tod_class == Timestream:
+        # may need better check here in future...
+        full_data = True
+        if self.params['time_select'] != (0, None):
+            full_data = False
+            tod.time_select(self.params['time_select'])
+        if self.params['freq_select'] != (0, None):
+            full_data = False
+            tod.frequency_select(self.params['freq_select'])
+        if self._Tod_class == Timestream and self.params['pol_select'] != (0, None):
+            full_data = False
             tod.polarization_select(self.params['pol_select'])
-        tod.feed_select(self.params['feed_select'], self.params['corr'])
+        if self.params['feed_select'] != (0, None) and self.params['corr'] != 'all':
+            full_data = False
+            tod.feed_select(self.params['feed_select'], self.params['corr'])
 
-        return tod
+        return tod, full_data
 
     def subset_select(self, tod):
         """Data subset select."""
-        tod.subset_time_select(self.params['time_select'])
-        tod.subset_frequency_select(self.params['freq_select'])
-        if self._Tod_class == Timestream:
+        # may need better check here in future...
+        full_data = True
+        if self.params['time_select'] != (0, None):
+            full_data = False
+            tod.subset_time_select(self.params['time_select'])
+        if self.params['freq_select'] != (0, None):
+            full_data = False
+            tod.subset_frequency_select(self.params['freq_select'])
+        if self._Tod_class == Timestream and self.params['pol_select'] != (0, None):
+            full_data = False
             tod.subset_polarization_select(self.params['pol_select'])
-        tod.subset_feed_select(self.params['feed_select'], self.params['corr'])
+        if self.params['feed_select'] != (0, None) and self.params['corr'] != 'all':
+            full_data = False
+            tod.subset_feed_select(self.params['feed_select'], self.params['corr'])
 
-        return tod
+        return tod, full_data
 
     def copy_input(self, tod):
         """Return a copy of tod, so the original tod would not be changed."""
