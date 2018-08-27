@@ -115,8 +115,10 @@ class TimestreamTask(OneAndOne):
                     self._Tod_class = Timestream
                 else:
                     raise ValueError('Invaid input %s, need either a RawTimestream or Timestream object' % tod)
-                tod = self.subset_select(tod)
-                tod = tod.subset()
+
+                if not self.full_data_select():
+                    tod = self.subset_select(tod)
+                    tod = tod.subset(return_copy=False)
 
         return super(TimestreamTask, self).read_process_write(tod)
 
@@ -135,11 +137,27 @@ class TimestreamTask(OneAndOne):
             input_files = self.input_files
         tod = self._Tod_class(input_files, mode, start, stop, dist_axis)
 
-        tod = self.data_select(tod)
+        if not self.full_data_select():
+            tod = self.data_select(tod)
 
         tod.load_all()
 
         return tod
+
+    def full_data_select(self):
+        """Check to see whether select all data or not."""
+        # may need better check here in future...
+        full_data = True
+        if self.params['time_select'] != (0, None):
+            full_data = False
+        if self.params['freq_select'] != (0, None):
+            full_data = False
+        if self._Tod_class == Timestream and self.params['pol_select'] != (0, None):
+            full_data = False
+        if self.params['feed_select'] != (0, None) and self.params['corr'] != 'all':
+            full_data = False
+
+        return full_data
 
     def data_select(self, tod):
         """Data select."""

@@ -1449,13 +1449,16 @@ class BasicTod(memh5.MemDiskGroup):
             self._copy_a_common_dataset(name, other)
 
 
-    def subset(self):
+    def subset(self, return_copy=False):
         """Return a subset of the data as a new data container."""
 
         shp = self.main_data.shape
         new_shp = tuple([ len(np.arange(a)[s]) for (a, s) in zip(shp, self.subset_data_select) ])
         if shp == new_shp:
-            return self.copy()
+            if return_copy:
+                return self.copy()
+            else:
+                return self
 
         # create a new container to hold the data subset
         cont = self.__class__(dist_axis=self.main_data_dist_axis, comm=self.comm)
