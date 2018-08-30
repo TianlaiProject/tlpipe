@@ -114,8 +114,8 @@ class MeerKAT2TL(FileIterBase):
             vis[:, :, 1] = rvis[:, :, vv_indx]
             vis[:, :, 2] = rvis[:, :, hv_indx]
             vis[:, :, 3] = rvis[:, :, vh_indx]
-            df.create_dataset('vis', chunks = (10, 1024, 1, 4), data=vis,
-                    dtype = vis.dtype, shape = vis.shape)
+            #df.create_dataset('vis', chunks = (10, 1024, 1, 4), data=vis,
+            df.create_dataset('vis', data=vis, dtype = vis.dtype, shape = vis.shape)
             df['vis'].attrs['dimname'] = 'Time, Frequency, Polarization, Baseline'
 
             df['pol'] = np.array(['hh', 'vv', 'hv', 'vh'])

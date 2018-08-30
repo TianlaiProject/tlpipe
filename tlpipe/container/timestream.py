@@ -38,6 +38,8 @@ class Timestream(timestream_common.TimestreamCommon):
                                      'freq': (1,),
                                      'pol': (2,),
                                      'blorder': (3,),
+                                     'ra' : (0,), # for meerKAT
+                                     'dec': (0,), # for meerKAT
                                    }
     _time_ordered_datasets_ = {'weather': (0,)}
     _time_ordered_attrs_ = {}

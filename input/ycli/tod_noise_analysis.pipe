@@ -19,15 +19,15 @@ pipe_logging = 'info'
 
 data_path = data_base + '/meerkat/raw/'
 
-# for the 1Hz data
-file_name = '1474580580'
-bad_time_list = [[3437, 3520]]
-bad_freq_list = [[None, 2190], [2473, 2548], [2696, 2704], [2900, None]]
-
-# # for the 20Hz data
-# file_name = '1474580092'
-# bad_time_list = [[0,  2064], [5664, None]]
+# # for the 1Hz data
+# file_name = '1474580580'
+# bad_time_list = [[3437, 3520]]
 # bad_freq_list = [[None, 2190], [2473, 2548], [2696, 2704], [2900, None]]
+
+# for the 20Hz data
+file_name = '1474580092'
+bad_time_list = [[0,  2064], [5664, None]]
+bad_freq_list = [[None, 2190], [2473, 2548], [2696, 2704], [2900, None]]
 
 #bad_freq_list = [[300, 500], [820, 845], [1014, 1087], 
 #                 [1100, 2150], [2695, 2702], [2890, 3010],
@@ -42,13 +42,13 @@ input_files = ['%s.h5'%file_name, ]
 
 #pipe_tasks.append(convertion.MeerKAT2TL)
 
-#pipe_tasks.append(tod_noise.DataEdit)
+pipe_tasks.append(tod_noise.DataEdit)
 
-#pipe_tasks.append(tod_svd.SVD)
+pipe_tasks.append(tod_svd.SVD)
 
 #pipe_tasks.append((tod_noise.PinkNoisePS, 'pnpsvis_'))
 
-#pipe_tasks.append((tod_noise.PinkNoisePS, 'pnpscln_'))
+pipe_tasks.append((tod_noise.PinkNoisePS, 'pnpscln_'))
 
 #pipe_tasks.append((tod_noise.PinkNoisePS, 'pnpsmod_'))
 
@@ -63,7 +63,7 @@ file_suffix = file_middle + '_%s_x_%s'%(ant, ant)
 
 #pipe_tasks.append((plot_svd.PlotSVD, 'psvd_'))
 
-pipe_tasks.append((plot_ps.PlotPS, 'ppssvd_'))
+#pipe_tasks.append((plot_ps.PlotPS, 'ppssvd_'))
 
 #pipe_tasks.append((plot_ps.PlotPS, 'ppsmod_'))
 
