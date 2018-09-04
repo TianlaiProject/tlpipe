@@ -807,8 +807,9 @@ class BeamTransfer(object):
             if mpiutil.rank0:
                 print "Transposing and writing chunk."
 
-            # Perform an in memory MPI transpose to get the m-ordered array
-            m_array = mpiutil.transpose_blocks(fb_array, (fbnum, 2, self.telescope.num_pol_sky, self.telescope.lmax + 1, self.telescope.mmax + 1))
+            # # Perform an in memory MPI transpose to get the m-ordered array
+            # m_array = mpiutil.transpose_blocks(fb_array, (fbnum, 2, self.telescope.num_pol_sky, self.telescope.lmax + 1, self.telescope.mmax + 1))
+            m_array = mpiutil.redistribute(fb_array, 0, -1, verbose=True)
 
             del fb_array
 
