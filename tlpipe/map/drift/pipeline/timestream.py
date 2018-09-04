@@ -162,8 +162,9 @@ class Timestream(object):
             row_mpairs[:, 0, ..., mi] = row_mmodes[...,  mi]
             row_mpairs[:, 1, ..., mi] = row_mmodes[..., -mi].conj()
 
-        # Transpose to get the entirety of an m-mode on each process (i.e. all frequencies)
-        col_mmodes = mpiutil.transpose_blocks(row_mpairs, (nfreq, 2, tel.npairs, mmax + 1))
+        # # Transpose to get the entirety of an m-mode on each process (i.e. all frequencies)
+        # col_mmodes = mpiutil.transpose_blocks(row_mpairs, (nfreq, 2, tel.npairs, mmax + 1))
+        col_mmodes = mpiutil.redistribute(row_mpairs, 0, -1)
 
         # Transpose the local section to make the m's first
         col_mmodes = np.transpose(col_mmodes, (3, 0, 1, 2))
@@ -808,15 +809,16 @@ def simulate(beamtransfer, outdir, tsname, maps=[], ndays=None, resolution=0, ad
                     row_map += f['map'][sfreq:efreq]
 
             # Calculate the alm's for the local sections
-            row_alm = hputil.sphtrans_sky(row_map, lmax=lmax).reshape((lfreq, npol * (lmax+1), lmax+1))
+            row_alm = hputil.sphtrans_sky(row_map, lmax=lmax).reshape((lfreq, npol * (lmax+1), lmax+1))[:, :, :mmax+1] # trop those with m > mmax
 
         else:
-            row_alm = np.zeros((lfreq, npol * (lmax+1), lmax+1), dtype=np.complex128)
+            row_alm = np.zeros((lfreq, npol * (lmax+1), mmax+1), dtype=np.complex128)
 
-        # Perform the transposition to distribute different m's across processes. Neat
-        # tip, putting a shorter value for the number of columns, trims the array at
-        # the same time
-        col_alm = mpiutil.transpose_blocks(row_alm, (nfreq, npol * (lmax+1), mmax+1))
+        # # Perform the transposition to distribute different m's across processes. Neat
+        # # tip, putting a shorter value for the number of columns, trims the array at
+        # # the same time
+        # col_alm = mpiutil.transpose_blocks(row_alm, (nfreq, npol * (lmax+1), mmax+1))
+        col_alm = mpiutil.redistribute(row_alm, 0, -1)
 
         # Transpose and reshape to shift m index first.
         col_alm = np.transpose(col_alm, (2, 0, 1)).reshape(lm, nfreq, npol, lmax+1)
@@ -833,8 +835,9 @@ def simulate(beamtransfer, outdir, tsname, maps=[], ndays=None, resolution=0, ad
         # frequencies across processors)
         row_vis = vis_data.transpose((0, 2, 1))#.reshape((lm * bt.ntel, nfreq))
 
-        # Parallel transpose to get all m's back onto the same processor
-        col_vis_tmp = mpiutil.transpose_blocks(row_vis, ((mmax+1), bt.ntel, nfreq))
+        # # Parallel transpose to get all m's back onto the same processor
+        # col_vis_tmp = mpiutil.transpose_blocks(row_vis, ((mmax+1), bt.ntel, nfreq))
+        col_vis_tmp = mpiutil.redistribute(row_vis, 0, -1)
         col_vis_tmp = col_vis_tmp.reshape(mmax + 1, 2, tel.npairs, lfreq)
 
 
