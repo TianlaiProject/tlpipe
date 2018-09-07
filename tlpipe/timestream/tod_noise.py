@@ -82,9 +82,9 @@ class PinkNoisePS(timestream_task.TimestreamTask):
 
     params_init = {
             'data_sets' : 'cleaned_vis', # cleaned_vis, vis, svdmodes
-            'n_bins'    : 20,
-            'f_min'     : None,
-            'f_max'     : None,
+            #'n_bins'    : 20,
+            #'f_min'     : None,
+            #'f_max'     : None,
             'avg_len'   : 100,
             'method'    : 'fft', # lombscargle
             }
@@ -130,34 +130,80 @@ class PinkNoisePS(timestream_task.TimestreamTask):
 
     def est_ps(self, vis, vis_mask, li, gi, bl, ts, **kwargs):
 
-        print vis.dtype
+        #print vis.dtype
         #vis = np.abs(vis)
 
-        n_bins = self.params['n_bins']
-        f_min  = self.params['f_min']
-        f_max  = self.params['f_max']
-        avg_len = self.params['avg_len']
         method = self.params['method']
 
         bad_time = np.all(vis_mask, axis=(1, 2))
         bad_freq = np.all(vis_mask, axis=(0, 2))
+        self.bad_time = bad_time
+        self.bad_freq = bad_freq
 
-        vis = vis[~bad_time, ...][:, ~bad_freq, ...]
-        print np.mean(vis, axis=0)
-        vis = vis - np.mean(vis, axis=0)[None, :, :]
-        time = ts['sec1970'][~bad_time]
-        inttime = ts.attrs['inttime']
-
+        num_infiles = len(self.input_files)
         name = ts.main_data_name
+        outfiles_map = ts._get_output_info(name, num_infiles)[-1]
+        st = 0
+        for fi, start, stop in outfiles_map:
+            et = st + (stop - start)
+
+            name = ts.main_data_name
+
+            _vis = vis[st:et, ...]
+            _vis = _vis[~bad_time[st:et], ...][:, ~bad_freq, ...]
+            #print np.mean(_vis, axis=0)
+            _vis = _vis - np.mean(_vis, axis=0)[None, :, :]
+            time = ts['sec1970'][st:et]
+            time = time[~bad_time[st:et]]
+            freq = ts['freq'][:]
+            freq = freq[~bad_freq]
+
+            _vis, name, freq, time = self.avg_vis(_vis, name, freq, time)
+
+            file_name = None
+            if len(self.output_files) == num_infiles:
+                output_file = self.output_files[fi]
+                file_suffix = '_%s_tcorrps_%s_m%03d_x_m%03d.h5'%(name, method, bl[0]-1, bl[1]-1)
+                file_name = output_file.replace('.h5', file_suffix)
+                file_name = output_path(file_name, relative= not file_name.startswith('/'))
+            self.ps_process_write(_vis, time, freq, ts, file_name)
+
+            del _vis
+            gc.collect()
+
+            st = et
+
+    def avg_vis(self, vis, name, freq, time):
+
+        return vis, name, freq, time
+
+    def ps_process_write(self, vis, time, freq, ts):
+
+        pass
+
+class PinkNoisePS_1DTC(PinkNoisePS):
+
+    params_init = {
+            'n_bins'    : 20,
+            'f_min'     : None,
+            'f_max'     : None,
+            }
+
+    prefix = 'pnps1dtc_'
+
+    def avg_vis(self, vis, name, freq, time):
+
+        avg_len = self.params['avg_len']
 
         if avg_len == 0:
             print "average all frequencies before ps. est."
             vis = np.mean(vis, axis=1)
             vis = vis[:, None, :]
-            name += '_avgEach'
+            name += '_avgEachF'
+            freq = None
         elif avg_len is None:
             print "no frequency average before ps. est."
-            name += '_avgNone'
+            name += '_avgNoneF'
         else:
             print "average every %d frequencis before ps. est."%avg_len
             time_n, freq_n, pol_n = vis.shape
@@ -169,7 +215,22 @@ class PinkNoisePS(timestream_task.TimestreamTask):
             vis = vis[:, :split_n * avg_len, :]
             vis.shape = (time_n, split_n, avg_len, pol_n)
             vis = np.mean(vis, axis=2)
-            name += '_avg%04d'%avg_len
+            name += '_avg%04dF'%avg_len
+        
+            freq = freq[:split_n * avg_len]
+            freq.shape = (split_n, avg_len)
+            freq = np.median(freq, axis=1)
+
+        return vis, name, freq, time
+
+
+    def ps_process_write(self, vis, time, freq, ts, file_name = None):
+
+        method = self.params['method']
+        n_bins = self.params['n_bins']
+        f_min  = self.params['f_min']
+        f_max  = self.params['f_max']
+        inttime = ts.attrs['inttime']
 
         if method == 'fft':
             psd_func = est_tcorr_psd1d_fft
@@ -178,23 +239,96 @@ class PinkNoisePS(timestream_task.TimestreamTask):
         tcorr_ps, tcorr_bc = psd_func(vis, time, n_bins=n_bins, 
                 f_min=f_min, f_max=f_max, inttime=inttime)
 
-        if len(self.output_files) > 1:
-            raise 
-        elif len(self.output_files) == 1:
-            output_files = output_path(self.output_files, relative=False,
-                    iteration=self.iteration)
-            file_suffix = '_%s_tcorrps_%s_m%03d_x_m%03d.h5'%(name, method, bl[0]-1, bl[1]-1)
-            file_name = output_files[0].replace('.h5', file_suffix)
+        if file_name is not None:
+            #output_files = output_path(self.output_files[fi], relative=False,
+            #        iteration=self.iteration)
+            #output_file = self.output_files[fi]
+            #file_suffix = '_%s_tcorrps_%s_m%03d_x_m%03d.h5'%(name, method, bl[0]-1, bl[1]-1)
+            #file_name = output_file.replace('.h5', file_suffix)
+            #file_name = output_path(file_name, relative= not file_name.startswith('/'))
             print file_name
             with h5py.File(file_name, 'w') as f:
                 f['tcorr_ps'] = tcorr_ps
                 f['tcorr_bc'] = tcorr_bc
-                if bad_freq is not None:
-                    f['bad_freq'] = bad_freq
-                if bad_time is not None:
-                    f['bad_time'] = bad_time
-        del vis
-        gc.collect()
+                if self.bad_freq is not None:
+                    f['bad_freq'] = self.bad_freq
+                if self.bad_time is not None:
+                    f['bad_time'] = self.bad_time
+
+class PinkNoisePS_1DFC(PinkNoisePS):
+
+    params_init = {
+            'n_bins'    : 20,
+            'w_min'     : None,
+            'w_max'     : None,
+            }
+
+    prefix = 'pnps1dtc_'
+
+    def avg_vis(self, vis, name, freq, time):
+
+        avg_len = self.params['avg_len']
+
+        if avg_len == 0:
+            print "average all time before ps. est."
+            vis = np.mean(vis, axis=0)
+            vis = vis[None, :, :]
+            name += '_avgEachT'
+            time = None
+        elif avg_len is None:
+            print "no time average before ps. est."
+            name += '_avgNoneT'
+        else:
+            print "average every %d time before ps. est."%avg_len
+            time_n, freq_n, pol_n = vis.shape
+            split_n = time_n / avg_len
+            if split_n == 0:
+                msg = "Only %d time steps, avg_len should be less than it"%time_n
+                raise ValueError(msg)
+            print "%d/%d time steps  are using"%(split_n * avg_len, time_n)
+            vis = vis[:split_n * avg_len, :, :]
+            vis.shape = (split_n, avg_len, freq_n, pol_n)
+            vis = np.mean(vis, axis=1)
+            name += '_avg%04dT'%avg_len
+        
+            time = time[:split_n * avg_len]
+            time.shape = (split_n, avg_len)
+            time = np.median(time, axis=1)
+
+        return vis, name, freq, time
+
+
+    def ps_process_write(self, vis, time, freq, ts, file_name = None):
+
+        method = self.params['method']
+        n_bins = self.params['n_bins']
+        w_min  = self.params['w_min']
+        w_max  = self.params['w_max']
+        df     = ts.attrs['freqstep']
+
+        if method == 'fft':
+            psd_func = est_tcorr_psd1d_fft
+        elif method == 'lombscargle':
+            psd_func = est_tcorr_psd1d_lombscargle
+        vis = np.swapaxes(vis, 0, 1)
+        tcorr_ps, tcorr_bc = psd_func(vis, freq, n_bins=n_bins, 
+                f_min=w_min, f_max=w_max, inttime=df)
+
+        if file_name is not None:
+            #output_files = output_path(self.output_files[fi], relative=False,
+            #        iteration=self.iteration)
+            #output_file = self.output_files[fi]
+            #file_suffix = '_%s_tcorrps_%s_m%03d_x_m%03d.h5'%(name, method, bl[0]-1, bl[1]-1)
+            #file_name = output_file.replace('.h5', file_suffix)
+            #file_name = output_path(file_name, relative= not file_name.startswith('/'))
+            print file_name
+            with h5py.File(file_name, 'w') as f:
+                f['tcorr_ps'] = tcorr_ps
+                f['tcorr_bc'] = tcorr_bc
+                if self.bad_freq is not None:
+                    f['bad_freq'] = self.bad_freq
+                if self.bad_time is not None:
+                    f['bad_time'] = self.bad_time
 
 def est_tcorr_psd1d_fft(data, ax, n_bins=None, inttime=None, f_min=None, f_max=None):
 
@@ -252,11 +386,22 @@ def est_tcorr_psd1d_fft(data, ax, n_bins=None, inttime=None, f_min=None, f_max=N
 def est_tcorr_psd1d_lombscargle(data, ax, n_bins=None, inttime=None, 
         f_min=None, f_max=None):
 
-    windowf = np.blackman(data.shape[0])
+    fft_len = data.shape[0]
+
+    print
+    print 'int time', inttime
+    print
+
+    if inttime is None:
+        inttime = ax[1] - ax[0]
+
+    windowf = np.blackman(fft_len)
 
     if n_bins is None: n_bins = 30
-    if f_min  is None: f_min = 1. / ( ax.max()     - ax.min() )
-    if f_max  is None: f_max = 1. / ( np.abs(ax[1] - ax[0]) ) / 2.
+    #if f_min  is None: f_min = 1. / ( ax.max()     - ax.min() )
+    #if f_max  is None: f_max = 1. / ( np.abs(ax[1] - ax[0]) ) / 2.
+    if f_min  is None: f_min = 1. / ( inttime * fft_len )
+    if f_max  is None: f_max = 1. / inttime / 2.
 
     freq_bins_c = np.logspace(np.log10(f_min), np.log10(f_max), n_bins)
     #freq_bins_c = np.linspace(f_min, f_max, n_bins)
@@ -282,12 +427,9 @@ def est_tcorr_psd1d_lombscargle(data, ax, n_bins=None, inttime=None,
             #hist   = np.histogram(freqs, bins=freq_bins_e, weights=_p)[0]
             #power[:, i, j] = hist / norm
     #power = np.sqrt(4. * power / float(ax.shape[0]) / np.std(y) ** 2.)
-    if inttime is None:
-        power *= (ax[1] - ax[0])
-    else:
-        power *= inttime
+    power *= inttime
 
-    power[freq_bins_c <= 1. / ( ax.max() - ax.min()) ] = 0.
-    power[freq_bins_c >= 1. / ( np.abs(ax[1] - ax[0]) ) / 2.] = 0.
+    power[freq_bins_c <= 1. / ( inttime * fft_len ) ] = 0.
+    power[freq_bins_c >= 1. / inttime / 2.] = 0.
 
     return power, freq_bins_c

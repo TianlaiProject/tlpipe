@@ -21,6 +21,7 @@ class SVD(timestream_task.TimestreamTask):
         print ts.vis.shape
 
         func = ts.bl_data_operate
+        #func = ts.time_and_bl_data_operate
 
         show_progress = self.params['show_progress']
         progress_step = self.params['progress_step']
@@ -64,71 +65,87 @@ class SVD(timestream_task.TimestreamTask):
 
     def find_and_clean_modes(self, vis, vis_mask, li, gi, bl, ts, **kwargs):
 
-        mode_list = self.params['mode_list']
+        print vis.shape
+
+        mode_list = list(self.params['mode_list'])
+        num_infiles = len(self.input_files)
 
         print vis.dtype
-        #vis = np.abs(vis) - 1.
-        #vis = np.abs(vis)
-        vis_rawshp = vis.shape
-
-        if len(self.output_files) > 1:
-            raise 
-        elif len(self.output_files) == 0:
-            svd_name = None
-        else:
-            svd_suffix = '_svdmodes_m%03d_x_m%03d.h5'%(bl[0]-1, bl[1]-1)
-            svd_name = self.output_files[0].replace('.h5', svd_suffix)
-            svd_name = output_path(svd_name, relative= not svd_name.startswith('/'))
-
-        mode_list = self.params['mode_list']
+        #vis_rawshp = vis.shape
+        cleaned_data_list = []
+        cleaned_mode_list = []
 
         bad_time = np.all(vis_mask, axis=(1, 2))
         bad_freq = np.all(vis_mask, axis=(0, 2))
-        good = (~bad_time)[:, None] * (~bad_freq)[None, :]
-        good = good[:, :, None] * np.ones_like(vis).astype('bool')
 
-        vis = vis[~bad_time, ...][:, ~bad_freq, ...]
-        if self.params['prewhiten']:
-            print "pre-whiten the vis"
-            vis = vis - np.mean(vis, axis=0)[None, :, :]
-        t_shp, f_shp, npol = vis.shape
-        k_shp = min(t_shp, f_shp)
+        outfiles_map = ts._get_output_info('vis', num_infiles)[-1]
+        st = 0
+        for fi, start, stop in outfiles_map:
+            et = st + (stop - start)
 
-        u = np.zeros([t_shp, k_shp, npol])
-        v = np.zeros([k_shp, f_shp, npol])
-        s = np.zeros([k_shp, npol])
+            if len(self.output_files) == num_infiles:
+                svd_suffix = '_svdmodes_m%03d_x_m%03d.h5'%(bl[0]-1, bl[1]-1)
+                svd_name = self.output_files[fi].replace('.h5', svd_suffix)
+                svd_name = output_path(svd_name, relative= not svd_name.startswith('/'))
+            else:
+                svd_name = None
+            
+            _vis = vis[st:et, ...]
+            vis_rawshp = _vis.shape
 
-        for i in range(npol):
-            u[...,i], s[:,i], v[...,i] =\
-                    np.linalg.svd(vis[..., i], full_matrices=False)
+            _vis = _vis[~bad_time[st:et], ...][:, ~bad_freq, ...]
+            if self.params['prewhiten']:
+                print "pre-whiten the vis"
+                _vis = _vis - np.mean(_vis, axis=0)[None, :, :]
+            t_shp, f_shp, npol = _vis.shape
+            k_shp = min(t_shp, f_shp)
 
-        if svd_name is not None:
-            print svd_name
-            with h5py.File(svd_name, 'w') as f:
-                f['u'] = u
-                f['v'] = v
-                f['s'] = s
-                if bad_freq is not None:
-                    f['bad_freq'] = bad_freq
-                if bad_time is not None:
-                    f['bad_time'] = bad_time
-                f['t'] = ts['sec1970']
-                f['f'] = ts.freq[:] * 1.e-3
+            u = np.zeros([t_shp, k_shp, npol])
+            v = np.zeros([k_shp, f_shp, npol])
+            s = np.zeros([k_shp, npol])
 
-        mode_list = list(mode_list)
-        cleaned_data = np.zeros((len(mode_list),) + vis_rawshp)
-        cleaned_mode = np.zeros((max(mode_list),) + vis_rawshp)
-        cleaned_data_tmp, cleaned_mode_tmp = \
-                clean_mode(vis, s, u, v, mode_list = mode_list)
-        #print "\t vis mean after svd", cleaned_data_tmp[0].mean()
-        cleaned_data_tmp.shape = (len(mode_list), -1)
-        cleaned_data[:, good] = cleaned_data_tmp
-        #print "\t vis mean after svd", cleaned_data[0][good].mean()
-        cleaned_mode_tmp.shape = (max(mode_list), -1)
-        cleaned_mode[:, good] = cleaned_mode_tmp
+            for i in range(npol):
+                u[...,i], s[:,i], v[...,i] =\
+                        np.linalg.svd(_vis[..., i], full_matrices=False)
 
-        self.cleaned_data_list.append(cleaned_data)
-        self.cleaned_mode_list.append(cleaned_mode)
+            if svd_name is not None:
+                print svd_name
+                with h5py.File(svd_name, 'w') as f:
+                    f['u'] = u
+                    f['v'] = v
+                    f['s'] = s
+                    if bad_freq is not None:
+                        f['bad_freq'] = bad_freq
+                    if bad_time is not None:
+                        f['bad_time'] = bad_time[st:et]
+                    f['t'] = ts['sec1970'][st:et]
+                    f['f'] = ts.freq[:] * 1.e-3
+
+            good = (~bad_time[st:et])[:, None] * (~bad_freq)[None, :]
+            good = good[:, :, None] * np.ones_like(_vis).astype('bool')
+
+            cleaned_data = np.zeros((len(mode_list), ) + vis_rawshp)
+            cleaned_mode = np.zeros((max(mode_list), ) + vis_rawshp)
+
+            cleaned_data_tmp, cleaned_mode_tmp = \
+                    clean_mode(_vis, s, u, v, mode_list = mode_list)
+            #print "\t vis mean after svd", cleaned_data_tmp[0].mean()
+            cleaned_data_tmp.shape = (len(mode_list), -1)
+            cleaned_data[:, good] = cleaned_data_tmp
+            cleaned_data_list.append(cleaned_data)
+            #print "\t vis mean after svd", cleaned_data[0][good].mean()
+            cleaned_mode_tmp.shape = (max(mode_list), -1)
+            cleaned_mode[:, good] = cleaned_mode_tmp
+            cleaned_mode_list.append(cleaned_mode)
+
+            st = et
+
+        cleaned_data_list = np.concatenate(cleaned_data_list, axis=1)
+        cleaned_mode_list = np.concatenate(cleaned_mode_list, axis=1)
+        print cleaned_data_list.shape
+
+        self.cleaned_data_list.append(cleaned_data_list)
+        self.cleaned_mode_list.append(cleaned_mode_list)
 
 def clean_mode(input_data, s, u, v, mode_list = [1, ]):
 

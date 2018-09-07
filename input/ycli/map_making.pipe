@@ -1,0 +1,63 @@
+# -*- mode: python; -*-
+#
+
+import os
+
+from tlpipe.map import dirtymap
+
+
+data_base = os.getenv('DATA_BASE')
+
+#sim_type = 'fnoise_beta0.0'
+sim_type = 'HI'
+
+pipe_tasks = []
+pipe_outdir = data_base + 'meerkat/sim_%s/'%sim_type
+pipe_logging = 'info'
+pipe_copy = False
+
+data_path = data_base + '/meerkat/sim/'
+
+#file_name = '1474580092'
+
+input_files = [
+    'sim_meerKAT3_AZdrift_20180915210600.h5',
+    'sim_meerKAT3_AZdrift_20180915220600.h5',
+    'sim_meerKAT3_AZdrift_20180915230600.h5',
+    'sim_meerKAT3_AZdrift_20180916000600.h5',
+    'sim_meerKAT3_AZdrift_20180916010600.h5',
+    'sim_meerKAT3_AZdrift_20180916020600.h5',
+    'sim_meerKAT3_AZdrift_20180916030600.h5',
+    'sim_meerKAT3_AZdrift_20180916040600.h5',
+    'sim_meerKAT3_AZdrift_20180916050600.h5',
+    'sim_meerKAT3_AZdrift_20180916060600.h5',
+    'sim_meerKAT3_AZdrift_20180916070600.h5',
+    'sim_meerKAT3_AZdrift_20180916080600.h5',
+    'sim_meerKAT3_AZdrift_20180916090600.h5',
+    'sim_meerKAT3_AZdrift_20180916100600.h5',
+    'sim_meerKAT3_AZdrift_20180916110600.h5',
+    'sim_meerKAT3_AZdrift_20180916120600.h5',
+    'sim_meerKAT3_AZdrift_20180916130600.h5',
+    'sim_meerKAT3_AZdrift_20180916140600.h5',
+    'sim_meerKAT3_AZdrift_20180916150600.h5',
+    'sim_meerKAT3_AZdrift_20180916160600.h5',
+    'sim_meerKAT3_AZdrift_20180916170600.h5',
+    'sim_meerKAT3_AZdrift_20180916180600.h5',
+    'sim_meerKAT3_AZdrift_20180916190600.h5',
+    'sim_meerKAT3_AZdrift_20180916200600.h5',
+    ]
+file_name = 'sim_meerKAT3_AZdrift_noise_inv_weight'
+
+pipe_tasks.append(dirtymap.DirtyMap)
+
+#dm_input_files  = ['svd/%s'%f for f in input_files]
+#dm_output_files = ['maps/%s'%file_name,]
+#dm_data_sets    = 'vis_sub00modes'
+#dm_data_sets    = 'vis_sub01modes'
+
+dm_input_files  = ['pned/%s'%f for f in input_files]
+dm_output_files = ['maps/%s'%file_name,]
+dm_data_sets    = 'vis'
+#dm_data_sets    = 'vis_sub00modes'
+#dm_data_sets    = 'vis_sub01modes'
+

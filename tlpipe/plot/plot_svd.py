@@ -105,8 +105,8 @@ class PlotSVD(FileIterBase):
         axvv2.tick_params(which='minor', length=2, width=1, direction='in')
         axvv2.yaxis.set_tick_params(which='both', left='off', right='off')
 
-        #self.fig.savefig(fig_name + '.png', dpi=500)
-        self.fig.savefig(fig_name + '.eps')
+        self.fig.savefig(fig_name + '.png', dpi=500)
+        #self.fig.savefig(fig_name + '.eps')
         self.fig.clf()
         plt.close()
 

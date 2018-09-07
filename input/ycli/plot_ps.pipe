@@ -10,6 +10,7 @@ data_base = os.getenv('DATA_BASE')
 pipe_tasks = []
 pipe_outdir = data_base + 'meerkat/'
 pipe_logging = 'info'
+pipe_copy = False
 
 data_path = data_base + '/meerkat/raw/'
 
@@ -21,7 +22,7 @@ ps_method = 'lombscargle' #'fft'
 # ==                         for plot                              ==
 # ===================================================================
 
-ant = 'm021' #'m021', 'm017', 'm036'
+ant = 'm036' #'m021', 'm017', 'm036'
 file_middle = '_avg0100_tcorrps_%s'%ps_method
 file_suffix = file_middle + '_%s_x_%s'%(ant, ant)
 

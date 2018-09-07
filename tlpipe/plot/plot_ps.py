@@ -26,6 +26,7 @@ class PlotPS(FileIterBase):
             'mfc_indx' : None,
             'fitting_path' : None,
             'fitting_comb' : False,
+            'corr_type'    : 'tcorr', # 'fcorr'
             }
 
     prefix = 'pps_'
@@ -45,7 +46,7 @@ class PlotPS(FileIterBase):
 
     def read_input(self):
 
-        return h5py.File(input_path(self.input_files[self.iteration]))
+        return h5py.File(input_path(self.input_files[self.iteration]), 'r')
 
     def write_output(self, output):
 
@@ -60,8 +61,12 @@ class PlotPS(FileIterBase):
         print '--', fig_name
 
         axhh, axvv = self.axes
-        axhh.set_xlabel(r'$f\,[{\rm Hz}]$')
-        axhh.set_ylabel(r'${\rm PSD}(f)$')
+        if self.params['corr_type'] == 'tcorr':
+            axhh.set_xlabel(r'$f\,[{\rm Hz}]$')
+            axhh.set_ylabel(r'${\rm PSD}(f)$')
+        elif self.params['corr_type'] == 'fcorr':
+            axhh.set_xlabel(r'$\omega\,[1/{\rm MHz}]$')
+            axhh.set_ylabel(r'${\rm PSD}(\omega)$')
         axhh.set_title(r'${\rm HH}$')
         axhh.legend(handles=self.legend_list, frameon=False, 
                 title=self.params['label_title'])
@@ -74,7 +79,10 @@ class PlotPS(FileIterBase):
         axhh.tick_params(length=4, width=1, direction='in')
         axhh.tick_params(which='minor', length=2, width=1, direction='in')
 
-        axvv.set_xlabel(r'$f\,[{\rm Hz}]$')
+        if self.params['corr_type'] == 'tcorr':
+            axvv.set_xlabel(r'$f\,[{\rm Hz}]$')
+        elif self.params['corr_type'] == 'fcorr':
+            axvv.set_xlabel(r'$\omega\,[1/{\rm MHz}]$')
         #axvv.set_ylabel(r'${\rm frequency\, [GHz]\, VV}$')
         axvv.set_title(r'${\rm VV}$')
         axvv.set_xlim(xmin=xmin, xmax=xmax)
@@ -164,11 +172,17 @@ class PlotPS(FileIterBase):
 
             # for HH
             like_file = input_path(base_path + base_name + '_HH/plot_data.likestats')
+            print
+            print '+' * 20
+            print base_name + '_HH'
             self._plot_thpsd_(axhh, x, like_file, fmt=fmt[1:], c=c)
 
             # for VV
             like_file = input_path(base_path + base_name + '_VV/plot_data.likestats')
+            print '-' * 20
+            print base_name + '_VV'
             self._plot_thpsd_(axvv, x, like_file, fmt=fmt[1:], c=c)
+            print
 
             if (labels[i] is not None) and self.params['fitting_comb']:
                 base_name = base_name.replace(base_name.split('_')[0], 'combineded')
@@ -207,7 +221,13 @@ class PlotPS(FileIterBase):
         amp_u   = 10. ** stats['amp'][4] - amp_m  
         fk_u    = 10. ** stats['fk'][4]  - fk_m
         alpha_u = stats['alpha'][4] - alpha_m
+
+
+        print 'AMP   %5.2f(%5.2f)+%5.2f-%5.2f'%(amp,   amp_m,   amp_u,   amp_l)
+        print 'alpha %5.2f(%5.2f)+%5.2f-%5.2f'%(alpha, alpha_m, alpha_u, alpha_l)
+        print 'fk    %5.2f(%5.2f)+%5.2f-%5.2f'%(fk,    fk_m,    fk_u,    fk_l)
         
+        #ax.plot(x, psd_f(x, amp_m, fk, alpha), fmt, color=c, linewidth=lw)
         ax.plot(x, psd_f(x, amp, fk, alpha), fmt, color=c, linewidth=lw)
 
 
