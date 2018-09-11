@@ -12,6 +12,8 @@ class SVD(timestream_task.TimestreamTask):
     params_init = {
             'mode_list' : [0],
             'prewhiten' : False,
+            'svd_path'  : None,
+            'method'    : 'both', # 'time', 'freq'
             }
 
     prefix = 'todsvd_'
@@ -100,35 +102,54 @@ class SVD(timestream_task.TimestreamTask):
             t_shp, f_shp, npol = _vis.shape
             k_shp = min(t_shp, f_shp)
 
-            u = np.zeros([t_shp, k_shp, npol])
-            v = np.zeros([k_shp, f_shp, npol])
-            s = np.zeros([k_shp, npol])
+            if self.params['svd_path'] is not None:
+                print 'read svd from'
+                print self.params['svd_path']
+                with h5py.File(self.params['svd_path'], 'r') as f:
+                    u = f['u'][:]
+                    v = f['v'][:]
+                    s = f['s'][:]
 
-            for i in range(npol):
-                u[...,i], s[:,i], v[...,i] =\
-                        np.linalg.svd(_vis[..., i], full_matrices=False)
+                    if v.shape[1] > _vis.shape[1]:
+                        print 'frequency axis not match, cut svd'
+                        v = v[:, :_vis.shape[1], :]
+            else:
+                u = np.zeros([t_shp, k_shp, npol])
+                v = np.zeros([k_shp, f_shp, npol])
+                s = np.zeros([k_shp, npol])
 
-            if svd_name is not None:
-                print svd_name
-                with h5py.File(svd_name, 'w') as f:
-                    f['u'] = u
-                    f['v'] = v
-                    f['s'] = s
-                    if bad_freq is not None:
-                        f['bad_freq'] = bad_freq
-                    if bad_time is not None:
-                        f['bad_time'] = bad_time[st:et]
-                    f['t'] = ts['sec1970'][st:et]
-                    f['f'] = ts.freq[:] * 1.e-3
+                for i in range(npol):
+                    u[...,i], s[:,i], v[...,i] =\
+                            np.linalg.svd(_vis[..., i], full_matrices=False)
+
+                if svd_name is not None:
+                    print svd_name
+                    with h5py.File(svd_name, 'w') as f:
+                        f['u'] = u
+                        f['v'] = v
+                        f['s'] = s
+                        if bad_freq is not None:
+                            f['bad_freq'] = bad_freq
+                        if bad_time is not None:
+                            f['bad_time'] = bad_time[st:et]
+                        f['t'] = ts['sec1970'][st:et]
+                        f['f'] = ts.freq[:] * 1.e-3
 
             good = (~bad_time[st:et])[:, None] * (~bad_freq)[None, :]
-            good = good[:, :, None] * np.ones_like(_vis).astype('bool')
+            good = good[:, :, None] * np.ones(vis_rawshp).astype('bool')
 
             cleaned_data = np.zeros((len(mode_list), ) + vis_rawshp)
             cleaned_mode = np.zeros((max(mode_list), ) + vis_rawshp)
 
-            cleaned_data_tmp, cleaned_mode_tmp = \
-                    clean_mode(_vis, s, u, v, mode_list = mode_list)
+            if self.params['method'] == 'both':
+                cleaned_data_tmp, cleaned_mode_tmp = \
+                        clean_mode(_vis, s, u, v, mode_list = mode_list)
+            elif self.params['method'] == 'time':
+                cleaned_data_tmp, cleaned_mode_tmp = \
+                        clean_t_mode(_vis, u, mode_list = mode_list)
+            elif self.params['method'] == 'freq':
+                cleaned_data_tmp, cleaned_mode_tmp = \
+                        clean_f_mode(_vis, v, mode_list = mode_list)
             #print "\t vis mean after svd", cleaned_data_tmp[0].mean()
             cleaned_data_tmp.shape = (len(mode_list), -1)
             cleaned_data[:, good] = cleaned_data_tmp
@@ -219,6 +240,47 @@ def clean_t_mode(input_data, u, mode_list = [1, ]):
             vec = u[:, j, 1]
             amp = np.dot(vec, i_map[:, :, 1])
             fit = amp[None, :] * vec[:, None]
+            c_mod[j, :, :, 1] = fit
+            i_map[:, :, 1]   -= fit
+
+
+
+        c_map[i, ...] = i_map
+
+    return c_map, c_mod
+
+def clean_f_mode(input_data, v, mode_list = [1, ]):
+
+    i_map = input_data
+
+    c_map = np.zeros((len(mode_list), ) + input_data.shape)
+    c_mod = np.zeros((max(mode_list), ) + input_data.shape)
+
+    #mode_list = [0, ] + mode_list
+
+    st_list = [0, ] + mode_list[:-1]
+    ed_list = mode_list
+
+    for i in range(len(mode_list)):
+
+        st = st_list[i]
+        ed = ed_list[i]
+
+        print st, ed
+
+        for j in range(st, ed):
+            print j
+
+            vec = v[j, :, 0]
+            amp = np.dot(i_map[:,:,0], vec)
+            fit = amp[:, None] * vec[None, :]
+            c_mod[j, :, :, 0] = fit
+            i_map[:, :, 0]   -= fit
+
+
+            vec = v[j, :, 1]
+            amp = np.dot(i_map[:, :, 1], vec)
+            fit = amp[:, None] * vec[None, :]
             c_mod[j, :, :, 1] = fit
             i_map[:, :, 1]   -= fit
 

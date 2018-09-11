@@ -4,13 +4,14 @@ import os
 
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+import matplotlib.ticker
 from tlpipe.utils.path_util import output_path, input_path
 from tlpipe.pipeline.pipeline import FileIterBase
 from tlpipe.mcmc import get_dist
 
 _c_list = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", 
           "#8c564b", "#e377c2", "#17becf", "#bcbd22", "#7f7f7f", 'w']
-_l_list = ['o:', 's--', '.--']
+_l_list = ['o:', 's--', '.--', 'o-', 's-']
 
 
 class PlotPS(FileIterBase):
@@ -60,6 +61,10 @@ class PlotPS(FileIterBase):
         fig_name = output_path(fig_name)
         print '--', fig_name
 
+        locmaj = matplotlib.ticker.LogLocator(base=10.0, subs=(1.0, ), numticks=100)
+        locmin = matplotlib.ticker.LogLocator(base=10.0, subs=np.arange(2, 10) * .1,
+                                                      numticks=100)
+
         axhh, axvv = self.axes
         if self.params['corr_type'] == 'tcorr':
             axhh.set_xlabel(r'$f\,[{\rm Hz}]$')
@@ -75,9 +80,12 @@ class PlotPS(FileIterBase):
         axhh.loglog()
         #axhh.semilogx()
         #axhh.set_xticklabels([])
-        axhh.minorticks_on()
+        #axhh.minorticks_on()
         axhh.tick_params(length=4, width=1, direction='in')
         axhh.tick_params(which='minor', length=2, width=1, direction='in')
+        axhh.xaxis.set_major_locator(locmaj)
+        axhh.xaxis.set_minor_locator(locmin)
+        axhh.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
 
         if self.params['corr_type'] == 'tcorr':
             axvv.set_xlabel(r'$f\,[{\rm Hz}]$')
@@ -90,9 +98,12 @@ class PlotPS(FileIterBase):
         axvv.loglog()
         #axvv.semilogx()
         axvv.set_yticklabels([])
-        axvv.minorticks_on()
+        #axvv.minorticks_on()
         axvv.tick_params(length=4, width=1, direction='in')
         axvv.tick_params(which='minor', length=2, width=1, direction='in')
+        axvv.xaxis.set_major_locator(locmaj)
+        axvv.xaxis.set_minor_locator(locmin)
+        axvv.xaxis.set_minor_formatter(matplotlib.ticker.NullFormatter())
 
         self.fig.savefig(fig_name + '.png', dpi=500)
         self.fig.clf()
@@ -166,30 +177,31 @@ class PlotPS(FileIterBase):
         if not self.params['fitting_path'] is None:
 
             x = np.logspace(np.log10(tcorr_bc.min()), np.log10(tcorr_bc.max()), 200)
-
-            base_path = self.params['fitting_path']
             base_name, ext = os.path.basename(self.input_files[self.iteration]).split('.')
 
-            # for HH
-            like_file = input_path(base_path + base_name + '_HH/plot_data.likestats')
-            print
-            print '+' * 20
-            print base_name + '_HH'
-            self._plot_thpsd_(axhh, x, like_file, fmt=fmt[1:], c=c)
+            base_path = self.params['fitting_path']
 
-            # for VV
-            like_file = input_path(base_path + base_name + '_VV/plot_data.likestats')
-            print '-' * 20
-            print base_name + '_VV'
-            self._plot_thpsd_(axvv, x, like_file, fmt=fmt[1:], c=c)
-            print
-
-            if (labels[i] is not None) and self.params['fitting_comb']:
+            if (labels[i] is not None) and self.params['fitting_comb'][i]:
                 base_name = base_name.replace(base_name.split('_')[0], 'combineded')
                 like_file = input_path(base_path + base_name + '_HH/plot_data.likestats')
                 self._plot_thpsd_(axhh, x, like_file, fmt='-', c=c, lw=1.5)
                 like_file = input_path(base_path + base_name + '_VV/plot_data.likestats')
                 self._plot_thpsd_(axvv, x, like_file, fmt='-', c=c, lw=1.5)
+            elif (labels[i] is not None):
+
+                # for HH
+                like_file = input_path(base_path + base_name + '_HH/plot_data.likestats')
+                print
+                print '+' * 20
+                #print base_name + '_HH'
+                self._plot_thpsd_(axhh, x, like_file, fmt=fmt[1:], c=c)
+
+                # for VV
+                like_file = input_path(base_path + base_name + '_VV/plot_data.likestats')
+                print '-' * 20
+                #print base_name + '_VV'
+                self._plot_thpsd_(axvv, x, like_file, fmt=fmt[1:], c=c)
+                print
 
         if labels[i] is not None:
             self.legend_list.append(mpatches.Patch(color=c, label=labels[i]))
@@ -223,9 +235,12 @@ class PlotPS(FileIterBase):
         alpha_u = stats['alpha'][4] - alpha_m
 
 
-        print 'AMP   %5.2f(%5.2f)+%5.2f-%5.2f'%(amp,   amp_m,   amp_u,   amp_l)
-        print 'alpha %5.2f(%5.2f)+%5.2f-%5.2f'%(alpha, alpha_m, alpha_u, alpha_l)
-        print 'fk    %5.2f(%5.2f)+%5.2f-%5.2f'%(fk,    fk_m,    fk_u,    fk_l)
+        #print 'AMP   %6.3f(%6.3f)+%6.3f-%6.3f'%(amp,   amp_m,   amp_u,   amp_l)
+        #print 'alpha %6.3f(%6.3f)+%6.3f-%6.3f'%(alpha, alpha_m, alpha_u, alpha_l)
+        #print 'fk    %6.3f(%6.3f)+%6.3f-%6.3f'%(fk,    fk_m,    fk_u,    fk_l)
+        #print 'AMP   %6.3f^{+%6.3f}_{-%6.3f}'%(amp,   amp_m,   amp_u,   amp_l)
+        print 'alpha $%6.3f^{+%6.3f}_{-%6.3f}$'%(alpha, alpha_u, alpha_l)
+        print 'fk    $%6.3f^{+%6.3f}_{-%6.3f}$'%(fk,    fk_u,    fk_l)
         
         #ax.plot(x, psd_f(x, amp_m, fk, alpha), fmt, color=c, linewidth=lw)
         ax.plot(x, psd_f(x, amp, fk, alpha), fmt, color=c, linewidth=lw)

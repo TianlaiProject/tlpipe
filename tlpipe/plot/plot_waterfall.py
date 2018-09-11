@@ -255,6 +255,8 @@ class PlotMeerKAT(timestream_task.TimestreamTask):
             'vmin'      : None,
             'vmax'      : None,
             'fig_name'  : 'wf/',
+            'bad_freq_list' : None,
+            'bad_time_list' : None,
             }
     prefix = 'pkat_'
 
@@ -268,6 +270,22 @@ class PlotMeerKAT(timestream_task.TimestreamTask):
 
         show_progress = self.params['show_progress']
         progress_step = self.params['progress_step']
+
+        bad_time_list = self.params['bad_time_list']
+        bad_freq_list = self.params['bad_freq_list']
+
+        if bad_time_list is not None:
+            print "Mask bad time"
+            for bad_time in bad_time_list:
+                print bad_time
+                ts.vis_mask[slice(*bad_time), ...] = True
+
+        if bad_freq_list is not None:
+            print "Mask bad freq"
+            for bad_freq in bad_freq_list:
+                print bad_freq
+                ts.vis_mask[:, slice(*bad_freq), ...] = True
+
 
         func(self.plot, full_data=True, show_progress=show_progress, 
                 progress_step=progress_step, keep_dist_axis=False)
@@ -334,6 +352,9 @@ class PlotMeerKAT(timestream_task.TimestreamTask):
             print mean
             vmax = mean + re_scale * std
             vmin = mean - re_scale * std
+        else:
+            vmax = self.params['vmax']
+            vmin = self.params['vmin']
 
         fig  = plt.figure(figsize=(10, 6))
         axhh = fig.add_axes([0.10, 0.52, 0.75, 0.40])
@@ -380,5 +401,5 @@ class PlotMeerKAT(timestream_task.TimestreamTask):
 
         fig_name = '%s_%s_m%03d_x_m%03d.png' % (fig_prefix, main_data, bl[0]-1, bl[1]-1)
         fig_name = output_path(fig_name)
-        plt.savefig(fig_name, formate='png', dpi=300)
+        plt.savefig(fig_name, formate='png') #, dpi=100)
         plt.close()

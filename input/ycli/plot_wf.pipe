@@ -14,12 +14,14 @@ pipe_logging = 'info'
 data_path = data_base + '/meerkat/raw/'
 
 # for the 1Hz data
-file_name = '1474580580'
-bad_time_list = [[3437, 3520]]
-bad_freq_list = [[None, 2190], [2473, 2548], [2696, 2704], [2900, None]]
+#file_name = '1474580580'
+# bad_time_list = [[3437, 3520]]
+# bad_freq_list = [[None, 2190], [2473, 2548], [2696, 2704], [2900, None]]
+#bad_time_list = []
+#bad_freq_list = [[None, 2190], [2900, None]]
 
 # # for the 20Hz data
-# file_name = '1474580092'
+file_name = '1474580092'
 # bad_time_list = [[0,  2064], [5664, None]]
 # bad_freq_list = [[None, 2190], [2473, 2548], [2696, 2704], [2900, None]]
 
@@ -52,11 +54,16 @@ pipe_tasks.append(plot_waterfall.PlotMeerKAT)
 # waterfall plots
 #pkat_input_files = m2t_output_files
 pkat_input_files = ['svd/%s.h5'%file_name, ]
+#pkat_input_files = ['tl/%s.h5'%file_name, ]
 #pkat_input_files = todsvd_output_files
 pkat_re_scale = 2.
+pkat_vmax = 300.
+pkat_vmin = 150.
 pkat_main_data = main_data
 #pkat_main_data = 'vis_sub00modes'
 pkat_fig_name = 'wf/%s'%file_name
 pkat_flag_mask = True
+pkat_bad_freq_list = None # bad_freq_list
+pkat_bad_time_list = None #bad_time_list
 
 

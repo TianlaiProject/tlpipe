@@ -31,10 +31,17 @@ class DataEdit(timestream_task.TimestreamTask):
         progress_step = self.params['progress_step']
 
         if bad_time_list is not None:
-            print "Mask bad time"
-            for bad_time in bad_time_list:
-                print bad_time
-                ts.vis_mask[slice(*bad_time), ...] = True
+            num_infiles = len(self.input_files)
+            name = ts.main_data_name
+            outfiles_map = ts._get_output_info(name, num_infiles)[-1]
+            st = 0
+            for fi, start, stop in outfiles_map:
+                et = st + (stop - start)
+                print "Mask bad time"
+                for bad_time in bad_time_list:
+                    print bad_time
+                    ts.vis_mask[st:et, ...][slice(*bad_time), ...] = True
+                st = et
 
         if bad_freq_list is not None:
             print "Mask bad freq"

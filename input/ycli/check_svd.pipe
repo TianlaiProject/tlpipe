@@ -20,14 +20,14 @@ pipe_logging = 'info'
 data_path = data_base + '/meerkat/raw/'
 
 # # for the 1Hz data
-# file_name = '1474580580'
-# bad_time_list = [[3437, 3520]]
-# bad_freq_list = [[None, 2190], [2473, 2548], [2696, 2704], [2900, None]]
+file_name = '1474580580'
+bad_time_list = [[3437, 3520]]
+bad_freq_list = [[None, 2190], [2473, 2548], [2696, 2704], [2900, None]]
 
 # for the 20Hz data
-file_name = '1474580092'
-bad_time_list = [[0,  2064], [5664, None]]
-bad_freq_list = [[None, 2190], [2473, 2548], [2696, 2704], [2900, None]]
+# file_name = '1474580092'
+# bad_time_list = [[0,  2064], [5664, None]]
+# bad_freq_list = [[None, 2190], [2473, 2548], [2696, 2704], [2900, None]]
 
 #bad_freq_list = [[300, 500], [820, 845], [1014, 1087], 
 #                 [1100, 2150], [2695, 2702], [2890, 3010],
@@ -37,6 +37,10 @@ n_bins    = 20
 mode_list = [0, 1, 2, 5]
 ps_method = 'lombscargle' #'fft'
 prewhiten = True
+
+#method = 'both' 
+method = 'time'
+#method = 'freq'
 
 input_files = ['%s.h5'%file_name, ]
 
@@ -60,16 +64,16 @@ input_files = ['%s.h5'%file_name, ]
 # ===================================================================
 
 ant = 'm017' #'m021', 'm017', 'm036'
-#file_middle = '_avg0100F_tcorrps_%s'%ps_method
+file_middle = '_avg0100F_tcorrps_%s'%ps_method
 #file_middle = '_avg0100T_tcorrps_%s'%ps_method
-file_middle = '_avg2000T_tcorrps_%s'%ps_method
+#file_middle = '_avg2000T_tcorrps_%s'%ps_method
 file_suffix = file_middle + '_%s_x_%s'%(ant, ant)
 
 #pipe_tasks.append((plot_svd.PlotSVD, 'psvd_'))
 
-#pipe_tasks.append((plot_ps.PlotPS, 'pps1dtcsvd_'))
+pipe_tasks.append((plot_ps.PlotPS, 'pps1dtcsvd_'))
 
-pipe_tasks.append((plot_ps.PlotPS, 'pps1dfcsvd_'))
+#pipe_tasks.append((plot_ps.PlotPS, 'pps1dfcsvd_'))
 
 #pipe_tasks.append((plot_ps.PlotPS, 'ppsmod_'))
 
@@ -103,7 +107,8 @@ pned_output_files  = ['pned/%s'%f for f in input_files]
 #todsvd_in = pned_out
 todsvd_input_files = pned_output_files
 todsvd_mode_list = mode_list
-todsvd_output_files = ['svd/%s'%f for f in input_files]
+todsvd_output_files = ['svd_%s/%s'%(method, f) for f in input_files]
+todsvd_method = method
 todsvd_prewhiten = prewhiten
 #todsvd_out = 'todsvd'
 
@@ -121,7 +126,7 @@ pnpsvis_avg_len = 100
 
 # parameter for Power spectrum estimation for cleaned vis
 pnps1dtccln_input_files  = todsvd_output_files
-pnps1dtccln_output_files = ['pnps_1dtc/%s'%f for f in input_files]
+pnps1dtccln_output_files = ['pnps_%s_1dtc/%s'%(method, f) for f in input_files]
 pnps1dtccln_data_sets = 'cleaned_vis'
 pnps1dtccln_n_bins = n_bins
 pnps1dtccln_f_min  = 1.e-4
@@ -160,7 +165,7 @@ psvd_mode_n = 6
 #------------------------------------------------------------------------------
 
 # parameter for plot ps with differenct svd modes subtraction
-file_name_temp = 'pnps_1dtc/' + file_name + '_vis_sub%02dmodes' + file_suffix + '.h5'
+file_name_temp = 'pnps_%s_1dtc/'%method + file_name + '_vis_sub%02dmodes' + file_suffix + '.h5'
 pps1dtcsvd_input_files = [file_name_temp%m for m in mode_list]
 pps1dtcsvd_labels = [
     'without mode subtracted',
@@ -171,7 +176,7 @@ pps1dtcsvd_labels = [
 pps1dtcsvd_label_title = 'MeerKAT Ant. %s'%ant
 pps1dtcsvd_vmin = 1.e-9
 pps1dtcsvd_vmax = 1.e-3
-pps1dtcsvd_output_files = ['ps/%s_submodes%s'%(file_name, file_suffix),]
+pps1dtcsvd_output_files = ['ps_%s/%s_submodes%s'%(method, file_name, file_suffix),]
 
 #------------------------------------------------------------------------------
 
