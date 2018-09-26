@@ -22,8 +22,9 @@ ps_method = 'lombscargle' #'fft'
 # ==                         for plot                              ==
 # ===================================================================
 
-ant = 'm021' #'m021', 'm017', 'm036'
-file_middle = '_avg0100_tcorrps_%s'%ps_method
+ant = 'm017' #'m021', 'm017', 'm036'
+#file_middle = '_avg0100_tcorrps_%s'%ps_method
+file_middle = '_avg0050F_tcorrps_%s'%ps_method
 file_suffix = file_middle + '_%s_x_%s'%(ant, ant)
 
 pipe_tasks.append((plot_ps.PlotPS, 'ppssvd_'))
@@ -40,12 +41,12 @@ pipe_tasks.append((plot_ps.PlotPS, 'ppssvd_'))
 
 # parameter for plot ps with differenct svd modes subtraction
 ppssvd_input_files = [
-        'pnps/1474580580_vis_sub00modes%s.h5'%file_suffix,
+        'pnps_1dtc/1474580580_vis_sub00modes%s.h5'%file_suffix,
         #'pnps/1474580580_vis_sub01modes%s.h5'%file_suffix,
         #'pnps/1474580580_vis_sub02modes%s.h5'%file_suffix,
-        'pnps/1474580580_vis_sub05modes%s.h5'%file_suffix,
+        'pnps_1dtc/1474580580_vis_sub05modes%s.h5'%file_suffix,
 
-        'pnps/1474580092_vis_sub00modes%s.h5'%file_suffix,
+        'pnps_1dtc/1474580092_vis_sub00modes%s.h5'%file_suffix,
         #'pnps/1474580092_vis_sub01modes%s.h5'%file_suffix,
         #'pnps/1474580092_vis_sub02modes%s.h5'%file_suffix,
         #'pnps/1474580092_vis_sub05modes%s.h5'%file_suffix,

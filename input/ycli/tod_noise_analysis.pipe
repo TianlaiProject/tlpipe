@@ -48,7 +48,7 @@ input_files = ['%s.h5'%file_name, ]
 
 #pipe_tasks.append((tod_noise.PinkNoisePS, 'pnpsvis_'))
 
-#pipe_tasks.append((tod_noise.PinkNoisePS_1DTC, 'pnps1dtccln_'))
+pipe_tasks.append((tod_noise.PinkNoisePS_1DTC, 'pnps1dtccln_'))
 
 #pipe_tasks.append((tod_noise.PinkNoisePS_1DFC, 'pnps1dfccln_'))
 
@@ -61,15 +61,16 @@ input_files = ['%s.h5'%file_name, ]
 
 ant = 'm017' #'m021', 'm017', 'm036'
 #file_middle = '_avg0100F_tcorrps_%s'%ps_method
+file_middle = '_avg0050F_tcorrps_%s'%ps_method
 #file_middle = '_avg0100T_tcorrps_%s'%ps_method
-file_middle = '_avg2000T_tcorrps_%s'%ps_method
+#file_middle = '_avg2000T_tcorrps_%s'%ps_method
 file_suffix = file_middle + '_%s_x_%s'%(ant, ant)
 
 #pipe_tasks.append((plot_svd.PlotSVD, 'psvd_'))
 
 #pipe_tasks.append((plot_ps.PlotPS, 'pps1dtcsvd_'))
 
-pipe_tasks.append((plot_ps.PlotPS, 'pps1dfcsvd_'))
+#pipe_tasks.append((plot_ps.PlotPS, 'pps1dfcsvd_'))
 
 #pipe_tasks.append((plot_ps.PlotPS, 'ppsmod_'))
 
@@ -127,7 +128,8 @@ pnps1dtccln_n_bins = n_bins
 pnps1dtccln_f_min  = 1.e-4
 pnps1dtccln_f_max  = 10.
 pnps1dtccln_method =  ps_method
-pnps1dtccln_avg_len = 100
+#pnps1dtccln_avg_len = 100
+pnps1dtccln_avg_len = 50
 
 #------------------------------------------------------------------------------
 

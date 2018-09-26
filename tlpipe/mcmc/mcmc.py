@@ -66,7 +66,7 @@ class MCMC_BASE(FileIterBase):
         #print self.iteration
         for i in range(self.iteration, self.iteration + self.iter_step):
             print self.input_files[i]
-            fhs.append(h5py.File(input_path(self.input_files[i])))
+            fhs.append(h5py.File(input_path(self.input_files[i]), 'r'))
 
         return fhs
 
