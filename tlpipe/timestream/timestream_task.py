@@ -153,7 +153,7 @@ class TimestreamTask(OneAndOne):
             full_data = False
         if self._Tod_class == Timestream and self.params['pol_select'] != (0, None):
             full_data = False
-        if self.params['feed_select'] != (0, None) and self.params['corr'] != 'all':
+        if self.params['feed_select'] != (0, None) or self.params['corr'] != 'all':
             full_data = False
 
         return full_data
@@ -171,7 +171,7 @@ class TimestreamTask(OneAndOne):
         if self._Tod_class == Timestream and self.params['pol_select'] != (0, None):
             full_data = False
             tod.polarization_select(self.params['pol_select'])
-        if self.params['feed_select'] != (0, None) and self.params['corr'] != 'all':
+        if self.params['feed_select'] != (0, None) or self.params['corr'] != 'all':
             full_data = False
             tod.feed_select(self.params['feed_select'], self.params['corr'])
 
