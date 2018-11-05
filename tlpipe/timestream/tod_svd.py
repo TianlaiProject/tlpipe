@@ -4,9 +4,23 @@ import h5py
 from caput import mpiutil
 from tlpipe.utils.path_util import output_path
 
+
+class PolyFit(timestream_task.TimestreamTask):
+    """
+    Apply Polynomial fitting to the time stream data
+    """
+
+    params_init = {
+            'order_list' : [0],
+            'prewhiten' : False,
+            }
+
+    prefix = 'todpfit_'
+
+
 class SVD(timestream_task.TimestreamTask):
     """
-    nothing but testing
+    Apply SVD clean to the time stream data
     """
 
     params_init = {

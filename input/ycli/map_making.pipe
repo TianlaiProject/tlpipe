@@ -9,7 +9,9 @@ from tlpipe.map import dirtymap
 data_base = os.getenv('DATA_BASE')
 
 #sim_type = 'fnoise_beta0.0'
-sim_type = 'HI_tf_v5m'
+#sim_type = 'HI_tf'
+#sim_type = 'HI_tf_v5m'
+sim_type = 'wigglez_syn_fnoise_beta0.5'
 
 pipe_tasks = []
 pipe_outdir = data_base + 'meerkat/sim_%s/'%sim_type
@@ -18,9 +20,16 @@ pipe_copy = False
 
 data_path = data_base + '/meerkat/sim/'
 
+method = 'freq'
+
 #file_name = '1474580092'
 
 input_files = [
+    'MeerKAT3_HorizonRasterDrift_20180915203600.h5',
+    'MeerKAT3_HorizonRasterDrift_20180916020000.h5',
+    'MeerKAT3_HorizonRasterDrift_20180916203000.h5',
+    'MeerKAT3_HorizonRasterDrift_20180917015400.h5',
+
         #'sim_meerKAT3_AZdrift_20180915210600.h5',
         #'sim_meerKAT3_AZdrift_20180915230605.h5',
         #'sim_meerKAT3_AZdrift_20180916010610.h5',
@@ -34,62 +43,69 @@ input_files = [
         #'sim_meerKAT3_AZdrift_20180916170650.h5',
         #'sim_meerKAT3_AZdrift_20180916190655.h5',
 
-         'sim_meerKAT3_AZdrift_20180916210700.h5',
-         'sim_meerKAT3_AZdrift_20180917090730.h5',
-         'sim_meerKAT3_AZdrift_20180917070725.h5',
-         'sim_meerKAT3_AZdrift_20180917030715.h5',
-         'sim_meerKAT3_AZdrift_20180916230705.h5',
-         'sim_meerKAT3_AZdrift_20180917110735.h5',
-         'sim_meerKAT3_AZdrift_20180917050720.h5',
-         'sim_meerKAT3_AZdrift_20180916130640.h5',
-         'sim_meerKAT3_AZdrift_20180916090630.h5',
-         'sim_meerKAT3_AZdrift_20180915210600.h5',
-         'sim_meerKAT3_AZdrift_20180918230905.h5',
-         'sim_meerKAT3_AZdrift_20180918130840.h5',
-         'sim_meerKAT3_AZdrift_20180917010710.h5',
-         'sim_meerKAT3_AZdrift_20180916190655.h5',
-         'sim_meerKAT3_AZdrift_20180916170650.h5',
-         'sim_meerKAT3_AZdrift_20180916150645.h5',
-         'sim_meerKAT3_AZdrift_20180916110635.h5',
-         'sim_meerKAT3_AZdrift_20180916070625.h5',
-         'sim_meerKAT3_AZdrift_20180916050620.h5',
-         'sim_meerKAT3_AZdrift_20180916030615.h5',
-         'sim_meerKAT3_AZdrift_20180916010610.h5',
-         'sim_meerKAT3_AZdrift_20180915230605.h5',
-         'sim_meerKAT3_AZdrift_20180919030915.h5',
-         'sim_meerKAT3_AZdrift_20180919010910.h5',
-         'sim_meerKAT3_AZdrift_20180918210900.h5',
-         'sim_meerKAT3_AZdrift_20180918190855.h5',
-         'sim_meerKAT3_AZdrift_20180918150845.h5',
-         'sim_meerKAT3_AZdrift_20180918010810.h5',
-         'sim_meerKAT3_AZdrift_20180918090830.h5',
-         'sim_meerKAT3_AZdrift_20180917130740.h5',
-         'sim_meerKAT3_AZdrift_20180920111035.h5',
-         'sim_meerKAT3_AZdrift_20180920051020.h5',
-         'sim_meerKAT3_AZdrift_20180918170850.h5',
-         'sim_meerKAT3_AZdrift_20180918110835.h5',
-         'sim_meerKAT3_AZdrift_20180918070825.h5',
-         'sim_meerKAT3_AZdrift_20180918050820.h5',
-         'sim_meerKAT3_AZdrift_20180918030815.h5',
-         'sim_meerKAT3_AZdrift_20180917230805.h5',
-         'sim_meerKAT3_AZdrift_20180917210800.h5',
-         'sim_meerKAT3_AZdrift_20180917190755.h5',
-         'sim_meerKAT3_AZdrift_20180917170750.h5',
-         'sim_meerKAT3_AZdrift_20180917150745.h5',
-         'sim_meerKAT3_AZdrift_20180920191055.h5',
-         'sim_meerKAT3_AZdrift_20180920171050.h5',
-         'sim_meerKAT3_AZdrift_20180920151045.h5',
-         'sim_meerKAT3_AZdrift_20180920131040.h5',
-         'sim_meerKAT3_AZdrift_20180920071025.h5',
-         'sim_meerKAT3_AZdrift_20180920011010.h5',
-         'sim_meerKAT3_AZdrift_20180919170950.h5',
-         'sim_meerKAT3_AZdrift_20180919110935.h5',
+        # 'sim_meerKAT3_AZdrift_20180916210700.h5',
+        # 'sim_meerKAT3_AZdrift_20180917090730.h5',
+        # 'sim_meerKAT3_AZdrift_20180917070725.h5',
+        # 'sim_meerKAT3_AZdrift_20180917030715.h5',
+        # 'sim_meerKAT3_AZdrift_20180916230705.h5',
+        # 'sim_meerKAT3_AZdrift_20180917110735.h5',
+        # 'sim_meerKAT3_AZdrift_20180917050720.h5',
+        # 'sim_meerKAT3_AZdrift_20180916130640.h5',
+        # 'sim_meerKAT3_AZdrift_20180916090630.h5',
+        # 'sim_meerKAT3_AZdrift_20180915210600.h5',
+        # 'sim_meerKAT3_AZdrift_20180918230905.h5',
+        # 'sim_meerKAT3_AZdrift_20180918130840.h5',
+        # 'sim_meerKAT3_AZdrift_20180917010710.h5',
+        # 'sim_meerKAT3_AZdrift_20180916190655.h5',
+        # 'sim_meerKAT3_AZdrift_20180916170650.h5',
+        # 'sim_meerKAT3_AZdrift_20180916150645.h5',
+        # 'sim_meerKAT3_AZdrift_20180916110635.h5',
+        # 'sim_meerKAT3_AZdrift_20180916070625.h5',
+        # 'sim_meerKAT3_AZdrift_20180916050620.h5',
+        # 'sim_meerKAT3_AZdrift_20180916030615.h5',
+        # 'sim_meerKAT3_AZdrift_20180916010610.h5',
+        # 'sim_meerKAT3_AZdrift_20180915230605.h5',
+        # 'sim_meerKAT3_AZdrift_20180919030915.h5',
+        # 'sim_meerKAT3_AZdrift_20180919010910.h5',
+        # 'sim_meerKAT3_AZdrift_20180918210900.h5',
+        # 'sim_meerKAT3_AZdrift_20180918190855.h5',
+        # 'sim_meerKAT3_AZdrift_20180918150845.h5',
+        # 'sim_meerKAT3_AZdrift_20180918010810.h5',
+        # 'sim_meerKAT3_AZdrift_20180918090830.h5',
+        # 'sim_meerKAT3_AZdrift_20180917130740.h5',
+        # 'sim_meerKAT3_AZdrift_20180920111035.h5',
+        # 'sim_meerKAT3_AZdrift_20180920051020.h5',
+        # 'sim_meerKAT3_AZdrift_20180918170850.h5',
+        # 'sim_meerKAT3_AZdrift_20180918110835.h5',
+        # 'sim_meerKAT3_AZdrift_20180918070825.h5',
+        # 'sim_meerKAT3_AZdrift_20180918050820.h5',
+        # 'sim_meerKAT3_AZdrift_20180918030815.h5',
+        # 'sim_meerKAT3_AZdrift_20180917230805.h5',
+        # 'sim_meerKAT3_AZdrift_20180917210800.h5',
+        # 'sim_meerKAT3_AZdrift_20180917190755.h5',
+        # 'sim_meerKAT3_AZdrift_20180917170750.h5',
+        # 'sim_meerKAT3_AZdrift_20180917150745.h5',
+        # 'sim_meerKAT3_AZdrift_20180920191055.h5',
+        # 'sim_meerKAT3_AZdrift_20180920171050.h5',
+        # 'sim_meerKAT3_AZdrift_20180920151045.h5',
+        # 'sim_meerKAT3_AZdrift_20180920131040.h5',
+        # 'sim_meerKAT3_AZdrift_20180920071025.h5',
+        # 'sim_meerKAT3_AZdrift_20180920011010.h5',
+        # 'sim_meerKAT3_AZdrift_20180919170950.h5',
+        # 'sim_meerKAT3_AZdrift_20180919110935.h5',
 
-    #'sim_meerKAT3_AZdrift_20180915210600.h5',
-    #'sim_meerKAT3_AZdrift_20180915220600.h5',
-    #'sim_meerKAT3_AZdrift_20180915230600.h5',
-    #'sim_meerKAT3_AZdrift_20180916000600.h5',
-    #'sim_meerKAT3_AZdrift_20180916010600.h5',
+    #'MeerKAT3_AzDrift_20180915210600.h5',
+    #'MeerKAT3_AzDrift_20180915220600.h5',
+    #'MeerKAT3_AzDrift_20180915230600.h5',
+    #'MeerKAT3_AzDrift_20180916000600.h5',
+    #'MeerKAT3_AzDrift_20180916010600.h5',
+
+    #'MeerKAT3_HorizonRasterDrift_20180916000000.h5',
+    #'MeerKAT3_HorizonRasterDrift_20180916010000.h5',
+    #'MeerKAT3_HorizonRasterDrift_20180916020000.h5',
+    #'MeerKAT3_HorizonRasterDrift_20180916030000.h5',
+    #'MeerKAT3_HorizonRasterDrift_20180916040000.h5',
+
     #'sim_meerKAT3_AZdrift_20180916020600.h5',
     #'sim_meerKAT3_AZdrift_20180916030600.h5',
     #'sim_meerKAT3_AZdrift_20180916040600.h5',
@@ -110,9 +126,10 @@ input_files = [
     #'sim_meerKAT3_AZdrift_20180916190600.h5',
     #'sim_meerKAT3_AZdrift_20180916200600.h5',
     ]
-file_name = 'sim_meerKAT3_AZdrift_noise_inv_weight'
+#file_name = 'sim_meerKAT3_AZdrift_noise_inv_weight'
+file_name = 'sim_meerKAT3_HorizonRasterDrift_noise_cov_weight'
 
-pipe_tasks.append(dirtymap.DirtyMap)
+pipe_tasks.append(dirtymap.DirtyMap_Flat)
 
 #dm_input_files  = ['svd/%s'%f for f in input_files]
 #dm_output_files = ['maps/%s'%file_name,]
@@ -120,9 +137,15 @@ pipe_tasks.append(dirtymap.DirtyMap)
 #dm_data_sets    = 'vis_sub01modes'
 
 #dm_input_files  = ['pned/%s'%f for f in input_files]
-dm_input_files  = ['svd_time/%s'%f for f in input_files]
-dm_output_files = ['maps/%s'%file_name,]
-#dm_data_sets    = 'vis'
-dm_data_sets    = 'vis_sub00modes'
+#dm_input_files  = ['svd_%s/%s'%(method, f) for f in input_files]
+dm_ra_range = [0, 25]
+dm_ra_delta = 0.2
+dm_dec_range = [-4.0, 5.0]
+dm_dec_delta = 0.2
+dm_tblock_len = 200
+dm_input_files  = ['sim/%s'%f for f in input_files]
+dm_output_files = ['maps_test/%s'%file_name, ]
+dm_data_sets    = 'vis'
+#dm_data_sets    = 'vis_sub00modes'
 #dm_data_sets    = 'vis_sub05modes'
 
