@@ -236,8 +236,8 @@ class DirtyMap_GBT(timestream_task.TimestreamTask):
         with h5py.File(output_file, 'w') as f:
 
             al.save_h5(f, 'dirty_map',  dirty_map)
-            al.save_h5(f, 'clean_map',  dirty_map)
-            al.save_h5(f, 'noise_diag', dirty_map)
+            al.save_h5(f, 'clean_map',  clean_map)
+            al.save_h5(f, 'noise_diag', noise_diag)
 
             f['pol'] = self.pol
             f['bl']  = self.bl
