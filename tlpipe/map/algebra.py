@@ -68,7 +68,7 @@ from numpy.lib.utils import safe_eval
 
 #import utils.cubic_conv_interpolation as cci
 
-import kiyopy.custom_exceptions as ce
+import tlpipe.kiyopy.custom_exceptions as ce
 
 # ---- Slight modification to the NPY format. ---------------------------------
 
@@ -1964,9 +1964,9 @@ def partial_dot(left, right):
     # Then we'll reshape both into 2D arrays (matricies).
     left_sliced_reshape = (sp.prod(left_rows_only_shape + left_notdot_shape),
                            sp.prod(left_todot_shape))
-    right_sliced_reshape = (sp.prod(right_todot_shape),
-                            sp.prod(right_notdot_shape +
-                                    right_cols_only_shape))
+    right_sliced_reshape = (int(sp.prod(right_todot_shape)),
+                            int(sp.prod(right_notdot_shape +
+                                    right_cols_only_shape)))
     # After the dot, we will neet to reshape back.
     out_sliced_reshape = tuple(left_rows_only_shape + left_notdot_shape
                                + right_notdot_shape + right_cols_only_shape)
