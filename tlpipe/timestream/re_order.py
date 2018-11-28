@@ -93,7 +93,7 @@ class ReOrder(timestream_task.TimestreamTask):
                 sel1[time_axis] = slice(0, nt1)
                 sel2 = [ slice(0, None) ] * len(shp)
                 sel2[time_axis] = slice(ind, ind+nt1)
-                data[sel1] = dset.local_data[sel2]
+                data[tuple(sel1)] = dset.local_data[tuple(sel2)]
                 if dset.distributed:
                     data = mpiarray.MPIArray.wrap(data, axis=time_axis)
                 ts.create_main_axis_ordered_dataset(axis, name, data, axis_order, recreate=True, copy_attrs=True)
@@ -118,6 +118,6 @@ class ReOrder(timestream_task.TimestreamTask):
                 sel2 = sel1[:]
                 sel1[time_axis] = slice(ind0, None)
                 sel2[time_axis] = slice(0, ind0)
-                dset.local_data[:] = np.concatenate([ dset.local_data[sel1], dset.local_data[sel2] ], axis=time_axis)
+                dset.local_data[:] = np.concatenate([ dset.local_data[tuple(sel1)], dset.local_data[tuple(sel2)] ], axis=time_axis)
 
         return super(ReOrder, self).process(ts)

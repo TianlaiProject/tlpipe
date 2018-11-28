@@ -1000,9 +1000,9 @@ class TimestreamCommon(container.BasicTod):
                 else:
                     axis_val = axis_vals
                 if copy_data:
-                    func(self.local_vis[data_sel].copy(), self.local_vis_mask[data_sel].copy(), lind, gind, axis_val, self, **kwargs)
+                    func(self.local_vis[tuple(data_sel)].copy(), self.local_vis_mask[tuple(data_sel)].copy(), lind, gind, axis_val, self, **kwargs)
                 else:
-                    func(self.local_vis[data_sel], self.local_vis_mask[data_sel], lind, gind, axis_val, self, **kwargs)
+                    func(self.local_vis[tuple(data_sel)], self.local_vis_mask[tuple(data_sel)], lind, gind, axis_val, self, **kwargs)
             if full_data and keep_dist_axis:
                 self.redistribute(original_dist_axis)
         elif isinstance(op_axis, tuple):
@@ -1041,9 +1041,9 @@ class TimestreamCommon(container.BasicTod):
                     else:
                         axis_val += (axis_vals[ai],)
                 if copy_data:
-                    func(self.local_vis[data_sel].copy(), self.local_vis_mask[data_sel].copy(), lind, gind, axis_val, self, **kwargs)
+                    func(self.local_vis[tuple(data_sel)].copy(), self.local_vis_mask[tuple(data_sel)].copy(), lind, gind, axis_val, self, **kwargs)
                 else:
-                    func(self.local_vis[data_sel], self.local_vis_mask[data_sel], lind, gind, axis_val, self, **kwargs)
+                    func(self.local_vis[tuple(data_sel)], self.local_vis_mask[tuple(data_sel)], lind, gind, axis_val, self, **kwargs)
             if full_data and keep_dist_axis:
                 self.redistribute(original_dist_axis)
         else:
