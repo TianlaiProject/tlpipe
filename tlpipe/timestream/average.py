@@ -11,6 +11,7 @@ Inheritance diagram
 import warnings
 import numpy as np
 import timestream_task
+from tlpipe.container.timestream import Timestream
 
 
 class Average(timestream_task.TimestreamTask):
@@ -20,6 +21,10 @@ class Average(timestream_task.TimestreamTask):
     :class:`~tlpipe.timestream.accumulate.Accum`.
 
     """
+
+    params_init = {
+                    'keep_last_in': True, # only keep the last in arg from Accum
+                  }
 
     prefix = 'av_'
 
@@ -37,6 +42,18 @@ class Average(timestream_task.TimestreamTask):
             # ts.local_vis_mask[:] = np.where(ts['weight'].local_data != 0, False, True) # already done in accumulate
 
             # del weight to save memory
-            ts.delete_a_dataset('weight')
+            ts.delete_a_dataset('weight', reserve_hint=False)
 
         return super(Average, self).process(ts)
+
+    def read_process_write(self, ts):
+        """Overwrite method of :class:`timestream_task.TimestreamTask` to allow
+        `ts` be a file name.
+        """
+
+        # load data from file
+        if isinstance(ts, basestring):
+            ts = Timestream(ts, mode='r', start=0, stop=None, dist_axis=0, use_hints=True)
+            ts.load_all()
+
+        return super(Average, self).read_process_write(ts)

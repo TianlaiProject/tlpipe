@@ -57,6 +57,10 @@ def decompose(M, rank=1, S=None, lmbda=None, threshold='hard', max_iter=100, tol
         if not np.allclose(M, M.T.conj()):
             raise ValueError('M must be a Hermitian matrix')
 
+    # if M is zero matrix, L and S should be zero matrix too
+    if np.allclose(M, 0.0):
+        return np.zeros_like(M), np.zeros_like(M)
+
     if lmbda is None:
         fixed_lmbda = False
     else:

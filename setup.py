@@ -36,6 +36,13 @@ st_ext = Extension(
             extra_compile_args=args,
             extra_link_args=args)
 
+# SIR operator extension
+sir_ext = Extension(
+            'tlpipe.rfi.sir_operator', [ cython_file('tlpipe/rfi/sir_operator') ],
+            include_dirs=[ np.get_include() ],
+            extra_compile_args=args,
+            extra_link_args=args)
+
 
 
 
@@ -53,7 +60,7 @@ setup(
     version = __version__,
 
     packages = find_packages(),
-    ext_modules = [ st_ext ],
+    ext_modules = [ st_ext, sir_ext ],
     install_requires = requires,
     package_data = {},
     scripts = ['scripts/tlpipe', 'scripts/h5info'],

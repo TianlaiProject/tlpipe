@@ -36,6 +36,9 @@ class Combine(timestream_task.TimestreamTask):
 
         ts.bl_data_operate(self.combine, show_progress=show_progress, progress_step=progress_step,)
 
+        # set flag to indicate the combination
+        ts['vis_mask'].attrs['combined_mask'] = True
+
         return super(Combine, self).process(ts)
 
     def combine(self, vis, vis_mask, li, gi, tf, ts, **kwargs):

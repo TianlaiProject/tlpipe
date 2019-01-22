@@ -9,13 +9,15 @@ Inheritance diagram
 
 """
 
+import os
+import time
 import re
 import pickle
 import itertools
 import numpy as np
 import h5py
 import ephem
-from datetime import datetime
+from datetime import datetime, timedelta
 import container
 from caput import mpiutil
 from caput import mpiarray
@@ -250,6 +252,14 @@ class TimestreamCommon(container.BasicTod):
             freq_axis = self.main_data_axes.index('frequency')
             freq = freq[self.main_data_select[freq_axis]]
 
+            # # frequency correction for the early observational data of cylinder array
+            # # correct freq only once here
+            # if self.is_cylinder:
+            #     # compare in Beijing time both
+            #     if datetime.strptime(self.attrs['obstime'][-1], "%Y/%m/%d %H:%M:%S.%f") < datetime.strptime('2018/06/06', "%Y/%m/%d"):
+            #         # cylinder data before June 6, 2018 needs to correct the frequency
+            #         freq += 0.9765625 # MHz
+
             # if frequency is just the distributed axis, load freq distributed
             if 'frequency' == self.main_data_axes[self.main_data_dist_axis]:
                 freq = mpiarray.MPIArray.from_numpy_array(freq)
@@ -262,15 +272,13 @@ class TimestreamCommon(container.BasicTod):
             int_time = self.infiles[0].attrs['inttime']
             sec1970s = []
             nts = []
-            for fh in mpiutil.mpilist(self.infiles, method='con', comm=self.comm):
+            for fh in self.infiles:
                 sec1970s.append(fh.attrs['sec1970'])
                 nts.append(fh[self.main_data_name].shape[0])
             sec1970 = np.zeros(sum(nts), dtype=np.float64) # precision float32 is not enough
             cum_nts = np.cumsum([0] + nts)
             for idx, (nt, sec) in enumerate(zip(nts, sec1970s)):
                 sec1970[cum_nts[idx]:cum_nts[idx+1]] = np.array([ sec + i*int_time for i in xrange(nt)], dtype=np.float64) # precision float32 is not enough
-            # gather local sec1970
-            sec1970 = mpiutil.gather_array(sec1970, root=None, comm=self.comm)
             # select the corresponding section
             sec1970 = sec1970[self.main_data_start:self.main_data_stop][self.main_data_select[0]]
 
@@ -302,7 +310,7 @@ class TimestreamCommon(container.BasicTod):
             # generate local time in hour from 0 to 24.0
             def _hour(t):
                 return t.hour + t.minute/60.0 + t.second/3600.0 + t.microsecond/3.6e8
-            local_hour = np.array([ _hour(datetime.fromtimestamp(s).time()) for s in sec1970 ], dtype=np.float64)
+            local_hour = np.array([ _hour((datetime.utcfromtimestamp(s) + timedelta(hours=8)).time()) for s in sec1970 ], dtype=np.float64)
             if 'time' == self.main_data_axes[self.main_data_dist_axis]:
                 local_hour = mpiarray.MPIArray.wrap(local_hour, axis=0)
             # if time is just the distributed axis, load local_hour distributed
@@ -341,23 +349,41 @@ class TimestreamCommon(container.BasicTod):
             self.create_main_time_ordered_dataset('ra_dec', data=ra_dec)
             self['ra_dec'].attrs['unit'] = 'radian'
 
-            # determin if it is the same pointing
-            if self.main_data_dist_axis == 0:
+            # determin if it is the same pointing, the same dec
+            if 'time' == self.main_data_axes[self.main_data_dist_axis]:
                 az_alt = az_alt.local_array
                 ra_dec = ra_dec.local_array
-            # gather local az_alt
-            az_alt = mpiutil.gather_array(az_alt, root=None, comm=self.comm)
-            if np.allclose(az_alt[:, 0], az_alt[0, 0]) and np.allclose(az_alt[:, 1], az_alt[0, 1]):
-                self['az_alt'].attrs['same_pointing'] = True
+                az0 = mpiutil.bcast(az_alt[0, 0], root=0, comm=self.comm)
+                alt0 = mpiutil.bcast(az_alt[0, 1], root=0, comm=self.comm)
+                dec0 = mpiutil.bcast(ra_dec[0, 1], root=0, comm=self.comm)
+                if np.allclose(az_alt[:, 0], az0) and np.allclose(az_alt[:, 1], alt0):
+                    local_same_pointing = 1
+                else:
+                    local_same_pointing = 0
+                if np.allclose(ra_dec[:, 1], dec0):
+                    local_same_dec = 1
+                else:
+                    local_same_dec = 0
+                same_pointing = mpiutil.allreduce(local_same_pointing, op=mpiutil.MIN, comm=self.comm)
+                same_dec = mpiutil.allreduce(local_same_dec, op=mpiutil.MIN, comm=self.comm)
+                if same_pointing == 1:
+                    self['az_alt'].attrs['same_pointing'] = True
+                else:
+                    self['az_alt'].attrs['same_pointing'] = False
+                if same_dec == 1:
+                    self['ra_dec'].attrs['same_dec'] = True
+                else:
+                    self['ra_dec'].attrs['same_dec'] = False
             else:
-                self['az_alt'].attrs['same_pointing'] = False
-            # determin if it is the same dec
-            # gather local ra_dec
-            ra_dec = mpiutil.gather_array(ra_dec, root=None, comm=self.comm)
-            if np.allclose(ra_dec[:, 1], ra_dec[0, 1]):
-                self['ra_dec'].attrs['same_dec'] = True
-            else:
-                self['ra_dec'].attrs['same_dec'] = False
+                if np.allclose(az_alt[:, 0], az_alt[0, 0]) and np.allclose(az_alt[:, 1], az_alt[0, 1]):
+                    self['az_alt'].attrs['same_pointing'] = True
+                else:
+                    self['az_alt'].attrs['same_pointing'] = False
+
+                if np.allclose(ra_dec[:, 1], ra_dec[0, 1]):
+                    self['ra_dec'].attrs['same_dec'] = True
+                else:
+                    self['ra_dec'].attrs['same_dec'] = False
 
 
     @property
@@ -735,12 +761,15 @@ class TimestreamCommon(container.BasicTod):
         self.feed_ordered_datasets[name] = axis_order
 
 
-    def delete_a_dataset(self, name):
-        """Delete a dataset and also remove it from the hint if it is in it."""
-        super(TimestreamCommon, self).delete_a_dataset(name)
+    def delete_a_dataset(self, name, reserve_hint=True):
+        """Delete a dataset. If `reserve_hint` is False, also remove it from
+        the hint if it is in it.
+        """
+        super(TimestreamCommon, self).delete_a_dataset(name, reserve_hint=reserve_hint)
 
-        if name in self._feed_ordered_datasets_.iterkeys():
-            del self._feed_ordered_datasets_[name]
+        if not reserve_hint:
+            if name in self._feed_ordered_datasets_.iterkeys():
+                del self._feed_ordered_datasets_[name]
 
 
     def check_status(self):
@@ -758,7 +787,7 @@ class TimestreamCommon(container.BasicTod):
         if num != 0 and num != 1:
             raise RuntimeError('Not all feed_ordered_datasets have an aligned feed axis')
 
-    def to_files(self, outfiles, exclude=[], check_status=True, write_hints=True, libver='latest', chunk_vis=True, chunk_shape=None, chunk_size=64):
+    def to_files(self, outfiles, exclude=[], check_status=True, write_hints=True, libver='earliest', chunk_vis=True, chunk_shape=None, chunk_size=64):
         """Save the data hold in this container to files.
 
         Parameters
@@ -779,7 +808,7 @@ class TimestreamCommon(container.BasicTod):
             the newest version of these structures without particular concern for
             backwards compatibility, can be performance advantages. The 'earliest'
             option means that HDF5 will make a best effort to be backwards
-            compatible. Default is 'latest'.
+            compatible. Default is 'earliest'.
         chunk_vis : bool, optional
             If True, dataset 'vis' and 'vis_mask' in the saved files will be
             chunked. Default True.
@@ -825,7 +854,7 @@ class TimestreamCommon(container.BasicTod):
                     chunk_shape = (tc, num_freq, num_pol, 1)
 
         # split output files among procs
-        for fi, outfile in enumerate(mpiutil.mpilist(outfiles, method='con', comm=self.comm)):
+        for fi, outfile in mpiutil.mpilist(list(enumerate(outfiles)), method='rand', comm=self.comm):
             # first write top level common attrs and datasets to file
             with h5py.File(outfile, 'w', libver=libver) as f:
 
@@ -878,6 +907,13 @@ class TimestreamCommon(container.BasicTod):
                         for fi, start, stop in outfiles_map:
 
                             et = st + (stop - start)
+                            for i in range(120):
+                                if os.path.isfile(outfiles[fi]):
+                                    break
+                                else:
+                                    time.sleep(0.5)
+                            else:
+                                raise RuntimeError('File %s does not exist' % outfiles[fi])
                             with h5py.File(outfiles[fi], 'r+', libver=libver) as f:
                                 f[dset_name][start:stop] = self[dset_name].local_data[st:et]
                             st = et
@@ -968,9 +1004,9 @@ class TimestreamCommon(container.BasicTod):
                 else:
                     axis_val = axis_vals
                 if copy_data:
-                    func(self.local_vis[data_sel].copy(), self.local_vis_mask[data_sel].copy(), lind, gind, axis_val, self, **kwargs)
+                    func(self.local_vis[tuple(data_sel)].copy(), self.local_vis_mask[tuple(data_sel)].copy(), lind, gind, axis_val, self, **kwargs)
                 else:
-                    func(self.local_vis[data_sel], self.local_vis_mask[data_sel], lind, gind, axis_val, self, **kwargs)
+                    func(self.local_vis[tuple(data_sel)], self.local_vis_mask[tuple(data_sel)], lind, gind, axis_val, self, **kwargs)
             if full_data and keep_dist_axis:
                 self.redistribute(original_dist_axis)
         elif isinstance(op_axis, tuple):
@@ -1009,9 +1045,9 @@ class TimestreamCommon(container.BasicTod):
                     else:
                         axis_val += (axis_vals[ai],)
                 if copy_data:
-                    func(self.local_vis[data_sel].copy(), self.local_vis_mask[data_sel].copy(), lind, gind, axis_val, self, **kwargs)
+                    func(self.local_vis[tuple(data_sel)].copy(), self.local_vis_mask[tuple(data_sel)].copy(), lind, gind, axis_val, self, **kwargs)
                 else:
-                    func(self.local_vis[data_sel], self.local_vis_mask[data_sel], lind, gind, axis_val, self, **kwargs)
+                    func(self.local_vis[tuple(data_sel)], self.local_vis_mask[tuple(data_sel)], lind, gind, axis_val, self, **kwargs)
             if full_data and keep_dist_axis:
                 self.redistribute(original_dist_axis)
         else:

@@ -220,20 +220,38 @@ class Dispatch(timestream_task.TimestreamTask):
 
         tod = self._Tod_class(input_files, mode, this_start, this_stop, dist_axis)
 
-        tod = self.data_select(tod)
+        tod, _ = self.data_select(tod)
 
         tod.load_all() # load in all data
 
         if self.start_ra is None: # the first iteration
-            ra_dec = mpiutil.gather_array(tod['ra_dec'].local_data, root=None)
-            self.start_ra = ra_dec[extra_inttime, 0]
+            if 'time' == tod.main_data_axes[tod.main_data_dist_axis]:
+                # ra_dec is distributed among processes
+                # find the point of ra_dec[extra_inttime, 0] of the global array
+                local_offset = tod['ra_dec'].local_offset[0]
+                local_shape = tod['ra_dec'].local_shape[0]
+                if local_offset <= extra_inttime and extra_inttime < local_offset + local_shape:
+                    in_this = 1
+                    start_ra = tod['ra_dec'].local_data[extra_inttime-local_offset, 0]
+                else:
+                    in_this = 0
+                    start_ra = None
+
+                # get the rank
+                max_val, in_rank = mpiutil.allreduce((in_this, tod.rank), op=mpiutil.MAXLOC, comm=tod.comm)
+                # bcast from this rank
+                start_ra = mpiutil.bcast(start_ra, root=in_rank, comm=tod.comm)
+                self.start_ra = start_ra
+            else:
+                self.start_ra = ra_dec[extra_inttime, 0]
+
         tod.vis.attrs['start_ra'] = self.start_ra # used for re_order
 
         return tod
 
     def data_select(self, tod):
         """Data select."""
-        super(Dispatch, self).data_select(tod)
+        tod, full_data = super(Dispatch, self).data_select(tod)
 
         if self.params['exclude_bad']:
             with h5py.File(self.input_files[0], 'r') as f:
@@ -243,23 +261,25 @@ class Dispatch(timestream_task.TimestreamTask):
                     badchn = f['channo'].attrs['badchn']
                 except KeyError:
                     # no badchn
-                    return tod
+                    return tod, full_data
 
-            bad_feed = [ feedno[np.where(channo == bc)[0][0]] for bc in badchn ]
-            feed_select = self.params['feed_select']
-            if isinstance(feed_select, tuple):
-                feeds = feedno[slice(*feed_select)].tolist()
-            elif isinstance(feed_select, list):
-                feeds = feed_select
-            # remove bad feeds from feeds
-            for bf in bad_feed:
-                if bf in feeds:
-                    feeds.remove(bf)
+            if badchn.size > 0:
+                bad_feed = [ feedno[np.where(channo == bc)[0][0]] for bc in badchn ]
+                feed_select = self.params['feed_select']
+                if isinstance(feed_select, tuple):
+                    feeds = feedno[slice(*feed_select)].tolist()
+                elif isinstance(feed_select, list):
+                    feeds = feed_select
+                # remove bad feeds from feeds
+                for bf in bad_feed:
+                    if bf in feeds:
+                        feeds.remove(bf)
 
-            # feed select
-            tod.feed_select(feeds, self.params['corr'])
+                # feed select
+                tod.feed_select(feeds, self.params['corr'])
+                full_data = False
 
-        return tod
+        return tod, full_data
 
     def process(self, rt):
         """Return loaded data as a

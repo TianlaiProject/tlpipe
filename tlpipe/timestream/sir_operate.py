@@ -10,6 +10,8 @@ Inheritance diagram
 
 import numpy as np
 import timestream_task
+from tlpipe.container.raw_timestream import RawTimestream
+from tlpipe.container.timestream import Timestream
 from tlpipe.rfi import sir_operator
 
 
@@ -35,7 +37,15 @@ class Sir(timestream_task.TimestreamTask):
         show_progress = self.params['show_progress']
         progress_step = self.params['progress_step']
 
-        ts.bl_data_operate(self.operate, full_data=True, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False)
+        if isinstance(ts, RawTimestream):
+            func = ts.bl_data_operate
+        elif isinstance(ts, Timestream):
+            if ts['vis_mask'].attrs.get('combined_mask', False):
+                func = ts.bl_data_operate
+            else:
+                func = ts.pol_and_bl_data_operate
+
+        func(self.operate, full_data=True, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False)
 
         return super(Sir, self).process(ts)
 
@@ -46,24 +56,46 @@ class Sir(timestream_task.TimestreamTask):
         MASKNOISE = 1
         MASKRFI = 2
 
+        has_ns = ('ns_on' in ts.iterkeys())
+        if has_ns:
+            ns_on = ts['ns_on'][:]
+
         if vis_mask.ndim == 2:
             mask = vis_mask.copy()
-            if 'ns_on' in ts.iterkeys():
-                mask[ts['ns_on'][:]] &= ~MASKNOISE
+#<<<<<<< HEAD
+#            if 'ns_on' in ts.iterkeys():
+#                mask[ts['ns_on'][:]] &= ~MASKNOISE
+#=======
+            if has_ns:
+                mask[ns_on] = False
+#>>>>>>> master
             mask = sir_operator.vertical_sir(mask, eta)
-            # mask[ts['ns_on'][:]] = True
+            if has_ns:
+                mask[ns_on] = True
             vis_mask[:] = sir_operator.horizontal_sir(mask, eta)
-            if 'ns_on' in ts.iterkeys():
-                mask[ts['ns_on'][:]] |= MASKNOISE
+#<<<<<<< HEAD
+#            if 'ns_on' in ts.iterkeys():
+#                mask[ts['ns_on'][:]] |= MASKNOISE
+#        elif vis_mask.ndim == 3:
+#            # This shold be done after the combination of all pols
+#            mask = vis_mask[:, :, 0].copy()
+#            if 'ns_on' in ts.iterkeys():
+#                mask[ts['ns_on'][:]] &= ~MASKNOISE
+#=======
         elif vis_mask.ndim == 3:
             # This shold be done after the combination of all pols
             mask = vis_mask[:, :, 0].copy()
-            if 'ns_on' in ts.iterkeys():
-                mask[ts['ns_on'][:]] &= ~MASKNOISE
+            if has_ns:
+                mask[ns_on] = False
+#>>>>>>> master
             mask = sir_operator.vertical_sir(mask, eta)
-            # mask[ts['ns_on'][:]] = True
+            if has_ns:
+                mask[ns_on] = True
             vis_mask[:] = sir_operator.horizontal_sir(mask, eta)[:, :, np.newaxis]
-            if 'ns_on' in ts.iterkeys():
-                mask[ts['ns_on'][:]] |= MASKNOISE 
+#<<<<<<< HEAD
+#            if 'ns_on' in ts.iterkeys():
+#                mask[ts['ns_on'][:]] |= MASKNOISE 
+#=======
+#>>>>>>> master
         else:
             raise RuntimeError('Invalid shape of vis_mask: %s' % vis_mask.shape)

@@ -9,7 +9,7 @@ Inheritance diagram
 """
 
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
 import h5py
@@ -153,10 +153,10 @@ class NsCal(timestream_task.TimestreamTask):
             # gather ns_cal_phase / ns_cal_amp to rank 0
             ns_cal_phase = mpiutil.gather_array(rt['ns_cal_phase'].local_data, axis=2, root=0, comm=rt.comm)
             phs_unit = rt['ns_cal_phase'].attrs['unit']
-            rt.delete_a_dataset('ns_cal_phase')
+            rt.delete_a_dataset('ns_cal_phase', reserve_hint=False)
             if not phs_only:
                 ns_cal_amp = mpiutil.gather_array(rt['ns_cal_amp'].local_data, axis=2, root=0, comm=rt.comm)
-                rt.delete_a_dataset('ns_cal_amp')
+                rt.delete_a_dataset('ns_cal_amp', reserve_hint=False)
 
             if tag_output_iter:
                 gain_file = output_path(gain_file, iteration=self.iteration)
@@ -182,7 +182,7 @@ class NsCal(timestream_task.TimestreamTask):
                         # save ns_cal_amp
                         f.create_dataset('ns_cal_amp', data=ns_cal_amp)
 
-            rt.delete_a_dataset('ns_cal_time_inds')
+            rt.delete_a_dataset('ns_cal_time_inds', reserve_hint=False)
 
         return super(NsCal, self).process(rt)
 
@@ -236,8 +236,8 @@ class NsCal(timestream_task.TimestreamTask):
             if unmasked_only and off_sec.count() < max(2, num_mean/2): # more valid sample to make stable
                 continue
 
+            valid = True
             upper = ind + 1 + on_time
-            valid_inds.append(ind)
             off_mean = np.ma.mean(off_sec)
             this_on = np.ma.masked_invalid(vis[ind+1:upper]) # all on signal
             # just to avoid the case of all invalid on values
@@ -247,11 +247,19 @@ class NsCal(timestream_task.TimestreamTask):
                 continue
             diff = on_mean - off_mean
             phs = np.angle(diff) # in radians
+            if not np.isfinite(phs):
+                valid = False
+            if not phs_only:
+                amp_ = np.abs(diff)
+                if not (np.isfinite(amp_) and amp_ > 1.0e-8): # amp_ should > 0
+                    valid = False
+            if not valid:
+                continue
+            valid_inds.append(ind)
             if save_gain:
                 rt['ns_cal_phase'].local_data[ii, lfi, lbi] = phs
             phase.append( phs ) # in radians
             if not phs_only:
-                amp_ = np.abs(diff)
                 if save_gain:
                     rt['ns_cal_amp'].local_data[ii, lfi, lbi] = amp_
                 amp.append( amp_ )
@@ -336,7 +344,7 @@ class NsCal(timestream_task.TimestreamTask):
                 fig, ax = plt.subplots()
             else:
                 fig, ax = plt.subplots(2, sharex=True)
-            ax_val = np.array([ datetime.fromtimestamp(sec) for sec in rt['sec1970'][:] ])
+            ax_val = np.array([ (datetime.utcfromtimestamp(sec) + timedelta(hours=8)) for sec in rt['sec1970'][:] ])
             xlabel = '%s' % ax_val[0].date()
             ax_val = mdates.date2num(ax_val)
             if order_bl and (bl[0] > bl[1]):

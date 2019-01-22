@@ -318,7 +318,7 @@ class BeamTransfer(object):
         return beam
 
 
-    @util.cache_last
+    # @util.cache_last
     def beam_m(self, mi, fi=None):
         """Fetch the beam transfer matrix for a given m.
 
@@ -341,7 +341,7 @@ class BeamTransfer(object):
 
     #====== Loading freq-ordered beams =================
 
-    @util.cache_last
+    # @util.cache_last
     def _load_beam_freq(self, fi, fullm=False):
 
         tel = self.telescope
@@ -362,7 +362,7 @@ class BeamTransfer(object):
         return beamf
 
 
-    @util.cache_last
+    # @util.cache_last
     def beam_freq(self, fi, fullm=False, single=False):
         """Fetch the beam transfer matrix for a given frequency.
 
@@ -474,7 +474,7 @@ class BeamTransfer(object):
 
     #====== SVD Beam loading ===========================
 
-    @util.cache_last
+    # @util.cache_last
     def beam_svd(self, mi, fi=None):
         """Fetch the SVD beam transfer matrix (S V^H) for a given m. This SVD beam
         transfer projects from the sky into the SVD basis.
@@ -507,7 +507,7 @@ class BeamTransfer(object):
         return bs
 
 
-    @util.cache_last
+    # @util.cache_last
     def invbeam_svd(self, mi, fi=None):
         """Fetch the SVD beam transfer matrix (S V^H) for a given m. This SVD beam
         transfer projects from the sky into the SVD basis.
@@ -540,7 +540,7 @@ class BeamTransfer(object):
         return ibs
 
 
-    @util.cache_last
+    # @util.cache_last
     def beam_ut(self, mi, fi=None):
         """Fetch the SVD beam transfer matrix (U^H) for a given m. This SVD beam
         transfer projects from the telescope space into the SVD basis.
@@ -573,7 +573,7 @@ class BeamTransfer(object):
         return bs
 
 
-    @util.cache_last
+    # @util.cache_last
     def beam_singularvalues(self, mi):
         """Fetch the vector of beam singular values for a given m.
 
@@ -668,7 +668,7 @@ class BeamTransfer(object):
         ## Divide frequencies between MPI processes and calculate the beams
         ## for the baselines, then write out into separate files.
 
-        for fi in mpiutil.mpirange(self.nfreq):
+        for fi in mpiutil.mpirange(self.nfreq, method='rand'):
 
             if os.path.exists(self._ffile(fi)) and not regen:
                 print ("f index %i. File: %s exists. Skipping..." %
@@ -745,10 +745,10 @@ class BeamTransfer(object):
             print "Splitting into %i chunks...." % num_chunks
 
         # The local m sections
-        lm, sm, em = mpiutil.split_local(self.telescope.mmax+1)
+        # lm, sm, em = mpiutil.split_local(self.telescope.mmax+1)
 
         # Iterate over all m's and create the hdf5 files we will write into.
-        for mi in mpiutil.mpirange(self.telescope.mmax + 1):
+        for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
 
             if os.path.exists(self._mfile(mi)) and not regen:
                 print ("m index %i. File: %s exists. Skipping..." % (mi, (self._mfile(mi))))
@@ -813,7 +813,8 @@ class BeamTransfer(object):
             del fb_array
 
             # Write out the current set of chunks into the m-files.
-            for lmi, mi in enumerate(range(sm, em)):
+            # for lmi, mi in enumerate(range(sm, em)):
+            for lmi, mi in enumerate(mpiutil.mpirange(self.telescope.mmax + 1, method='con')):
 
                 # Open up correct m-file
                 with h5py.File(self._mfile(mi), 'r+') as mfile:
@@ -847,7 +848,7 @@ class BeamTransfer(object):
 
         # For each `m` collect all the `m` sections from each frequency file,
         # and write them into a new `m` file. Use MPI if available.
-        for mi in mpiutil.mpirange(self.telescope.mmax + 1):
+        for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
 
             if os.path.exists(self._svdfile(mi)) and not regen:
                 print ("m index %i. File: %s exists. Skipping..." %
@@ -1113,7 +1114,7 @@ class BeamTransfer(object):
 
     project_vector_backward = project_vector_telescope_to_sky
 
-    def project_vector_telescope_to_sky_tk(self, mi, vec, nbin=None, eps=0.01):
+    def project_vector_telescope_to_sky_tk(self, mi, vec, nbin=None, eps=0.01, correct_order=0, mmode0=None):
         """Invert a vector from the telescope space onto the sky using
         the Tikhonov regularization method. This is the map-making process.
 
@@ -1136,6 +1137,10 @@ class BeamTransfer(object):
         beam = beam.reshape((nfreq, self.ntel, self.nsky))
         # beam = beam[:, 0].reshape((nfreq, -1, self.nsky)) # positive m only
 
+        # if prior mmode not None
+        if mmode0 is not None:
+            mmode0 = mmode0.reshape((nfreq, self.nsky))
+
         n, s, e = mpiutil.split_m(nfreq, nbin)
 
         vecb = np.zeros((nbin, self.telescope.num_pol_sky, self.telescope.lmax + 1), dtype=np.complex128)
@@ -1144,10 +1149,32 @@ class BeamTransfer(object):
 
         for bi in xrange(nbin):
             B = beam[s[bi]:e[bi]].reshape(-1, self.nsky)
-            BB = np.dot(B.T.conj(), B)
-            np.fill_diagonal(BB, eps + np.diag(BB))
+            BB = np.dot(B.T.conj(), B) # B^* B
+            np.fill_diagonal(BB, eps + np.diag(BB)) # (B^* B + eps I)
             vec1 = vec[s[bi]:e[bi]].reshape(-1)
-            vecb[bi] = np.dot(la.pinv(BB), np.dot(B.T.conj(), vec1))
+            try:
+                BBi = la.pinv(BB) # (B^* B + eps I)^-1
+            except np.linalg.linalg.LinAlgError:
+                print 'Compute pinv of BB failed for mi = %d, bi = %d' % (mi, bi)
+                continue
+            if mmode0 is not None:
+                vecb[bi] = np.dot(BBi, np.dot(B.T.conj(), vec1) + eps * mmode0[bi])
+            else:
+                # vecb[bi] = np.dot(BBi, np.dot(B.T.conj(), vec1))
+
+                # BBi *= -eps # -eps (B^* B + eps I)^-1
+                # np.fill_diagonal(BBi, 1.0 + np.diag(BB))  # I - eps (B^* B + eps I)^-1
+                # vecb[bi] = np.dot(la.pinv(BBi), vecb[bi].flatten()) # [ I - eps (B^* B + eps I)^-1 ]^-1 a
+
+                # or
+                ahat = np.dot(BBi, np.dot(B.T.conj(), vec1))
+                vecb[bi] = ahat # the zero-th order, no correction
+                if correct_order > 0:
+                    Delta = eps * BBi # eps (B^* B + eps I)^-1
+                    Da = ahat # to save the previous order Delta**(i-1) * ahat
+                    for i in range(1, correct_order+1):
+                        Da = np.dot(Delta, Da)
+                        vecb[bi] += Da # high order correction
 
         return vecb
 
@@ -1525,7 +1552,7 @@ class BeamTransferTempSVD(BeamTransfer):
 
         # For each `m` collect all the `m` sections from each frequency file,
         # and write them into a new `m` file. Use MPI if available.
-        for mi in mpiutil.mpirange(self.telescope.mmax + 1):
+        for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
 
             if os.path.exists(self._svdfile(mi)) and not regen:
                 print ("m index %i. File: %s exists. Skipping..." %
@@ -1620,7 +1647,7 @@ class BeamTransferFullSVD(BeamTransfer):
 
         # For each `m` collect all the `m` sections from each frequency file,
         # and write them into a new `m` file. Use MPI if available.
-        for mi in mpiutil.mpirange(self.telescope.mmax + 1):
+        for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
 
             if os.path.exists(self._svdfile(mi)) and not regen:
                 print ("m index %i. File: %s exists. Skipping..." %

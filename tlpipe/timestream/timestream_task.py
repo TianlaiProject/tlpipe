@@ -49,7 +49,7 @@ class TimestreamTask(OneAndOne):
                     'exclude': [],
                     'check_status': True,
                     'write_hints': True,
-                    'libver': 'latest',
+                    'libver': 'earliest', # earliest to have best backward compatibility
                     'chunk_vis': False, # chunk vis and vis_mask in saved files
                     'chunk_shape': None,
                     'chunk_size': 64, # KB
@@ -115,7 +115,10 @@ class TimestreamTask(OneAndOne):
                     self._Tod_class = Timestream
                 else:
                     raise ValueError('Invaid input %s, need either a RawTimestream or Timestream object' % tod)
-                tod = self.subset_select(tod)
+
+                tod, full_data = self.subset_select(tod)
+                if not full_data:
+                    tod = tod.subset(return_copy=False)
 
         return super(TimestreamTask, self).read_process_write(tod)
 
@@ -134,31 +137,64 @@ class TimestreamTask(OneAndOne):
             input_files = self.input_files
         tod = self._Tod_class(input_files, mode, start, stop, dist_axis)
 
-        tod = self.data_select(tod)
+        tod, full_data = self.data_select(tod)
 
         tod.load_all()
 
         return tod
 
+    def full_data_select(self):
+        """Check to see whether select all data or not."""
+        # may need better check here in future...
+        full_data = True
+        if self.params['time_select'] != (0, None):
+            full_data = False
+        if self.params['freq_select'] != (0, None):
+            full_data = False
+        if self._Tod_class == Timestream and self.params['pol_select'] != (0, None):
+            full_data = False
+        if self.params['feed_select'] != (0, None) or self.params['corr'] != 'all':
+            full_data = False
+
+        return full_data
+
     def data_select(self, tod):
         """Data select."""
-        tod.time_select(self.params['time_select'])
-        tod.frequency_select(self.params['freq_select'])
-        if self._Tod_class == Timestream:
+        # may need better check here in future...
+        full_data = True
+        if self.params['time_select'] != (0, None):
+            full_data = False
+            tod.time_select(self.params['time_select'])
+        if self.params['freq_select'] != (0, None):
+            full_data = False
+            tod.frequency_select(self.params['freq_select'])
+        if self._Tod_class == Timestream and self.params['pol_select'] != (0, None):
+            full_data = False
             tod.polarization_select(self.params['pol_select'])
-        tod.feed_select(self.params['feed_select'], self.params['corr'])
+        if self.params['feed_select'] != (0, None) or self.params['corr'] != 'all':
+            full_data = False
+            tod.feed_select(self.params['feed_select'], self.params['corr'])
 
-        return tod
+        return tod, full_data
 
     def subset_select(self, tod):
         """Data subset select."""
-        tod.subset_time_select(self.params['time_select'])
-        tod.subset_frequency_select(self.params['freq_select'])
-        if self._Tod_class == Timestream:
+        # may need better check here in future...
+        full_data = True
+        if self.params['time_select'] != (0, None):
+            full_data = False
+            tod.subset_time_select(self.params['time_select'])
+        if self.params['freq_select'] != (0, None):
+            full_data = False
+            tod.subset_frequency_select(self.params['freq_select'])
+        if self._Tod_class == Timestream and self.params['pol_select'] != (0, None):
+            full_data = False
             tod.subset_polarization_select(self.params['pol_select'])
-        tod.subset_feed_select(self.params['feed_select'], self.params['corr'])
+        if self.params['feed_select'] != (0, None) and self.params['corr'] != 'all':
+            full_data = False
+            tod.subset_feed_select(self.params['feed_select'], self.params['corr'])
 
-        return tod
+        return tod, full_data
 
     def copy_input(self, tod):
         """Return a copy of tod, so the original tod would not be changed."""
