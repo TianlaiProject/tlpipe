@@ -133,10 +133,9 @@ class Detect(timestream_task.TimestreamTask):
 
         if mpiutil.rank0:
             print 'Detected noise source: period = %d, on_time = %d, off_time = %d' % (period, on_time, off_time)
-        num_period = np.int(np.ceil(len(tt_mean) / np.float(period)))
-        tmp_ns_on = np.array(([True] * on_time + [False] * off_time) * num_period)[:len(tt_mean)]
         on_start = Counter(pinds % period).most_common(1)[0][0]
-        ns_on = np.roll(tmp_ns_on, on_start)
+        num_period = np.int(np.ceil(len(tt_mean) / np.float(period)))
+        ns_on = np.array([False] * on_start + ([True] * on_time + [False] * off_time) * num_period)[:len(tt_mean)]
 
         # import matplotlib
         # matplotlib.use('Agg')
