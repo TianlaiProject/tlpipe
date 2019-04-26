@@ -8,7 +8,7 @@ Inheritance diagram
 
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy as np
 from tlpipe.timestream import timestream_task
 from tlpipe.container.raw_timestream import RawTimestream
@@ -141,7 +141,7 @@ class Plot(timestream_task.TimestreamTask):
 
             # ax_val = ts.time[:]
             # xlabel = r'$t$ / Julian Date'
-            ax_val = np.array([ datetime.fromtimestamp(sec) for sec in ts['sec1970'][:] ])
+            ax_val = np.array([ (datetime.utcfromtimestamp(sec) + timedelta(hours=8)) for sec in ts['sec1970'][:] ])
             xlabel = '%s' % ax_val[0].date()
             ax_val = mdates.date2num(ax_val)
         else:

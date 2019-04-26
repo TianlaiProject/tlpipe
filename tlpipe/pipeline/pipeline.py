@@ -667,6 +667,7 @@ class TaskBase(object):
                     'requires': None,
                     'in': None,
                     'out': None,
+                    'keep_last_in': False, # if true, will only keep the last `in`
                     'timing': False, # timing the executing of next()
                   }
 
@@ -1005,6 +1006,9 @@ class TaskBase(object):
                         raise PipelineRuntimeError(msg)
                     else:
                         # Accept the data product and store for later use.
+                        if self.params['keep_last_in']:
+                            while not self._in[jj].empty():
+                                self._in[jj].get()
                         self._in[jj].put(product)
 
 

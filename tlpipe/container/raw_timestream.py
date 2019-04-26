@@ -9,6 +9,7 @@ Inheritance diagram
 
 """
 
+import re
 import itertools
 import numpy as np
 import timestream_common
@@ -249,7 +250,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
             self.create_bl_ordered_dataset('bl_pol', data=bl_pol)
 
 
-    def separate_pol_and_bl(self, keep_dist_axis=False):
+    def separate_pol_and_bl(self, keep_dist_axis=False, destroy_self=False):
         """Separate baseline axis to polarization and baseline.
 
         This will create and return a Timestream container holding the polarization
@@ -260,6 +261,9 @@ class RawTimestream(timestream_common.TimestreamCommon):
         keep_dist_axis : bool, optional
             Whether to redistribute main data to the original dist axis if the
             dist axis has changed during the operation. Default False.
+        destroy_self : bool, optional
+            If True, will gradually delete datasets and attributes of self to
+            release memory. Default False.
 
         """
 
@@ -268,6 +272,10 @@ class RawTimestream(timestream_common.TimestreamCommon):
         if 'baseline' == self.main_data_axes[original_dist_axis]:
             keep_dist_axis = False # can not keep dist axis in this case
             self.redistribute(0)
+
+        # could not keep dist axis if destroy_self == True
+        if destroy_self:
+            keep_dist_axis = False
 
         # create a Timestream container to hold the pol and bl separated data
         ts = timestream.Timestream(dist_axis=self.main_data_dist_axis, comm=self.comm)
@@ -325,6 +333,9 @@ class RawTimestream(timestream_common.TimestreamCommon):
         # create attrs of this dataset
         ts.main_data.attrs['dimname'] = 'Time, Frequency, Polarization, Baseline'
 
+        if destroy_self:
+            self.delete_a_dataset('vis')
+
         # create a MPIArray to hold the pol and bl separated vis_mask
         rvis_mask = self['vis_mask'].local_data
         shp = rvis_mask.shape[:2] + (4, len(xx_inds))
@@ -339,6 +350,9 @@ class RawTimestream(timestream_common.TimestreamCommon):
         # create vis_mask
         axis_order = ts.main_axes_ordered_datasets[ts.main_data_name]
         ts.create_main_axis_ordered_dataset(axis_order, 'vis_mask', vis_mask, axis_order)
+
+        if destroy_self:
+            self.delete_a_dataset('vis_mask')
 
         # create other datasets needed
         # pol ordered dataset
@@ -357,17 +371,24 @@ class RawTimestream(timestream_common.TimestreamCommon):
             raise RuntimeError('Should not have other bl_ordered_datasets %s' % other_bl_dset)
 
         # copy other attrs
-        for attrs_name, attrs_value in self.attrs.iteritems():
+        attrs_items = list(self.attrs.iteritems())
+        for attrs_name, attrs_value in attrs_items:
             if attrs_name not in self.time_ordered_attrs:
                 ts.attrs[attrs_name] = attrs_value
+            if destroy_self:
+                self.delete_an_attribute(attrs_name)
 
         # copy other datasets
         for dset_name, dset in self.iteritems():
             if dset_name == self.main_data_name or dset_name == 'vis_mask':
+                if destroy_self:
+                    self.delete_a_dataset(dset_name)
                 # already created above
                 continue
             elif dset_name in self.main_axes_ordered_datasets.keys():
                 if dset_name in self.bl_ordered_datasets.keys():
+                    if destroy_self:
+                        self.delete_a_dataset(dset_name)
                     # already created above
                     continue
                 else:
@@ -384,6 +405,8 @@ class RawTimestream(timestream_common.TimestreamCommon):
                 ts.create_time_ordered_dataset(dset_name, dset.data, axis_order)
             elif dset_name in self.feed_ordered_datasets.keys():
                 if dset_name == 'channo': # channo no useful for Timestream
+                    if destroy_self:
+                        self.delete_a_dataset(dset_name)
                     continue
                 else:
                     axis_order = self.feed_ordered_datasets[dset_name]
@@ -396,6 +419,15 @@ class RawTimestream(timestream_common.TimestreamCommon):
 
             # copy attrs of this dset
             memh5.copyattrs(dset.attrs, ts[dset_name].attrs)
+
+            if destroy_self:
+                self.delete_a_dataset(dset_name)
+
+        # resume hints of self, error may happen if not do so
+        if destroy_self:
+            for key in self.__class__.__dict__.keys():
+                if re.match(self.hints_pattern, key):
+                    setattr(self, key, self.__class__.__dict__[key])
 
         # redistribute self to original axis
         if keep_dist_axis:

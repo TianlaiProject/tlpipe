@@ -49,7 +49,7 @@ class TimestreamTask(OneAndOne):
                     'exclude': [],
                     'check_status': True,
                     'write_hints': True,
-                    'libver': 'latest',
+                    'libver': 'earliest', # earliest to have best backward compatibility
                     'chunk_vis': False, # chunk vis and vis_mask in saved files
                     'chunk_shape': None,
                     'chunk_size': 64, # KB

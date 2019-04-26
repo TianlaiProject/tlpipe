@@ -8,9 +8,12 @@ Inheritance diagram
 
 """
 
+import os
 import numpy as np
+import h5py
 import timestream_task
 from tlpipe.container.timestream import Timestream
+from tlpipe.utils.path_util import input_path, output_path
 from caput import mpiutil
 from caput import mpiarray
 
@@ -31,6 +34,8 @@ class Accum(timestream_task.TimestreamTask):
     params_init = {
                     'check': True, # check data alignment before accumulate
                     'load_data': None, # load data from disk first and accumulate to it if not None but a list of files
+                    'cache_to_file': False, # cache the data to file instead of in memory
+                    'cache_file_name': 'cache/accumulate.hdf5', # name of the cache file
                   }
 
     prefix = 'ac_'
@@ -45,6 +50,48 @@ class Accum(timestream_task.TimestreamTask):
         check = self.params['check']
         load_data = self.params['load_data']
 
+        # cache to file
+        if self.params['cache_to_file']:
+            cache_file_name = input_path(self.params['cache_file_name'])
+            if not os.path.isfile(cache_file_name):
+                # write ts to cache_file_name
+                cache_file_name = output_path(self.params['cache_file_name'], mkdir=True)
+                ts.apply_mask(fill_val=0) # apply mask, fill 0 to masked values
+                # create weight dataset
+                weight = np.logical_not(ts.local_vis_mask).astype(np.int16) # use int16 to save memory
+                weight = mpiarray.MPIArray.wrap(weight, axis=ts.main_data_dist_axis)
+                axis_order = ts.main_axes_ordered_datasets[ts.main_data_name]
+                ts.create_main_axis_ordered_dataset(axis_order, 'weight', weight, axis_order)
+                ts.attrs['ndays'] = 1 # record number of days accumulated
+
+                ts.to_files(cache_file_name)
+
+                # empty ts to release memory
+                ts.empty()
+            else:
+                # accumulate ts to cache_file_name
+                ts.apply_mask(fill_val=0) # apply mask, fill 0 to masked values
+                for rk in range(ts.nproc):
+                    if ts.rank == rk:
+                        with h5py.File(cache_file_name, 'r+') as f:
+                            # may need some check in future...
+                            if np.prod(ts['vis'].local_shape) > 0: # no need to write if no local data
+                                slc = []
+                                for st, ln in zip(ts['vis'].local_offset, ts['vis'].local_shape):
+                                    slc.append(slice(st, st+ln))
+                                f['vis'][tuple(slc)] += ts.local_vis # accumulate vis
+                                f['weight'][tuple(slc)] += np.logical_not(ts.local_vis_mask).astype(np.int16) # update weight
+                                f['vis_mask'][tuple(slc)] = np.where(f['weight'][tuple(slc)] != 0, False, True) # update mask
+                            if rk == 0:
+                                f.attrs['ndays'] += 1
+                    mpiutil.barrier(ts.comm)
+
+                # empty ts to release memory
+                ts.empty()
+
+            return cache_file_name
+
+        # accumulate in memory
         # ts.redistribute('baseline')
 
         # load data from disk if load_data is set

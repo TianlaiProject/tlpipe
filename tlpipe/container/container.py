@@ -39,7 +39,11 @@ def ensure_file_list(files):
     if memh5.is_group(files):
         files = [files]
     elif isinstance(files, basestring):
-        files = sorted(glob.glob(files))
+        fls = sorted(glob.glob(files))
+        if len(fls) == 0:
+            files = [ files ]
+        else:
+            files = fls
     elif hasattr(files, '__iter__'):
         # Copy the sequence and make sure it's mutable.
         files = list(files)
@@ -175,11 +179,10 @@ class BasicTod(memh5.MemDiskGroup):
             return [], 0, 0
 
         num_ts = []
-        for fh in mpiutil.mpilist(files, method='con', comm=self.comm):
+        for fh in files:
             with h5py.File(fh, 'r') as f:
                 num_ts.append(f[dset_name].shape[0])
 
-        num_ts = mpiutil.gather_list(num_ts, comm=self.comm)
         nt = sum(num_ts) # total length of the first axis along different files
 
         tmp_start = start if start >=0 else start + nt
@@ -216,34 +219,25 @@ class BasicTod(memh5.MemDiskGroup):
         stop = nt if stop is None else stop
         assert (start <= stop and stop - start <= nt), 'Invalid start %d and stop %d' % (start, stop)
 
-        lt, st, et = mpiutil.split_local(stop-start, comm=self.comm) # selected total length distributed among different procs
-        if self.comm is not None:
-            lts = self.comm.allgather(lt)
-        else:
-            lts = [ lt ]
+        lts, _, _ = mpiutil.split_all(stop-start, comm=self.comm) # selected total length distributed among different procs
         cum_lts = np.cumsum(lts) # cumsum of lengths by all procs
         cum_lts = (cum_lts + start).tolist()
         tmp_cum_lts = [start] + cum_lts
         cum_num_ts = np.cumsum(num_ts).tolist() # cumsum of lengths of all files
         tmp_cum_num_ts = [0] + cum_num_ts
 
-        # start and stop (included) file indices owned by this proc
-        sf, ef = np.searchsorted(cum_num_ts, tmp_cum_lts[self.rank], side='right'), np.searchsorted(cum_num_ts, tmp_cum_lts[self.rank+1], side='left')
-        lf_indices = xrange(sf, ef+1) # file indices owned by this proc
+        # start and stop (included) file indices owned by all procs
+        sf, ef = np.searchsorted(cum_num_ts, tmp_cum_lts[:-1], side='right'), np.searchsorted(cum_num_ts, tmp_cum_lts[1:], side='left')
 
         # allocation interval by all procs
         intervals = sorted(list(set([start] + cum_lts + cum_num_ts[:-1] + [stop])))
         intervals = [ (intervals[i], intervals[i+1]) for i in xrange(len(intervals)-1) ]
-        if self.comm is not None:
-            num_lf_ind = self.comm.allgather(len(lf_indices))
-        else:
-            num_lf_ind = [ len(lf_indices) ]
-        cum_num_lf_ind = np.cumsum([0] +num_lf_ind)
+        cum_num_lf_ind = np.cumsum([0] + (ef - sf + 1).tolist())
         # local intervals owned by this proc
         lits = intervals[cum_num_lf_ind[self.rank]: cum_num_lf_ind[self.rank+1]]
         # infiles_map: a list of (file_idx, start, stop)
         files_map = []
-        for idx, fi in enumerate(lf_indices):
+        for idx, fi in enumerate(range(sf[self.rank], ef[self.rank]+1)):
             files_map.append((fi, lits[idx][0]-tmp_cum_num_ts[fi], lits[idx][1]-tmp_cum_num_ts[fi]))
 
         return files_map
@@ -254,10 +248,9 @@ class BasicTod(memh5.MemDiskGroup):
         ### shape and type are get from the first file and suppose they are the same in all self.infiles
 
         num_ts = []
-        for fh in mpiutil.mpilist(self.infiles, method='con', comm=self.comm):
+        for fh in self.infiles:
             num_ts.append(fh[dset_name].shape[0])
 
-        num_ts = mpiutil.gather_list(num_ts, comm=self.comm)
         if stop is None:
             stop = sum(num_ts) # total length of the first axis along different files
         infiles_map = self._gen_files_map(num_ts, start, stop)
@@ -415,11 +408,8 @@ class BasicTod(memh5.MemDiskGroup):
         ### load a time ordered attribute from all the file
 
         self.attrs[name] = []
-        for fh in mpiutil.mpilist(self.infiles, method='con', comm=self.comm):
+        for fh in self.infiles:
             self.attrs[name].append(fh.attrs[name])
-
-        # gather time ordered attrs
-        self.attrs[name] = mpiutil.gather_list(self.attrs[name], comm=self.comm)
 
     def _load_an_attribute(self, name):
         ### load an attribute (either a commmon or a time ordered)
@@ -909,28 +899,45 @@ class BasicTod(memh5.MemDiskGroup):
         self.create_main_axis_ordered_dataset(0, name, data, axis_order, recreate, copy_attrs, check_align)
 
 
-    def delete_a_dataset(self, name):
-        """Delete a dataset and also remove it from the hint if it is in it."""
+    def delete_a_dataset(self, name, reserve_hint=True):
+        """Delete a dataset. If `reserve_hint` is False, also remove it from
+        the hint if it is in it.
+        """
         if name in self.iterkeys():
             del self[name]
         else:
             warnings.warn('Dataset %s does not exist')
 
-        if name in self._main_axes_ordered_datasets_.iterkeys():
-            del self._main_axes_ordered_datasets_[name]
-        if name in self._time_ordered_datasets_.iterkeys():
-            del self._time_ordered_datasets_[name]
+        if not reserve_hint:
+            if name in self._main_axes_ordered_datasets_.iterkeys():
+                del self._main_axes_ordered_datasets_[name]
+            if name in self._time_ordered_datasets_.iterkeys():
+                del self._time_ordered_datasets_[name]
 
-    def delete_an_attribute(self, name):
-        """Delete an attribute and also remove it from the hint if it is in it."""
+    def delete_an_attribute(self, name, reserve_hint=True):
+        """Delete an attribute. If `reserve_hint` is False, also remove it from
+        the hint if it is in it.
+        """
         if name in self.attrs.iterkeys():
             del self.attrs[name]
         else:
             warnings.warn('Attribute %s does not exist')
 
-        if name in self._time_ordered_attrs_.iterkeys():
-            del self._time_ordered_attrs_[name]
+        if not reserve_hint:
+            if name in self._time_ordered_attrs_:
+                self._time_ordered_attrs_.remove(name)
 
+    def empty(self, reserve_hints=True):
+        """Delete all datasets and attributes in this container. If
+        `reserve_hints` is False, also remove them from the hint if they are in it.
+        """
+        # delete attributes
+        attrs_keys = list(self.attrs.iterkeys())
+        for attrs_name in attrs_keys:
+            self.delete_an_attribute(attrs_name, reserve_hint=reserve_hints)
+        # delete datasets
+        for dset_name in self.iterkeys():
+            self.delete_a_dataset(dset_name, reserve_hint=reserve_hints)
 
     @property
     def history(self):
@@ -1102,7 +1109,7 @@ class BasicTod(memh5.MemDiskGroup):
         return dset_shape, dset_type, outfiles_map
 
 
-    def to_files(self, outfiles, exclude=[], check_status=True, write_hints=True, libver='latest'):
+    def to_files(self, outfiles, exclude=[], check_status=True, write_hints=True, libver='earliest'):
         """Save the data hold in this container to files.
 
         Parameters
@@ -1123,7 +1130,7 @@ class BasicTod(memh5.MemDiskGroup):
             the newest version of these structures without particular concern for
             backwards compatibility, can be performance advantages. The 'earliest'
             option means that HDF5 will make a best effort to be backwards
-            compatible. Default is 'latest'.
+            compatible. Default is 'earliest'.
 
         """
 
