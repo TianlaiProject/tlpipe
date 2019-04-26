@@ -1,0 +1,127 @@
+# -*- mode: python; -*-
+#
+
+import os
+import matplotlib
+matplotlib.use('Agg')
+
+from tlpipe.map import dirtymap
+
+data_base = '/scratch/users/ycli/'
+
+pipe_tasks = []
+pipe_outdir = data_base + 'meerkat/'
+pipe_logging = 'info'
+pipe_copy = False
+
+data_prefix = '1551037708'
+scans = (11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 
+         38, 41, 43, 45, 47, 49, 51, 54, 56, 58, 60, 62, 64)
+input_files_1 = [ '%s_auto_scan_%03d.h5'%(data_prefix, si) for si in scans]
+
+
+data_prefix = '1551055211'
+scans = ( 11, 13, 15, 17, 19, 21, 24, 26, 28, 30, 32, 34, 36, 
+          38, 40, 43, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64,)
+input_files_2 = [ '%s_auto_scan_%03d.h5'%(data_prefix, si) for si in scans]
+
+input_files = input_files_1 + input_files_2
+
+feed_bad  = [19, 33, 37]
+feed_bad += [26, 27, 28, 42, 43, 52, 60]
+feed_list = range(1, 65)
+for _bad in feed_bad:
+    feed_list.remove(_bad)
+#print feed_list
+
+file_name_all = 'WiggleZ11_Feb24_R_plus_S'
+#pipe_tasks.append((dirtymap.MakeMap_CombineAll, 'dmall_'))
+
+file_name_A = 'WiggleZ11_Feb24_R_plus_S_A'
+#file_name_A = 'WiggleZ11_Feb24_R_plus_S_A_long'
+#file_name_A = 'WiggleZ11_Feb24_R_plus_S_A_slop'
+pipe_tasks.append((dirtymap.MakeMap_CombineAll, 'dmA_'))
+
+file_name_B = 'WiggleZ11_Feb24_R_plus_S_B'
+#file_name_B = 'WiggleZ11_Feb24_R_plus_S_B_long'
+#file_name_B = 'WiggleZ11_Feb24_R_plus_S_B_slop'
+pipe_tasks.append((dirtymap.MakeMap_CombineAll, 'dmB_'))
+
+file_name_R = 'WiggleZ11_Feb24_R'
+#pipe_tasks.append((dirtymap.MakeMap_CombineAll, 'dmR_'))
+
+file_name_S = 'WiggleZ11_Feb24_S'
+#pipe_tasks.append((dirtymap.MakeMap_CombineAll, 'dmS_'))
+
+#dmall_field_centre = (162.5, 3.5)
+dmall_field_centre = (163.0, 3.5)
+dmall_pixel_spacing = 0.4
+dmall_map_shape = [85, 30]
+#dmall_interpolation = 'linear'
+#dmall_interpolation = 'linear3'
+dmall_interpolation = 'nearest'
+#dmall_interpolation = 'cubic'
+dmall_tblock_len = 90
+dmall_input_files  = ['rb_wn/%s'%f for f in input_files]
+dmall_output_files = ['maps_wn/%s'%file_name_all, ]
+dmall_data_sets    = 'vis'
+dmall_freq_select  = (5, None) #(0, None)
+dmall_pol_select   = (0, 2)
+dmall_deweight_time_slope = False # True
+dmall_deweight_time_mean = True
+
+dmA_field_centre = (163.0, 3.5)
+dmA_pixel_spacing = 0.4
+dmA_map_shape = [85, 30]
+dmA_interpolation = 'nearest'
+dmA_tblock_len = 108
+dmA_input_files  = ['rb_smooth/%s'%f for f in input_files]
+dmA_output_files = ['maps_smooth/%s'%file_name_A, ]
+dmA_data_sets    = 'vis'
+dmA_freq_select  = (5, None) #(0, None)
+dmA_pol_select   = (0, 2)
+dmA_deweight_time_slope = False
+dmA_deweight_time_mean = True
+dmA_feed_select = feed_list[:27]
+
+dmB_field_centre = (163.0, 3.5)
+dmB_pixel_spacing = 0.4
+dmB_map_shape = [85, 30]
+dmB_interpolation = 'nearest'
+dmB_tblock_len = 108
+dmB_input_files  = ['rb_smooth/%s'%f for f in input_files]
+dmB_output_files = ['maps_smooth/%s'%file_name_B, ]
+dmB_data_sets    = 'vis'
+dmB_freq_select  = (5, None) #(0, None)
+dmB_pol_select   = (0, 2)
+dmB_deweight_time_slope =  False
+dmB_deweight_time_mean = True
+dmB_feed_select = feed_list[27:]
+
+dmR_field_centre = (163.0, 3.5)
+dmR_pixel_spacing = 0.4
+dmR_map_shape = [85, 30]
+dmR_interpolation = 'nearest'
+#dmR_interpolation = 'linear3'
+dmR_tblock_len = 90
+dmR_input_files  = ['rb_wn/%s'%f for f in input_files_1]
+dmR_output_files = ['maps_wn/%s'%file_name_R, ]
+dmR_data_sets    = 'vis'
+dmR_freq_select  = (0, None) #(0, None)
+dmR_pol_select   = (0, 2)
+dmR_deweight_time_slope = False # True
+dmR_deweight_time_mean = True
+
+dmS_field_centre = (163.0, 3.5)
+dmS_pixel_spacing = 0.4
+dmS_map_shape = [85, 30]
+dmS_interpolation = 'nearest'
+dmS_tblock_len = 90
+dmS_input_files  = ['rb_wn/%s'%f for f in input_files_2]
+dmS_output_files = ['maps_wn/%s'%file_name_S, ]
+dmS_data_sets    = 'vis'
+dmS_freq_select  = (0, None) #(0, None)
+dmS_pol_select   = (0, 2)
+dmS_deweight_time_slope = False # True
+dmS_deweight_time_mean = True
+

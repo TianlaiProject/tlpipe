@@ -1,0 +1,53 @@
+# -*- mode: python; -*-
+#
+
+import os
+
+from tlpipe.timestream import convertion
+scan_id = int(os.getenv('SCAN_ID'))
+#scan_id = 9
+
+#data_base = os.getenv('DATA_BASE')
+data_base = '/scratch/users/ycli/'
+
+pipe_tasks = []
+pipe_outdir = data_base + 'meerkat/'
+pipe_logging = 'info'
+pipe_copy = False
+
+#input_files = [
+#    '1551037708',
+#    #'1551055211',
+#]
+#data_path = '/data/projects/hi_im/Feb_24_2019/%s/%s/%s_sdp_l0.full.rdb'
+
+# scans for 1551037708
+#scans = (0, 3, 5, 7, 9, 67, 69, 71, 74, 76)
+# scans for 1551055211
+#scans = (0, 2, 4, 7, 9, 67, 69, 71, 74, 76) # 3C237
+
+
+data_path = '/data/projects/hi_im/incoming/%s/%s/%s_sdp_l0.full.rdb'
+
+pipe_tasks.append((convertion.MeerKAT2TL, 'm2t1_'))
+input_file1 = '1553966342'
+scans1 = ( 1,  4,  6,  8, 10, 12, 14,
+          72, 74, 76, 79, 81, 83, 86,)
+
+# parameter for MeerKAt to TL
+m2t1_corr          = 'auto'
+m2t1_selection     = (scans1[scan_id], ) #'scan'
+m2t1_input_files   = [data_path%(input_file1, input_file1, input_file1),]
+m2t1_output_files  = ['PictorA/%s_auto_track_%03d.h5'%(input_file1, scans1[scan_id]),]
+
+pipe_tasks.append((convertion.MeerKAT2TL, 'm2t2_'))
+input_file2 = '1554156377'
+scans2 = ( 1,  4,  6,  8, 10, 12, 14,
+          73, 76, 79, 81, 83, 85, 87)
+
+# parameter for MeerKAt to TL
+m2t2_corr          = 'auto'
+m2t2_selection     = (scans2[scan_id], ) #'scan'
+m2t2_input_files   = [data_path%(input_file2, input_file2, input_file2),]
+m2t2_output_files  = ['3C273/%s_auto_track_%03d.h5'%(input_file2, scans2[scan_id])]
+

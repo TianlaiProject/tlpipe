@@ -38,8 +38,8 @@ class Timestream(timestream_common.TimestreamCommon):
                                      'freq': (1,),
                                      'pol': (2,),
                                      'blorder': (3,),
-                                     'ra' : (0,), # for meerKAT
-                                     'dec': (0,), # for meerKAT
+                                     'ra' : (0,3), # for meerKAT
+                                     'dec': (0,3), # for meerKAT
                                    }
     _time_ordered_datasets_ = {'weather': (0,)}
     _time_ordered_attrs_ = {}
@@ -207,7 +207,6 @@ class Timestream(timestream_common.TimestreamCommon):
 
         self.create_main_axis_ordered_dataset('polarization', name, data, axis_order, recreate, copy_attrs, check_align)
 
-
     def lin2stokes(self):
         """Convert the linear polarized data to Stokes polarization."""
         try:
@@ -246,6 +245,74 @@ class Timestream(timestream_common.TimestreamCommon):
 
             del self['pol']
             self.create_dataset('pol', data=np.array([p['I'], p['Q'], p['U'], p['V']]), dtype='i4')
+            self['pol'].attrs['pol_type'] = 'stokes'
+
+            # redistribute self to original axis
+            self.redistribute(original_dist_axis)
+
+        else:
+            raise RuntimeError('Can not convert to Stokes polarization')
+
+
+    def lin2I(self):
+        """Convert the linear polarized data to Stokes polarization."""
+        try:
+            pol = self.pol
+        except KeyError:
+            raise RuntimeError('Polarization of the data is unknown, can not convert')
+
+        if pol.attrs['pol_type'] == 'stokes' and pol.shape[0] == 4:
+            warning.warn('Data is already Stokes polarization, no need to convert')
+            return
+
+        if pol.attrs['pol_type'] == 'linear' and pol.shape[0] >=2:
+
+            # redistribute to 0 axis if polarization is the distributed axis
+            original_dist_axis = self.main_data_dist_axis
+            if 'polarization' == self.main_data_axes[self.main_data_dist_axis]:
+                self.redistribute(0)
+
+            pol = pol[:].tolist()
+            p = self.pol_dict
+
+            # create a new MPIArray to hold the new data
+            shp = self.main_data.shape
+            shp = shp[:-2] + (1, ) + shp[-1:]
+            md = mpiarray.MPIArray(shp, axis=self.main_data_dist_axis, 
+                    comm=self.comm, dtype=self.main_data.dtype)
+            # convert to Stokes I, Q, U, V
+            #print "convert to Stokes I, Q, U, V "
+            #md.local_array[:, :, 0] = # do we need 0.5? \
+            md.local_array[:, :, 0] = (
+                      self.main_data.local_data[:, :, pol.index('hh')]\
+                    + self.main_data.local_data[:, :, pol.index('vv')]) # I
+
+            attr_dict = {} # temporarily save attrs of this dataset
+            memh5.copyattrs(self.main_data.attrs, attr_dict)
+            del self[self.main_data_name]
+            # create main data
+            self.create_dataset(self.main_data_name, shape=md.shape, 
+                    dtype=md.dtype, data=md, distributed=True, 
+                    distributed_axis=self.main_data_dist_axis)
+            memh5.copyattrs(attr_dict, self.main_data.attrs)
+
+            if self.main_data_name + '_mask' in self.keys():
+                mk = mpiarray.MPIArray(shp, axis=self.main_data_dist_axis, 
+                        comm=self.comm, dtype=self[self.main_data_name + '_mask'].dtype)
+                mk.local_array[:, :, 0] = \
+                          self[self.main_data_name + '_mask'].local_data[:, :, pol.index('hh')]\
+                        * self[self.main_data_name + '_mask'].local_data[:, :, pol.index('vv')] 
+                attr_dict = {} # temporarily save attrs of this dataset
+                memh5.copyattrs(self[self.main_data_name + '_mask'].attrs, attr_dict)
+                del self[self.main_data_name + '_mask']
+                # create main data mask
+                self.create_dataset(self.main_data_name + '_mask', shape=md.shape, 
+                        dtype=mk.dtype, data=mk, distributed=True, 
+                        distributed_axis=self.main_data_dist_axis)
+                memh5.copyattrs(attr_dict, self[self.main_data_name + '_mask'].attrs)
+
+            del self['pol']
+            self.create_dataset('pol', data=np.array(['I', ]), dtype='S1')
             self['pol'].attrs['pol_type'] = 'stokes'
 
             # redistribute self to original axis

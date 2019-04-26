@@ -1,0 +1,41 @@
+# -*- mode: python; -*-
+#
+
+import os
+from astropy import units as u
+import numpy as np
+
+from tlpipe.sim import cube_sim
+
+data_base = os.getenv('DATA_BASE')
+
+sim_type = 'wigglez_cube'
+
+pipe_tasks = []
+pipe_outdir = data_base + 'sim_meerkat/sim_%s/'%sim_type
+pipe_logging = 'info'
+pipe_copy = False
+
+
+pipe_tasks.append(cube_sim.CubeSim)
+
+csim_prefix           = 'MeerKAT3_wiggleZ11hr'
+#csim_freq             = np.linspace(950, 1350, 32)
+csim_freq             = np.linspace(960, 1088, 128, endpoint=False)
+csim_mock_n           = 10
+csim_scenario         = 'ideal'
+csim_refinement       =  2
+csim_field_centre     = (162.5, 3.5)
+
+csim_pixel_spacing    = 0.2
+csim_map_shape        = [200, 60]
+csim_map_pad          = 5
+
+#csim_pixel_spacing    = 0.5
+#csim_map_shape        = [54, 22]
+#csim_map_pad          = 5
+
+csim_outfiles = ['raw', 'delta', 'withbeam']
+
+
+

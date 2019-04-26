@@ -1,0 +1,60 @@
+# -*- mode: python; -*-
+#
+
+import os
+
+from tlpipe.plot import plot_waterfall
+
+data_base = '/scratch/users/ycli/'
+
+pipe_tasks = []
+pipe_outdir = data_base + 'meerkat/'
+pipe_logging = 'info'
+pipe_copy = False
+
+#data_prefix = '1551037708'
+data_prefix = '1551055211'
+
+# scans for 1551037708
+if data_prefix == '1551037708':
+    print '1551037708'
+    scans = (11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 
+             38, 41, 43, 45, 47, 49, 51, 54, 56, 58, 60, 62, 64)
+# scans for 1551055211
+if data_prefix == '1551055211':
+    print '1551055211'
+    scans = ( 11, 13, 15, 17, 19, 21, 24, 26, 28, 30, 32, 34, 36, 
+              38, 40, 43, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64,)
+
+input_files = [ '%s_auto_scan_%03d.h5'%(data_prefix, si) for si in scans]
+
+# ===================================================================
+# ==                         for plot                              ==
+# ===================================================================
+
+pipe_tasks.append(plot_waterfall.PlotMeerKAT)
+
+
+# ===================================================================
+# ==             details for parameter defination                  ==
+# ===================================================================
+
+
+# waterfall plots
+#pkat_input_files = m2t_output_files
+#pkat_input_files = ['cal_to_noise/%s'%f for f in input_files ]
+#pkat_input_files = ['caled/%s'%f for f in input_files ]
+#pkat_input_files = ['rb/%s'%f for f in input_files ]
+#pkat_input_files = ['sir/%s'%f for f in input_files]
+#pkat_input_files = ['sir_wn/%s'%f for f in input_files[10:12]]
+pkat_input_files = ['rb_wn/%s'%f for f in input_files[10:12]]
+pkat_re_scale = 1.0 #0.2
+pkat_vmax = 35.
+pkat_vmin = 25.
+pkat_main_data = 'vis'
+pkat_fig_name = 'wf/rb_wn/%s_s%ds%d'%(data_prefix, scans[10], scans[11])
+pkat_flag_mask = True
+pkat_bad_freq_list = [[0,5],] #None # bad_freq_list
+pkat_bad_time_list = None #bad_time_list
+
+

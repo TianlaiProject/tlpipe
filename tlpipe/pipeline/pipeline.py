@@ -451,6 +451,7 @@ class Manager(object):
         # Read in the parameters.
         self.params, self.task_params = parse_ini.parse(pipefile, self.params_init, prefix=self.prefix, return_undeclared=True, feedback=feedback)
         self.tasks = self.params['tasks']
+        self.feedback = feedback
 
         # timing the running
         if self.params['timing']:
@@ -594,7 +595,7 @@ class Manager(object):
         if mpiutil.rank0:
             logger.info('Initializing task: ' + str(task))
 
-        task = task(self.task_params)
+        task = task(self.task_params, feedback=self.feedback)
 
         return task
 
@@ -1197,7 +1198,7 @@ class OneAndOne(TaskBase):
                 for input_file in self.input_files:
                     msg += '\n\t%s' % input_file
                 logger.info(msg)
-            mpiutil.barrier()
+            #mpiutil.barrier()
             input = self.read_input()
 
         # Analyze.
@@ -1240,7 +1241,7 @@ class OneAndOne(TaskBase):
 
                 logger.info(msg)
 
-            mpiutil.barrier()
+            #mpiutil.barrier()
 
             self.write_output(output)
 
@@ -1349,6 +1350,27 @@ def _import_class(class_path):
         task_cls = globals()[class_name]
     return task_cls
 
+class run_pipeline(object):
+
+    def __init__(self, params):
+
+        #pipe_logging = 'info'
+        pipe_logging = 'critical'
+        pipe_copy = False
+    
+        _p = locals()
+        _p.update(params())
+
+        #print "feedback = %d"%_p['pipe_feedback']
+        self.P = Manager(_p, feedback=_p['pipe_feedback'])
+
+    def run(self):
+
+        self.P.run()
+
+    def __call__(self):
+
+        self.P.run()
 
 if __name__ == "__main__":
     import doctest

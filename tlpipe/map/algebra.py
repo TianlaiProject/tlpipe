@@ -66,7 +66,7 @@ import numpy as np
 import numpy.lib.format as npfor
 from numpy.lib.utils import safe_eval
 
-#import utils.cubic_conv_interpolation as cci
+import tlpipe.map.cubic_conv_interpolation as cci
 
 import tlpipe.kiyopy.custom_exceptions as ce
 
@@ -573,6 +573,8 @@ def _check_axis_names(array, axis_names=None) :
         axis_names = array.axes
 
     if len(axis_names) != array.ndim :
+        print axis_names
+        print array.ndim
         raise ValueError("axis_names parameter must be a sequence of length "
                          "arr.ndim")
     else :
@@ -719,6 +721,41 @@ class alg_object(object) :
         return (self.info[axis_name + '_delta']*(sp.arange(len) - len//2) 
                 + self.info[axis_name + '_centre'])
 
+    def get_axis_edges(self, axis_name):
+
+        """Calculate the array representing a named axis.  
+        
+        For a given axis name, calculate the 1D array that gives the value of 
+        bin edges of that axis.  This requires that the relevant meta data be set by
+        `set_axis_info`.
+
+        Parameters
+        ----------
+        axis_name : str or int
+            Name of the axis to be calculated.  `axis_name` must occur in the
+            `axes` attribute.  If an int is passed, than it is convered to a
+            string by indexing the `axes` attribute.
+
+        Returns
+        -------
+        axis_array : np.ndarray
+            The array corresponding to the values of the axis quantity along
+            it's axis.
+
+        See Also
+        --------
+        set_axis_info
+        copy_axis_info
+        """
+        
+        if isinstance(axis_name, int) :
+            axis_name = self.axes[axis_name]
+        len = self.shape[self.axes.index(axis_name)]
+        return (self.info[axis_name + '_delta']*(sp.arange(len + 1) - len//2) 
+                + self.info[axis_name + '_centre']
+                - 0.5 * self.info[axis_name + '_delta'])
+
+
     def slice_interpolate_weights(self, axes, coord, kind='linear') :
         """Get the interpolation weights for a subset of the dimensions.
 
@@ -800,6 +837,51 @@ class alg_object(object) :
                     weight *= (1.0 - normalized_distance[jj, temp_ii%2])
                     temp_ii = temp_ii//2
                 weights[ii] = weight
+        elif kind  == 'linear3' :
+            # Any interpolation scheme that depends on data points
+            # directly surrounding. There are 3^n of them.
+            m = 3**n
+            points = sp.empty((m, n), dtype=int)
+            weights = sp.empty((m,), dtype=float)
+            # Find the indices of the surrounding points, as well as the 
+            single_inds = sp.empty((n, 3), dtype=int)
+            normalized_distance = sp.empty((n, 3), dtype=float)
+            for ii in range(n) :
+                axis_ind = axes[ii]
+                value = coord[ii]
+                # The spacing between points of the axis we are considering.
+                delta = abs(self.info[self.axes[axis_ind] + "_delta"])
+                # For each axis, find the indicies that surround the
+                # interpolation location.
+                axis = self.get_axis(axis_ind)
+                if value > max(axis) or value < min(axis) :
+                    message = ("Interpolation coordinate outside of "
+                               "interpolation range.  axis: " + str(axis_ind)
+                               + ", coord: " + str(value) + ", range: "
+                               + str((min(axis), max(axis))))
+                    raise ce.DataError(message)
+                distances = abs(axis - value)
+                min_ind = distances.argmin()
+                single_inds[ii, 0] = min_ind
+                normalized_distance[ii, 0] = distances[min_ind] #/delta
+                distances[min_ind] = distances.max() + 1
+                min_ind = distances.argmin()
+                single_inds[ii, 1] = min_ind
+                normalized_distance[ii, 1] = distances[min_ind] #/delta
+                distances[min_ind] = distances.max() + 1
+                min_ind = distances.argmin()
+                single_inds[ii, 2] = min_ind
+                normalized_distance[ii, 2] = distances[min_ind] #/delta
+            # Now that we have all the distances, figure out all the weights.
+            for ii in range(m) :
+                temp_ii = ii
+                weight = 1.0
+                for jj in range(n) :
+                    points[ii, jj] = single_inds[jj, temp_ii%3]
+                    #weight *= (1.0 - normalized_distance[jj, temp_ii%3])
+                    weight *= np.exp( - normalized_distance[jj, temp_ii%3] ** 2. )
+                    temp_ii = temp_ii//2
+                weights[ii] = weight
         elif kind == 'nearest':
             # Only one grid point to consider and each axis is independant.
             m = 1
@@ -818,39 +900,39 @@ class alg_object(object) :
                                + ", coord: " + str(coord[ii]) + ".")
                     raise ce.DataError(message)
                 points[0, ii] = round(index)
-        #elif kind == 'cubic':
-        #    # Make sure the given point is an array.
-        #    pnt = sp.array(coord)
-        #    # Get the array containing the first value in each dimension.
-        #    # And get the arrays of deltas for each dimension.
-        #    x0 = []
-        #    step_sizes = []
-        #    for ax in axes:
-        #        ax_name = self.axes[ax]
-        #        x0.append(self.get_axis(ax_name)[0])
-        #        ax_delta_name = ax_name + "_delta"
-        #        step_sizes.append(self.info[ax_delta_name])
-        #    x0 = sp.array(x0)
-        #    step_sizes = sp.array(step_sizes)
-        #    # Get the maximum possible index in each dimension in axes.
-        #    max_inds = np.array(self.shape) - 1
-        #    max_needed_inds = []
-        #    for ax in axes:
-        #        max_needed_inds.append(max_inds[ax])
-        #    max_inds = np.array(max_needed_inds)
-        #    # If there are less than four elements along some dimension
-        #    # then raise an error since cubic conv won't work.
-        #    too_small_axes = []
-        #    for i in range(len(max_inds)):
-        #        if max_inds[i] < 3:
-        #            too_small_axes.append(axes[i])
-        #    if not (len(too_small_axes) == 0):
-        #        msg = "Need at least 4 points for cubic interpolation " + \
-        #              "on axis (axes): " + str(too_small_axes)
-        #        raise ce.DataError(msg)
-        #    # Get the nodes needed and their weights.
-        #    points, weights = cci.interpolate_weights(axes, pnt, x0, \
-        #                          step_sizes, max_inds)
+        elif kind == 'cubic':
+            # Make sure the given point is an array.
+            pnt = sp.array(coord)
+            # Get the array containing the first value in each dimension.
+            # And get the arrays of deltas for each dimension.
+            x0 = []
+            step_sizes = []
+            for ax in axes:
+                ax_name = self.axes[ax]
+                x0.append(self.get_axis(ax_name)[0])
+                ax_delta_name = ax_name + "_delta"
+                step_sizes.append(self.info[ax_delta_name])
+            x0 = sp.array(x0)
+            step_sizes = sp.array(step_sizes)
+            # Get the maximum possible index in each dimension in axes.
+            max_inds = np.array(self.shape) - 1
+            max_needed_inds = []
+            for ax in axes:
+                max_needed_inds.append(max_inds[ax])
+            max_inds = np.array(max_needed_inds)
+            # If there are less than four elements along some dimension
+            # then raise an error since cubic conv won't work.
+            too_small_axes = []
+            for i in range(len(max_inds)):
+                if max_inds[i] < 3:
+                    too_small_axes.append(axes[i])
+            if not (len(too_small_axes) == 0):
+                msg = "Need at least 4 points for cubic interpolation " + \
+                      "on axis (axes): " + str(too_small_axes)
+                raise ce.DataError(msg)
+            # Get the nodes needed and their weights.
+            points, weights = cci.interpolate_weights(axes, pnt, x0, \
+                                  step_sizes, max_inds)
         else :
             message = "Unsupported interpolation algorithm: " + kind
             raise ValueError(message)

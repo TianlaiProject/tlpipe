@@ -1,0 +1,116 @@
+# -*- mode: python; -*-
+#
+
+import os
+
+from tlpipe.timestream import tod_edit
+from tlpipe.timestream import freq_rebin
+from tlpipe.timestream import flag_data
+
+data_base = '/scratch/users/ycli/'
+
+pipe_tasks = []
+pipe_outdir = data_base + 'meerkat/'
+pipe_logging = 'info'
+pipe_copy = False
+
+#data_prefix = '1551037708' # Feb. 27 rising scans
+#data_prefix = '1551055211' # Feb. 27 setting scans
+data_prefix = '1553966342' # Mar. 30 rising scans 
+#data_prefix = '1554156377' # Apr. 01 setting scans
+
+#pipe_tasks.append(tod_edit.DataEdit)
+#pipe_tasks.append(flag_data.FlagData)
+pipe_tasks.append(freq_rebin.Rebin)
+
+cal = 'Tcal'
+
+data_name = data_prefix + '_auto_scan_%03d.h5'
+
+if data_prefix == '1551037708':
+    scans = (11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 
+             38, 41, 43, 45, 47, 49, 51, 54, 56, 58, 60, 62, 64)
+    bad_freq = [[330, 345], [380, 500], [1100, 1150], [1180, 1200]]
+    bad_time = [[205, 220], [1580, 1650]]
+    cal_data = '/3C273/3C273_C1_%s.h5'%cal
+
+if data_prefix == '1551055211':
+    scans = ( 11, 13, 15, 17, 19, 21, 24, 26, 28, 30, 32, 34, 36, 
+              38, 40, 43, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64,)
+    bad_freq = [[330, 345], [380, 500], [1100, 1150], [1180, 1200]]
+    bad_time = [[400, 450], [1440, 1480], [1520, 1560], [1640, 1690],
+                [1750, 1790], [-1, None]]
+    cal_data = '/3C273/3C273_C1_%s.h5'%cal
+
+if data_prefix == '1554156377':
+    scans = (16, 18, 20, 22, 24, 26, 28, 30, 33, 35, 37, 39, 41,
+             43, 45, 48, 50, 52, 54, 56, 58, 60, 63, 66, 68, 70,)
+    bad_time = [[400, 460], ]
+    #bad_freq = [(0, 200), (325,500), (1100,1150), (1180,1200),
+    #            (1350, 2200), (2650, 2750), (3150, 3710), (3900, None)]
+    bad_freq = [[210, 230],]
+    cal_data = '/3C273/3C273_C2_%s.h5'%cal
+
+if data_prefix == '1553966342':
+    scans = (16, 18, 20, 23, 25, 27, 29, 31, 33, 35, 37, 39, 41,
+             43, 45, 47, 49, 51, 54, 57, 59, 61, 63, 65, 67, 69)
+    bad_time = [[1600, 1610], [2100, 2120], ]
+    #bad_freq = [(0, 200), (325,500), (1100,1150), (1180,1200),
+    #        (1350, 2200), (2650, 2750), (3150, 3710), (3900, None)]
+    bad_freq = [[210, 230],[290, 300]] #[(40, 80), ]
+    cal_data = '/PictorA/PictorA_C1_%s.h5'%cal
+
+input_files = [ '%s_auto_scan_%03d.h5'%(data_prefix, si) for si in scans]
+
+#feed_bad  = [19, 33, 37]
+#feed_bad += [26, 27, 28, 42, 43, 52, 60]
+#feed_list = range(1, 65)
+#for _bad in feed_bad:
+#    feed_list.remove(_bad)
+#print feed_list
+
+rm_ncal = True
+
+# ------------------------------------------------------------------------
+# initial edit, pickup real part, cal to noise spec
+de_input_files = ['auto/%s'%f for f in input_files]
+de_corr = 'auto'
+de_pol_select = (0, 2)
+de_freq_select = (200, 1200)
+de_output_files = ['caled_%s/%s'%(cal, f) for f in input_files]
+de_init_cal_pha = 2
+de_bad_freq_list = None #bad_freq
+de_bad_time_list = None #bad_time
+de_noise_flag = '/scratch/users/ycli/meerkat/%s_cal_flag.npy'%data_prefix
+de_cal_data = '/scratch/users/ycli/meerkat/' + cal_data
+de_cal_with_nd = cal == 'Tcal'
+de_rm_ncal = rm_ncal
+
+# ------------------------------------------------------------------------
+# rfi flagging
+
+fd_corr = 'auto'
+fd_input_files = de_output_files
+fd_output_files = ['fd_%s/%s'%(cal, f) for f in input_files]
+fd_sigma_thres = 4.
+#fd_feed_select = [1,]
+fd_badness_thres = 0.1
+fd_time_cut = 1
+fd_bad_freq_list = bad_freq
+fd_bad_time_list = bad_time
+fd_time_block = 108
+
+# ------------------------------------------------------------------------
+# freq rebin
+rb_input_files = fd_output_files
+rb_corr = 'auto'
+rb_bin_number  = 120
+#rb_feed_select = feed_list
+rb_output_files = ['rb_%s/%s'%(cal, f) for f in input_files]
+
+
+
+
+
+
+

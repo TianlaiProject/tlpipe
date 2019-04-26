@@ -1,0 +1,347 @@
+# -*- mode: python; -*-
+#
+
+import os
+
+from tlpipe.timestream import convertion
+from tlpipe.timestream import tod_noise
+from tlpipe.timestream import tod_svd
+from tlpipe.sim import survey_sim
+from tlpipe.plot import plot_svd
+from tlpipe.plot import plot_ps
+from tlpipe.plot import plot_waterfall
+
+
+data_base = os.getenv('DATA_BASE')
+
+#sim_type = 'wigglez_HI_n25_fn_a1.5_b0.3_k0.040'
+sim_type = 'wigglez_HI_n25_fn_a2.2_b0.3_k0.070'
+
+pipe_tasks = []
+pipe_outdir = data_base + 'sim_meerkat/sim_%s/'%sim_type
+pipe_logging = 'info'
+pipe_copy = False
+
+data_path = data_base + '/meerkat/sim/'
+
+#file_name = '1474580092'
+bad_time_list = None 
+bad_freq_list = None 
+
+n_bins    = 20 
+mode_list = [0, 1, 2, 5]
+ps_method = 'lombscargle' #'fft'
+prewhiten = True
+mock = 0
+
+HI_model_scenario = 'ideal'
+HI_model_type     = 'withbeam'
+prefix = 'MeerKAT60'
+
+suffix = (prefix, HI_model_scenario, HI_model_type)
+
+input_files = [
+    '%s_HorizonRasterDrift_%s_%s_20190401172431.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190401223031.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190402172125.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190402222725.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190403171829.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190403222429.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190404171523.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190404222123.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190405171227.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190405221817.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190406170921.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190406221521.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190407170615.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190407221215.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190408170319.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190408220919.h5'%suffix,
+    ]
+
+#pipe_tasks.append(tod_noise.DataEdit)
+
+#pipe_tasks.append(tod_svd.SVD)
+#pipe_tasks.append((tod_svd.SVD_OneStop, 'todsvd1s0_'))
+#pipe_tasks.append((tod_svd.SVD_OneStop, 'todsvd1s1_'))
+#pipe_tasks.append((tod_svd.SVD_OneStop, 'todsvd1s5_'))
+
+#pipe_tasks.append((tod_noise.PinkNoisePS_1DTC, 'pnpsvis_'))
+#pipe_tasks.append((tod_noise.PinkNoisePS_1DTC, 'pnps1dtc0_'))
+#pipe_tasks.append((tod_noise.PinkNoisePS_1DTC, 'pnps1dtc1_'))
+#pipe_tasks.append((tod_noise.PinkNoisePS_1DTC, 'pnps1dtc5_'))
+
+#pipe_tasks.append((tod_noise.PinkNoisePS_1DTC, 'pnps1dtccln_'))
+
+#pipe_tasks.append((tod_noise.PinkNoisePS_1DFC, 'pnps1dfccln_'))
+
+#pipe_tasks.append((tod_noise.PinkNoisePS_1DTC, 'pnpsmod_'))
+pipe_tasks.append((tod_noise.PinkNoisePS_1DFC, 'pnps1dfc0_'))
+
+
+# ===================================================================
+# ==                         for plot                              ==
+# ===================================================================
+
+file_name = '%s_HorizonRasterDrift_%s_%s_20181127155700'%suffix
+ant = 'm000' #'m021', 'm017', 'm036'
+file_middle = '_avgNoneF_tcorrps_%s'%ps_method
+#file_middle = '_avgNoneT_tcorrps_%s'%ps_method
+file_suffix = file_middle + '_%s_x_%s'%(ant, ant)
+
+#pipe_tasks.append((plot_svd.PlotSVD, 'psvd_'))
+
+#pipe_tasks.append((plot_ps.PlotPS, 'pps1dtc_'))
+
+#pipe_tasks.append((plot_ps.PlotPS, 'pps1dtcsvd_'))
+
+#pipe_tasks.append((plot_ps.PlotPS, 'pps1dfcsvd_'))
+
+#pipe_tasks.append((plot_ps.PlotPS, 'ppsmod_'))
+
+#pipe_tasks.append((plot_ps.PlotPS, 'ppsall_'))
+
+#pipe_tasks.append(plot_waterfall.PlotMeerKAT)
+
+
+# ===================================================================
+# ==             details for parameter defination                  ==
+# ===================================================================
+
+# paramerer for DataEdit
+pned_input_files  = ['sim_mock%03d/%s'%(mock, f) for f in input_files]
+pned_corr = 'auto'
+pned_pol_select = (0, 2) # ignore the cross pol
+pned_out = 'pned'
+pned_bandpass_cal = False
+pned_bad_time_list = bad_time_list
+pned_bad_freq_list = bad_freq_list
+pned_output_files  = ['pned_mock%03d/%s'%(mock, f) for f in input_files]
+
+#------------------------------------------------------------------------------
+
+# parameter for SVD
+#todsvd_in = pned_out
+todsvd_input_files = pned_output_files
+todsvd_mode_list = mode_list
+todsvd_output_files = ['svd_mock%03d/%s'%(mock, f) for f in input_files]
+todsvd_prewhiten = prewhiten
+#todsvd_out = 'todsvd'
+
+#------------------------------------------------------------------------------
+
+# parameter for SVD
+todsvd1s0_input_files = pned_output_files
+todsvd1s0_mode_list = [0, ]
+todsvd1s0_output_files = ['svd_mock%03d_sub00/%s'%(mock, f) for f in input_files]
+todsvd1s0_prewhiten = prewhiten
+
+# parameter for SVD
+todsvd1s1_input_files = pned_output_files
+todsvd1s1_mode_list = [1, ]
+todsvd1s1_output_files = ['svd_mock%03d_sub01/%s'%(mock, f) for f in input_files]
+todsvd1s1_prewhiten = prewhiten
+
+# parameter for SVD
+todsvd1s5_input_files = pned_output_files
+todsvd1s5_mode_list = [5, ]
+todsvd1s5_output_files = ['svd_mock%03d_sub05/%s'%(mock, f) for f in input_files]
+todsvd1s5_prewhiten = prewhiten
+
+#------------------------------------------------------------------------------
+
+# parameter for Power spectrum estimation for raw vis
+#pnpsvis_input_files = todsvd_output_files
+pnpsvis_input_files = pned_output_files
+pnpsvis_output_files = ['pnps_1dtc_mock%03d/%s'%(mock, f) for f in input_files]
+pnpsvis_data_sets = 'vis'
+pnpsvis_n_bins = n_bins
+pnpsvis_method =  ps_method
+#pnpsvis_avg_len = 100
+pnpsvis_avg_len = None
+
+#------------------------------------------------------------------------------
+
+# parameter for Power spectrum estimation for vis onestop 0 mode
+pnps1dtc0_input_files = todsvd1s0_output_files[:1]
+pnps1dtc0_output_files = ['pnps_1dtc_mock%03d_sub00/%s'%(mock, input_files[0])]
+pnps1dtc0_data_sets = 'vis'
+pnps1dtc0_n_bins = n_bins
+pnps1dtc0_f_min  = 1.e-4
+pnps1dtc0_f_max  = 0.5
+pnps1dtc0_method =  ps_method
+pnps1dtc0_avg_len = None
+
+# parameter for Power spectrum estimation for vis onestop 0 mode
+pnps1dtc1_input_files = todsvd1s1_output_files[:1]
+pnps1dtc1_output_files = ['pnps_1dtc_mock%03d_sub01/%s'%(mock, input_files[0])]
+pnps1dtc1_data_sets = 'vis'
+pnps1dtc1_n_bins = n_bins
+pnps1dtc1_f_min  = 1.e-4
+pnps1dtc1_f_max  = 0.5
+pnps1dtc1_method =  ps_method
+pnps1dtc1_avg_len = None
+
+# parameter for Power spectrum estimation for vis onestop 0 mode
+pnps1dtc5_input_files = todsvd1s5_output_files[:1]
+pnps1dtc5_output_files = ['pnps_1dtc_mock%03d_sub05/%s'%(mock, input_files[0])]
+pnps1dtc5_data_sets = 'vis'
+pnps1dtc5_n_bins = n_bins
+pnps1dtc5_f_min  = 1.e-4
+pnps1dtc5_f_max  = 0.5
+pnps1dtc5_method =  ps_method
+pnps1dtc5_avg_len = None
+
+#------------------------------------------------------------------------------
+
+# parameter for Power spectrum estimation for cleaned vis freq corr
+pnps1dfc0_input_files = todsvd1s0_output_files[:1]
+pnps1dfc0_output_files = ['pnps_1dfc_mock%03d_sub00/%s'%(mock, input_files[0])]
+pnps1dfc0_data_sets = 'vis'
+pnps1dfc0_n_bins = n_bins
+pnps1dfc0_w_min  = None #1.e-4
+pnps1dfc0_w_max  = None #10.
+pnps1dfc0_method =  ps_method
+pnps1dfc0_avg_len = 1000
+
+#------------------------------------------------------------------------------
+
+# parameter for Power spectrum estimation for cleaned vis time corr
+pnps1dtccln_input_files = todsvd_output_files
+pnps1dtccln_output_files = ['pnps_1dtc/%s'%f for f in input_files]
+pnps1dtccln_data_sets = 'cleaned_vis'
+pnps1dtccln_n_bins = n_bins
+pnps1dtccln_f_min  = 1.e-4
+pnps1dtccln_f_max  = 10.
+pnps1dtccln_method =  ps_method
+#pnps1dtccln_avg_len = 100
+pnps1dtccln_avg_len = None
+
+#------------------------------------------------------------------------------
+
+# parameter for Power spectrum estimation for cleaned vis freq corr
+pnps1dfccln_input_files = todsvd_output_files
+pnps1dfccln_output_files = ['pnps_1dfc/%s'%f for f in input_files]
+pnps1dfccln_data_sets = 'cleaned_vis'
+pnps1dfccln_n_bins = n_bins
+pnps1dfccln_w_min  = None #1.e-4
+pnps1dfccln_w_max  = None #10.
+pnps1dfccln_method =  ps_method
+pnps1dfccln_avg_len = None
+#pnps1dfccln_avg_len = None
+
+#------------------------------------------------------------------------------
+
+# parameter for Power spectrum estimation for svd modes
+pnpsmod_input_files = todsvd_output_files
+pnpsmod_output_files = ['pnps_1dtc/%s'%f for f in input_files]
+pnpsmod_data_sets = 'modes'
+pnpsmod_n_bins = n_bins
+pnpsmod_method =  ps_method
+#pnpsmod_avg_len = 100
+pnpsmod_avg_len = None
+
+#------------------------------------------------------------------------------
+
+# parameter for plot SVD modes
+psvd_input_files = ['svd/%s_svdmodes_%s_x_%s.h5'%(file_name, ant, ant) ]
+psvd_output_files = ['svd/%s_svdmodes_%s_x_%s'%(file_name, ant, ant) ]
+psvd_mode_n = 6
+
+#------------------------------------------------------------------------------
+
+# parameter for plot ps 
+file_name_temp = 'pnps_1dtc_mock%03d/'%mock + file_name + '_vis' + file_suffix + '.h5'
+pps1dtc_input_files = [file_name_temp, ]
+pps1dtc_labels = [
+    'without mode subtracted',
+    ]
+pps1dtc_label_title = 'MeerKAT Ant. %s'%ant
+pps1dtc_vmin = None #1.e-4 #1.e-9
+pps1dtc_vmax = None #5.e1 # 1.e-3
+pps1dtc_output_files = ['ps_1dtc_mock%03d/%s_submodes%s'%(mock, file_name, file_suffix),]
+
+
+#------------------------------------------------------------------------------
+
+# parameter for plot ps with differenct svd modes subtraction
+file_name_temp = 'pnps_1dtc/' + file_name + '_vis_sub%02dmodes' + file_suffix + '.h5'
+pps1dtcsvd_input_files = [file_name_temp%m for m in mode_list]
+pps1dtcsvd_labels = [
+    'without mode subtracted',
+    'subtract the first mode',
+    'subtract the first 2 modes',
+    'subtract the first 5 modes',
+    ]
+pps1dtcsvd_label_title = 'MeerKAT Ant. %s'%ant
+pps1dtcsvd_vmin = 1.e-4 #1.e-9
+pps1dtcsvd_vmax = 5.e1 # 1.e-3
+pps1dtcsvd_output_files = ['ps_1dtc/%s_submodes%s'%(file_name, file_suffix),]
+
+#------------------------------------------------------------------------------
+
+# parameter for plot ps with differenct svd modes subtraction
+file_name_temp = 'pnps_1dfc/' + file_name + '_vis_sub%02dmodes' + file_suffix + '.h5'
+pps1dfcsvd_input_files = [file_name_temp%m for m in mode_list]
+pps1dfcsvd_labels = [
+    'without mode subtracted',
+    'subtract the first mode',
+    'subtract the first 2 modes',
+    'subtract the first 5 modes',
+    ]
+pps1dfcsvd_label_title = 'MeerKAT Ant. %s'%ant
+pps1dfcsvd_vmin = 1.e-18 #1.e-9
+pps1dfcsvd_vmax = 5.e-9 # 1.e-3
+pps1dfcsvd_corr_type = 'fcorr'
+pps1dfcsvd_output_files = ['ps_1dfc/%s_submodes%s'%(file_name, file_suffix),]
+
+#------------------------------------------------------------------------------
+
+# parameter for plot ps with differenct svd modes subtraction
+file_name_temp = 'pnps/' + file_name + '_modes%02d' + file_suffix + '.h5'
+ppsmod_input_files = [file_name_temp%(m + 1) for m in range(4)]
+ppsmod_labels = [
+    'the 1st SVD mode',
+    'the 2nd SVD mode',
+    'the 3rd SVD mode',
+    'the 4th SVD mode',
+    ]
+ppsmod_label_title = 'MeerKAT Ant. %s'%ant
+ppsmod_vmin = 1.e-4
+ppsmod_vmax = 5.e1
+ppsmod_output_files = ['ps/%s_SVDmodes%s'%(file_name, file_suffix),]
+
+
+#------------------------------------------------------------------------------
+
+# parameter for plot raw ps with differenct ants
+ppsall_input_files = [
+    'pnps/%s_vis_avg0100_tcorrps_%s_m017_x_m017.h5'%(file_name, ps_method),
+    'pnps/%s_vis_avg0100_tcorrps_%s_m021_x_m021.h5'%(file_name, ps_method),
+    'pnps/%s_vis_avg0100_tcorrps_%s_m036_x_m036.h5'%(file_name, ps_method),
+    ]
+ppsall_labels = [
+    'MeerKAT Ant. m017',
+    'MeerKAT Ant. m021',
+    'MeerKAT Ant. m036',
+    ]
+ppsall_vmin = 1.e-9
+ppsall_vmax = 1.e-3
+ppsall_output_files = ['ps/%s_allants_%s'%(file_name, file_middle)]
+
+
+#------------------------------------------------------------------------------
+
+# waterfall plots
+#pkat_input_files = m2t_output_files
+pkat_input_files = pned_output_files
+#pkat_input_files = todsvd_output_files
+pkat_re_scale = 2.
+#pkat_fig_name = 'wf/%s_raw'%file_name
+#pkat_fig_name = 'wf/%s_flagbad'%file_name
+pkat_main_data = 'vis'
+#pkat_main_data = 'vis_sub00modes'
+pkat_fig_name = 'wf/%s'%file_name
+pkat_flag_mask = True
+
+

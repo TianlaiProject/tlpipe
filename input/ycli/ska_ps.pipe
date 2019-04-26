@@ -1,0 +1,156 @@
+# -*- mode: python; -*-
+#
+
+import os
+import sys
+import numpy as np
+
+from tlpipe.powerspectrum import power_spectrum
+from tlpipe.powerspectrum import tf
+
+data_base = os.getenv('DATA_BASE')
+
+sim_type = 'eor'
+
+pipe_tasks = []
+pipe_outdir = data_base + 'ska/sim_%s/'%sim_type
+pipe_logging = 'info'
+pipe_copy = False
+
+file_name = 'SKAChallenge_cube_ideal'
+
+svd_key = os.getenv('SVD_KEY')
+#svd_key_list = ['svd_mode_eor_p_noise_p_fg_10', 
+#                'svd_mode_eor_p_noise_p_fg_100', 
+#                'svd_mode_eor_p_noise_p_fg_1000',]
+
+# ------ auto power spectrum -------
+pipe_tasks.append((power_spectrum.AutoPS_CubeFile, 'apscuberaw_'))
+#pipe_tasks.append((power_spectrum.AutoPS_CubeFile, 'apscubecln1_'))
+#pipe_tasks.append((power_spectrum.AutoPS_CubeFile, 'apscubecln2_'))
+#pipe_tasks.append((power_spectrum.AutoPS_CubeFile, 'apscubecln3_'))
+#pipe_tasks.append((power_spectrum.AutoPS_CubeFile, 'apscubecln4_'))
+#pipe_tasks.append((power_spectrum.AutoPS_CubeFile, 'apscubecln5_'))
+#pipe_tasks.append((power_spectrum.AutoPS_CubeFile, 'apscubecln6_'))
+#pipe_tasks.append((power_spectrum.AutoPS_CubeFile, 'apscubecln7_'))
+#pipe_tasks.append((power_spectrum.AutoPS_CubeFile, 'apscubecln8_'))
+#pipe_tasks.append((power_spectrum.AutoPS_CubeFile, 'apscubecln9_'))
+
+apscuberaw_input_files  = ['sim/%s.h5'%(file_name, ), ]
+apscuberaw_output_files = ['ps_w/%s_auto.h5'%file_name, ]
+apscuberaw_kmin = 4.e-2
+apscuberaw_kmax = 4.e-1
+apscuberaw_knum = 10
+apscuberaw_kbin_x = np.linspace(0.0474, 0.2288, 25)
+apscuberaw_kbin_y = np.linspace(0.0459, 0.4590, 10)
+apscuberaw_logk = False
+apscuberaw_map_key = ['raw', 'raw']
+apscuberaw_weight_key = [None,  None]
+
+cln = 1
+apscubecln1_input_files  = ['fgc/%s_%s.h5'%(file_name, svd_key), ]
+apscubecln1_output_files = ['ps_w/%s_%s_cln%02d_auto.h5'%(file_name, svd_key, cln), ]
+apscubecln1_kmin = 4.e-2
+apscubecln1_kmax = 4.e-1
+apscubecln1_knum = 10
+apscubecln1_kbin_x = np.linspace(0.0474, 0.2288, 25)
+apscubecln1_kbin_y = np.linspace(0.0459, 0.4590, 10)
+apscubecln1_logk = False
+apscubecln1_map_key = ['clean_map_cln%02dm'%cln, 'clean_map_cln%02dm'%cln]
+apscubecln1_weight_key = [None,  None]
+
+cln = 2
+apscubecln2_input_files  = ['fgc/%s_%s.h5'%(file_name, svd_key), ]
+apscubecln2_output_files = ['ps_w/%s_%s_cln%02d_auto.h5'%(file_name, svd_key, cln), ]
+apscubecln2_kmin = 4.e-2
+apscubecln2_kmax = 4.e-1
+apscubecln2_knum = 10
+apscubecln2_kbin_x = np.linspace(0.0474, 0.2288, 25)
+apscubecln2_kbin_y = np.linspace(0.0459, 0.4590, 10)
+apscubecln2_logk = False
+apscubecln2_map_key = ['clean_map_cln%02dm'%cln, 'clean_map_cln%02dm'%cln]
+apscubecln2_weight_key = [None,  None]
+
+cln = 3
+apscubecln3_input_files  = ['fgc/%s_%s.h5'%(file_name, svd_key), ]
+apscubecln3_output_files = ['ps_w/%s_%s_cln%02d_auto.h5'%(file_name, svd_key, cln), ]
+apscubecln3_kmin = 4.e-2
+apscubecln3_kmax = 4.e-1
+apscubecln3_knum = 10
+apscubecln3_kbin_x = np.linspace(0.0474, 0.2288, 25)
+apscubecln3_kbin_y = np.linspace(0.0459, 0.4590, 10)
+apscubecln3_logk = False
+apscubecln3_map_key = ['clean_map_cln%02dm'%cln, 'clean_map_cln%02dm'%cln]
+apscubecln3_weight_key = [None,  None]
+
+cln = 4
+apscubecln4_input_files  = ['fgc/%s_%s.h5'%(file_name, svd_key), ]
+apscubecln4_output_files = ['ps_w/%s_%s_cln%02d_auto.h5'%(file_name, svd_key, cln), ]
+apscubecln4_kmin = 4.e-2
+apscubecln4_kmax = 4.e-1
+apscubecln4_knum = 10
+apscubecln4_kbin_x = np.linspace(0.0474, 0.2288, 25)
+apscubecln4_kbin_y = np.linspace(0.0459, 0.4590, 10)
+apscubecln4_logk = False
+apscubecln4_map_key = ['clean_map_cln%02dm'%cln, 'clean_map_cln%02dm'%cln]
+apscubecln4_weight_key = [None,  None]
+
+cln = 5
+apscubecln5_input_files  = ['fgc/%s_%s.h5'%(file_name, svd_key), ]
+apscubecln5_output_files = ['ps_w/%s_%s_cln%02d_auto.h5'%(file_name, svd_key, cln), ]
+apscubecln5_kmin = 4.e-2
+apscubecln5_kmax = 4.e-1
+apscubecln5_knum = 10
+apscubecln5_kbin_x = np.linspace(0.0474, 0.2288, 25)
+apscubecln5_kbin_y = np.linspace(0.0459, 0.4590, 10)
+apscubecln5_logk = False
+apscubecln5_map_key = ['clean_map_cln%02dm'%cln, 'clean_map_cln%02dm'%cln]
+apscubecln5_weight_key = [None,  None]
+
+cln = 6
+apscubecln6_input_files  = ['fgc/%s_%s.h5'%(file_name, svd_key), ]
+apscubecln6_output_files = ['ps_w/%s_%s_cln%02d_auto.h5'%(file_name, svd_key, cln), ]
+apscubecln6_kmin = 4.e-2
+apscubecln6_kmax = 4.e-1
+apscubecln6_knum = 10
+apscubecln6_kbin_x = np.linspace(0.0474, 0.2288, 25)
+apscubecln6_kbin_y = np.linspace(0.0459, 0.4590, 10)
+apscubecln6_logk = False
+apscubecln6_map_key = ['clean_map_cln%02dm'%cln, 'clean_map_cln%02dm'%cln]
+apscubecln6_weight_key = [None,  None]
+
+cln = 7
+apscubecln7_input_files  = ['fgc/%s_%s.h5'%(file_name, svd_key), ]
+apscubecln7_output_files = ['ps_w/%s_%s_cln%02d_auto.h5'%(file_name, svd_key, cln), ]
+apscubecln7_kmin = 4.e-2
+apscubecln7_kmax = 4.e-1
+apscubecln7_knum = 10
+apscubecln7_kbin_x = np.linspace(0.0474, 0.2288, 25)
+apscubecln7_kbin_y = np.linspace(0.0459, 0.4590, 10)
+apscubecln7_logk = False
+apscubecln7_map_key = ['clean_map_cln%02dm'%cln, 'clean_map_cln%02dm'%cln]
+apscubecln7_weight_key = [None,  None]
+
+cln = 8
+apscubecln8_input_files  = ['fgc/%s_%s.h5'%(file_name, svd_key), ]
+apscubecln8_output_files = ['ps_w/%s_%s_cln%02d_auto.h5'%(file_name, svd_key, cln), ]
+apscubecln8_kmin = 4.e-2
+apscubecln8_kmax = 4.e-1
+apscubecln8_knum = 10
+apscubecln8_kbin_x = np.linspace(0.0474, 0.2288, 25)
+apscubecln8_kbin_y = np.linspace(0.0459, 0.4590, 10)
+apscubecln8_logk = False
+apscubecln8_map_key = ['clean_map_cln%02dm'%cln, 'clean_map_cln%02dm'%cln]
+apscubecln8_weight_key = [None,  None]
+
+cln = 9
+apscubecln9_input_files  = ['fgc/%s_%s.h5'%(file_name, svd_key), ]
+apscubecln9_output_files = ['ps_w/%s_%s_cln%02d_auto.h5'%(file_name, svd_key, cln), ]
+apscubecln9_kmin = 4.e-2
+apscubecln9_kmax = 4.e-1
+apscubecln9_knum = 10
+apscubecln9_kbin_x = np.linspace(0.0474, 0.2288, 25)
+apscubecln9_kbin_y = np.linspace(0.0459, 0.4590, 10)
+apscubecln9_logk = False
+apscubecln9_map_key = ['clean_map_cln%02dm'%cln, 'clean_map_cln%02dm'%cln]
+apscubecln9_weight_key = [None,  None]

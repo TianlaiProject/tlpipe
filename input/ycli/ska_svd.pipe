@@ -1,0 +1,35 @@
+# -*- mode: python; -*-
+#
+
+import os
+import sys
+import numpy as np
+
+from tlpipe.powerspectrum import power_spectrum
+from tlpipe.powerspectrum import tf
+
+data_base = os.getenv('DATA_BASE')
+
+sim_type = 'eor'
+
+pipe_tasks = []
+pipe_outdir = data_base + 'ska/sim_%s/'%sim_type
+pipe_logging = 'info'
+pipe_copy = False
+
+file_name = 'SKAChallenge_cube_ideal'
+
+svd_key = os.getenv('SVD_KEY')
+#svd_key_list = ['svd_mode_eor_p_noise_p_fg_10', 
+#                'svd_mode_eor_p_noise_p_fg_100', 
+#                'svd_mode_eor_p_noise_p_fg_1000',]
+
+# ------ auto power spectrum -------
+pipe_tasks.append(tf.FG_clean_CubeFile)
+fgccube_svd_keys = svd_key
+fgccube_svd_file = '/users/ycli/data/ska/svd_mode.hdf5'
+fgccube_svd_mode = np.arange(1, 10)
+fgccube_map_key  = 'raw'
+fgccube_input_files = ['sim/%s.h5'%(file_name, ), ]
+fgccube_output_files = ['fgc/%s_%s.h5'%(file_name, svd_key), ]
+

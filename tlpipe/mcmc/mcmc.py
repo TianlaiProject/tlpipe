@@ -12,6 +12,8 @@ from tlpipe.pipeline.pipeline import FileIterBase
 
 import get_dist
 
+from pipeline.Observatory.Receivers import Noise
+
 #from analysis_mcmc.my_src import plot_triangle
 #from analysis_mcmc.my_src import plot_2d
 #from analysis_mcmc.my_src import plot_1d
@@ -201,6 +203,136 @@ class MCMC_BASE(FileIterBase):
 
         return -0.5 * chisq_total
 
+
+class MCMC_FN(MCMC_BASE):
+
+
+    params_init = {
+            'amp'  : (-1.0, -5.0, 2.0, r'$\lg(T^2_{\rm sys}/\delta \nu)$'),
+            'fk'   : (-1.0, -2.0, 1.0, r'$\lg(f_k)$'),
+            'alpha': ( 1.0,  0.0, 2.0, r'$\alpha$'),
+            'beta' : ( 0.1,  1.0, 0.3, r'$\beta$'),
+
+            'pol'  : ('HH', 'VV'),
+            'T_obs' : 3600., # s
+            'f_tot' : 120., # MHz
+            'f_res' : 0.2, # Mhz
+            'f_avg' : 100.
+            }
+
+    prefix = 'mcfn_'
+
+    _mcmc_params_ = ['pol', 'T_obs', 'f_tot', 'f_res', 'f_avg']
+
+    def read_input(self):
+
+        fhs = super(MCMC_FN, self).read_input()
+
+        pol_n = len(self.params['pol'])
+
+        self.x = []
+        self.y = []
+        self.e = []
+
+        for i in range(pol_n):
+
+            x = []
+            y = []
+            e = []
+
+            for fh in fhs:
+
+                tcorr_ps = fh['tcorr_ps'][:]
+                tcorr_bc = fh['tcorr_bc'][:]
+
+                mean = np.mean(tcorr_ps, axis=1)
+                erro = np.std( tcorr_ps, axis=1)
+
+                pp = mean[:, i] > 0
+                x.append(tcorr_bc[pp])
+                y.append(mean[pp, i])
+                e.append(erro[pp, i])
+
+            self.x.append(x)
+            self.y.append(y)
+            self.e.append(e)
+
+
+        return 1
+
+    def process(self, input):
+
+        iteration = self.iter_start + self._iter_cnt
+        output_file, ext = self.output_files[iteration].split('.')
+
+        x_tmp = copy.copy(self.x)
+        y_tmp = copy.copy(self.y)
+        e_tmp = copy.copy(self.e)
+        pol_n = len(self.params['pol'])
+        outputs = []
+        for i in range(pol_n):
+            self.output_file = output_file + '_%s.%s'%(self.params['pol'][i], ext)
+            self.x = x_tmp[i]
+            self.y = y_tmp[i]
+            self.e = e_tmp[i]
+            o = super(MCMC_FN, self).process(1)
+            outputs.append(o)
+
+        return outputs
+
+    def write_output(self, output):
+
+        #print output[0]
+
+        pol_n = len(self.params['pol'])
+        iteration = self.iter_start + self._iter_cnt
+        output_file, ext = self.output_files[iteration].split('.')
+        for i in range(pol_n):
+            self.output_file = output_file + '_%s.%s'%(self.params['pol'][i], ext)
+            super(MCMC_FN, self).write_output(output[i])
+
+
+    def chisq(self, p):
+
+        amp   = p['amp'][0]
+        fk    = p['fk'][0]
+        alpha = p['alpha'][0]
+        beta  = p['beta'][0]
+
+        grad  = (1. - beta) / beta
+
+        T_obs = self.params['T_obs']
+        f_tot = self.params['f_tot'] #* 1.e6
+        f_res = self.params['f_res'] #* 1.e6
+        f_avg = self.params['f_avg']
+        f_num = f_tot / f_res
+
+        x = self.x
+        y = self.y
+        yerr = self.e
+        chisq = 0
+
+        A = ( 10.**amp ) / f_res / f_avg / 1.e6
+        F = lambda lgf: 10.**((fk-lgf) * alpha)
+        H = lambda lgw: 10.**((np.log10(1./f_tot) - lgw) * grad)
+        #C = Noise.C3(grad, int(f_num), f_res)
+        C = 1.
+
+        y_f = lambda lgf:  A * ( 1. + C * H(np.log10(1./ f_res / f_avg)) * F(lgf))
+        #y_f = lambda lgf:  A * ( 1. + F(lgf))
+
+        f_f = lambda lgw:  A * ( 1. + C * H(lgw) * F(np.log10(1./ T_obs)))
+
+        for i in range(len(x) - 1):
+
+            chisq += np.sum( (y_f(np.log10(x[i])) - y[i])**2. / yerr[i]**2.)
+
+            #y_f = lambda f: amp + np.log10(1. + 10.**((fk-f) * alpha))
+            #chisq = np.sum( ( y_f(np.log10(x)) - np.log10(y) )**2. / yerr**2 )
+
+        #chisq += 0.1 * np.sum( (f_f(np.log10(x[-1])) - y[-1])**2. / yerr[-1]**2. )
+
+        return chisq
 
 class MCMC_TEST(MCMC_BASE):
 

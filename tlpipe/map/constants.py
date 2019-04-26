@@ -32,6 +32,7 @@ T_medium = 0.01
 # machine precision).  T_small can be used to regularize matricies without
 # interfering with the noise model.
 T_small = 1.e-3
+#T_small = 1.e-6
 
 # The scale of the telescope system temperature. Approximate.
 T_sys = 25.  # K

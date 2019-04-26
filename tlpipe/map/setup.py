@@ -16,6 +16,10 @@ setup(name='mapmaker',
                             include_dirs=[np.get_include()], 
                             depends=["setup.py",
                                      "_mapmaker.pyx"]),
+                  Extension('cubicspline', ['cubicspline.pyx'],
+                            include_dirs=[np.get_include()],
+                            depends=["setup.py",
+                                     "cubicspline.pyx"]),
                  ],
      cmdclass={'build_ext': build_ext}  
 )

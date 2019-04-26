@@ -1,0 +1,50 @@
+# -*- mode: python; -*-
+#
+
+import os
+import numpy as np
+
+from tlpipe.powerspectrum import power_spectrum
+
+data_base = os.getenv('DATA_BASE')
+
+#sim_type = 'wigglez_n25'
+#sim_type = 'wigglez_n25_fn_a1.0_b0.5_k0.1'
+#sim_type = 'wigglez_n25_fn_a1.0_b0.0_k0.1'
+#sim_type = 'wigglez_n25_fn_a1.0_b1.0_k0.1'
+sim_type = 'wigglez_HI'
+
+pipe_tasks = []
+pipe_outdir = data_base + 'meerkat_sim/sim_%s/'%sim_type
+pipe_logging = 'info'
+pipe_copy = False
+
+file_name = 'MeerKAT16_HorizonRasterDrift_shift_GBT_ideal_withbeam'
+
+# ------ auto power spectrum -------
+#pipe_tasks.append(power_spectrum.PowerSpectrum)
+pipe_tasks.append(power_spectrum.AutoPS_OneByOne)
+
+#aps1b1_input_files  = ['maps_mpi/%s_mock%03d_I_combined_vis.h5'%(file_name, ii) for ii in range(10)]
+aps1b1_input_files  = ['maps_mpi/%s_mock%03d_I_combined_vis.h5'%(file_name, ii) for ii in range(10)]
+aps1b1_output_files = ['ps/%s_auto.h5'%file_name, ]
+aps1b1_kmin = 1.e-2
+aps1b1_kmax = 1.0
+aps1b1_knum = 10
+aps1b1_kbin_x = np.logspace(-2,  0, 20)
+aps1b1_kbin_y = np.logspace(-2,  0, 20)
+aps1b1_logk = True
+aps1b1_weight_key = ('noise_diag', 'noise_diag')
+aps1b1_nonorm = True
+
+
+# ------ cross power spectrum, one by one -------
+#pipe_tasks.append(power_spectrum.CrossPS_OneByOne)
+
+xps1b1_input_files  = ['maps_mpi/%s_mock%03d_I_combined_vis.h5'%(file_name, ii) for ii in range(10)]
+xps1b1_input_files2 = [data_base + 'meerkat/sim_wigglez_HI_corr/' + \
+                       'maps_mpi/%s_mock%03d_I_combined_vis.h5'%(file_name, ii) for ii in range(10)]
+xps1b1_output_files = ['ps_w/%s_x1b1.h5'%file_name, ]
+xps1b1_kmin = 1.e-2
+xps1b1_kmax = 1.0
+

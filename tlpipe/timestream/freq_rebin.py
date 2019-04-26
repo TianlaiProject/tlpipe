@@ -32,6 +32,8 @@ class Rebin(timestream_task.TimestreamTask):
     prefix = 'rb_'
 
     def process(self, ts):
+        print ts.vis.shape
+        print ts['ra'].shape
 
         assert isinstance(ts, Timestream), '%s only works for Timestream object' % self.__class__.__name__
 

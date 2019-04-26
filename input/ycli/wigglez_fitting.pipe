@@ -1,0 +1,61 @@
+# -*- mode: python; -*-
+#
+
+import os
+
+from tlpipe.mcmc import mcmc_fn
+
+#data_base = os.getenv('DATA_BASE')
+data_base = '/data/users/ycli/'
+
+#ant = os.getenv('ant')
+#comb = os.getenv('comb') == 'T'
+ant = 'm036'
+
+
+pipe_tasks = []
+pipe_outdir = data_base + 'meerkat/'
+pipe_logging = 'info'
+pipe_copy = False
+
+data_path = data_base + '/meerkat/raw/'
+
+n_bins    = 15
+mode_list = [0, 1, 2, 5]
+mode = 5
+ps_method = 'lombscargle' #'fft'
+
+#ant = 'm017' #'m021', 'm017', 'm036'
+#file_middle = '_avg0100_tcorrps_%s'%ps_method
+#file_middle = '_avg0050F_tcorrps_%s'%ps_method
+file_middle = '_tcorrps_%s'%ps_method
+file_suffix = file_middle + '_%s_x_%s'%(ant, ant)
+
+pipe_tasks.append((mcmc_fn.MCMC_FN, 'mcmc2_'))
+
+
+mcmc2_nwalkers = 10
+mcmc2_steps    = 1000000
+mcmc2_iter_step = 2
+mcmc2_pol = ('HH', 'VV')
+mcmc2_T_obs = 20.
+mcmc2_f_tot = 0.209 * 600. #710.
+mcmc2_f_res = 0.209
+mcmc2_f_avg = 100.
+mcmc2_input_files = [
+        #'pnps_1dtc/1474580092_vis_sub%02dmodes%s%s.h5'%(mode, '_avg0100F', file_suffix),
+        'pnps_1dtc/1474580580_vis_sub%02dmodes%s%s.h5'%(mode, '_avg0100F', file_suffix),
+        'pnps_1dfc/1474580580_vis_sub%02dmodes%s%s.h5'%(mode, '_avg0020T', file_suffix),
+    ]
+mcmc2_output_files = [
+        #'mcmc/combineded_TF2log_vis_sub%02dmodes%s.h5'%(mode, file_suffix),
+        'mcmc/combineded_TFlog_vis_sub%02dmodes%s.h5'%(mode, file_suffix),
+    ]
+
+mcmc2_amp   = (-0.0, -1.00,  1.0, r'$\lg(A)$')
+mcmc2_fk    = (-2.0, -4.00,  1.0, r'$\lg(f_k)$')
+mcmc2_alpha = ( 2.0,  0.00,  4.0, r'$\alpha$')
+mcmc2_beta  = ( 0.5,  0.10,  1.0, r'$\beta$')
+
+
+

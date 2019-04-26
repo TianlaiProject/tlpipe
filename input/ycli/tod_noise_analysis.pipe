@@ -16,24 +16,26 @@ data_base = os.getenv('DATA_BASE')
 pipe_tasks = []
 pipe_outdir = data_base + 'meerkat/'
 pipe_logging = 'info'
+pipe_copy = False
 
 data_path = data_base + '/meerkat/raw/'
 
-# # for the 1Hz data
-# file_name = '1474580580'
-# bad_time_list = [[3437, 3520]]
-# bad_freq_list = [[None, 2190], [2473, 2548], [2696, 2704], [2900, None]]
-
-# for the 20Hz data
-file_name = '1474580092'
-bad_time_list = [[0,  2064], [5664, None]]
+# for the 1Hz data
+file_name = '1474580580'
+bad_time_list = [[3437, 3520]]
 bad_freq_list = [[None, 2190], [2473, 2548], [2696, 2704], [2900, None]]
+
+# # for the 20Hz data
+# file_name = '1474580092'
+# bad_time_list = [[0,  2064], [5664, None]]
+# bad_freq_list = [[None, 2190], [2473, 2548], [2696, 2704], [2900, None]]
 
 #bad_freq_list = [[300, 500], [820, 845], [1014, 1087], 
 #                 [1100, 2150], [2695, 2702], [2890, 3010],
 #                 [3190, 3710], [3900, None]]
 
 n_bins    = 20 
+n_bins_f  = 10
 mode_list = [0, 1, 2, 5]
 ps_method = 'lombscargle' #'fft'
 prewhiten = True
@@ -48,9 +50,9 @@ input_files = ['%s.h5'%file_name, ]
 
 #pipe_tasks.append((tod_noise.PinkNoisePS, 'pnpsvis_'))
 
-pipe_tasks.append((tod_noise.PinkNoisePS_1DTC, 'pnps1dtccln_'))
+#pipe_tasks.append((tod_noise.PinkNoisePS_1DTC, 'pnps1dtccln_'))
 
-#pipe_tasks.append((tod_noise.PinkNoisePS_1DFC, 'pnps1dfccln_'))
+pipe_tasks.append((tod_noise.PinkNoisePS_1DFC, 'pnps1dfccln_'))
 
 #pipe_tasks.append((tod_noise.PinkNoisePS, 'pnpsmod_'))
 
@@ -128,20 +130,20 @@ pnps1dtccln_n_bins = n_bins
 pnps1dtccln_f_min  = 1.e-4
 pnps1dtccln_f_max  = 10.
 pnps1dtccln_method =  ps_method
-#pnps1dtccln_avg_len = 100
-pnps1dtccln_avg_len = 50
+pnps1dtccln_avg_len = 100
+#pnps1dtccln_avg_len = 50
 
 #------------------------------------------------------------------------------
 
 pnps1dfccln_input_files  = todsvd_output_files
-pnps1dfccln_output_files = ['pnps_1dfc/%s'%f for f in input_files]
+pnps1dfccln_output_files = ['pnps_1dfc_test/%s'%f for f in input_files]
 pnps1dfccln_data_sets = 'cleaned_vis'
-pnps1dfccln_n_bins = n_bins
-pnps1dfccln_w_min  = None #1.e-4
-pnps1dfccln_w_max  = None #10.
+pnps1dfccln_n_bins = n_bins_f
+pnps1dfccln_w_min  = 8.e-3
+pnps1dfccln_w_max  = 2.
 pnps1dfccln_method =  ps_method
 #pnps1dfccln_avg_len = 100
-pnps1dfccln_avg_len = 2000
+pnps1dfccln_avg_len = 20
 
 #------------------------------------------------------------------------------
 # parameter for Power spectrum estimation for svd modes

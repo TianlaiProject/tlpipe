@@ -257,6 +257,8 @@ class PlotMeerKAT(timestream_task.TimestreamTask):
             'fig_name'  : 'wf/',
             'bad_freq_list' : None,
             'bad_time_list' : None,
+            'show'          : None,
+            'plot_index'    : False,
             }
     prefix = 'pkat_'
 
@@ -325,12 +327,18 @@ class PlotMeerKAT(timestream_task.TimestreamTask):
         else:
             vis1 = vis
 
-        y_axis = ts.freq[:] * 1.e-3
-        y_label = r'$\nu$ / GHz'
-        x_axis = [ datetime.fromtimestamp(s) for s in ts['sec1970']]
-        x_label = '%s' % x_axis[0].date()
-        # convert datetime objects to the correct format for matplotlib to work with
-        x_axis = mdates.date2num(x_axis)
+        if self.params['plot_index']:
+            y_axis = np.arange(ts.freq.shape[0])
+            y_label = r'$\nu$ index'
+            x_axis = np.arange(ts['sec1970'].shape[0])
+            x_label = 'time index'
+        else:
+            y_axis = ts.freq[:] * 1.e-3
+            y_label = r'$\nu$ / GHz'
+            x_axis = [ datetime.fromtimestamp(s) for s in ts['sec1970']]
+            x_label = '%s' % x_axis[0].date()
+            # convert datetime objects to the correct format for matplotlib to work with
+            x_axis = mdates.date2num(x_axis)
 
         bad_time = np.all(vis_mask, axis=(1, 2))
         bad_freq = np.all(vis_mask, axis=(0, 2))
@@ -349,7 +357,7 @@ class PlotMeerKAT(timestream_task.TimestreamTask):
         if re_scale is not None:
             mean = np.ma.mean(vis1)
             std  = np.ma.std(vis1)
-            print mean
+            print mean, std
             vmax = mean + re_scale * std
             vmin = mean - re_scale * std
         else:
@@ -376,7 +384,8 @@ class PlotMeerKAT(timestream_task.TimestreamTask):
         #ax.xaxis.set_major_locator(locator)
         #ax.xaxis.set_minor_locator(AutoMinorLocator(2))
 
-        axhh.xaxis.set_major_formatter(date_format)
+        if not self.params['plot_index']:
+            axhh.xaxis.set_major_formatter(date_format)
         axhh.set_xticklabels([])
         axhh.set_ylabel(r'${\rm frequency\, [GHz]\, HH}$')
         axhh.set_xlim(xmin=x_axis[0], xmax=x_axis[-1])
@@ -385,7 +394,8 @@ class PlotMeerKAT(timestream_task.TimestreamTask):
         axhh.tick_params(length=4, width=1, direction='in')
         axhh.tick_params(which='minor', length=2, width=1, direction='in')
 
-        axvv.xaxis.set_major_formatter(date_format)
+        if not self.params['plot_index']:
+            axvv.xaxis.set_major_formatter(date_format)
         #axvv.set_xlabel(r'$({\rm time} - {\rm UT}\quad %s\,) [{\rm hour}]$'%t_start)
         axvv.set_xlabel(x_label)
         axvv.set_ylabel(r'${\rm frequency\, [GHz]\, VV}$')
@@ -395,11 +405,17 @@ class PlotMeerKAT(timestream_task.TimestreamTask):
         axvv.tick_params(length=4, width=1, direction='in')
         axvv.tick_params(which='minor', length=2, width=1, direction='in')
 
-        fig.autofmt_xdate()
+        if not self.params['plot_index']:
+            fig.autofmt_xdate()
 
-        cax.set_ylabel(r'${\rm V}/{\rm V}_{\rm time median}$')
+        #cax.set_ylabel(r'${\rm V}/{\rm V}_{\rm time median}$')
+        #cax.set_ylabel(r'${\rm V}/{\rm V}_{\rm noise\, cal}$')
+        cax.set_ylabel(r'${\rm T}\,[{\rm K}]$')
 
         fig_name = '%s_%s_m%03d_x_m%03d.png' % (fig_prefix, main_data, bl[0]-1, bl[1]-1)
         fig_name = output_path(fig_name)
         plt.savefig(fig_name, formate='png') #, dpi=100)
+        if self.params['show'] is not None:
+            if self.params['show'] == bl[0]-1:
+                plt.show()
         plt.close()

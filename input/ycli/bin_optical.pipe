@@ -1,0 +1,25 @@
+# -*- mode: python; -*-
+#
+
+import os
+
+from tlpipe.map import optical_catalog
+
+data_base = os.getenv('DATA_BASE')
+
+pipe_tasks = []
+pipe_outdir = data_base + 'meerkat/sdss/'
+pipe_logging = 'info'
+pipe_copy = False
+
+pipe_tasks.append(optical_catalog.BinOpticalCat)
+
+optical_path = '/data/users/ycli/SDSS/dr12/'
+optical_name = 'DR12v5_LOWZ_South.fits.gz'
+bo_input_files  = [optical_path + 'galaxy_' + optical_name,
+                   optical_path + 'random0_' + optical_name,
+                   optical_path + 'random1_' + optical_name,
+                   ]
+bo_output_files = ['maps_mpi/' + optical_name + '/binning', ]
+bo_tmp_map = '/data/users/ycli/meerkat/sim_wigglez_HI_corr/maps_mpi/MeerKAT16_HorizonRasterDrift_shift_GBT_ideal_withbeam_mock000_I_combined_vis.h5'
+

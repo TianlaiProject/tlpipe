@@ -48,6 +48,8 @@ class TimestreamCommon(container.BasicTod):
                                      'local_hour': (0,),
                                      'freq': (1,),
                                      'blorder': (2,), # 2 or 3
+                                     'ra' : (1, 2),
+                                     'dec' : (1, 2),
                                    }
     _time_ordered_datasets_ = {'weather': (0,)}
     _time_ordered_attrs_ = {'obstime', 'sec1970'}
@@ -288,7 +290,8 @@ class TimestreamCommon(container.BasicTod):
                 self['sec1970'].attrs["continuous"] = True
 
             # generate julian date
-            jul_date = np.array([ date_util.get_juldate(datetime.fromtimestamp(s), tzone=self.infiles[0].attrs['timezone']) for s in sec1970 ], dtype=np.float64) # precision float32 is not enough
+            #jul_date = np.array([ date_util.get_juldate(datetime.fromtimestamp(s), tzone=self.infiles[0].attrs['timezone']) for s in sec1970 ], dtype=np.float64) # precision float32 is not enough
+            jul_date = np.array([ date_util.get_juldate(datetime.fromtimestamp(s), tzone='UTC+00') for s in sec1970 ], dtype=np.float64) # precision float32 is not enough
             if 'time' == self.main_data_axes[self.main_data_dist_axis]:
                 jul_date = mpiarray.MPIArray.wrap(jul_date, axis=0)
             # if time is just the distributed axis, load jul_date distributed

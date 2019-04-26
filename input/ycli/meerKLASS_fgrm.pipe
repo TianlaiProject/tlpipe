@@ -1,0 +1,25 @@
+# -*- mode: python; -*-
+#
+
+import os
+import numpy as np
+
+from tlpipe.powerspectrum import fgrm
+
+data_base = os.getenv('DATA_BASE')
+
+pipe_tasks = []
+pipe_outdir = data_base + 'meerkat/'
+pipe_logging = 'info'
+pipe_copy = False
+
+map_list = ['WiggleZ11_Feb24_R_plus_S_A_vis.h5', 
+            'WiggleZ11_Feb24_R_plus_S_B_vis.h5']
+
+pipe_tasks.append(fgrm.FGRM_SVD)
+
+fg_input_files  = ['maps_wn_smooth/%s'%f for f in map_list]
+fg_output_files = ['maps_fgrm_smooth/%s'%f for f in map_list]
+fg_output_combined = 'maps_fgrm_smooth/WiggleZ11_Feb24_R_plus_S_vis.h5'
+fg_mode_list = [0, 1, 2, 5, 10, 15, 20, 25, 30, 35]
+

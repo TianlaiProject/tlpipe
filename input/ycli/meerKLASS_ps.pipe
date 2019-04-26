@@ -1,0 +1,50 @@
+# -*- mode: python; -*-
+#
+
+import os
+import numpy as np
+
+from tlpipe.powerspectrum import power_spectrum
+
+data_base = os.getenv('DATA_BASE')
+
+pipe_tasks = []
+pipe_outdir = data_base + 'meerkat/'
+pipe_logging = 'info'
+pipe_copy = False
+
+file_name = 'WiggleZ11_Feb24_R_plus_S_vis'
+#opt_name  = 'bossDR12v5'
+opt_name  = 'wiggleZDR2'
+mock_numb = 100
+
+mode = 15
+
+# ------ cross power spectrum -------
+pipe_tasks.append(power_spectrum.CrossPS_OneByOne)
+
+xps1b1_input_files   = ['maps_fgrm_smooth/%s.h5'%file_name, ] * (mock_numb + 1)
+xps1b1_input_files2  = ['sdss/%s/binning_realmap.h5'%opt_name,]\
+                     + ['sdss/%s/binning_mockmap%03d.h5'%(opt_name, i) 
+                                           for i in range(mock_numb) ]
+xps1b1_output_files = ['ps_smooth/%s_x_%s_sub%02dmodes.h5'%(file_name, opt_name, mode), ]
+
+#xps1b1_kmin = 7.e-2
+#xps1b1_kmax = 2.e-1
+#xps1b1_knum = 10
+
+xps1b1_kmin = 5.e-2
+xps1b1_kmax = 4.e-1
+xps1b1_knum = 15
+
+xps1b1_kbin_x = np.logspace(-2,  0, 20)
+xps1b1_kbin_y = np.logspace(-2,  0, 20)
+xps1b1_logk = True
+xps1b1_map_key = ['cleaned_%02dmode'%mode, 'delta']
+xps1b1_weight_key = ['cleaned_%02dmode_weight'%mode, 'separable']
+#xps1b1_map_key = ['cleaned_%02dmode/WiggleZ11_Feb24_R_plus_S_B_vis'%mode, 'delta']
+#xps1b1_weight_key = ['weight', 'separable']
+xps1b1_nonorm = False
+xps1b1_unitless = True
+
+

@@ -1,0 +1,71 @@
+# -*- mode: python; -*-
+#
+
+import os
+import matplotlib
+matplotlib.use('Agg')
+
+from tlpipe.map import dirtymap
+
+
+data_base = os.getenv('DATA_BASE')
+mock_numb = int(os.getenv('MOCK'))
+
+sim_type = 'wigglez_HI_n25_fn_a1.5_b0.5_k0.040'
+#sim_type = 'wigglez_HI_n25'
+
+pipe_tasks = []
+pipe_outdir = data_base + 'meerkat_sim/sim_%s/'%sim_type
+pipe_logging = 'info'
+pipe_copy = False
+
+HI_model_scenario = 'ideal'
+HI_model_type     = 'withbeam'
+prefix = 'MeerKAT60'
+
+suffix = (prefix, HI_model_scenario, HI_model_type)
+
+input_files = [
+
+    '%s_HorizonRasterDrift_%s_%s_20190401172431.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190401223031.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190402172125.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190402222725.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190403171829.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190403222429.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190404171523.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190404222123.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190405171227.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190405221817.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190406170921.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190406221521.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190407170615.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190407221215.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190408170319.h5'%suffix,
+    '%s_HorizonRasterDrift_%s_%s_20190408220919.h5'%suffix,
+
+    ]
+#file_name = 'sim_meerKAT3_AZdrift_noise_inv_weight'
+file_name = '%s_HorizonRasterDrift_shift_GBT_%s_%s'%suffix
+
+#pipe_tasks.append(dirtymap.DirtyMap_GBT)
+#pipe_tasks.append(dirtymap.MakeMap_Ionly)
+pipe_tasks.append(dirtymap.MakeMap_CombineAll)
+
+dm_field_centre = (162.5, 3.5)
+dm_pixel_spacing = 0.4
+dm_map_shape = [50, 25]
+dm_interpolation = 'linear'
+#dm_interpolation = 'nearest'
+#dm_interpolation = 'cubic'
+dm_tblock_len = 108
+dm_input_files  = ['sim_mock%03d/%s'%(mock_numb, f) for f in input_files]
+dm_output_files = ['maps_mpi_108_slope/%s_mock%03d_I_combined'%(file_name, mock_numb), ]
+dm_data_sets    = 'vis'
+dm_freq_select  = (0, None) #(0, None)
+dm_pol_select   = (0, 2)
+dm_deweight_time_slope = True
+dm_deweight_time_mean = True
+#dm_data_sets    = 'vis_sub00modes'
+#dm_data_sets    = 'vis_sub05modes'
+

@@ -2,6 +2,7 @@
 .tramp_history
 
 *.py[cod]
+*.c
 
 # C extensions
 *.so

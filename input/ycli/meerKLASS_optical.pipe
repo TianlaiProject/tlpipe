@@ -1,0 +1,36 @@
+# -*- mode: python; -*-
+#
+
+import os
+
+from tlpipe.map import optical_catalog
+
+data_base = os.getenv('DATA_BASE')
+
+pipe_tasks = []
+pipe_outdir = data_base + 'meerkat/sdss/'
+pipe_logging = 'info'
+pipe_copy = False
+
+pipe_tasks.append(optical_catalog.BinOpticalCat)
+
+#optical_path = '/data/users/ycli/SDSS/dr12/'
+#optical_name = 'DR12v5_CMASSLOWZTOT_North.fits.gz'
+#bo_input_files  = [optical_path + 'galaxy_' + optical_name,
+#                   optical_path + 'random0_' + optical_name,
+#                   optical_path + 'random1_' + optical_name,]
+#bo_output_files = [optical_name + '/binning', ]
+#bo_tmp_map = '/scratch/users/ycli/meerkat/maps_wn/WiggleZ11_Feb24_R_plus_S_A_vis.h5'
+#bo_ra_label  = 'RA'
+#bo_dec_label = 'DEC'
+#bo_z_label   = 'Z'
+
+optical_path = '/data/users/ycli/WiggleZ/dr2/'
+optical_name = 'wigglez_dr2.fits.gz'
+bo_input_files  = [optical_path + optical_name,]
+bo_output_files = [optical_name + '/binning', ]
+bo_tmp_map = '/scratch/users/ycli/meerkat/maps_wn/WiggleZ11_Feb24_R_plus_S_A_vis.h5'
+bo_ra_label  = 'ra'
+bo_dec_label = 'dec'
+bo_z_label   = 'redshift'
+

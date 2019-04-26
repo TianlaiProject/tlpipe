@@ -58,12 +58,17 @@ class DataEdit(timestream_task.TimestreamTask):
         vis_abs = mpiarray.MPIArray.wrap(ts.vis[:].real, 0)
         ts.create_main_data(vis_abs, recreate=True, copy_attrs=True)
         print ts.vis.dtype
+        #print ts.vis.shape
+        #print np.var(ts.vis[:, :, 0, 0], axis=0)
 
         return super(DataEdit, self).process(ts)
 
     def data_edit(self, vis, vis_mask, li, gi, bl, ts, **kwargs):
 
-        vis_abs = np.abs(vis)
+        if vis.dtype == np.complex:
+            vis_abs = np.abs(vis)
+        else:
+            vis_abs = vis
 
         bad_time = np.all(vis_mask, axis=(1, 2))
         bad_freq = np.all(vis_mask, axis=(0, 2))
@@ -78,8 +83,11 @@ class DataEdit(timestream_task.TimestreamTask):
             bandpass[bandpass==0] = np.inf
             vis_abs /= bandpass[None, ...]
 
-        vis.real = vis_abs
-        vis.imag = 0.
+        if vis.dtype == np.complex:
+            vis.real = vis_abs
+            vis.imag = 0.
+        else:
+            vis = vis_abs
 
 
 class PinkNoisePS(timestream_task.TimestreamTask):
@@ -164,6 +172,9 @@ class PinkNoisePS(timestream_task.TimestreamTask):
             time = time[~bad_time[st:et]]
             freq = ts['freq'][:]
             freq = freq[~bad_freq]
+
+            #print "Normalize with dt %f df %f"%((time[1]-time[0]), (freq[1] - freq[0]))
+            #_vis = _vis / (time[1]-time[0]) / (freq[1] - freq[0])
 
             _vis, name, freq, time = self.avg_vis(_vis, name, freq, time)
 
@@ -270,7 +281,7 @@ class PinkNoisePS_1DFC(PinkNoisePS):
             'w_max'     : None,
             }
 
-    prefix = 'pnps1dtc_'
+    prefix = 'pnps1dfc_'
 
     def avg_vis(self, vis, name, freq, time):
 
@@ -342,8 +353,8 @@ def est_tcorr_psd1d_fft(data, ax, n_bins=None, inttime=None, f_min=None, f_max=N
     mean = np.mean(data, axis=0)
     data -= mean[None, :, :]
 
-    windowf = np.blackman(data.shape[0])
-    data *= windowf[:, None, None]
+    #windowf = np.blackman(data.shape[0])
+    #data *= windowf[:, None, None]
 
     fftdata = np.fft.fft(data, axis=0, norm='ortho')
 
@@ -395,14 +406,15 @@ def est_tcorr_psd1d_lombscargle(data, ax, n_bins=None, inttime=None,
 
     fft_len = data.shape[0]
 
-    print
-    print 'int time', inttime
-    print
-
     if inttime is None:
         inttime = ax[1] - ax[0]
 
-    windowf = np.blackman(fft_len)
+    print 
+    print 'int time', inttime
+    print
+
+
+    #windowf = np.blackman(fft_len)
 
     if n_bins is None: n_bins = 30
     #if f_min  is None: f_min = 1. / ( ax.max()     - ax.min() )
@@ -429,8 +441,9 @@ def est_tcorr_psd1d_lombscargle(data, ax, n_bins=None, inttime=None,
         for j in range(n_pol):
             y = data[:, i, j]
             y = y - np.mean(y)
-            y = y * windowf
-            power[:, i, j] = lombscargle(ax, y, 2. * np.pi * freq_bins_c)
+            #y = y * windowf
+            power[:, i, j] = lombscargle(ax, y, 2. * np.pi * freq_bins_c,
+                    normalize=False)
             #hist   = np.histogram(freqs, bins=freq_bins_e, weights=_p)[0]
             #power[:, i, j] = hist / norm
     #power = np.sqrt(4. * power / float(ax.shape[0]) / np.std(y) ** 2.)

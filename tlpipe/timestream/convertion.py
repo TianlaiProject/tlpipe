@@ -10,6 +10,10 @@ class MeerKAT2TL(FileIterBase):
     """ class for converting MeerKAT data format to TL
 
     """
+    params_init = {
+            'corr' : 'auto',
+            'selection' : (), # 'scan',
+            }
 
     prefix = 'm2t_'
 
@@ -25,12 +29,16 @@ class MeerKAT2TL(FileIterBase):
 
         print self.output_files
 
-        for i in range(len(self.output_files)):
-            output_file = self.output_files[i]
-            output_data = output[i]
+        # Data Array
+        output_data = output[0]
+        output_data.select(scans=self.params['selection'][0])
+        ants = output_data.ants
+        for fi in range(len(self.output_files)):
+            output_file = self.output_files[fi]
+            output_data.select(scans=self.params['selection'][fi])
 
-            if path.basename(output_file) != path.basename(output_data.name):
-                raise 
+            #if path.basename(output_file) != path.basename(output_data.name):
+            #    raise 
 
             #for key in output_data.__dict__.keys():
             #    print key
@@ -54,7 +62,7 @@ class MeerKAT2TL(FileIterBase):
 
             df.attrs['telescope'] = 'MeerKAT-Dish-I' # 
             df.attrs['dishdiam'] = output_data.ants[0].diameter
-            df.attrs['nants'] = 64
+            df.attrs['nants'] = len(output_data.ants)
             df.attrs['npols'] = 2
             df.attrs['cylen'] = -1 # For dish: -1
             df.attrs['cywid'] = -1 # For dish: -1
@@ -72,16 +80,15 @@ class MeerKAT2TL(FileIterBase):
             df.attrs['inttime'] = inttime
             df.attrs['obstime'] = obstime
             df.attrs['sec1970'] = output_data.timestamps[0]
+            time_n = output_data.timestamps.shape[0]
 
             freqs = output_data.freqs * 1.e-6
+            freq_n = freqs.shape[0]
 
-            df.attrs['nfreq'] = freqs.shape[0] # Number of Frequency Points
+            df.attrs['nfreq'] = freq_n # Number of Frequency Points
             df.attrs['freqstart'] = freqs[0] # MHz; Frequency starts.
             df.attrs['freqstep'] = freqs[1] - freqs[0] # MHz; Frequency step.
 
-            # Data Array
-            corr = [' '.join(x) for x in output_data.corr_products]
-            ants = output_data.ants
 
             feedno = []
             channo = []
@@ -98,37 +105,78 @@ class MeerKAT2TL(FileIterBase):
 
             antn   = len(feedno)
 
-            hh_indx = [corr.index('m%03dh m%03dh'%(feedno[i]-1, feedno[j]-1))
-                for i in range(antn) for j in range(i, antn)]
-            vv_indx = [corr.index('m%03dv m%03dv'%(feedno[i]-1, feedno[j]-1))
-                for i in range(antn) for j in range(i, antn)]
-            hv_indx = [corr.index('m%03dh m%03dv'%(feedno[i]-1, feedno[j]-1))
-                for i in range(antn) for j in range(i, antn)]
-            vh_indx = [corr.index('m%03dv m%03dh'%(feedno[i]-1, feedno[j]-1))
-                for i in range(antn) for j in range(i, antn)]
+            if self.params['corr'] == 'all':
+                corr = [' '.join(x) for x in output_data.corr_products]
+                hh_indx = [corr.index('m%03dh m%03dh'%(feedno[i]-1, feedno[j]-1))
+                    for i in range(antn) for j in range(i, antn)]
+                vv_indx = [corr.index('m%03dv m%03dv'%(feedno[i]-1, feedno[j]-1))
+                    for i in range(antn) for j in range(i, antn)]
+                hv_indx = [corr.index('m%03dh m%03dv'%(feedno[i]-1, feedno[j]-1))
+                    for i in range(antn) for j in range(i, antn)]
+                vh_indx = [corr.index('m%03dv m%03dh'%(feedno[i]-1, feedno[j]-1))
+                    for i in range(antn) for j in range(i, antn)]
 
-            rvis = np.array(output_data.vis)
-            shp = rvis.shape[:2] + (4, len(hh_indx))
-            vis = np.empty(shp, dtype=rvis.dtype)
-            vis[:, :, 0] = rvis[:, :, hh_indx]
-            vis[:, :, 1] = rvis[:, :, vv_indx]
-            vis[:, :, 2] = rvis[:, :, hv_indx]
-            vis[:, :, 3] = rvis[:, :, vh_indx]
+                rvis = np.array(output_data.vis)
+                shp = rvis.shape[:2] + (4, len(hh_indx))
+                vis = np.empty(shp, dtype=rvis.dtype)
+                vis[:, :, 0] = rvis[:, :, hh_indx]
+                vis[:, :, 1] = rvis[:, :, vv_indx]
+                vis[:, :, 2] = rvis[:, :, hv_indx]
+                vis[:, :, 3] = rvis[:, :, vh_indx]
+                df['pol'] = np.array(['hh', 'vv', 'hv', 'vh'])
+                df['pol'].attrs['pol_type'] = 'linear'
+
+                blorder = [[feedno[i], feedno[j]] for i in range(antn)\
+                        for j in range(i, antn)]
+                df['blorder'] = blorder
+                df['blorder'].attrs['dimname'] = 'Baselines, BaselineName'
+
+            elif self.params['corr'] == 'auto':
+
+                shp = (time_n, freq_n, 2, antn)
+                vis = np.empty(shp, dtype='complex64')
+                ra  = np.empty(shp[:1] + (antn, ), dtype='float')
+                dec = np.empty(shp[:1] + (antn, ), dtype='float')
+
+                pols = ['H', 'V']
+
+                for ii, ant in enumerate(ants):
+                    print ii, ant.name
+
+                    #for pol in range(2):
+                    #    print pols[pol],
+
+                        
+                    output_data.select(ants=ant)
+                    #output_data.select(scans=self.params['selection'][fi], ants=ant)
+                    #output_data.select(scans=5, ants=ant)
+                    vis[:, :, :, ii] = output_data.vis[:, :, :2]
+
+                    ra[:, ii]  = output_data.ra[:, 0]
+                    dec[:, ii] = output_data.dec[:, 0]
+
+                df['pol'] = np.array(['hh', 'vv'])
+                df['pol'].attrs['pol_type'] = 'linear'
+
+                blorder = [[feedno[i], feedno[i]] for i in range(antn)]
+                df['blorder'] = blorder
+                df['blorder'].attrs['dimname'] = 'Baselines, BaselineName'
+
+            df['ra']  = ra
+            df['ra'].attrs['dimname'] = 'Time, Baselines'
+            df['dec'] = dec
+            df['dec'].attrs['dimname'] = 'Time, Baselines'
+
+
             #df.create_dataset('vis', chunks = (10, 1024, 1, 4), data=vis,
             df.create_dataset('vis', data=vis, dtype = vis.dtype, shape = vis.shape)
             df['vis'].attrs['dimname'] = 'Time, Frequency, Polarization, Baseline'
 
-            df['pol'] = np.array(['hh', 'vv', 'hv', 'vh'])
-            df['pol'].attrs['pol_type'] = 'linear'
             
             df['feedno'] = feedno
             df['channo'] = channo
             df['channo'].attrs['dimname'] = 'Feed No., (HPolarization VPolarization)'
             
-            blorder = [[feedno[i], feedno[j]] for i in range(antn) for j in range(i, antn)]
-            df['blorder'] = blorder
-            df['blorder'].attrs['dimname'] = 'Baselines, BaselineName'
-
             
             df['feedpos'] = feedpos
             df['feedpos'].attrs['dimname'] = 'Feed No., (X,Y,Z) coordinate' ###

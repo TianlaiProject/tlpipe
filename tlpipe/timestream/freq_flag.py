@@ -40,6 +40,9 @@ class Flag(timestream_task.TimestreamTask):
 
             ts.redistribute('time')
 
+            print ts['ra'].shape
+            print ts['vis'].shape
+
             if isinstance(ts, RawTimestream):
                 func = ts.time_and_bl_data_operate
             elif isinstance(ts, Timestream):

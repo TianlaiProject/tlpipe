@@ -2,6 +2,7 @@ import numpy as np
 import timestream_task
 import h5py
 from caput import mpiutil
+from caput import mpiarray
 from tlpipe.utils.path_util import output_path
 
 
@@ -17,7 +18,6 @@ class PolyFit(timestream_task.TimestreamTask):
 
     prefix = 'todpfit_'
 
-
 class SVD(timestream_task.TimestreamTask):
     """
     Apply SVD clean to the time stream data
@@ -28,6 +28,7 @@ class SVD(timestream_task.TimestreamTask):
             'prewhiten' : False,
             'svd_path'  : None,
             'method'    : 'both', # 'time', 'freq'
+            'save_svd'  : True,
             }
 
     prefix = 'todsvd_'
@@ -99,7 +100,7 @@ class SVD(timestream_task.TimestreamTask):
         for fi, start, stop in outfiles_map:
             et = st + (stop - start)
 
-            if len(self.output_files) == num_infiles:
+            if len(self.output_files) == num_infiles and self.params['save_svd']:
                 svd_suffix = '_svdmodes_m%03d_x_m%03d.h5'%(bl[0]-1, bl[1]-1)
                 svd_name = self.output_files[fi].replace('.h5', svd_suffix)
                 svd_name = output_path(svd_name, relative= not svd_name.startswith('/'))
@@ -169,7 +170,7 @@ class SVD(timestream_task.TimestreamTask):
             cleaned_data[:, good] = cleaned_data_tmp
             cleaned_data_list.append(cleaned_data)
             #print "\t vis mean after svd", cleaned_data[0][good].mean()
-            cleaned_mode_tmp.shape = (max(mode_list), -1)
+            cleaned_mode_tmp.shape = (max(mode_list + [1,]), -1)
             cleaned_mode[:, good] = cleaned_mode_tmp
             cleaned_mode_list.append(cleaned_mode)
 
@@ -182,12 +183,50 @@ class SVD(timestream_task.TimestreamTask):
         self.cleaned_data_list.append(cleaned_data_list)
         self.cleaned_mode_list.append(cleaned_mode_list)
 
+class SVD_OneStop(SVD):
+
+    prefix = 'todsvd1s_'
+
+    params_init = {
+            'save_svd'  : False,
+            }
+
+    def process(self, ts):
+
+        print ts.vis.shape
+
+        func = ts.bl_data_operate
+        #func = ts.time_and_bl_data_operate
+
+        show_progress = self.params['show_progress']
+        progress_step = self.params['progress_step']
+        mode_list     = self.params['mode_list'][-1:]
+        self.params['mode_list'] = mode_list
+
+        self.cleaned_data_list = []
+        self.cleaned_mode_list = []
+        func(self.find_and_clean_modes, full_data=True, copy_data=True, 
+                show_progress=show_progress, 
+                progress_step=progress_step, keep_dist_axis=False)
+
+        cleaned_data_list = np.array(self.cleaned_data_list)
+        #for mi in range(len(mode_list)):
+        cleaned_data = cleaned_data_list[:, 0, ...]
+        cleaned_data = np.rollaxis(cleaned_data, 0, 4)
+        #ts.vis = cleaned_data
+        cleaned_data = mpiarray.MPIArray.wrap(cleaned_data, 0)
+        ts.create_main_data(cleaned_data, recreate=True, copy_attrs=True)
+
+        ts.create_dataset('mode_list', data=np.array(mode_list))
+        
+        return super(SVD, self).process(ts)
+
 def clean_mode(input_data, s, u, v, mode_list = [1, ]):
 
     i_map = input_data
 
     c_map = np.zeros((len(mode_list), ) + input_data.shape)
-    c_mod = np.zeros((max(mode_list), ) + input_data.shape)
+    c_mod = np.zeros((max(mode_list + [1,]), ) + input_data.shape)
 
     #mode_list = [0, ] + mode_list
 
@@ -227,7 +266,7 @@ def clean_t_mode(input_data, u, mode_list = [1, ]):
     i_map = input_data
 
     c_map = np.zeros((len(mode_list), ) + input_data.shape)
-    c_mod = np.zeros((max(mode_list), ) + input_data.shape)
+    c_mod = np.zeros((max(mode_list + [1,]), ) + input_data.shape)
 
     #mode_list = [0, ] + mode_list
 
@@ -268,7 +307,7 @@ def clean_f_mode(input_data, v, mode_list = [1, ]):
     i_map = input_data
 
     c_map = np.zeros((len(mode_list), ) + input_data.shape)
-    c_mod = np.zeros((max(mode_list), ) + input_data.shape)
+    c_mod = np.zeros((max(mode_list + [1,]), ) + input_data.shape)
 
     #mode_list = [0, ] + mode_list
 

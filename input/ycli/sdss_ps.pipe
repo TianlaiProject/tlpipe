@@ -1,0 +1,32 @@
+# -*- mode: python; -*-
+#
+
+import os
+
+from tlpipe.powerspectrum import power_spectrum
+
+data_base = os.getenv('DATA_BASE')
+
+pipe_tasks = []
+pipe_outdir = data_base + 'meerkat/'
+pipe_logging = 'info'
+pipe_copy = False
+
+
+# ------ auto power spectrum -------
+pipe_tasks.append(power_spectrum.AutoPS_Opt)
+
+file_name = 'DR12v5_CMASSLOWZTOT_North.fits.gz'
+#file_name = 'wigglez_dr2.fits.gz'
+input_files  = ['sdss/%s/binning_realmap.h5'%file_name, ]
+input_files += ['sdss/%s/binning_mockmap%03d.h5'%(file_name,i) for i in range(100) ]
+
+apsopt_input_files  = input_files
+apsopt_output_files = ['ps/%s_opt.h5'%file_name, ]
+apsopt_map_key = ['delta', 'delta']
+apsopt_weight_key   = ['separable', 'separable']
+apsopt_kmin = 2.e-2
+apsopt_kmax = 3.e-1
+apsopt_nonorm = False
+apsopt_unitless = True
+
