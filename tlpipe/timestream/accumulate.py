@@ -80,7 +80,10 @@ class Accum(timestream_task.TimestreamTask):
                                 for st, ln in zip(ts['vis'].local_offset, ts['vis'].local_shape):
                                     slc.append(slice(st, st+ln))
                                 f['vis'][tuple(slc)] += ts.local_vis # accumulate vis
-                                f['weight'][tuple(slc)] += np.logical_not(ts.local_vis_mask).astype(np.int16) # update weight
+                                if 'weight' in ts.iterkeys():
+                                    f['weight'][tuple(slc)] += ts['weight'].local_data
+                                else:
+                                    f['weight'][tuple(slc)] += np.logical_not(ts.local_vis_mask).astype(np.int16) # update weight
                                 f['vis_mask'][tuple(slc)] = np.where(f['weight'][tuple(slc)] != 0, False, True) # update mask
                             if rk == 0:
                                 f.attrs['ndays'] += 1
@@ -134,7 +137,10 @@ class Accum(timestream_task.TimestreamTask):
 
             ts.apply_mask(fill_val=0) # apply mask, fill 0 to masked values
             self.data.local_vis[:] += ts.local_vis # accumulate vis
-            self.data['weight'].local_data[:] += np.logical_not(ts.local_vis_mask).astype(np.int16) # update weight
+            if 'weight' in ts.iterkeys():
+                self.data['weight'].local_data[:] += ts['weight'].local_data
+            else:
+                self.data['weight'].local_data[:] += np.logical_not(ts.local_vis_mask).astype(np.int16) # update weight
             self.data.local_vis_mask[:] = np.where(self.data['weight'].local_data != 0, False, True) # update mask
             self.data.attrs['ndays'] += 1
 

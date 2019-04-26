@@ -243,7 +243,7 @@ class Timestream(object):
 
     #======== Make map from uncleaned stream ============
 
-    def mapmake_full(self, nside, mapname, nbin=None, dirty=False, method='svd', normalize=True, threshold=1.0e3, eps=0.01, prior_map_file=None):
+    def mapmake_full(self, nside, mapname, nbin=None, dirty=False, method='svd', normalize=True, threshold=1.0e3, eps=0.01, correct_order=0, prior_map_file=None):
 
         nfreq = self.telescope.nfreq
         if nbin is None:
@@ -277,7 +277,7 @@ class Timestream(object):
                 elif method == 'tk':
                     # sphmode = self.beamtransfer.project_vector_telescope_to_sky_tk(mi, mmode, nbin, eps=eps)
                     mmode0 = alm0[:, :, :, mi] if alm0 is not None else None
-                    sphmode = self.beamtransfer.project_vector_telescope_to_sky_tk(mi, mmode, nbin, eps=eps, mmode0=mmode0)
+                    sphmode = self.beamtransfer.project_vector_telescope_to_sky_tk(mi, mmode, nbin, eps=eps, correct_order=correct_order, mmode0=mmode0)
                 else:
                     raise ValueError('Unknown map-making method %s' % method)
 
@@ -299,6 +299,8 @@ class Timestream(object):
             for mi in mlist:
 
                 alm[..., mi] = alm_list[mi]
+
+                alm[:, :, 100:, 1] = 0
 
             skymap = hputil.sphtrans_inv_sky(alm, nside)
 

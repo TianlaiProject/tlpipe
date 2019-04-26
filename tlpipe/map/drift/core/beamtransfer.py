@@ -1114,7 +1114,7 @@ class BeamTransfer(object):
 
     project_vector_backward = project_vector_telescope_to_sky
 
-    def project_vector_telescope_to_sky_tk(self, mi, vec, nbin=None, eps=0.01, mmode0=None):
+    def project_vector_telescope_to_sky_tk(self, mi, vec, nbin=None, eps=0.01, correct_order=0, mmode0=None):
         """Invert a vector from the telescope space onto the sky using
         the Tikhonov regularization method. This is the map-making process.
 
@@ -1149,13 +1149,32 @@ class BeamTransfer(object):
 
         for bi in xrange(nbin):
             B = beam[s[bi]:e[bi]].reshape(-1, self.nsky)
-            BB = np.dot(B.T.conj(), B)
-            np.fill_diagonal(BB, eps + np.diag(BB))
+            BB = np.dot(B.T.conj(), B) # B^* B
+            np.fill_diagonal(BB, eps + np.diag(BB)) # (B^* B + eps I)
             vec1 = vec[s[bi]:e[bi]].reshape(-1)
+            try:
+                BBi = la.pinv(BB) # (B^* B + eps I)^-1
+            except np.linalg.linalg.LinAlgError:
+                print 'Compute pinv of BB failed for mi = %d, bi = %d' % (mi, bi)
+                continue
             if mmode0 is not None:
-                vecb[bi] = np.dot(la.pinv(BB), np.dot(B.T.conj(), vec1) + eps * mmode0[bi])
+                vecb[bi] = np.dot(BBi, np.dot(B.T.conj(), vec1) + eps * mmode0[bi])
             else:
-                vecb[bi] = np.dot(la.pinv(BB), np.dot(B.T.conj(), vec1))
+                # vecb[bi] = np.dot(BBi, np.dot(B.T.conj(), vec1))
+
+                # BBi *= -eps # -eps (B^* B + eps I)^-1
+                # np.fill_diagonal(BBi, 1.0 + np.diag(BB))  # I - eps (B^* B + eps I)^-1
+                # vecb[bi] = np.dot(la.pinv(BBi), vecb[bi].flatten()) # [ I - eps (B^* B + eps I)^-1 ]^-1 a
+
+                # or
+                ahat = np.dot(BBi, np.dot(B.T.conj(), vec1))
+                vecb[bi] = ahat # the zero-th order, no correction
+                if correct_order > 0:
+                    Delta = eps * BBi # eps (B^* B + eps I)^-1
+                    Da = ahat # to save the previous order Delta**(i-1) * ahat
+                    for i in range(1, correct_order+1):
+                        Da = np.dot(Delta, Da)
+                        vecb[bi] += Da # high order correction
 
         return vecb
 

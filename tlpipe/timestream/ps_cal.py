@@ -76,6 +76,7 @@ class PsCal(timestream_task.TimestreamTask):
                     'subtract_src': False, # subtract vis of the calibrator from data
                     'apply_gain': True,
                     'save_gain': False,
+                    'save_phs_change': False,
                     'gain_file': 'gain/gain.hdf5',
                     'temperature_convert': False,
                   }
@@ -99,6 +100,7 @@ class PsCal(timestream_task.TimestreamTask):
         subtract_src = self.params['subtract_src']
         apply_gain = self.params['apply_gain']
         save_gain = self.params['save_gain']
+        save_phs_change = self.params['save_phs_change']
         gain_file = self.params['gain_file']
         temperature_convert = self.params['temperature_convert']
         show_progress = self.params['show_progress']
@@ -168,11 +170,14 @@ class PsCal(timestream_task.TimestreamTask):
             start_ind = transit_ind - np.int(span / int_time)
             end_ind = transit_ind + np.int(span / int_time) + 1 # plus 1 to make transit_ind is at the center
 
-            # check if data contain this range
-            if start_ind < 0:
-                raise RuntimeError('start_ind: %d < 0' % start_ind)
-            if end_ind > ts.vis.shape[0]:
-                raise RuntimeError('end_ind: %d > %d' % (end_ind, ts.vis.shape[0]))
+            start_ind = max(0, start_ind)
+            end_ind = min(end_ind, ts.vis.shape[0])
+
+            # # check if data contain this range
+            # if start_ind < 0:
+            #     raise RuntimeError('start_ind: %d < 0' % start_ind)
+            # if end_ind > ts.vis.shape[0]:
+            #     raise RuntimeError('end_ind: %d > %d' % (end_ind, ts.vis.shape[0]))
 
             if vis_conj:
                 ts.local_vis[:] = ts.local_vis.conj()
@@ -222,8 +227,8 @@ class PsCal(timestream_task.TimestreamTask):
             bis_conj = [] # indices that shold be conj
             mis = [] # indices in the nfeed x nfeed matrix by flatten it to a vector
             mis_conj = [] # indices (of conj vis) in the nfeed x nfeed matrix by flatten it to a vector
-            for bi, (ai, aj) in enumerate(bls):
-                ai, aj = ai - 1, aj - 1 # ai/aj starts from 1
+            for bi, (fdi, fdj) in enumerate(bls):
+                ai, aj = feedno.index(fdi), feedno.index(fdj)
                 mis.append(ai * nfeed + aj)
                 if ai != aj:
                     bis_conj.append(bi)
@@ -259,6 +264,9 @@ class PsCal(timestream_task.TimestreamTask):
                 if np.where(invalid)[0].shape[0] > 0.3 * nfeed**2:
                     continue
                 Vmat[invalid] = 0
+                # if all are zeros
+                if np.allclose(Vmat, 0.0):
+                    continue
 
                 # fill diagonal of Vmat to 0
                 if zero_diag:
@@ -344,6 +352,8 @@ class PsCal(timestream_task.TimestreamTask):
                 if apply_gain or save_gain:
                     e, U = la.eigh(V0 / Sc[fi], eigvals=(nfeed-1, nfeed-1))
                     g = U[:, -1] * e[-1]**0.5
+                    if g[0].real < 0:
+                        g *= -1.0 # make all g[0] phase 0, instead of pi
                     lGain[ii] = g
 
                     # plot Gain
@@ -378,6 +388,8 @@ class PsCal(timestream_task.TimestreamTask):
                     lv[:, bi] = lsrc_vis[:, b1, b2]
                 lv = mpiarray.MPIArray.wrap(lv, axis=0, comm=ts.comm)
                 lv = lv.redistribute(axis=1).local_array.reshape(nt, nf, 2, -1)
+                if 'ns_on' in ts.iterkeys():
+                    lv[ts['ns_on'][start_ind:end_ind]] = 0 # avoid ns_on signal to become nan
                 ts.local_vis[start_ind:end_ind, :, pol.index('xx')] -= lv[:, :, 0]
                 ts.local_vis[start_ind:end_ind, :, pol.index('yy')] -= lv[:, :, 1]
 
@@ -402,7 +414,11 @@ class PsCal(timestream_task.TimestreamTask):
                         f.create_dataset('outlier_vis', shp, dtype=lotl_vis.dtype)
                         f.attrs['calibrator'] = calibrator
                         f.attrs['dim'] = 'time, freq, pol, feed, feed'
-                        f.attrs['time'] = ts.time[start_ind:end_ind]
+                        try:
+                            f.attrs['time'] = ts.time[start_ind:end_ind]
+                        except RuntimeError:
+                            f.create_dataset('time', data=ts.time[start_ind:end_ind])
+                            f.attrs['time'] = '/time'
                         f.attrs['freq'] = freq
                         f.attrs['pol'] = np.array(['xx', 'yy'])
                         f.attrs['feed'] = np.array(feedno)
@@ -449,15 +465,20 @@ class PsCal(timestream_task.TimestreamTask):
                         lG_abs[i, valid_inds] = np.where(vabs_diff>3.0*vmad, np.nan, vabs)
 
                 # choose data slice near the transit time
-                c = nt/2 # center ind
-                li = max(0, c - 10)
-                hi = min(nt, c + 10 + 1)
+                li = max(start_ind, transit_ind - 10) - start_ind
+                hi = min(end_ind, transit_ind + 10 + 1) - start_ind
                 # compute s_top for this time range
                 n0 = np.zeros(((hi-li), 3))
                 for ti, jt in enumerate(ts.time[start_ind:end_ind][li:hi]):
                     aa.set_jultime(jt)
                     s.compute(aa)
                     n0[ti] = s.get_crds('top', ncrd=3)
+                if save_phs_change:
+                    n0t = np.zeros((nt, 3))
+                    for ti, jt in enumerate(ts.time[start_ind:end_ind]):
+                        aa.set_jultime(jt)
+                        s.compute(aa)
+                        n0t[ti] = s.get_crds('top', ncrd=3)
 
                 # get the positions of feeds
                 feedpos = ts['feedpos'][:]
@@ -473,6 +494,8 @@ class PsCal(timestream_task.TimestreamTask):
                 del fpd_inds
                 # create data to save the solved gain for each feed
                 lgain = np.full((len(fpd_linds),), cnan, dtype=Gain.dtype) # gain for each feed
+                if save_phs_change:
+                    lphs = np.full((nt, len(fpd_linds)), np.nan, dtype=Gain.real.dtype) # phase change with time for each feed
 
                 # check for conj
                 num_conj = 0
@@ -520,23 +543,30 @@ class PsCal(timestream_task.TimestreamTask):
                         Gi = Gain.local_array[li:hi, ii]
                         e_phs = np.dot(ef[inds].conj(), Gi[inds]/y[inds]) / len(inds)
                         ea = np.abs(e_phs)
-                        if np.abs(ea - 1.0) < 0.01:
+                        if np.abs(ea - 1.0) < 0.1:
                             # compute gain for this feed
                             lgain[ii] = mag * e_phs
+                            if save_phs_change:
+                                lphs[:, ii] = np.angle(np.exp(-2.0J * np.pi * np.dot(n0t, ui)) * Gain.local_array[:, ii])
                         else:
                             e_phs_conj = np.dot(ef[inds], Gi[inds]/y[inds]) / len(inds)
                             eac = np.abs(e_phs_conj)
                             if eac > ea:
                                 if np.abs(eac - 1.0) < 0.01:
-                                    print '%d, %d, %d: may need to be conjugated' % (fi, pi, di)
+                                    print 'feedno = %d, fi = %d, pol = %s: may need to be conjugated' % (feedno[di], fi, gain_pd[pi])
                             else:
-                                print '%d, %d, %d: maybe wrong abs(e_phs):' % (fi, pi, di), ea
+                                print 'feedno = %d, fi = %d, pol = %s: maybe wrong abs(e_phs): %s' % (feedno[di], fi, gain_pd[pi], ea)
 
 
                 # gather local gain
                 gain = mpiutil.gather_array(lgain, axis=0, root=None, comm=ts.comm)
                 del lgain
                 gain = gain.reshape(nf, 2, nfeed)
+                if save_phs_change:
+                    phs = mpiutil.gather_array(lphs, axis=1, root=0, comm=ts.comm)
+                    del lphs
+                    if mpiutil.rank0:
+                        phs = phs.reshape(nt, nf, 2, nfeed)
 
                 # apply gain to vis
                 if apply_gain:
@@ -564,7 +594,11 @@ class PsCal(timestream_task.TimestreamTask):
                             dset = f.create_dataset('Gain', (nt, nf, 2, nfeed), dtype=Gain.dtype)
                             dset.attrs['calibrator'] = calibrator
                             dset.attrs['dim'] = 'time, freq, pol, feed'
-                            dset.attrs['time'] = ts.time[start_ind:end_ind]
+                            try:
+                                dset.attrs['time'] = ts.time[start_ind:end_ind]
+                            except RuntimeError:
+                                f.create_dataset('time', data=ts.time[start_ind:end_ind])
+                                dset.attrs['time'] = '/time'
                             dset.attrs['freq'] = freq
                             dset.attrs['pol'] = np.array(['xx', 'yy'])
                             dset.attrs['feed'] = np.array(feedno)
@@ -575,6 +609,9 @@ class PsCal(timestream_task.TimestreamTask):
                             dset.attrs['freq'] = freq
                             dset.attrs['pol'] = np.array(['xx', 'yy'])
                             dset.attrs['feed'] = np.array(feedno)
+                            # save phs
+                            if save_phs_change:
+                                f.create_dataset('phs', data=phs)
 
                     mpiutil.barrier()
 

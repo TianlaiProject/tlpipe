@@ -46,7 +46,7 @@ class MapMaking(timestream_task.TimestreamTask):
                     'auto_correlations': False,
                     'time_avg': 'avg', # or 'fft'
                     'pol': 'xx', # 'yy' or 'I'
-                    'interp': 'nearest', # 'rbf' or 'none'
+                    'interp': 'none', # 'linear', 'nearest' or 'rbf'
                     'beam_dir': 'map/bt',
                     'use_existed_beam': False,
                     'gen_invbeam': True,
@@ -64,6 +64,7 @@ class MapMaking(timestream_task.TimestreamTask):
                     'normalize': True, # only used for dirty map-making
                     'threshold': 1.0e3, # only used for dirty map-making
                     'epsilon': 0.01, # regularization parameter for tk
+                    'correct_order': 1, # tk deconv correction order
                   }
 
     prefix = 'mm_'
@@ -97,6 +98,7 @@ class MapMaking(timestream_task.TimestreamTask):
         normalize = self.params['normalize']
         threshold = self.params['threshold']
         eps = self.params['epsilon']
+        correct_order = self.params['correct_order']
 
         if use_existed_beam:
             # load the saved telescope from disk
@@ -181,9 +183,9 @@ class MapMaking(timestream_task.TimestreamTask):
                                 false_inds = np.where(~local_vis_mask[:, fi, bi])[0] # un-masked inds
                                 if len(false_inds) > 0.1 * local_vis.shape[0]:
                 # nearest interpolate for local_vis
-                                    if interp == 'nearest':
-                                        itp_real = interp1d(false_inds, local_vis[false_inds, fi, bi].real, kind='nearest', fill_value='extrapolate', assume_sorted=True)
-                                        itp_imag = interp1d(false_inds, local_vis[false_inds, fi, bi].imag, kind='nearest', fill_value='extrapolate', assume_sorted=True)
+                                    if interp in ('linear', 'nearest'):
+                                        itp_real = interp1d(false_inds, local_vis[false_inds, fi, bi].real, kind=interp, fill_value='extrapolate', assume_sorted=True)
+                                        itp_imag = interp1d(false_inds, local_vis[false_inds, fi, bi].imag, kind=interp, fill_value='extrapolate', assume_sorted=True)
                                     elif interp == 'rbf':
                                         itp_real = Rbf(false_inds, local_vis[false_inds, fi, bi].real, smooth=10)
                                         itp_imag = Rbf(false_inds, local_vis[false_inds, fi, bi].imag, smooth=10)
@@ -227,26 +229,26 @@ class MapMaking(timestream_task.TimestreamTask):
                     Vm = np.fft.fftshift(np.fft.fft(local_vis, axis=0), axes=0)
                     vis[:] = np.fft.ifft(np.fft.ifftshift(Vm[nt/2-tel.mmax:nt/2+tel.mmax+1], axes=0), axis=0) / (1.0 * nt / phi_size)
 
-                    for fi in xrange(vis.shape[1]):
-                        for bi in xrange(vis.shape[2]):
-                            # plot local_vis and vis
-                            import matplotlib
-                            matplotlib.use('Agg')
-                            import matplotlib.pyplot as plt
+                    # for fi in xrange(vis.shape[1]):
+                    #     for bi in xrange(vis.shape[2]):
+                    #         # plot local_vis and vis
+                    #         import matplotlib
+                    #         matplotlib.use('Agg')
+                    #         import matplotlib.pyplot as plt
 
-                            phi0 = np.linspace(0, 2*np.pi, nt, endpoint=False)
-                            phi1 = np.linspace(0, 2*np.pi, phi_size, endpoint=False)
-                            plt.figure()
-                            plt.subplot(211)
-                            plt.plot(phi0, local_vis[:, fi, bi].real, label='v0.real')
-                            plt.plot(phi1, vis[:, fi, bi].real, label='v1.real')
-                            plt.legend()
-                            plt.subplot(212)
-                            plt.plot(phi0, local_vis[:, fi, bi].imag, label='v0.imag')
-                            plt.plot(phi1, vis[:, fi, bi].imag, label='v1.imag')
-                            plt.legend()
-                            plt.savefig('vis_fft/vis_%d_%d.png' % (fi, bi))
-                            plt.close()
+                    #         phi0 = np.linspace(0, 2*np.pi, nt, endpoint=False)
+                    #         phi1 = np.linspace(0, 2*np.pi, phi_size, endpoint=False)
+                    #         plt.figure()
+                    #         plt.subplot(211)
+                    #         plt.plot(phi0, local_vis[:, fi, bi].real, label='v0.real')
+                    #         plt.plot(phi1, vis[:, fi, bi].real, label='v1.real')
+                    #         plt.legend()
+                    #         plt.subplot(212)
+                    #         plt.plot(phi0, local_vis[:, fi, bi].imag, label='v0.imag')
+                    #         plt.plot(phi1, vis[:, fi, bi].imag, label='v1.imag')
+                    #         plt.legend()
+                    #         plt.savefig('vis_fft/vis_%d_%d.png' % (fi, bi))
+                    #         plt.close()
 
                 else:
                     raise ValueError('Unknown time_avg: %s' % time_avg)
@@ -362,7 +364,7 @@ class MapMaking(timestream_task.TimestreamTask):
         if dirty_map:
             tstream.mapmake_full(nside, 'map_full_dirty.hdf5', nbin, dirty=True, method=method, normalize=normalize, threshold=threshold)
         else:
-            tstream.mapmake_full(nside, 'map_full.hdf5', nbin, dirty=False, method=method, normalize=normalize, threshold=threshold, eps=eps, prior_map_file=prior_map)
+            tstream.mapmake_full(nside, 'map_full.hdf5', nbin, dirty=False, method=method, normalize=normalize, threshold=threshold, eps=eps, correct_order=correct_order, prior_map_file=prior_map)
 
         # ts.add_history(self.history)
 

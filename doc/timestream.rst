@@ -29,7 +29,6 @@ Operating tasks
    combine_mask
    sir_operate
    rfi_stats
-   subdata
    bad_detect
    delay_transform
    ns_cal
@@ -43,6 +42,7 @@ Operating tasks
    phase_closure
    ps_subtract
    daytime_mask
+   sun_mask
    re_order
    accumulate
    barrier

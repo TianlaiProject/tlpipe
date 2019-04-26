@@ -220,7 +220,7 @@ class Dispatch(timestream_task.TimestreamTask):
 
         tod = self._Tod_class(input_files, mode, this_start, this_stop, dist_axis)
 
-        tod = self.data_select(tod)
+        tod, _ = self.data_select(tod)
 
         tod.load_all() # load in all data
 
@@ -251,7 +251,7 @@ class Dispatch(timestream_task.TimestreamTask):
 
     def data_select(self, tod):
         """Data select."""
-        super(Dispatch, self).data_select(tod)
+        tod, full_data = super(Dispatch, self).data_select(tod)
 
         if self.params['exclude_bad']:
             with h5py.File(self.input_files[0], 'r') as f:
@@ -261,23 +261,25 @@ class Dispatch(timestream_task.TimestreamTask):
                     badchn = f['channo'].attrs['badchn']
                 except KeyError:
                     # no badchn
-                    return tod
+                    return tod, full_data
 
-            bad_feed = [ feedno[np.where(channo == bc)[0][0]] for bc in badchn ]
-            feed_select = self.params['feed_select']
-            if isinstance(feed_select, tuple):
-                feeds = feedno[slice(*feed_select)].tolist()
-            elif isinstance(feed_select, list):
-                feeds = feed_select
-            # remove bad feeds from feeds
-            for bf in bad_feed:
-                if bf in feeds:
-                    feeds.remove(bf)
+            if badchn.size > 0:
+                bad_feed = [ feedno[np.where(channo == bc)[0][0]] for bc in badchn ]
+                feed_select = self.params['feed_select']
+                if isinstance(feed_select, tuple):
+                    feeds = feedno[slice(*feed_select)].tolist()
+                elif isinstance(feed_select, list):
+                    feeds = feed_select
+                # remove bad feeds from feeds
+                for bf in bad_feed:
+                    if bf in feeds:
+                        feeds.remove(bf)
 
-            # feed select
-            tod.feed_select(feeds, self.params['corr'])
+                # feed select
+                tod.feed_select(feeds, self.params['corr'])
+                full_data = False
 
-        return tod
+        return tod, full_data
 
     def process(self, rt):
         """Return loaded data as a

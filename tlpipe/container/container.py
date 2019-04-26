@@ -473,10 +473,10 @@ class BasicTod(memh5.MemDiskGroup):
                         msel[ti] = slice(st, et)
                         st = et
                         fh = self.infiles[fi]
-                        if np.prod(self[name].local_data[msel].shape) > 0:
+                        if np.prod(self[name].local_data[tuple(msel)].shape) > 0:
                             # only read in data if non-empty, may get error otherwise
                             fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
-                            self[name].local_data[msel] = fh[name][tuple(fsel)]
+                            self[name].local_data[tuple(msel)] = fh[name][tuple(fsel)]
 
                 else:
                     # load data from all files as a distributed dataset
@@ -503,9 +503,9 @@ class BasicTod(memh5.MemDiskGroup):
 
                         msel[ti] = slice(st, et)
                         st = et
-                        if np.prod(self[name].local_data[msel].shape) > 0:
+                        if np.prod(self[name].local_data[tuple(msel)].shape) > 0:
                             fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
-                            self[name].local_data[msel] = fh[name][tuple(fsel)]
+                            self[name].local_data[tuple(msel)] = fh[name][tuple(fsel)]
 
             else:
                 if self.main_data_dist_axis == 0:
@@ -546,9 +546,9 @@ class BasicTod(memh5.MemDiskGroup):
 
                     msel[ti] = slice(st, et)
                     st = et
-                    if np.prod(self[name][msel].shape) > 0:
+                    if np.prod(self[name][tuple(msel)].shape) > 0:
                         fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
-                        self[name][msel] = fh[name][tuple(fsel)] # not a distributed dataset
+                        self[name][tuple(msel)] = fh[name][tuple(fsel)] # not a distributed dataset
 
             else:
                 # load data from the first file
@@ -580,10 +580,10 @@ class BasicTod(memh5.MemDiskGroup):
                 msel[ti] = slice(st, et)
                 st = et
                 fh = self.infiles[fi]
-                if np.prod(self[name].local_data[msel].shape) > 0:
+                if np.prod(self[name].local_data[tuple(msel)].shape) > 0:
                     # only read in data if non-empty, may get error otherwise
                     fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
-                    self[name].local_data[msel] = fh[name][tuple(fsel)]
+                    self[name].local_data[tuple(msel)] = fh[name][tuple(fsel)]
         else:
             # load data as a common dataset
             # create a common dataset to hold the data to be load
@@ -611,9 +611,9 @@ class BasicTod(memh5.MemDiskGroup):
 
                 msel[ti] = slice(st, et)
                 st = et
-                if np.prod(self[name][msel].shape) > 0:
+                if np.prod(self[name][tuple(msel)].shape) > 0:
                     fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
-                    self[name][msel] = fh[name][tuple(fsel)] # not a distributed dataset
+                    self[name][tuple(msel)] = fh[name][tuple(fsel)] # not a distributed dataset
 
     def _load_a_dataset(self, name):
         ### load a dataset (either a commmon or a main axis ordered or a time ordered)
@@ -1304,9 +1304,9 @@ class BasicTod(memh5.MemDiskGroup):
                 else:
                     axis_val = axis_vals
                 if copy_data:
-                    func(self.main_data.local_data[data_sel].copy(), lind, gind, axis_val, self, **kwargs)
+                    func(self.main_data.local_data[tuple(data_sel)].copy(), lind, gind, axis_val, self, **kwargs)
                 else:
-                    func(self.main_data.local_data[data_sel], lind, gind, axis_val, self, **kwargs)
+                    func(self.main_data.local_data[tuple(data_sel)], lind, gind, axis_val, self, **kwargs)
             if full_data and keep_dist_axis:
                 self.redistribute(original_dist_axis)
         elif isinstance(op_axis, tuple):
@@ -1345,9 +1345,9 @@ class BasicTod(memh5.MemDiskGroup):
                     else:
                         axis_val += (axis_vals[ai],)
                 if copy_data:
-                    func(self.main_data.local_data[data_sel].copy(), lind, gind, axis_val, self, **kwargs)
+                    func(self.main_data.local_data[tuple(data_sel)].copy(), lind, gind, axis_val, self, **kwargs)
                 else:
-                    func(self.main_data.local_data[data_sel], lind, gind, axis_val, self, **kwargs)
+                    func(self.main_data.local_data[tuple(data_sel)], lind, gind, axis_val, self, **kwargs)
             if full_data and keep_dist_axis:
                 self.redistribute(original_dist_axis)
         else:
@@ -1449,13 +1449,16 @@ class BasicTod(memh5.MemDiskGroup):
             self._copy_a_common_dataset(name, other)
 
 
-    def subset(self):
+    def subset(self, return_copy=False):
         """Return a subset of the data as a new data container."""
 
         shp = self.main_data.shape
         new_shp = tuple([ len(np.arange(a)[s]) for (a, s) in zip(shp, self.subset_data_select) ])
         if shp == new_shp:
-            return self.copy()
+            if return_copy:
+                return self.copy()
+            else:
+                return self
 
         # create a new container to hold the data subset
         cont = self.__class__(dist_axis=self.main_data_dist_axis, comm=self.comm)

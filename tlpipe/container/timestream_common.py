@@ -252,6 +252,14 @@ class TimestreamCommon(container.BasicTod):
             freq_axis = self.main_data_axes.index('frequency')
             freq = freq[self.main_data_select[freq_axis]]
 
+            # # frequency correction for the early observational data of cylinder array
+            # # correct freq only once here
+            # if self.is_cylinder:
+            #     # compare in Beijing time both
+            #     if datetime.strptime(self.attrs['obstime'][-1], "%Y/%m/%d %H:%M:%S.%f") < datetime.strptime('2018/06/06', "%Y/%m/%d"):
+            #         # cylinder data before June 6, 2018 needs to correct the frequency
+            #         freq += 0.9765625 # MHz
+
             # if frequency is just the distributed axis, load freq distributed
             if 'frequency' == self.main_data_axes[self.main_data_dist_axis]:
                 freq = mpiarray.MPIArray.from_numpy_array(freq)
@@ -996,9 +1004,9 @@ class TimestreamCommon(container.BasicTod):
                 else:
                     axis_val = axis_vals
                 if copy_data:
-                    func(self.local_vis[data_sel].copy(), self.local_vis_mask[data_sel].copy(), lind, gind, axis_val, self, **kwargs)
+                    func(self.local_vis[tuple(data_sel)].copy(), self.local_vis_mask[tuple(data_sel)].copy(), lind, gind, axis_val, self, **kwargs)
                 else:
-                    func(self.local_vis[data_sel], self.local_vis_mask[data_sel], lind, gind, axis_val, self, **kwargs)
+                    func(self.local_vis[tuple(data_sel)], self.local_vis_mask[tuple(data_sel)], lind, gind, axis_val, self, **kwargs)
             if full_data and keep_dist_axis:
                 self.redistribute(original_dist_axis)
         elif isinstance(op_axis, tuple):
@@ -1037,9 +1045,9 @@ class TimestreamCommon(container.BasicTod):
                     else:
                         axis_val += (axis_vals[ai],)
                 if copy_data:
-                    func(self.local_vis[data_sel].copy(), self.local_vis_mask[data_sel].copy(), lind, gind, axis_val, self, **kwargs)
+                    func(self.local_vis[tuple(data_sel)].copy(), self.local_vis_mask[tuple(data_sel)].copy(), lind, gind, axis_val, self, **kwargs)
                 else:
-                    func(self.local_vis[data_sel], self.local_vis_mask[data_sel], lind, gind, axis_val, self, **kwargs)
+                    func(self.local_vis[tuple(data_sel)], self.local_vis_mask[tuple(data_sel)], lind, gind, axis_val, self, **kwargs)
             if full_data and keep_dist_axis:
                 self.redistribute(original_dist_axis)
         else:
