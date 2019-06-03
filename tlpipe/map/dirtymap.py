@@ -3,7 +3,7 @@
 import matplotlib.pyplot as plt
 
 from caput import mpiutil
-#from tlpipe.pipeline.pipeline import OneAndOne
+from tlpipe.pipeline.pipeline import OneAndOne
 from tlpipe.timestream import timestream_task
 from tlpipe.utils.path_util import output_path
 from tlpipe.map import algebra as al
@@ -21,6 +21,72 @@ import gc
 
 from constants import T_infinity, T_huge, T_large, T_medium, T_small, T_sys
 from constants import f_medium, f_large
+
+class CleanMap_GBT(mapbase.MultiMapBase, OneAndOne):
+
+    params_init = {
+
+            'save_cov' : False,
+            }
+
+    prefix = 'cm_'
+
+
+    def read_input(self):
+
+        for input_file in self.input_files:
+
+            print input_file
+            self.open(input_file)
+
+
+        self.map_tmp = al.make_vect(al.load_h5(self.df_in[0], 'dirty_map'))
+        self.map_shp = self.map_tmp.shape
+        for output_file in self.output_files:
+            output_file = output_path(output_file, 
+                relative= not output_file.startswith('/'))
+            self.allocate_output(output_file, 'w')
+            self.create_dataset_like(-1, 'clean_map',  self.map_tmp)
+            self.create_dataset_like(-1, 'noise_diag', self.map_tmp)
+
+        return 1
+
+    def process(self, input):
+
+        def _indx_f(x, shp): 
+            if x >= np.prod(shp): return 
+            _i = [int(x / np.prod(shp[1:])), ]
+            for i in range(1, len(shp)): 
+                x -= _i[i-1] * np.prod(shp[i:])
+                _i += [int(x / np.prod(shp[i+1:])),]
+            return tuple(_i)
+
+        task_n = np.prod(self.map_shp[:-2])
+        for task_ind in mpiutil.mpirange(task_n):
+
+
+            indx = _indx_f(task_ind, self.map_shp[:-2])
+            print task_ind, indx
+
+
+            map_shp = self.map_shp[-2:]
+            _dirty_map = np.zeros(map_shp)
+            _cov_inv = np.zeros(map_shp * 2, dtype=float)
+            for df in self.df_in:
+                _dirty_map += df['dirty_map'][indx + (slice(None), )]
+                _cov_inv   += df['cov_inv'][indx + (slice(None), )]
+
+            print _cov_inv.max(), _cov_inv.min()
+
+            clean_map, noise_diag = make_cleanmap(_dirty_map, _cov_inv)
+            self.df_out[-1]['clean_map' ][indx + (slice(None), )] = clean_map
+            self.df_out[-1]['noise_diag'][indx + (slice(None), )] = noise_diag
+
+    def finish(self):
+        if mpiutil.rank0:
+            print 'Finishing CleanMapMaking.'
+
+        mpiutil.barrier()
 
 class DirtyMap_GBT(mapbase.MapBase, timestream_task.TimestreamTask):
 

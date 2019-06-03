@@ -11,11 +11,14 @@ from tlpipe.map import dirtymap
 data_base = os.getenv('DATA_BASE')
 mock_numb = int(os.getenv('MOCK'))
 
-sim_type = 'wigglez_HI_n25_fn_a1.5_b0.5_k0.040'
-#sim_type = 'wigglez_HI_n25'
+mode = 1
+
+#sim_type = 'wigglez_HI_n25_fn_a1.5_b0.5_k0.040'
+sim_type = 'wigglez_HI_n25'
+#sim_type = 'wigglez_HI_n25_fn_a2.5_b0.3_k0.046'
 
 pipe_tasks = []
-pipe_outdir = data_base + 'meerkat_sim/sim_%s/'%sim_type
+pipe_outdir = data_base + 'sim_meerkat/sim_%s/'%sim_type
 pipe_logging = 'info'
 pipe_copy = False
 
@@ -48,9 +51,8 @@ input_files = [
 #file_name = 'sim_meerKAT3_AZdrift_noise_inv_weight'
 file_name = '%s_HorizonRasterDrift_shift_GBT_%s_%s'%suffix
 
-#pipe_tasks.append(dirtymap.DirtyMap_GBT)
-#pipe_tasks.append(dirtymap.MakeMap_Ionly)
-pipe_tasks.append(dirtymap.MakeMap_CombineAll)
+#pipe_tasks.append(dirtymap.MakeMap_CombineAll)
+pipe_tasks.append((dirtymap.MakeMap_CombineAll, 'dmraw_'))
 
 dm_field_centre = (162.5, 3.5)
 dm_pixel_spacing = 0.4
@@ -58,14 +60,28 @@ dm_map_shape = [50, 25]
 dm_interpolation = 'linear'
 #dm_interpolation = 'nearest'
 #dm_interpolation = 'cubic'
-dm_tblock_len = 108
-dm_input_files  = ['sim_mock%03d/%s'%(mock_numb, f) for f in input_files]
-dm_output_files = ['maps_mpi_108_slope/%s_mock%03d_I_combined'%(file_name, mock_numb), ]
+dm_tblock_len = 2700
+dm_input_files  = ['svd_mock%03d_sub%02d/%s'%(mock_numb, mode, f) for f in input_files]
+dm_output_files = ['maps_sub%02d/%s_mock%03d_I_combined'%(mode, file_name, mock_numb), ]
 dm_data_sets    = 'vis'
 dm_freq_select  = (0, None) #(0, None)
 dm_pol_select   = (0, 2)
-dm_deweight_time_slope = True
+dm_deweight_time_slope = False
 dm_deweight_time_mean = True
 #dm_data_sets    = 'vis_sub00modes'
 #dm_data_sets    = 'vis_sub05modes'
 
+dmraw_field_centre = (162.5, 3.5)
+dmraw_pixel_spacing = 0.4
+dmraw_map_shape = [50, 25]
+dmraw_interpolation = 'linear'
+#dmraw_interpolation = 'nearest'
+#dmraw_interpolation = 'cubic'
+dmraw_tblock_len = 2700
+dmraw_input_files  = ['pned_mock%03d/%s'%(mock_numb, f) for f in input_files]
+dmraw_output_files = ['maps_raw/%s_mock%03d_I_combined'%(file_name, mock_numb), ]
+dmraw_data_sets    = 'vis'
+dmraw_freq_select  = (0, None) #(0, None)
+dmraw_pol_select   = (0, 2)
+dmraw_deweight_time_slope = False
+dmraw_deweight_time_mean = True

@@ -30,9 +30,12 @@ pipe_copy = False
 data_path = '/data/projects/hi_im/incoming/%s/%s/%s_sdp_l0.full.rdb'
 
 pipe_tasks.append((convertion.MeerKAT2TL, 'm2t1_'))
-input_file1 = '1553966342'
-scans1 = ( 1,  4,  6,  8, 10, 12, 14,
-          72, 74, 76, 79, 81, 83, 86,)
+#input_file1 = '1553966342'
+#scans1 = ( 1,  4,  6,  8, 10, 12, 14,
+#          72, 74, 76, 79, 81, 83, 86,)
+input_file1 = '1556034219'
+scans1 = ( 0,  2,  4,  6,  8,  11, 13,
+          72, 75, 77, 80, 82,  85, 87)
 
 # parameter for MeerKAt to TL
 m2t1_corr          = 'auto'
@@ -41,9 +44,12 @@ m2t1_input_files   = [data_path%(input_file1, input_file1, input_file1),]
 m2t1_output_files  = ['PictorA/%s_auto_track_%03d.h5'%(input_file1, scans1[scan_id]),]
 
 pipe_tasks.append((convertion.MeerKAT2TL, 'm2t2_'))
-input_file2 = '1554156377'
-scans2 = ( 1,  4,  6,  8, 10, 12, 14,
-          73, 76, 79, 81, 83, 85, 87)
+#input_file2 = '1554156377'
+#scans2 = ( 1,  4,  6,  8, 10, 12, 14,
+#          73, 76, 79, 81, 83, 85, 87)
+input_file2 = '1556052116'
+scans2 = ( 1,  3,  5,  7,  9, 12, 14,
+          76, 79, 81, 83, 85, 87, 90)
 
 # parameter for MeerKAt to TL
 m2t2_corr          = 'auto'

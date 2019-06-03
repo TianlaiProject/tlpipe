@@ -17,14 +17,14 @@ from tlpipe.plot import plot_waterfall
 data_base = os.getenv('DATA_BASE')
 
 sim_type = 'wigglez'
-sim_fn   = False
+sim_fn   = True
 sim_fg   = False
 sim_HI   = True
 
 T_rec = 25.
-f_k   = 0.07
-alpha = 2.2
-beta  = 0.3
+f_k   = 0.046
+alpha = 2.49
+beta  = 0.27
 
 if sim_HI:
     sim_type += '_HI'

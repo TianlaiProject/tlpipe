@@ -29,6 +29,7 @@ class SVD(timestream_task.TimestreamTask):
             'svd_path'  : None,
             'method'    : 'both', # 'time', 'freq'
             'save_svd'  : True,
+            'save_modes' : True,
             }
 
     prefix = 'todsvd_'
@@ -63,18 +64,19 @@ class SVD(timestream_task.TimestreamTask):
             #ts.create_main_time_ordered_dataset(dset_name, ts.vis_mask)
             #ts[dset_name].attrs['dimname'] = ts.vis.attrs['dimname']
         
-        cleaned_mode_list = np.array(self.cleaned_mode_list)
-        for mi in range(max(mode_list)):
-            cleaned_mode = cleaned_mode_list[:, mi, ...]
-            cleaned_mode = np.rollaxis(cleaned_mode, 0, 4)
+        if self.params['save_modes']:
+            cleaned_mode_list = np.array(self.cleaned_mode_list)
+            for mi in range(max(mode_list)):
+                cleaned_mode = cleaned_mode_list[:, mi, ...]
+                cleaned_mode = np.rollaxis(cleaned_mode, 0, 4)
 
-            dset_name = 'modes%02d'%(mi+1)
-            ts.create_main_time_ordered_dataset(dset_name, cleaned_mode)
-            ts[dset_name].attrs['dimname'] = ts.vis.attrs['dimname']
+                dset_name = 'modes%02d'%(mi+1)
+                ts.create_main_time_ordered_dataset(dset_name, cleaned_mode)
+                ts[dset_name].attrs['dimname'] = ts.vis.attrs['dimname']
 
-            #dset_name = 'modes%02d_mask'%(mi+1)
-            #ts.create_main_time_ordered_dataset(dset_name, ts.vis_mask)
-            #ts[dset_name].attrs['dimname'] = ts.vis.attrs['dimname']
+                #dset_name = 'modes%02d_mask'%(mi+1)
+                #ts.create_main_time_ordered_dataset(dset_name, ts.vis_mask)
+                #ts[dset_name].attrs['dimname'] = ts.vis.attrs['dimname']
         #ts['mode_list'] = mode_list
         ts.create_dataset('mode_list', data=np.array(mode_list))
         
@@ -189,6 +191,7 @@ class SVD_OneStop(SVD):
 
     params_init = {
             'save_svd'  : False,
+            'save_modes' : False,
             }
 
     def process(self, ts):
@@ -216,6 +219,20 @@ class SVD_OneStop(SVD):
         #ts.vis = cleaned_data
         cleaned_data = mpiarray.MPIArray.wrap(cleaned_data, 0)
         ts.create_main_data(cleaned_data, recreate=True, copy_attrs=True)
+
+        if self.params['save_modes']:
+            cleaned_mode_list = np.array(self.cleaned_mode_list)
+            for mi in range(max(mode_list)):
+                cleaned_mode = cleaned_mode_list[:, mi, ...]
+                cleaned_mode = np.rollaxis(cleaned_mode, 0, 4)
+
+                dset_name = 'modes%02d'%(mi+1)
+                ts.create_main_time_ordered_dataset(dset_name, cleaned_mode)
+                ts[dset_name].attrs['dimname'] = ts.vis.attrs['dimname']
+
+                #dset_name = 'modes%02d_mask'%(mi+1)
+                #ts.create_main_time_ordered_dataset(dset_name, ts.vis_mask)
+                #ts[dset_name].attrs['dimname'] = ts.vis.attrs['dimname']
 
         ts.create_dataset('mode_list', data=np.array(mode_list))
         

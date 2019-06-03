@@ -363,11 +363,11 @@ class SurveySim(pipeline.TaskBase):
             df['jul_date'] = t_list.jd
             df['jul_date'].attrs['dimname'] = 'Time,'
 
-            df['ra']  = ra_list
-            df['ra'].attrs['dimname'] = 'Time,'
+            df['ra']  = ra_list[:, None]  * np.ones(len(self.blorder))[None, :]
+            df['ra'].attrs['dimname'] = 'Time, BaseLines'
 
-            df['dec'] = dec_list
-            df['dec'].attrs['dimname'] = 'Time,'
+            df['dec'] = dec_list[:, None] * np.ones(len(self.blorder))[None, :]
+            df['dec'].attrs['dimname'] = 'Time, BaseLines'
 
             freq = self.params['freq']
             df.attrs['nfreq'] = freq.shape[0] # Number of Frequency Points

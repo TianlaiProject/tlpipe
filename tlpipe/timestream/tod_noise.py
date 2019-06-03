@@ -49,15 +49,18 @@ class DataEdit(timestream_task.TimestreamTask):
                 print bad_freq
                 ts.vis_mask[:, slice(*bad_freq), ...] = True
 
+        if self.params['corr'] == 'auto':
+            old_dtype = ts.vis.dtype
+            vis_abs = mpiarray.MPIArray.wrap(ts.vis[:].real, 0)
+            ts.create_main_data(vis_abs, recreate=True, copy_attrs=True)
+            new_dtype = ts.vis.dtype
+            print "Use Auto only, Convert from %s to %s"%(old_dtype, new_dtype)
+
         func = ts.bl_data_operate
         func(self.data_edit, full_data=True, copy_data=False, 
                 show_progress=show_progress, 
                 progress_step=progress_step, keep_dist_axis=False)
 
-        print ts.vis.dtype
-        vis_abs = mpiarray.MPIArray.wrap(ts.vis[:].real, 0)
-        ts.create_main_data(vis_abs, recreate=True, copy_attrs=True)
-        print ts.vis.dtype
         #print ts.vis.shape
         #print np.var(ts.vis[:, :, 0, 0], axis=0)
 
@@ -65,7 +68,7 @@ class DataEdit(timestream_task.TimestreamTask):
 
     def data_edit(self, vis, vis_mask, li, gi, bl, ts, **kwargs):
 
-        if vis.dtype == np.complex:
+        if vis.dtype == np.complex or vis.dtype == np.complex64:
             vis_abs = np.abs(vis)
         else:
             vis_abs = vis
@@ -77,13 +80,14 @@ class DataEdit(timestream_task.TimestreamTask):
 
         bandpass_cal = self.params['bandpass_cal']
         if bandpass_cal:
-            bandpass = np.median(vis_abs[~bad_time, ...], axis=0)
+            "Bandpass cal with time median value"
+            bandpass = np.median(vis_abs[tuple(~bad_time), ...], axis=0)
             bandpass[:,0] = medfilt(bandpass[:,0], kernel_size=11)
             bandpass[:,1] = medfilt(bandpass[:,1], kernel_size=11)
             bandpass[bandpass==0] = np.inf
             vis_abs /= bandpass[None, ...]
 
-        if vis.dtype == np.complex:
+        if vis.dtype == np.complex or vis.dtype == np.complex64:
             vis.real = vis_abs
             vis.imag = 0.
         else:
@@ -272,6 +276,8 @@ class PinkNoisePS_1DTC(PinkNoisePS):
                     f['bad_freq'] = self.bad_freq
                 if self.bad_time is not None:
                     f['bad_time'] = self.bad_time
+            print '-' * 20
+            print
 
 class PinkNoisePS_1DFC(PinkNoisePS):
 
@@ -348,6 +354,9 @@ class PinkNoisePS_1DFC(PinkNoisePS):
                 if self.bad_time is not None:
                     f['bad_time'] = self.bad_time
 
+            print '-' * 20
+            print
+
 def est_tcorr_psd1d_fft(data, ax, n_bins=None, inttime=None, f_min=None, f_max=None):
 
     mean = np.mean(data, axis=0)
@@ -409,10 +418,12 @@ def est_tcorr_psd1d_lombscargle(data, ax, n_bins=None, inttime=None,
     if inttime is None:
         inttime = ax[1] - ax[0]
 
-    print 
-    print 'int time', inttime
-    print
+    n = ax.shape[0]
+    d = inttime
+    fftfreq = np.fft.fftfreq(n, d) #* 2 * np.pi 
+    fftfreq = fftfreq[fftfreq>0]
 
+    print 'int time', inttime
 
     #windowf = np.blackman(fft_len)
 
@@ -424,9 +435,9 @@ def est_tcorr_psd1d_lombscargle(data, ax, n_bins=None, inttime=None,
 
     freq_bins_c = np.logspace(np.log10(f_min), np.log10(f_max), n_bins)
     #freq_bins_c = np.linspace(f_min, f_max, n_bins)
-    #freq_bins_d = freq_bins_c[1] / freq_bins_c[0]
-    #freq_bins_e = freq_bins_c / (freq_bins_d ** 0.5)
-    #freq_bins_e = np.append(freq_bins_e, freq_bins_e[-1] * freq_bins_d)
+    freq_bins_d = freq_bins_c[1] / freq_bins_c[0]
+    freq_bins_e = freq_bins_c / (freq_bins_d ** 0.5)
+    freq_bins_e = np.append(freq_bins_e, freq_bins_e[-1] * freq_bins_d)
 
     #freqs = np.linspace(f_min, f_max, ax.shape[0])
     #freqs = np.linspace(f_min, f_max, 1024)
@@ -435,17 +446,18 @@ def est_tcorr_psd1d_lombscargle(data, ax, n_bins=None, inttime=None,
 
     power = np.zeros([n_bins, n_freq, n_pol])
 
-    #norm = np.histogram(freqs, bins=freq_bins_e)[0] * 1.
-    #norm[norm==0] = np.inf
+    norm = np.histogram(fftfreq, bins=freq_bins_e)[0] * 1.
+    norm[norm==0] = np.inf
     for i in range(n_freq):
         for j in range(n_pol):
             y = data[:, i, j]
             y = y - np.mean(y)
             #y = y * windowf
-            power[:, i, j] = lombscargle(ax, y, 2. * np.pi * freq_bins_c,
-                    normalize=False)
-            #hist   = np.histogram(freqs, bins=freq_bins_e, weights=_p)[0]
-            #power[:, i, j] = hist / norm
+            #power[:, i, j] = lombscargle(ax, y, 2. * np.pi * freq_bins_c,
+            #        normalize=False)
+            _p = lombscargle(ax, y, 2. * np.pi * fftfreq, normalize=False)
+            hist   = np.histogram(fftfreq, bins=freq_bins_e, weights=_p)[0]
+            power[:, i, j] = hist / norm
     #power = np.sqrt(4. * power / float(ax.shape[0]) / np.std(y) ** 2.)
     power *= inttime
 

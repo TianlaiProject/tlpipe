@@ -43,7 +43,7 @@ class FGRM_SVD(mapbase.MultiMapBase, pipeline.OneAndOne):
             self.allocate_output(output_file, 'w')
             #self.create_dataset('binavg_1d', self.dset_shp + (self.knum,))
 
-            self.df_list[-1]['mode_list'] = self.params['mode_list']
+            self.df_out[-1]['mode_list'] = self.params['mode_list']
 
     def combine_results(self):
 
@@ -51,7 +51,7 @@ class FGRM_SVD(mapbase.MultiMapBase, pipeline.OneAndOne):
         output_combined  = output_path(output_combined, 
                 relative= not output_combined.startswith('/'))
         self.allocate_output(output_combined, 'w')
-        self.df_list[-1]['mode_list'] = self.params['mode_list']
+        self.df_out[-1]['mode_list'] = self.params['mode_list']
 
         for _m in self.params['mode_list']:
             mode_key = 'cleaned_%02dmode'%_m
@@ -61,17 +61,17 @@ class FGRM_SVD(mapbase.MultiMapBase, pipeline.OneAndOne):
                                 dset_info = self.map_info)
             mask = np.ones(self.dset_shp[:1]).astype('bool')
             for ii in range(len(self.output_files)):
-                for key in self.df_list[ii][mode_key].keys():
-                    self.df_list[-1][mode_key][:]\
-                            += self.df_list[ii]['weight'][:]\
-                            *  self.df_list[ii]['%s/%s'%(mode_key, key)][:]
-                    self.df_list[-1][mode_key + '_weight'][:]\
-                            += self.df_list[ii]['weight'][:]
-                mask *= ~(self.df_list[ii]['mask'][:].astype('bool'))
-            weight = self.df_list[-1][mode_key + '_weight'][:]
+                for key in self.df_out[ii][mode_key].keys():
+                    self.df_out[-1][mode_key][:]\
+                            += self.df_out[ii]['weight'][:]\
+                            *  self.df_out[ii]['%s/%s'%(mode_key, key)][:]
+                    self.df_out[-1][mode_key + '_weight'][:]\
+                            += self.df_out[ii]['weight'][:]
+                mask *= ~(self.df_out[ii]['mask'][:].astype('bool'))
+            weight = self.df_out[-1][mode_key + '_weight'][:]
             weight[weight==0] = np.inf
-            self.df_list[-1][mode_key][:] /= weight
-            self.df_list[-1][mode_key + '_mask'] = (~mask).astype('int')
+            self.df_out[-1][mode_key][:] /= weight
+            self.df_out[-1][mode_key + '_mask'] = (~mask).astype('int')
 
 
 
@@ -167,32 +167,32 @@ class FGRM_SVD(mapbase.MultiMapBase, pipeline.OneAndOne):
             mode_list_st[1:] = mode_list_st[:-1]
 
             dset_key = tind_o[0] + '_sigvalu'
-            self.df_list[tind_l[0]][dset_key] = svd_info[0]
+            self.df_out[tind_l[0]][dset_key] = svd_info[0]
             dset_key = tind_o[0] + '_sigvect'
-            self.df_list[tind_l[0]][dset_key] = svd_info[1]
-            self.df_list[tind_l[0]]['weight'][:] = weights[0]
-            self.df_list[tind_l[0]]['mask'][:]   = (~freq_mask).astype('int')
+            self.df_out[tind_l[0]][dset_key] = svd_info[1]
+            self.df_out[tind_l[0]]['weight'][:] = weights[0]
+            self.df_out[tind_l[0]]['mask'][:]   = (~freq_mask).astype('int')
 
 
             dset_key = tind_o[1] + '_sigvalu'
-            self.df_list[tind_r[0]][dset_key] = svd_info[0]
+            self.df_out[tind_r[0]][dset_key] = svd_info[0]
             dset_key = tind_o[1] + '_sigvect'
-            self.df_list[tind_r[0]][dset_key] = svd_info[2]
-            self.df_list[tind_r[0]]['weight'][:] = weights[1]
-            self.df_list[tind_r[0]]['mask'][:]   = (~freq_mask).astype('int')
+            self.df_out[tind_r[0]][dset_key] = svd_info[2]
+            self.df_out[tind_r[0]]['weight'][:] = weights[1]
+            self.df_out[tind_r[0]]['mask'][:]   = (~freq_mask).astype('int')
 
             for (n_modes_st, n_modes_ed) in zip(mode_list_st, mode_list_ed):
                 svd_modes = svd_info[1][n_modes_st:n_modes_ed]
                 maps[0], amp = find_modes.subtract_frequency_modes( maps[0], svd_modes, 
                                                                     weights[0], freq_mask)
                 dset_key = 'cleaned_%02dmode/'%n_modes_ed + tind_o[0]
-                self.df_list[tind_l[0]][dset_key][:] = copy.deepcopy(maps[0])
+                self.df_out[tind_l[0]][dset_key][:] = copy.deepcopy(maps[0])
 
                 svd_modes = svd_info[2][n_modes_st:n_modes_ed]
                 maps[1], amp = find_modes.subtract_frequency_modes( maps[1], svd_modes, 
                                                                     weights[1], freq_mask)
                 dset_key = 'cleaned_%02dmode/'%n_modes_ed + tind_o[1]
-                self.df_list[tind_r[0]][dset_key][:] = copy.deepcopy(maps[1])
+                self.df_out[tind_r[0]][dset_key][:] = copy.deepcopy(maps[1])
 
 
         if self.params['output_combined'] is not None:
@@ -207,7 +207,7 @@ class FGRM_SVD(mapbase.MultiMapBase, pipeline.OneAndOne):
         print 'RANK %03d Finishing Ps.'%(mpiutil.rank)
 
         mpiutil.barrier()
-        for df in self.df_list:
+        for df in self.df_out:
             df.close()
 
 def noise_diag_2_weight(weight):

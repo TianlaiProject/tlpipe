@@ -5,6 +5,8 @@ from os import path
 
 from tlpipe.pipeline.pipeline import FileIterBase
 
+import time
+
 
 class MeerKAT2TL(FileIterBase):
     """ class for converting MeerKAT data format to TL
@@ -116,13 +118,27 @@ class MeerKAT2TL(FileIterBase):
                 vh_indx = [corr.index('m%03dv m%03dh'%(feedno[i]-1, feedno[j]-1))
                     for i in range(antn) for j in range(i, antn)]
 
-                rvis = np.array(output_data.vis)
+                #rvis = np.array(output_data.vis)
+                rvis = output_data.vis.dataset
                 shp = rvis.shape[:2] + (4, len(hh_indx))
                 vis = np.empty(shp, dtype=rvis.dtype)
-                vis[:, :, 0] = rvis[:, :, hh_indx]
-                vis[:, :, 1] = rvis[:, :, vv_indx]
-                vis[:, :, 2] = rvis[:, :, hv_indx]
-                vis[:, :, 3] = rvis[:, :, vh_indx]
+
+                t0 = time.time()
+                vis[:, :, 0] = rvis[:, :, hh_indx].compute()
+                print 'load xx use %8.2f s'%(time.time() - t0)
+
+                t0 = time.time()
+                vis[:, :, 1] = rvis[:, :, vv_indx].compute()
+                print 'load yy use %8.2f s'%(time.time() - t0)
+
+                t0 = time.time()
+                vis[:, :, 2] = rvis[:, :, hv_indx].compute()
+                print 'load xy use %8.2f s'%(time.time() - t0)
+
+                t0 = time.time()
+                vis[:, :, 3] = rvis[:, :, vh_indx].compute()
+                print 'load yx use %8.2f s'%(time.time() - t0)
+
                 df['pol'] = np.array(['hh', 'vv', 'hv', 'vh'])
                 df['pol'].attrs['pol_type'] = 'linear'
 
@@ -141,19 +157,21 @@ class MeerKAT2TL(FileIterBase):
                 pols = ['H', 'V']
 
                 for ii, ant in enumerate(ants):
-                    print ii, ant.name
+                    t0 = time.time()
+                    print ii, ant.name,
 
                     #for pol in range(2):
                     #    print pols[pol],
 
                         
-                    output_data.select(ants=ant)
+                    output_data.select(ants=ant, pol='HH, VV')
                     #output_data.select(scans=self.params['selection'][fi], ants=ant)
                     #output_data.select(scans=5, ants=ant)
-                    vis[:, :, :, ii] = output_data.vis[:, :, :2]
+                    vis[:, :, :, ii] = output_data.vis[:]
 
                     ra[:, ii]  = output_data.ra[:, 0]
                     dec[:, ii] = output_data.dec[:, 0]
+                    print "\tload %s %8.2f s"%(ant.name, time.time() - t0)
 
                 df['pol'] = np.array(['hh', 'vv'])
                 df['pol'].attrs['pol_type'] = 'linear'

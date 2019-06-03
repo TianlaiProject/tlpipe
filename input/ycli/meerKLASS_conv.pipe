@@ -37,14 +37,28 @@ pipe_copy = False
 #scans = (16, 18, 20, 23, 25, 27, 29, 31, 33, 35, 37, 39, 41,
 #         43, 45, 47, 49, 51, 54, 57, 59, 61, 63, 65, 67, 69)
 
-input_files = [
-    '1554156377',
-]
-data_path = '/data/projects/hi_im/incoming/%s/%s/%s_sdp_l0.full.rdb'
+#input_files = [
+#    '1554156377',
+#]
+#data_path = '/data/projects/hi_im/incoming/%s/%s/%s_sdp_l0.full.rdb'
+#
+## scans for 1554156377
+#scans = (16, 18, 20, 22, 24, 26, 28, 30, 33, 35, 37, 39, 41,
+#         43, 45, 48, 50, 52, 54, 56, 58, 60, 63, 66, 68, 70,)
 
-# scans for 1554156377
-scans = (16, 18, 20, 22, 24, 26, 28, 30, 33, 35, 37, 39, 41,
-         43, 45, 48, 50, 52, 54, 56, 58, 60, 63, 66, 68, 70,)
+#input_files = [
+#    '1556034219',
+#]
+#data_path = '/data/projects/hi_im/SCI-20190418-MS-01/%s/%s/%s_sdp_l0.full.rdb'
+#scans = (15, 17, 19, 21, 23, 25, 27, 29, 32, 34, 36, 38, 40, 
+#         42, 44, 46, 49, 51, 53, 55, 57, 59, 61, 64, 67, 69)
+         
+input_files = [
+    '1556052116',
+]
+data_path = '/data/projects/hi_im/SCI-20190418-MS-01/%s/%s/%s_sdp_l0.full.rdb'
+scans = (16, 18, 21, 23, 25, 27, 29, 31, 33, 35, 38, 40, 42,
+         45, 47, 49, 52, 54, 56, 59, 61, 63, 66, 68, 70, 73)
 
 pipe_tasks.append(convertion.MeerKAT2TL)
 

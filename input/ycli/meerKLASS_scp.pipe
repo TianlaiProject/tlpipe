@@ -1,0 +1,34 @@
+# -*- mode: python; -*-
+#
+
+import os
+
+from tlpipe.timestream import convertion
+from astropy.time import Time
+
+#data_base = os.getenv('DATA_BASE')
+data_base = '/scratch/users/ycli/'
+
+pipe_tasks = []
+pipe_outdir = data_base + 'meerkat/'
+pipe_logging = 'info'
+pipe_copy = False
+
+input_files = [
+    #'1556128500',
+    '1556042203',
+]
+data_path = '/data/projects/hi_im/COM-20190418-MS-01/%s/%s/%s_sdp_l0.full.rdb'
+scans = (1, )
+
+t = Time(int(input_files[0]), format='unix')
+fn = "%s_%s"%(t.datetime.strftime('%Y%m%d_UTC%Hh%Mm%Ss'), input_files[0])
+
+pipe_tasks.append(convertion.MeerKAT2TL)
+
+# parameter for MeerKAt to TL
+m2t_corr          = 'auto'
+m2t_selection     = (1, ) #'scan'
+m2t_input_files   = [data_path%(f, f, f) for f in input_files]
+m2t_output_files  = ['scp/%s/%s_auto_scan_%03d.h5'%(fn, input_files[0], 1),]
+

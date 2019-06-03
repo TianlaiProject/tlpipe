@@ -15,7 +15,9 @@ from tlpipe.plot import plot_waterfall
 data_base = os.getenv('DATA_BASE')
 
 #sim_type = 'wigglez_HI_n25_fn_a1.5_b0.3_k0.040'
-sim_type = 'wigglez_HI_n25_fn_a2.2_b0.3_k0.070'
+#sim_type = 'wigglez_HI_n25_fn_a2.2_b0.3_k0.070'
+#sim_type = 'wigglez_HI_n25_fn_a2.5_b0.3_k0.046'
+sim_type = 'wigglez_HI_n25'
 
 pipe_tasks = []
 pipe_outdir = data_base + 'sim_meerkat/sim_%s/'%sim_type
@@ -59,7 +61,7 @@ input_files = [
     '%s_HorizonRasterDrift_%s_%s_20190408220919.h5'%suffix,
     ]
 
-#pipe_tasks.append(tod_noise.DataEdit)
+pipe_tasks.append(tod_noise.DataEdit)
 
 #pipe_tasks.append(tod_svd.SVD)
 #pipe_tasks.append((tod_svd.SVD_OneStop, 'todsvd1s0_'))
@@ -76,7 +78,7 @@ input_files = [
 #pipe_tasks.append((tod_noise.PinkNoisePS_1DFC, 'pnps1dfccln_'))
 
 #pipe_tasks.append((tod_noise.PinkNoisePS_1DTC, 'pnpsmod_'))
-pipe_tasks.append((tod_noise.PinkNoisePS_1DFC, 'pnps1dfc0_'))
+#pipe_tasks.append((tod_noise.PinkNoisePS_1DFC, 'pnps1dfc0_'))
 
 
 # ===================================================================

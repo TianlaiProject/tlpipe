@@ -83,7 +83,7 @@ class DataEdit(timestream_task.TimestreamTask):
             print "Directely calibration "
             if self.params['cal_data'] is None:
                 print "Directely calibration needs gain solution"
-            raise
+                raise
             func(self.data_edit_direct_cal, full_data=True, copy_data=False, 
                     show_progress=show_progress, 
                     progress_step=progress_step, keep_dist_axis=False)
@@ -95,9 +95,11 @@ class DataEdit(timestream_task.TimestreamTask):
 
     def data_edit_direct_cal(self, vis, vis_mask, li, gi, bl, ts, **kwargs):
 
+        ant = bl[0] - 1
+        print "global index %3d: m%03d"%(gi, ant)
         cal_on  = np.load(self.params['noise_flag'])
         vis_mask[cal_on, ...] = True
-        cal_spec = read_noise_spec(self.params['cal_data'], ts.freq, gi)
+        cal_spec = read_noise_spec(self.params['cal_data'], ts.freq, ant)
         cal_spec[cal_spec==0] = np.inf
         vis /= cal_spec[None, :, :]
 
@@ -108,7 +110,7 @@ class DataEdit(timestream_task.TimestreamTask):
         ant = bl[0] - 1
         print "global index %3d: m%03d"%(gi, ant)
         cal_on  = np.load(self.params['noise_flag'])
-        noise_cal = get_noise_cal(vis, _time, noise_flag = cal_on,
+        noise_cal, cal_off = get_noise_cal(vis, _time, noise_flag = cal_on,
                 duty_frac = self.params['duty_frac'],
                 #cal_phase = self.params['init_cal_pha'],
                 #period=self.params['cal_period'],
@@ -122,7 +124,7 @@ class DataEdit(timestream_task.TimestreamTask):
         if self.params['cal_data'] is not None:
             #print ts.freq[0], ts.freq[1]
             cal_spec = read_noise_spec(self.params['cal_data'], ts.freq, ant)
-            #cal_spec = polyfit_noise_spec(self.params['cal_data'], ts.freq[:], ant, 20)
+            #cal_spec = polyfit_noise_spec(self.params['cal_data'], ts.freq[:], ant, 6)
             vis *= cal_spec[None, :, :]
 
 def cal_to_noise_cal(vis, noise_cal, cal_on, duty_frac=0.9, sub_cal=True):
@@ -142,7 +144,7 @@ def cal_to_noise_cal(vis, noise_cal, cal_on, duty_frac=0.9, sub_cal=True):
 
     return vis
 
-def read_noise_spec(cal_data, freq_in, ant, kind='linear'):
+def read_noise_spec(cal_data, freq_in, ant, kind='quadratic'):
 
     with h5py.File(cal_data) as data:
         ant_names = np.array(data['ants'][:])
@@ -210,8 +212,9 @@ def get_noise_cal(vis, time, noise_flag, duty_frac=0.9, smooth_cal=True,
     cal_on  = noise_flag[:vis_shp[0]]
     if roll_for_off:
         cal_off = cal_on.copy()
-        cal_off = np.roll(cal_off, 2)
+        cal_off = (np.roll(cal_off,  1) + np.roll(cal_off, -1)) ^ cal_off
         vis_cal = vis[cal_on, ...] - vis[cal_off, ...]
+        cal_off_fit = vis[cal_off, ...]
     else:
         #cal_off = np.mean(vis[~cal_on, ...], axis=0)
         #cal_off = np.median(vis[~cal_on, ...], axis=0)
@@ -255,10 +258,7 @@ def get_noise_cal(vis, time, noise_flag, duty_frac=0.9, smooth_cal=True,
     #vis = vis/noise_cal
     #vis[cal_on, ...] -= 1.
 
-    if roll_for_off:
-        return noise_cal
-    else:
-        return noise_cal, cal_off_fit
+    return noise_cal, cal_off_fit
 
 
 #def cal_to_noise(vis, time, cal_phase=None, period=10, duty_time=1.8):
