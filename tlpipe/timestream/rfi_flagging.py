@@ -80,7 +80,7 @@ class Flag(timestream_task.TimestreamTask):
         itp = interpolate.Interpolate(vis_abs, vis_mask)
         background = itp.fit()
         # Gaussian fileter
-        gf = gaussian_filter.GaussianFilter(background, time_kernal_size=tk_size, freq_kernal_size=fk_size)
+        gf = gaussian_filter.GaussianFilter(background, time_kernal_size=tk_size, freq_kernal_size=fk_size, filter_direction=flag_direction)
         background = gf.fit()
         # sum-threshold
         vis_diff = vis_abs - background
@@ -96,7 +96,7 @@ class Flag(timestream_task.TimestreamTask):
         # next rounds
         for i in xrange(threshold_num):
             # Gaussian fileter
-            gf = gaussian_filter.GaussianFilter(vis_diff, st.vis_mask, time_kernal_size=tk_size, freq_kernal_size=fk_size)
+            gf = gaussian_filter.GaussianFilter(vis_diff, st.vis_mask, time_kernal_size=tk_size, freq_kernal_size=fk_size, filter_direction=flag_direction)
             background = gf.fit()
             # sum-threshold
             vis_diff = vis_diff - background
