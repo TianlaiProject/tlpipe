@@ -63,7 +63,7 @@ class MapMaking(timestream_task.TimestreamTask):
                     'method': 'svd', # or tk
                     'normalize': True, # only used for dirty map-making
                     'threshold': 1.0e3, # only used for dirty map-making
-                    'epsilon': 0.01, # regularization parameter for tk
+                    'epsilon': 0.0001, # regularization parameter for tk
                     'correct_order': 1, # tk deconv correction order
                   }
 

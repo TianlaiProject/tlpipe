@@ -869,16 +869,19 @@ class UnpolarisedTelescope(TransitTelescope):
         uv = self.baselines[bl_index] / self.wavelengths[f_index]
         fringe = visibility.fringe(self._angpos, self.zenith, uv)
 
-        pxarea = (4 * np.pi / beami.shape[0])
+        # pxarea = (4 * np.pi / beami.shape[0])
 
         # Beam solid angle (integrate over beam^2 - equal area pixels)
-        om_i = np.sum(np.abs(beami)**2 * self._horizon) * pxarea
-        om_j = np.sum(np.abs(beamj)**2 * self._horizon) * pxarea
+        # om_i = np.sum(np.abs(beami)**2 * self._horizon) * pxarea
+        # om_j = np.sum(np.abs(beamj)**2 * self._horizon) * pxarea
 
-        omega_A = (om_i * om_j)**0.5
+        # omega_A = (om_i * om_j)**0.5
 
         # Calculate the complex visibility transfer function
-        cvis = self._horizon * fringe * beami * beamj.conjugate() / omega_A
+        # cvis = self._horizon * fringe * beami * beamj.conjugate() / omega_A
+
+        # NOTE: to have consistent normalization with ps_cal, don't divide_A here
+        cvis = self._horizon * fringe * beami * beamj.conjugate()
 
         return cvis
 
@@ -962,15 +965,18 @@ class PolarisedTelescope(TransitTelescope):
         pow_stokes = [ np.sum(beami * np.dot(beamj.conjugate(), polproj), axis=1) * self._horizon for polproj in p_stokes]
 
         # Calculate the solid angle of each beam
-        pxarea = (4*np.pi / beami.shape[0])
+        # pxarea = (4*np.pi / beami.shape[0])
 
-        om_i = np.sum(np.abs(beami)**2 * self._horizon[:, np.newaxis]) * pxarea
-        om_j = np.sum(np.abs(beamj)**2 * self._horizon[:, np.newaxis]) * pxarea
+        # om_i = np.sum(np.abs(beami)**2 * self._horizon[:, np.newaxis]) * pxarea
+        # om_j = np.sum(np.abs(beamj)**2 * self._horizon[:, np.newaxis]) * pxarea
 
-        omega_A = (om_i * om_j)**0.5
+        # omega_A = (om_i * om_j)**0.5
 
         # Calculate the complex visibility transfer function
-        cv_stokes = [ p * (2 * fringe / omega_A) for p in pow_stokes ]
+        # cv_stokes = [ p * (2 * fringe / omega_A) for p in pow_stokes ]
+
+        # NOTE: to have consistent normalization with ps_cal, don't divide omega_A here
+        cv_stokes = [ p * (2 * fringe) for p in pow_stokes ]
 
         return cv_stokes
 
