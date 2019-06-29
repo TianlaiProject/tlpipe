@@ -1,7 +1,6 @@
 import numpy as np
 
-from ..core import telescope
-from ..telescope import cylinder, cylbeam
+from . import cylinder
 
 
 class TlUnpolarisedCylinder(cylinder.UnpolarisedCylinderTelescope):

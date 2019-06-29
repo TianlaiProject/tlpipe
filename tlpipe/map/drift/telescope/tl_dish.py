@@ -4,7 +4,7 @@ import numpy as np
 from scipy.special import jn
 
 from cora.util import coord
-from tlpipe.map.fmmode.core import telescope
+from ..core import telescope
 
 
 def ang_conv(ang):

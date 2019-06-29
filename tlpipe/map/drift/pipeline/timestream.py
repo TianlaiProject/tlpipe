@@ -29,7 +29,7 @@ class Timestream(object):
             Directory to create the Timestream in.
         tsname : string
             Name of the timestream.
-        beamtransfer : fmmode.core.beamtransfer.BeamTransfer
+        beamtransfer : drfit.core.beamtransfer.BeamTransfer
             BeamTransfer object containing the analysis products.
         """
         self.directory = os.path.abspath(tsdir)
