@@ -69,6 +69,7 @@ class PsCal(timestream_task.TimestreamTask):
                     'vis_conj': False, # if True, conjugate the vis first
                     'zero_diag': False, # if True, fill 0 to the diagonal of vis matrix before SPCA
                     'span': 60, # second
+                    'reserve_high_gain': False, # if True, will not flag those gain significantly higher than mean value, only flag significantly lower ones
                     'plot_figs': False,
                     'fig_name': 'gain/gain',
                     'save_src_vis': False, # save the extracted calibrator visibility
@@ -92,6 +93,7 @@ class PsCal(timestream_task.TimestreamTask):
         vis_conj = self.params['vis_conj']
         zero_diag = self.params['zero_diag']
         span = self.params['span']
+        reserve_high_gain = self.params['reserve_high_gain']
         plot_figs = self.params['plot_figs']
         fig_prefix = self.params['fig_name']
         tag_output_iter = self.params['tag_output_iter']
@@ -462,7 +464,12 @@ class PsCal(timestream_task.TimestreamTask):
                         vmed = np.median(vabs)
                         vabs_diff = np.abs(vabs - vmed)
                         vmad = np.median(vabs_diff) / 0.6745
-                        lG_abs[i, valid_inds] = np.where(vabs_diff>3.0*vmad, np.nan, vabs)
+                        if reserve_high_gain:
+                            # reserve significantly higher ones, flag only significantly lower ones
+                            lG_abs[i, valid_inds] = np.where(vmed-vabs>3.0*vmad, np.nan, vabs)
+                        else:
+                            # flag both significantly higher and lower ones
+                            lG_abs[i, valid_inds] = np.where(vabs_diff>3.0*vmad, np.nan, vabs)
 
                 # choose data slice near the transit time
                 li = max(start_ind, transit_ind - 10) - start_ind
