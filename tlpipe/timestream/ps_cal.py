@@ -639,7 +639,7 @@ class PsCal(timestream_task.TimestreamTask):
                             time.sleep(0.5)
                             continue
                     else:
-                        raise RuntimeError('Could not open file: %s...' % src_vis_file)
+                        raise RuntimeError('Could not open file: %s...' % gain_file)
 
                     mpiutil.barrier()
 
