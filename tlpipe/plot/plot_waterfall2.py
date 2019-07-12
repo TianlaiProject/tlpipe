@@ -40,6 +40,7 @@ class Plot(timestream_task.TimestreamTask):
                     'fig_name': 'wf/',
                     'feed_no': False, # True to use feed number (true baseline) else use channel no
                     'order_bl': True, # True to make small feed no first
+                    'plot_list': ['freq']
                   }
 
     prefix = 'pwf_'
@@ -68,6 +69,8 @@ class Plot(timestream_task.TimestreamTask):
         feed_no = self.params['feed_no']
         order_bl = self.params['order_bl']
         tag_output_iter = self.params['tag_output_iter']
+        plot_list = self.params['plot_list']
+        print("plot_list=",plot_list)
         iteration = self.iteration
  #       print("keys=",ts.keys())
  #       print("attrs=",ts.attrs.keys())
@@ -92,8 +95,8 @@ class Plot(timestream_task.TimestreamTask):
         else:
             raise ValueError('Need either a RawTimestream or Timestream')
         print("Startpol, bl=",pol,bl,vis.shape)
-        print("begin",vis[0,0],vis[3599,0])
- #       print("begin",vis[0,1],vis[3599,1])
+#        print("begin",vis[0,0],vis[3599,0])
+#       print("begin",vis[0,1],vis[3599,1])
 
         ntpt = vis.shape[0]
         freq = ts.freq[:]
@@ -104,7 +107,7 @@ class Plot(timestream_task.TimestreamTask):
         freq_extent = [freq[0], freq[-1]]
         time_extent = [0.0,np.float32(ntpt-1)]
         extent = time_extent +  freq_extent 
-        plot_list = ['resub','freq']
+#        plot_list = ['resub','freq']
 #        plot_list = ['freq']
         for ptype in plot_list:
             if ptype=='resub':
@@ -117,6 +120,11 @@ class Plot(timestream_task.TimestreamTask):
                 subvis = True
                 title = 'Subtracted Imag(Vis)' + tstart
                 vis1 = np.ma.array(vis.imag, mask=vis_mask,copy=True)
+            elif ptype=='abs':
+                paxis = '2D'
+                subvis = False
+                title = 'Abs(Vis)' + tstart
+                vis1 = np.ma.array(np.abs(vis), mask=vis_mask,copy=True)
             elif ptype=='freq':
                 paxis = 'freq'
                 subvis = False
@@ -166,6 +174,7 @@ class Plot(timestream_task.TimestreamTask):
                 fig_name = '%s%s_%d_%d.png' % \
                     (fig_prefix, ptype, bl[0], bl[1])
                 vislabel = 'V(%d,%d)' % (bl[0],bl[1])
+            print("figure=",fig_name)
             if tag_output_iter:
                 fig_name = output_path(fig_name, iteration=iteration)
             else:
@@ -173,4 +182,4 @@ class Plot(timestream_task.TimestreamTask):
             plt.text(xtext,ytext,vislabel,transform=axes.transAxes)
             plt.savefig(fig_name)
             plt.close()
-        print("end",vis[0,0],vis[3599,0])
+#        print("end",vis[0,0],vis[3599,0])
