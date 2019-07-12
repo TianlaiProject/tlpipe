@@ -92,6 +92,7 @@ class RfiStbl(timestream_task.TimestreamTask):
         vis = ts['vis']
         vis_mask = ts['vis_mask']
 #        print("vis_mask.dtype=",vis_mask.dtype,vis_mask.shape)
+        print("vis.shape=",vis.shape)
         number = np.count_nonzero(vis_mask)
         print("masked=",number)
         blorder = ts['blorder']
@@ -166,14 +167,19 @@ class RfiStbl(timestream_task.TimestreamTask):
         tfwgtoff = np.zeros(ntfbin,dtype=np.int64)
         #Loop over intervals noise source on / noise source off
 
-#        for ne in range(nedge-1):
-        for ne in range(18,20):
+        for ne in range(nedge-1):
             n1 = edge[ne]
             n2 = edge[ne+1]
+            ntmax = n2 - n1
+            if ntmax<5:
+                continue
+# ********* Temporary
+            if ne!=3:
+                continue
+
             noise = ns_on[n1]
 
             print("Looking in range",n1," to ",n2-1)
-            ntmax = n2 - n1
             avef = np.float(ntmax)
             sqavef =np.sqrt(avef)
             sigpm = ftol_fact/sqavef
@@ -195,20 +201,16 @@ class RfiStbl(timestream_task.TimestreamTask):
                 #Copy to masked array temp
                 temp = np.ma.array(abs(vis[n1:n2,:,bl]),mask=msk)
                 #Average over frequency
-                fave = np.mean(temp,axis=1)
+                fave = ma.mean(temp,axis=1)
                 #Get differences between adjacent time bins
-                diff = np.diff(fave)
+                diff = ma.diff(fave)
                 #Now get second differences in time
-                quad = np.diff(diff)
-
+                quad = ma.diff(diff)
                 #sigt is the rms deviation of time differences
                 sigt = mstats.trimmed_std(quad,siglim,ddof=1)
                  #Check for valid sigma
                 if sigt<=0.0 or sigt==np.ma.core.MaskedConstant:
                     #No.  Just mask everything and continue with next bl
-                    vis_mask[n1:n2,:,bl] |= MASKRFI
-                    continue
-                if ntmax<5:
                     vis_mask[n1:n2,:,bl] |= MASKRFI
                     continue
                 #print("sigt=",sigt,sigtpr,n1,n2,blorder[bl])
@@ -219,7 +221,11 @@ class RfiStbl(timestream_task.TimestreamTask):
                     ttol = ttol*ttol_extra
 
                 for nt in range(1,ntmax-3):
-                    if quad.mask[nt]:
+                    if np.isscalar(quad.mask):
+                        qmask = quad.mask
+                    else:
+                        qmask = quad.mask[nt]
+                    if qmask:
                         vis_mask[nt,:,bl] |= MASKRFI
                         continue
                        #Look for maximum slope change=minimum in quad
@@ -326,6 +332,8 @@ class RfiStbl(timestream_task.TimestreamTask):
                 for fi in range(-2,nfpt-2):
                    #sig3 = np.std(vis[n1:n2,fi+2,bl],ddof=1)
                     sig3 = mstats.trimmed_std(temp[:,fi+2],siglim,ddof=1)
+                    if sig3==0.0:
+                        sig3 = ma.std(temp[:,fi+2])
                     if sig3==np.ma.core.MaskedConstant:
                         sig3 = 0.0
 
@@ -334,9 +342,18 @@ class RfiStbl(timestream_task.TimestreamTask):
                     else:
                         if fi>=0:
                             sigmaq[fi,bl] = 0.0
+#                            print("sigmaq=0",fi,bl,sig1,sig2,sig3)
+#                            if sig1==0.0:
+#                                print("temp0=",temp[:,fi])
+#                            if sig2==0.0:
+#                                print("temp1=",temp[:,fi+1])
+#                                sig2 = ma.std(temp[:,fi+1])
+#                                print("sig2=",sig2)
+#                            if sig3==0.0:
+#                                print("temp2=",temp[:,fi+2])
                     sig1 = sig2
                     sig2 = sig3
-                    
+                      
                     if fi<1 or fi>=nfpt-3:
                         continue
                 #for fi in range(1,nfpt-3):
@@ -347,7 +364,7 @@ class RfiStbl(timestream_task.TimestreamTask):
                         continue
 
 #test is True if point does NOT have rfi signature
-                    test = -quad[fi]/sigmaq[fi,bl]<sigpm
+                    test = -quad[fi]<sigpm*sigmaq[fi,bl]
 #                    if fi==2 or fi==194 or fi==354:
 #                        print("blorder=",fi,bl,blorder[bl])
 #                        print("tave=",tave[fi-2],tave[fi-1],tave[fi],tave[fi+1])
@@ -355,7 +372,7 @@ class RfiStbl(timestream_task.TimestreamTask):
 #                        print("diff=",bl,diff[0],diff[1],diff[2],diff[3])
 #                        print("quads",bl,quad[1],quad[2],quad[3])
 #                        print("sigma",bl,sigmaq[1,bl],sigmaq[2,bl])
-                    if plot_sigs:
+                    if plot_sigs and sigmaq[fi,bl]>0.0:
                         if noise:
                             ib = np.int32(-sqavef*quad[fi] \
                                                /(sigmaq[fi,bl]*fbinon))
@@ -374,10 +391,18 @@ class RfiStbl(timestream_task.TimestreamTask):
                         add = quad[fi-1]
                         if quad[fi+1]<add:
                             add = quad[fi+1]
-                            test = -(quad[fi]+add)/sigmaq[fi,bl]<sigpm
+                            test = -(quad[fi]+add)<sigpm*sigmaq[fi,bl]
 
                     if test:
                         continue
+#                    print("fi",fi,bl)
+#                    print ("tave=",tave[fi-2],tave[fi-1],tave[fi], \
+#                               tave[fi+1],tave[fi+2])
+#                    print ("diff=",diff[fi-2],diff[fi-1],diff[fi], \
+#                               diff[fi+1],diff[fi+2])
+#                    print ("quad=",quad[fi-2],quad[fi-1],quad[fi], \
+#                               quad[fi+1],quad[fi+2])
+#                    print ("quad,sigma",quad[fi],sigmaq[fi,bl])
                     fcen[fi+1,bl] = 1
 #                    if fi==10 and ne==1:
 #                        print(bl,test,fcen[fi+1,bl])
@@ -427,7 +452,7 @@ class RfiStbl(timestream_task.TimestreamTask):
                     temp = abs(vis[nt+n1,:,bl])
                     diff = np.diff(temp)
                     quad = np.diff(diff)
-                    signif = -quad/sigmaq[:,bl]
+#                    signif = -quad/sigmaq[:,bl]
   
                     for fi in range(1,nfpt-3):
                         if (vis_mask[nt+n1,fi+1,bl]&maskbad)!=0:
@@ -440,7 +465,7 @@ class RfiStbl(timestream_task.TimestreamTask):
 #                        print("fi=",fi,"quad=",quad[fi-1],quad[fi],quad[fi+1],\
 #                                  signif[fi])
 #test is True if point does NOT have rfi signature
-                        test = signif[fi]<tftol
+                        test = quad[fi]<tftol*sigmaq[fi,bl]
 
                         if plot_sigs:
                             if noise:
@@ -460,7 +485,7 @@ class RfiStbl(timestream_task.TimestreamTask):
                             if quad[fi+1]<add:
                                 add = quad[fi+1]
 #FIX THIS*******************************
-                                test = -(quad[fi]+add)/sigmaq[fi,bl]<tftol
+                                test = -(quad[fi]+add)<tftol*sigmaq[fi,bl]
 #                                if not test:
 #                                    print("fi=",fi,"quad=",quad[fi-1], \
 #                                              quad[fi],quad[fi+1],add, \
@@ -596,81 +621,81 @@ class RfiStbl(timestream_task.TimestreamTask):
 #                plt.savefig(fig_name)
 #                plt.close('all')
 
-        print("vis_mask.dtype=",vis_mask.dtype,vis_mask.shape)
-        number = np.count_nonzero(vis_mask)
-        print("masked=",number)
+#        print("vis_mask.dtype=",vis_mask.dtype,vis_mask.shape)
+#        number = np.count_nonzero(vis_mask)
+#        print("masked=",number)
 
-        bsamp = (4,5,8,33,34,35,36,57,58,73,74,75,76,105,106,107,108, \
-                     216,217,218,219,220,221)
-        non = np.zeros(10,dtype=np.int32)
-        noff = np.zeros(10,dtype=np.int32)
-        sumon = np.zeros(10,dtype=np.float32)
-        sumvon = np.zeros(10,dtype=np.float32)
-        sumoff = np.zeros(10,dtype=np.float32)
-        sumvoff = np.zeros(10,dtype=np.float32)
-        frange = range(10)
-        for fi in frange:
-            print("fi=",fi)
-            for bl in bsamp:
-                print("bl=",bl)
-                for ne in range(nedge-1):
-                    n1 = edge[ne]
-                    n2 = edge[ne+1]
-                    noise = ns_on[n1]
-                    temp = abs(vis[n1:n2,fi,bl])
+#        bsamp = (4,5,8,33,34,35,36,57,58,73,74,75,76,105,106,107,108, \
+#                     216,217,218,219,220,221)
+#        non = np.zeros(10,dtype=np.int32)
+#        noff = np.zeros(10,dtype=np.int32)
+#        sumon = np.zeros(10,dtype=np.float32)
+#        sumvon = np.zeros(10,dtype=np.float32)
+#        sumoff = np.zeros(10,dtype=np.float32)
+#        sumvoff = np.zeros(10,dtype=np.float32)
+#        frange = range(10)
+#        for fi in frange:
+#            print("fi=",fi)
+#            for bl in bsamp:
+#                print("bl=",bl)
+#                for ne in range(nedge-1):
+#                    n1 = edge[ne]
+#                    n2 = edge[ne+1]
+#                    noise = ns_on[n1]
+#                    temp = abs(vis[n1:n2,fi,bl])
 #                    print("fi=",fi,"bl=",bl,"ne=",ne,temp[n2-n1-1])
-                    tempsq = temp*temp
-                    if noise:
-                        non[fi] += (n2-n1)
-                        sumon[fi] += np.sum(temp)
-                        sumvon[fi] += np.sum(tempsq)
-                    else:
-                        noff[fi] += (n2-n1)
-                        sumoff[fi] += np.sum(temp)
-                        sumvoff[fi] += np.sum(tempsq)
-        print("non=",non)
-        print("noff=",noff)
+#                    tempsq = temp*temp
+#                    if noise:
+#                        non[fi] += (n2-n1)
+#                        sumon[fi] += np.sum(temp)
+#                        sumvon[fi] += np.sum(tempsq)
+#                    else:
+#                        noff[fi] += (n2-n1)
+#                        sumoff[fi] += np.sum(temp)
+#                        sumvoff[fi] += np.sum(tempsq)
+#        print("non=",non)
+#        print("noff=",noff)
 
-        print("sumon=",sumon)
-        print("sumoff",sumoff)
-        print("noise on")
-        for n in range(10):
-            sumon[n] = sumon[n]/non[n]
-            sumvon[n] = sumvon[n]/non[n] - sumon[n]*sumon[n]
-            sumvon[n] = np.sqrt(sumvon[n]/(non[n]-1))
-            line = "%i,%.4f,%.4f" % (n,sumon[n],sumvon[n])
-            print(line)
-        print("noise off")
-        for n in range(10):
-            sumoff[n] = sumoff[n]/noff[n]
-            sumvoff[n] = sumvoff[n]/noff[n] - sumoff[n]*sumoff[n]
-            sumvoff[n] = np.sqrt(sumvoff[n]/(noff[n]-1))
-            line = "%i,%.4f,%.4f" % (n,sumoff[n],sumvoff[n])
-            print(line)
+#        print("sumon=",sumon)
+#        print("sumoff",sumoff)
+#        print("noise on")
+#        for n in range(10):
+#            sumon[n] = sumon[n]/non[n]
+#            sumvon[n] = sumvon[n]/non[n] - sumon[n]*sumon[n]
+#            sumvon[n] = np.sqrt(sumvon[n]/(non[n]-1))
+#            line = "%i,%.4f,%.4f" % (n,sumon[n],sumvon[n])
+#            print(line)
+#        print("noise off")
+#        for n in range(10):
+#            sumoff[n] = sumoff[n]/noff[n]
+#            sumvoff[n] = sumvoff[n]/noff[n] - sumoff[n]*sumoff[n]
+#            sumvoff[n] = np.sqrt(sumvoff[n]/(noff[n]-1))
+#            line = "%i,%.4f,%.4f" % (n,sumoff[n],sumvoff[n])
+#            print(line)
         
-        tbad = np.zeros(9,dtype=np.float32)
-        tgood = np.zeros(9,dtype=np.float32)
-        numbad = 0
-        numgood = 0
-        for nt in range(2155,2164):
-            for bl in range(nbl):
-                x = 6
-                temp = abs(vis[nt,0:nfpt,bl])
-                base = blorder[bl]
-                base0 = base[0]
-                base1 = base[1]
-                if base0==base1:
-                    continue
-                good = base0<=16 and base1>16
-                if good:
-                    tgood[nt-2155] += np.mean(temp)
-                    numgood += 1
-                else:
-                    tbad[nt-2155] += np.mean(temp)
-                    numbad += 1
-            tgood[nt-2155] /= numgood
-            tbad[nt-2155] /= numbad
-            print ("time=",nt,tgood[nt-2155],tbad[nt-2155])
+#        tbad = np.zeros(9,dtype=np.float32)
+#        tgood = np.zeros(9,dtype=np.float32)
+#        numbad = 0
+#        numgood = 0
+#        for nt in range(2155,2164):
+#            for bl in range(nbl):
+#                x = 6
+#                temp = abs(vis[nt,0:nfpt,bl])
+#                base = blorder[bl]
+#                base0 = base[0]
+#                base1 = base[1]
+#                if base0==base1:
+#                    continue
+#                good = base0<=16 and base1>16
+#                if good:
+#                    tgood[nt-2155] += np.mean(temp)
+#                    numgood += 1
+#                else:
+#                    tbad[nt-2155] += np.mean(temp)
+#                    numbad += 1
+#            tgood[nt-2155] /= numgood
+#            tbad[nt-2155] /= numbad
+#            print ("time=",nt,tgood[nt-2155],tbad[nt-2155])
 
         return super(RfiStbl, self).process(ts)
 
