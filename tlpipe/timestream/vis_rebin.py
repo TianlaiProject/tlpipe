@@ -37,10 +37,8 @@ class Rebin(timestream_task.TimestreamTask):
         assert isinstance(ts, Timestream), '%s only works for Timestream object' % self.__class__.__name__
 
         MASKNOAVE = 32
-        print("vis_rebin")
         freq_bin = self.params['freq_bin']
         time_bin = self.params['time_bin']
-        print("bin_numbers",freq_bin,time_bin)
         ts.redistribute('baseline')
 
         ntin = len(ts.time)
@@ -62,17 +60,17 @@ class Rebin(timestream_task.TimestreamTask):
         local_hour_in = ts['local_hour']
         local_hour = np.zeros(ntout, dtype=local_hour_in.dtype)
         az_alt_in = ts['az_alt']
-        az_alt = np.zeros(ntout, dtype=az_alt_in.dtype)
+        az_alt = np.zeros([ntout,2], dtype=az_alt_in.dtype)
         ra_dec_in = ts['ra_dec']
-        ra_dec = np.zeros(ntout, dtype=ra_dec_in.dtype)
+        ra_dec_in[:,0] = np.unwrap(ra_dec_in[:,0])
+        ra_dec = np.zeros([ntout,2], dtype=ra_dec_in.dtype)
         ns_on_in = ts['ns_on']
         ns_on = np.zeros(ntout, dtype=ns_on_in.dtype)
-        print("sec1970",sec1970.dtype,sec1970[0])
 
 
         vis = np.zeros((ntout,nfout)+ts.local_vis.shape[2:], dtype=ts.vis.dtype)
         vis_mask= np.zeros((ntout,nfout)+ts.local_vis.shape[2:], dtype=ts.vis_mask.dtype) # all False
-        print("shapes",freq.shape,vis.shape,vis_mask.shape)
+#        print("shapes",freq.shape,vis.shape,vis_mask.shape)
         
         # average over frequency
         for nt in xrange(ntout):
@@ -81,8 +79,13 @@ class Rebin(timestream_task.TimestreamTask):
             sec1970[nt] = np.mean(sec1970_in[bt:et])
             jul_date[nt] = np.mean(jul_date_in[bt:et])
             local_hour[nt] = np.mean(local_hour_in[bt:et])
-            az_alt[nt] = np.mean(az_alt_in[bt:et])
-            ra_dec[nt] = np.mean(ra_dec_in[bt:et])
+            az_alt[nt] = np.mean(az_alt_in[bt:et],axis=0)
+#            print("az_alt",az_alt[nt])
+            ra_dec[nt] = np.mean(ra_dec_in[bt:et],axis=0)
+            ra_dec[nt,0] = ra_dec[nt,0] % (2.0*np.pi)
+#            print("nt=",nt)
+#            print("ra_dec[nt]=",ra_dec[nt])
+#            print("ra_dec=",ra_dec_in[bt:et])
             ns_on[nt] = np.any(ns_on_in[bt:et])
             for nf in xrange(nfout):
                 bf = nf*freq_bin
