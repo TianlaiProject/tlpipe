@@ -50,7 +50,8 @@ class Stack(timestream_task.TimestreamTask):
         fig_prefix = self.params['fig_name']
 #        plot = self.params['plot']
         plot_tproj = self.params['plot_tproj']
-        print("fig_prefix=",fig_prefix)
+#        print("fig_prefix=",fig_prefix)
+#        print("plot_tproj=",plot_tproj)
 #        print("plot=",plot)
 
 #Check axis order.  Must be time x frequency x baseline. No reordering
@@ -79,8 +80,8 @@ class Stack(timestream_task.TimestreamTask):
         blorder = ts['blorder']
         freq = ts['freq'][:]
         print("freq.dim=",freq.shape)
-        print(freq)
-        print("blorder=",blorder)
+#        print(freq)
+#        print("blorder=",blorder)
         ntot = blorder.shape[0]
         for n in range(ntot):
             print("blorder=",n,blorder[n])
@@ -120,7 +121,7 @@ class Stack(timestream_task.TimestreamTask):
         nfpt = vis.shape[1]
         npol = vis.shape[2]
         nbl = vis.shape[3]
-        print("ntpt,nfpt,npol,nbl=",ntpt,nfpt,npol,nbl)
+#        print("ntpt,nfpt,npol,nbl=",ntpt,nfpt,npol,nbl)
 
     
         if plot_tproj:
@@ -157,7 +158,18 @@ class Stack(timestream_task.TimestreamTask):
                 print("fig_name=",fig_name)
                 plt.savefig(fig_name)
                 plt.close()
-
+        plot_tindv = True
+        if plot_tindv:
+            for nb in range(nbl):
+                for n in range(npol):
+                    tproj = np.mean(np.abs(vis[:,:,n,nb]),axis=1)
+                    plt.figure()
+                    plt.plot(range(ntpt),tproj[:])
+                    name = fig_prefix + ('_%i_%i' % (nb,n))
+                    fig_name = output_path(name)
+                    print("fig_name=",fig_name)
+                    plt.savefig(fig_name)
+                    plt.close()
 
         freq_label = r'$Frequency$ (MHz)'
         time_label = r'$Time$ (sec)'
@@ -175,7 +187,7 @@ class Stack(timestream_task.TimestreamTask):
         for pol in range(4):
             for blord in range(nbl):
                 bl = blorder[blord]
-                print("bl,pol=",bl,pol)
+ #               print("bl,pol=",bl,pol)
 
 #                plt.figure(figsize=[6,3],dpi=600)
 #                axes = plt.subplot(111)
@@ -238,7 +250,7 @@ class Stack(timestream_task.TimestreamTask):
             if pol<=1:
                 upper = 50000.0
             else:
-                upper = 4.0
+                upper = 500.0
             
             ax.hist(histdat,bins=20,range=(0.0,upper))
             name = fig_prefix + '_hist_auto_' + pname
@@ -263,7 +275,7 @@ class Stack(timestream_task.TimestreamTask):
             if pol<=1:
                 upper = 200
             else:
-                upper = 0.2
+                upper = 100
             ax.hist(histdat,bins=50,range=(0.0,upper))
             name = fig_prefix + '_hist_cross_' + pname
             fig_name = output_path(name)
