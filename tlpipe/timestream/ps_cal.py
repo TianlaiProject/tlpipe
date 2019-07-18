@@ -25,6 +25,7 @@ from caput import mpiarray
 from tlpipe.utils.path_util import output_path
 from tlpipe.utils import progress
 from tlpipe.utils import rpca_decomp
+from tlpipe.cal import calibrators
 import tlpipe.plot
 import matplotlib.pyplot as plt
 
@@ -124,16 +125,17 @@ class PsCal(timestream_task.TimestreamTask):
             # transit_time = transitsource[-1, 0] # second, sec1970
             # int_time = ts.attrs['inttime'] # second
 
-            # calibrator
-            srclist, cutoff, catalogs = a.scripting.parse_srcs(calibrator, catalog)
-            cat = a.src.get_catalog(srclist, cutoff, catalogs)
-            assert(len(cat) == 1), 'Allow only one calibrator'
-            s = cat.values()[0]
+            # get the calibrator
+            try:
+                s = calibrators.get_src(calibrator)
+            except KeyError:
+                if mpiutil.rank0:
+                    print 'Calibrator %s is unavailable, available calibrators are:'
+                    for key, d in calibrators.src_data.items():
+                        print '%8s  ->  %12s' % (key, d[0])
+                raise RuntimeError('Calibrator %s is unavailable')
             if mpiutil.rank0:
-                print 'Calibrating for source %s with' % calibrator,
-                print 'strength', s._jys, 'Jy',
-                print 'measured at', s.mfreq, 'GHz',
-                print 'with index', s.index
+                print 'Try to calibrate with %s...' % s.src_name
 
             # get transit time of calibrator
             # array
@@ -163,7 +165,7 @@ class PsCal(timestream_task.TimestreamTask):
                 cnt += 1
 
             if mpiutil.rank0:
-                print 'transit ind of %s: %s, time: %s' % (calibrator, transit_inds, local_next_transit)
+                print 'transit ind of %s: %s, time: %s' % (s.src_name, transit_inds, local_next_transit)
 
             ### now only use the first transit point to do the cal
             ### may need to improve in the future
@@ -174,12 +176,6 @@ class PsCal(timestream_task.TimestreamTask):
 
             start_ind = max(0, start_ind)
             end_ind = min(end_ind, ts.vis.shape[0])
-
-            # # check if data contain this range
-            # if start_ind < 0:
-            #     raise RuntimeError('start_ind: %d < 0' % start_ind)
-            # if end_ind > ts.vis.shape[0]:
-            #     raise RuntimeError('end_ind: %d > %d' % (end_ind, ts.vis.shape[0]))
 
             if vis_conj:
                 ts.local_vis[:] = ts.local_vis.conj()
@@ -238,7 +234,8 @@ class PsCal(timestream_task.TimestreamTask):
 
             # construct visibility matrix for a single time, freq, pol
             Vmat = np.full((nfeed, nfeed), cnan, dtype=ts.vis.dtype)
-            Sc = s.get_jys()
+            # get flus of the calibrator in the observing frequencies
+            Sc = s.get_jys(freq)
             if show_progress and mpiutil.rank0:
                 pg = progress.Progress(tfp_len, step=progress_step)
             for ii, (ti, fi, pi) in enumerate(tfp_linds):
@@ -249,8 +246,6 @@ class PsCal(timestream_task.TimestreamTask):
                     continue
                 # aa.set_jultime(ts['jul_date'][ti])
                 # s.compute(aa)
-                # get fluxes vs. freq of the calibrator
-                # Sc = s.get_jys()
                 # get the topocentric coordinate of the calibrator at the current time
                 # s_top = s.get_crds('top', ncrd=3)
                 # aa.sim_cache(cat.get_crds('eq', ncrd=3)) # for compute bm_response and sim
@@ -280,7 +275,6 @@ class PsCal(timestream_task.TimestreamTask):
                 S0 = np.where(np.abs(diff)>3.0*rpca_decomp.MAD(Vmat), diff, 0)
                 # stable PCA decomposition
                 V0, S = rpca_decomp.decompose(Vmat, rank=1, S=S0, max_iter=100, threshold='hard', tol=1.0e-6, debug=False)
-                # V0, S = rpca_decomp.decompose(Vmat, rank=1, S=S0, max_iter=100, threshold='soft', tol=1.0e-6, debug=False)
                 if save_src_vis or subtract_src:
                     lsrc_vis[ii] = V0
                     if save_src_vis:
