@@ -619,7 +619,7 @@ class Timestream(object):
 
 
     @classmethod
-    def load(cls, tsdir):
+    def load(cls, tsdir, tsname):
         """Load the Timestream object from disk.
 
         Parameters
@@ -629,7 +629,7 @@ class Timestream(object):
         """
 
         # Create temporary object to extract picklefile property
-        tmp_obj = cls(tsdir, tsdir)
+        tmp_obj = cls(tsdir, tsname, 'bt')
 
         with open(tmp_obj._picklefile, 'r') as f:
             print "=== Loading Timestream object. ==="

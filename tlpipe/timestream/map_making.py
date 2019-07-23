@@ -377,6 +377,6 @@ class MapMaking(timestream_task.TimestreamTask):
         use_existed_beam = self.params['use_existed_beam']
 
         if use_existed_beam:
-            self.process(ts)
+            return self.process(ts)
         else:
             return super(MapMaking, self).read_process_write(ts)
