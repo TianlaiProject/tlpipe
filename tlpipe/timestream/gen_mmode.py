@@ -13,6 +13,7 @@ import numpy as np
 import h5py
 import timestream_task
 from tlpipe.container.timestream import Timestream
+from tlpipe.core import constants as const
 
 from caput import mpiutil
 from tlpipe.utils.path_util import output_path
@@ -108,6 +109,22 @@ class GenMmode(timestream_task.TimestreamTask):
         mmode = np.zeros((2*tel.mmax+1, nfreq, nuq), dtype=np.complex128)
         N = np.zeros((nfreq, nuq), dtype=np.int) # number of accumulate terms
 
+        start_ra = ts.vis.attrs['start_ra']
+        ra = mpiutil.gather_array(ts['ra_dec'].local_data[:, 0], root=None)
+        ra = np.unwrap(ra)
+        # find the first index that ra closest to start_ra
+        ind = np.searchsorted(ra, start_ra)
+        if np.abs(ra[ind] - start_ra) > np.abs(ra[ind+1] - start_ra):
+            ind = ind + 1
+
+        # get number of int_time in one sidereal day
+        num_int = np.int(np.around(1.0 * const.sday / ts.attrs['inttime']))
+        nt = ts.vis.shape[0]
+        nt1 = min(num_int, nt-ind)
+
+        inds = np.arange(nt)
+        local_inds = mpiutil.scatter_array(inds, root=None)
+
         local_phi = ts['ra_dec'].local_data[:, 0]
         # the Fourier transfom matrix
         E = np.exp(-1.0J * np.outer(np.arange(-tel.mmax, tel.mmax+1), local_phi))
@@ -129,11 +146,13 @@ class GenMmode(timestream_task.TimestreamTask):
                     try:
                         b_ind = bls.index((feeds[a1], feeds[a2]))
                         V = ts.local_vis[:, :, pi, b_ind]
-                        M = ts.local_vis_mask[:, :, pi, b_ind] # mask
                     except ValueError:
                         b_ind = bls.index((feeds[a2], feeds[a1]))
                         V = ts.local_vis[:, :, pi, b_ind].conj()
-                        M = ts.local_vis_mask[:, :, pi, b_ind] # mask
+                    M = ts.local_vis_mask[:, :, pi, b_ind] # mask
+                    # mask time points that are outside of this day
+                    M[local_inds<ind, :] = True
+                    M[local_inds>=ind+nt1, :] = True
                     V = np.where(M, 0, V) # fill masked values with 0
                     M = M.astype(np.int)
                     mmode[:, :, qi] += np.dot(E, V)
