@@ -603,6 +603,7 @@ class PsCal(timestream_task.TimestreamTask):
                             dset.attrs['freq'] = freq
                             dset.attrs['pol'] = np.array(['xx', 'yy'])
                             dset.attrs['feed'] = np.array(feedno)
+                            dset.attrs['transit_ind'] = transit_ind
                             # save gain
                             dset = f.create_dataset('gain', data=gain)
                             dset.attrs['calibrator'] = calibrator
