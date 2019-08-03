@@ -106,8 +106,14 @@ class GenMmode(timestream_task.TimestreamTask):
         nuq = len(unqpairs) # number of unique pairs
 
         # to save m-mode
-        mmode = np.zeros((2*tel.mmax+1, nfreq, nuq), dtype=np.complex128)
-        N = np.zeros((nfreq, nuq), dtype=np.int) # number of accumulate terms
+        if mpiutil.rank0:
+            # large array only in rank0 to save memory
+            mmode = np.zeros((2*tel.mmax+1, nfreq, nuq), dtype=np.complex128)
+            N = np.zeros((nfreq, nuq), dtype=np.int) # number of accumulate terms
+
+        # mmode of a specific unique pair
+        mmodeqi = np.zeros((2*tel.mmax+1, nfreq), dtype=np.complex128)
+        Nqi = np.zeros((nfreq), dtype=np.int) # number of accumulate terms
 
         start_ra = ts.vis.attrs['start_ra']
         ra = mpiutil.gather_array(ts['ra_dec'].local_data[:, 0], root=None)
@@ -140,6 +146,8 @@ class GenMmode(timestream_task.TimestreamTask):
 
         # compute mmodes for each unique pair
         for qi in range(nuq):
+            mmodeqi[:] = 0
+            Nqi[:] = 0
             this_pairs = allpairs[red_bin[qi]:red_bin[qi+1]]
             for a1, a2 in this_pairs:
                 for pi in pis:
@@ -155,29 +163,36 @@ class GenMmode(timestream_task.TimestreamTask):
                     M[local_inds>=ind+nt1, :] = True
                     V = np.where(M, 0, V) # fill masked values with 0
                     M = M.astype(np.int)
-                    mmode[:, :, qi] += np.dot(E, V)
-                    N[:, qi] += np.sum(M, axis=0)
+                    # mmode[:, :, qi] += np.dot(E, V)
+                    # N[:, qi] += np.sum(M, axis=0)
+                    mmodeqi += np.dot(E, V)
+                    Nqi += np.sum(M, axis=0)
+
+            mpiutil.barrier()
+
+            # accumulate mmode from all processes by Reduce
+            if mpiutil.size > 1: # more than one processes
+                if mpiutil.rank0:
+                    # use IN_PLACE to reuse the mmode and N array
+                    mpiutil.world.Reduce(mpiutil.IN_PLACE, mmodeqi, op=mpiutil.SUM, root=0)
+                    mpiutil.world.Reduce(mpiutil.IN_PLACE, Nqi, op=mpiutil.SUM, root=0)
+                else:
+                    mpiutil.world.Reduce(mmodeqi, mmodeqi, op=mpiutil.SUM, root=0)
+                    mpiutil.world.Reduce(Nqi, Nqi, op=mpiutil.SUM, root=0)
+
+            if mpiutil.rank0:
+                mmode[:, :, qi] = mmodeqi
+                N[:, qi] = Nqi
 
         del ts
-
-        # accumulate mmode from all processes by Reduce
-        if mpiutil.size > 1: # more than one processes
-            if mpiutil.rank0:
-                # use IN_PLACE to reuse the mmode and N array
-                mpiutil.world.Reduce(mpiutil.IN_PLACE, mmode, op=mpiutil.SUM, root=0)
-                mpiutil.world.Reduce(mpiutil.IN_PLACE, N, op=mpiutil.SUM, root=0)
-            else:
-                mpiutil.world.Reduce(mmode, mmode, op=mpiutil.SUM, root=0)
-                mpiutil.world.Reduce(N, N, op=mpiutil.SUM, root=0)
+        del E
 
         # beamtransfer
         bt = beamtransfer.BeamTransfer(beam_dir, tel, noise_weight, True)
         # timestream
         tstream = timestream.Timestream(ts_dir, ts_name, bt, no_m_zero)
 
-        if not mpiutil.rank0:
-            del mmode
-        else:
+        if mpiutil.rank0:
             # reshape mmode toseparate positive and negative ms
             mmode1 = np.zeros((tel.mmax+1, nfreq, 2, nuq), dtype=mmode.dtype)
             mmode1[0, :, 0] = mmode[tel.mmax]
