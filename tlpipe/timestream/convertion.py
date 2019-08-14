@@ -2,6 +2,7 @@ import numpy as np
 import katdal
 import h5py
 from os import path
+from caput import mpiarray
 
 from tlpipe.pipeline.pipeline import FileIterBase
 
@@ -29,7 +30,7 @@ class MeerKAT2TL(FileIterBase):
 
     def write_output(self, output):
 
-        print self.output_files
+        #print self.output_files
 
         # Data Array
         output_data = output[0]
@@ -151,27 +152,16 @@ class MeerKAT2TL(FileIterBase):
 
                 shp = (time_n, freq_n, 2, antn)
                 vis = np.empty(shp, dtype='complex64')
-                ra  = np.empty(shp[:1] + (antn, ), dtype='float')
-                dec = np.empty(shp[:1] + (antn, ), dtype='float')
+                #ra  = np.empty(shp[:1] + (antn, ), dtype='float')
+                #dec = np.empty(shp[:1] + (antn, ), dtype='float')
 
-                pols = ['H', 'V']
+                #az = np.empty(shp[:1] + (antn, ), dtype='float')
+                #el = np.empty(shp[:1] + (antn, ), dtype='float')
 
-                for ii, ant in enumerate(ants):
-                    t0 = time.time()
-                    print ii, ant.name,
-
-                    #for pol in range(2):
-                    #    print pols[pol],
-
-                        
-                    output_data.select(ants=ant, pol='HH, VV')
-                    #output_data.select(scans=self.params['selection'][fi], ants=ant)
-                    #output_data.select(scans=5, ants=ant)
-                    vis[:, :, :, ii] = output_data.vis[:]
-
-                    ra[:, ii]  = output_data.ra[:, 0]
-                    dec[:, ii] = output_data.dec[:, 0]
-                    print "\tload %s %8.2f s"%(ant.name, time.time() - t0)
+                t0 = time.time()
+                vis[:] = output_data.vis[:, :, :2*antn].reshape(shp)
+                print "\tload vis of scan %3d use %8.2f s"%(
+                        self.params['selection'][fi], time.time() - t0)
 
                 df['pol'] = np.array(['hh', 'vv'])
                 df['pol'].attrs['pol_type'] = 'linear'
@@ -180,11 +170,30 @@ class MeerKAT2TL(FileIterBase):
                 df['blorder'] = blorder
                 df['blorder'].attrs['dimname'] = 'Baselines, BaselineName'
 
-            df['ra']  = ra
+            ra  = output_data.ra[...,:2*antn].reshape((time_n, antn))
+            ra  = mpiarray.MPIArray.wrap(ra, axis=0)
+            df.create_dataset('ra', data=ra, dtype=ra.dtype, shape=ra.shape)
             df['ra'].attrs['dimname'] = 'Time, Baselines'
-            df['dec'] = dec
+
+            dec  = output_data.dec[...,:2*antn].reshape((time_n, antn))
+            dec = mpiarray.MPIArray.wrap(dec, axis=0)
+            df.create_dataset('dec', data=dec, dtype=dec.dtype, shape=dec.shape)
             df['dec'].attrs['dimname'] = 'Time, Baselines'
 
+            az  = output_data.az[...,:2*antn].reshape((time_n, antn))
+            az  = mpiarray.MPIArray.wrap(az, axis=0)
+            df.create_dataset('az', data=az, dtype=az.dtype, shape=az.shape)
+            df['az'].attrs['dimname'] = 'Time, Baselines'
+
+            el  = output_data.el[...,:2*antn].reshape((time_n, antn))
+            el  = mpiarray.MPIArray.wrap(el, axis=0)
+            df.create_dataset('el', data=el, dtype=el.dtype, shape=el.shape)
+            df['el'].attrs['dimname'] = 'Time, Baselines'
+
+            flags = output_data.flags[...,:2*antn].reshape(vis.shape)
+            flags = mpiarray.MPIArray.wrap(flags, axis=0)
+            df.create_dataset('flags', data=flags, dtype=flags.dtype, shape=flags.shape)
+            df['flags'].attrs['dimname'] = 'Time, Frequency, Polarization, Baseline'
 
             #df.create_dataset('vis', chunks = (10, 1024, 1, 4), data=vis,
             df.create_dataset('vis', data=vis, dtype = vis.dtype, shape = vis.shape)

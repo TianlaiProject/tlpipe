@@ -19,7 +19,9 @@ from tlpipe.utils.path_util import output_path
 from tlpipe.utils import hist_eq
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from matplotlib.ticker import MaxNLocator, AutoMinorLocator
+from matplotlib.ticker import MaxNLocator, AutoMinorLocator, MultipleLocator
+
+from astropy.time import Time
 
 from scipy.signal import medfilt
 
@@ -251,8 +253,10 @@ class PlotMeerKAT(timestream_task.TimestreamTask):
 
     params_init = {
             'main_data' : 'vis',
+            'corr' : 'auto',
             'flag_mask' : True,
             'flag_ns'   : False,
+            'flag_raw'  : True,
             're_scale'  : None,
             'vmin'      : None,
             'vmax'      : None,
@@ -265,6 +269,7 @@ class PlotMeerKAT(timestream_task.TimestreamTask):
             'bad_time_list' : None,
             'show'          : None,
             'plot_index'    : False,
+            'plot_ra'       : False,
             'unit' : r'${\rm T}\,[{\rm K}]$', 
             }
     prefix = 'pkat_'
@@ -273,7 +278,7 @@ class PlotMeerKAT(timestream_task.TimestreamTask):
 
         ts.main_data_name = self.params['main_data']
 
-        ts.redistribute('baseline')
+        #ts.redistribute('baseline')
 
         func = ts.bl_data_operate
 
@@ -295,6 +300,9 @@ class PlotMeerKAT(timestream_task.TimestreamTask):
                 print bad_freq
                 ts.vis_mask[:, slice(*bad_freq), ...] = True
 
+        if 'flags' in ts.iterkeys() and self.params['flag_raw']:
+            print 'apply raw flags'
+            ts.vis_mask[:] += ts['flags'][:]
 
         func(self.plot, full_data=True, show_progress=show_progress, 
                 progress_step=progress_step, keep_dist_axis=False)
@@ -320,25 +328,25 @@ class PlotMeerKAT(timestream_task.TimestreamTask):
         fig_prefix = self.params['fig_name']
         main_data = self.params['main_data']
 
+        vis1 = np.ma.array(vis)
         if flag_mask:
-            vis1 = np.ma.array(vis, mask=vis_mask)
-        elif flag_ns:
+            vis1.mask = vis_mask
+
+        #if 'flags' in ts.iterkeys():
+        #    print 'apply raw flags'
+        #    print ts['flags'].shape
+        #    vis1.mask += ts['flags'][:]
+
+        if flag_ns:
             if 'ns_on' in ts.iterkeys():
-                vis1 = vis.copy()
-                on = np.where(ts['ns_on'][:])[0]
-                vis1[on] = complex(np.nan, np.nan)
-                #if not interpolate_ns:
-                #    vis1[on] = complex(np.nan, np.nan)
-                #else:
-                #    off = np.where(np.logical_not(ts['ns_on'][:]))[0]
-                #    for fi in xrange(vis1.shape[1]):
-                #        itp_real = InterpolatedUnivariateSpline(off, vis1[off, fi].real)
-                #        itp_imag= InterpolatedUnivariateSpline(off, vis1[off, fi].imag)
-                #        vis1[on, fi] = itp_real(on) + 1.0J * itp_imag(on)
+                print 'Uisng Noise Diode Mask for Ant. %03d'%(bl[0] - 1)
+                #vis1 = vis.copy()
+                #on = np.where(ts['ns_on'][:])[0]
+                #vis1[on] = complex(np.nan, np.nan)
+                on = ts['ns_on'][:, gi]
+                vis1.mask[on, ...] = True
             else:
-                vis1 = vis
-        else:
-            vis1 = vis
+                print "No Noise Diode Mask info"
 
         if self.params['plot_index']:
             y_axis = np.arange(ts.freq.shape[0])
@@ -348,23 +356,36 @@ class PlotMeerKAT(timestream_task.TimestreamTask):
         else:
             y_axis = ts.freq[:] * 1.e-3
             y_label = r'$\nu$ / GHz'
-            x_axis = [ datetime.fromtimestamp(s) for s in ts['sec1970']]
-            x_label = '%s' % x_axis[0].date()
-            # convert datetime objects to the correct format for matplotlib to work with
-            x_axis = mdates.date2num(x_axis)
+            if self.params['plot_ra']:
+                #print ts['ra'].shape
+                #print gi, li
+                x_axis = ts['ra'][:, gi]
+                x_label = 'R.A.' 
+            else:
+                x_axis = [ datetime.fromtimestamp(s) for s in ts['sec1970']]
+                x_label = 'UTC %s' % x_axis[0].date()
+                # convert datetime objects to the correct format for 
+                # matplotlib to work with
+                x_axis = mdates.date2num(x_axis)
+            if xmin is not None:
+                xmin = x_axis[xmin]
+            if xmax is not None:
+                xmax = x_axis[xmax]
 
         bad_time = np.all(vis_mask, axis=(1, 2))
         bad_freq = np.all(vis_mask, axis=(0, 2))
 
-        good_time_st = np.argwhere(~bad_time)[ 0, 0]
-        good_time_ed = np.argwhere(~bad_time)[-1, 0]
-        vis1 = vis1[good_time_st:good_time_ed, ...]
-        x_axis = x_axis[good_time_st:good_time_ed]
+        if np.any(bad_time):
+            good_time_st = np.argwhere(~bad_time)[ 0, 0]
+            good_time_ed = np.argwhere(~bad_time)[-1, 0]
+            vis1 = vis1[good_time_st:good_time_ed, ...]
+            x_axis = x_axis[good_time_st:good_time_ed]
 
-        good_freq_st = np.argwhere(~bad_freq)[ 0, 0]
-        good_freq_ed = np.argwhere(~bad_freq)[-1, 0]
-        vis1 = vis1[:, good_freq_st:good_freq_ed, ...]
-        y_axis = y_axis[good_freq_st:good_freq_ed]
+        if np.any(bad_freq):
+            good_freq_st = np.argwhere(~bad_freq)[ 0, 0]
+            good_freq_ed = np.argwhere(~bad_freq)[-1, 0]
+            vis1 = vis1[:, good_freq_st:good_freq_ed, ...]
+            y_axis = y_axis[good_freq_st:good_freq_ed]
 
 
         if re_scale is not None:
@@ -387,6 +408,8 @@ class PlotMeerKAT(timestream_task.TimestreamTask):
 
         fig.colorbar(im, cax=cax, ax=axvv)
 
+        axhh.set_title('Antenna M%03d'%(bl[0] - 1))
+
         # format datetime string
         # date_format = mdates.DateFormatter('%y/%m/%d %H:%M')
         date_format = mdates.DateFormatter('%H:%M')
@@ -397,8 +420,9 @@ class PlotMeerKAT(timestream_task.TimestreamTask):
         #ax.xaxis.set_major_locator(locator)
         #ax.xaxis.set_minor_locator(AutoMinorLocator(2))
 
-        if not self.params['plot_index']:
+        if not self.params['plot_index'] and not self.params['plot_ra']:
             axhh.xaxis.set_major_formatter(date_format)
+            #axhh.xaxis.set_major_locator(MultipleLocator(0.5))
         axhh.set_xticklabels([])
         axhh.set_ylabel(r'${\rm frequency\, [GHz]\, HH}$')
         if xmin is None: xmin = x_axis[0]
@@ -411,7 +435,7 @@ class PlotMeerKAT(timestream_task.TimestreamTask):
         axhh.tick_params(length=4, width=1, direction='in')
         axhh.tick_params(which='minor', length=2, width=1, direction='in')
 
-        if not self.params['plot_index']:
+        if not self.params['plot_index'] and not self.params['plot_ra']:
             axvv.xaxis.set_major_formatter(date_format)
         #axvv.set_xlabel(r'$({\rm time} - {\rm UT}\quad %s\,) [{\rm hour}]$'%t_start)
         axvv.set_xlabel(x_label)
@@ -422,7 +446,7 @@ class PlotMeerKAT(timestream_task.TimestreamTask):
         axvv.tick_params(length=4, width=1, direction='in')
         axvv.tick_params(which='minor', length=2, width=1, direction='in')
 
-        if not self.params['plot_index']:
+        if not self.params['plot_index'] and not self.params['plot_ra']:
             fig.autofmt_xdate()
 
         #cax.set_ylabel(r'${\rm V}/{\rm V}_{\rm time median}$')
@@ -443,6 +467,7 @@ class PlotTimeStream(timestream_task.TimestreamTask):
 
     params_init = {
             'main_data' : 'vis',
+            'corr' : 'auto',
             'flag_mask' : True,
             'flag_ns'   : False,
             're_scale'  : None,
@@ -457,11 +482,13 @@ class PlotTimeStream(timestream_task.TimestreamTask):
             'bad_time_list' : None,
             'show'          : None,
             'plot_index'    : False,
+            'plot_ra'       : False,
             'legend_title' : '', 
+            'nvss_cat' : None,
             }
     prefix = 'ptsbase_'
 
-    def __init__(self, parameter_file_or_dict=None, feedback=2):
+    def process(self, ts):
 
         fig  = plt.figure(figsize=(8, 6))
         self.axhh = fig.add_axes([0.11, 0.52, 0.83, 0.40])
@@ -469,10 +496,6 @@ class PlotTimeStream(timestream_task.TimestreamTask):
         self.fig  = fig
         self.xmin =  1.e19
         self.xmax = -1.e19
-
-        super(PlotTimeStream, self).__init__(parameter_file_or_dict, feedback)
-
-    def process(self, ts):
 
         ts.main_data_name = self.params['main_data']
 
@@ -498,11 +521,15 @@ class PlotTimeStream(timestream_task.TimestreamTask):
                 print bad_freq
                 ts.vis_mask[:, slice(*bad_freq), ...] = True
 
+        if self.params['nvss_cat'] is not None:
+            self.nvss_range = []
+
 
         func(self.plot, full_data=True, show_progress=show_progress, 
                 progress_step=progress_step, keep_dist_axis=False)
 
-        return super(PlotTimeStream, self).process(ts)
+        self.write_output(None)
+        #return super(PlotTimeStream, self).process(ts)
 
     def plot(self, vis, vis_mask, li, gi, bl, ts, **kwargs):
 
@@ -519,12 +546,24 @@ class PlotTimeStream(timestream_task.TimestreamTask):
         axvv = self.axvv
         fig  = self.fig
 
+        if self.params['nvss_cat'] is not None:
+            nvss_cat = get_nvss_radec(self.params['nvss_cat'] , self.nvss_range)
+            _ymin, _ymax = axhh.get_ylim()
+            for ii in range(nvss_cat.shape[0]):
+                axhh.axvline(nvss_cat['RA'][ii], 0, 1, 
+                        color='k', linestyle='--', linewidth=0.8)
+                axvv.axvline(nvss_cat['RA'][ii], 0, 1, 
+                        color='k', linestyle='--', linewidth=0.8)
+
         x_label = self.x_label
 
         date_format = mdates.DateFormatter('%H:%M')
 
-        if not self.params['plot_index']:
+        if not self.params['plot_index'] and not self.params['plot_ra']:
             axhh.xaxis.set_major_formatter(date_format)
+            #axhh.xaxis.set_major_locator(MultipleLocator(1./6.))
+            axhh.xaxis.set_major_locator(mdates.HourLocator(interval=1))
+            axhh.xaxis.set_minor_locator(mdates.MinuteLocator(interval=10))
         axhh.set_xticklabels([])
         #axhh.set_ylabel(r'${\rm frequency\, [GHz]\, HH}$')
         #axhh.set_ylabel('HH Polarization')
@@ -539,8 +578,12 @@ class PlotTimeStream(timestream_task.TimestreamTask):
         axhh.tick_params(which='minor', length=2, width=1, direction='in')
         axhh.legend(title=self.params['legend_title'])
 
-        if not self.params['plot_index']:
+        if not self.params['plot_index'] and not self.params['plot_ra']:
             axvv.xaxis.set_major_formatter(date_format)
+            #axvv.xaxis.set_major_locator(MultipleLocator(1./6.))
+            axvv.xaxis.set_major_locator(mdates.HourLocator(interval=1))
+            axvv.xaxis.set_minor_locator(mdates.MinuteLocator(interval=10))
+        axhh.set_xticklabels([])
         #axvv.set_xlabel(r'$({\rm time} - {\rm UT}\quad %s\,) [{\rm hour}]$'%t_start)
         axvv.set_xlabel(x_label)
         #axvv.set_ylabel(r'${\rm frequency\, [GHz]\, VV}$')
@@ -551,17 +594,44 @@ class PlotTimeStream(timestream_task.TimestreamTask):
         axvv.tick_params(length=4, width=1, direction='in')
         axvv.tick_params(which='minor', length=2, width=1, direction='in')
 
-        if not self.params['plot_index']:
+        if not self.params['plot_index'] and not self.params['plot_ra']:
             fig.autofmt_xdate()
 
         #cax.set_ylabel(r'${\rm V}/{\rm V}_{\rm time median}$')
         #cax.set_ylabel(r'${\rm V}/{\rm V}_{\rm noise\, cal}$')
         #cax.set_ylabel(self.params['unit'])
 
+def get_nvss_radec(nvss_path, nvss_range):
+
+    import astropy.io.fits as pyfits
+
+    hdulist = pyfits.open(nvss_path)
+    data = hdulist[1].data
+
+    _sel = np.zeros(data['RA'].shape[0], dtype ='bool')
+    for _nvss_range in nvss_range:
+        print _nvss_range
+
+        ra_min, ra_max, dec_min, dec_max = _nvss_range
+
+        sel  = data['RA'] > ra_min
+        sel *= data['RA'] < ra_max
+        sel *= data['DEC'] > dec_min
+        sel *= data['DEC'] < dec_max
+
+        print np.sum(sel)
+
+        _sel = _sel + sel
+
+    hdulist.close()
+
+    return data[_sel]
+
 
 class PlotVvsTime(PlotTimeStream):
 
     prefix = 'pts_'
+
 
     def plot(self, vis, vis_mask, li, gi, bl, ts, **kwargs):
 
@@ -580,17 +650,24 @@ class PlotVvsTime(PlotTimeStream):
         ymin      = self.params['ymin']
         ymax      = self.params['ymax']
 
+        vis1 = np.ma.array(vis)
         if flag_mask:
-            vis1 = np.ma.array(vis, mask=vis_mask)
-        elif flag_ns:
+            vis1.mask = vis_mask
+
+        if flag_ns:
             if 'ns_on' in ts.iterkeys():
-                vis1 = vis.copy()
-                on = np.where(ts['ns_on'][:])[0]
-                vis1[on] = complex(np.nan, np.nan)
+                print 'Uisng Noise Diode Mask for Ant. %03d'%(bl[0] - 1)
+                #vis1 = vis.copy()
+                #on = np.where(ts['ns_on'][:])[0]
+                #vis1[on] = complex(np.nan, np.nan)
+                if len(ts['ns_on'].shape) == 2:
+                    on = ts['ns_on'][:, gi].astype('bool')
+                else:
+                    on = ts['ns_on'][:]
+                #on = ts['ns_on'][:]
+                vis1.mask[on, ...] = True
             else:
-                vis1 = vis
-        else:
-            vis1 = vis
+                print "No Noise Diode Mask info"
 
         if self.params['plot_index']:
             y_label = r'$\nu$ index'
@@ -598,9 +675,22 @@ class PlotVvsTime(PlotTimeStream):
             self.x_label = 'time index'
         else:
             y_label = r'$\nu$ / GHz'
-            x_axis = [ datetime.fromtimestamp(s) for s in ts['sec1970']]
-            self.x_label = '%s' % x_axis[0].date()
-            x_axis = mdates.date2num(x_axis)
+            #x_axis = [ datetime.fromtimestamp(s) for s in ts['sec1970']]
+            #self.x_label = '%s' % x_axis[0].date()
+            #x_axis = mdates.date2num(x_axis)
+            if self.params['plot_ra']:
+                #print ts['ra'].shape
+                #print gi, li
+                x_axis = ts['ra'][:, gi]
+                self.x_label = 'R.A.' 
+            else:
+                x_axis = [ datetime.fromtimestamp(s) for s in ts['sec1970']]
+                self.x_label = '%s UTC' % x_axis[0].date()
+                x_axis = mdates.date2num(x_axis)
+            if xmin is not None:
+                xmin = x_axis[xmin]
+            if xmax is not None:
+                xmax = x_axis[xmax]
 
         bad_time = np.all(vis_mask, axis=(1, 2))
         bad_freq = np.all(vis_mask, axis=(0, 2))
@@ -618,13 +708,34 @@ class PlotVvsTime(PlotTimeStream):
         axvv = self.axvv
 
         label = 'M%03d'%(bl[0] - 1)
-        axhh.plot(x_axis, np.ma.mean(vis1[:,:,0], axis=1), label = label)
-        axvv.plot(x_axis, np.ma.mean(vis1[:,:,1], axis=1))
+        #axhh.plot(x_axis, np.ma.mean(vis1[:,:,0], axis=1), '.', label = label)
+        #axvv.plot(x_axis, np.ma.mean(vis1[:,:,1], axis=1), '.')
+        axhh.plot(x_axis, np.ma.mean(vis1[:,:,0], axis=1), '-', 
+                label = label, drawstyle='steps-mid')
+        axvv.plot(x_axis, np.ma.mean(vis1[:,:,1], axis=1), '-',
+                drawstyle='steps-mid')
+
 
         if xmin is None: xmin = x_axis[0]
         if xmax is None: xmax = x_axis[-1]
         self.xmin = min([xmin, self.xmin])
         self.xmax = max([xmax, self.xmax])
+
+        if self.params['nvss_cat'] is not None:
+            dec_min = np.min(ts['dec'][:, gi])
+            dec_max = np.max(ts['dec'][:, gi])
+            #dec_min = 25.65294 #15.15294
+            #dec_max = 25.65294 #15.15294
+            #if dec_min == dec_max:
+            dec_min -= 2./60.
+            dec_max += 2./60.
+            #dec_min = 25.541339365641274
+            #dec_max = 25.61497357686361
+            #dec_min = 25.458541361490884
+            #dec_max = 25.532173665364585
+            dec_min = 25.789624659220376
+            dec_max = 25.863256963094077
+            self.nvss_range.append([xmin, xmax, dec_min, dec_max])
 
     def write_output(self, output):
 
@@ -649,6 +760,54 @@ class PlotVvsTime(PlotTimeStream):
         #        plt.show()
         #plt.close()
 
+class PlotNoiseCal(PlotVvsTime):
+
+    prefix = 'pcal_'
+
+    params_init = {
+            'noise_cal_init_time' : None,
+            'noise_cal_period' : 19.9915424299,
+            'noise_cal_length' : 1.8,
+            'noise_cal_delayed_ant' : [],
+            }
+
+    def plot(self, vis, vis_mask, li, gi, bl, ts, **kwargs):
+
+        super(PlotNoiseCal, self).plot(vis, vis_mask, li, gi, bl, ts, **kwargs)
+
+        axhh = self.axhh
+        axvv = self.axvv
+        fig  = self.fig
+
+        if self.params['noise_cal_init_time'] is not None:
+            print "plot noise diode"
+            if self.params['plot_index']:
+                msg = 'noise diode need to plot in time, not index'
+            else:
+                t0 = Time(self.params['noise_cal_init_time']).unix
+                t1 = ts['sec1970'][-1]
+                tl = self.params['noise_cal_length']
+                tp = self.params['noise_cal_period']
+                #tp = 19.9915424299
+
+                if bl[0] - 1 in self.params['noise_cal_delayed_ant']:
+                    print "Cal delayed, t0 plus 1 s"
+                    t0 += 1
+
+                noise_st = np.arange(t0,      t1, tp)
+                noise_ed = np.arange(t0 + tl, t1, tp)
+
+                for _st in noise_st:
+                    _st = datetime.fromtimestamp(_st) 
+                    _st = mdates.date2num(_st)
+                    axhh.axvline(_st, color='k', linestyle='-', linewidth=1)
+                    axvv.axvline(_st, color='k', linestyle='-', linewidth=1)
+
+                for _ed in noise_ed:
+                    _ed = datetime.fromtimestamp(_ed) 
+                    _ed = mdates.date2num(_ed)
+                    axhh.axvline(_ed, color='k', linestyle='--', linewidth=1)
+                    axvv.axvline(_ed, color='k', linestyle='--', linewidth=1)
 
 class PlotPointingvsTime(PlotTimeStream):
 
@@ -722,34 +881,136 @@ class PlotPointingvsTime(PlotTimeStream):
             fig_name = output_path(fig_name)
             plt.savefig(fig_name, formate='png') #, dpi=100)
 
-        #super(PlotVvsTime, self).write_output(output)
 
-        #fig_prefix = self.params['output_files'][0]
-        #main_data = self.params['main_data']
+class PlotSpectrum(PlotTimeStream):
 
-        #axhh = self.axhh
-        #axvv = self.axvv
-        #fig  = self.fig
+    prefix = 'psp_'
 
+    def plot(self, vis, vis_mask, li, gi, bl, ts, **kwargs):
+
+        xmin      = self.params['xmin']
+        xmax      = self.params['xmax']
+        ymin      = self.params['ymin']
+        ymax      = self.params['ymax']
+
+        print "global index %2d [m%03d]"%(gi, bl[0]-1)
+        freq_indx = np.arange(vis.shape[1])
+        freq = ts['freq'][:] * 1.e-3
+        self.x_label = r'$\nu$ / GHz'
+
+        bad_freq = np.all(vis_mask, axis=(0, 2))
+        bad_time = np.all(vis_mask, axis=(1, 2))
+
+        if vis.dtype == 'complex' or vis.dtype == 'complex64':
+            print "Convert complex to float by abs"
+            vis = np.abs(vis.copy())
+
+        vis = np.ma.array(vis)
+        vis.mask = vis_mask.copy()
+        
+        if 'ns_on' in ts.iterkeys():
+            ns_on = ts['ns_on'][:, gi]
+        else:
+            ns_on = np.zeros(bad_time.shape).astype('bool')
+
+        vis.mask[ns_on, ...] = True
+        spec_HH = np.ma.median(vis[..., 0], axis=0)
+        spec_VV = np.ma.median(vis[..., 1], axis=0)
+        
+        #bp_HH = np.ma.array(medfilt(spec_HH, 11))
+        #bp_HH.mask = bad_freq
+        #spec_HH /= bp_HH
+        
+        #bp_VV = np.ma.array(medfilt(spec_VV, 11))
+        #bp_VV.mask = bad_freq
+        #spec_VV /= bp_VV
+
+        axhh = self.axhh
+        axvv = self.axvv
+        
+        label = 'M%03d'%(bl[0] - 1)
+        axhh.plot(freq, spec_HH , label=label, linewidth=1.5)
+        #ax.plot(freq, bp_HH , 'y-', linewidth=1.0)
+        
+        axvv.plot(freq, spec_VV , linewidth=1.5)
+        #ax.plot(freq, bp_VV , 'y-', linewidth=1.0)
+
+        #if 'ns_on' in ts.iterkeys():
+
+        #    vis.mask = vis_mask.copy()
+        #    vis.mask[~ns_on] = True
+        #    ns_HH = np.ma.median(vis[..., 0], axis=0)
+        #    ns_VV = np.ma.median(vis[..., 1], axis=0)
+
+        #    ns_HH = np.ma.array(medfilt(ns_HH, 11))
+        #    ns_HH.mask = bad_freq
+
+        #    ns_VV = np.ma.array(medfilt(ns_VV, 11))
+        #    ns_VV.mask = bad_freq
+
+        #    axhh.plot(freq, ns_HH , 'g--', label='noise HH', linewidth=1.5)
+        #    axvv.plot(freq, ns_VV , 'r--', label='noise VV', linewidth=1.5)
+
+        if xmin is None: xmin = freq[0]
+        if xmax is None: xmax = freq[-1]
+        self.xmin = min([xmin, self.xmin])
+        self.xmax = max([xmax, self.xmax])
+
+    def write_output(self, output):
+
+        #super(PlotSpectrum, self).write_output(output)
+
+        fig_prefix = self.params['output_files'][0]
+        main_data = self.params['main_data']
+        ymin      = self.params['ymin']
+        ymax      = self.params['ymax']
+
+        axhh = self.axhh
+        axvv = self.axvv
+        fig  = self.fig
+
+        x_label = self.x_label
+
+        axhh.set_xticklabels([])
+        #axhh.set_ylabel(r'${\rm frequency\, [GHz]\, HH}$')
         #axhh.set_ylabel('HH Polarization')
-        #axvv.set_ylabel('VV Polarization')
+        #if xmin is None: xmin = x_axis[0]
+        #if xmax is None: xmax = x_axis[-1]
+        xmin = self.xmin
+        xmax = self.xmax
+        axhh.set_xlim(xmin=self.xmin, xmax=self.xmax)
+        axhh.set_ylim(ymin=ymin, ymax=ymax)
+        axhh.minorticks_on()
+        axhh.tick_params(length=4, width=1, direction='in')
+        axhh.tick_params(which='minor', length=2, width=1, direction='in')
+        axhh.legend(title=self.params['legend_title'])
+        axhh.set_ylabel('HH Polarization')
 
-        #if fig_prefix is not None:
-        #    fig_name = '%s_%s_TS.png' % (fig_prefix, main_data)
-        #    fig_name = output_path(fig_name)
-        #    plt.savefig(fig_name, formate='png') #, dpi=100)
-        ##if self.params['show'] is not None:
-        ##    if self.params['show'] == bl[0]-1:
-        ##        plt.show()
-        ##plt.close()
+        #axvv.set_xlabel(r'$({\rm time} - {\rm UT}\quad %s\,) [{\rm hour}]$'%t_start)
+        axvv.set_xlabel(x_label)
+        #axvv.set_ylabel(r'${\rm frequency\, [GHz]\, VV}$')
+        #axvv.set_ylabel('VV Polarization')
+        axvv.set_xlim(xmin=self.xmin, xmax=self.xmax)
+        axvv.set_ylim(ymin=ymin, ymax=ymax)
+        axvv.minorticks_on()
+        axvv.tick_params(length=4, width=1, direction='in')
+        axvv.tick_params(which='minor', length=2, width=1, direction='in')
+        axvv.set_ylabel('VV Polarization')
+
+        if fig_prefix is not None:
+            fig_name = '%s_%s_Spec.png' % (fig_prefix, main_data)
+            fig_name = output_path(fig_name)
+            plt.savefig(fig_name, formate='png') #, dpi=100)
 
 class CheckSpec(timestream_task.TimestreamTask):
     
     prefix = 'csp_'
     
     params_init = {
+        'corr' : 'auto',
         'bad_freq_list' : [],
         'bad_time_list' : [],
+        'legend_title' : '',
         'show' : None,
         'ymin' : None,
         'ymax' : None,
@@ -799,12 +1060,9 @@ class CheckSpec(timestream_task.TimestreamTask):
         bad_freq = np.all(vis_mask, axis=(0, 2))
         bad_time = np.all(vis_mask, axis=(1, 2))
         
-        print "global index %2d [m%03d]"%(gi, bl[0])
+        print "global index %2d [m%03d]"%(gi, bl[0]-1)
         freq_indx = np.arange(vis.shape[1])
         freq = ts['freq'][:]
-        print freq[~bad_freq][0], freq[~bad_freq][-1]
-        print vis.shape
-        print vis.dtype
         
         fig = plt.figure(figsize=(8, 4))
         ax  = fig.add_axes([0.1, 0.1, 0.85, 0.85])
@@ -812,33 +1070,57 @@ class CheckSpec(timestream_task.TimestreamTask):
         if vis.dtype == 'complex' or vis.dtype == 'complex64':
             vis = np.abs(vis)
         vis = np.ma.array(vis)
-        vis.mask = vis_mask
+        vis.mask = vis_mask.copy()
         
         #spec_HH = np.ma.mean(vis[:, :, 0], axis=0)
         #spec_VV = np.ma.mean(vis[:, :, 1], axis=0)
 
-        spec_HH = np.ma.median(vis[~bad_time, ..., 0], axis=0)
-        spec_VV = np.ma.median(vis[~bad_time, ..., 1], axis=0)
+        if 'ns_on' in ts.iterkeys():
+            ns_on = ts['ns_on'][:, gi]
+        else:
+            ns_on = np.zeros(bad_time.shape).astype('bool')
+
+        vis.mask[ns_on, ...] = True
+        spec_HH = np.ma.median(vis[..., 0], axis=0)
+        spec_VV = np.ma.median(vis[..., 1], axis=0)
         
-        bp_HH = np.ma.array(medfilt(spec_HH, 11))
-        bp_HH.mask = bad_freq
+        #bp_HH = np.ma.array(medfilt(spec_HH, 11))
+        #bp_HH.mask = bad_freq
         #spec_HH /= bp_HH
         
-        bp_VV = np.ma.array(medfilt(spec_VV, 11))
-        bp_VV.mask = bad_freq
+        #bp_VV = np.ma.array(medfilt(spec_VV, 11))
+        #bp_VV.mask = bad_freq
         #spec_VV /= bp_VV
+
         
+        ax.plot(freq, spec_HH , 'g-', label='HH', linewidth=1.5)
+        #ax.plot(freq, bp_HH , 'y-', linewidth=1.0)
         
-        ax.plot(freq, spec_HH , 'g-', label='HH')
-        ax.plot(freq, bp_HH , 'y-', linewidth=0.8)
+        ax.plot(freq, spec_VV , 'r-', label='VV', linewidth=1.5)
+        #ax.plot(freq, bp_VV , 'y-', linewidth=1.0)
+
+        if 'ns_on' in ts.iterkeys():
+
+            vis.mask = vis_mask.copy()
+            vis.mask[~ns_on] = True
+            ns_HH = np.ma.median(vis[..., 0], axis=0)
+            ns_VV = np.ma.median(vis[..., 1], axis=0)
+
+            ns_HH = np.ma.array(medfilt(ns_HH, 11))
+            ns_HH.mask = bad_freq
+
+            ns_VV = np.ma.array(medfilt(ns_VV, 11))
+            ns_VV.mask = bad_freq
+
+            ax.plot(freq, ns_HH , 'g--', label='noise HH', linewidth=1.5)
+            ax.plot(freq, ns_VV , 'r--', label='noise VV', linewidth=1.5)
         
-        ax.plot(freq, spec_VV , 'r-', label='VV')
-        ax.plot(freq, bp_VV , 'y-', linewidth=0.8)
+
 
         ax.set_xlabel('Frequency [MHz]')
         ax.set_ylabel('Power')
         #ax.semilogy()
-        ax.legend()
+        ax.legend(title=self.params['legend_title'])
         ax.tick_params(length=4, width=0.8, direction='in')
         ax.tick_params(which='minor', length=2, width=0.8, direction='in')
         

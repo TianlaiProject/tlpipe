@@ -1362,18 +1362,27 @@ class run_pipeline(object):
         pipe_logging = 'critical'
         pipe_copy = False
     
-        _p = locals()
-        _p.update(params())
+        self._p = locals()
+        self._p.update(params())
 
         #print "feedback = %d"%_p['pipe_feedback']
-        self.P = Manager(_p, feedback=_p['pipe_feedback'])
+
+    @property
+    def param(self):
+        return self._p
+
+    def add(self, params):
+
+        self._p.update(params())
 
     def run(self):
 
+        self.P = Manager(self._p, feedback=self._p['pipe_feedback'])
         self.P.run()
 
     def __call__(self):
 
+        self.P = Manager(self._p, feedback=self._p['pipe_feedback'])
         self.P.run()
 
 if __name__ == "__main__":

@@ -15,6 +15,8 @@ import get_dist
 
 from pipeline.Observatory.Receivers import Noise
 
+reload(mcmc)
+
 def _fn_model(amp, fk, alpha, beta, f_res, f_avg, f_tot, T_obs):
 
     grad  = (1. - beta) / beta
@@ -56,9 +58,7 @@ class MCMC_FN(mcmc.MCMC_BASE):
 
     _mcmc_params_ = ['pol', 'T_obs', 'f_tot', 'f_res', 'f_avg']
 
-    def read_input(self):
-
-        fhs = super(MCMC_FN, self).read_input()
+    def get_measurements(self, fhs):
 
         pol_idx = {'HH': 0, 'VV': 1}
 
@@ -84,9 +84,6 @@ class MCMC_FN(mcmc.MCMC_BASE):
                 n_ps = float(tcorr_ps.shape[1])
                 erro = np.std(tcorr_ps, axis=1) / np.sqrt(n_ps)
 
-                #print 
-                #print po, pol_idx[po]
-                #print
                 pp = mean[:, pol_idx[po]] > 0
                 x.append(tcorr_bc[pp])
                 y.append(mean[pp, pol_idx[po]])
@@ -95,7 +92,6 @@ class MCMC_FN(mcmc.MCMC_BASE):
             self.x.append(x)
             self.y.append(y)
             self.e.append(e)
-
 
         return 1
 
@@ -121,7 +117,7 @@ class MCMC_FN(mcmc.MCMC_BASE):
 
     def write_output(self, output):
 
-        print output[0]
+        #print output[0]
 
         pol_n = len(self.params['pol'])
         iteration = self.iter_start + self._iter_cnt
@@ -173,6 +169,58 @@ class MCMC_FN_T(MCMC_FN):
 
     prefix = 'mcfnt_'
 
+    def get_measurements(self, fhs):
+
+        pol_idx = {'HH': 0, 'VV': 1}
+
+        #pol_n = len(self.params['pol'])
+
+        self.x = []
+        self.y = []
+        self.e = []
+
+        for po in self.params['pol']:
+
+            x = []
+            y = []
+            e = []
+
+            for fh in fhs:
+
+                tcorr_ps = fh['tcorr_ps'][:,:,pol_idx[po]]
+                tcorr_bc = fh['tcorr_bc'][:]
+
+                tcorr_ps = np.ma.masked_equal(tcorr_ps, 0)
+
+                mean = np.ma.mean(tcorr_ps, axis=1)
+                pp = mean > 0
+
+
+                x.append(tcorr_bc[pp])
+                y.append(mean[pp])
+
+                tcorr_ps = tcorr_ps[pp, :]
+
+                n_ps = float(tcorr_ps.shape[1])
+                #erro = np.std(tcorr_ps, axis=1) / np.sqrt(n_ps)
+                #e.append(erro[pp])
+
+                cov  = np.cov(tcorr_ps) / n_ps
+                #print cov.min(), cov.max()
+                #print 0.001 * np.diag(cov).min()
+                #cov[ cov < 0.001 * np.diag(cov).min()]
+                cov  = np.eye(cov.shape[0]) * np.diag(cov)
+                covi = np.linalg.pinv(cov, rcond=1.e-15)
+                #covi[covi < 1.e-10] = 0.
+                e.append(covi)
+
+            self.x.append(x)
+            self.y.append(y)
+            self.e.append(e)
+
+        return 1
+
+
     def chisq(self, p):
 
         amp   = p['amp'][0]
@@ -195,10 +243,18 @@ class MCMC_FN_T(MCMC_FN):
 
         for i in range(len(x)):
 
-            err = yerr[i]
-            chisq += np.sum(
-                (np.log10(y_f(np.log10(x[i]))) - np.log10(y[i]))**2./ err**2.
-             )
+            #err = yerr[i] / y[i] / np.log(10.)
+            #chisq += np.sum((np.log10(y_f(np.log10(x[i]))) - np.log10(y[i]))**2./ err**2.)
+            #chisq += np.sum( (y_f(np.log10(x[i])) - y[i]) ** 2. / err ** 2.)
+
+            covi = yerr[i] * y[i][None, :] * y[i][:, None] * np.log(10) * np.log(10)
+            #covi[covi < 0.] = 0.
+            yth = y_f(np.log10(x[i]))
+            yob = y[i]
+            yy  = np.log10(yth) - np.log10(yob)
+            #yy  = np.log(yth) - np.log(yob)
+            #yy  = yth - yob
+            chisq += np.dot(np.dot(yy, covi), yy)
 
         return chisq
 

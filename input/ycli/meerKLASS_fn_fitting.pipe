@@ -1,0 +1,105 @@
+# -*- mode: python; -*-
+#
+
+import os
+
+from tlpipe.mcmc import mcmc_fn
+
+DATA_BASE = '/scratch/users/ycli/'
+mode     = int(os.getenv('MODE'))
+ant_indx = int(os.getenv('ANT'))
+
+from astropy.time import Time
+
+DATA = '1556128500'; SCAN = 0
+
+#DATA = '1556042203'; SCAN = 1
+
+#DATA = '1555783823'; SCAN = 1
+
+DATA_Key = Time(int(DATA), format='unix').utc.datetime.strftime('%Y%m%d_UTC%Hh%Mm%Ss')
+print DATA_Key
+
+noise_init_time = None
+noise_period = 19.9915424299
+if DATA_Key == '20190424_UTC17h55m00s':
+    bad_time_list = [[0, 50], [490, 540], [1090, 1200], [2670, 2730], [3750, 4000]]
+    bad_freq_list = [[0, 50], [595, 605], [930, 955]]
+    ants_list = [
+        'm000', 'm001', 'm002', 'm003', 'm004', 'm005', 'm006', 'm007', 'm008', 'm009',
+        'm010', 'm011', 'm012', 'm013', 'm015', 'm016', 'm018', 'm019', 'm020', 'm021',
+        'm022', 'm023', 'm024', 'm025', 'm026', 'm027', 'm028', 'm029', 'm030', 'm031',
+        'm033', 'm034', 'm035', 'm036', 'm037', 'm038', 'm039', 'm040', 'm043', 'm044',
+        'm045', 'm046', 'm047', 'm048', 'm049', 'm050', 'm051', 'm052', 'm053', 'm054',
+        'm055', 'm056', 'm058', 'm059', 'm060', 'm061', 'm062', 'm063'
+    ]
+
+
+elif DATA_Key == '20190423_UTC17h56m43s':
+    bad_time_list = [[0, 120], [3150, 3180], [3750, 3820]]
+    bad_freq_list = [[0, 50], [595, 605], [930, 955]]
+    ants_list = [
+        'm000', 'm001', 'm002', 'm003', 'm004', 'm006', 'm007', 'm008', 'm009', 'm010',
+        'm011', 'm012', 'm013', 'm015', 'm016', 'm018', 'm019', 'm020', 'm021', 'm022',
+        'm023', 'm024', 'm025', 'm026', 'm027', 'm028', 'm029', 'm030', 'm031', 'm033',
+        'm034', 'm035', 'm036', 'm037', 'm038', 'm039', 'm040', 'm041', 'm042', 'm043',
+        'm044', 'm045', 'm046', 'm047', 'm048', 'm049', 'm050', 'm051', 'm052', 'm053',
+        'm054', 'm055', 'm056', 'm057', 'm058', 'm059', 'm060', 'm061', 'm062', 'm063']
+
+
+elif DATA_Key == '20190420_UTC18h10m23s':
+    bad_freq_list = [[0, 100], [365, 460], [595, 605], [930, 955]]
+    bad_time_list = [[0, 450], [2615, 2625], [2630, 2638], [4060, 4120]]
+    noise_init_time = '2019-04-20 18:10:22'
+    noise_period = 19.9915424299
+    ants_list = [
+        'm000', 'm001', 'm002', 'm003', 'm004', 'm005', 'm006', 'm007', 'm008', 'm009',
+        'm010', 'm011', 'm012', 'm013', 'm015', 'm016', 'm018', 'm019', 'm020', 'm021',
+        'm022', 'm023', 'm024', 'm025', 'm026', 'm027', 'm028', 'm029', 'm030', 'm031',
+        'm033', 'm034', 'm035', 'm036', 'm037', 'm038', 'm040', 'm041', 'm042', 'm043',
+        'm044', 'm045', 'm046', 'm047', 'm048', 'm049', 'm050', 'm051', 'm052', 'm053',
+        'm054', 'm055', 'm056', 'm057', 'm058', 'm059', 'm060', 'm061', 'm062', 'm063']
+
+
+file_list = ['%s_%s/%s_auto_scan_%03d.h5'%(DATA_Key, DATA, DATA, SCAN), ]
+
+
+pipe_tasks  = []
+data_base   = DATA_BASE
+pipe_outdir = data_base + '/analysis_meerkat/'
+pipe_feedback = 0
+
+pipe_tasks.append(mcmc_fn.MCMC_FN_T)
+
+#mode = 0
+ant  = ants_list[ant_indx]
+
+path_tmp = 'pnps_1dtc_sub%02d_%s_%s/'
+file_tmp = '%s_auto_scan_%03d_vis_avg0100F_tcorrps_fft_%s_x_%s.h5'
+
+input_file = path_tmp%(mode, DATA_Key, DATA) + file_tmp%(DATA, SCAN, ant, ant)
+output_file = path_tmp%(mode, DATA_Key, DATA) + file_tmp%(DATA, SCAN, ant, ant)
+
+mcfnt_nwalkers = 100
+mcfnt_steps = 50000
+mcfnt_iter_step = 1
+mcfnt_pol = ('HH', 'VV')
+mcfnt_T_obs = 20 # doen't matter if only fit for tcorr
+mcfnt_f_tot = 0.209 * 700
+mcfnt_f_res = 0.209
+mcfnt_f_avg = 100.
+mcfnt_input_files = [
+    'fn_analysis/' + input_file,
+]
+mcfnt_output_files = [
+    'fn_analysis/mcmc/' + output_file,
+]
+mcfnt_amp   = ( 0.0, -1.00,  1.0, r'$\lg(A)$')
+mcfnt_fk    = (-1.0, -4.00,  1.0, r'$\lg(f_k)$')
+mcfnt_alpha = ( 2.0,  0.00,  4.0, r'$\alpha$')
+mcfnt_beta  = ( 0.5,  0.1,   0.999, r'$\beta$')
+
+
+
+
+
