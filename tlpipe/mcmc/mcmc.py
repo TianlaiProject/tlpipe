@@ -7,6 +7,8 @@ import copy
 
 import os
 
+import pathos.pools as pool
+
 from tlpipe.utils.path_util import output_path, input_path
 from tlpipe.pipeline.pipeline import FileIterBase
 
@@ -61,6 +63,13 @@ class MCMC_BASE(FileIterBase):
         all_mcmc_params = list(set(all_mcmc_params))
         return all_mcmc_params
 
+    def get_measurements(self, fhs):
+
+        self.x = []
+        self.y = []
+        self.e = []
+
+        return 1
 
     def read_input(self):
 
@@ -70,7 +79,7 @@ class MCMC_BASE(FileIterBase):
             print self.input_files[i]
             fhs.append(h5py.File(input_path(self.input_files[i]), 'r'))
 
-        return fhs
+        return self.get_measurements(fhs)
 
     def chisq(self, p):
 
@@ -108,7 +117,9 @@ class MCMC_BASE(FileIterBase):
 
         ndim     = theta_ini.shape[0]
         nwalkers = self.params['nwalkers'] 
-        threads  = 1 #nwalkers
+        threads  = 4
+        #_pool = pool.ThreadPool(threads)
+        _pool = pool.ProcessPool(4)
 
         theta_range = (theta_max - theta_min) * 0.2
 
@@ -117,7 +128,7 @@ class MCMC_BASE(FileIterBase):
         steps = self.params['steps']
 
         sampler = emcee.EnsembleSampler(nwalkers, ndim, self.lnprob, 
-                threads=threads, pool=None, args=(param_key,),
+                threads=threads, pool=_pool, args=(param_key,),
                 kwargs={'theta_min':theta_min, 'theta_max':theta_max})
 
         pos, prob, state = sampler.run_mcmc(pos, steps, None)
@@ -126,6 +137,7 @@ class MCMC_BASE(FileIterBase):
         chisq = sampler.lnprobability * (-2.)
 
         sampler.reset()
+        #if _pool is not None: _pool.close()
 
         return chain, chisq
 
@@ -150,6 +162,7 @@ class MCMC_BASE(FileIterBase):
             theta_min.append(v[1])
             theta_max.append(v[2])
             param_tex.append(v[3])
+
 
         param_key = np.array(param_key)
         theta_ini = np.array(theta_ini)

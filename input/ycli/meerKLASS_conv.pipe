@@ -2,9 +2,10 @@
 #
 
 import os
+from astropy.time import Time
 
 from tlpipe.timestream import convertion
-scan_id = int(os.getenv('SCAN_ID'))
+#scan_id = int(os.getenv('SCAN_ID'))
 
 #data_base = os.getenv('DATA_BASE')
 data_base = '/scratch/users/ycli/'
@@ -53,18 +54,40 @@ pipe_copy = False
 #scans = (15, 17, 19, 21, 23, 25, 27, 29, 32, 34, 36, 38, 40, 
 #         42, 44, 46, 49, 51, 53, 55, 57, 59, 61, 64, 67, 69)
          
-input_files = [
-    '1556052116',
-]
-data_path = '/data/projects/hi_im/SCI-20190418-MS-01/%s/%s/%s_sdp_l0.full.rdb'
-scans = (16, 18, 21, 23, 25, 27, 29, 31, 33, 35, 38, 40, 42,
-         45, 47, 49, 52, 54, 56, 59, 61, 63, 66, 68, 70, 73)
+#input_files = [
+#    '1556052116',
+#]
+#data_path = '/data/projects/hi_im/SCI-20190418-MS-01/%s/%s/%s_sdp_l0.full.rdb'
+#scans = (16, 18, 21, 23, 25, 27, 29, 31, 33, 35, 38, 40, 42,
+#         45, 47, 49, 52, 54, 56, 59, 61, 63, 66, 68, 70, 73)
+
+data_root = '/data/projects/hi_im/SCI-20190418-MS-01/'
+data_file = '%s/%s/%s_sdp_l0.full.rdb'
+
+#DATA = '1555775533'
+#scans = (16, 18, 20, 23, 25, 27, 29, 31, 33, 35, 37, 40, 43,
+#         45, 47, 49, 51, 53, 55, 57, 60, 62, 64, 66, 68, 70)
+#DATA = '1555793534'
+#scans = (16, 18, 20, 23, 26, 29, 31, 33, 35, 37, 39, 41, 43,
+#         46, 48, 50, 52, 54, 56, 58, 60, 63, 65, 67, 69, 71)
+#DATA = '1555861810'
+#scans = (15, 17, 20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40,
+#         42, 44, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64, 67)
+#DATA = '1555879611'
+#scans = (16, 18, 20, 23, 25, 27, 29, 31, 33, 35, 37, 39, 42,
+#         44, 46, 48, 50, 52, 54, 56, 59, 61, 63, 65, 67, 69)
+DATA = '1556120503'
+scans = (14, 16, 18, 20, 22, 24, 26, 29, 31, 33, 35, 37, 39, 
+         41, 43, 46, 48, 50, 52, 54, 56, 58, 61, 64, 66, 68)
+
+DATA_Key = Time(int(DATA), format='unix').datetime.strftime('%Y%m%d_UTC%Hh%Mm%Ss')
 
 pipe_tasks.append(convertion.MeerKAT2TL)
 
 # parameter for MeerKAt to TL
 m2t_corr          = 'auto'
-m2t_selection     = (scans[scan_id], ) #'scan'
-m2t_input_files   = [data_path%(f, f, f) for f in input_files]
-m2t_output_files  = ['auto/%s_auto_scan_%03d.h5'%(input_files[0], scans[scan_id]),]
+m2t_selection     = scans #'scan'
+m2t_input_files   = [data_root + data_file%(DATA, DATA, DATA), ]
+m2t_output_files  = ['auto/%s_%s/%s_auto_scan_%03d.h5'%(DATA_Key, DATA, DATA, _s)\
+                     for _s in scans]
 

@@ -17,9 +17,10 @@ pipe_copy = False
 input_files = [
     #'1556128500',
     '1556042203',
+    #'1555783823',
 ]
 data_path = '/data/projects/hi_im/COM-20190418-MS-01/%s/%s/%s_sdp_l0.full.rdb'
-scans = (1, )
+scans = (0, )
 
 t = Time(int(input_files[0]), format='unix')
 fn = "%s_%s"%(t.datetime.strftime('%Y%m%d_UTC%Hh%Mm%Ss'), input_files[0])
@@ -28,7 +29,7 @@ pipe_tasks.append(convertion.MeerKAT2TL)
 
 # parameter for MeerKAt to TL
 m2t_corr          = 'auto'
-m2t_selection     = (1, ) #'scan'
+m2t_selection     = scans
 m2t_input_files   = [data_path%(f, f, f) for f in input_files]
-m2t_output_files  = ['scp/%s/%s_auto_scan_%03d.h5'%(fn, input_files[0], 1),]
+m2t_output_files  = ['scp/%s_flag/%s_auto_scan_%03d.h5'%(fn, input_files[0], scans[0]),]
 

@@ -31,7 +31,7 @@ def cal_conf(like, be):
             #print
     
 def load_param_dict(file_fname):
-    print file_fname
+    #print file_fname
     fin = open(file_fname, 'r')
     param_dict = pickle.load(fin)
     fin.close()

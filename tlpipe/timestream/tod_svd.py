@@ -30,6 +30,8 @@ class SVD(timestream_task.TimestreamTask):
             'method'    : 'both', # 'time', 'freq'
             'save_svd'  : True,
             'save_modes' : True,
+            'fill_mask' : True,
+            'use_raw_flag' : True,
             }
 
     prefix = 'todsvd_'
@@ -37,6 +39,13 @@ class SVD(timestream_task.TimestreamTask):
     def process(self, ts):
 
         print ts.vis.shape
+
+        #if 'ns_on' in ts.iterkeys():
+        #    #ts.vis_mask[ts['ns_on'][:], ...] = True
+        #    ts.vis_mask += ts['ns_on'][:, None, None, :]
+
+        if 'flags' in ts.iterkeys() and self.params['use_raw_flag']:
+            ts.vis_mask[:] += ts['flags'][:]
 
         func = ts.bl_data_operate
         #func = ts.time_and_bl_data_operate
@@ -84,7 +93,16 @@ class SVD(timestream_task.TimestreamTask):
 
     def find_and_clean_modes(self, vis, vis_mask, li, gi, bl, ts, **kwargs):
 
-        print vis.shape
+        vis_mask = vis_mask.copy()
+
+        if 'ns_on' in ts.iterkeys():
+            #ts.vis_mask[ts['ns_on'][:], ...] = True
+            vis_mask += ts['ns_on'][:, gi][:, None, None]
+
+        #print vis.shape
+        if self.params['fill_mask']:
+            print "fill masked with mean"
+            vis[vis_mask] = np.mean(vis[~vis_mask])
 
         mode_list = list(self.params['mode_list'])
         num_infiles = len(self.input_files)
@@ -96,6 +114,8 @@ class SVD(timestream_task.TimestreamTask):
 
         bad_time = np.all(vis_mask, axis=(1, 2))
         bad_freq = np.all(vis_mask, axis=(0, 2))
+        #if 'ns_on' in ts.iterkeys():
+        #    bad_time = bad_time + ts['ns_on'][:]
 
         outfiles_map = ts._get_output_info('vis', num_infiles)[-1]
         st = 0
@@ -196,7 +216,14 @@ class SVD_OneStop(SVD):
 
     def process(self, ts):
 
-        print ts.vis.shape
+        #print ts.vis.shape
+        #if 'ns_on' in ts.iterkeys():
+        #    ts.vis_mask[:] += ts['ns_on'][:][:, None, None, :]
+
+        if 'flags' in ts.iterkeys() and self.params['use_raw_flag']:
+            print "using raw flags"
+            ts.vis_mask[:] += ts['flags'][:]
+
 
         func = ts.bl_data_operate
         #func = ts.time_and_bl_data_operate

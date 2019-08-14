@@ -40,6 +40,10 @@ class Timestream(timestream_common.TimestreamCommon):
                                      'blorder': (3,),
                                      'ra' : (0,3), # for meerKAT
                                      'dec': (0,3), # for meerKAT
+                                     'az' : (0,3), # for meerKAT
+                                     'el' : (0,3), # for meerKAT
+                                     'flags' : (0, 1, 2, 3), # for meerKAT
+                                     'ns_on' : (0, 3), # for meerKAT
                                    }
     _time_ordered_datasets_ = {'weather': (0,)}
     _time_ordered_attrs_ = {}

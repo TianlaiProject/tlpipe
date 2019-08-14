@@ -1,7 +1,9 @@
+#import matplotlib.pyplot as plt
 import numpy as np
 import gc
 import timestream_task
 import h5py
+from astropy.time import Time
 from tlpipe.utils.path_util import output_path
 from caput import mpiutil
 from caput import mpiarray
@@ -17,6 +19,12 @@ class DataEdit(timestream_task.TimestreamTask):
             'bad_time_list' : None,
             'bad_freq_list' : None,
             'bandpass_cal'  : True,
+            'fill_noise_diode' : False,
+            'noise_cal_init_time'  : None,
+            'noise_cal_period' : 19.9915424299, # in unit of second
+            'noise_cal_length' : 1.8, # in unit of second
+            'noise_cal_ext' : [0, 0], # in unit of int time, extending cal_on
+            'noise_cal_delayed_ant' : [],
             }
 
     prefix = 'pned_'
@@ -49,12 +57,33 @@ class DataEdit(timestream_task.TimestreamTask):
                 print bad_freq
                 ts.vis_mask[:, slice(*bad_freq), ...] = True
 
-        if self.params['corr'] == 'auto':
-            old_dtype = ts.vis.dtype
-            vis_abs = mpiarray.MPIArray.wrap(ts.vis[:].real, 0)
+        old_dtype = ts.vis.dtype
+        if self.params['corr'] == 'auto' and old_dtype == np.complex64:
+            vis_abs = mpiarray.MPIArray.wrap(np.abs(ts.vis[:]), 0)
             ts.create_main_data(vis_abs, recreate=True, copy_attrs=True)
             new_dtype = ts.vis.dtype
-            print "Use Auto only, Convert from %s to %s"%(old_dtype, new_dtype)
+            print "Use Auto only, Convert from %s to %s by abs"%(old_dtype, new_dtype)
+
+        if self.params['noise_cal_init_time'] is not None:
+            noise_on = np.zeros((ts.vis.shape[0], ts.vis.shape[3]), dtype='bool')
+            noise_on = mpiarray.MPIArray.wrap(noise_on, axis=0)
+            ts.create_dataset('ns_on', data=noise_on, dtype=noise_on.dtype)
+            ts['ns_on'].attrs['dimname'] = 'Time, Baseline'
+
+            #noise_cal_delayed = False
+            #if bl[0] - 1 in self.params['noise_cal_delayed_ant']:
+            #    print "Cal delayed, t0 plus 1 s"
+            #    noise_cal_delayed = True
+
+            #noise_on = get_cal_stamps(self.params['noise_cal_init_time'],
+            #                          self.params['noise_cal_period'],
+            #                          self.params['noise_cal_length'],
+            #                          ts['sec1970'][:],
+            #                          self.params['noise_cal_ext'],
+            #                          noise_cal_delayed)
+            #noise_on = mpiarray.MPIArray.wrap(noise_on, axis=0)
+            #ts.create_time_ordered_dataset('ns_on', data=noise_on, recreate=True)
+            #ts['ns_on'].attrs['dimname'] = 'Time'
 
         func = ts.bl_data_operate
         func(self.data_edit, full_data=True, copy_data=False, 
@@ -73,7 +102,25 @@ class DataEdit(timestream_task.TimestreamTask):
         else:
             vis_abs = vis
 
+        if self.params['noise_cal_init_time'] is not None:
+            noise_cal_delayed = False
+            print "Mask Noise Diode for Ant. M%03d"%(bl[0] - 1)
+            if bl[0] - 1 in self.params['noise_cal_delayed_ant']:
+                print "Cal delayed, t0 plus 1 s"
+                noise_cal_delayed = True
+
+            noise_on = get_cal_stamps(self.params['noise_cal_init_time'],
+                                      self.params['noise_cal_period'],
+                                      self.params['noise_cal_length'],
+                                      ts['sec1970'][:],
+                                      self.params['noise_cal_ext'],
+                                      noise_cal_delayed)
+            ts['ns_on'][:, gi] = noise_on
+
+
         bad_time = np.all(vis_mask, axis=(1, 2))
+        if 'ns_on' in ts.iterkeys() :
+            bad_time = bad_time + ts['ns_on'][:, gi]
         bad_freq = np.all(vis_mask, axis=(0, 2))
         good = (~bad_time)[:, None] * (~bad_freq)[None, :]
         good = good[:, :, None] * np.ones_like(vis_abs).astype('bool')
@@ -87,11 +134,76 @@ class DataEdit(timestream_task.TimestreamTask):
             bandpass[bandpass==0] = np.inf
             vis_abs /= bandpass[None, ...]
 
+        if self.params['fill_noise_diode']:
+            if 'ns_on' in ts.iterkeys() :
+                print 'Fill noise diode on time with nearby time'
+                noise_on = ts['ns_on'][:, gi]
+                vis_abs = fill_noise_diode_nearby(vis_abs, noise_on)
+            else:
+                print "No noise diode info. not able to fill"
+
+
         if vis.dtype == np.complex or vis.dtype == np.complex64:
             vis.real = vis_abs
             vis.imag = 0.
         else:
             vis = vis_abs
+
+def fill_noise_diode_nearby(vis, noise_on):
+
+
+    # take one time stamp ahead and one after the flagged time stamps 
+    # as noise diode off time
+    noise_off = (np.roll(noise_on, 1)  + np.roll(noise_on, -1)) ^ noise_on
+
+
+    # pick the noise off time value
+    vis_fillvalue = vis[noise_off, ...]
+
+    # if the first two time stamps are both noise diode on,
+    # vis_fillvalue will pick the last time stamp value. 
+    # we fix it by rolling vis_fillvalue one stamp, and fill the first
+    # value equal to the second. 
+    if noise_on[0] and noise_on[1]:
+        vis_fillvalue[-1, ...] = vis_fillvalue[0, ...]
+        vis_fillvalue = np.roll(vis_fillvalue, 1, axis=0)
+    # fill the noise_on with noise_off values
+    vis[noise_on, ...] = vis_fillvalue
+
+    return vis
+
+def get_cal_stamps(t0, p, l, time, ext=[0, 0], noise_cal_delayed=False):
+
+    t0 = Time(t0).unix #+ 5.
+    if noise_cal_delayed:
+        t0 += 1
+
+    dt = time[1] - time[0]
+    t_bins = np.append(time, time[-1] + dt)
+    t_bins -= 0.5 * dt
+
+    #noise_st = np.arange(t0,     t_bins[-1], p * dt)
+    #noise_ed = np.arange(t0 + l, t_bins[-1], p * dt)
+    noise_st = np.arange(t0,     t_bins[-1], p)
+    noise_ed = np.arange(t0 + l, t_bins[-1], p)
+
+    noise_on  = np.histogram(noise_st, t_bins)[0]
+    noise_on += np.histogram(noise_ed, t_bins)[0]
+    noise_on  = noise_on.astype('bool')
+
+    noise_on_p = noise_on.copy()
+    if ext[0] != 0:
+        for ii in range(ext[0]):
+            noise_on_p += np.roll(noise_on.copy(), ii + 1)
+
+    noise_on_n = noise_on.copy()
+    if ext[1] != 0:
+        for ii in range(ext[0]):
+            noise_on_n += np.roll(noise_on.copy(), -(ii + 1))
+
+    noise_on = noise_on_p + noise_on_n
+
+    return noise_on
 
 
 class PinkNoisePS(timestream_task.TimestreamTask):
@@ -106,6 +218,7 @@ class PinkNoisePS(timestream_task.TimestreamTask):
             #'f_max'     : None,
             'avg_len'   : 100,
             'method'    : 'fft', # lombscargle
+            'fill_noise_diode' : False,
             }
 
     prefix = 'pnps_'
@@ -151,12 +264,25 @@ class PinkNoisePS(timestream_task.TimestreamTask):
 
         #print vis.dtype
         #vis = np.abs(vis)
+        vis = vis.copy()
 
         method = self.params['method']
 
         bad_time = np.all(vis_mask, axis=(1, 2))
+
+        if 'ns_on' in ts.iterkeys():
+            if self.params['fill_noise_diode']:
+                print 'Fill noise diode with nearby time stamps'
+                noise_on = ts['ns_on'][:, gi]
+                vis = fill_noise_diode_nearby(vis, noise_on)
+            else:
+                print "Mask noise diode as bad time"
+                bad_time = bad_time + ts['ns_on'][:, gi]
+
         bad_freq = np.all(vis_mask, axis=(0, 2))
-        self.bad_time = bad_time
+        #print np.all(bad_freq)
+        #print np.all(bad_time)
+        #self.bad_time = bad_time
         self.bad_freq = bad_freq
 
         num_infiles = len(self.input_files)
@@ -168,14 +294,16 @@ class PinkNoisePS(timestream_task.TimestreamTask):
 
             name = ts.main_data_name
 
-            _vis = vis[st:et, ...]
-            _vis = _vis[~bad_time[st:et], ...][:, ~bad_freq, ...]
+            self.bad_time = bad_time[st:et]
+
+            _vis = vis[st:et, ...].copy()
+            #_vis = _vis[~bad_time[st:et], ...][:, ~bad_freq, ...]
             #print np.mean(_vis, axis=0)
-            _vis = _vis - np.mean(_vis, axis=0)[None, :, :]
+            #_vis = _vis - np.mean(_vis, axis=0)[None, :, :]
             time = ts['sec1970'][st:et]
-            time = time[~bad_time[st:et]]
+            #time = time[~bad_time[st:et]]
             freq = ts['freq'][:]
-            freq = freq[~bad_freq]
+            #freq = freq[~bad_freq]
 
             #print "Normalize with dt %f df %f"%((time[1]-time[0]), (freq[1] - freq[0]))
             #_vis = _vis / (time[1]-time[0]) / (freq[1] - freq[0])
@@ -214,6 +342,9 @@ class PinkNoisePS_1DTC(PinkNoisePS):
     prefix = 'pnps1dtc_'
 
     def avg_vis(self, vis, name, freq, time):
+
+        freq = freq[~self.bad_freq]
+        vis  = vis[:, ~self.bad_freq, ...]
 
         avg_len = self.params['avg_len']
 
@@ -258,8 +389,8 @@ class PinkNoisePS_1DTC(PinkNoisePS):
             psd_func = est_tcorr_psd1d_fft
         elif method == 'lombscargle':
             psd_func = est_tcorr_psd1d_lombscargle
-        tcorr_ps, tcorr_bc = psd_func(vis, time, n_bins=n_bins, 
-                f_min=f_min, f_max=f_max, inttime=inttime)
+        tcorr_ps, tcorr_bc = psd_func(vis, time, self.bad_time,
+                n_bins=n_bins, f_min=f_min, f_max=f_max, inttime=inttime)
 
         if file_name is not None:
             #output_files = output_path(self.output_files[fi], relative=False,
@@ -290,6 +421,9 @@ class PinkNoisePS_1DFC(PinkNoisePS):
     prefix = 'pnps1dfc_'
 
     def avg_vis(self, vis, name, freq, time):
+
+        time = time[~self.bad_time]
+        vis  = vis[~self.bad_time, ...]
 
         avg_len = self.params['avg_len']
 
@@ -335,8 +469,8 @@ class PinkNoisePS_1DFC(PinkNoisePS):
         elif method == 'lombscargle':
             psd_func = est_tcorr_psd1d_lombscargle
         vis = np.swapaxes(vis, 0, 1)
-        tcorr_ps, tcorr_bc = psd_func(vis, freq, n_bins=n_bins, 
-                f_min=w_min, f_max=w_max, inttime=df)
+        tcorr_ps, tcorr_bc = psd_func(vis, freq, self.bad_freq,
+                n_bins=n_bins, f_min=w_min, f_max=w_max, inttime=df)
 
         if file_name is not None:
             #output_files = output_path(self.output_files[fi], relative=False,
@@ -357,10 +491,88 @@ class PinkNoisePS_1DFC(PinkNoisePS):
             print '-' * 20
             print
 
-def est_tcorr_psd1d_fft(data, ax, n_bins=None, inttime=None, f_min=None, f_max=None):
+class PinkNoiseCF_1DTC(PinkNoisePS):
 
-    mean = np.mean(data, axis=0)
+    params_init = {
+            'n_bins'    : 20,
+            't_min'     : None,
+            't_max'     : None,
+            'linear_bins': False,
+            }
+
+    prefix = 'pntf1dtc_'
+
+    def avg_vis(self, vis, name, freq, time):
+
+        # for time corr, we average over frequencies.
+        # just pickup the good frequency channels.
+        freq = freq[~self.bad_freq]
+        vis  = vis[:, ~self.bad_freq]
+
+        avg_len = self.params['avg_len']
+
+        if avg_len == 0:
+            print "average all frequencies before ps. est."
+            vis = np.mean(vis, axis=1)
+            vis = vis[:, None, :]
+            name += '_avgEachF'
+            freq = None
+        elif avg_len is None:
+            print "no frequency average before ps. est."
+            name += '_avgNoneF'
+        else:
+            print "average every %d frequencis before ps. est."%avg_len
+            time_n, freq_n, pol_n = vis.shape
+            split_n = freq_n / avg_len
+            if split_n == 0:
+                msg = "Only %d freq channels, avg_len should be less than it"%freq_n
+                raise ValueError(msg)
+            print "%d/%d freq channels are using"%(split_n * avg_len, freq_n)
+            vis = vis[:, :split_n * avg_len, :]
+            vis.shape = (time_n, split_n, avg_len, pol_n)
+            vis = np.mean(vis, axis=2)
+            name += '_avg%04dF'%avg_len
+        
+            freq = freq[:split_n * avg_len]
+            freq.shape = (split_n, avg_len)
+            freq = np.median(freq, axis=1)
+
+        return vis, name, freq, time
+
+
+    def ps_process_write(self, vis, time, freq, ts, file_name = None):
+
+        n_bins = self.params['n_bins']
+        t_min  = self.params['t_min']
+        t_max  = self.params['t_max']
+        linear_bins =self.params['linear_bins']
+        inttime = ts.attrs['inttime']
+
+        psd_func = est_tcorr_cor1d
+        tcorr_cf, tcorr_bc = psd_func(vis, time, self.bad_time,
+                n_bins=n_bins, linear_bins=linear_bins, 
+                t_min=t_min, t_max=t_max, inttime=inttime)
+
+        if file_name is not None:
+            print file_name
+            with h5py.File(file_name, 'w') as f:
+                f['tcorr_ps'] = tcorr_cf
+                f['tcorr_bc'] = tcorr_bc
+                if self.bad_freq is not None:
+                    f['bad_freq'] = self.bad_freq
+                if self.bad_time is not None:
+                    f['bad_time'] = self.bad_time
+            print '-' * 20
+            print
+
+def est_tcorr_psd1d_fft(data, ax, flag, n_bins=None, inttime=None,
+        f_min=None, f_max=None):
+
+    data = data.copy()
+
+    mean = np.mean(data[~flag, ...], axis=0)
     data -= mean[None, :, :]
+    data[flag, ...] = 0.
 
     #windowf = np.blackman(data.shape[0])
     #data *= windowf[:, None, None]
@@ -410,16 +622,32 @@ def est_tcorr_psd1d_fft(data, ax, n_bins=None, inttime=None, f_min=None, f_max=N
         return fftdata_p, freq_p
 
 
-def est_tcorr_psd1d_lombscargle(data, ax, n_bins=None, inttime=None, 
+def est_tcorr_psd1d_lombscargle(data, ax, flag, n_bins=None, inttime=None, 
         f_min=None, f_max=None):
 
-    fft_len = data.shape[0]
+    #fft_len = data.shape[0]
+
+    #data = np.ma.array(data)
+    #data.mask = np.zeros(data.shape)
+    #data.mask[flag, ...] = 1
+    #data_mean = np.ma.mean(data, axis=0)
+    #data_std  = np.ma.std(data, axis=0)
+    #print data_mean
+    #print data_std
+    #data_rand = np.random.standard_normal(data.shape) * data_std + data_mean
+    ##data = np.ones_like(data)
+    #data = data.data
+    #data[flag, ...] = data_rand[flag, ...]
+    data = data[~flag, ...]
+    ax   = ax[~flag, ...]
 
     if inttime is None:
         inttime = ax[1] - ax[0]
 
-    n = ax.shape[0]
+    #n = ax.shape[0]
     d = inttime
+    n = int((ax[-1] - ax[0]) / inttime)
+    fft_len = n
     fftfreq = np.fft.fftfreq(n, d) #* 2 * np.pi 
     fftfreq = fftfreq[fftfreq>0]
 
@@ -439,6 +667,8 @@ def est_tcorr_psd1d_lombscargle(data, ax, n_bins=None, inttime=None,
     freq_bins_e = freq_bins_c / (freq_bins_d ** 0.5)
     freq_bins_e = np.append(freq_bins_e, freq_bins_e[-1] * freq_bins_d)
 
+    #fftfreq = freq_bins_c
+
     #freqs = np.linspace(f_min, f_max, ax.shape[0])
     #freqs = np.linspace(f_min, f_max, 1024)
 
@@ -451,7 +681,7 @@ def est_tcorr_psd1d_lombscargle(data, ax, n_bins=None, inttime=None,
     for i in range(n_freq):
         for j in range(n_pol):
             y = data[:, i, j]
-            y = y - np.mean(y)
+            #y = y - np.mean(y)
             #y = y * windowf
             #power[:, i, j] = lombscargle(ax, y, 2. * np.pi * freq_bins_c,
             #        normalize=False)
@@ -465,3 +695,64 @@ def est_tcorr_psd1d_lombscargle(data, ax, n_bins=None, inttime=None,
     power[freq_bins_c >= 1. / inttime / 2.] = 0.
 
     return power, freq_bins_c
+
+def est_tcorr_cor1d(data, ax, n_bins, flag, linear_bins=False, 
+        inttime=None, t_min=None, t_max=None):
+
+    ax = ax - ax[0]
+    ax = np.float32(ax)
+
+    fft_len = data.shape[0]
+
+    if inttime is None:
+        inttime = ax[1] - ax[0]
+
+    n = ax.shape[0]
+    d = inttime
+
+    if n_bins is None: n_bins = 30
+    if t_min  is None: t_min =  inttime
+    if t_max  is None: t_max =  inttime * fft_len / 2.
+
+    if linear_bins:
+        tau_bins_c = np.linspace(t_min, t_max, n_bins)
+        tau_bins_d = tau_bins_c[1] - tau_bins_c[0]
+        tau_bins_e = tau_bins_c - (tau_bins_d * 0.5)
+        tau_bins_e = np.append(tau_bins_e, tau_bins_e[-1] + tau_bins_d)
+    else:
+        tau_bins_c = np.logspace(np.log10(t_min), np.log10(t_max), n_bins)
+        tau_bins_d = tau_bins_c[1] / tau_bins_c[0]
+        tau_bins_e = tau_bins_c / (tau_bins_d ** 0.5)
+        tau_bins_e = np.append(tau_bins_e, tau_bins_e[-1] * tau_bins_d)
+
+    n_freq, n_pol = data.shape[1:]
+
+    power = np.zeros([n_bins, n_freq, n_pol])
+
+    timelag = (ax[:, None] - ax[None, :]).flatten()
+    timelag = np.abs(timelag)
+
+    norm = np.histogram(timelag, bins=tau_bins_e)[0] * 1.
+    norm[norm==0] = np.inf
+    #plt.plot(tau_bins_e[:-1], norm)
+    #plt.show()
+
+
+    for i in range(n_freq):
+        for j in range(n_pol):
+            y = data[:, i, j]
+            #y = y - np.mean(y)
+            #y = y.astype('float32')
+            _p = (y[:, None] * y[None, :]).flatten()
+            #print _p.size * _p.itemsize / ((1024.)**2)
+            hist  = np.histogram(timelag, bins=tau_bins_e, weights=_p)[0]
+            power[:, i, j] = hist / norm
+            del _p
+            gc.collect()
+    #power = np.sqrt(4. * power / float(ax.shape[0]) / np.std(y) ** 2.)
+    #power *= inttime
+
+    power[tau_bins_c <= inttime ] = 0.
+    power[tau_bins_c >= inttime * fft_len / 2.] = 0.
+
+    return power, tau_bins_c
