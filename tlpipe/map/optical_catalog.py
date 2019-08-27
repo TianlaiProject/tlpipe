@@ -18,6 +18,7 @@ class BinOpticalCat(mapbase.MapBase, pipeline.OneAndOne):
     params_init = {
 
             'tmp_map'   : None,
+            'tmp_grid'  : None,
             'ra_label'  : 'RA',
             'dec_label' : 'DEC',
             'z_label'   : 'Z',
@@ -40,6 +41,31 @@ class BinOpticalCat(mapbase.MapBase, pipeline.OneAndOne):
                 self.freq_edges = tmp.get_axis_edges('freq')
                 self.ra_edges   = tmp.get_axis_edges('ra')
                 self.dec_edges  = tmp.get_axis_edges('dec')
+        elif self.params['tmp_grid'] is not None:
+            with np.load(self.params['tmp_grid']) as f:
+                freq = f['freq'] * 1.e-6
+                ra   = f['ra']
+                dec  = f['dec']
+
+                nfreq = freq.shape[0]
+                dfreq = freq[1] - freq[0]
+
+                nra   = ra.shape[0]
+                dra   = ra[1]  - ra[0]
+
+                ndec  = dec.shape[0]
+                ddec  = dec[1] - dec[0]
+
+                map_shp   = [nfreq, nra, ndec]
+                self.tmp  = al.make_vect(np.zeros(map_shp), 
+                                         axis_names=('freq', 'ra', 'dec'))
+                self.tmp.set_axis_info('freq', freq[nfreq//2], dfreq)
+                self.tmp.set_axis_info('ra',   ra[nra//2], dra)
+                self.tmp.set_axis_info('dec',  dec[ndec//2], ddec)
+
+                self.freq_edges = self.tmp.get_axis_edges('freq')
+                self.ra_edges   = self.tmp.get_axis_edges('ra')
+                self.dec_edges  = self.tmp.get_axis_edges('dec')
         else:
             msg = "Need Temp map!!"
             raise ValueError(msg)

@@ -704,16 +704,23 @@ class PlotVvsTime(PlotTimeStream):
         good_freq_ed = np.argwhere(~bad_freq)[-1, 0]
         vis1 = vis1[:, good_freq_st:good_freq_ed, ...]
 
+        self._plot(vis1, x_axis, xmin, xmax, bl, ts)
+
+    def _plot(self, vis1, x_axis, xmin, xmax, bl, ts):
+
         axhh = self.axhh
         axvv = self.axvv
 
         label = 'M%03d'%(bl[0] - 1)
         #axhh.plot(x_axis, np.ma.mean(vis1[:,:,0], axis=1), '.', label = label)
         #axvv.plot(x_axis, np.ma.mean(vis1[:,:,1], axis=1), '.')
-        axhh.plot(x_axis, np.ma.mean(vis1[:,:,0], axis=1), '-', 
+        _l = axhh.plot(x_axis, np.ma.mean(vis1[:,:,0], axis=1), '-', 
                 label = label, drawstyle='steps-mid')
+        axhh.plot(x_axis, np.ma.mean(vis1[:,:,0], axis=1), '.', c=_l[0].get_color())
+
         axvv.plot(x_axis, np.ma.mean(vis1[:,:,1], axis=1), '-',
                 drawstyle='steps-mid')
+        axvv.plot(x_axis, np.ma.mean(vis1[:,:,1], axis=1), '.', c=_l[0].get_color())
 
 
         if xmin is None: xmin = x_axis[0]
@@ -759,6 +766,128 @@ class PlotVvsTime(PlotTimeStream):
         #    if self.params['show'] == bl[0]-1:
         #        plt.show()
         #plt.close()
+
+class PlotNcalVSTime(PlotVvsTime):
+
+    prefix = 'pnt_'
+
+    def plot(self, vis, vis_mask, li, gi, bl, ts, **kwargs):
+
+        #vis = np.abs(vis)
+        if vis.dtype == np.complex or vis.dtype == np.complex64:
+            print "take the abs of complex value"
+            vis = np.abs(vis)
+
+        flag_mask = self.params['flag_mask']
+        flag_ns   = self.params['flag_ns']
+        re_scale  = self.params['re_scale']
+        vmin      = self.params['vmin']
+        vmax      = self.params['vmax']
+        xmin      = self.params['xmin']
+        xmax      = self.params['xmax']
+        ymin      = self.params['ymin']
+        ymax      = self.params['ymax']
+
+        vis1 = np.ma.array(vis)
+        if flag_mask:
+            vis1.mask = vis_mask
+
+        if 'ns_on' in ts.iterkeys():
+            print 'Uisng Noise Diode Mask for Ant. %03d'%(bl[0] - 1)
+            if len(ts['ns_on'].shape) == 2:
+                on = ts['ns_on'][:, gi].astype('bool')
+            else:
+                on = ts['ns_on'][:]
+            #on = ts['ns_on'][:]
+            vis1.mask[~on, ...] = True
+        else:
+            print "No Noise Diode Mask info"
+
+        if self.params['plot_index']:
+            y_label = r'$\nu$ index'
+            x_axis = np.arange(ts['sec1970'].shape[0])
+            self.x_label = 'time index'
+        else:
+            y_label = r'$\nu$ / GHz'
+            #x_axis = [ datetime.fromtimestamp(s) for s in ts['sec1970']]
+            #self.x_label = '%s' % x_axis[0].date()
+            #x_axis = mdates.date2num(x_axis)
+            if self.params['plot_ra']:
+                #print ts['ra'].shape
+                #print gi, li
+                x_axis = ts['ra'][:, gi]
+                self.x_label = 'R.A.' 
+            else:
+                x_axis = [ datetime.fromtimestamp(s) for s in ts['sec1970']]
+                self.x_label = '%s UTC' % x_axis[0].date()
+                x_axis = mdates.date2num(x_axis)
+            if xmin is not None:
+                xmin = x_axis[xmin]
+            if xmax is not None:
+                xmax = x_axis[xmax]
+
+        bad_time = np.all(vis_mask, axis=(1, 2))
+        bad_freq = np.all(vis_mask, axis=(0, 2))
+
+        good_time_st = np.argwhere(~bad_time)[ 0, 0]
+        good_time_ed = np.argwhere(~bad_time)[-1, 0]
+        vis1 = vis1[good_time_st:good_time_ed, ...]
+        x_axis = x_axis[good_time_st:good_time_ed]
+
+        on  = on[good_time_st:good_time_ed]
+        #if on[0] and not on[1]: on[0] = False
+        #if on[-1] and not on[-2]: on[-1] = False
+        on[ :2] = False
+        on[-2:] = False
+        # rm noise cal with half missing
+        on  = (np.roll(on, 1) * on) + (np.roll(on, -1) * on)
+        off = (np.roll(on, 1) + np.roll(on, -1)) ^ on
+
+        good_freq_st = np.argwhere(~bad_freq)[ 0, 0]
+        good_freq_ed = np.argwhere(~bad_freq)[-1, 0]
+        vis1 = vis1[:, good_freq_st:good_freq_ed, ...]
+
+        #vis1 = vis1.data
+        vis1_on  = vis1[on, ...]
+        vis1_off = vis1[off, ...].data
+        vis1 = vis1_on - vis1_off
+
+        vis_shp = vis1.shape
+        vis1 = vis1.reshape((-1, 2) + vis_shp[1:])
+        vis1 = vis1 + vis1[:, ::-1, ...]
+        vis1.shape = vis_shp
+
+        vis1 /= np.ma.median(vis1, axis=(0,1))[None, None, :]
+        #vis1 /= np.ma.mean(vis1, axis=(0,1))[None, None, :]
+
+        x_axis   = x_axis[on]
+
+        axhh = self.axhh
+        axvv = self.axvv
+
+        label = 'M%03d'%(bl[0] - 1)
+        #axhh.plot(x_axis, np.ma.mean(vis1[:,:,0], axis=1), '.', label = label)
+        #axvv.plot(x_axis, np.ma.mean(vis1[:,:,1], axis=1), '.')
+
+        vis1 = np.ma.median(vis1, axis=1)
+        good = ~vis1.mask
+        vis1_poly_xx = np.poly1d(np.polyfit(x_axis[good[:,0]], vis1[:, 0][good[:,0]], 4))
+        vis1_poly_yy = np.poly1d(np.polyfit(x_axis[good[:,1]], vis1[:, 1][good[:,1]], 4))
+
+        #vis1 = np.ma.array(medfilt(vis1.data, kernel_size=(11, 1)), mask = vis1.mask)
+
+        _l = axhh.plot(x_axis, vis1[:,0], '-', lw=1, label = label, drawstyle='steps-mid')
+        axhh.plot(x_axis, vis1_poly_xx(x_axis), '-', c=_l[0].get_color(), lw=2.0)
+        _l = axvv.plot(x_axis, vis1[:,1], '-', lw=1, drawstyle='steps-mid')
+        axvv.plot(x_axis, vis1_poly_yy(x_axis), '-', c=_l[0].get_color(), lw=2.0)
+
+        axhh.axhline(1, 0, 1, c='k', lw=1.5, ls='--')
+        axvv.axhline(1, 0, 1, c='k', lw=1.5, ls='--')
+
+        if xmin is None: xmin = x_axis[0]
+        if xmax is None: xmax = x_axis[-1]
+        self.xmin = min([xmin, self.xmin])
+        self.xmax = max([xmax, self.xmax])
 
 class PlotNoiseCal(PlotVvsTime):
 

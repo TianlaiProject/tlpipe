@@ -7,7 +7,6 @@ Inheritance diagram
    :parts: 2
 
 """
-
 import sys, traceback
 from os import path
 import logging
