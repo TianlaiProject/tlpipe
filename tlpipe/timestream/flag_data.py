@@ -90,26 +90,33 @@ class FlagData(timestream_task.TimestreamTask) :
         badness_thres = self.params['badness_thres']
         time_cut      = self.params['time_cut']
         time_block    = self.params['time_block']
-        already_flagged = np.sum(vis_mask)
+
+        if 'ns_on' in ts.iterkeys():
+            ns_on = ts['ns_on'][:, gi]
+            #_vis = vis[~ns_on, ...]
+            #_vis_mask = vis_mask[~ns_on, ...].copy()
+
+        already_flagged = np.sum(vis_mask[~ns_on])
         if time_block  is None:
             time_block = vis.shape[0]
         for i in range(0, vis.shape[0], time_block):
 
             time_slice = slice(i, i+time_block)
-            for j in range(5):
-                _already_flagged = np.sum(vis_mask[time_slice])
+            _ns_off = ~ns_on[time_slice]
+            for j in range(10):
+                _already_flagged = np.sum(vis_mask[time_slice][_ns_off])
 
-                Data      = ma.array(vis[time_slice])
-                Data.mask = vis_mask[time_slice]
+                Data      = ma.array(vis[time_slice][_ns_off])
+                Data.mask = vis_mask[time_slice][_ns_off]
                 badness   = flag_data(Data, sigma_thres, badness_thres, time_cut)
-                vis_mask[time_slice] += Data.mask
+                vis_mask[time_slice][_ns_off] += Data.mask
 
-                _new_flags = np.sum(vis_mask[time_slice]) - _already_flagged
-                percent = float(_new_flags) / np.prod(vis[time_slice].shape) * 100
-                if percent < 1. : break
+                _new_flags = np.sum(vis_mask[time_slice][_ns_off]) - _already_flagged
+                percent = float(_new_flags) / np.prod(vis[time_slice][_ns_off].shape)
+                if percent < 0.01 : break
 
-        new_flags = np.sum(vis_mask) - already_flagged
-        percent = float(new_flags) / np.prod(vis.shape) * 100
+        new_flags = np.sum(vis_mask[~ns_on]) - already_flagged
+        percent = float(new_flags) / np.prod(vis[~ns_on].shape) * 100
         print "global index [bl] %2d: %f%%"%(gi, percent)
 
         # Can print or return badness here if you would like
@@ -165,7 +172,7 @@ def flag_data(Data, sigma_thres, badness_thres, time_cut):
     bad_freqs = []
     amount_masked = -1 # For recursion
 
-    destroy_time_with_mean_arrays(Data1, 5., flag_size=1)
+    destroy_time_with_mean_arrays(Data1, 2.5, flag_size=8)
 
     while not (amount_masked == 0) and itr < max_itr:
         amount_masked = destroy_with_variance(Data1, sigma_thres, bad_freqs) 
@@ -272,7 +279,7 @@ def destroy_with_variance(data, sigma_thres=6, bad_freq_list=[]):
             data[:,freq,:].mask = True
     return amount_masked
 
-def destroy_time_with_mean_arrays(data, sigma_thres = 8., flag_size=5):
+def destroy_time_with_mean_arrays(data, sigma_thres = 3., flag_size=5):
     '''Mask times with high means.
     
     If there is a problem in time, the mean over all frequencies
@@ -293,7 +300,7 @@ def destroy_time_with_mean_arrays(data, sigma_thres = 8., flag_size=5):
     b = ma.mean(data[:, :, 1], -1)
     # Get means and std for all arrays.
     means = sp.array([ma.mean(a), ma.mean(b)])
-    sig   = sp.array([ma.std(a), ma.std(b)])
+    sig   = sp.array([ma.std(a),  ma.std(b)])
     # Get max accepted values.
     max_accepted = means + sigma_thres * sig
     min_accepted = means - sigma_thres * sig

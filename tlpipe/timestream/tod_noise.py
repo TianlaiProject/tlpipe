@@ -1,7 +1,7 @@
 #import matplotlib.pyplot as plt
 import numpy as np
 import gc
-import timestream_task
+from tlpipe.timestream import timestream_task
 import h5py
 from astropy.time import Time
 from tlpipe.utils.path_util import output_path
@@ -16,6 +16,7 @@ class DataEdit(timestream_task.TimestreamTask):
     """
 
     params_init = {
+            'mask_time_split_file': False,
             'bad_time_list' : None,
             'bad_freq_list' : None,
             'bandpass_cal'  : True,
@@ -39,17 +40,22 @@ class DataEdit(timestream_task.TimestreamTask):
         progress_step = self.params['progress_step']
 
         if bad_time_list is not None:
-            num_infiles = len(self.input_files)
-            name = ts.main_data_name
-            outfiles_map = ts._get_output_info(name, num_infiles)[-1]
-            st = 0
-            for fi, start, stop in outfiles_map:
-                et = st + (stop - start)
-                print "Mask bad time"
+            if self.params['mask_time_split_file']:
+                num_infiles = len(self.input_files)
+                name = ts.main_data_name
+                outfiles_map = ts._get_output_info(name, num_infiles)[-1]
+                st = 0
+                for fi, start, stop in outfiles_map:
+                    et = st + (stop - start)
+                    print "Mask bad time"
+                    for bad_time in bad_time_list:
+                        print bad_time
+                        ts.vis_mask[st:et, ...][slice(*bad_time), ...] = True
+                    st = et
+            else:
                 for bad_time in bad_time_list:
                     print bad_time
-                    ts.vis_mask[st:et, ...][slice(*bad_time), ...] = True
-                st = et
+                    ts.vis_mask[slice(*bad_time), ...] = True
 
         if bad_freq_list is not None:
             print "Mask bad freq"
@@ -129,8 +135,8 @@ class DataEdit(timestream_task.TimestreamTask):
         if bandpass_cal:
             "Bandpass cal with time median value"
             bandpass = np.median(vis_abs[tuple(~bad_time), ...], axis=0)
-            bandpass[:,0] = medfilt(bandpass[:,0], kernel_size=11)
-            bandpass[:,1] = medfilt(bandpass[:,1], kernel_size=11)
+            bandpass[:,0] = medfilt(bandpass[:,0], kernel_size=51)
+            bandpass[:,1] = medfilt(bandpass[:,1], kernel_size=51)
             bandpass[bandpass==0] = np.inf
             vis_abs /= bandpass[None, ...]
 
