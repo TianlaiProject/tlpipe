@@ -3,6 +3,7 @@ import scipy as sp
 import _mapmaker as _mapmaker_c
 from tlpipe.map import algebra as al
 
+
 class Pointing(object):
     """Class represents the pointing operator.
 

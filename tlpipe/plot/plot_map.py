@@ -2,6 +2,7 @@
 
 from tlpipe.map import algebra as al
 from tlpipe.powerspectrum import fgrm
+from tlpipe.plot import plot_waterfall
 
 import h5py as h5
 import numpy as np
@@ -54,7 +55,7 @@ def load_maps(dm_path, dm_file, name='clean_map'):
 def plot_map(data, indx = (), figsize=(10, 4),
             xlim=[None, None], ylim=[None, None], logscale=False,
             vmin=None, vmax=None, sigma=2., inv=False, mK=True,
-            smoothing=False):
+            smoothing=False, nvss_path=None, c_label=None):
     
     #imap *= 1.e3
     #imap = data[0][indx + (slice(None),)]
@@ -125,6 +126,14 @@ def plot_map(data, indx = (), figsize=(10, 4),
     ax.set_ylim(ylim)
     ax.set_xlabel(r'${\rm RA}\,[^\circ]$')
     ax.set_ylabel(r'${\rm Dec}\,[^\circ]$')
+
+    nvss_range = [ [ra_edges.min(), ra_edges.max(), dec_edges.min(), dec_edges.max()],]
+    if nvss_path is not None:
+        nvss_cat = plot_waterfall.get_nvss_radec(nvss_path, nvss_range)
+        nvss_sel = nvss_cat['FLUX_20_CM'] > 10.
+        nvss_ra  = nvss_cat['RA'][nvss_sel]
+        nvss_dec = nvss_cat['DEC'][nvss_sel]
+        ax.plot(nvss_ra, nvss_dec, 'ko', mec='k', mfc='w', ms=10, mew=1.5)
     
     
     
@@ -138,7 +147,9 @@ def plot_map(data, indx = (), figsize=(10, 4),
     else:
         fig.colorbar(cm, ax=ax, cax=cax)
     cax.minorticks_off()
-    cax.set_ylabel(r'$T\,$' + unit)
+    if c_label is None:
+        c_label = r'$T\,$' + unit
+    cax.set_ylabel(c_label)
     
 def load_ps1d(ps_path, ps_file):
 

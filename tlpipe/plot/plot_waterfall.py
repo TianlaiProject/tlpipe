@@ -733,8 +733,8 @@ class PlotVvsTime(PlotTimeStream):
             #dec_max = 25.61497357686361
             #dec_min = 25.458541361490884
             #dec_max = 25.532173665364585
-            dec_min = 25.789624659220376
-            dec_max = 25.863256963094077
+            #dec_min = 25.789624659220376
+            #dec_max = 25.863256963094077
             self.nvss_range.append([xmin, xmax, dec_min, dec_max])
 
     def write_output(self, output):

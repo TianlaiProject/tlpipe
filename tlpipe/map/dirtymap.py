@@ -22,11 +22,13 @@ import gc
 from constants import T_infinity, T_huge, T_large, T_medium, T_small, T_sys
 from constants import f_medium, f_large
 
+
 class CleanMap_GBT(mapbase.MultiMapBase, OneAndOne):
 
     params_init = {
 
             'save_cov' : False,
+            'threshold' : 1.e-3,
             }
 
     prefix = 'cm_'
@@ -61,6 +63,7 @@ class CleanMap_GBT(mapbase.MultiMapBase, OneAndOne):
                 _i += [int(x / np.prod(shp[i+1:])),]
             return tuple(_i)
 
+        threshold = self.params['threshold']
         task_n = np.prod(self.map_shp[:-2])
         for task_ind in mpiutil.mpirange(task_n):
 
@@ -78,13 +81,15 @@ class CleanMap_GBT(mapbase.MultiMapBase, OneAndOne):
 
             print _cov_inv.max(), _cov_inv.min()
 
-            clean_map, noise_diag = make_cleanmap(_dirty_map, _cov_inv)
+            clean_map, noise_diag = make_cleanmap(_dirty_map, _cov_inv, threshold)
             self.df_out[-1]['clean_map' ][indx + (slice(None), )] = clean_map
             self.df_out[-1]['noise_diag'][indx + (slice(None), )] = noise_diag
 
     def finish(self):
         if mpiutil.rank0:
             print 'Finishing CleanMapMaking.'
+
+        self.__del__()
 
         mpiutil.barrier()
 
@@ -315,6 +320,8 @@ def make_dirtymap(vis, vis_mask, time, ra, dec, map_tmp, tblock_len, n_poly=1,
 def timestream2map(vis_one, vis_mask, time, ra, dec, map_tmp, n_poly = 1, 
         interpolation = 'linear'):
 
+    vis_mask = (vis_mask.copy()).astype('bool')
+
     vis_one = np.array(vis_one)
     vis_one[vis_mask] = 0.
 
@@ -331,6 +338,7 @@ def timestream2map(vis_one, vis_mask, time, ra, dec, map_tmp, n_poly = 1,
     _good *= ( dec > min(map_tmp.get_axis('dec')))
     _good *= ~vis_mask
     if np.sum(_good) < 5: 
+        print 'bad block < 5'
         return al.zeros_like(map_tmp), cov_inv_block
 
     ra   = ra[_good]
@@ -367,17 +375,17 @@ def timestream2map(vis_one, vis_mask, time, ra, dec, map_tmp, n_poly = 1,
 
     return dirty_map, cov_inv_block
 
-def make_cleanmap(dirty_map, cov_inv_block):
+def make_cleanmap(dirty_map, cov_inv_block, threshold=1.e-1):
     
     map_shp = dirty_map.shape
     dirty_map.shape = (np.prod(map_shp), )
     cov_inv_block.shape = (np.prod(map_shp), np.prod(map_shp))
     cov_inv_diag, Rot = linalg.eigh(cov_inv_block, overwrite_a=True)
     map_rotated = sp.dot(Rot.T, dirty_map)
-    bad_modes = cov_inv_diag <= 1.e-3 * cov_inv_diag.max()
+    bad_modes = cov_inv_diag <= threshold * cov_inv_diag.max()
     print "cov_inv_diag max = %4.1f"%cov_inv_diag.max()
     print "discarded: %4.1f" % (100.0 * sp.sum(bad_modes) / bad_modes.size) +\
-                "% of modes"
+                "% of modes" + " (tho=%f)"%threshold
     map_rotated[bad_modes] = 0.
     cov_inv_diag[bad_modes] = 1.
     print "cov_inv_diag min = %5.4e"%cov_inv_diag.min()
