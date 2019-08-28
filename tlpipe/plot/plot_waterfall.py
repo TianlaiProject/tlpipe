@@ -842,30 +842,13 @@ class PlotNcalVSTime(PlotVvsTime):
         x_axis = x_axis[good_time_st:good_time_ed]
 
         on  = on[good_time_st:good_time_ed]
-        #if on[0] and not on[1]: on[0] = False
-        #if on[-1] and not on[-2]: on[-1] = False
-        on[ :on_t] = False
-        on[-on_t:] = False
-        # rm noise cal with half missing
-        #on  = (np.roll(on, 1) * on) + (np.roll(on, -1) * on)
-        #off = (np.roll(on, 1) + np.roll(on, -1)) ^ on
-        off = np.roll(on, 1)
 
         good_freq_st = np.argwhere(~bad_freq)[ 0, 0]
         good_freq_ed = np.argwhere(~bad_freq)[-1, 0]
         vis1 = vis1[:, good_freq_st:good_freq_ed, ...]
 
-        #vis1 = vis1.data
-        vis1_on  = vis1[on, ...]
-        vis1_off = vis1[off, ...].data
-        vis1 = vis1_on - vis1_off
 
-        if on_t > 1:
-            vis_shp = vis1.shape
-            vis1 = vis1.reshape((-1, on_t) + vis_shp[1:])
-            vis1 = vis1 + vis1[:, ::-1, ...]
-            vis1.shape = vis_shp
-
+        vis1, on = get_Ncal(vis1, vis_mask, on, on_t)
         vis1 /= np.ma.median(vis1, axis=(0,1))[None, None, :]
         #vis1 /= np.ma.mean(vis1, axis=(0,1))[None, None, :]
 
@@ -897,6 +880,36 @@ class PlotNcalVSTime(PlotVvsTime):
         if xmax is None: xmax = x_axis[-1]
         self.xmin = min([xmin, self.xmin])
         self.xmax = max([xmax, self.xmax])
+
+def get_Ncal(vis, vis_mask, on, on_t):
+
+    # remove the cal at the beginning/ending
+    on[ :on_t] = False
+    on[-on_t:] = False
+    if on_t == 2:
+        # noise cal may have half missing, because of the RFI flagging
+        # remove them
+        on  = (np.roll(on, 1) * on) + (np.roll(on, -1) * on)
+        # use one time stamp before, one after as cal off
+        off = (np.roll(on, 1) + np.roll(on, -1)) ^ on
+    elif on_t == 1:
+        off = np.roll(on, 1)
+    else:
+        raise
+    
+    #vis1 = vis1.data
+    vis1_on  = vis[on, ...]
+    vis1_off = vis[off, ...].data
+    vis1 = vis1_on - vis1_off
+
+    if on_t > 1:
+        vis_shp = vis1.shape
+        vis1 = vis1.reshape((-1, on_t) + vis_shp[1:])
+        vis1 = vis1 + vis1[:, ::-1, ...]
+        vis1.shape = vis_shp
+
+    return vis1, on
+
 
 class PlotNoiseCal(PlotVvsTime):
 

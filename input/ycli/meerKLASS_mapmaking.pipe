@@ -1,87 +1,58 @@
 # -*- mode: python; -*-
 #
 
-import os
-import matplotlib
-matplotlib.use('Agg')
-
+from astropy.time import Time
 from tlpipe.map import dirtymap
+import os
 
-data_base = '/scratch/users/ycli/'
+DATA_BASE = '/scratch/users/ycli/'
 
-pipe_tasks = []
-pipe_outdir = data_base + 'meerkat/'
-pipe_logging = 'info'
-pipe_copy = False
+DATA_list = [
+    '1556034219', # 20190423_UTC15h43m39s
+    '1556052116', # 20190423_UTC20h41m56s
+]
 
-# data on Feb24
-data_prefix = '1551037708'
-scans = (11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31, 33, 35, 
-         38, 41, 43, 45, 47, 49, 51, 54, 56, 58, 60, 62, 64)
-input_files_1 = [ '%s_auto_scan_%03d.h5'%(data_prefix, si) for si in scans]
+data_root = DATA_BASE + '/meerkat/auto/'
+
+FILE_LIST = []
+for DATA in DATA_list:
 
 
-data_prefix = '1551055211'
-scans = ( 11, 13, 15, 17, 19, 21, 24, 26, 28, 30, 32, 34, 36, 
-          38, 40, 43, 46, 48, 50, 52, 54, 56, 58, 60, 62, 64,)
-input_files_2 = [ '%s_auto_scan_%03d.h5'%(data_prefix, si) for si in scans]
+    DATA_Key = Time(int(DATA), format='unix').utc.datetime.strftime('%Y%m%d_UTC%Hh%Mm%Ss')
+    print DATA_Key
+    data_path = data_root + '%s_%s/'%(DATA_Key, DATA)
+    file_list = os.listdir(data_path)
+    file_list.sort()
+    FILE_LIST += ['%s_%s/%s'%(DATA_Key, DATA, f) for f in file_list]
 
-feed_bad_12  = [19, 33, 37]
-feed_bad_12 += [26, 27, 28, 42, 43, 52, 60]
+FILE_NAME = 'WiggleZ11_Apr23RS'
+#print FILE_LIST
 
-# data on Mar30
-data_prefix = '1553966342'
-scans = (16, 18, 20, 23, 25, 27, 29, 31, 33, 35, 37, 39, 41,
-         43, 45, 47, 49, 51, 54, 57, 59, 61, 63, 65, 67, 69)
-input_files_3 = [ '%s_auto_scan_%03d.h5'%(data_prefix, si) for si in scans]
+show = 0
 
-feed_bad_3  = [15, 18, 33, 37, 51, 42, 46]
+pipe_tasks  = []
+data_base   = DATA_BASE
+pipe_outdir = data_base + '/analysis_meerkat/'
+pipe_feedback = 0
+file_list = FILE_LIST
 
-# data on Apr01
-data_prefix = '1554156377'
-scans = (16, 18, 20, 22, 24, 26, 28, 30, 33, 35, 37, 39, 41,
-         43, 45, 48, 50, 52, 54, 56, 58, 60, 63, 66, 68, 70,)
-input_files_4 = [ '%s_auto_scan_%03d.h5'%(data_prefix, si) for si in scans]
-
-feed_bad_4  = [15, 18, 33, 37, 51, 42]
-feed_bad_4 += [8, 55, 52]
-
-#input_files = input_files_1 + input_files_2
-#feed_bad = feed_bad_12
-#file_name_all = 'WiggleZ11_Feb24_R_S'
-
-input_files = input_files_3
-feed_bad = feed_bad_3
-file_name_all = 'WiggleZ11_Mar30_R'
-
-#input_files = input_files_4
-#feed_bad = feed_bad_4
-#file_name_all = 'WiggleZ11_Apr01_S'
-
-feed_list = range(1, 65)
-for _bad in feed_bad:
-    feed_list.remove(_bad)
-
-#pipe_tasks.append((dirtymap.MakeMap_CombineAll, 'dmall_'))
-pipe_tasks.append(dirtymap.CleanMap_GBT)
+pipe_tasks.append((dirtymap.MakeMap_CombineAll, 'dmall_'))
+#pipe_tasks.append(dirtymap.CleanMap_GBT)
 
 dmall_field_centre = (163.0, 3.5)
 dmall_pixel_spacing = 0.4
 dmall_map_shape = [85, 30]
-#dmall_interpolation = 'linear'
+dmall_interpolation = 'linear'
 #dmall_interpolation = 'linear3'
-dmall_interpolation = 'nearest'
+#dmall_interpolation = 'nearest'
 #dmall_interpolation = 'cubic'
 dmall_tblock_len = 108
-dmall_input_files  = ['rb_Tcal/%s'%f for f in input_files]
-dmall_output_files = ['maps_Tcal/%s'%file_name_all, ]
+dmall_input_files  = ['wigglez_analysis/rb/%s'%f for f in file_list]
+dmall_output_files = ['wigglez_analysis/maps/%s'%FILE_NAME, ]
 dmall_data_sets    = 'vis'
-dmall_freq_select  = (5, None) #(0, None)
+dmall_freq_select  = (0, None)
 dmall_pol_select   = (0, 2)
 dmall_deweight_time_slope = False # True
 dmall_deweight_time_mean = True
 dmall_save_cov = True
 
-cm_input_files = ['maps_Tcal/%s_vis.h5'%'WiggleZ11_Mar30_R', 
-                  'maps_Tcal/%s_vis.h5'%'WiggleZ11_Apr01_S', ]
-cm_output_files = ['maps_smooth/WiggleZ11_Apr01_R_plus_S_Combined_vis.h5']
