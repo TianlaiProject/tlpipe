@@ -704,9 +704,9 @@ class PlotVvsTime(PlotTimeStream):
         good_freq_ed = np.argwhere(~bad_freq)[-1, 0]
         vis1 = vis1[:, good_freq_st:good_freq_ed, ...]
 
-        self._plot(vis1, x_axis, xmin, xmax, bl, ts)
+        self._plot(vis1, x_axis, xmin, xmax, gi, bl, ts)
 
-    def _plot(self, vis1, x_axis, xmin, xmax, bl, ts):
+    def _plot(self, vis1, x_axis, xmin, xmax, gi, bl, ts):
 
         axhh = self.axhh
         axvv = self.axvv
@@ -769,6 +769,11 @@ class PlotVvsTime(PlotTimeStream):
 
 class PlotNcalVSTime(PlotVvsTime):
 
+
+    params_init = {
+            'noise_on_time' : 2,
+            }
+
     prefix = 'pnt_'
 
     def plot(self, vis, vis_mask, li, gi, bl, ts, **kwargs):
@@ -787,6 +792,8 @@ class PlotNcalVSTime(PlotVvsTime):
         xmax      = self.params['xmax']
         ymin      = self.params['ymin']
         ymax      = self.params['ymax']
+
+        on_t = self.params['noise_on_time']
 
         vis1 = np.ma.array(vis)
         if flag_mask:
@@ -837,11 +844,12 @@ class PlotNcalVSTime(PlotVvsTime):
         on  = on[good_time_st:good_time_ed]
         #if on[0] and not on[1]: on[0] = False
         #if on[-1] and not on[-2]: on[-1] = False
-        on[ :2] = False
-        on[-2:] = False
+        on[ :on_t] = False
+        on[-on_t:] = False
         # rm noise cal with half missing
-        on  = (np.roll(on, 1) * on) + (np.roll(on, -1) * on)
-        off = (np.roll(on, 1) + np.roll(on, -1)) ^ on
+        #on  = (np.roll(on, 1) * on) + (np.roll(on, -1) * on)
+        #off = (np.roll(on, 1) + np.roll(on, -1)) ^ on
+        off = np.roll(on, 1)
 
         good_freq_st = np.argwhere(~bad_freq)[ 0, 0]
         good_freq_ed = np.argwhere(~bad_freq)[-1, 0]
@@ -852,10 +860,11 @@ class PlotNcalVSTime(PlotVvsTime):
         vis1_off = vis1[off, ...].data
         vis1 = vis1_on - vis1_off
 
-        vis_shp = vis1.shape
-        vis1 = vis1.reshape((-1, 2) + vis_shp[1:])
-        vis1 = vis1 + vis1[:, ::-1, ...]
-        vis1.shape = vis_shp
+        if on_t > 1:
+            vis_shp = vis1.shape
+            vis1 = vis1.reshape((-1, on_t) + vis_shp[1:])
+            vis1 = vis1 + vis1[:, ::-1, ...]
+            vis1.shape = vis_shp
 
         vis1 /= np.ma.median(vis1, axis=(0,1))[None, None, :]
         #vis1 /= np.ma.mean(vis1, axis=(0,1))[None, None, :]
