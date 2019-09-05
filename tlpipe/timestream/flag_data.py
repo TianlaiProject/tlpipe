@@ -37,6 +37,8 @@ class FlagData(timestream_task.TimestreamTask) :
                    # How many times to hide around a bad time.
                    'time_cut' : 5,
                    'time_block' : 108,
+                   'time_thres' : 2.5,
+                   'time_flag_first' : True,
                    'bad_freq_list'  : None,
                    'bad_time_list'  : None,
                    }
@@ -86,10 +88,12 @@ class FlagData(timestream_task.TimestreamTask) :
 
         See `flag_data()` for parameter explanations and more info.
         '''
-        sigma_thres   = self.params['sigma_thres']
-        badness_thres = self.params['badness_thres']
-        time_cut      = self.params['time_cut']
-        time_block    = self.params['time_block']
+        sigma_thres     = self.params['sigma_thres']
+        badness_thres   = self.params['badness_thres']
+        time_cut        = self.params['time_cut']
+        time_block      = self.params['time_block']
+        time_thres      = self.params['time_thres']
+        time_flag_first = self.params['time_flag_first']
 
         if 'ns_on' in ts.iterkeys():
             ns_on = ts['ns_on'][:, gi]
@@ -108,7 +112,8 @@ class FlagData(timestream_task.TimestreamTask) :
 
                 Data      = ma.array(vis[time_slice][_ns_off])
                 Data.mask = vis_mask[time_slice][_ns_off]
-                badness   = flag_data(Data, sigma_thres, badness_thres, time_cut)
+                badness   = flag_data(Data, sigma_thres, time_thres, 
+                                      badness_thres, time_cut, time_flag_first)
                 vis_mask[time_slice][_ns_off] += Data.mask
 
                 _new_flags = np.sum(vis_mask[time_slice][_ns_off]) - _already_flagged
@@ -116,13 +121,18 @@ class FlagData(timestream_task.TimestreamTask) :
                 if percent < 0.01 : break
 
         new_flags = np.sum(vis_mask[~ns_on]) - already_flagged
+        print already_flagged
+        print new_flags
+        print np.prod(vis[~ns_on].shape) 
+        print np.prod(vis_mask[~ns_on].shape) 
+        print vis_mask.max()
         percent = float(new_flags) / np.prod(vis[~ns_on].shape) * 100
         print "global index [bl] %2d: %f%%"%(gi, percent)
 
         # Can print or return badness here if you would like
         # to see if the Data had a problem in time or not.
 
-def flag_data(Data, sigma_thres, badness_thres, time_cut):
+def flag_data(Data, sigma_thres, time_thres, badness_thres, time_cut, time_flag_first):
     '''Flag bad data from RFI and far outliers.
 
     Parameters
@@ -172,7 +182,9 @@ def flag_data(Data, sigma_thres, badness_thres, time_cut):
     bad_freqs = []
     amount_masked = -1 # For recursion
 
-    destroy_time_with_mean_arrays(Data1, 2.5, flag_size=8)
+    if time_flag_first:
+        time_thres
+        destroy_time_with_mean_arrays(Data1, time_thres, flag_size=8)
 
     while not (amount_masked == 0) and itr < max_itr:
         amount_masked = destroy_with_variance(Data1, sigma_thres, bad_freqs) 
@@ -188,7 +200,7 @@ def flag_data(Data, sigma_thres, badness_thres, time_cut):
     if badness:
         Data2 = copy.deepcopy(Data)
         # Mask the bad times.
-        destroy_time_with_mean_arrays(Data2, flag_size=time_cut)
+        destroy_time_with_mean_arrays(Data2, time_thres, flag_size=time_cut)
         # Then try to flag again with bad times masked.
         # Bad style for repeating as above, sorry.
         itr = 0
@@ -279,7 +291,7 @@ def destroy_with_variance(data, sigma_thres=6, bad_freq_list=[]):
             data[:,freq,:].mask = True
     return amount_masked
 
-def destroy_time_with_mean_arrays(data, sigma_thres = 3., flag_size=5):
+def destroy_time_with_mean_arrays(data, sigma_thres = 6., flag_size=5):
     '''Mask times with high means.
     
     If there is a problem in time, the mean over all frequencies

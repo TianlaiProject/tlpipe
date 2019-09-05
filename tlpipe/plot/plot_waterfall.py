@@ -687,10 +687,10 @@ class PlotVvsTime(PlotTimeStream):
                 x_axis = [ datetime.fromtimestamp(s) for s in ts['sec1970']]
                 self.x_label = '%s UTC' % x_axis[0].date()
                 x_axis = mdates.date2num(x_axis)
-            if xmin is not None:
-                xmin = x_axis[xmin]
-            if xmax is not None:
-                xmax = x_axis[xmax]
+            #if xmin is not None:
+            #    xmin = x_axis[xmin]
+            #if xmax is not None:
+            #    xmax = x_axis[xmax]
 
         bad_time = np.all(vis_mask, axis=(1, 2))
         bad_freq = np.all(vis_mask, axis=(0, 2))
@@ -772,6 +772,7 @@ class PlotNcalVSTime(PlotVvsTime):
 
     params_init = {
             'noise_on_time' : 2,
+            'timevars_poly' : 4,
             }
 
     prefix = 'pnt_'
@@ -863,8 +864,11 @@ class PlotNcalVSTime(PlotVvsTime):
 
         vis1 = np.ma.median(vis1, axis=1)
         good = ~vis1.mask
-        vis1_poly_xx = np.poly1d(np.polyfit(x_axis[good[:,0]], vis1[:, 0][good[:,0]], 4))
-        vis1_poly_yy = np.poly1d(np.polyfit(x_axis[good[:,1]], vis1[:, 1][good[:,1]], 4))
+        poly_order = self.params['timevars_poly']
+        vis1_poly_xx = np.poly1d(
+                np.polyfit(x_axis[good[:,0]], vis1[:, 0][good[:,0]], poly_order))
+        vis1_poly_yy = np.poly1d(
+                np.polyfit(x_axis[good[:,1]], vis1[:, 1][good[:,1]], poly_order))
 
         #vis1 = np.ma.array(medfilt(vis1.data, kernel_size=(11, 1)), mask = vis1.mask)
 
@@ -892,14 +896,19 @@ def get_Ncal(vis, vis_mask, on, on_t):
         on  = (np.roll(on, 1) * on) + (np.roll(on, -1) * on)
         # use one time stamp before, one after as cal off
         off = (np.roll(on, 1) + np.roll(on, -1)) ^ on
+        vis1_on  = vis[on, ...]
+        vis1_off = vis[off, ...].data
     elif on_t == 1:
-        off = np.roll(on, 1)
+        off = np.roll(on, 1) + np.roll(on, -1)
+        vis1_on  = vis[on, ...]
+        vis1_off = vis[off, ...].data
+        vis_shp = vis1_off.shape
+        vis1_off = vis1_off.reshape( (-1, 2) + vis_shp[1:] )
+        vis1_off = np.mean(vis1_off, axis=1)
     else:
         raise
     
     #vis1 = vis1.data
-    vis1_on  = vis[on, ...]
-    vis1_off = vis[off, ...].data
     vis1 = vis1_on - vis1_off
 
     if on_t > 1:
