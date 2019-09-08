@@ -248,6 +248,14 @@ class TimestreamCommon(container.BasicTod):
             freq_axis = self.main_data_axes.index('frequency')
             freq = freq[self.main_data_select[freq_axis]]
 
+            # # new freq computing, need to be checked
+            # # original 1024 freqs, now 1008 freqs
+            # # 0 1 2 3 4 | 5 6 ... 220 | 221 ... 796 | 797 ... 1012 | 1013 ...1023
+            # #             0 1 ... 215 | 216 ... 791 | 792 ... 1007 |
+            # #                           currently used 576 freqs in (216, 792
+            # freq = np.array([ freq_start + i*freq_step for i in xrange(1024)], dtype=np.float32)
+            # freq = freq[5:5+nfreq]
+
             # # frequency correction for the early observational data of cylinder array
             # # correct freq only once here
             # if self.is_cylinder:
