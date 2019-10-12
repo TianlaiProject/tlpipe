@@ -74,6 +74,7 @@ class Flag(timestream_task.TimestreamTask):
         threshold_num = max(0, int(self.params['threshold_num']))
 
         vis_abs = np.abs(vis) # operate only on the amplitude
+        vis_mask[ts['ns_on'][:]] = True
 
         # first round
         # first complete masked vals due to ns by interpolate

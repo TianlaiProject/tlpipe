@@ -125,7 +125,8 @@ class Plot(timestream_task.TimestreamTask):
                 vis1 = vis.copy()
                 on = np.where(ts['ns_on'][:])[0]
                 if not interpolate_ns:
-                    vis1[on] = complex(np.nan, np.nan)
+                    # vis1[on] = complex(np.nan, np.nan)
+                    vis1[on] = np.nan
                 else:
                     off = np.where(np.logical_not(ts['ns_on'][:]))[0]
                     for fi in range(vis1.shape[1]):
@@ -174,7 +175,8 @@ class Plot(timestream_task.TimestreamTask):
                 extent = time_extent + freq_extent
 
             fig, ax = plt.subplots()
-            vis_abs = np.abs(vis1)
+            # vis_abs = np.abs(vis1)
+            vis_abs = vis1
             if hist_equal:
                 if isinstance(vis_abs, np.ma.MaskedArray):
                     vis_hist = hist_eq.hist_eq(vis_abs.filled(0))
@@ -183,6 +185,11 @@ class Plot(timestream_task.TimestreamTask):
                     vis_hist = hist_eq.hist_eq(np.where(np.isfinite(vis_abs), vis_abs, 0))
                     mask = np.where(np.isfinite(vis_abs), False, True)
                     vis_abs = np.ma.array(vis_hist, mask=mask)
+            # if pol <= 1:
+            #     vmin, vmax = 0, 200
+            # else:
+            #     vmin, vmax = -100, 100
+            # im = ax.imshow(vis_abs, extent=extent, origin='lower', aspect='auto', cmap=cmap, vmin=vmin, vmax=vmax)
             im = ax.imshow(vis_abs, extent=extent, origin='lower', aspect='auto', cmap=cmap)
             # convert axis to datetime string
             if transpose:

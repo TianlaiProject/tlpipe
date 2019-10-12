@@ -35,6 +35,7 @@ class Timestream(timestream_common.TimestreamCommon):
                                      'vis_mask': (0, 1, 2, 3),
                                      'sec1970': (0,),
                                      'jul_date': (0,),
+                                     'ns_on': (0,),
                                      'freq': (1,),
                                      'pol': (2,),
                                      'blorder': (3,),
