@@ -54,26 +54,29 @@ class Sir(timestream_task.TimestreamTask):
 
         eta = self.params['eta']
 
-        has_ns = ('ns_on' in ts.keys())
-        if has_ns:
-            ns_on = ts['ns_on'][:]
+        # has_ns = ('ns_on' in ts.keys())
+        # if has_ns:
+        #     ns_on = ts['ns_on'][:]
+        #     mask_ns_on = vis_mask[ns_on]
 
         if vis_mask.ndim == 2:
             mask = vis_mask.copy()
-            if has_ns:
-                mask[ns_on] = False
+            # if has_ns and mask_ns_on.all():
+            #     mask[ns_on] = False
             mask = sir_operator.vertical_sir(mask, eta)
-            if has_ns:
-                mask[ns_on] = True
+            # if has_ns and mask_ns_on.all():
+            #     mask[ns_on] = True
             vis_mask[:] = sir_operator.horizontal_sir(mask, eta)
         elif vis_mask.ndim == 3:
             # This shold be done after the combination of all pols
             mask = vis_mask[:, :, 0].copy()
-            if has_ns:
-                mask[ns_on] = False
+            # if has_ns and mask_ns_on.all():
+            #     mask[ns_on] = False
             mask = sir_operator.vertical_sir(mask, eta)
-            if has_ns:
-                mask[ns_on] = True
+            # if has_ns and mask_ns_on.all():
+            #     mask[ns_on] = True
             vis_mask[:] = sir_operator.horizontal_sir(mask, eta)[:, :, np.newaxis]
         else:
             raise RuntimeError('Invalid shape of vis_mask: %s' % vis_mask.shape)
+
+        vis_mask[ts['ns_on'][:]] = False # undo ns_on mask
