@@ -76,6 +76,7 @@ class PsCal(timestream_task.TimestreamTask):
                     'save_src_vis': False, # save the extracted calibrator visibility
                     'src_vis_file': 'src_vis/src_vis.hdf5',
                     'subtract_src': False, # subtract vis of the calibrator from data
+                    'replace_with_src': False, # replace vis with the subtracted src_vis, only work when subtract_src = True
                     'apply_gain': True,
                     'save_gain': False,
                     'save_phs_change': False,
@@ -101,6 +102,7 @@ class PsCal(timestream_task.TimestreamTask):
         save_src_vis = self.params['save_src_vis']
         src_vis_file = self.params['src_vis_file']
         subtract_src = self.params['subtract_src']
+        replace_with_src = self.params['replace_with_src']
         apply_gain = self.params['apply_gain']
         save_gain = self.params['save_gain']
         save_phs_change = self.params['save_phs_change']
@@ -384,10 +386,14 @@ class PsCal(timestream_task.TimestreamTask):
                     lv[:, bi] = lsrc_vis[:, b1, b2]
                 lv = mpiarray.MPIArray.wrap(lv, axis=0, comm=ts.comm)
                 lv = lv.redistribute(axis=1).local_array.reshape(nt, nf, 2, -1)
-                if 'ns_on' in ts.iterkeys():
-                    lv[ts['ns_on'][start_ind:end_ind]] = 0 # avoid ns_on signal to become nan
-                ts.local_vis[start_ind:end_ind, :, pol.index('xx')] -= lv[:, :, 0]
-                ts.local_vis[start_ind:end_ind, :, pol.index('yy')] -= lv[:, :, 1]
+                if replace_with_src:
+                    ts.local_vis[start_ind:end_ind, :, pol.index('xx')] = lv[:, :, 0]
+                    ts.local_vis[start_ind:end_ind, :, pol.index('yy')] = lv[:, :, 1]
+                else:
+                    if 'ns_on' in ts.iterkeys():
+                        lv[ts['ns_on'][start_ind:end_ind]] = 0 # avoid ns_on signal to become nan
+                    ts.local_vis[start_ind:end_ind, :, pol.index('xx')] -= lv[:, :, 0]
+                    ts.local_vis[start_ind:end_ind, :, pol.index('yy')] -= lv[:, :, 1]
 
                 del lv
 
