@@ -39,7 +39,8 @@ class Rebin(timestream_task.TimestreamTask):
 
         ts.redistribute('baseline')
 
-        nt = len(ts.time)
+        # nt = len(ts.time)
+        nt = ts.local_vis.shape[0]
         nfreq = len(ts.freq)
         if bin_number >= nfreq:
             warnings.warn('The number of bins can not exceed the number of frequencies, do nothing')
