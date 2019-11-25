@@ -39,13 +39,18 @@ class Timestream(timestream_common.TimestreamCommon):
                                      'freq': (1,),
                                      'pol': (2,),
                                      'blorder': (3,),
+                                     'ra': (0,),
+                                     'dec': (0,),
                                    }
     _time_ordered_datasets_ = {'weather': (0,)}
     _time_ordered_attrs_ = {}
     _feed_ordered_datasets_ = { 'antpointing': (None, 0),
+                                'channo': (0, None),
                                 'feedno': (0,),
                                 'feedpos': (0,),
                                 'polerr': (0,),
+                                'ra': (None, 0),
+                                'dec': (None, 0),
                               }
 
 
