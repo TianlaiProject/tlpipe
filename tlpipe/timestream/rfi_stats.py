@@ -124,6 +124,7 @@ class Stats(timestream_task.TimestreamTask):
             # plot freq_mask
             plt.figure()
             plt.plot(ts.freq[:], 100*freq_mask/np.float(nt*nb))
+            plt.grid(True)
             plt.xlabel(r'$\nu$ / MHz')
             plt.ylabel(r'RFI (%)')
             plt.savefig(freq_fig_name)
