@@ -68,7 +68,13 @@ class Stats(timestream_task.TimestreamTask):
 
         # un-mask ns-on positions
         if 'ns_on' in ts.iterkeys():
-            vis_mask[ts['ns_on'][:]] = False
+            if len(ts['ns_on'].shape) == 1:
+                on = ts['ns_on']
+            elif len(ts['ns_on'].shape) == 2:
+                on = ts['ns_on'][:, gi[1]]
+            else:
+                raise RuntimeError('ns_on must be a 1d or 2d array')
+            vis_mask[on] = False
 
         # statistics along time axis
         time_mask = np.sum(vis_mask, axis=(1, 2)).reshape(-1, 1)

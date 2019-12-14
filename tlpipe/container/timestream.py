@@ -51,6 +51,7 @@ class Timestream(timestream_common.TimestreamCommon):
                                 'polerr': (0,),
                                 'ra': (None, 0),
                                 'dec': (None, 0),
+                                'ns_on': (None, 0),
                               }
 
 

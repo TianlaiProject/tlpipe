@@ -59,6 +59,17 @@ class Sir(timestream_task.TimestreamTask):
         #     ns_on = ts['ns_on'][:]
         #     mask_ns_on = vis_mask[ns_on]
 
+        if 'ns_on' in ts.iterkeys():
+            has_ns = True
+            if len(ts['ns_on'].shape) == 1:
+                on = ts['ns_on']
+            elif len(ts['ns_on'].shape) == 2:
+                on = ts['ns_on'][:, gi[1]]
+            else:
+                raise RuntimeError('ns_on must be a 1d or 2d array')
+        else:
+            has_ns = False
+
         if vis_mask.ndim == 2:
             mask = vis_mask.copy()
             # if has_ns and mask_ns_on.all():
@@ -79,4 +90,5 @@ class Sir(timestream_task.TimestreamTask):
         else:
             raise RuntimeError('Invalid shape of vis_mask: %s' % vis_mask.shape)
 
-        vis_mask[ts['ns_on'][:]] = False # undo ns_on mask
+        if has_ns:
+            vis_mask[on] = False # undo ns_on mask
