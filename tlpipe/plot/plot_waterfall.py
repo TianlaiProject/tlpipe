@@ -118,17 +118,31 @@ class Plot(timestream_task.TimestreamTask):
             if (not bl1 in bl_incl) or (bl1 in bl_excl):
                 return
 
-        if flag_mask:
+        if 'ns_on' in ts.keys():
+            has_ns = True
+            if len(ts['ns_on'].shape) == 1:
+                on = ts['ns_on']
+            elif len(ts['ns_on'].shape) == 2:
+                on = ts['ns_on'][:, gi[1]]
+            else:
+                raise RuntimeError('ns_on must be a 1d or 2d array')
+        else:
+            has_ns = False
+
+        if flag_mask and flag_ns:
+            if has_ns:
+                vis_mask[on] = True
+            vis1 = np.ma.array(vis, mask=vis_mask)
+        elif flag_mask:
             vis1 = np.ma.array(vis, mask=vis_mask)
         elif flag_ns:
-            if 'ns_on' in ts.keys():
+            if has_ns:
                 vis1 = vis.copy()
-                on = np.where(ts['ns_on'][:])[0]
                 if not interpolate_ns:
                     # vis1[on] = complex(np.nan, np.nan)
                     vis1[on] = np.nan
                 else:
-                    off = np.where(np.logical_not(ts['ns_on'][:]))[0]
+                    off = np.where(np.logical_not(on))[0]
                     for fi in range(vis1.shape[1]):
                         itp_real = InterpolatedUnivariateSpline(off, vis1[off, fi].real)
                         itp_imag= InterpolatedUnivariateSpline(off, vis1[off, fi].imag)

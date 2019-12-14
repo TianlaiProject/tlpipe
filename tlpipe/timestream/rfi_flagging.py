@@ -73,8 +73,20 @@ class Flag(timestream_task.TimestreamTask):
         fk_size = self.params['fk_size']
         threshold_num = max(0, int(self.params['threshold_num']))
 
+        if 'ns_on' in ts.iterkeys():
+            has_ns = True
+            if len(ts['ns_on'].shape) == 1:
+                on = ts['ns_on']
+            elif len(ts['ns_on'].shape) == 2:
+                on = ts['ns_on'][:, gi[1]]
+            else:
+                raise RuntimeError('ns_on must be a 1d or 2d array')
+        else:
+            has_ns = False
+
         vis_abs = np.abs(vis) # operate only on the amplitude
-        vis_mask[ts['ns_on'][:]] = True # temporarily make ns_on masked
+        if has_ns:
+            vis_mask[on] = True # temporarily make ns_on masked
 
         # first round
         # first complete masked vals due to ns by interpolate
@@ -92,7 +104,8 @@ class Flag(timestream_task.TimestreamTask):
         # if all have been masked, no need to flag again
         if st.vis_mask.all():
             vis_mask[:] = st.vis_mask
-            vis_mask[ts['ns_on'][:]] = False # undo ns_on mask
+            if has_ns:
+                vis_mask[on] = False # undo ns_on mask
             return
 
         # next rounds
@@ -111,4 +124,5 @@ class Flag(timestream_task.TimestreamTask):
 
         # replace vis_mask with the flagged mask
         vis_mask[:] = st.vis_mask
-        vis_mask[ts['ns_on'][:]] = False # undo ns_on mask
+        if has_ns:
+            vis_mask[on] = False # undo ns_on mask
