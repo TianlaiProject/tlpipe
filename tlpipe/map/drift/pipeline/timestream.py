@@ -243,7 +243,7 @@ class Timestream(object):
 
     #======== Make map from uncleaned stream ============
 
-    def mapmake_full(self, nside, mapname, nbin=None, dirty=False, method='svd', normalize=True, threshold=1.0e3, eps=0.01, correct_order=0, prior_map_file=None):
+    def mapmake_full(self, nside, mapname, nbin=None, dirty=False, method='svd', normalize=True, threshold=1.0e3, eps=0.01, correct_order=0, prior_map_file=None, save_alm=False):
 
         nfreq = self.telescope.nfreq
         if nbin is None:
@@ -294,11 +294,18 @@ class Timestream(object):
             alm = np.zeros((nbin, self.telescope.num_pol_sky, self.telescope.lmax + 1,
                             self.telescope.lmax + 1), dtype=np.complex128)
 
-            mlist = range(1 if self.no_m_zero else 0, self.telescope.mmax + 1)
+            # mlist = range(1 if self.no_m_zero else 0, self.telescope.mmax + 1)
+            mlist = range(self.telescope.mmax + 1)
 
             for mi in mlist:
 
                 alm[..., mi] = alm_list[mi]
+
+            if save_alm:
+                alm1 = alm.copy()
+
+            if self.no_m_zero:
+                alm[:, :, :, 0] = 0
 
                 alm[:, :, 100:, 1] = 0
 
@@ -306,8 +313,16 @@ class Timestream(object):
 
             with h5py.File(self.output_directory + '/' + mapname, 'w') as f:
                 f.create_dataset('/map', data=skymap)
+                f.attrs['dim'] = 'freq, pol, pix'
                 f.attrs['frequency'] = cfreqs
                 f.attrs['polarization'] = np.array(['I', 'Q', 'U', 'V'])[:self.beamtransfer.telescope.num_pol_sky]
+
+                if save_alm:
+                    f.create_dataset('/alm', data=alm1)
+                    f.attrs['dim'] = 'freq, pol, l, m'
+                    f.attrs['frequency'] = cfreqs
+                    f.attrs['polarization'] = np.array(['I', 'Q', 'U', 'V'])[:self.beamtransfer.telescope.num_pol_sky]
+
 
         mpiutil.barrier()
 

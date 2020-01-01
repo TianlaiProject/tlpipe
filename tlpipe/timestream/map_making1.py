@@ -39,6 +39,7 @@ class MapMaking(timestream_task.TimestreamTask):
                     'threshold': 1.0e3, # only used for dirty map-making
                     'epsilon': 0.0001, # regularization parameter for tk
                     'correct_order': 1, # tk deconv correction order
+                    'save_alm': True, # save also alm
                   }
 
     prefix = 'mm_'
@@ -56,6 +57,7 @@ class MapMaking(timestream_task.TimestreamTask):
         threshold = self.params['threshold']
         eps = self.params['epsilon']
         correct_order = self.params['correct_order']
+        save_alm = self.params['save_alm']
 
         bt = tstream.beamtransfer
         bt.generate()
@@ -65,7 +67,7 @@ class MapMaking(timestream_task.TimestreamTask):
         if dirty_map:
             tstream.mapmake_full(nside, 'map_full_dirty.hdf5', nbin, dirty=True, method=method, normalize=normalize, threshold=threshold)
         else:
-            tstream.mapmake_full(nside, 'map_full.hdf5', nbin, dirty=False, method=method, normalize=normalize, threshold=threshold, eps=eps, correct_order=correct_order, prior_map_file=prior_map)
+            tstream.mapmake_full(nside, 'map_full.hdf5', nbin, dirty=False, method=method, normalize=normalize, threshold=threshold, eps=eps, correct_order=correct_order, prior_map_file=prior_map, save_alm=save_alm)
 
         return tstream
 
