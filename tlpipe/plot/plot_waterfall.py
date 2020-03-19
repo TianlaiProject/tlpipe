@@ -140,13 +140,14 @@ class Plot(timestream_task.TimestreamTask):
                 vis1 = vis.copy()
                 if not interpolate_ns:
                     # vis1[on] = complex(np.nan, np.nan)
-                    vis1[on] = np.nan
+                    vis1[on] = np.nan # FAST data is real
                 else:
                     off = np.where(np.logical_not(on))[0]
                     for fi in range(vis1.shape[1]):
-                        itp_real = InterpolatedUnivariateSpline(off, vis1[off, fi].real)
-                        itp_imag= InterpolatedUnivariateSpline(off, vis1[off, fi].imag)
-                        vis1[on, fi] = itp_real(on) + 1.0J * itp_imag(on)
+                        # itp_real = InterpolatedUnivariateSpline(off, vis1[off, fi].real)
+                        # itp_imag= InterpolatedUnivariateSpline(off, vis1[off, fi].imag)
+                        # vis1[on, fi] = itp_real(on) + 1.0J * itp_imag(on)
+                        vis1[on, fi] = InterpolatedUnivariateSpline(off, vis1[off, fi])(on) # FAST data is real
             else:
                 vis1 = vis
         else:
@@ -190,7 +191,7 @@ class Plot(timestream_task.TimestreamTask):
 
             fig, ax = plt.subplots()
             # vis_abs = np.abs(vis1)
-            vis_abs = vis1
+            vis_abs = vis1 # FAST data is real
             if hist_equal:
                 if isinstance(vis_abs, np.ma.MaskedArray):
                     vis_hist = hist_eq.hist_eq(vis_abs.filled(0))
@@ -204,7 +205,15 @@ class Plot(timestream_task.TimestreamTask):
             # else:
             #     vmin, vmax = -100, 100
             # im = ax.imshow(vis_abs, extent=extent, origin='lower', aspect='auto', cmap=cmap, vmin=vmin, vmax=vmax)
-            im = ax.imshow(vis_abs, extent=extent, origin='lower', aspect='auto', cmap=cmap)
+
+            vis_abs_ma = np.ma.masked_invalid(vis_abs)
+            med = np.ma.median(vis_abs_ma)
+            mad = np.ma.median(np.ma.abs(vis_abs_ma - med)) / 0.6745
+            vmin = max(med - 3.0 * mad, np.ma.min(vis_abs_ma))
+            vmax = min(med + 3.0 * mad, np.ma.max(vis_abs_ma))
+            im = ax.imshow(vis_abs, extent=extent, origin='lower', aspect='auto', cmap=cmap, vmin=vmin, vmax=vmax)
+
+            # im = ax.imshow(vis_abs, extent=extent, origin='lower', aspect='auto', cmap=cmap)
             # convert axis to datetime string
             if transpose:
                 ax.xaxis_date()
