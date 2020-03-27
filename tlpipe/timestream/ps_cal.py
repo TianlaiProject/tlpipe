@@ -584,7 +584,11 @@ class PsCal(timestream_task.TimestreamTask):
                                 g1 = gain[fi, pi_, feedno.index(fd1)]
                                 g2 = gain[fi, pi_, feedno.index(fd2)]
                                 if np.isfinite(g1) and np.isfinite(g2):
-                                    ts.local_vis[:, fi, pi, bi] /= (g1 * np.conj(g2))
+                                    if fd1 == fd2:
+                                        # auto-correlation should be real
+                                        ts.local_vis[:, fi, pi, bi] /= (g1 * np.conj(g2)).real
+                                    else:
+                                        ts.local_vis[:, fi, pi, bi] /= (g1 * np.conj(g2))
                                 else:
                                     # mask the un-calibrated vis
                                     ts.local_vis_mask[:, fi, pi, bi] = True
