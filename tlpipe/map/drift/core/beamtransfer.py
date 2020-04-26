@@ -1134,12 +1134,13 @@ class BeamTransfer(object):
         beam = self.beam_m(mi) # shape (nfreq, 2, npairs, npol_sky, lmax+1)
 
         nfreq = self.nfreq
-        beam = beam.reshape((nfreq, self.ntel, self.nsky))
-        # beam = beam[:, 0].reshape((nfreq, -1, self.nsky)) # positive m only
+        nl = self.telescope.lmax + 1 - mi # do not include l < m
+        npl = self.telescope.num_pol_sky * nl
+        beam = beam[:, :, :, :, mi:].reshape((nfreq, self.ntel, npl))
 
         # if prior mmode not None
         if mmode0 is not None:
-            mmode0 = mmode0.reshape((nfreq, self.nsky))
+            mmode0 = mmode0[:, :, mi:].reshape((nfreq, npl))
 
         n, s, e = mpiutil.split_m(nfreq, nbin)
 
@@ -1148,7 +1149,7 @@ class BeamTransfer(object):
         # vec = vec[:, 0] # positive m only
 
         for bi in xrange(nbin):
-            B = beam[s[bi]:e[bi]].reshape(-1, self.nsky)
+            B = beam[s[bi]:e[bi]].reshape(-1, npl) # all zeros for l < m
             BB = np.dot(B.T.conj(), B) # B^* B
             np.fill_diagonal(BB, eps + np.diag(BB)) # (B^* B + eps I)
             vec1 = vec[s[bi]:e[bi]].reshape(-1)
@@ -1158,7 +1159,7 @@ class BeamTransfer(object):
                 print 'Compute pinv of BB failed for mi = %d, bi = %d' % (mi, bi)
                 continue
             if mmode0 is not None:
-                vecb[bi] = np.dot(BBi, np.dot(B.T.conj(), vec1) + eps * mmode0[bi])
+                vecb[bi, :, mi:] = np.dot(BBi, np.dot(B.T.conj(), vec1) + eps * mmode0[bi]).reshape(self.telescope.num_pol_sky, nl)
             else:
                 # vecb[bi] = np.dot(BBi, np.dot(B.T.conj(), vec1))
 
@@ -1168,13 +1169,13 @@ class BeamTransfer(object):
 
                 # or
                 ahat = np.dot(BBi, np.dot(B.T.conj(), vec1))
-                vecb[bi] = ahat # the zero-th order, no correction
+                vecb[bi, :, mi:] = ahat.reshape(self.telescope.num_pol_sky, nl) # the zero-th order, no correction
                 if correct_order > 0:
                     Delta = eps * BBi # eps (B^* B + eps I)^-1
                     Da = ahat # to save the previous order Delta**(i-1) * ahat
                     for i in range(1, correct_order+1):
                         Da = np.dot(Delta, Da)
-                        vecb[bi] += Da # high order correction
+                        vecb[bi, :, mi:] += Da.reshape(self.telescope.num_pol_sky, nl) # high order correction
 
         return vecb
 
