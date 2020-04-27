@@ -81,7 +81,7 @@ class PsCal(timestream_task.TimestreamTask):
                     'save_gain': False,
                     'save_phs_change': False,
                     'gain_file': 'gain/gain.hdf5',
-                    'temperature_convert': False,
+                    # 'temperature_convert': False,
                   }
 
     prefix = 'pc_'
@@ -107,7 +107,7 @@ class PsCal(timestream_task.TimestreamTask):
         save_gain = self.params['save_gain']
         save_phs_change = self.params['save_phs_change']
         gain_file = self.params['gain_file']
-        temperature_convert = self.params['temperature_convert']
+        # temperature_convert = self.params['temperature_convert']
         show_progress = self.params['show_progress']
         progress_step = self.params['progress_step']
 
@@ -184,7 +184,7 @@ class PsCal(timestream_task.TimestreamTask):
 
             nt = end_ind - start_ind
             t_inds = range(start_ind, end_ind)
-            freq = ts.freq[:]
+            freq = ts.freq[:] # MHz
             nf = len(freq)
             nlb = len(ts.local_bl[:])
             nfeed = len(feedno)
@@ -237,7 +237,6 @@ class PsCal(timestream_task.TimestreamTask):
             # construct visibility matrix for a single time, freq, pol
             Vmat = np.full((nfeed, nfeed), cnan, dtype=ts.vis.dtype)
             # get flus of the calibrator in the observing frequencies
-            Sc = s.get_jys(freq)
             if show_progress and mpiutil.rank0:
                 pg = progress.Progress(tfp_len, step=progress_step)
             for ii, (ti, fi, pi) in enumerate(tfp_linds):
@@ -348,8 +347,11 @@ class PsCal(timestream_task.TimestreamTask):
                     plt.close()
 
                 if apply_gain or save_gain:
-                    e, U = la.eigh(V0 / Sc[fi], eigvals=(nfeed-1, nfeed-1))
-                    g = U[:, -1] * e[-1]**0.5
+                    # use v_ij = gi gj^* \int Ai Aj^* e^(2\pi i n \cdot uij) T(x) d^2n
+                    # precisely, we shold have
+                    # V0 = (lambda^2 * Sc / (2 k_B)) * gi gj^* Ai Aj^* e^(2\pi i n0 \cdot uij)
+                    e, U = la.eigh(V0, eigvals=(nfeed-1, nfeed-1))
+                    g = U[:, -1] * e[-1]**0.5 # = \sqrt(lambda^2 * Sc / (2 k_B)) * gi Ai * e^(2\pi i n0 \cdot ui)
                     if g[0].real < 0:
                         g *= -1.0 # make all g[0] phase 0, instead of pi
                     lGain[ii] = g
@@ -474,6 +476,7 @@ class PsCal(timestream_task.TimestreamTask):
                 # choose data slice near the transit time
                 li = max(start_ind, transit_ind - 10) - start_ind
                 hi = min(end_ind, transit_ind + 10 + 1) - start_ind
+                ci = transit_ind - start_ind # center index for transit_ind
                 # compute s_top for this time range
                 n0 = np.zeros(((hi-li), 3))
                 for ti, jt in enumerate(ts.time[start_ind:end_ind][li:hi]):
@@ -542,17 +545,17 @@ class PsCal(timestream_task.TimestreamTask):
                     inds = np.where(np.isfinite(y))[0]
                     if len(inds) >= max(4, 0.5 * len(y)):
                         # get the approximate magnitude by averaging the central G_abs
-                        mag = np.mean(y[inds])
+                        mag = np.mean(y[inds]) # = \sqrt(lambda^2 * Sc / (2 k_B)) * |gi| Ai
                         # solve phase by least square fit
                         ui = (feedpos[di] - feedpos[0]) * (1.0e6*freq[fi]) / const.c # position of this feed (relative to the first feed) in unit of wavelength
                         exp_factor = np.exp(2.0J * np.pi * np.dot(n0, ui))
                         ef = exp_factor
                         Gi = Gain.local_array[li:hi, ii]
-                        e_phs = np.dot(ef[inds].conj(), Gi[inds]/y[inds]) / len(inds)
+                        e_phs = np.dot(ef[inds].conj(), Gi[inds]/y[inds]) / len(inds) # the phase of gi
                         ea = np.abs(e_phs)
                         if np.abs(ea - 1.0) < 0.1:
                             # compute gain for this feed
-                            lgain[ii] = mag * e_phs
+                            lgain[ii] = mag * e_phs # \sqrt(lambda^2 * Sc / (2 k_B)) * gi Ai
                             if save_phs_change:
                                 lphs[:, ii] = np.angle(np.exp(-2.0J * np.pi * np.dot(n0t, ui)) * Gain.local_array[:, ii])
                         else:
@@ -575,6 +578,14 @@ class PsCal(timestream_task.TimestreamTask):
                     if mpiutil.rank0:
                         phs = phs.reshape(nt, nf, 2, nfeed)
 
+                # normalize to get the exact gain
+                Sc = s.get_jys(1.0e-3 * freq)
+                # Omega = aa.ants[0].beam.Omega ### TODO: implement Omega for dish
+                Ai = aa.ants[0].beam.response(n0[ci - li])
+                lmd = const.c / (1.0e6*freq)
+                factor = np.sqrt((lmd**2 * 1.0e-26 * Sc) / (2 * const.k_B)) * Ai # NOTE: 1Jy = 1.0e-26 W m^-2 Hz^-1
+                gain /= factor
+
                 # apply gain to vis
                 if apply_gain:
                     for fi in range(nf):
@@ -592,6 +603,9 @@ class PsCal(timestream_task.TimestreamTask):
                                 else:
                                     # mask the un-calibrated vis
                                     ts.local_vis_mask[:, fi, pi, bi] = True
+
+                    # in unit K after the calibration
+                    ts.vis.attrs['unit'] = 'K'
 
                 # save gain to file
                 if save_gain:
@@ -647,17 +661,6 @@ class PsCal(timestream_task.TimestreamTask):
                         raise RuntimeError('Could not open file: %s...' % gain_file)
 
                     mpiutil.barrier()
-
-
-        # convert vis from intensity unit to temperature unit in K
-        if temperature_convert:
-            if 'unit' in ts.vis.attrs.keys() and ts.vis.attrs['unit'] == 'K':
-                if mpiutil.rank0:
-                    print 'vis is already in unit K, do nothing...'
-            else:
-                factor = 1.0e-26 * (const.c**2 / (2 * const.k_B * (1.0e6*freq)**2)) # NOTE: 1Jy = 1.0e-26 W m^-2 Hz^-1
-                ts.local_vis[:] *= factor[np.newaxis, :, np.newaxis, np.newaxis]
-                ts.vis.attrs['unit'] = 'K'
 
 
         return super(PsCal, self).process(ts)
