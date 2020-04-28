@@ -209,6 +209,7 @@ class PsCal(timestream_task.TimestreamTask):
             del lvis_mask
             tfp_len = len(tfp_linds)
 
+            # lotl_mask = np.zeros((tfp_len, nfeed, nfeed), dtype=bool)
             cnan = complex(np.nan, np.nan) # complex nan
             if save_src_vis or subtract_src:
                 # save calibrator src vis
@@ -275,7 +276,34 @@ class PsCal(timestream_task.TimestreamTask):
                 diff = Vmat - med
                 S0 = np.where(np.abs(diff)>3.0*rpca_decomp.MAD(Vmat), diff, 0)
                 # stable PCA decomposition
-                V0, S = rpca_decomp.decompose(Vmat, rank=1, S=S0, max_iter=100, threshold='hard', tol=1.0e-6, debug=False)
+                V0, S = rpca_decomp.decompose(Vmat, rank=1, S=S0, max_iter=200, threshold='hard', tol=1.0e-6, debug=False)
+
+                # # find abnormal values in S
+                # # first check diagonal elements
+                # import pdb; pdb.set_trace()
+                # svals = np.diag(S)
+                # smed = np.median(svals.real) + 1.0J * np.median(svals.imag)
+                # smad = rpca_decomp.MAD(svals)
+                # # abnormal indices
+                # abis =  np.where(np.abs(svals - smed) > 3.0 * smad)[0]
+                # for abi in abis:
+                #     lotl_mask[ii, abi, abi] = True
+                # # then check non-diagonal elements
+                # for rii in range(nfeed):
+                #     for cii in range(nfeed):
+                #         if rii == cii:
+                #             continue
+                #         rli = max(0, rii-2)
+                #         rhi = min(nfeed, rii+3)
+                #         cli = max(0, cii-2)
+                #         chi = min(nfeed, cii+3)
+                #         svals = np.array([ S[xi, yi] for xi in range(rli, rhi) for yi in range(cli, chi) if xi != yi ])
+                #         smed = np.median(svals.real) + 1.0J * np.median(svals.imag)
+                #         smad = rpca_decomp.MAD(svals)
+                #         if np.abs(S[rii, cii] - smed) > 3.0 * smad:
+                #             lotl_mask[ii, rii, cii] = True
+
+
                 if save_src_vis or subtract_src:
                     lsrc_vis[ii] = V0
                     if save_src_vis:
@@ -379,6 +407,17 @@ class PsCal(timestream_task.TimestreamTask):
                         plt.close()
 
 
+            # # apply outlier mask
+            # nbl = len(bls)
+            # lom = np.zeros((lotl_mask.shape[0], nbl), dtype=lotl_mask.dtype)
+            # for bi, (fd1, fd2) in enumerate(bls):
+            #     b1, b2 = feedno.index(fd1), feedno.index(fd2)
+            #     lom[:, bi] = lotl_mask[:, b1, b2]
+            # lom = mpiarray.MPIArray.wrap(lom, axis=0, comm=ts.comm)
+            # lom = lom.redistribute(axis=1).local_array.reshape(nt, nf, 2, -1)
+            # ts.local_vis_mask[start_ind:end_ind, :, pol.index('xx')] |= lom[:, :, 0]
+            # ts.local_vis_mask[start_ind:end_ind, :, pol.index('yy')] |= lom[:, :, 1]
+
             # subtract the vis of calibrator from self.vis
             if subtract_src:
                 nbl = len(bls)
@@ -416,6 +455,7 @@ class PsCal(timestream_task.TimestreamTask):
                         f.create_dataset('sky_vis', shp, dtype=lsky_vis.dtype)
                         f.create_dataset('src_vis', shp, dtype=lsrc_vis.dtype)
                         f.create_dataset('outlier_vis', shp, dtype=lotl_vis.dtype)
+                        # f.create_dataset('outlier_mask', shp, dtype=lotl_mask.dtype)
                         f.attrs['calibrator'] = calibrator
                         f.attrs['dim'] = 'time, freq, pol, feed, feed'
                         try:
@@ -442,6 +482,7 @@ class PsCal(timestream_task.TimestreamTask):
                                         f['sky_vis'][ti_, fi, pi_] = lsky_vis[ii]
                                         f['src_vis'][ti_, fi, pi_] = lsrc_vis[ii]
                                         f['outlier_vis'][ti_, fi, pi_] = lotl_vis[ii]
+                                        # f['outlier_mask'][ti_, fi, pi_] = lotl_mask[ii]
                             mpiutil.barrier()
                         break
                     except IOError:
@@ -453,6 +494,7 @@ class PsCal(timestream_task.TimestreamTask):
                 del lsrc_vis
                 del lsky_vis
                 del lotl_vis
+                # del lotl_mask
 
                 mpiutil.barrier()
 
