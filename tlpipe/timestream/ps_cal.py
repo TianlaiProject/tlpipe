@@ -626,7 +626,7 @@ class PsCal(timestream_task.TimestreamTask):
                 Ai = aa.ants[0].beam.response(n0[ci - li])
                 lmd = const.c / (1.0e6*freq)
                 factor = np.sqrt((lmd**2 * 1.0e-26 * Sc) / (2 * const.k_B)) * Ai # NOTE: 1Jy = 1.0e-26 W m^-2 Hz^-1
-                gain /= factor
+                gain /= factor[:, np.newaxis, np.newaxis]
 
                 # apply gain to vis
                 if apply_gain:
