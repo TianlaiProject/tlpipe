@@ -228,7 +228,7 @@ class NsCal(timestream_task.TimestreamTask):
                 continue
 
             lower = ind - num_mean
-            off_sec = np.ma.array(vis[lower:ind], mask=(~np.isfinite(vis[lower:ind]))&vis_mask[lower:ind])
+            off_sec = np.ma.array(vis[lower:ind], mask=(~np.isfinite(vis[lower:ind]))|vis_mask[lower:ind])
             if off_sec.count() == 0: # all are invalid values
                 continue
             if unmasked_only and off_sec.count() < max(2, num_mean/2): # more valid sample to make stable
