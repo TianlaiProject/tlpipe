@@ -1,0 +1,19 @@
+# -*- mode: python; -*-
+
+from example_tasks import GetEggs, CookEggs, PrintEggs
+
+pipe_tasks = []
+
+pipe_tasks.append(PrintEggs)
+### parameters for PrintEggs
+pe_eggs = ['green', 'duck', 'ostrich']
+
+pipe_tasks.append(GetEggs)
+### parameters for GetEggs
+ge_eggs = pe_eggs
+ge_out = 'egg'
+
+pipe_tasks.append(CookEggs)
+### parameters for CookEggs
+ce_style = 'fried'
+ce_in = ge_out

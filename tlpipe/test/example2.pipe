@@ -1,0 +1,25 @@
+# -*- mode: python; -*-
+
+from example_tasks import GetEggs, CookEggs, DoNothing, PrintEggs
+
+
+pipe_tasks = []
+eggs = ['green', 'duck', 'ostrich']
+
+pipe_tasks.append(GetEggs)
+### parameters for GetEggs
+ge_eggs = eggs
+ge_out = 'egg'
+
+pipe_tasks.append(CookEggs)
+### parameters for CookEggs
+ce_style = 'fried'
+ce_in = ge_out
+
+pipe_tasks.append(DoNothing)
+### parameters for DoNothing
+dn_in = 'non_existent_data_product'
+
+pipe_tasks.append(PrintEggs)
+### parameters for PrintEggs
+pe_eggs = eggs
