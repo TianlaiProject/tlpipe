@@ -1,0 +1,16 @@
+cff-version: 1.1.0
+message: "Please cite the following works when using this software: https://ui.adsabs.harvard.edu/abs/2020ascl.soft11006Z"
+authors:
+- family-names: Zuo
+  given-names: Shifan
+title: "tlpipe: Data processing pipeline for the Tianlai experiment"
+version: v0.1.0
+date-released: 2015
+identifiers:
+ - type: "ascl-id"
+   value: "2011.006"
+ - type: "doi"
+   value: PLACEHOLDER
+ - type: "bibcode"
+   value: "2020ascl.soft11006Z"
+abstract: "tlpipe processes the drift scan survey data from the Tianlai experiment; the Tainlai project is a 21cm intensity mapping experiment aimed at detecting dark energy by measuring the baryon acoustic oscillation (BAO) features in the large scale structure power spectrum. tlpipe performs offline data processing tasks such as radio frequency interference (RFI) flagging, array calibration, binning, and map-making, in addition to other tasks. It includes utility functions needed for the data analysis, such as data selection, transformation, visualization and others. tlpipe implements a number of new algorithms are implemented, including the eigenvector decomposition method for array calibration and the Tikhnov regularization for m-mode analysis."
