@@ -362,6 +362,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
         p = self.pol_dict
         ts.create_pol_ordered_dataset('pol', data=np.array([p['xx'], p['yy'], p['xy'], p['yx']], dtype='i4'))
         ts['pol'].attrs['pol_type'] = 'linear'
+        ts['pol'].attrs['pol_dict'] = '%s' % p
 
         # bl ordered dataset
         blorder = np.array([ [feedno[i], feedno[j]] for i in xrange(nfeed) for j in xrange(i, nfeed) ])
