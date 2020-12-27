@@ -11,7 +11,7 @@ Inheritance diagram
 import os
 import numpy as np
 import h5py
-import timestream_task
+from . import timestream_task
 from tlpipe.container.timestream import Timestream
 from tlpipe.utils.path_util import input_path, output_path
 from caput import mpiutil
@@ -80,7 +80,7 @@ class Accum(timestream_task.TimestreamTask):
                                 for st, ln in zip(ts['vis'].local_offset, ts['vis'].local_shape):
                                     slc.append(slice(st, st+ln))
                                 f['vis'][tuple(slc)] += ts.local_vis # accumulate vis
-                                if 'weight' in ts.iterkeys():
+                                if 'weight' in ts.keys():
                                     f['weight'][tuple(slc)] += ts['weight'].local_data
                                 else:
                                     f['weight'][tuple(slc)] += np.logical_not(ts.local_vis_mask).astype(np.int16) # update weight
@@ -125,7 +125,7 @@ class Accum(timestream_task.TimestreamTask):
 
             delta = 2*np.pi/self.data['ra_dec'].shape[0]
             if not np.allclose(ra_self, ra_ts, rtol=0, atol=delta):
-                print 'RA not align within %f for rank %d, max gap %f' % (delta, mpiutil.rank, np.abs(ra_ts - ra_self).max())
+                print('RA not align within %f for rank %d, max gap %f' % (delta, mpiutil.rank, np.abs(ra_ts - ra_self).max()))
             # assert np.allclose(self.data['ra_dec'].local_data[:, 0], ts['ra_dec'].local_data[:, 0], rtol=0, atol=2*np.pi/self.data['ra_dec'].shape[0]), 'Can not accumulate data, RA not align.'
             # assert np.allclose(self.data['ra_dec'].local_data[:, 1], ts['ra_dec'].local_data[:, 1]), 'Can not accumulate data with different DEC.'
             # other checks if required
@@ -137,7 +137,7 @@ class Accum(timestream_task.TimestreamTask):
 
             ts.apply_mask(fill_val=0) # apply mask, fill 0 to masked values
             self.data.local_vis[:] += ts.local_vis # accumulate vis
-            if 'weight' in ts.iterkeys():
+            if 'weight' in ts.keys():
                 self.data['weight'].local_data[:] += ts['weight'].local_data
             else:
                 self.data['weight'].local_data[:] += np.logical_not(ts.local_vis_mask).astype(np.int16) # update weight

@@ -8,7 +8,7 @@ Inheritance diagram
 
 """
 
-import timestream_task
+from . import timestream_task
 
 
 class Rt2ts(timestream_task.TimestreamTask):

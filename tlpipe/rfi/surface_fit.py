@@ -2,7 +2,7 @@ import abc
 import numpy as np
 
 
-class SurfaceFitMethod(object):
+class SurfaceFitMethod(object, metaclass=abc.ABCMeta):
     """Abstract base class for surface fitting methods.
 
     A surface fit to the correlated visibilities :math:`V(\\nu, t)` as a
@@ -23,8 +23,6 @@ class SurfaceFitMethod(object):
         strong pulsars.
 
     """
-
-    __metaclass__ = abc.ABCMeta  # Enforce Abstract class
 
 
     def __init__(self, time_freq_vis, time_freq_vis_mask=None):

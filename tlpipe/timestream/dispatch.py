@@ -11,7 +11,7 @@ Inheritance diagram
 import itertools
 import numpy as np
 import h5py
-import timestream_task
+from . import timestream_task
 from tlpipe.core import constants as const
 
 from caput import mpiutil
@@ -176,7 +176,7 @@ class Dispatch(timestream_task.TimestreamTask):
 
         if self.next_grp and ngrp > 1:
             if mpiutil.rank0:
-                print 'Start file group %d of %d...' % (self.grp_cnt, ngrp)
+                print('Start file group %d of %d...' % (self.grp_cnt, ngrp))
             self.restart_iteration() # re-start iteration for each group
             self.next_grp = False
             self.abs_start = None
@@ -211,11 +211,11 @@ class Dispatch(timestream_task.TimestreamTask):
         this_span = self.int_time * (this_stop - this_start) # in unit second
         if this_span < drop_days * const.sday:
             if mpiutil.rank0:
-                print 'Not enough span time, drop it...'
+                print('Not enough span time, drop it...')
             return None
         elif (this_stop - this_start) <= extra_inttime: # use int comparision
             if mpiutil.rank0:
-                print 'Not enough span time (less than `extra_inttime`), drop it...'
+                print('Not enough span time (less than `extra_inttime`), drop it...')
             return None
 
         tod = self._Tod_class(input_files, mode, this_start, this_stop, dist_axis)

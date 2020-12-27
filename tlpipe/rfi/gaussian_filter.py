@@ -8,7 +8,7 @@ Inheritance diagram
 
 """
 
-import surface_fit
+from . import surface_fit
 import numpy as np
 import scipy.ndimage as ndimage
 

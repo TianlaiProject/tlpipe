@@ -10,7 +10,7 @@ Inheritance diagram
 
 import warnings
 import numpy as np
-import timestream_task
+from . import timestream_task
 from tlpipe.container.timestream import Timestream
 from caput import mpiutil
 from caput import mpiarray
@@ -51,7 +51,7 @@ class Rebin(timestream_task.TimestreamTask):
             vis_mask= np.zeros((nt, bin_number)+ts.local_vis.shape[2:], dtype=ts.vis_mask.dtype) # all False
 
             # average over frequency
-            for idx in xrange(bin_number):
+            for idx in range(bin_number):
                 inds, weight = unique(repeat_inds[start[idx]:end[idx]], return_counts=True)
                 # rebin freq
                 freq[idx] = average(ts.freq[inds], axis=0, weights=weight)

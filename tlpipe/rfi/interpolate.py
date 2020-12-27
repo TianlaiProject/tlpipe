@@ -8,7 +8,7 @@ Inheritance diagram
 
 """
 
-import surface_fit
+from . import surface_fit
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
 
@@ -51,7 +51,7 @@ class Interpolate(surface_fit.SurfaceFitMethod):
 
         height, width = self.vis.shape
 
-        for ri in xrange(height):
+        for ri in range(height):
             on = np.where(self.vis_mask[ri])[0] # masked inds
             off = np.where(np.logical_not(self.vis_mask[ri]))[0] # un-masked inds
             if len(off) <= max(self.order + 1, self.mask_ratio*width):
@@ -69,7 +69,7 @@ class Interpolate(surface_fit.SurfaceFitMethod):
 
         height, width = self.vis.shape
 
-        for ci in xrange(width):
+        for ci in range(width):
             on = np.where(self.vis_mask[:, ci])[0] # masked inds
             off = np.where(np.logical_not(self.vis_mask[:, ci]))[0] # un-masked inds
             if len(off) <= max(self.order + 1, self.mask_ratio*height):

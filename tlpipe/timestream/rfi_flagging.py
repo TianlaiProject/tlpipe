@@ -9,7 +9,7 @@ Inheritance diagram
 """
 
 import numpy as np
-import timestream_task
+from . import timestream_task
 from tlpipe.container.raw_timestream import RawTimestream
 from tlpipe.container.timestream import Timestream
 from tlpipe.rfi import interpolate
@@ -94,7 +94,7 @@ class Flag(timestream_task.TimestreamTask):
             return
 
         # next rounds
-        for i in xrange(threshold_num):
+        for i in range(threshold_num):
             # Gaussian fileter
             gf = gaussian_filter.GaussianFilter(vis_diff, st.vis_mask, time_kernal_size=tk_size, freq_kernal_size=fk_size, filter_direction=flag_direction)
             background = gf.fit()

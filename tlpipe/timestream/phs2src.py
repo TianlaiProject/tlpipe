@@ -11,7 +11,7 @@ Inheritance diagram
 import numpy as np
 import ephem
 import aipy as a
-import timestream_task
+from . import timestream_task
 from tlpipe.utils.date_util import get_ephdate
 from caput import mpiutil
 
@@ -59,7 +59,7 @@ class Phs2src(timestream_task.TimestreamTask):
             # convert an observing time to the ra_dec of the array pointing of that time
             src_time = get_ephdate(source, tzone=ts.attrs['timezone']) # utc time
             aa.date = str(ephem.Date(src_time)) # utc time
-            # print 'date:', aa.date
+            # print('date:', aa.date)
             antpointing = np.radians(ts['antpointing'][-1, :, :]) # radians
             azs = antpointing[:, 0]
             alts = antpointing[:, 1]
@@ -71,7 +71,7 @@ class Phs2src(timestream_task.TimestreamTask):
             az, alt = ephem.degrees(az), ephem.degrees(alt)
             src_ra, src_dec = aa.radec_of(az, alt)
             source = '%s_%s' % (src_ra, src_dec)
-            # print 'source:', source
+            # print('source:', source)
         except ValueError:
             pass
 
@@ -81,7 +81,7 @@ class Phs2src(timestream_task.TimestreamTask):
         assert(len(cat) == 1), 'Allow only one source'
         s = cat.values()[0]
         if mpiutil.rank0:
-            print 'Phase to source %s.' % source
+            print('Phase to source %s.' % source)
 
 
         show_progress = self.params['show_progress']

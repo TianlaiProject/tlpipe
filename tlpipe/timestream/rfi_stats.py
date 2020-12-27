@@ -10,7 +10,7 @@ Inheritance diagram
 
 from datetime import datetime, timedelta
 import numpy as np
-import timestream_task
+from . import timestream_task
 from tlpipe.utils.path_util import output_path
 import tlpipe.plot
 import matplotlib.pyplot as plt
@@ -67,7 +67,7 @@ class Stats(timestream_task.TimestreamTask):
         nb = mpiutil.allreduce(lnb, comm=ts.comm)
 
         # un-mask ns-on positions
-        if 'ns_on' in ts.iterkeys():
+        if 'ns_on' in ts.keys():
             vis_mask[ts['ns_on'][:]] = False
 
         # statistics along time axis

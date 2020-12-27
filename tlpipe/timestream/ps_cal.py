@@ -16,7 +16,7 @@ from scipy import linalg as la
 import ephem
 import h5py
 import aipy as a
-import timestream_task
+from . import timestream_task
 from tlpipe.container.timestream import Timestream
 from tlpipe.core import constants as const
 
@@ -132,12 +132,12 @@ class PsCal(timestream_task.TimestreamTask):
                 s = calibrators.get_src(calibrator)
             except KeyError:
                 if mpiutil.rank0:
-                    print 'Calibrator %s is unavailable, available calibrators are:'
+                    print('Calibrator %s is unavailable, available calibrators are:')
                     for key, d in calibrators.src_data.items():
-                        print '%8s  ->  %12s' % (key, d[0])
+                        print('%8s  ->  %12s' % (key, d[0]))
                 raise RuntimeError('Calibrator %s is unavailable')
             if mpiutil.rank0:
-                print 'Try to calibrate with %s...' % s.src_name
+                print('Try to calibrate with %s...' % s.src_name)
 
             # get transit time of calibrator
             # array
@@ -167,7 +167,7 @@ class PsCal(timestream_task.TimestreamTask):
                 cnt += 1
 
             if mpiutil.rank0:
-                print 'transit ind of %s: %s, time: %s' % (s.src_name, transit_inds, local_next_transit)
+                print('transit ind of %s: %s, time: %s' % (s.src_name, transit_inds, local_next_transit))
 
             ### now only use the first transit point to do the cal
             ### may need to improve in the future
@@ -183,12 +183,12 @@ class PsCal(timestream_task.TimestreamTask):
                 ts.local_vis[:] = ts.local_vis.conj()
 
             nt = end_ind - start_ind
-            t_inds = range(start_ind, end_ind)
+            t_inds = list(range(start_ind, end_ind))
             freq = ts.freq[:] # MHz
             nf = len(freq)
             nlb = len(ts.local_bl[:])
             nfeed = len(feedno)
-            tfp_inds = list(itertools.product(t_inds, range(nf), [pol.index('xx'), pol.index('yy')])) # only for xx and yy
+            tfp_inds = list(itertools.product(t_inds, list(range(nf)), [pol.index('xx'), pol.index('yy')])) # only for xx and yy
             ns, ss, es = mpiutil.split_all(len(tfp_inds), comm=ts.comm)
             # gather data to make each process to have its own data which has all bls
             for ri, (ni, si, ei) in enumerate(zip(ns, ss, es)):
@@ -244,7 +244,7 @@ class PsCal(timestream_task.TimestreamTask):
                 if show_progress and mpiutil.rank0:
                     pg.show(ii)
                 # when noise on, just pass
-                if 'ns_on' in ts.iterkeys() and ts['ns_on'][ti]:
+                if 'ns_on' in ts.keys() and ts['ns_on'][ti]:
                     continue
                 # aa.set_jultime(ts['jul_date'][ti])
                 # s.compute(aa)
@@ -431,7 +431,7 @@ class PsCal(timestream_task.TimestreamTask):
                     ts.local_vis[start_ind:end_ind, :, pol.index('xx')] = lv[:, :, 0]
                     ts.local_vis[start_ind:end_ind, :, pol.index('yy')] = lv[:, :, 1]
                 else:
-                    if 'ns_on' in ts.iterkeys():
+                    if 'ns_on' in ts.keys():
                         lv[ts['ns_on'][start_ind:end_ind]] = 0 # avoid ns_on signal to become nan
                     ts.local_vis[start_ind:end_ind, :, pol.index('xx')] -= lv[:, :, 0]
                     ts.local_vis[start_ind:end_ind, :, pol.index('yy')] -= lv[:, :, 1]
@@ -473,7 +473,7 @@ class PsCal(timestream_task.TimestreamTask):
                 for i in range(10):
                     try:
                         # NOTE: if write simultaneously, will loss data with processes distributed in several nodes
-                        for ri in xrange(mpiutil.size):
+                        for ri in range(mpiutil.size):
                             if ri == mpiutil.rank:
                                 with h5py.File(src_vis_file, 'r+') as f:
                                     for ii, (ti, fi, pi) in enumerate(tfp_linds):
@@ -541,7 +541,7 @@ class PsCal(timestream_task.TimestreamTask):
                 G_abs = mpiarray.MPIArray.wrap(lG_abs, axis=0, comm=ts.comm)
                 G_abs = G_abs.redistribute(axis=1).reshape(nt, nf, 2, None).redistribute(axis=0).reshape(None, nf*2*nfeed).redistribute(axis=1)
 
-                fpd_inds = list(itertools.product(range(nf), range(2), range(nfeed))) # only for xx and yy
+                fpd_inds = list(itertools.product(list(range(nf)), list(range(2)), list(range(nfeed)))) # only for xx and yy
                 fpd_linds = mpiutil.mpilist(fpd_inds, method='con', comm=ts.comm)
                 del fpd_inds
                 # create data to save the solved gain for each feed
@@ -571,10 +571,10 @@ class PsCal(timestream_task.TimestreamTask):
                 num_conj = mpiutil.allreduce(num_conj, comm=ts.comm)
                 if num_conj > 0.5 * (nf * 2 * nfeed): # 2 for 2 pols
                     if mpiutil.rank0:
-                        print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
-                        print '!!!   Detect data should be their conjugate...   !!!'
-                        print '!!!   Correct it automatically...                !!!'
-                        print '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+                        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+                        print('!!!   Detect data should be their conjugate...   !!!')
+                        print('!!!   Correct it automatically...                !!!')
+                        print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
                     mpiutil.barrier()
                     # correct vis
                     ts.local_vis[:] = ts.local_vis.conj()
@@ -605,9 +605,9 @@ class PsCal(timestream_task.TimestreamTask):
                             eac = np.abs(e_phs_conj)
                             if eac > ea:
                                 if np.abs(eac - 1.0) < 0.01:
-                                    print 'feedno = %d, fi = %d, pol = %s: may need to be conjugated' % (feedno[di], fi, gain_pd[pi])
+                                    print('feedno = %d, fi = %d, pol = %s: may need to be conjugated' % (feedno[di], fi, gain_pd[pi]))
                             else:
-                                print 'feedno = %d, fi = %d, pol = %s: maybe wrong abs(e_phs): %s' % (feedno[di], fi, gain_pd[pi], ea)
+                                print('feedno = %d, fi = %d, pol = %s: maybe wrong abs(e_phs): %s' % (feedno[di], fi, gain_pd[pi], ea))
 
 
                 # gather local gain
@@ -687,7 +687,7 @@ class PsCal(timestream_task.TimestreamTask):
                     for i in range(10):
                         try:
                             # NOTE: if write simultaneously, will loss data with processes distributed in several nodes
-                            for ri in xrange(mpiutil.size):
+                            for ri in range(mpiutil.size):
                                 if ri == mpiutil.rank:
                                     with h5py.File(gain_file, 'r+') as f:
                                         for ii, (ti, fi, pi) in enumerate(tfp_linds):

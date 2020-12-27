@@ -356,7 +356,7 @@ See the documentation for these base classes for more details.
 
 import sys
 import inspect
-import Queue
+import queue
 import collections
 import logging
 import os
@@ -374,6 +374,10 @@ from tlpipe.utils.path_util import input_path, output_path
 
 # Set the module logger.
 logger = logging.getLogger(__name__)
+
+# turn off a ton of matplotlib DEBUG messages
+mpl_logger = logging.getLogger('matplotlib')
+mpl_logger.setLevel(logging.WARNING)
 
 
 # Exceptions
@@ -456,7 +460,7 @@ class Manager(object):
         if self.params['timing']:
             self.start_time = datetime.datetime.now()
             if mpiutil.rank0:
-                print 'Start the pipeline at %s...' % self.start_time
+                print('Start the pipeline at %s...' % self.start_time)
 
         # set environment var
         os.environ['TL_OUTPUT'] = self.params['outdir'] + '/'
@@ -488,10 +492,10 @@ class Manager(object):
         """Show all parameters that can be set and their default values."""
         if mpiutil.rank0:
 
-            print 'Parameters of %s:' % cls.__name__
+            print('Parameters of %s:' % cls.__name__)
             for key, val in cls.params_init.items():
-                print '%s:  %s' % (key, val)
-            print
+                print('%s:  %s' % (key, val))
+            print()
 
         mpiutil.barrier()
 
@@ -534,7 +538,7 @@ class Manager(object):
                 msg += str(e)
                 new_e = PipelineConfigError(msg)
                 # This preserves the traceback.
-                raise new_e.__class__, new_e, sys.exc_info()[2]
+                raise new_e.__class__(new_e).with_traceback(sys.exc_info()[2])
             pipeline_tasks.append(task)
             if mpiutil.rank0:
                 logger.debug("Added %s to task list." % task.__class__.__name__)
@@ -608,8 +612,8 @@ class Manager(object):
             end_time = datetime.datetime.now()
             run_time = end_time - self.start_time
             days, secs, msecs = run_time.days, run_time.seconds, run_time.microseconds
-            hours = secs / 3600
-            mins = (secs / 60) % 60
+            hours = secs // 3600
+            mins = (secs // 60) % 60
             secs = secs % 60 + 1.0e-6 * msecs
 
             msg = 'Total run time:'
@@ -629,20 +633,20 @@ class Manager(object):
                 msg += (' %.2f seconds' % secs)
 
             if mpiutil.rank0:
-                print
-                print 'End the pipeline at %s...' % end_time
-                print msg
+                print()
+                print('End the pipeline at %s...' % end_time)
+                print(msg)
 
         if mpiutil.rank0:
             # done for the pipeline
-            print
-            print
-            print "=========================================="
-            print "=                                        ="
-            print "=        DONE FOR THE PIPELINE!!         ="
-            print "=           CONGRATULATIONS!!            ="
-            print "=                                        ="
-            print "=========================================="
+            print()
+            print()
+            print("==========================================")
+            print("=                                        =")
+            print("=        DONE FOR THE PIPELINE!!         =")
+            print("=           CONGRATULATIONS!!            =")
+            print("=                                        =")
+            print("==========================================")
 
 
 
@@ -714,10 +718,10 @@ class TaskBase(object):
             # get all params that has merged params of the all super classes
             all_params = cls._get_params()
 
-            print 'Parameters of task %s:' % cls.__name__
+            print('Parameters of task %s:' % cls.__name__)
             for key, val in all_params.items():
-                print '%s:  %s' % (key, val)
-            print
+                print('%s:  %s' % (key, val))
+            print()
 
         mpiutil.barrier()
 
@@ -819,7 +823,7 @@ class TaskBase(object):
         in_ = format_list(self.params['in'])
         out = format_list(self.params['out'])
         # Inspect the `setup` method to see how many arguments it takes.
-        setup_argspec = inspect.getargspec(self.setup)
+        setup_argspec = inspect.getfullargspec(self.setup)
         # Make sure it matches `requires` keys list specified in config.
         n_requires = len(requires)
         try:
@@ -837,7 +841,7 @@ class TaskBase(object):
                    " got %d" % (len(setup_argspec.args) - 1, n_requires))
             raise PipelineConfigError(msg)
         # Inspect the `next` method to see how many arguments it takes.
-        next_argspec = inspect.getargspec(self.next)
+        next_argspec = inspect.getfullargspec(self.next)
         # Make sure it matches `in` keys list specified in config.
         n_in = len(in_)
         try:
@@ -859,7 +863,7 @@ class TaskBase(object):
         self._requires_keys = requires
         self._requires = [None] * n_requires
         self._in_keys = in_
-        self._in = [Queue.Queue() for i in xrange(n_in)]
+        self._in = [queue.Queue() for i in range(n_in)]
         self._out_keys = out
 
     def _pipeline_advance_state(self):
@@ -886,7 +890,7 @@ class TaskBase(object):
                 if not in_.empty():
                     # XXX Clean up.
                     if mpiutil.rank0:
-                        print "Something left: %i" % in_.qsize()
+                        print("Something left: %i" % in_.qsize())
 
                     msg = "Task finished %s iterating `next()` but input queue \'%s\' isn't empty." % (self.__class__.__name__, in_key)
                     if mpiutil.rank0:
@@ -971,7 +975,7 @@ class TaskBase(object):
         """
 
         n_keys = len(keys)
-        for ii in xrange(n_keys):
+        for ii in range(n_keys):
             key = keys[ii]
             product = products[ii]
             for jj, requires_key in enumerate(self._requires_keys):
@@ -1096,13 +1100,14 @@ class OneAndOne(TaskBase):
         self.dry_run_time = self.params['dry_run_time']
 
         # Inspect the `process` method to see how many arguments it takes.
-        pro_argspec = inspect.getargspec(self.process)
+        pro_argspec = inspect.getfullargspec(self.process)
         n_args = len(pro_argspec.args) - 1
         if n_args  > 1:
             msg = ("`process` method takes more than 1 argument, which is not"
                    " allowed")
             raise PipelineConfigError(msg)
-        if pro_argspec.varargs or pro_argspec.keywords or pro_argspec.defaults:
+        # if pro_argspec.varargs or pro_argspec.keywords or pro_argspec.defaults:
+        if pro_argspec.varargs or pro_argspec.varkw or pro_argspec.defaults or pro_argspec.kwonlyargs or pro_argspec.kwonlydefaults:
             msg = ("`process` method may not have variable length or optional"
                    " arguments")
             raise PipelineConfigError(msg)
@@ -1312,7 +1317,7 @@ class FileIterBase(OneAndOne):
         output_files = format_list(self.params['output_files'])
 
         if self.iter_num is None:
-            self.iter_num = (len(input_files) - self.iter_start) / self.iter_step
+            self.iter_num = (len(input_files) - self.iter_start) // self.iter_step
 
         if len(input_files) == 0:
             self.input_files = []

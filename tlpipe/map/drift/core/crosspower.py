@@ -31,7 +31,7 @@ class CrossPower(psmc.PSMonteCarlo):
         qa = np.zeros((self.nbands + 1, self.nsamples))
 
         # Split calculation into subranges to save on memory usage
-        num, starts, ends = mpiutil.split_m(self.nsamples, (self.nsamples / 1000) + 1)
+        num, starts, ends = mpiutil.split_m(self.nsamples, (self.nsamples // 1000) + 1)
 
         for n, s, e in zip(num, starts, ends):
 

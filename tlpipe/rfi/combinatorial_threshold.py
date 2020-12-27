@@ -39,8 +39,8 @@ class CombinatorialThreshold(object):
             raise ValueError('Invalid time_freq_vis_mask')
 
         max_log2_length = np.int(np.ceil(np.log2(max_threshold_length))) + 1
-        time_lengths = [ 2**i for i in xrange(max_log2_length) ]
-        freq_lengths = [ 2**i for i in xrange(max_log2_length) ]
+        time_lengths = [ 2**i for i in range(max_log2_length) ]
+        freq_lengths = [ 2**i for i in range(max_log2_length) ]
         # include nt, nf in lengths
         if nt < max_threshold_length:
             time_lengths.append(nt)

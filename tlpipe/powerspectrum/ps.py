@@ -11,15 +11,15 @@ class Ps(OneAndOne):
 
     def setup(self):
         if mpiutil.rank0:
-            print 'Setting up Ps.'
+            print('Setting up Ps.')
 
     def process(self, input):
 
         if mpiutil.rank0:
-            print self.history
+            print(self.history)
 
         return input
 
     def finish(self):
         if mpiutil.rank0:
-            print 'Finishing Ps.'
+            print('Finishing Ps.')

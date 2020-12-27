@@ -11,7 +11,7 @@ Inheritance diagram
 import os
 import numpy as np
 import h5py
-import timestream_task
+from . import timestream_task
 
 from caput import mpiutil
 from tlpipe.utils.path_util import output_path
@@ -48,7 +48,7 @@ class NormalizeMmode(timestream_task.TimestreamTask):
                 os.remove(count_file)
         else:
             if mpiutil.rank0:
-                print 'Count file %s does not exist, do noting...' % count_file
+                print('Count file %s does not exist, do noting...' % count_file)
 
         # mpiutil.barrier()
 
@@ -63,6 +63,6 @@ class NormalizeMmode(timestream_task.TimestreamTask):
             ts_dir = output_path(self.params['ts_dir'])
             ts_name = self.params['ts_name']
             if mpiutil.rank0:
-                print 'Try to load tstream from %s/%s' % (ts_dir, ts_name)
+                print('Try to load tstream from %s/%s' % (ts_dir, ts_name))
             tstream = timestream.Timestream.load(ts_dir, ts_name)
             return self.process(tstream)

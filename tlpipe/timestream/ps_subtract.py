@@ -10,7 +10,7 @@ Inheritance diagram
 
 import numpy as np
 import aipy as a
-import timestream_task
+from . import timestream_task
 from tlpipe.core import constants as const
 from caput import mpiutil
 
@@ -58,7 +58,7 @@ class PsSub(timestream_task.TimestreamTask):
         cat = a.src.get_catalog(srclist, cutoff, catalogs)
         # nps = len(cat) # number of point sources
         if mpiutil.rank0:
-            print 'Subtracting point sources %s...' % ps
+            print('Subtracting point sources %s...' % ps)
 
         # get transit time of the point sources
         # array
@@ -76,7 +76,7 @@ class PsSub(timestream_task.TimestreamTask):
             else:
                 transit_ind = nt + int((transit_time - ts['jul_date'][-1]) / int_time)
             pre_transit_ind = transit_ind - num_int # previous transit time
-            inds = range(pre_transit_ind-num_span, pre_transit_ind+num_span) + range(transit_ind-num_span, transit_ind+num_span)
+            inds = list(range(pre_transit_ind-num_span, pre_transit_ind+num_span)) + list(range(transit_ind-num_span, transit_ind+num_span))
             inds = np.intersect1d(inds, np.arange(nt))
 
             for ti in inds:
@@ -88,7 +88,7 @@ class PsSub(timestream_task.TimestreamTask):
                 s_top = s.get_crds('top', ncrd=3)
                 aa.sim_cache(s.get_crds('eq', ncrd=3)[:, np.newaxis]) # for compute bm_response and sim
                 # for pi in range(len(pol)):
-                for pi in xrange(2): # only cal for xx, yy
+                for pi in range(2): # only cal for xx, yy
                     aa.set_active_pol(pol[pi])
                     for bi, (i, j) in enumerate(bls):
                         ai = feedno.index(i)

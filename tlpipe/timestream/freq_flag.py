@@ -10,7 +10,7 @@ Inheritance diagram
 
 import warnings
 import numpy as np
-import timestream_task
+from . import timestream_task
 from tlpipe.container.raw_timestream import RawTimestream
 from tlpipe.container.timestream import Timestream
 

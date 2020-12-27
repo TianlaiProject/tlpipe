@@ -1,9 +1,6 @@
 """Some functions related to pickle."""
 
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
+import pickle
 
 
 def get_value(val):

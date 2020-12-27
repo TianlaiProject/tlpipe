@@ -91,6 +91,6 @@ class ConfigReader(object):
             ctype, cname = self._config_dict[key]
             cval = config[key]
 
-            print "Setting %s to %s" % (cname, cval)
+            print("Setting %s to %s" % (cname, cval))
 
             self.__setattr__(cname, ctype(cval))

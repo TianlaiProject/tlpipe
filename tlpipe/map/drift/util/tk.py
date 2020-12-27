@@ -46,7 +46,7 @@ def tk(A, b, th=1.0e-8, x0=1.0, noise=False):
     def xm(mu):
         return np.dot(V*(s/(s**2 + mu**2)), Uhb)
 
-    for k in xrange(1, r+1):
+    for k in range(1, r+1):
         xk = xk + (1.0 / s[k-1]) * Uhb[k-1] * V[:, k-1]
         assert np.allclose(xk, np.dot(np.dot(V[:, :k]*(1.0/s[:k]), Uh[:k, :]), b))
         pk = la.norm(b - np.dot(A, xk))
@@ -89,4 +89,4 @@ if __name__ == '__main__':
     b = b0 + e
 
     xm = tk(A, b)
-    print la.norm(xm - x), la.norm(x)
+    print(la.norm(xm - x), la.norm(x))

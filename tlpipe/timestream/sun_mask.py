@@ -11,7 +11,7 @@ Inheritance diagram
 import numpy as np
 import ephem
 import aipy as a
-import timestream_task
+from . import timestream_task
 
 
 class Mask(timestream_task.TimestreamTask):

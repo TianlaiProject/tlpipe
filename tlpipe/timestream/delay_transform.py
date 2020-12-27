@@ -11,7 +11,7 @@ Inheritance diagram
 from datetime import datetime, timedelta
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
-import timestream_task
+from . import timestream_task
 from tlpipe.container.raw_timestream import RawTimestream
 from tlpipe.container.timestream import Timestream
 from tlpipe.utils.path_util import output_path
@@ -133,7 +133,7 @@ class Delay(timestream_task.TimestreamTask):
                 v_tau[on] = complex(np.nan, np.nan)
             else:
                 off = np.where(np.logical_not(ts['ns_on'][:]))[0]
-                for fi in xrange(nfreq):
+                for fi in range(nfreq):
                     itp_real = InterpolatedUnivariateSpline(off, v_tau[off, fi].real)
                     itp_imag= InterpolatedUnivariateSpline(off, v_tau[off, fi].imag)
                     v_tau[on, fi] = itp_real(on) + 1.0J * itp_imag(on)
@@ -144,7 +144,7 @@ class Delay(timestream_task.TimestreamTask):
                 lb, hb = 0, nfreq
             else:
                 # select center part
-                ci = nfreq / 2
+                ci = nfreq // 2
                 lb = max(0, ci - int(tau_span))
                 hb = min(nfreq, ci + int(tau_span) + 1)
             v_tau = v_tau[:, lb:hb]

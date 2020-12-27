@@ -9,7 +9,7 @@ Inheritance diagram
 """
 
 import numpy as np
-import timestream_task
+from . import timestream_task
 from tlpipe.container.timestream import Timestream
 from tlpipe.core import constants as const
 from caput import mpiarray
@@ -73,14 +73,14 @@ class ReOrder(timestream_task.TimestreamTask):
         ra_dec[:nt1] = ts['ra_dec'][ind:ind+nt1]
         if nt1 < num_int: # not enough data
             dphi = 2 * np.pi * ts.attrs['inttime'] / const.sday
-            ra_dec[nt1:, 0] = np.array([ ts['ra_dec'][-1, 0] + dphi*i for i in xrange(num_int-nt1) ]) # for ra
+            ra_dec[nt1:, 0] = np.array([ ts['ra_dec'][-1, 0] + dphi*i for i in range(num_int-nt1) ]) # for ra
             ra_dec[:, 0] = np.where(ra_dec[:, 0]>2*np.pi, ra_dec[:, 0]-2*np.pi, ra_dec[:, 0])
             ra_dec[nt1:, 1] = np.mean(ts['ra_dec'][:, 1]) # for dec
         ts.create_main_axis_ordered_dataset('time', 'ra_dec', ra_dec, (0,), recreate=True, copy_attrs=True)
 
         # complete other main_time_ordered_datasets with zeros
         for name in ts.main_time_ordered_datasets.keys():
-            if name in ts.iterkeys() and not name in ('vis', 'vis_mask', 'ra_dec'):
+            if name in ts.keys() and not name in ('vis', 'vis_mask', 'ra_dec'):
                 dset = ts[name]
                 axis_order = ts.main_axes_ordered_datasets[name]
                 axis = tuple([ ts.main_data_axes[ax] for ax in axis_order if ax is not None ])
@@ -111,7 +111,7 @@ class ReOrder(timestream_task.TimestreamTask):
 
         # re-order all main_time_ordered_datasets
         for name in ts.main_time_ordered_datasets.keys():
-            if name in ts.iterkeys():
+            if name in ts.keys():
                 dset = ts[name]
                 time_axis = ts.main_time_ordered_datasets[name].index(0)
                 sel1 = [slice(0, None)] * (time_axis + 1)

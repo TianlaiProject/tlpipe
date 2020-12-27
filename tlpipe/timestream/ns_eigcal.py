@@ -14,7 +14,7 @@ import numpy as np
 from scipy import linalg as la
 from scipy.interpolate import InterpolatedUnivariateSpline
 import h5py
-import timestream_task
+from . import timestream_task
 from tlpipe.container.timestream import Timestream
 
 from caput import mpiutil
@@ -137,7 +137,7 @@ class NsCal(timestream_task.TimestreamTask):
                     mis_conj.append(aj * nfeed + ai)
 
 
-            tfp_inds = list(itertools.product(range(num_on), range(nf), range(npol)))
+            tfp_inds = list(itertools.product(list(range(num_on)), list(range(nf)), list(range(npol))))
             ns, ss, es = mpiutil.split_all(len(tfp_inds), comm=ts.comm)
             # gather data to make each process to have its own data which has all bls
             for ri, (ni, si, ei) in enumerate(zip(ns, ss, es)):
@@ -243,7 +243,7 @@ class NsCal(timestream_task.TimestreamTask):
                 for i in range(10):
                     try:
                         # NOTE: if write simultaneously, will loss data with processes distributed in several nodes
-                        for ri in xrange(mpiutil.size):
+                        for ri in range(mpiutil.size):
                             if ri == mpiutil.rank:
                                 with h5py.File(ns_vis_file, 'r+') as f:
                                     for ii, (ti, fi, pi) in enumerate(tfp_linds):

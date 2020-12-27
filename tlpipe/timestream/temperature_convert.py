@@ -9,7 +9,7 @@ Inheritance diagram
 """
 
 import numpy as np
-import timestream_task
+from . import timestream_task
 from tlpipe.core import constants as const
 from caput import mpiutil
 
@@ -28,7 +28,7 @@ class Convert(timestream_task.TimestreamTask):
     def process(self, ts):
         if 'unit' in ts.vis.attrs.keys() and ts.vis.attrs['unit'] == 'K':
             if mpiutil.rank0:
-                print 'vis is already in unit K, do nothing...'
+                print('vis is already in unit K, do nothing...')
         else:
             freq = ts.local_freq[:] # MHz
             factor = 1.0e-26 * (const.c**2 / (2 * const.k_B * (1.0e6*freq)**2)) # NOTE: 1Jy = 1.0e-26 W m^-2 Hz^-1

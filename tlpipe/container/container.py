@@ -38,7 +38,7 @@ def ensure_file_list(files):
 
     if memh5.is_group(files):
         files = [files]
-    elif isinstance(files, basestring):
+    elif isinstance(files, str):
         fls = sorted(glob.glob(files))
         if len(fls) == 0:
             files = [ files ]
@@ -70,7 +70,7 @@ def check_axis(axis, axes):
     """
     naxis = len(axes)
     # Process if axis is a string
-    if isinstance(axis, basestring):
+    if isinstance(axis, str):
         try:
             valid_axis = axes.index(axis)
         except ValueError:
@@ -148,9 +148,9 @@ class BasicTod(memh5.MemDiskGroup):
         if files is not None and use_hints:
             fl = ensure_file_list(files)[0]
             with h5py.File(fl, 'r') as f:
-                if 'hints' in f.attrs.iterkeys():
+                if 'hints' in f.attrs.keys():
                     hints = pickle.loads(f.attrs['hints'])
-                    for key, val in hints.iteritems():
+                    for key, val in hints.items():
                         setattr(self, key, val)
 
         self.infiles_mode = mode
@@ -231,7 +231,7 @@ class BasicTod(memh5.MemDiskGroup):
 
         # allocation interval by all procs
         intervals = sorted(list(set([start] + cum_lts + cum_num_ts[:-1] + [stop])))
-        intervals = [ (intervals[i], intervals[i+1]) for i in xrange(len(intervals)-1) ]
+        intervals = [ (intervals[i], intervals[i+1]) for i in range(len(intervals)-1) ]
         cum_num_lf_ind = np.cumsum([0] + (ef - sf + 1).tolist())
         # local intervals owned by this proc
         lits = intervals[cum_num_lf_ind[self.rank]: cum_num_lf_ind[self.rank+1]]
@@ -278,7 +278,7 @@ class BasicTod(memh5.MemDiskGroup):
 
     @main_data_name.setter
     def main_data_name(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             self._main_data_name_ = value
         else:
             raise ValueError('Attribute main_data_name must be a string')
@@ -290,11 +290,11 @@ class BasicTod(memh5.MemDiskGroup):
 
     @main_data_axes.setter
     def main_data_axes(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             self._main_data_axes_ = (value,)
         elif hasattr(value, '__iter__'):
             for val in value:
-                if not isinstance(val, basestring):
+                if not isinstance(val, str):
                     raise ValueError('Attribute main_data_axes must be a tuple of strings')
             self._main_data_axes_ = tuple(value)
         else:
@@ -333,11 +333,11 @@ class BasicTod(memh5.MemDiskGroup):
 
     @time_ordered_attrs.setter
     def time_ordered_attrs(self, value):
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             self._time_ordered_attrs_ = {value}
         elif hasattr(value, '__iter__'):
             for val in value:
-                if not isinstance(val, basestring):
+                if not isinstance(val, str):
                     raise ValueError('Attribute time_ordered_attrs must be a set of strings')
             self._time_ordered_attrs_ = set(value)
         else:
@@ -634,7 +634,7 @@ class BasicTod(memh5.MemDiskGroup):
 
         fh = self.infiles[0]
         # read in top level common attrs
-        for attr_name in fh.attrs.iterkeys():
+        for attr_name in fh.attrs.keys():
             if attr_name not in self.time_ordered_attrs and attr_name != 'hints':
                 self._load_a_common_attribute(attr_name)
 
@@ -645,7 +645,7 @@ class BasicTod(memh5.MemDiskGroup):
             return
 
         fh = self.infiles[0]
-        for attr_name in fh.attrs.iterkeys():
+        for attr_name in fh.attrs.keys():
             if attr_name in self.time_ordered_attrs:
                 self._load_a_time_ordered_attribute(attr_name)
 
@@ -657,7 +657,7 @@ class BasicTod(memh5.MemDiskGroup):
 
         fh = self.infiles[0]
         # read in top level common datasets
-        for dset_name in fh.iterkeys():
+        for dset_name in fh.keys():
             if (dset_name not in self.main_axes_ordered_datasets.keys()) and (dset_name not in self.time_ordered_datasets.keys()):
                 self._load_a_common_dataset(dset_name)
 
@@ -668,7 +668,7 @@ class BasicTod(memh5.MemDiskGroup):
             return
 
         fh = self.infiles[0]
-        for dset_name in fh.iterkeys():
+        for dset_name in fh.keys():
             if (dset_name in self.time_ordered_datasets.keys()) and (not dset_name in self.main_axes_ordered_datasets.keys()):
                 self._load_a_time_ordered_dataset(dset_name)
 
@@ -679,7 +679,7 @@ class BasicTod(memh5.MemDiskGroup):
             return
 
         fh = self.infiles[0]
-        for dset_name in fh.iterkeys():
+        for dset_name in fh.keys():
             if dset_name in self.main_axes_ordered_datasets.keys():
                 self._load_a_main_axes_ordered_dataset(dset_name)
 
@@ -698,7 +698,7 @@ class BasicTod(memh5.MemDiskGroup):
             return
 
         fh = self.infiles[0]
-        for dset_name in fh.iterkeys():
+        for dset_name in fh.keys():
             if dset_name in self.main_axes_ordered_datasets.keys() and dset_name != self.main_data_name:
                 self._load_a_main_axes_ordered_dataset(dset_name)
 
@@ -710,12 +710,12 @@ class BasicTod(memh5.MemDiskGroup):
 
         fh = self.infiles[0]
         # load in top level attrs
-        for attr_name in fh.attrs.iterkeys():
+        for attr_name in fh.attrs.keys():
             if attr_name != 'hints':
                 self._load_an_attribute(attr_name)
 
         # load in top level datasets
-        for dset_name in fh.iterkeys():
+        for dset_name in fh.keys():
             self._load_a_dataset(dset_name)
 
 
@@ -760,7 +760,7 @@ class BasicTod(memh5.MemDiskGroup):
 
         time_axis = axis_order.index(0)
 
-        if not name in self.iterkeys():
+        if not name in self.keys():
             if self.main_data_dist_axis == 0:
                 self.create_dataset(name, data=data, distributed=True, distributed_axis=time_axis)
             else:
@@ -826,7 +826,7 @@ class BasicTod(memh5.MemDiskGroup):
                 axis_name = self.main_data_axes[tmp_ax]
                 raise ValueError('%s axis does not align with main data, can not create a %s ordered dataset %s' % (axis_name.capitalize(), axis_name, name))
 
-        if not name in self.iterkeys():
+        if not name in self.keys():
             if self.main_data_dist_axis in axes:
                 self.create_dataset(name, data=data, distributed=True, distributed_axis=axis_order.index(self.main_data_dist_axis))
             else:
@@ -864,7 +864,7 @@ class BasicTod(memh5.MemDiskGroup):
 
         """
 
-        axis = tuple(xrange(len(data.shape)))
+        axis = tuple(range(len(data.shape)))
         name = self.main_data_name
         axis_order = axis
 
@@ -903,22 +903,22 @@ class BasicTod(memh5.MemDiskGroup):
         """Delete a dataset. If `reserve_hint` is False, also remove it from
         the hint if it is in it.
         """
-        if name in self.iterkeys():
+        if name in self.keys():
             del self[name]
         else:
             warnings.warn('Dataset %s does not exist')
 
         if not reserve_hint:
-            if name in self._main_axes_ordered_datasets_.iterkeys():
+            if name in self._main_axes_ordered_datasets_.keys():
                 del self._main_axes_ordered_datasets_[name]
-            if name in self._time_ordered_datasets_.iterkeys():
+            if name in self._time_ordered_datasets_.keys():
                 del self._time_ordered_datasets_[name]
 
     def delete_an_attribute(self, name, reserve_hint=True):
         """Delete an attribute. If `reserve_hint` is False, also remove it from
         the hint if it is in it.
         """
-        if name in self.attrs.iterkeys():
+        if name in self.attrs.keys():
             del self.attrs[name]
         else:
             warnings.warn('Attribute %s does not exist')
@@ -932,11 +932,11 @@ class BasicTod(memh5.MemDiskGroup):
         `reserve_hints` is False, also remove them from the hint if they are in it.
         """
         # delete attributes
-        attrs_keys = list(self.attrs.iterkeys())
+        attrs_keys = list(self.attrs.keys())
         for attrs_name in attrs_keys:
             self.delete_an_attribute(attrs_name, reserve_hint=reserve_hints)
         # delete datasets
-        for dset_name in self.iterkeys():
+        for dset_name in self.keys():
             self.delete_a_dataset(dset_name, reserve_hint=reserve_hints)
 
     @property
@@ -960,38 +960,38 @@ class BasicTod(memh5.MemDiskGroup):
         """Create a new history entry."""
 
         if self.history and history is not '':
-            self.attrs['history'] += ('\n' + history)
+            self.attrs['history'] += np.bytes_('\n' + history)
 
     def info(self):
         """List basic information of the data hold by this container."""
         if self.rank0:
             # list the opened files
-            print
-            print 'Input files:'
+            print()
+            print('Input files:')
             for fh in self.infiles:
-                print '  ', fh.filename
-            print
+                print('  ', fh.filename)
+            print()
             # distributed axis
-            print '%s distribution axis: (%d, %s)' % (self.main_data_name, self.main_data_dist_axis, self.main_data_axes[self.main_data_dist_axis])
-            print
+            print('%s distribution axis: (%d, %s)' % (self.main_data_name, self.main_data_dist_axis, self.main_data_axes[self.main_data_dist_axis]))
+            print()
             # hints for this class
             for key in self.__class__.__dict__.keys():
                 if re.match(self.hints_pattern, key):
-                    print '%s = %s' % (key, getattr(self, key))
-            print
+                    print('%s = %s' % (key, getattr(self, key)))
+            print()
             # list all top level attributes
-            for attr_name, attr_val in self.attrs.iteritems():
-                print '%s:' % attr_name, attr_val
+            for attr_name, attr_val in self.attrs.items():
+                print('%s:' % attr_name, attr_val)
             # list all top level datasets
-            for dset_name, dset in self.iteritems():
+            for dset_name, dset in self.items():
                 if dset.distributed:
-                    print '%s  shape = %s, dist_axis = %d' % (dset_name, dset.shape, dset.distributed_axis)
+                    print('%s  shape = %s, dist_axis = %d' % (dset_name, dset.shape, dset.distributed_axis))
                 else:
-                    print '%s  shape = %s' % (dset_name, dset.shape)
+                    print('%s  shape = %s' % (dset_name, dset.shape))
                 # list its attributes
-                for attr_name, attr_val in dset.attrs.iteritems():
-                    print '  %s:' % attr_name, attr_val
-            print
+                for attr_name, attr_val in dset.attrs.items():
+                    print('  %s:' % attr_name, attr_val)
+            print()
 
         mpiutil.barrier(comm=self.comm)
 
@@ -1031,7 +1031,7 @@ class BasicTod(memh5.MemDiskGroup):
 
             # redistribute other main_axes_ordered_datasets
             for name, val in self.main_axes_ordered_datasets.items():
-                if name in self.iterkeys() and name != self.main_data_name:
+                if name in self.keys() and name != self.main_data_name:
                     if axis in val:
                         with warnings.catch_warnings():
                             warnings.simplefilter('ignore')
@@ -1042,7 +1042,7 @@ class BasicTod(memh5.MemDiskGroup):
 
             # redistribute other time_ordered_datasets
             for name, val in self.time_ordered_datasets.items():
-                if name in self.iterkeys() and not name in self.main_axes_ordered_datasets.keys():
+                if name in self.keys() and not name in self.main_axes_ordered_datasets.keys():
                     if axis == 0:
                         self.dataset_common_to_distributed(name, distributed_axis=val.index(0))
                     else:
@@ -1056,7 +1056,7 @@ class BasicTod(memh5.MemDiskGroup):
         check has done here in this basic container.
         """
 
-        for name, dset in self.iteritems():
+        for name, dset in self.items():
             # check main_axes_ordered_datasets
             if name in self.main_axes_ordered_datasets.keys():
                 val = self.main_axes_ordered_datasets[name]
@@ -1084,7 +1084,7 @@ class BasicTod(memh5.MemDiskGroup):
                     raise RuntimeError('Dataset %s should be common' % name)
 
         # check axis are aligned
-        for axis in xrange(len(self.main_data_axes)):
+        for axis in range(len(self.main_data_axes)):
             lens = [] # to save the length of axis
             for name, val in self.main_axes_ordered_datasets.items():
                 if name in self.items() and axis in val:
@@ -1157,13 +1157,13 @@ class BasicTod(memh5.MemDiskGroup):
                     f.attrs['hints'] = pickle.dumps(hint_dict)
 
                 # write top level common attrs
-                for attrs_name, attrs_value in self.attrs.iteritems():
+                for attrs_name, attrs_value in self.attrs.items():
                     if attrs_name in exclude:
                         continue
                     if attrs_name not in self.time_ordered_attrs:
                         f.attrs[attrs_name] = self.attrs[attrs_name]
 
-                for dset_name, dset in self.iteritems():
+                for dset_name, dset in self.items():
                     if dset_name in exclude:
                         continue
                     # write top level common datasets
@@ -1183,7 +1183,7 @@ class BasicTod(memh5.MemDiskGroup):
         mpiutil.barrier(comm=self.comm)
 
         # then write time ordered datasets
-        for dset_name, dset in self.iteritems():
+        for dset_name, dset in self.items():
             if dset_name in exclude:
                 continue
             if dset_name in self.time_ordered_datasets.keys():
@@ -1191,7 +1191,7 @@ class BasicTod(memh5.MemDiskGroup):
 
                 st = 0
                 # NOTE: if write simultaneously, will loss data with processes distributed in several nodes
-                for ri in xrange(self.nproc):
+                for ri in range(self.nproc):
                     if ri == self.rank:
                         for fi, start, stop in outfiles_map:
 
@@ -1214,11 +1214,11 @@ class BasicTod(memh5.MemDiskGroup):
             setattr(cont, key, getattr(self, key))
 
         # copy attrs
-        for attrs_name, attrs_value in self.attrs.iteritems():
+        for attrs_name, attrs_value in self.attrs.items():
             cont.attrs[attrs_name] = deepcopy(attrs_value)
 
         # copy datasets
-        for dset_name, dset in self.iteritems():
+        for dset_name, dset in self.items():
             cont.create_dataset(dset_name, data=dset.data.copy())
             memh5.copyattrs(dset.attrs, cont[dset_name].attrs)
 
@@ -1278,7 +1278,7 @@ class BasicTod(memh5.MemDiskGroup):
                 func(self.main_data.local_data.copy(), self, **kwargs)
             else:
                 func(self.main_data.local_data, self, **kwargs)
-        elif isinstance(op_axis, int) or isinstance(op_axis, basestring):
+        elif isinstance(op_axis, int) or isinstance(op_axis, str):
             axis = check_axis(op_axis, self.main_data_axes)
             data_sel = [ slice(0, None) ] * len(self.main_data_axes)
             if full_data:
@@ -1469,11 +1469,11 @@ class BasicTod(memh5.MemDiskGroup):
             setattr(cont, key, getattr(self, key))
 
         # copy attrs
-        for name in self.attrs.iterkeys():
+        for name in self.attrs.keys():
             cont._copy_an_attribute(name, self)
 
         # copy datasets
-        for name in self.iterkeys():
+        for name in self.keys():
             cont._copy_a_dataset(name, self)
 
         return cont

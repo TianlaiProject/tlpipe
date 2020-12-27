@@ -29,7 +29,7 @@ Revision History:
 
 """
 
-import custom_exceptions as ce
+from . import custom_exceptions as ce
 from caput import mpiutil
 
 def parse(ini_data, params, return_undeclared=False, prefix='',
@@ -107,19 +107,19 @@ def parse(ini_data, params, return_undeclared=False, prefix='',
     if isinstance(ini_data, str) :
         if feedback > 0 :
             if mpiutil.rank0:
-                print 'Reading parameters from file: '+ ini_data
+                print('Reading parameters from file: '+ ini_data)
         # Convert local variables defined in python script to dictionary.
         # This is in a separate function to avoid namespace issues.
         dict_to_parse = _execute_parameter_file(ini_data)
     elif isinstance(ini_data, dict) :
         if feedback > 0 :
             if mpiutil.rank0:
-                print 'Reading parameters from dictionary.'
+                print('Reading parameters from dictionary.')
         dict_to_parse = ini_data
     elif ini_data is None :
         if feedback > 0 :
             if mpiutil.rank0:
-                print 'No input, all parameters defaulted.'
+                print('No input, all parameters defaulted.')
         if return_undeclared :
             return dict(params), {}
         else :
@@ -156,16 +156,16 @@ def parse_dict(dict_to_parse, params, return_undeclared=False, prefix='',
     # Same keys as params but for checking but contains only a flag to indicate
     # if parameter retained it's default value.
     defaulted_params = {}
-    for key in params.iterkeys():
+    for key in params.keys():
         defaulted_params[key] = True
     # Make dictionaries for outputs
     undeclared = {} # For keys found in dict_to_parse and not in params
     out_params = dict(params)
 
     # Loop over both input dictionaries and look for matching keys
-    for inkey, invalue in dict_to_parse.iteritems():
+    for inkey, invalue in dict_to_parse.items():
         found_match_flag = False
-        for key, value in params.iteritems():
+        for key, value in params.items():
             # Check for matching keys. Note stripping.
             if prefix + key.strip() == inkey.strip():
                 if type(value) != type(invalue):
@@ -177,7 +177,7 @@ def parse_dict(dict_to_parse, params, return_undeclared=False, prefix='',
                             "Parameter name: " + key)
                     elif feedback > 1:
                         if mpiutil.rank0:
-                            print ("Warning: Assigned an input "
+                            print("Warning: Assigned an input "
                                 "parameter to the value of the wrong type. "
                                 "Parameter name: " + key)
                 out_params[key] = invalue
@@ -192,14 +192,14 @@ def parse_dict(dict_to_parse, params, return_undeclared=False, prefix='',
     # about the parameters that were set. Depending on feedback level.
     if feedback > 1 :
         if mpiutil.rank0:
-            print "Parameters set."
-        for key, value in out_params.iteritems():
+            print("Parameters set.")
+        for key, value in out_params.items():
             if defaulted_params[key] :
                 if mpiutil.rank0:
-                    print "parameter: "+key+" defaulted to value: "+str(value)
+                    print("parameter: "+key+" defaulted to value: "+str(value))
             elif feedback > 2 :
                 if mpiutil.rank0:
-                    print "parameter: "+key+" obtained value: "+str(value)
+                    print("parameter: "+key+" obtained value: "+str(value))
 
     if return_undeclared :
         return out_params, undeclared
@@ -218,7 +218,8 @@ def _execute_parameter_file(this_parameter_file_name):
     # Execute the filename which presumably holds a python script. This will
     # bring the parameters defined there into the local scope.
     try:
-        exec(open(this_parameter_file_name).read())
+        with open(this_parameter_file_name, 'r') as f:
+            exec(f.read())
     except Exception as E:
         msg = ("Execution of parameter file " + this_parameter_file_name +
                " caused an error.  The error message was: " + repr(E))
@@ -257,7 +258,7 @@ def write_params(params, file_name, prefix='', mode='w') :
     if not (mode == 'w' or mode == 'a') :
         raise ValueError("Params can be written with mode either 'w' or 'a'.")
     file = open(file_name, mode)
-    for par_name, value in params.iteritems() :
+    for par_name, value in params.items() :
         line_str = prefix + par_name + ' = '
         try :
             line_str = line_str + repr(value)

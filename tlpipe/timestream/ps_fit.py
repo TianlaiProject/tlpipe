@@ -12,7 +12,7 @@ import os
 import numpy as np
 import ephem
 import aipy as a
-import timestream_task
+from . import timestream_task
 from tlpipe.container.timestream import Timestream
 from caput import mpiutil
 from tlpipe.utils.path_util import output_path
@@ -31,7 +31,7 @@ def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit
 
     gains = []
     chi2s = []
-    shifts = xrange(-num_shift/2, num_shift/2+1)
+    shifts = range(-num_shift//2, num_shift//2+1)
     for si in shifts:
         # vis = vis_obs[start_ind+si:end_ind+si].astype(np.complex128) # improve precision
         vis = vis_obs[start_ind+si:end_ind+si]
@@ -54,10 +54,10 @@ def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit
     chi2s = np.array(chi2s)
     if np.allclose(chi2s, np.sort(chi2s)):
         if mpiutil.rank0:
-            print 'Warn: chi2 increasing for %s...' % (idx,)
+            print('Warn: chi2 increasing for %s...' % (idx,))
     if np.allclose(chi2s, np.sort(chi2s)[::-1]):
         if mpiutil.rank0:
-            print 'Warn: chi2 decreasing for %s...' % (idx,)
+            print('Warn: chi2 decreasing for %s...' % (idx,))
 
     ind = np.argmin(chi2s)
     gain = gains[ind]
@@ -68,7 +68,7 @@ def fit(vis_obs, vis_mask, vis_sim, start_ind, end_ind, num_shift, idx, plot_fit
     obs_data = obs_data / factor # make amp close to each other
     vis_cal = np.ma.array(vis_obs[start_ind+si:end_ind+si], mask=vis_mask[start_ind+si:end_ind+si]) / gain
     if si != 0 and mpiutil.rank0:
-        print 'shift %d for %s...' % (si, idx)
+        print('shift %d for %s...' % (si, idx))
 
     if plot_fit and (fi in freq_plt and (i, j) in bls_plt):
         # plot the fit
@@ -154,7 +154,7 @@ class PsFit(timestream_task.TimestreamTask):
             bls_plt = [ bl for bl in bl_incl if not bl in bl_excl ]
 
         if freq_incl == 'all':
-            freq_plt = range(ts.freq.shape[0])
+            freq_plt = list(range(ts.freq.shape[0]))
         else:
             freq_plt = [ fi for fi in freq_incl if not fi in freq_excl ]
 
@@ -171,10 +171,10 @@ class PsFit(timestream_task.TimestreamTask):
         assert(len(cat) == 1), 'Allow only one calibrator'
         s = cat.values()[0]
         if mpiutil.rank0:
-            print 'Calibrating for source %s with' % calibrator,
-            print 'strength', s._jys, 'Jy',
-            print 'measured at', s.mfreq, 'GHz',
-            print 'with index', s.index
+            print('Calibrating for source %s with' % calibrator, end=' ')
+            print('strength', s._jys, 'Jy', end=' ')
+            print('measured at', s.mfreq, 'GHz', end=' ')
+            print('with index', s.index)
 
         # get transit time of calibrator
         # array
@@ -199,7 +199,7 @@ class PsFit(timestream_task.TimestreamTask):
             cnt += 1
 
         if mpiutil.rank0:
-            print 'transit inds: ', transit_inds
+            print('transit inds: ', transit_inds)
 
         ### now only use the first transit point to do the cal
         ### may need to improve in the future
@@ -226,7 +226,7 @@ class PsFit(timestream_task.TimestreamTask):
         Omega_ij = aa[0].beam.Omega
         pre_factor = 1.0e-26 * (const.c**2 / (2 * const.k_B * (1.0e6*freq)**2) / Omega_ij) # NOTE: 1Jy = 1.0e-26 W m^-2 Hz^-1
 
-        for ind, ti in enumerate(xrange(start_ind, end_ind)):
+        for ind, ti in enumerate(range(start_ind, end_ind)):
             aa.set_jultime(ts['jul_date'][ti])
             s.compute(aa)
             # get fluxes vs. freq of the calibrator
@@ -236,7 +236,7 @@ class PsFit(timestream_task.TimestreamTask):
             aa.sim_cache(cat.get_crds('eq', ncrd=3)) # for compute bm_response and sim
 
             # for pi in range(len(pol)):
-            for pi in xrange(2): # only cal for xx, yy
+            for pi in range(2): # only cal for xx, yy
                 aa.set_active_pol(pol[pi])
                 # assume all have the same beam responce, speed the calculation
                 # resp1 = aa[0].bm_response(s_top, pol=pol[pi][0]).transpose()
@@ -255,9 +255,9 @@ class PsFit(timestream_task.TimestreamTask):
         mpiutil.barrier()
 
         # iterate over freq
-        for fi in xrange(nfreq):
+        for fi in range(nfreq):
             # for pi in xrange(len(pol)):
-            for pi in xrange(2): # only cal for xx, yy
+            for pi in range(2): # only cal for xx, yy
                 for bi, (i, j) in enumerate(bls):
                     gain, si = fit(vis[:, fi, pi, bi], vis_mask[:, fi, pi, bi], vis_sim[:, fi, pi, bi], start_ind, end_ind, num_shift, (fi, pi, (i, j)), plot_fit, fig_prefix, self.iteration, tag_output_iter, bls_plt, freq_plt)
                     # cal for vis

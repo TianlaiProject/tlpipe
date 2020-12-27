@@ -124,7 +124,7 @@ def fraunhofer_cylinder(antenna_func, width, res=1.0):
     """
     res = int(res * 16)
     num = 512
-    hnum = 512/2 -1
+    hnum = 512 // 2 -1
 
     ua = -1.0 * np.linspace(-1.0, 1.0, num, endpoint=False)[::-1]
 

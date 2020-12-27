@@ -10,7 +10,7 @@ Inheritance diagram
 
 import numpy as np
 from sklearn.neighbors import LocalOutlierFactor
-import timestream_task
+from . import timestream_task
 from tlpipe.container.raw_timestream import RawTimestream
 from tlpipe.container.timestream import Timestream
 
@@ -83,10 +83,10 @@ class Flag(timestream_task.TimestreamTask):
                 if vis_mask[ti, fi]:
                     continue
 
-                lti = max(0, ti - time_window/2)
-                hti = min(nt, ti + time_window/2 + 1)
-                lfi = max(0, fi - freq_window/2)
-                hfi = min(nf, fi + freq_window/2 + 1)
+                lti = max(0, ti - time_window//2)
+                hti = min(nt, ti + time_window//2 + 1)
+                lfi = max(0, fi - freq_window//2)
+                hfi = min(nf, fi + freq_window//2 + 1)
                 sec = vis[lti:hti, lfi:hfi].flatten()
                 sec_mask = vis_mask[lti:hti, lfi:hfi].flatten()
                 vi = np.where(sec_mask==False)[0] # valid inds

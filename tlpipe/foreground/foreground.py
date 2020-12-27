@@ -11,15 +11,15 @@ class FgSub(OneAndOne):
 
     def setup(self):
         if mpiutil.rank0:
-            print 'Setting up FgSub.'
+            print('Setting up FgSub.')
 
     def process(self, input):
 
         if mpiutil.rank0:
-            print self.history
+            print(self.history)
 
         return input
 
     def finish(self):
         if mpiutil.rank0:
-            print 'Finishing FgSub.'
+            print('Finishing FgSub.')

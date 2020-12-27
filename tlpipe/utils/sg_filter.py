@@ -62,7 +62,7 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     try:
         window_size = np.abs(np.int(window_size))
         order = np.abs(np.int(order))
-    except ValueError, msg:
+    except ValueError as msg:
         raise ValueError("window_size and order have to be of type int")
 
     if window_size % 2 != 1 or window_size < 1:
@@ -70,10 +70,10 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
     if window_size < order + 2:
         raise TypeError("window_size is too small for the polynomials order")
 
-    order_range = xrange(order+1)
+    order_range = range(order+1)
     half_window = (window_size -1) // 2
     # pre-compute coefficients
-    b = np.mat([[k**i for i in order_range] for k in xrange(-half_window, half_window+1)])
+    b = np.mat([[k**i for i in order_range] for k in range(-half_window, half_window+1)])
     m = np.linalg.pinv(b).A[deriv] * rate**deriv * factorial(deriv)
     # pad the signal at the extremes with
     # values taken from the signal itself

@@ -142,10 +142,10 @@ def get_srcs(srcs=None, cutoff=None):
 if __name__ == '__main__':
     name = 'cyg'
     s = get_src(name)
-    print s
+    print(s)
 
     freq = 0.75 # MHz
-    print s.get_jys(freq)
+    print(s.get_jys(freq))
 
     freqs = np.logspace(-1.0, 1.0)
     jys = s.get_jys(freqs)
@@ -161,6 +161,6 @@ if __name__ == '__main__':
 
     srclist, cutoff, catalogs = a.scripting.parse_srcs(name, 'misc')
     cat = a.src.get_catalog(srclist, cutoff, catalogs)
-    s1 = cat.values()[0]
+    s1 = list(cat.values())[0]
     s1.update_jys(freq)
-    print s1.get_jys()
+    print(s1.get_jys())

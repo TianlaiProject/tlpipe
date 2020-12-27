@@ -58,7 +58,7 @@ def beam_circular(angpos, zenith, diameter):
     return 2*jinc(x)
 
 
-class TlDishArray(object):
+class TlDishArray(object, metaclass=abc.ABCMeta):
     """A abstract base class describing the Tianlai dishe array for inheriting by sub-classes.
 
     Attributes
@@ -86,8 +86,6 @@ class TlDishArray(object):
         Choose frequency channels to include.
 
     """
-
-    __metaclass__ = abc.ABCMeta  # Enforce Abstract class
 
     def __init__(self, dish_width=6.0, feedpos=np.zeros((0, 3)), pointing=[0.0, 90.0, 0.0]):
 

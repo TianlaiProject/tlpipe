@@ -12,8 +12,8 @@ Inheritance diagram
 import re
 import itertools
 import numpy as np
-import timestream_common
-import timestream
+from . import timestream_common
+from . import timestream
 from caput import mpiarray
 from caput import memh5
 
@@ -80,11 +80,11 @@ class RawTimestream(timestream_common.TimestreamCommon):
     #     nchan = len(channels)
     #     # use set for easy comparison
     #     if corr == 'auto':
-    #         channel_pairs = [ {channels[i]} for i in xrange(nchan) ]
+    #         channel_pairs = [ {channels[i]} for i in range(nchan) ]
     #     elif corr == 'cross':
-    #         channel_pairs = [ {channels[i], channels[j]} for i in xrange(nchan) for j in xrange(i+1, nchan) ]
+    #         channel_pairs = [ {channels[i], channels[j]} for i in range(nchan) for j in range(i+1, nchan) ]
     #     elif corr == 'all':
-    #         channel_pairs = [ {channels[i], channels[j]} for i in xrange(nchan) for j in xrange(i, nchan) ]
+    #         channel_pairs = [ {channels[i], channels[j]} for i in range(nchan) for j in range(i, nchan) ]
     #     else:
     #         raise ValueError('Unknown correlation type %s' % corr)
 
@@ -212,7 +212,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
         super(RawTimestream, self).load_all()
 
         # create some new necessary datasets is they do not already exist in file
-        if 'true_blorder' not in self.iterkeys():
+        if 'true_blorder' not in self.keys():
             feed_no = self['feedno'][:].tolist()
             xch_no = self['channo'][:, 0].tolist()
             ych_no = self['channo'][:, 1].tolist()
@@ -288,10 +288,10 @@ class RawTimestream(timestream_common.TimestreamCommon):
         ychans = [ self['channo'][feedno.index(fd)][1] for fd in feedno ]
 
         nfeed = len(feedno)
-        xx_pairs = [ (xchans[i], xchans[j]) for i in xrange(nfeed) for j in xrange(i, nfeed) ]
-        yy_pairs = [ (ychans[i], ychans[j]) for i in xrange(nfeed) for j in xrange(i, nfeed) ]
-        xy_pairs = [ (xchans[i], ychans[j]) for i in xrange(nfeed) for j in xrange(i, nfeed) ]
-        yx_pairs = [ (ychans[i], xchans[j]) for i in xrange(nfeed) for j in xrange(i, nfeed) ]
+        xx_pairs = [ (xchans[i], xchans[j]) for i in range(nfeed) for j in range(i, nfeed) ]
+        yy_pairs = [ (ychans[i], ychans[j]) for i in range(nfeed) for j in range(i, nfeed) ]
+        xy_pairs = [ (xchans[i], ychans[j]) for i in range(nfeed) for j in range(i, nfeed) ]
+        yx_pairs = [ (ychans[i], xchans[j]) for i in range(nfeed) for j in range(i, nfeed) ]
 
         blorder = [ tuple(bl) for bl in self['blorder'] ]
         conj_blorder = [ tuple(bl[::-1]) for bl in self['blorder'] ]
@@ -365,7 +365,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
         ts['pol'].attrs['pol_dict'] = '%s' % p
 
         # bl ordered dataset
-        blorder = np.array([ [feedno[i], feedno[j]] for i in xrange(nfeed) for j in xrange(i, nfeed) ])
+        blorder = np.array([ [feedno[i], feedno[j]] for i in range(nfeed) for j in range(i, nfeed) ])
         ts.create_bl_ordered_dataset('blorder', data=blorder)
         # copy attrs of this dset
         memh5.copyattrs(self['blorder'].attrs, ts['blorder'].attrs)
@@ -375,7 +375,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
             raise RuntimeError('Should not have other bl_ordered_datasets %s' % other_bl_dset)
 
         # copy other attrs
-        attrs_items = list(self.attrs.iteritems())
+        attrs_items = list(self.attrs.items())
         for attrs_name, attrs_value in attrs_items:
             if attrs_name not in self.time_ordered_attrs:
                 ts.attrs[attrs_name] = attrs_value
@@ -383,7 +383,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
                 self.delete_an_attribute(attrs_name)
 
         # copy other datasets
-        for dset_name, dset in self.iteritems():
+        for dset_name, dset in self.items():
             if dset_name == self.main_data_name or dset_name == 'vis_mask':
                 if destroy_self:
                     self.delete_a_dataset(dset_name)

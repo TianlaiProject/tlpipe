@@ -15,7 +15,7 @@ from scipy.linalg import eigh
 from scipy.interpolate import interp1d, Rbf
 import h5py
 import aipy as a
-import timestream_task
+from . import timestream_task
 from tlpipe.container.timestream import Timestream
 
 from caput import mpiutil
@@ -160,9 +160,9 @@ class MapMaking(timestream_task.TimestreamTask):
                     yy_vis_mask = ts.local_vis_mask[:, :, 1, :]
 
                     local_vis = np.zeros_like(xx_vis)
-                    for ti in xrange(local_vis.shape[0]):
-                        for fi in xrange(local_vis.shape[1]):
-                            for bi in xrange(local_vis.shape[2]):
+                    for ti in range(local_vis.shape[0]):
+                        for fi in range(local_vis.shape[1]):
+                            for bi in range(local_vis.shape[2]):
                                 if xx_vis_mask[ti, fi, bi] != yy_vis_mask[ti, fi, bi]:
                                     if xx_vis_mask[ti, fi, bi]:
                                         local_vis[ti, fi, bi] = yy_vis[ti, fi, bi]
@@ -175,8 +175,8 @@ class MapMaking(timestream_task.TimestreamTask):
                     raise ValueError('Invalid pol: %s' % pol)
 
                 if interp != 'none':
-                    for fi in xrange(local_vis.shape[1]):
-                        for bi in xrange(local_vis.shape[2]):
+                    for fi in range(local_vis.shape[1]):
+                        for bi in range(local_vis.shape[2]):
                             # interpolate for local_vis
                             true_inds = np.where(local_vis_mask[:, fi, bi])[0] # masked inds
                             if len(true_inds) > 0:
@@ -216,7 +216,7 @@ class MapMaking(timestream_task.TimestreamTask):
                     num, start, end = mpiutil.split_m(nt*phi_size, phi_size)
 
                     # average over time
-                    for idx in xrange(phi_size):
+                    for idx in range(phi_size):
                         inds, weight = unique(repeat_inds[start[idx]:end[idx]], return_counts=True)
                         if interp == 'none':
                             vis[idx] = average(np.ma.array(local_vis[inds], mask=local_vis_mask[inds]), axis=0, weights=weight) # time mean
@@ -287,7 +287,7 @@ class MapMaking(timestream_task.TimestreamTask):
                 vis_stream = np.zeros(vis_tmp.shape[:-1]+(nrd,), dtype=vis_tmp.dtype)
                 red_bin = np.cumsum(np.insert(redundancy, 0, 0)) # redundancy bin
                 # average over redundancy
-                for ind in xrange(nrd):
+                for ind in range(nrd):
                     vis_stream[:, :, ind] = np.sum(vis_tmp[:, :, red_bin[ind]:red_bin[ind+1]], axis=2) / redundancy[ind]
 
                 del vis_tmp
@@ -309,7 +309,7 @@ class MapMaking(timestream_task.TimestreamTask):
 
             if os.path.exists(parent_path + '/COMPLETED'):
                 if mpiutil.rank0:
-                    print 'Use existed timestream_f files in %s' % parent_path
+                    print('Use existed timestream_f files in %s' % parent_path)
             else:
                 for fi in mpiutil.mpirange(nfreq):
                     # Make directory if required

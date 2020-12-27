@@ -11,12 +11,12 @@ class Calibration(OneAndOne):
 
     def setup(self):
         if mpiutil.rank0:
-            print 'Setting up Calibration.'
+            print('Setting up Calibration.')
 
     def process(self, input):
 
         if mpiutil.rank0:
-            print self.history
+            print(self.history)
 
         return input
 
@@ -25,4 +25,4 @@ class Calibration(OneAndOne):
 
     def finish(self):
         if mpiutil.rank0:
-            print 'Finishing Calibration.'
+            print('Finishing Calibration.')

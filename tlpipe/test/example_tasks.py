@@ -26,16 +26,16 @@ class PrintEggs(pipeline.TaskBase):
         self.i = 0
 
     def setup(self):
-        print "Setting up PrintEggs."
+        print("Setting up PrintEggs.")
 
     def next(self):
         if self.i >= len(self.params['eggs']):
             raise pipeline.PipelineStopIteration()
-        print "Spam and %s eggs." % self.params['eggs'][self.i]
+        print("Spam and %s eggs." % self.params['eggs'][self.i])
         self.i += 1
 
     def finish(self):
-        print "Finished PrintEggs."
+        print("Finished PrintEggs.")
 
 
 class GetEggs(pipeline.TaskBase):
@@ -55,7 +55,7 @@ class GetEggs(pipeline.TaskBase):
         self.eggs = self.params['eggs']
 
     def setup(self):
-        print "Setting up GetEggs."
+        print("Setting up GetEggs.")
 
     def next(self):
         if self.i >= len(self.eggs):
@@ -65,7 +65,7 @@ class GetEggs(pipeline.TaskBase):
         return egg
 
     def finish(self):
-        print "Finished GetEggs."
+        print("Finished GetEggs.")
 
 
 class CookEggs(pipeline.TaskBase):
@@ -77,13 +77,13 @@ class CookEggs(pipeline.TaskBase):
     prefix = 'ce_'
 
     def setup(self):
-        print "Setting up CookEggs."
+        print("Setting up CookEggs.")
 
     def next(self, egg):
-        print "Cooking %s %s eggs." % (self.params['style'], egg)
+        print("Cooking %s %s eggs." % (self.params['style'], egg))
 
     def finish(self):
-        print "Finished CookEggs."
+        print("Finished CookEggs.")
 
 
 class DoNothing(pipeline.TaskBase):
@@ -91,11 +91,11 @@ class DoNothing(pipeline.TaskBase):
     prefix = 'dn_'
 
     def setup(self):
-        print "Setting up DoNothing."
+        print("Setting up DoNothing.")
 
     def next(self, input):
-        print "DoNothing next."
+        print("DoNothing next.")
 
     def finish(self):
-        print "Finished DoNothing."
+        print("Finished DoNothing.")
 

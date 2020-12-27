@@ -9,7 +9,7 @@ Inheritance diagram
 """
 
 import numpy as np
-import timestream_task
+from . import timestream_task
 from tlpipe.container.raw_timestream import RawTimestream
 from tlpipe.container.timestream import Timestream
 from tlpipe.rfi import sir_operator
@@ -54,7 +54,7 @@ class Sir(timestream_task.TimestreamTask):
 
         eta = self.params['eta']
 
-        has_ns = ('ns_on' in ts.iterkeys())
+        has_ns = ('ns_on' in ts.keys())
         if has_ns:
             ns_on = ts['ns_on'][:]
 

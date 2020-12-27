@@ -10,7 +10,7 @@ Inheritance diagram
 
 import numpy as np
 import h5py
-import timestream_task
+from . import timestream_task
 from tlpipe.container.timestream import Timestream
 from tlpipe.utils.path_util import input_path
 

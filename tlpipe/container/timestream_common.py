@@ -18,10 +18,10 @@ import numpy as np
 import h5py
 import ephem
 from datetime import datetime, timedelta
-import container
 from caput import mpiutil
 from caput import mpiarray
 from caput import memh5
+from . import container
 from tlpipe.core import tl_array
 from tlpipe.core import constants as const
 from tlpipe.utils import date_util
@@ -232,27 +232,27 @@ class TimestreamCommon(container.BasicTod):
         super(TimestreamCommon, self).load_all()
 
         # create some new necessary datasets if they do not already exist in file
-        if 'vis_mask' not in self.iterkeys():
+        if 'vis_mask' not in self.keys():
             # create the mask array
             vis_mask = np.where(np.isfinite(self.local_vis), False, True)
             vis_mask = mpiarray.MPIArray.wrap(vis_mask, axis=self.main_data_dist_axis)
             axis_order = self.main_axes_ordered_datasets[self.main_data_name]
             vis_mask = self.create_main_axis_ordered_dataset(axis_order, 'vis_mask', vis_mask, axis_order)
 
-        if 'freq' not in self.iterkeys():
+        if 'freq' not in self.keys():
             # generate frequency points
             freq_start = self.attrs['freqstart']
             freq_step = self.attrs['freqstep']
             nfreq = self.attrs['nfreq']
             if self.is_dish:
-                freq = np.array([ freq_start + i*freq_step for i in xrange(nfreq)], dtype=np.float32)
+                freq = np.array([ freq_start + i*freq_step for i in range(nfreq)], dtype=np.float32)
             else: # freq correction for cylinder
                 # new freq computing, need to be checked
                 # original 1024 freqs, now 1008 freqs
                 # 0 1 2 3 4 | 5 6 ... 220 | 221 ... 796 | 797 ... 1012 | 1013 ...1023
                 #             0 1 ... 215 | 216 ... 791 | 792 ... 1007 |
                 #                           currently used 576 freqs in (216, 792)
-                freq = np.array([ freq_start + i*freq_step for i in xrange(1024)], dtype=np.float32)
+                freq = np.array([ freq_start + i*freq_step for i in range(1024)], dtype=np.float32)
                 freq = freq[5:5+nfreq]
             freq_axis = self.main_data_axes.index('frequency')
             freq = freq[self.main_data_select[freq_axis]]
@@ -272,7 +272,7 @@ class TimestreamCommon(container.BasicTod):
             # create attrs of this dset
             self['freq'].attrs["unit"] = 'MHz'
 
-        if 'sec1970' not in self.iterkeys():
+        if 'sec1970' not in self.keys():
             # generate sec1970
             int_time = self.infiles[0].attrs['inttime']
             sec1970s = []
@@ -283,7 +283,7 @@ class TimestreamCommon(container.BasicTod):
             sec1970 = np.zeros(sum(nts), dtype=np.float64) # precision float32 is not enough
             cum_nts = np.cumsum([0] + nts)
             for idx, (nt, sec) in enumerate(zip(nts, sec1970s)):
-                sec1970[cum_nts[idx]:cum_nts[idx+1]] = np.array([ sec + i*int_time for i in xrange(nt)], dtype=np.float64) # precision float32 is not enough
+                sec1970[cum_nts[idx]:cum_nts[idx+1]] = np.array([ sec + i*int_time for i in range(nt)], dtype=np.float64) # precision float32 is not enough
             # select the corresponding section
             sec1970 = sec1970[self.main_data_start:self.main_data_stop][self.main_data_select[0]]
 
@@ -339,7 +339,7 @@ class TimestreamCommon(container.BasicTod):
             # generate ra, dec of the antenna pointing
             aa = self.array
             ra_dec = np.zeros_like(az_alt) # radians
-            for ti in xrange(az_alt.shape[0]):
+            for ti in range(az_alt.shape[0]):
                 az, alt = az_alt[ti]
                 az, alt = ephem.degrees(az), ephem.degrees(alt)
                 aa.set_jultime(self['jul_date'].local_data[ti])
@@ -513,7 +513,7 @@ class TimestreamCommon(container.BasicTod):
     def is_dish(self):
         """True if data is get from dish array."""
         try:
-            return 'Dish' in self.attrs['telescope']
+            return b'Dish' in self.attrs['telescope']
         except KeyError:
             raise KeyError('Attribute telescope does not exist, try to load it first')
 
@@ -521,7 +521,7 @@ class TimestreamCommon(container.BasicTod):
     def is_cylinder(self):
         """True if data is get from cylinder array."""
         try:
-            return 'Cylinder' in self.attrs['telescope']
+            return b'Cylinder' in self.attrs['telescope']
         except KeyError:
             raise KeyError('Attribute telescope does not exist, try to load it first')
 
@@ -746,10 +746,10 @@ class TimestreamCommon(container.BasicTod):
 
         shape = data.shape
         feed_axis = axis_order.index(0)
-        if 'feedno' in self.iterkeys() and shape[feed_axis] != self['feedno'].shape[0]:
+        if 'feedno' in self.keys() and shape[feed_axis] != self['feedno'].shape[0]:
             raise ValueError('Feed axis does not align with feedno, can not create a feed ordered dataset %s' % name)
 
-        if not name in self.iterkeys():
+        if not name in self.keys():
             self.create_dataset(name, data=data)
         else:
             if recreate:
@@ -773,7 +773,7 @@ class TimestreamCommon(container.BasicTod):
         super(TimestreamCommon, self).delete_a_dataset(name, reserve_hint=reserve_hint)
 
         if not reserve_hint:
-            if name in self._feed_ordered_datasets_.iterkeys():
+            if name in self._feed_ordered_datasets_.keys():
                 del self._feed_ordered_datasets_[name]
 
 
@@ -870,14 +870,14 @@ class TimestreamCommon(container.BasicTod):
                     f.attrs['hints'] = pickle.dumps(hint_dict)
 
                 # write top level common attrs
-                for attrs_name, attrs_value in self.attrs.iteritems():
+                for attrs_name, attrs_value in self.attrs.items():
                     if attrs_name in exclude:
                         continue
                     if attrs_name not in self.time_ordered_attrs:
                         f.attrs[attrs_name] = self.attrs[attrs_name]
 
 
-                for dset_name, dset in self.iteritems():
+                for dset_name, dset in self.items():
                     if dset_name in exclude:
                         continue
                     # write top level common datasets
@@ -899,7 +899,7 @@ class TimestreamCommon(container.BasicTod):
         mpiutil.barrier(comm=self.comm)
 
         # then write time ordered datasets
-        for dset_name, dset in self.iteritems():
+        for dset_name, dset in self.items():
             if dset_name in exclude:
                 continue
             if dset_name in self.time_ordered_datasets.keys():
@@ -907,7 +907,7 @@ class TimestreamCommon(container.BasicTod):
 
                 st = 0
                 # NOTE: if write simultaneously, will loss data with processes distributed in several nodes
-                for ri in xrange(self.nproc):
+                for ri in range(self.nproc):
                     if ri == self.rank:
                         for fi, start, stop in outfiles_map:
 
@@ -983,7 +983,7 @@ class TimestreamCommon(container.BasicTod):
                 func(self.local_vis.copy(), self.local_vis_mask.copy(), self, **kwargs)
             else:
                 func(self.local_vis, self.local_vis_mask, self, **kwargs)
-        elif isinstance(op_axis, int) or isinstance(op_axis, basestring):
+        elif isinstance(op_axis, int) or isinstance(op_axis, str):
             axis = container.check_axis(op_axis, self.main_data_axes)
             data_sel = [ slice(0, None) ] * len(self.main_data_axes)
             if full_data:

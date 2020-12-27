@@ -3,7 +3,7 @@
 import unittest
 import os
 
-import utils
+from . import utils
 
 
 class TestMKDIR(unittest.TestCase) :

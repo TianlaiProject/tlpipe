@@ -8,7 +8,7 @@ Inheritance diagram
 
 """
 
-import local_fit
+from . import local_fit
 import numpy as np
 
 

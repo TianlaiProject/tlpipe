@@ -9,7 +9,7 @@ Inheritance diagram
 """
 
 import numpy as np
-import combinatorial_threshold
+from . import combinatorial_threshold
 
 
 class VarThreshold(combinatorial_threshold.CombinatorialThreshold):
@@ -34,8 +34,8 @@ class VarThreshold(combinatorial_threshold.CombinatorialThreshold):
 
         vis = np.ma.array(self.vis, mask=self.vis_mask)
 
-        for y in xrange(height):
-            for x in xrange(width-length):
+        for y in range(height):
+            for x in range(width-length):
                 vis1 = np.ma.compressed(vis[y, x:x+length])
                 if vis1.size > 0 and (np.abs(vis1) > threshold).all():
                     self.vis_mask[y, x:x+length] = True
@@ -49,8 +49,8 @@ class VarThreshold(combinatorial_threshold.CombinatorialThreshold):
 
         vis = np.ma.array(self.vis, mask=self.vis_mask)
 
-        for x in xrange(width):
-            for y in xrange(height-length):
+        for x in range(width):
+            for y in range(height-length):
                 vis1 = np.ma.compressed(vis[y:y+length, x])
                 if vis1.size > 0 and (np.abs(vis1) > threshold).all():
                     self.vis_mask[y:y+length, x] = True

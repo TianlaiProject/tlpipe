@@ -6,7 +6,7 @@ import numpy as np
 
 from cora.util import hputil, units
 
-import visibility
+from . import visibility
 from ..util import util
 
 
@@ -127,7 +127,7 @@ def latlon_to_sphpol(latlon):
 
 
 
-class TransitTelescope(object):
+class TransitTelescope(object, metaclass=abc.ABCMeta):
     """Base class for simulating any transit interferometer.
 
     This is an abstract class, and several methods must be implemented before it
@@ -169,7 +169,6 @@ class TransitTelescope(object):
         so the rotation angle is what is overhead at Greenwich (Earth Rotation
         Angle).
     """
-    __metaclass__ = abc.ABCMeta  # Enforce Abstract class
 
     # def __init__(self, latitude=45, longitude=0, **kwargs):
     #     """Initialise a telescope object.
@@ -604,7 +603,7 @@ class TransitTelescope(object):
         # Generate the array for the Transfer functions
 
         tshape = bl_indices.shape + (self.num_pol_sky, lside+1, 2*lside+1)
-        print "Size: %i elements. Memory %f GB." % (np.prod(tshape), 2*np.prod(tshape) * 8.0 / 2**30)
+        print("Size: %i elements. Memory %f GB." % (np.prod(tshape), 2*np.prod(tshape) * 8.0 / 2**30))
         tarray = np.zeros(tshape, dtype=np.complex128)
 
         # Sort the baselines by ascending lmax and iterate through in that
@@ -827,13 +826,12 @@ class TransitTelescope(object):
 
 
 
-class UnpolarisedTelescope(TransitTelescope):
+class UnpolarisedTelescope(TransitTelescope, metaclass=abc.ABCMeta):
     """A base for an unpolarised telescope.
 
     Again, an abstract class, but the only things that require implementing are
     the `feedpositions`, `_get_unique` and the `beam` function.
     """
-    __metaclass__ = abc.ABCMeta
 
     _npol_sky_ = 1
 
@@ -930,7 +928,7 @@ class UnpolarisedTelescope(TransitTelescope):
 
 
 
-class PolarisedTelescope(TransitTelescope):
+class PolarisedTelescope(TransitTelescope, metaclass=abc.ABCMeta):
     """A base for a polarised telescope.
 
     Again, an abstract class, but the only things that require implementing are
@@ -941,7 +939,6 @@ class PolarisedTelescope(TransitTelescope):
     beamx, beamy : methods
         Routines giving the field pattern for the x and y feeds.
     """
-    __metaclass__ = abc.ABCMeta
 
     _npol_sky_ = 4
 
@@ -998,7 +995,7 @@ class PolarisedTelescope(TransitTelescope):
     #===================================================
 
 
-class SimpleUnpolarisedTelescope(UnpolarisedTelescope):
+class SimpleUnpolarisedTelescope(UnpolarisedTelescope, metaclass=abc.ABCMeta):
     """A base for a unpolarised telescope.
 
     Again, an abstract class, but the only things that require implementing are
@@ -1009,8 +1006,6 @@ class SimpleUnpolarisedTelescope(UnpolarisedTelescope):
     beam : method
         Routines giving the field pattern for the feeds.
     """
-
-    __metaclass__ = abc.ABCMeta
 
 
     @property
@@ -1032,7 +1027,7 @@ class SimpleUnpolarisedTelescope(UnpolarisedTelescope):
 
 
 
-class SimplePolarisedTelescope(PolarisedTelescope):
+class SimplePolarisedTelescope(PolarisedTelescope, metaclass=abc.ABCMeta):
     """A base for a polarised telescope.
 
     Again, an abstract class, but the only things that require implementing are
@@ -1043,8 +1038,6 @@ class SimplePolarisedTelescope(PolarisedTelescope):
     beamx, beamy : methods
         Routines giving the field pattern for the x and y feeds.
     """
-
-    __metaclass__ = abc.ABCMeta
 
 
     @property

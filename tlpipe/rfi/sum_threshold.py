@@ -10,8 +10,8 @@ Inheritance diagram
 
 import warnings
 import numpy as np
-import combinatorial_threshold
-from _sum_threshold import threshold_len1, hthreshold, vthreshold
+from . import combinatorial_threshold
+from ._sum_threshold import threshold_len1, hthreshold, vthreshold
 
 
 class SumThreshold(combinatorial_threshold.CombinatorialThreshold):

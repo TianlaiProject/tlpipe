@@ -11,7 +11,7 @@ Inheritance diagram
 import warnings
 import numpy as np
 from scipy.interpolate import InterpolatedUnivariateSpline
-import timestream_task
+from . import timestream_task
 from tlpipe.container.raw_timestream import RawTimestream
 from tlpipe.container.timestream import Timestream
 from tlpipe.utils.sg_filter import savitzky_golay
@@ -54,7 +54,7 @@ class Flag(timestream_task.TimestreamTask):
         nfreq = len(freq)
         # bl = ts.local_bl[:]
 
-        # freq_window = min(nfreq/2, freq_window)
+        # freq_window = min(nfreq//2, freq_window)
         # ensure window_size is an odd number
         if freq_window % 2 == 0:
             freq_window += 1
@@ -64,7 +64,7 @@ class Flag(timestream_task.TimestreamTask):
         else:
             freq_flag = True
 
-        # time_window = min(nt/2, time_window)
+        # time_window = min(nt//2, time_window)
         # ensure window_size is an odd number
         if time_window % 2 == 0:
             time_window += 1
@@ -128,7 +128,7 @@ class Flag(timestream_task.TimestreamTask):
             else:
                 abs_vis1 = abs_vis.data.copy() # convert to ordinary array
 
-            for cnt in xrange(10):
+            for cnt in range(10):
                 if cnt != 0:
                     abs_vis1[inds] = smooth[inds]
                 smooth = savitzky_golay(abs_vis1, freq_window, 3)
@@ -180,7 +180,7 @@ class Flag(timestream_task.TimestreamTask):
             else:
                 abs_vis1 = abs_vis.data.copy()
 
-            for cnt in xrange(10):
+            for cnt in range(10):
                 if cnt != 0:
                     abs_vis1[inds] = smooth[inds]
                 smooth = savitzky_golay(abs_vis1, time_window, 3)

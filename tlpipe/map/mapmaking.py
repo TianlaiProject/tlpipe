@@ -11,15 +11,15 @@ class MapMaking(OneAndOne):
 
     def setup(self):
         if mpiutil.rank0:
-            print 'Setting up MapMaking.'
+            print('Setting up MapMaking.')
 
     def process(self, input):
 
         if mpiutil.rank0:
-            print self.history
+            print(self.history)
 
         return input
 
     def finish(self):
         if mpiutil.rank0:
-            print 'Finishing MapMaking.'
+            print('Finishing MapMaking.')

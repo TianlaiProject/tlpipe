@@ -11,8 +11,8 @@ Inheritance diagram
 
 import itertools
 import numpy as np
-import container
-import timestream_common
+from . import container
+from . import timestream_common
 from caput import mpiarray
 from caput import memh5
 

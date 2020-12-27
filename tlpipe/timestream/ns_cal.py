@@ -15,7 +15,7 @@ from scipy.interpolate import InterpolatedUnivariateSpline
 import h5py
 from caput import mpiutil
 from caput import mpiarray
-import timestream_task
+from . import timestream_task
 from tlpipe.container.raw_timestream import RawTimestream
 from tlpipe.utils.path_util import output_path
 import tlpipe.plot
@@ -86,7 +86,7 @@ class NsCal(timestream_task.TimestreamTask):
 
         assert isinstance(rt, RawTimestream), '%s only works for RawTimestream object currently' % self.__class__.__name__
 
-        if not 'ns_on' in rt.iterkeys():
+        if not 'ns_on' in rt.keys():
             raise RuntimeError('No noise source info, can not do noise source calibration')
 
         rt.redistribute('baseline')
@@ -265,7 +265,7 @@ class NsCal(timestream_task.TimestreamTask):
         # not enough valid data to do the ns_cal
         num_valid = len(valid_inds)
         if num_valid <= 3:
-            print 'Only have %d valid points, mask all for fi = %d, bl = (%d, %d)...' % (num_valid, fbl[0], fbl[1][0], fbl[1][1])
+            print('Only have %d valid points, mask all for fi = %d, bl = (%d, %d)...' % (num_valid, fbl[0], fbl[1][0], fbl[1][1]))
             vis_mask[:] = True # mask the vis as no ns_cal has done
             return
 
@@ -278,7 +278,7 @@ class NsCal(timestream_task.TimestreamTask):
         itp_phase = []
         if not phs_only:
             itp_amp = []
-        for i in xrange(len(intervals) -1):
+        for i in range(len(intervals) -1):
             this_chunk = valid_inds[intervals[i]:intervals[i+1]]
             if len(this_chunk) > 3:
                 itp_inds.append(this_chunk)
@@ -299,7 +299,7 @@ class NsCal(timestream_task.TimestreamTask):
 
         # get mask pairs
         mask_pairs = []
-        for i in xrange(num_itp):
+        for i in range(num_itp):
             if i == 0:
                 mask_pairs.append((0, itp_pairs[i][0]))
             if i == num_itp - 1:

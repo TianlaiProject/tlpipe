@@ -4,7 +4,7 @@ import unittest
 import os
 
 import parse_ini
-import custom_exceptions as ce
+from . import custom_exceptions as ce
 
 test_ini_file_name = 'testfile_parse_ini.ini'
 # This is a dictionary of parameters found in the above name file, copied
@@ -24,16 +24,16 @@ class TestInternal(unittest.TestCase) :
     def test__execute_parameter_file(self) :
         file_ini_params = parse_ini._execute_parameter_file(
                               test_ini_file_name)
-        for key, value in test_ini_dict.iteritems() :
-            self.assertTrue(file_ini_params.has_key(key))
-            if file_ini_params.has_key(key) :
+        for key, value in test_ini_dict.items() :
+            self.assertTrue(key in file_ini_params)
+            if key in file_ini_params :
                 self.assertEqual(file_ini_params[key], value)
 
 class TestReads(unittest.TestCase) :
     
     def setUp(self) :
         self.template_dict = dict(test_ini_dict)
-        for key in self.template_dict.iterkeys() :
+        for key in self.template_dict.keys() :
             self.template_dict[key] = 0
     
     def test_parse_dict_reads(self) :
@@ -54,7 +54,7 @@ class TestReads(unittest.TestCase) :
                                         return_undeclared=False, checking=0)
 
     def tearDown(self) :
-        for key in self.template_dict.iterkeys() :
+        for key in self.template_dict.keys() :
             self.assertEqual(self.out_dict[key], test_ini_dict[key])
             self.assertEqual(self.template_dict[key], 0)
 
@@ -70,14 +70,14 @@ class TestDefaults(unittest.TestCase) :
 
     def test_parse_dict_defaults(self) :
         self.out_dict = parse_ini.parse(test_ini_dict, self.template_dict,
-                                        checking=01)
+                                        checking=1)
 
     def test_parse_file_defaults(self) :
         self.out_dict = parse_ini.parse(test_ini_file_name, self.template_dict,
-                                        checking=01)
+                                        checking=1)
 
     def tearDown(self) :
-        for key, value in self.template_dict.iteritems() :
+        for key, value in self.template_dict.items() :
             self.assertEqual(self.out_dict[key], value)
 
 class TestReturnsUndeclared(unittest.TestCase) :
@@ -90,21 +90,21 @@ class TestReturnsUndeclared(unittest.TestCase) :
         self.out_dict, self.undeclared = parse_ini.parse(test_ini_dict,
                                              self.template_dict,
                                              return_undeclared=True,
-                                             checking=01)
+                                             checking=1)
     
     def test_parse_file_undeclared(self) :
         self.out_dict, self.undeclared = parse_ini.parse(test_ini_file_name,
                                              self.template_dict,
                                              return_undeclared=True,
-                                             checking=01)
+                                             checking=1)
 
     def tearDown(self) :
-        for key, value in test_ini_dict.iteritems() :
-            if self.template_dict.has_key(key) :
-                self.assertTrue(self.template_backup.has_key(key))
+        for key, value in test_ini_dict.items() :
+            if key in self.template_dict :
+                self.assertTrue(key in self.template_backup)
             else :
-                self.assertTrue(self.undeclared.has_key(key))
-                if self.undeclared.has_key(key) :
+                self.assertTrue(key in self.undeclared)
+                if key in self.undeclared :
                     self.assertEqual(self.undeclared[key], value)
 
 class TestWriteParams(unittest.TestCase) :
@@ -116,10 +116,10 @@ class TestWriteParams(unittest.TestCase) :
         changed_ini['a_list'] = [5,6,7]
         copy_changed = dict(changed_ini)
         parse_ini.write_params(changed_ini, 'temp.ini')
-        read_ini = parse_ini.parse('temp.ini', test_ini_dict, checking = 01)
+        read_ini = parse_ini.parse('temp.ini', test_ini_dict, checking=1)
         os.remove('temp.ini')
-        for key, value in copy_changed.iteritems() :
-            self.assertTrue(read_ini.has_key(key))
+        for key, value in copy_changed.items() :
+            self.assertTrue(key in read_ini)
             self.assertEqual(value, read_ini[key])
             self.assertEqual(value, changed_ini[key])
 
@@ -128,13 +128,13 @@ class TestExceptions(unittest.TestCase) :
     def test_parse_typechecking(self) :
         template_dict = dict(test_ini_dict)
         for swapped in [1, 0, None, 'a', [1,2,3], ('a',3.14), 3.14159] :
-            for key, value in test_ini_dict.iteritems() :
+            for key, value in test_ini_dict.items() :
                 ini_dict = dict(test_ini_dict)
                 ini_dict[key] = swapped
                 if not type(swapped) is type(value) :
                     self.assertRaises(ce.FileParameterTypeError,
                                       parse_ini.parse, ini_dict,
-                                      template_dict, checking=03)
+                                      template_dict, checking=3)
 
 class TestPrefix(unittest.TestCase) :
     
@@ -158,7 +158,7 @@ class TestPrefix(unittest.TestCase) :
         out_dict, undeclared = parse_ini.parse(self.prefixed_ini_dict,
                                              self.params_init, prefix='tt_',
                                              return_undeclared=True,
-                                             checking=01)
+                                             checking=1)
         self.assertEqual(out_dict['a_string'], 'string')
         self.assertEqual(out_dict['a'], 1)
         self.assertEqual(out_dict['b'], 10)
@@ -171,7 +171,7 @@ class TestPrefix(unittest.TestCase) :
         changed_ini['a'] = 15
         parse_ini.write_params(changed_ini, 'temp.ini', prefix='tt_')
         read_ini = parse_ini.parse('temp.ini', self.params_init, prefix='tt_',
-                                   checking = 01)
+                                   checking=1)
         self.assertEqual(read_ini['a'], 15)
         self.assertEqual(read_ini['b'], 10)
         os.remove('temp.ini')

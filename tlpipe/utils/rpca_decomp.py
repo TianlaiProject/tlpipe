@@ -83,7 +83,7 @@ def decompose(M, rank=1, S=None, lmbda=None, threshold='hard', max_iter=100, tol
     d = M.shape[0]
     MF= la.norm(M, ord='fro')
 
-    for it in xrange(max_iter):
+    for it in range(max_iter):
         # compute only the largest rank eigen values and vectors, which is faster
         s, U = la.eigh(M - S, eigvals=(d-rank, d-1))
         # threshold s to make L Hermitian positive semidefinite
@@ -106,7 +106,7 @@ def decompose(M, rank=1, S=None, lmbda=None, threshold='hard', max_iter=100, tol
                 lmbda = th
 
             if debug:
-                print 'lmbda:', lmbda
+                print('lmbda:', lmbda)
 
         # compute new S
         if hard:
@@ -117,13 +117,13 @@ def decompose(M, rank=1, S=None, lmbda=None, threshold='hard', max_iter=100, tol
         tol1 = (la.norm(L - L_old, ord='fro') + la.norm(S - S_old, ord='fro')) / MF
         if tol1 < tol:
             if debug:
-                print 'Converge when iteration: %d with tol: %g < %g' % (it, tol1, tol)
+                print('Converge when iteration: %d with tol: %g < %g' % (it, tol1, tol))
             break
 
         L_old = L
         S_old = S
 
     else:
-        print 'Exit with max_iter: %d, tol: %g >= %g' % (it, tol1, tol)
+        print('Exit with max_iter: %d, tol: %g >= %g' % (it, tol1, tol))
 
     return L, S

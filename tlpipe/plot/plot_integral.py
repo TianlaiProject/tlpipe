@@ -101,7 +101,7 @@ class Plot(timestream_task.TimestreamTask):
         if flag_mask:
             vis1 = np.ma.array(vis, mask=vis_mask)
         elif flag_ns:
-            if 'ns_on' in ts.iterkeys():
+            if 'ns_on' in ts.keys():
                 vis1 = vis.copy()
                 on = np.where(ts['ns_on'][:])[0]
                 vis1[on] = complex(np.nan, np.nan)

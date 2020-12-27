@@ -10,19 +10,19 @@ class Progress(object):
             if length < 10:
                 step = 1
             elif length < 10000:
-                step = length / 10
+                step = length // 10
             else:
-                step = length / 100
+                step = length // 100
 
         if length <= 0:
             self.cnts = []
         else:
-            num = length / step + 1
+            num = length // step + 1
             self.cnts = [ i * step for i in range(num) ]
 
     def show(self, cnt):
         if cnt in self.cnts:
-            print self.msg % cnt
+            print(self.msg % cnt)
 
 
 if __name__ == '__main__':

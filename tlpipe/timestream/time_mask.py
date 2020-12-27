@@ -10,7 +10,7 @@ Inheritance diagram
 
 from datetime import datetime
 import numpy as np
-import timestream_task
+from . import timestream_task
 from tlpipe.utils import date_util
 
 

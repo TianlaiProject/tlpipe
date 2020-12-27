@@ -11,7 +11,7 @@ Inheritance diagram
 import os
 import numpy as np
 import h5py
-import timestream_task
+from . import timestream_task
 from tlpipe.container.timestream import Timestream
 from tlpipe.core import constants as const
 

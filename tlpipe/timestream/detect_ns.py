@@ -11,7 +11,7 @@ Inheritance diagram
 import warnings
 from collections import Counter
 import numpy as np
-import timestream_task
+from . import timestream_task
 from tlpipe.container.raw_timestream import RawTimestream
 from caput import mpiutil
 from caput import mpiarray
@@ -52,7 +52,7 @@ class Detect(timestream_task.TimestreamTask):
             else:
                 bl_ind = auto_inds[0]
                 if mpiutil.rank0:
-                    print 'Warning: Required channel %d doen not in the data, use channel %d instead' % (channel, rt.bl[bl_ind, 0])
+                    print('Warning: Required channel %d doen not in the data, use channel %d instead' % (channel, rt.bl[bl_ind, 0]))
         else:
             bl_ind = auto_inds[0]
         # move the chosen channel to the first
@@ -111,7 +111,7 @@ class Detect(timestream_task.TimestreamTask):
                     warnings.warn('Incorrect detect for auto-correlation of Channel: %d, period %d != on_time %d + off_time %d, does not use it' % (this_chan, period, on_time, off_time))
                 continue
             else:
-                if 'noisesource' in rt.iterkeys():
+                if 'noisesource' in rt.keys():
                     if rt['noisesource'].shape[0] == 1: # only 1 noise source
                         start, stop, cycle = rt['noisesource'][0, :]
                         int_time = rt.attrs['inttime']
@@ -132,7 +132,7 @@ class Detect(timestream_task.TimestreamTask):
             raise RuntimeError('Failed to detect noise source signal')
 
         if mpiutil.rank0:
-            print 'Detected noise source: period = %d, on_time = %d, off_time = %d' % (period, on_time, off_time)
+            print('Detected noise source: period = %d, on_time = %d, off_time = %d' % (period, on_time, off_time))
         on_start = Counter(pinds % period).most_common(1)[0][0]
         num_period = np.int(np.ceil(len(tt_mean) / np.float(period)))
         ns_on = np.array([False] * on_start + ([True] * on_time + [False] * off_time) * num_period)[:len(tt_mean)]
@@ -161,7 +161,7 @@ class Detect(timestream_task.TimestreamTask):
         if mask_near > 0:
             on_inds = np.where(ns_on)[0]
             new_on_inds = on_inds.tolist()
-            for i in xrange(1, mask_near+1):
+            for i in range(1, mask_near+1):
                 new_on_inds = new_on_inds + (on_inds-i).tolist() + (on_inds+i).tolist()
             new_on_inds = np.unique(new_on_inds)
 

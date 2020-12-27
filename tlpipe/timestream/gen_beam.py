@@ -9,7 +9,7 @@ Inheritance diagram
 """
 
 import numpy as np
-import timestream_task
+from . import timestream_task
 from tlpipe.container.timestream import Timestream
 
 from caput import mpiutil

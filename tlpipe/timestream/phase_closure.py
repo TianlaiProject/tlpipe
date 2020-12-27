@@ -14,7 +14,7 @@ import numpy as np
 from scipy import optimize
 import h5py
 import aipy as a
-import timestream_task
+from . import timestream_task
 from caput import mpiutil
 from tlpipe.utils.path_util import output_path
 import tlpipe.plot
@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 # make cache to speed the visibility getting
 def mk_cache(cache, bl, bls, vis):
     # if in cache, return
-    if bl in cache.iterkeys():
+    if bl in cache.keys():
         return cache[bl]
 
     # else cache it before return
@@ -88,7 +88,7 @@ class Closure(timestream_task.TimestreamTask):
         ts.redistribute('frequency')
 
         if freq_incl == 'all':
-            freq_plt = range(rt.freq.shape[0])
+            freq_plt = list(range(rt.freq.shape[0]))
         else:
             freq_plt = [ fi for fi in freq_incl if not fi in freq_excl ]
 
@@ -104,24 +104,24 @@ class Closure(timestream_task.TimestreamTask):
         assert(len(cat) == 1), 'Allow only one calibrator'
         s = cat.values()[0]
         if mpiutil.rank0:
-            print 'Calibrating for source %s with' % calibrator,
-            print 'strength', s._jys, 'Jy',
-            print 'measured at', s.mfreq, 'GHz',
-            print 'with index', s.index
+            print('Calibrating for source %s with' % calibrator, end=' ')
+            print('strength', s._jys, 'Jy', end=' ')
+            print('measured at', s.mfreq, 'GHz', end=' ')
+            print('with index', s.index)
 
         ra = ts['ra_dec'][:, 0]
         ra = np.unwrap(ra)
-        if 'ns_on' in ts.iterkeys():
+        if 'ns_on' in ts.keys():
             ra = ra[np.logical_not(ts['ns_on'][:])] # get only ns_off values
         abs_diff = np.abs(np.diff(s._ra - ra))
         ind1 = np.argmin(abs_diff)
         if mpiutil.rank0:
-            print 'ind1:', ind1
+            print('ind1:', ind1)
 
         for pi in [ pol.index('xx'), pol.index('yy') ]: # xx and yy
             if nfreq > 0: # skip empty processes
                 # find the ind that not be all masked
-                for i in xrange(20):
+                for i in range(20):
                     if not ts.local_vis_mask[ind1+i, :, pi].all():
                         ind = ind1 + i
                         break
@@ -132,9 +132,9 @@ class Closure(timestream_task.TimestreamTask):
                     raise RuntimeError('vis is masked during this period for pol %s' % pol[pi])
 
                 if mpiutil.rank0:
-                    print 'ind:', ind
+                    print('ind:', ind)
 
-                for fi in xrange(nfreq):
+                for fi in range(nfreq):
                     gfi = fi + ts.freq.local_offset[0] # global freq index
                     vis = ts.local_vis[ind, fi, pi, :] # only I
                     vis_mask = ts.local_vis_mask[ind, fi, pi, :] # only I
@@ -187,7 +187,7 @@ class Closure(timestream_task.TimestreamTask):
 
                         if gauss_fit:
                             # Generate data from bins as a set of points
-                            x = [0.5 * (data[1][i] + data[1][i+1]) for i in xrange(len(data[1])-1)]
+                            x = [0.5 * (data[1][i] + data[1][i+1]) for i in range(len(data[1])-1)]
                             y = data[0]
 
                             popt, pcov = optimize.curve_fit(f, x, y)

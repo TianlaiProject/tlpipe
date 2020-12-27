@@ -8,7 +8,7 @@ Inheritance diagram
 
 """
 
-import timestream_task
+from . import timestream_task
 from tlpipe.container.timestream import Timestream
 
 from caput import mpiutil
@@ -81,6 +81,6 @@ class MapMaking(timestream_task.TimestreamTask):
             ts_dir = output_path(self.params['ts_dir'])
             ts_name = self.params['ts_name']
             if mpiutil.rank0:
-                print 'Try to load tstream from %s/%s' % (ts_dir, ts_name)
+                print('Try to load tstream from %s/%s' % (ts_dir, ts_name))
             tstream = timestream.Timestream.load(ts_dir, ts_name)
             return self.process(tstream)

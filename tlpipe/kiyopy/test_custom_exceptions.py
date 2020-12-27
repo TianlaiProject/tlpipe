@@ -1,7 +1,7 @@
 """Unit tests for exceptions.py"""
 
 import unittest
-import custom_exceptions as ce
+from . import custom_exceptions as ce
 
 class TestDataError(unittest.TestCase) :
     

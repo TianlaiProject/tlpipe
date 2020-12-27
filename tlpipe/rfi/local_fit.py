@@ -9,13 +9,11 @@ Inheritance diagram
 """
 
 import abc
-import surface_fit
+from . import surface_fit
 
 
-class LocalFitMethod(surface_fit.SurfaceFitMethod):
+class LocalFitMethod(surface_fit.SurfaceFitMethod, metaclass=abc.ABCMeta):
     """Abstract base class for local fit method."""
-
-    __metaclass__ = abc.ABCMeta  # Enforce Abstract class
 
 
     def __init__(self, time_freq_vis, time_freq_vis_mask=None, time_window_size=20, freq_window_size=40):
@@ -25,12 +23,12 @@ class LocalFitMethod(surface_fit.SurfaceFitMethod):
         height, width = self.vis.shape
 
         if 2 * freq_window_size > width:
-            self._hsize = freq_window_size / 2
+            self._hsize = freq_window_size // 2
         else:
             self._hsize = freq_window_size
 
         if 2 * time_window_size > height:
-            self._vsize = time_window_size / 2
+            self._vsize = time_window_size // 2
         else:
             self._vsize = time_window_size
 
@@ -57,8 +55,8 @@ class LocalFitMethod(surface_fit.SurfaceFitMethod):
 
         height, width = self.vis.shape
 
-        for y in xrange(height):
-            for x in xrange(width):
+        for y in range(height):
+            for x in range(width):
                 self._background[y, x] = self.calculate_background(x, y)
 
         return self._background

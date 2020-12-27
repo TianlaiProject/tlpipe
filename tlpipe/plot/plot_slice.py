@@ -101,14 +101,14 @@ class Plot(timestream_task.TimestreamTask):
 
         if plot_type == 'time':
             nt = vis.shape[0]
-            c = nt/2
-            s = max(0, c-slices/2)
+            c = nt//2
+            s = max(0, c-slices//2)
             e = min(nt, s+slices)
             if flag_mask:
                 vis1 = np.ma.array(vis[s:e], mask=vis_mask[s:e])
             elif flag_ns:
                 vis1 = vis[s:e].copy()
-                if 'ns_on' in ts.iterkeys():
+                if 'ns_on' in ts.keys():
                     ns_on = ts['ns_on'][s:e]
                     on = np.where(ns_on)[0]
                     vis1[on] = complex(np.nan, np.nan)
@@ -122,14 +122,14 @@ class Plot(timestream_task.TimestreamTask):
             xlabel = r'$\nu$ / MHz'
         elif plot_type == 'freq':
             nfreq = vis.shape[1]
-            c = nfreq/2
-            s = max(0, c-slices/2)
+            c = nfreq//2
+            s = max(0, c-slices//2)
             e = min(nfreq, s+slices)
             if flag_mask:
                 vis1 = np.ma.array(vis[:, s:e], mask=vis_mask[:, s:e])
             elif flag_ns:
                 vis1 = vis[:, s:e].copy()
-                if 'ns_on' in ts.iterkeys():
+                if 'ns_on' in ts.keys():
                     ns_on = ts['ns_on'][:]
                     on = np.where(ns_on)[0]
                     vis1[on] = complex(np.nan, np.nan)

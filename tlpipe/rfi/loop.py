@@ -98,7 +98,7 @@ class LocalOutlierProbability(object):
         d2_matrix = diff_matrix[:, :, 0]**2 + diff_matrix[:, :, 1]**2
 
         self._data = data.copy() # does not change the input data
-        self._data_inds = range(n_data)
+        self._data_inds = list(range(n_data))
         self._slots = np.zeros(n_data, dtype=np.int) # 0 for taken, -1 for empty
         self._n_data = n_data
         self._d2_matrix = d2_matrix

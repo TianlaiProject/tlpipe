@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.ndimage import convolve1d
 from scipy.ndimage import median_filter
-from robust_stats import MAD
+from .robust_stats import MAD
 
 
 # default spline wavelet scaling function
@@ -20,7 +20,7 @@ def up_sampling(a):
 
 def convolve(a, phi):
     """Convolve `a` along each axis sequentially by `phi`."""
-    for ax in xrange(a.ndim):
+    for ax in range(a.ndim):
         a = convolve1d(a, phi, axis=ax, mode='reflect')
 
     return a
@@ -45,7 +45,7 @@ def starlet_transform(a, level=None, gen2=False, approx_only=False, phi=_phi):
     phi = phi.astype(a.dtype)
     W = []
 
-    for li in xrange(level):
+    for li in range(level):
         if li > 0:
             phi = up_sampling(phi)
         approx = convolve(a, phi)
@@ -83,7 +83,7 @@ def multiscale_median_transform(a, level=None, scale=2, approx_only=False):
 
     W = []
 
-    for li in xrange(level):
+    for li in range(level):
         if li > 0:
             scale *= 2
         approx = median_filter(a, 2*scale+1)
@@ -118,7 +118,7 @@ def median_wavelet_transform(a, level=None, scale=2, tau=5.0, approx_only=False,
     phi = phi.astype(a.dtype)
     W = []
 
-    for li in xrange(level):
+    for li in range(level):
         if li > 0:
             scale *= 2
         approx = median_filter(a, 2*scale+1)
@@ -162,7 +162,7 @@ def multiscale_median_flag(a, level=None, scale=2, tau=5.0, return_mask=True):
         else:
             return a
 
-    for li in xrange(level):
+    for li in range(level):
         if li > 0:
             scale *= 2
         approx = median_filter(a, 2*scale+1)

@@ -9,7 +9,7 @@ Inheritance diagram
 """
 
 import numpy as np
-import timestream_task
+from . import timestream_task
 from tlpipe.container.raw_timestream import RawTimestream
 from tlpipe.container.timestream import Timestream
 from caput import mpiutil
@@ -53,7 +53,7 @@ class Detect(timestream_task.TimestreamTask):
         # mask bl that have no signal
         problematic_bls = []
         bad_bls = []
-        for bi in xrange(len(ts.local_bl)):
+        for bi in range(len(ts.local_bl)):
             bl = tuple(ts.local_bl[bi])
             if isinstance(ts, RawTimestream):
                 # create a copy of vis for this bi, and fill 0 in masked positions
@@ -99,11 +99,11 @@ class Detect(timestream_task.TimestreamTask):
             num_chs = len(ts['channo'][:].flatten())
             pchs = []
             bchs = []
-            for ch, val in bad_chs.iteritems():
+            for ch, val in bad_chs.items():
                 if val > 0.5 * num_chs:
                     bchs.append(ch)
             # exclude those already in bchs
-            for ch, val in problematic_chs.iteritems():
+            for ch, val in problematic_chs.items():
                 if val > 0.5 * num_chs and not ch in bchs:
                     pchs.append(ch)
 
@@ -131,13 +131,13 @@ class Detect(timestream_task.TimestreamTask):
             num_feeds = len(ts['feedno'][:])
             pfeeds = []
             bfeeds = []
-            for pol, d in bad_feeds.iteritems():
-                for fd, val in d.iteritems():
+            for pol, d in bad_feeds.items():
+                for fd, val in d.items():
                     if val > 0.5 * num_feeds:
                         bfeeds.append((fd, pol))
             # exclude those already in bfeeds
-            for pol, d in problematic_feeds.iteritems():
-                for fd, val in d.iteritems():
+            for pol, d in problematic_feeds.items():
+                for fd, val in d.items():
                     if val > 0.5 * num_feeds and not (fd, pol) in bfeeds:
                         pfeeds.append((fd, pol))
 
@@ -150,13 +150,13 @@ class Detect(timestream_task.TimestreamTask):
 
 
         if mpiutil.rank0:
-            print 'Bad baseline: ', bad_bls
-            print 'Problematic baseline: ', [ bl for bl in problematic_bls if not bl in bad_bls ]
+            print('Bad baseline: ', bad_bls)
+            print('Problematic baseline: ', [ bl for bl in problematic_bls if not bl in bad_bls ])
             if isinstance(ts, RawTimestream):
-                print 'Bad channels: ', bchs
-                print 'Problematic channels: ', pchs
+                print('Bad channels: ', bchs)
+                print('Problematic channels: ', pchs)
             elif isinstance(ts, Timestream):
-                print 'Bad feeds: ', bfeeds
-                print 'Problematic feeds: ', pfeeds
+                print('Bad feeds: ', bfeeds)
+                print('Problematic feeds: ', pfeeds)
 
         return super(Detect, self).process(ts)

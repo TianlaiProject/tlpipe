@@ -11,7 +11,7 @@ Inheritance diagram
 import numpy as np
 import aipy as ap
 
-import constants as const
+from . import constants as const
 from tlpipe.map.drift.telescope import cylbeam
 from tlpipe.map.drift.core import visibility
 from cora.util import coord
@@ -186,7 +186,7 @@ class CylinderBeam(ap.fit.Beam):
 
         pxarea = (4 * np.pi / (12 * nside**2))
         om = np.zeros_like(self.freqs)
-        for fi in xrange(len(self.freqs)):
+        for fi in range(len(self.freqs)):
             width = self.width / (const.c / (1.0e9 * self.freqs[fi]))
             beam = cylbeam.beam_amp(angpos, zenith, width, self.fwhm_h, self.fwhm_h)
             om[fi] = np.sum(np.abs(beam)**2 * horizon) * pxarea
@@ -227,7 +227,7 @@ class CylinderBeam(ap.fit.Beam):
 
         nfreq = len(self.freqs)
         resp = np.zeros((nfreq,)+xyz.shape[1:])
-        for fi in xrange( nfreq):
+        for fi in range( nfreq):
             resp[fi] = cylbeam.beam_amp(p_eq, zenith, width[fi], self.fwhm_h, self.fwhm_h)
             # resp[fi] = cylbeam.beam_amp(p_eq, zenith, width[fi], self.fwhm_e, self.fwhm_h) # for X dipole
             # resp[fi] = cylbeam.beam_amp(p_eq, zenith, width[fi], self.fwhm_h, self.fwhm_e) # for Y dipole
@@ -285,7 +285,7 @@ if __name__ == '__main__':
     y_ang = np.degrees(np.arctan2(yz[:, 2], yz[:, 1]))
 
     cyl_beam = CylinderBeam([750.0, 760.0], 15.0, 40.0)
-    print 'om:', cyl_beam.Omega
+    print('om:', cyl_beam.Omega)
     x_resp = cyl_beam.response(xz.T)
     y_resp = cyl_beam.response(yz.T)
 
@@ -294,10 +294,10 @@ if __name__ == '__main__':
     y_inds = np.where(y_resp>=0.5)[1]
     y_ind1, y_ind2 = y_inds[0], y_inds[-1]
 
-    print x_resp.shape
-    print y_resp.shape
-    print x_ang[x_ind1], x_ang[x_ind2]
-    print y_ang[y_ind1], y_ang[y_ind2]
+    print(x_resp.shape)
+    print(y_resp.shape)
+    print(x_ang[x_ind1], x_ang[x_ind2])
+    print(y_ang[y_ind1], y_ang[y_ind2])
 
     # 1d plot
     plt.figure()
@@ -319,7 +319,7 @@ if __name__ == '__main__':
     zs = np.where(zs2>=0.0, zs2**0.5, np.nan)
     xyz = np.array([xx, yy, zs])
     resp = cyl_beam.response(xyz)
-    print resp.shape
+    print(resp.shape)
 
     # 2d plot
     plt.figure()

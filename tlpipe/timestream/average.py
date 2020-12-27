@@ -10,7 +10,7 @@ Inheritance diagram
 
 import warnings
 import numpy as np
-import timestream_task
+from . import timestream_task
 from tlpipe.container.timestream import Timestream
 
 
@@ -30,7 +30,7 @@ class Average(timestream_task.TimestreamTask):
 
     def process(self, ts):
 
-        if not 'weight' in ts.iterkeys():
+        if not 'weight' in ts.keys():
             warnings.warn('Can not do the averrage without the weight, do nothing...')
         else:
             # divide weight
@@ -52,7 +52,7 @@ class Average(timestream_task.TimestreamTask):
         """
 
         # load data from file
-        if isinstance(ts, basestring):
+        if isinstance(ts, str):
             ts = Timestream(ts, mode='r', start=0, stop=None, dist_axis=0, use_hints=True)
             ts.load_all()
 
