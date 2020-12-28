@@ -1087,7 +1087,7 @@ class BasicTod(memh5.MemDiskGroup):
         for axis in range(len(self.main_data_axes)):
             lens = [] # to save the length of axis
             for name, val in self.main_axes_ordered_datasets.items():
-                if name in self.items() and axis in val:
+                if name in self.keys() and axis in val:
                     lens.append(self[name].shape[val.index(axis)])
             num = len(set(lens))
             if num != 0 and num != 1:
@@ -1154,7 +1154,7 @@ class BasicTod(memh5.MemDiskGroup):
                 if write_hints:
                     hint_keys = [ key for key in self.__class__.__dict__.keys() if re.match(self.hints_pattern, key) ]
                     hint_dict = { key: getattr(self, key) for key in hint_keys }
-                    f.attrs['hints'] = pickle.dumps(hint_dict)
+                    f.attrs['hints'] = pickle.dumps(hint_dict, protocol=0) # protocol = 0 for python2 compatibility and avoid of ValueError: VLEN strings do not support embedded NULLs
 
                 # write top level common attrs
                 for attrs_name, attrs_value in self.attrs.items():

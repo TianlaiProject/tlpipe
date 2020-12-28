@@ -375,8 +375,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
             raise RuntimeError('Should not have other bl_ordered_datasets %s' % other_bl_dset)
 
         # copy other attrs
-        attrs_items = list(self.attrs.items())
-        for attrs_name, attrs_value in attrs_items:
+        for attrs_name, attrs_value in self.attrs.items():
             if attrs_name not in self.time_ordered_attrs:
                 ts.attrs[attrs_name] = attrs_value
             if destroy_self:
