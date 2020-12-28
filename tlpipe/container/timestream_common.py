@@ -244,9 +244,7 @@ class TimestreamCommon(container.BasicTod):
             freq_start = self.attrs['freqstart']
             freq_step = self.attrs['freqstep']
             nfreq = self.attrs['nfreq']
-            if self.is_dish:
-                freq = np.array([ freq_start + i*freq_step for i in range(nfreq)], dtype=np.float32)
-            else: # freq correction for cylinder
+            if self.is_cylinder:
                 # new freq computing, need to be checked
                 # original 1024 freqs, now 1008 freqs
                 # 0 1 2 3 4 | 5 6 ... 220 | 221 ... 796 | 797 ... 1012 | 1013 ...1023
@@ -254,6 +252,8 @@ class TimestreamCommon(container.BasicTod):
                 #                           currently used 576 freqs in (216, 792)
                 freq = np.array([ freq_start + i*freq_step for i in range(1024)], dtype=np.float32)
                 freq = freq[5:5+nfreq]
+            else: # freq correction for cylinder
+                freq = np.array([ freq_start + i*freq_step for i in range(nfreq)], dtype=np.float32)
             freq_axis = self.main_data_axes.index('frequency')
             freq = freq[self.main_data_select[freq_axis]]
 
@@ -786,7 +786,9 @@ class TimestreamCommon(container.BasicTod):
         # additional checks for feed_ordered_datasets
         lens = []
         for name, val in self.feed_ordered_datasets.items():
-            if name in self.items():
+            if name in self.keys():
+                if name == 'ns_on' and len(self[name].shape) == 1:
+                    continue
                 lens.append(self[name].shape[val.index(0)])
         num = len(set(lens))
         if num != 0 and num != 1:
@@ -867,7 +869,7 @@ class TimestreamCommon(container.BasicTod):
                 if write_hints:
                     hint_keys = [ key for key in self.__class__.__dict__.keys() if re.match(self.hints_pattern, key) ]
                     hint_dict = { key: getattr(self, key) for key in hint_keys }
-                    f.attrs['hints'] = pickle.dumps(hint_dict)
+                    f.attrs['hints'] = pickle.dumps(hint_dict, protocol=0) # protocol = 0 for python2 compatibility and avoid of ValueError: VLEN strings do not support embedded NULLs
 
                 # write top level common attrs
                 for attrs_name, attrs_value in self.attrs.items():
