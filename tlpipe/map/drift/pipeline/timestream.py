@@ -285,7 +285,7 @@ class Timestream(object):
 
             # get center freq of each bin
             n, s, e = mpiutil.split_m(nfreq, nbin)
-            cfreqs = np.array([ self.beamtransfer.telescope.frequencies[(s[i]+e[i])/2] for i in range(nbin) ])
+            cfreqs = np.array([ self.beamtransfer.telescope.frequencies[(s[i]+e[i])//2] for i in range(nbin) ])
 
             alm = np.zeros((nbin, self.telescope.num_pol_sky, self.telescope.lmax + 1,
                             self.telescope.lmax + 1), dtype=np.complex128)
@@ -311,13 +311,13 @@ class Timestream(object):
                 f.create_dataset('/map', data=skymap)
                 f.attrs['dim'] = 'freq, pol, pix'
                 f.attrs['frequency'] = cfreqs
-                f.attrs['polarization'] = np.array(['I', 'Q', 'U', 'V'])[:self.beamtransfer.telescope.num_pol_sky]
+                f.attrs['polarization'] = np.string_(['I', 'Q', 'U', 'V'])[:self.beamtransfer.telescope.num_pol_sky] # np.string_ for python 3
 
                 if save_alm:
                     f.create_dataset('/alm', data=alm1)
                     f.attrs['dim'] = 'freq, pol, l, m'
                     f.attrs['frequency'] = cfreqs
-                    f.attrs['polarization'] = np.array(['I', 'Q', 'U', 'V'])[:self.beamtransfer.telescope.num_pol_sky]
+                    f.attrs['polarization'] = np.string_(['I', 'Q', 'U', 'V'])[:self.beamtransfer.telescope.num_pol_sky] # np.string_ for python 3
 
 
         mpiutil.barrier()
@@ -353,7 +353,7 @@ class Timestream(object):
             with h5py.File(self.output_directory + '/' + mapname, 'w') as f:
                 f.create_dataset('/map', data=skymap)
                 f.attrs['frequency'] = self.beamtransfer.telescope.frequencies
-                f.attrs['polarization'] = np.array(['I', 'Q', 'U', 'V'])[:self.beamtransfer.telescope.num_pol_sky]
+                f.attrs['polarization'] = np.string_(['I', 'Q', 'U', 'V'])[:self.beamtransfer.telescope.num_pol_sky] # np.string_ for python 3
 
         mpiutil.barrier()
 
@@ -515,7 +515,7 @@ class Timestream(object):
             with h5py.File(mapfile, 'w') as f:
                 f.create_dataset('/map', data=skymap)
                 f.attrs['frequency'] = self.beamtransfer.telescope.frequencies
-                f.attrs['polarization'] = np.array(['I', 'Q', 'U', 'V'])[:self.beamtransfer.telescope.num_pol_sky]
+                f.attrs['polarization'] = np.string_(['I', 'Q', 'U', 'V'])[:self.beamtransfer.telescope.num_pol_sky] # np.string_ for python 3
 
         mpiutil.barrier()
 
@@ -624,7 +624,7 @@ class Timestream(object):
 
         # Save pickled telescope object
         if mpiutil.rank0:
-            with open(self._picklefile, 'w') as f:
+            with open(self._picklefile, 'wb') as f:
                 print("=== Saving Timestream object. ===")
                 pickle.dump(self, f)
 
@@ -642,7 +642,7 @@ class Timestream(object):
         # Create temporary object to extract picklefile property
         tmp_obj = cls(tsdir, tsname, 'bt')
 
-        with open(tmp_obj._picklefile, 'r') as f:
+        with open(tmp_obj._picklefile, 'rb') as f:
             print("=== Loading Timestream object. ===")
             return pickle.load(f)
 

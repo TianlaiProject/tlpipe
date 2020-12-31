@@ -57,7 +57,7 @@ class Phs2src(timestream_task.TimestreamTask):
 
         try:
             # convert an observing time to the ra_dec of the array pointing of that time
-            src_time = get_ephdate(source, tzone=ts.attrs['timezone']) # utc time
+            src_time = get_ephdate(source, tzone=ts.attrs['timezone'].decode('ascii')) # utc time
             aa.date = str(ephem.Date(src_time)) # utc time
             # print('date:', aa.date)
             antpointing = np.radians(ts['antpointing'][-1, :, :]) # radians
@@ -79,7 +79,7 @@ class Phs2src(timestream_task.TimestreamTask):
         srclist, cutoff, catalogs = a.scripting.parse_srcs(source, catalog)
         cat = a.src.get_catalog(srclist, cutoff, catalogs)
         assert(len(cat) == 1), 'Allow only one source'
-        s = cat.values()[0]
+        s = list(cat.values())[0]
         if mpiutil.rank0:
             print('Phase to source %s.' % source)
 

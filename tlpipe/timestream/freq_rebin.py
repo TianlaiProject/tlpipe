@@ -73,7 +73,7 @@ class Rebin(timestream_task.TimestreamTask):
 
             # for other freq_axis datasets
             for name in ts.freq_ordered_datasets.keys():
-                if name in ts.iterkeys() and not name in ('freq', 'vis', 'vis_mask'): # exclude already rebinned datasets
+                if name in ts.keys() and not name in ('freq', 'vis', 'vis_mask'): # exclude already rebinned datasets
                     raise RuntimeError('Should not have other freq_ordered_datasets %s' % name)
 
             # update freqstep attr

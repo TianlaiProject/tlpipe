@@ -33,7 +33,7 @@ class Mask(timestream_task.TimestreamTask):
 
             srclist, cutoff, catalogs = a.scripting.parse_srcs('Sun', 'misc')
             cat = a.src.get_catalog(srclist, cutoff, catalogs)
-            s = cat.values()[0] # the Sun
+            s = list(cat.values())[0] # the Sun
 
             # get transit time of calibrator
             # array

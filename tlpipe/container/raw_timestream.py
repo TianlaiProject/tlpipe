@@ -375,14 +375,14 @@ class RawTimestream(timestream_common.TimestreamCommon):
             raise RuntimeError('Should not have other bl_ordered_datasets %s' % other_bl_dset)
 
         # copy other attrs
-        for attrs_name, attrs_value in self.attrs.items():
+        for attrs_name, attrs_value in list(self.attrs.items()): # convert to list first as python3 does not allow change dict size during iteration
             if attrs_name not in self.time_ordered_attrs:
                 ts.attrs[attrs_name] = attrs_value
             if destroy_self:
                 self.delete_an_attribute(attrs_name)
 
         # copy other datasets
-        for dset_name, dset in self.items():
+        for dset_name, dset in list(self.items()): # convert to list first as python3 does not allow change dict size during iteration
             if dset_name == self.main_data_name or dset_name == 'vis_mask':
                 if destroy_self:
                     self.delete_a_dataset(dset_name)

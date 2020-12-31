@@ -169,7 +169,7 @@ class PsFit(timestream_task.TimestreamTask):
         srclist, cutoff, catalogs = a.scripting.parse_srcs(calibrator, catalog)
         cat = a.src.get_catalog(srclist, cutoff, catalogs)
         assert(len(cat) == 1), 'Allow only one calibrator'
-        s = cat.values()[0]
+        s = list(cat.values())[0]
         if mpiutil.rank0:
             print('Calibrating for source %s with' % calibrator, end=' ')
             print('strength', s._jys, 'Jy', end=' ')

@@ -266,7 +266,7 @@ class BeamTransfer(object):
     @property
     def _telescope_pickle(self):
         # The pickled telescope object
-        return pickle.dumps(self.telescope)
+        return pickle.dumps(self.telescope, protocol=0)
 
 
     def __init__(self, directory, telescope=None, noise_weight=True, skip_svd=False):
@@ -287,7 +287,7 @@ class BeamTransfer(object):
                 print("Attempting to read telescope from disk...")
 
             try:
-                f = open(self._picklefile, 'r')
+                f = open(self._picklefile, 'rb')
                 self.telescope = pickle.load(f)
             except IOError as UnpicklingError:
                 raise Exception("Could not load Telescope object from disk.")
@@ -618,7 +618,7 @@ class BeamTransfer(object):
 
         # Save pickled telescope object
         if mpiutil.rank0:
-            with open(self._picklefile, 'w') as f:
+            with open(self._picklefile, 'wb') as f:
                 print("=== Saving Telescope object. ===")
                 pickle.dump(self.telescope, f)
 

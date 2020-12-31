@@ -147,7 +147,7 @@ class PsCal(timestream_task.TimestreamTask):
             transit_time = a.phs.ephem2juldate(next_transit) # Julian date
             # get time zone
             pattern = '[-+]?\d+'
-            tz = re.search(pattern, ts.attrs['timezone']).group()
+            tz = re.search(pattern, ts.attrs['timezone'].decode('ascii')).group() # ts.attrs['timezone'] is bytes in python3
             tz = int(tz)
             local_next_transit = ephem.Date(next_transit + tz * ephem.hour) # plus 8h to get Beijing time
             # if transit_time > ts['jul_date'][-1]:
@@ -464,7 +464,8 @@ class PsCal(timestream_task.TimestreamTask):
                             f.create_dataset('time', data=ts.time[start_ind:end_ind])
                             f.attrs['time'] = '/time'
                         f.attrs['freq'] = freq
-                        f.attrs['pol'] = np.array(['xx', 'yy'])
+                        # f.attrs['pol'] = np.array(['xx', 'yy'])
+                        f.attrs['pol'] = np.string_(['xx', 'yy']) # np.string_ for python 3
                         f.attrs['feed'] = np.array(feedno)
 
                 mpiutil.barrier()
@@ -667,7 +668,8 @@ class PsCal(timestream_task.TimestreamTask):
                                 f.create_dataset('time', data=ts.time[start_ind:end_ind])
                                 dset.attrs['time'] = '/time'
                             dset.attrs['freq'] = freq
-                            dset.attrs['pol'] = np.array(['xx', 'yy'])
+                            # dset.attrs['pol'] = np.array(['xx', 'yy'])
+                            dset.attrs['pol'] = np.string_(['xx', 'yy']) # np.string_ for python 3
                             dset.attrs['feed'] = np.array(feedno)
                             dset.attrs['transit_ind'] = transit_ind
                             # save gain
@@ -675,7 +677,8 @@ class PsCal(timestream_task.TimestreamTask):
                             dset.attrs['calibrator'] = calibrator
                             dset.attrs['dim'] = 'freq, pol, feed'
                             dset.attrs['freq'] = freq
-                            dset.attrs['pol'] = np.array(['xx', 'yy'])
+                            # dset.attrs['pol'] = np.array(['xx', 'yy'])
+                            dset.attrs['pol'] = np.string_(['xx', 'yy']) # np.string_ for python 3
                             dset.attrs['feed'] = np.array(feedno)
                             # save phs
                             if save_phs_change:
