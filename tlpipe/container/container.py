@@ -959,7 +959,7 @@ class BasicTod(memh5.MemDiskGroup):
     def add_history(self, history=''):
         """Create a new history entry."""
 
-        if self.history and history is not '':
+        if self.history and history != '':
             self.attrs['history'] += np.bytes_('\n' + history)
 
     def info(self):
