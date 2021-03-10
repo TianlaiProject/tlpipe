@@ -71,6 +71,7 @@ class PsCal(timestream_task.TimestreamTask):
                     'zero_diag': False, # if True, fill 0 to the diagonal of vis matrix before SPCA
                     'span': 60, # second
                     'reserve_high_gain': False, # if True, will not flag those gain significantly higher than mean value, only flag significantly lower ones
+                    'rpca_max_iter': 200, # max iteration number for rpca decomposition
                     'plot_figs': False,
                     'fig_name': 'gain/gain',
                     'save_src_vis': False, # save the extracted calibrator visibility
@@ -95,6 +96,7 @@ class PsCal(timestream_task.TimestreamTask):
         vis_conj = self.params['vis_conj']
         zero_diag = self.params['zero_diag']
         span = self.params['span']
+        rpca_max_iter = self.paras['rpca_max_iter']
         reserve_high_gain = self.params['reserve_high_gain']
         plot_figs = self.params['plot_figs']
         fig_prefix = self.params['fig_name']
@@ -276,7 +278,7 @@ class PsCal(timestream_task.TimestreamTask):
                 diff = Vmat - med
                 S0 = np.where(np.abs(diff)>3.0*rpca_decomp.MAD(Vmat), diff, 0)
                 # stable PCA decomposition
-                V0, S = rpca_decomp.decompose(Vmat, rank=1, S=S0, max_iter=200, threshold='hard', tol=1.0e-6, debug=False)
+                V0, S = rpca_decomp.decompose(Vmat, rank=1, S=S0, max_iter=rpca_max_iter, threshold='hard', tol=1.0e-6, debug=False)
 
                 # # find abnormal values in S
                 # # first check diagonal elements
