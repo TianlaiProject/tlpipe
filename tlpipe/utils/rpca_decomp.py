@@ -90,6 +90,8 @@ def decompose(M, rank=1, S=None, lmbda=None, threshold='hard', max_iter=100, tol
         # L = np.dot(U[:, -rank:]*np.maximum(s[-rank:], 0), U[:, -rank:].T.conj())
         L = np.dot(U*np.maximum(s, 0), U.T.conj())
 
+        L[~np.isfinite(L)] = 0 # set invalid val to 0
+
         res = M - L
 
         s1 = la.eigh(res, eigvals_only=True, eigvals=(d-1, d-1))
@@ -113,6 +115,8 @@ def decompose(M, rank=1, S=None, lmbda=None, threshold='hard', max_iter=100, tol
             S = truncate(res, lmbda)
         else:
             S = shrink(res, lmbda)
+
+        S[~np.isfinite(S)] = 0 # set invalid val to 0
 
         tol1 = (la.norm(L - L_old, ord='fro') + la.norm(S - S_old, ord='fro')) / MF
         if tol1 < tol:
