@@ -34,6 +34,8 @@ class GenMmode(timestream_task.TimestreamTask):
                     'l_boost': 1.0,
                     'bl_range': [0.0, 1.0e7],
                     'auto_correlations': False,
+                    'lmax': None, # max l to compute
+                    'mmax': None, # max m to compute
                     'pol': 'xx', # 'yy' or 'I'
                     'beam_dir': 'map/bt',
                     'noise_weight': True,
@@ -51,6 +53,8 @@ class GenMmode(timestream_task.TimestreamTask):
         l_boost = self.params['l_boost']
         bl_range = self.params['bl_range']
         auto_correlations = self.params['auto_correlations']
+        lmax = self.params['lmax']
+        mmax = self.params['mmax']
         pol = self.params['pol']
         beam_dir = output_path(self.params['beam_dir'])
         noise_weight = self.params['noise_weight']
@@ -87,7 +91,7 @@ class GenMmode(timestream_task.TimestreamTask):
             from tlpipe.map.drift.telescope import tl_dish
 
             dish_width = ts.attrs['dishdiam']
-            tel = tl_dish.TlUnpolarisedDishArray(lat, lon, freqs, band_width, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin, dish_width, feedpos, pointing)
+            tel = tl_dish.TlUnpolarisedDishArray(lat, lon, freqs, band_width, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin, lmax, mmax, dish_width, feedpos, pointing)
         elif ts.is_cylinder:
             from tlpipe.map.drift.telescope import tl_cylinder
 
@@ -95,7 +99,7 @@ class GenMmode(timestream_task.TimestreamTask):
             factor = 0.79 # for xx
             # factor = 0.88 # for yy
             cyl_width = factor * ts.attrs['cywid']
-            tel = tl_cylinder.TlUnpolarisedCylinder(lat, lon, freqs, band_width, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin, cyl_width, feedpos)
+            tel = tl_cylinder.TlUnpolarisedCylinder(lat, lon, freqs, band_width, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin, lmax, mmax, cyl_width, feedpos)
         else:
             raise RuntimeError('Unknown array type %s' % ts.attrs['telescope'])
 

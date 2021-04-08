@@ -1,4 +1,5 @@
 import abc
+import warnings
 
 import numpy as np
 
@@ -168,6 +169,10 @@ class TransitTelescope(object, metaclass=abc.ABCMeta):
         (Local Stellar Angle in `caput.time`). If not the origin is Greenwich,
         so the rotation angle is what is overhead at Greenwich (Earth Rotation
         Angle).
+    lmax : int
+        Maximum `l` to compute.
+    mmax : int
+        Maximum `m` to compute.
     """
 
     # def __init__(self, latitude=45, longitude=0, **kwargs):
@@ -182,7 +187,7 @@ class TransitTelescope(object, metaclass=abc.ABCMeta):
     #     # Set the observers position on the Earth
     #     ctime.Observer.__init__(self, longitude, latitude, **kwargs)
 
-    def __init__(self, latitude=45, longitude=0, freqs=[], band_width=None, tsys_flat=50.0, ndays=1.0, accuracy_boost=1.0, l_boost=1.0, bl_range=[0.0, 1.0e7], auto_correlations=False, local_origin=True):
+    def __init__(self, latitude=45, longitude=0, freqs=[], band_width=None, tsys_flat=50.0, ndays=1.0, accuracy_boost=1.0, l_boost=1.0, bl_range=[0.0, 1.0e7], auto_correlations=False, local_origin=True, lmax=None, mmax=None):
 
         self.latitude = latitude
         self.longitude = longitude
@@ -197,6 +202,8 @@ class TransitTelescope(object, metaclass=abc.ABCMeta):
         self.maxlength = bl_range[1]
         self.auto_correlations = auto_correlations
         self.local_origin = local_origin
+        self._lmax = lmax
+        self._mmax = mmax
 
 
     _pickle_keys = []
@@ -372,13 +379,25 @@ class TransitTelescope(object, metaclass=abc.ABCMeta):
     def lmax(self):
         """The maximum l the telescope is sensitive to."""
         lmax, mmax = max_lm(self.baselines, self.wavelengths.min(), self.u_width, self.v_width)
-        return int(np.ceil(lmax.max() * self.l_boost))
+        lmax = int(np.ceil(lmax.max() * self.l_boost))
+        if self._lmax is not None:
+            if self._lmax < lmax:
+                warnings.warn('The given (self._lmax = %d) < the computed (lmax = %d)' % (self._lmax, lmax))
+            return self._lmax
+        else:
+            return lmax
 
     @property
     def mmax(self):
         """The maximum m the telescope is sensitive to."""
         lmax, mmax = max_lm(self.baselines, self.wavelengths.min(), self.u_width, self.v_width)
-        return int(np.ceil(mmax.max() * self.l_boost))
+        mmax = int(np.ceil(mmax.max() * self.l_boost))
+        if self._mmax is not None:
+            if self._mmax < mmax:
+                warnings.warn('The given (self._mmax = %d) < the computed (mmax = %d)' % (self._mmax, mmax))
+            return self._mmax
+        else:
+            return mmax
 
     #===================================================
 

@@ -161,10 +161,10 @@ class TlUnpolarisedDishArray(TlDishArray, telescope.SimpleUnpolarisedTelescope):
     temperature.
     """
 
-    def __init__(self, latitude=45, longitude=0, freqs=[], band_width=None, tsys_flat=50.0, ndays=1.0, accuracy_boost=1.0, l_boost=1.0, bl_range=[0.0, 1.0e7], auto_correlations=False, local_origin=True, dish_width=6.0, feedpos=np.zeros((0, 3)), pointing=[0.0, 90.0, 0.0]):
+    def __init__(self, latitude=45, longitude=0, freqs=[], band_width=None, tsys_flat=50.0, ndays=1.0, accuracy_boost=1.0, l_boost=1.0, bl_range=[0.0, 1.0e7], auto_correlations=False, local_origin=True, lmax=None, mmax=None, dish_width=6.0, feedpos=np.zeros((0, 3)), pointing=[0.0, 90.0, 0.0]):
 
         TlDishArray.__init__(self, dish_width, feedpos, pointing)
-        telescope.SimpleUnpolarisedTelescope.__init__(self, latitude, longitude, freqs, band_width, tsys_flat, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin)
+        telescope.SimpleUnpolarisedTelescope.__init__(self, latitude, longitude, freqs, band_width, tsys_flat, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin, lmax, mmax)
 
     def beam(self, feed, freq):
         """Beam for a particular feed.
