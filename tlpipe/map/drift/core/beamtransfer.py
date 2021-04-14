@@ -1172,6 +1172,27 @@ class BeamTransfer(object):
 
         return vecb
 
+    def tk_deconv(self, fi, mi, alm_ps, eps=0.01):
+        """The tk based CLEAN deconvolution algorithm given in Eastwood et al., 2017,
+        The radio sky at meter wavelengths m-mode analysis imaging with the owens
+        valley long wavelength array.
+        """
+
+        B = self.beam_m(mi)[fi] # shape (2, npairs, npol_sky, lmax+1)
+        B = B.reshape(self.ntel, self.nsky) # shape (ntel, nsky)
+        BB = np.dot(B.T.conj(), B) # B^* B
+        BBa = np.dot(BB, alm_ps) # will modify BB in next step, so save (BB a) here
+        np.fill_diagonal(BB, eps + np.diag(BB)) # (B^* B + eps I)
+        alm_psf = np.zeros_like(alm_ps)
+        try:
+            BBi = la.pinv(BB) # (B^* B + eps I)^-1
+        except np.linalg.linalg.LinAlgError:
+            print 'Compute pinv of BB failed for mi = %d, bi = %d' % (mi, bi)
+            return alm_psf
+        alm_psf[:] = np.dot(BBi, BBa)
+
+        return alm_psf
+
     def project_vector_backward_dirty(self, mi, vec, nbin=None, normalize=True, threshold=1.0e3):
 
         beam = self.beam_m(mi).reshape((self.nfreq, self.ntel, self.nsky))

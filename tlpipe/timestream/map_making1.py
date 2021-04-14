@@ -40,6 +40,9 @@ class MapMaking(timestream_task.TimestreamTask):
                     'epsilon': 0.0001, # regularization parameter for tk
                     'correct_order': 1, # tk deconv correction order
                     'save_alm': True, # save also alm
+                    'tk_deconv': False, # apply tk deconvolution
+                    'loop_factor': 0.1, # loop factor
+                    'n_iter': 100, # number of iteration
                   }
 
     prefix = 'mm_'
@@ -58,6 +61,9 @@ class MapMaking(timestream_task.TimestreamTask):
         eps = self.params['epsilon']
         correct_order = self.params['correct_order']
         save_alm = self.params['save_alm']
+        tk_deconv = self.params['tk_deconv']
+        loop_factor = self.params['loop_factor']
+        n_iter = self.params['n_iter']
 
         bt = tstream.beamtransfer
         bt.generate()
@@ -67,7 +73,7 @@ class MapMaking(timestream_task.TimestreamTask):
         if dirty_map:
             tstream.mapmake_full(nside, 'map_full_dirty.hdf5', nbin, dirty=True, method=method, normalize=normalize, threshold=threshold)
         else:
-            tstream.mapmake_full(nside, 'map_full.hdf5', nbin, dirty=False, method=method, normalize=normalize, threshold=threshold, eps=eps, correct_order=correct_order, prior_map_file=prior_map, save_alm=save_alm)
+            tstream.mapmake_full(nside, 'map_full.hdf5', nbin, dirty=False, method=method, normalize=normalize, threshold=threshold, eps=eps, correct_order=correct_order, prior_map_file=prior_map, save_alm=save_alm, tk_deconv=tk_deconv, loop_factor=loop_factor, n_iter=n_iter)
 
         return tstream
 

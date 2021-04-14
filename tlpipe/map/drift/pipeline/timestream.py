@@ -3,6 +3,7 @@ import pickle
 
 import h5py
 import numpy as np
+# import healpy as hp
 
 from caput import mpiutil
 
@@ -239,7 +240,7 @@ class Timestream(object):
 
     #======== Make map from uncleaned stream ============
 
-    def mapmake_full(self, nside, mapname, nbin=None, dirty=False, method='svd', normalize=True, threshold=1.0e3, eps=0.01, correct_order=0, prior_map_file=None, save_alm=False):
+    def mapmake_full(self, nside, mapname, nbin=None, dirty=False, method='svd', normalize=True, threshold=1.0e3, eps=0.01, correct_order=0, prior_map_file=None, save_alm=False, tk_deconv=False, loop_factor=0.1, n_iter=100):
 
         nfreq = self.telescope.nfreq
         if nbin is None:
@@ -300,6 +301,25 @@ class Timestream(object):
             if save_alm:
                 alm1 = alm.copy()
 
+            if method == 'tk' and tk_deconv:
+                tmp_map = hputil.sphtrans_inv_sky(alm, nside)
+                clean_map = np.zeros_like(tmp_map)
+                for ii in range(n_iter):
+                    for fi in range(nfreq):
+                        max_i = np.argmax(tmp_map[fi, 0])
+                        # theta, phi = hp.pix2ang(nside, max_i)
+                        tmp_ps = np.zeros_like(tmp_map[fi, 0])
+                        tmp_ps[max_i] = tmp_map[max_i]
+                        # record the clean component
+                        clean_map[max_i] += loop_factor * tmp_map[max_i]
+                        ps_alm = hputil.sphtrans_real(tmp_ps) # (lmax, lmax)
+                        for mi in range(self.telescope.mmax + 1):
+                            alm_ps = self.beamtransfer.tk_deconv(fi, mi, ps_alm[:, mi], eps=eps)
+                            alm[fi, 0, :, mi] -= loop_factor * alm_ps
+                    tmp_map = hputil.sphtrans_inv_sky(alm, nside)
+                clean_map += tmp_map
+
+
             if self.no_m_zero:
                 alm[:, :, :, 0] = 0
 
@@ -319,6 +339,10 @@ class Timestream(object):
                     f.attrs['frequency'] = cfreqs
                     f.attrs['polarization'] = np.string_(['I', 'Q', 'U', 'V'])[:self.beamtransfer.telescope.num_pol_sky] # np.string_ for python 3
 
+            if method == 'tk' and tk_deconv:
+                # save clean_map
+                with h5py.File(self.output_directory + '/' + 'deconv_map.hdf5', 'w') as f:
+                    f.create_dataset('clean_map', data=clean_map)
 
         mpiutil.barrier()
 
