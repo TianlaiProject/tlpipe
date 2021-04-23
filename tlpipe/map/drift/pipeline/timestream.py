@@ -1,4 +1,5 @@
 import os
+import sys
 import pickle
 
 import h5py
@@ -8,6 +9,9 @@ import numpy as np
 from caput import mpiutil
 
 from cora.util import hputil
+
+import itertools
+from pathos.multiprocessing import ProcessingPool as Pool
 
 from ..core import kltransform
 from ..util import util
@@ -240,7 +244,7 @@ class Timestream(object):
 
     #======== Make map from uncleaned stream ============
 
-    def mapmake_full(self, nside, mapname, nbin=None, dirty=False, method='svd', normalize=True, threshold=1.0e3, eps=0.01, correct_order=0, prior_map_file=None, save_alm=False, tk_deconv=False, loop_factor=0.1, n_iter=100):
+    def mapmake_full(self, nside, mapname, nbin=None, dirty=False, method='svd', normalize=True, threshold=1.0e3, eps=0.01, correct_order=0, prior_map_file=None, save_alm=False, tk_deconv=False, map_to_deconv=None, loop_factor=0.1, n_iter=100):
 
         nfreq = self.telescope.nfreq
         if nbin is None:
@@ -280,7 +284,8 @@ class Timestream(object):
 
             return sphmode
 
-        alm_list = mpiutil.parallel_map(_make_alm, list(range(self.telescope.mmax + 1)), root=0, method='rand')
+        if not (method == 'tk' and tk_deconv and map_to_deconv is not None):
+            alm_list = mpiutil.parallel_map(_make_alm, list(range(self.telescope.mmax + 1)), root=0, method='rand')
 
         if mpiutil.rank0:
 
@@ -291,58 +296,106 @@ class Timestream(object):
             alm = np.zeros((nbin, self.telescope.num_pol_sky, self.telescope.lmax + 1,
                             self.telescope.lmax + 1), dtype=np.complex128)
 
-            # mlist = range(1 if self.no_m_zero else 0, self.telescope.mmax + 1)
-            mlist = list(range(self.telescope.mmax + 1))
+            if not (method == 'tk' and tk_deconv and map_to_deconv is not None):
+                # mlist = range(1 if self.no_m_zero else 0, self.telescope.mmax + 1)
+                mlist = list(range(self.telescope.mmax + 1))
 
-            for mi in mlist:
+                for mi in mlist:
 
-                alm[..., mi] = alm_list[mi]
-
-            if save_alm:
-                alm1 = alm.copy()
-
-            if method == 'tk' and tk_deconv:
-                tmp_map = hputil.sphtrans_inv_sky(alm, nside)
-                clean_map = np.zeros_like(tmp_map)
-                for ii in range(n_iter):
-                    for fi in range(nfreq):
-                        max_i = np.argmax(tmp_map[fi, 0])
-                        # theta, phi = hp.pix2ang(nside, max_i)
-                        tmp_ps = np.zeros_like(tmp_map[fi, 0])
-                        tmp_ps[max_i] = tmp_map[max_i]
-                        # record the clean component
-                        clean_map[max_i] += loop_factor * tmp_map[max_i]
-                        ps_alm = hputil.sphtrans_real(tmp_ps) # (lmax, lmax)
-                        for mi in range(self.telescope.mmax + 1):
-                            alm_ps = self.beamtransfer.tk_deconv(fi, mi, ps_alm[:, mi], eps=eps)
-                            alm[fi, 0, :, mi] -= loop_factor * alm_ps
-                    tmp_map = hputil.sphtrans_inv_sky(alm, nside)
-                clean_map += tmp_map
-
-
-            if self.no_m_zero:
-                alm[:, :, :, 0] = 0
-
-                alm[:, :, 100:, 1] = 0
-
-            skymap = hputil.sphtrans_inv_sky(alm, nside)
-
-            with h5py.File(self.output_directory + '/' + mapname, 'w') as f:
-                f.create_dataset('/map', data=skymap)
-                f.attrs['dim'] = 'freq, pol, pix'
-                f.attrs['frequency'] = cfreqs
-                f.attrs['polarization'] = np.string_(['I', 'Q', 'U', 'V'])[:self.beamtransfer.telescope.num_pol_sky] # np.string_ for python 3
+                    alm[..., mi] = alm_list[mi]
 
                 if save_alm:
-                    f.create_dataset('/alm', data=alm1)
-                    f.attrs['dim'] = 'freq, pol, l, m'
+                    alm1 = alm.copy()
+
+                skymap = hputil.sphtrans_inv_sky(alm, nside)
+            else:
+                with h5py.File(map_to_deconv, 'r') as f:
+                    skymap = f['map'][:]
+
+            if method == 'tk' and tk_deconv:
+                residual_map = skymap.copy() # does not change the original sky map
+                clean_map = np.zeros_like(skymap)
+                max_inds = np.zeros(nfreq, dtype=int)
+                max_vals = np.zeros(nfreq, dtype=skymap.dtype)
+                for ii in range(n_iter):
+                    print('deconv: %d of %d...' % (ii, n_iter))
+                    sys.stdout.flush()
+                    sys.stderr.flush()
+                    alm_psf = np.zeros_like(alm)
+                    for fi in range(nfreq):
+                        max_i = np.argmax(residual_map[fi, 0]) # index of the max pixel
+                        max_inds[fi] = max_i
+                        max_vals[fi] = residual_map[fi, 0, max_i]
+                        # build a ppint source map with value 1.0 in this pixel
+                        map_unit_ps = np.zeros_like(residual_map[fi, 0])
+                        map_unit_ps[max_i] = 1.0 # a unit point source
+                        # get a_lm of this point source map
+                        alm_unit_ps = hputil.sphtrans_real(map_unit_ps, lmax=self.telescope.lmax) # (lmax, lmax), a_lm of a single pixel with value 1.0
+                        # NOTE unit_ps and alm_ps is frequency-independent
+
+                        # compute alm PSF for only pol I
+                        # for mi in range(self.telescope.mmax + 1):
+                        #     alm_psf[fi, 0, :, mi] = self.beamtransfer.tk_deconv(fi, mi, alm_unit_ps[:, mi], eps=eps)
+                        num_m = self.telescope.mmax + 1
+                        p = Pool(20)
+                        alm_psf[fi, 0, :, :num_m] = np.array(p.map(self.beamtransfer.tk_deconv, itertools.repeat(fi, num_m), range(num_m), alm_unit_ps[:, range(num_m)].T, itertools.repeat(eps, num_m))).T
+
+                    # compute PSF map for alm_psf
+                    unit_psf = hputil.sphtrans_inv_sky(alm_psf, nside)
+                    ### TODO: check hte compute unit_psf
+
+                    # deconv
+                    for fi in range(nfreq):
+                        clean_ind = max_inds[fi]
+                        clean_component = loop_factor * max_vals[fi]
+                        clean_map[fi, 0, clean_ind] +=  clean_component
+                        residual_map[fi, 0] -= clean_component * unit_psf[fi, 0] # subtract a fraction of the PSF
+
+
+            # if method == 'tk' and tk_deconv:
+            #     tmp_map = hputil.sphtrans_inv_sky(alm, nside)
+            #     clean_map = np.zeros_like(tmp_map)
+            #     for ii in range(n_iter):
+            #         for fi in range(nfreq):
+            #             max_i = np.argmax(tmp_map[fi, 0])
+            #             # theta, phi = hp.pix2ang(nside, max_i)
+            #             tmp_ps = np.zeros_like(tmp_map[fi, 0])
+            #             tmp_ps[max_i] = tmp_map[max_i]
+            #             # record the clean component
+            #             clean_map[max_i] += loop_factor * tmp_map[max_i]
+            #             ps_alm = hputil.sphtrans_real(tmp_ps) # (lmax, lmax)
+            #             for mi in range(self.telescope.mmax + 1):
+            #                 alm_ps = self.beamtransfer.tk_deconv(fi, mi, ps_alm[:, mi], eps=eps)
+            #                 alm[fi, 0, :, mi] -= loop_factor * alm_ps
+            #         tmp_map = hputil.sphtrans_inv_sky(alm, nside)
+            #     clean_map += tmp_map
+
+
+            if not (method == 'tk' and tk_deconv and map_to_deconv is not None):
+                if self.no_m_zero:
+                    alm[:, :, :, 0] = 0
+
+                    alm[:, :, 100:, 1] = 0
+
+                skymap = hputil.sphtrans_inv_sky(alm, nside)
+
+                with h5py.File(self.output_directory + '/' + mapname, 'w') as f:
+                    f.create_dataset('/map', data=skymap)
+                    f.attrs['dim'] = 'freq, pol, pix'
                     f.attrs['frequency'] = cfreqs
                     f.attrs['polarization'] = np.string_(['I', 'Q', 'U', 'V'])[:self.beamtransfer.telescope.num_pol_sky] # np.string_ for python 3
 
+                    if save_alm:
+                        f.create_dataset('/alm', data=alm1)
+                        f.attrs['dim'] = 'freq, pol, l, m'
+                        f.attrs['frequency'] = cfreqs
+                        f.attrs['polarization'] = np.string_(['I', 'Q', 'U', 'V'])[:self.beamtransfer.telescope.num_pol_sky] # np.string_ for python 3
+
             if method == 'tk' and tk_deconv:
-                # save clean_map
+                # save clean_map and residual_map
                 with h5py.File(self.output_directory + '/' + 'deconv_map.hdf5', 'w') as f:
                     f.create_dataset('clean_map', data=clean_map)
+                    f.create_dataset('residual_map', data=residual_map)
 
         mpiutil.barrier()
 

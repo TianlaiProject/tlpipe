@@ -1187,7 +1187,7 @@ class BeamTransfer(object):
         try:
             BBi = la.pinv(BB) # (B^* B + eps I)^-1
         except np.linalg.linalg.LinAlgError:
-            print 'Compute pinv of BB failed for mi = %d, bi = %d' % (mi, bi)
+            print('Compute pinv of BB failed for mi = %d, bi = %d' % (mi, bi))
             return alm_psf
         alm_psf[:] = np.dot(BBi, BBa)
 
