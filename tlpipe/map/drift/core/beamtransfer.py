@@ -1172,26 +1172,67 @@ class BeamTransfer(object):
 
         return vecb
 
+    _cache_dict = dict()
+
+    # def tk_deconv(self, fi, mi, alm_ps, eps=0.01):
+    #     """The tk based CLEAN deconvolution algorithm given in Eastwood et al., 2017,
+    #     The radio sky at meter wavelengths m-mode analysis imaging with the owens
+    #     valley long wavelength array.
+    #     """
+
+    #     # print(self._cache_dict.keys())
+
+    #     if (fi, mi) in self._cache_dict:
+    #         BB, BBi = self._cache_dict[(fi, mi)]
+    #         BBa = np.dot(BB, alm_ps) # will modify BB in next step, so save (BB a) here
+    #     else:
+    #         B = self.beam_m(mi)[fi] # shape (2, npairs, npol_sky, lmax+1)
+    #         B = B.reshape(self.ntel, self.nsky) # shape (ntel, nsky)
+    #         BB = np.dot(B.T.conj(), B) # B^* B
+    #         BB1 = BB.copy()
+    #         # BBa = np.dot(BB, alm_ps) # will modify BB in next step, so save (BB a) here
+    #         np.fill_diagonal(BB, eps + np.diag(BB)) # (B^* B + eps I)
+    #         try:
+    #             BBi = la.pinv(BB) # (B^* B + eps I)^-1
+    #         except np.linalg.linalg.LinAlgError:
+    #             print('Compute pinv of BB failed for mi = %d, bi = %d' % (mi, bi))
+    #             BBi = np.zeros_like(BB)
+
+    #         # cach BBi
+    #         self._cache_dict[(fi, mi)] = (BB1, BBi)
+
+    #         BBa = np.dot(BB1, alm_ps) # will modify BB in next step, so save (BB a) here
+
+    #     return np.dot(BBi, BBa)
+
     def tk_deconv(self, fi, mi, alm_ps, eps=0.01):
         """The tk based CLEAN deconvolution algorithm given in Eastwood et al., 2017,
         The radio sky at meter wavelengths m-mode analysis imaging with the owens
         valley long wavelength array.
         """
 
-        B = self.beam_m(mi)[fi] # shape (2, npairs, npol_sky, lmax+1)
-        B = B.reshape(self.ntel, self.nsky) # shape (ntel, nsky)
-        BB = np.dot(B.T.conj(), B) # B^* B
-        BBa = np.dot(BB, alm_ps) # will modify BB in next step, so save (BB a) here
-        np.fill_diagonal(BB, eps + np.diag(BB)) # (B^* B + eps I)
-        alm_psf = np.zeros_like(alm_ps)
-        try:
-            BBi = la.pinv(BB) # (B^* B + eps I)^-1
-        except np.linalg.linalg.LinAlgError:
-            print('Compute pinv of BB failed for mi = %d, bi = %d' % (mi, bi))
-            return alm_psf
-        alm_psf[:] = np.dot(BBi, BBa)
+        # print(self._cache_dict.keys())
 
-        return alm_psf
+        if (fi, mi) in self._cache_dict:
+            BBiBB = self._cache_dict[(fi, mi)]
+        else:
+            B = self.beam_m(mi)[fi] # shape (2, npairs, npol_sky, lmax+1)
+            B = B.reshape(self.ntel, self.nsky) # shape (ntel, nsky)
+            BB = np.dot(B.T.conj(), B) # B^* B
+            BB1 = BB.copy()
+            # BBa = np.dot(BB, alm_ps) # will modify BB in next step, so save (BB a) here
+            np.fill_diagonal(BB, eps + np.diag(BB)) # (B^* B + eps I)
+            try:
+                BBi = la.pinv(BB) # (B^* B + eps I)^-1
+            except np.linalg.linalg.LinAlgError:
+                print('Compute pinv of BB failed for mi = %d, bi = %d' % (mi, bi))
+                BBi = np.zeros_like(BB)
+
+            BBiBB = np.dot(BBi, BB1)
+            # cach BBiBB
+            self._cache_dict[(fi, mi)] = BBiBB
+
+        return np.dot(BBiBB, alm_ps)
 
     def project_vector_backward_dirty(self, mi, vec, nbin=None, normalize=True, threshold=1.0e3):
 

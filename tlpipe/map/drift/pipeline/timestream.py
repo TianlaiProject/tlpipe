@@ -309,8 +309,11 @@ class Timestream(object):
 
                 skymap = hputil.sphtrans_inv_sky(alm, nside)
             else:
-                with h5py.File(map_to_deconv, 'r') as f:
-                    skymap = f['map'][:]
+
+                if map_to_deconv is not None:
+                    # read in the skymap to deconv
+                    with h5py.File(map_to_deconv, 'r') as f:
+                        skymap = f['map'][:]
 
             if method == 'tk' and tk_deconv:
                 residual_map = skymap.copy() # does not change the original sky map
@@ -321,7 +324,7 @@ class Timestream(object):
                     print('deconv: %d of %d...' % (ii, n_iter))
                     sys.stdout.flush()
                     sys.stderr.flush()
-                    alm_psf = np.zeros_like(alm)
+                    alm_psf = np.zeros((nbin, self.telescope.num_pol_sky, self.telescope.lmax + 1, self.telescope.lmax + 1), dtype=np.complex128)
                     for fi in range(nfreq):
                         max_i = np.argmax(residual_map[fi, 0]) # index of the max pixel
                         max_inds[fi] = max_i
@@ -334,11 +337,11 @@ class Timestream(object):
                         # NOTE unit_ps and alm_ps is frequency-independent
 
                         # compute alm PSF for only pol I
-                        # for mi in range(self.telescope.mmax + 1):
-                        #     alm_psf[fi, 0, :, mi] = self.beamtransfer.tk_deconv(fi, mi, alm_unit_ps[:, mi], eps=eps)
-                        num_m = self.telescope.mmax + 1
-                        p = Pool(20)
-                        alm_psf[fi, 0, :, :num_m] = np.array(p.map(self.beamtransfer.tk_deconv, itertools.repeat(fi, num_m), range(num_m), alm_unit_ps[:, range(num_m)].T, itertools.repeat(eps, num_m))).T
+                        for mi in range(self.telescope.mmax + 1):
+                            alm_psf[fi, 0, :, mi] = self.beamtransfer.tk_deconv(fi, mi, alm_unit_ps[:, mi], eps=eps)
+                        # num_m = self.telescope.mmax + 1
+                        # p = Pool(20)
+                        # alm_psf[fi, 0, :, :num_m] = np.array(p.map(self.beamtransfer.tk_deconv, itertools.repeat(fi, num_m), range(num_m), alm_unit_ps[:, range(num_m)].T, itertools.repeat(eps, num_m))).T
 
                     # compute PSF map for alm_psf
                     unit_psf = hputil.sphtrans_inv_sky(alm_psf, nside)
@@ -370,6 +373,8 @@ class Timestream(object):
             #         tmp_map = hputil.sphtrans_inv_sky(alm, nside)
             #     clean_map += tmp_map
 
+
+        if mpiutil.rank0:
 
             if not (method == 'tk' and tk_deconv and map_to_deconv is not None):
                 if self.no_m_zero:
