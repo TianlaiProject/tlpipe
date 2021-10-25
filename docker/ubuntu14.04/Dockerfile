@@ -53,10 +53,12 @@ RUN apt-get -yqq install git
 RUN pip install git+https://github.com/radiocosmology/cora.git
 
 # install aipy
-RUN pip install git+https://github.com/zuoshifan/aipy.git@zuo/develop
+# RUN pip install git+https://github.com/zuoshifan/aipy.git@zuo/develop
+RUN pip install git+https://github.com/zuoshifan/aipy.git@zuo/python3
 
 # install caput
-RUN pip install git+https://github.com/zuoshifan/caput.git@zuo/develop
+# RUN pip install git+https://github.com/zuoshifan/caput.git@zuo/develop
+RUN pip install git+https://github.com/zuoshifan/caput.git@zuo/python3
 
 # install tlpipe
 # RUN pip install git+https://github.com/TianlaiProject/tlpipe.git@zuo/develop
@@ -64,6 +66,7 @@ WORKDIR /usr/src
 RUN git clone https://github.com/TianlaiProject/tlpipe.git
 WORKDIR /usr/src/tlpipe
 # RUN git checkout zuo/develop
+RUN git checkout zuo/python3
 Run python setup.py develop
 
 # clean downloaded packages
