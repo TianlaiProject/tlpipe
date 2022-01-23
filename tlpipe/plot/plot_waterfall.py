@@ -41,6 +41,7 @@ class Plot(timestream_task.TimestreamTask):
                     'flag_ns': False,
                     'interpolate_ns': False,
                     'y_axis': 'time', # or 'jul_date', or 'ra'
+                    'use_utc': False, # True to use UTC time, else Beijing time
                     'plot_abs': False,
                     'abs_only': False,
                     'gray_color': False,
@@ -81,6 +82,7 @@ class Plot(timestream_task.TimestreamTask):
         flag_ns = self.params['flag_ns']
         interpolate_ns = self.params['interpolate_ns']
         y_axis = self.params['y_axis']
+        use_utc = self.params['use_utc']
         plot_abs = self.params['plot_abs']
         abs_only = self.params['abs_only']
         gray_color = self.params['gray_color']
@@ -146,8 +148,12 @@ class Plot(timestream_task.TimestreamTask):
             y_aixs = ts['ra_dec'][:, 0]
             y_label = r'RA / radian'
         elif y_axis == 'time':
-            y_aixs = [ (datetime.utcfromtimestamp(s) + timedelta(hours=8)) for s in (ts['sec1970'][0], ts['sec1970'][-1]) ]
-            y_label = '%s' % y_aixs[0].date()
+            if use_utc:
+                y_aixs = [ (datetime.utcfromtimestamp(s)) for s in (ts['sec1970'][0], ts['sec1970'][-1]) ]
+                y_label = 'UT+0h: %s' % y_aixs[0].date()
+            else:
+                y_aixs = [ (datetime.utcfromtimestamp(s) + timedelta(hours=8)) for s in (ts['sec1970'][0], ts['sec1970'][-1]) ]
+                y_label = '%s' % y_aixs[0].date()
             # convert datetime objects to the correct format for matplotlib to work with
             y_aixs = mdates.date2num(y_aixs)
         else:
