@@ -41,7 +41,10 @@ class NormalizeMmode(timestream_task.TimestreamTask):
             # normalize mmode
             for mi in mpiutil.mpirange(tel.mmax+1):
                 with h5py.File(tstream._mfile(mi), 'r+') as f:
-                    f['/mmode'][:] /= N[:, np.newaxis, :]
+                    mmode = f['/mmode'][:]
+                    mmode /= N[:, np.newaxis, :]
+                    mmode = np.where(np.isfinite(mmode), mmode, 0)
+                    f['/mmode'][:]  = mmode
             mpiutil.barrier()
             # delete the count file
             if mpiutil.rank0:

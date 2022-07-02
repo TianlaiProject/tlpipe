@@ -137,7 +137,7 @@ class GenMmode(timestream_task.TimestreamTask):
 
         local_phi = ts['ra_dec'].local_data[:, 0]
         # the Fourier transfom matrix
-        E = np.exp(-1.0J * np.outer(np.arange(-tel.mmax, tel.mmax+1), local_phi))
+        E = np.exp(-1.0J * np.outer(np.arange(-tel.mmax, tel.mmax+1), local_phi)) # e^(- i m phi)
 
         # pols to consider
         pol_str = [ ts.pol_dict[p] for p in ts['pol'][:] ] # as string
@@ -166,11 +166,11 @@ class GenMmode(timestream_task.TimestreamTask):
                     M[local_inds<ind, :] = True
                     M[local_inds>=ind+nt1, :] = True
                     V = np.where(M, 0, V) # fill masked values with 0
-                    M = M.astype(np.int)
+                    v = np.logical_not(M).astype(np.int) # 1 for valid, 0 for invalid
                     # mmode[:, :, qi] += np.dot(E, V)
-                    # N[:, qi] += np.sum(M, axis=0)
+                    # N[:, qi] += np.sum(v, axis=0)
                     mmodeqi += np.dot(E, V)
-                    Nqi += np.sum(M, axis=0)
+                    Nqi += np.sum(v, axis=0)
 
             mpiutil.barrier()
 
