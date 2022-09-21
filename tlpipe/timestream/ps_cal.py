@@ -96,7 +96,7 @@ class PsCal(timestream_task.TimestreamTask):
         vis_conj = self.params['vis_conj']
         zero_diag = self.params['zero_diag']
         span = self.params['span']
-        rpca_max_iter = self.paras['rpca_max_iter']
+        rpca_max_iter = self.params['rpca_max_iter']
         reserve_high_gain = self.params['reserve_high_gain']
         plot_figs = self.params['plot_figs']
         fig_prefix = self.params['fig_name']
