@@ -1,0 +1,49 @@
+#!/usr/bin/env python
+
+"""Phase the zenith-phased visibility data to a source.
+
+Authors: Shifan Zuo
+Date:    2022-09-19
+Email:   sfzuo@bao.ac.cn
+"""
+
+import os
+import logging
+import argparse
+from tlpipe.utils.argparse_action import EvalAction
+
+
+logging.basicConfig(level=logging.INFO)
+
+
+parser = argparse.ArgumentParser(description='Generate beam transfer matrices.')
+parser.add_argument('input_files', type=str, nargs='+', help='Input visibility hdf5 files.')
+parser.add_argument('-o', '--output_files', type=str, nargs='*', default=None, help='Output hdf5 files.')
+parser.add_argument('--outdir', type=str, default='./', help='Output directory.')
+parser.add_argument('-t', '--process_timing', default=False, type=bool, choices=[True, False], help='Show timing of the task.')
+parser.add_argument('--time_start', dest='start', type=int, default=0, help='Select time start index to read.')
+parser.add_argument('--time_stop', dest='stop', type=int, default=None, help='Select time stop index to read.')
+parser.add_argument('--freq_select', type=str, default=(0, None), action=EvalAction, help='Select frequency to read.')
+parser.add_argument('--pol_select', type=str, default=(0, None), action=EvalAction, help='Select polarization to read.')
+parser.add_argument('--feed_select', type=str, default=(0, None), action=EvalAction, help='Select feeds to read.')
+parser.add_argument('--show_info', default=False, type=bool, choices=[True, False], help='Show informations of internal data.')
+parser.add_argument('--source', default='cyg', type=str, help='Source to phase to, in format <src_name> or <ra XX[:XX:xx]>_<dec XX[:XX:xx]> or <time y/m/d h:m:s> (array pointing of this local time).')
+parser.add_argument('--catalog', default='misc', type=str, choices=['misc', 'helm', 'nvss'], help='The catalog the source is in.')
+
+
+args = parser.parse_args()
+args_dict = vars(args)
+
+# set environment var
+os.environ['TL_OUTPUT'] = args_dict['outdir'] + '/'
+
+
+from tlpipe.timestream import phs2src
+
+Phs2src = phs2src.Phs2src
+
+Phs2src.params_init.update(args_dict)
+phs = Phs2src()
+phs.setup()
+phs.next()
+phs.finish()

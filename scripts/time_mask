@@ -1,0 +1,48 @@
+#!/usr/bin/env python
+
+"""Mask the given time sections.
+
+Authors: Shifan Zuo
+Date:    2022-09-19
+Email:   sfzuo@bao.ac.cn
+"""
+
+import os
+import logging
+import argparse
+from tlpipe.utils.argparse_action import EvalAction
+
+
+logging.basicConfig(level=logging.INFO)
+
+
+parser = argparse.ArgumentParser(description='Mask the given time sections.')
+parser.add_argument('input_files', type=str, nargs='+', help='Input visibility hdf5 files.')
+parser.add_argument('-o', '--output_files', type=str, nargs='*', default=None, help='Output hdf5 files.')
+parser.add_argument('--outdir', type=str, default='./', help='Output directory.')
+parser.add_argument('-t', '--process_timing', default=False, type=bool, choices=[True, False], help='Show timing of the task.')
+parser.add_argument('--time_start', dest='start', type=int, default=0, help='Select time start index to read.')
+parser.add_argument('--time_stop', dest='stop', type=int, default=None, help='Select time stop index to read.')
+parser.add_argument('--freq_select', type=str, default=(0, None), action=EvalAction, help='Select frequency to read.')
+parser.add_argument('--pol_select', type=str, default=(0, None), action=EvalAction, help='Select polarization to read.')
+parser.add_argument('--feed_select', type=str, default=(0, None), action=EvalAction, help='Select feeds to read.')
+parser.add_argument('--show_info', default=False, type=bool, choices=[True, False], help='Show informations of internal data.')
+parser.add_argument('--mask_time_range', default=None, type=str, action=EvalAction, help="Mask time range, in format [ ('yyyymmddhhMMss', 'yyyymmddhhMMss'),  ('yyyymmddhhMMss', 'yyyymmddhhMMss')].")
+
+
+args = parser.parse_args()
+args_dict = vars(args)
+
+# set environment var
+os.environ['TL_OUTPUT'] = args_dict['outdir'] + '/'
+
+
+from tlpipe.timestream import time_mask
+
+Mask = time_mask.Mask
+
+Mask.params_init.update(args_dict)
+mask = Mask()
+mask.setup()
+mask.next()
+mask.finish()

@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+
+"""Map-making.
+
+Authors: Shifan Zuo
+Date:    2022-09-19
+Email:   sfzuo@bao.ac.cn
+"""
+
+import os
+import logging
+import argparse
+from tlpipe.utils.argparse_action import EvalAction
+
+
+logging.basicConfig(level=logging.INFO)
+
+
+parser = argparse.ArgumentParser(description='Map-making.')
+parser.add_argument('--in', type=str, default='mm', help='Any string to indicate an input to this task.')
+parser.add_argument('--outdir', type=str, default='./', help='Output directory.')
+parser.add_argument('-t', '--process_timing', default=False, type=bool, choices=[True, False], help='Show timing of the task.')
+parser.add_argument('--time_start', dest='start', type=int, default=0, help='Select time start index to read.')
+parser.add_argument('--time_stop', dest='stop', type=int, default=None, help='Select time stop index to read.')
+parser.add_argument('--freq_select', type=str, default=(0, None), action=EvalAction, help='Select frequency to read.')
+parser.add_argument('--pol_select', type=str, default=(0, None), action=EvalAction, help='Select polarization to read.')
+parser.add_argument('--feed_select', type=str, default=(0, None), action=EvalAction, help='Select feeds to read.')
+parser.add_argument('--show_info', default=False, type=bool, choices=[True, False], help='Show informations of internal data.')
+parser.add_argument('--ts_dir', default='map/ts', type=str, help='Directory of the saved timestream.')
+parser.add_argument('--ts_name', default='ts', type=str, help='Name of the saved timestream.')
+parser.add_argument('--simulate', default=False, type=bool, choices=[True, False], help='Do simulation.')
+parser.add_argument('--input_maps', default=[], type=str, action=EvalAction, help='Input maps for doing the simulation.')
+parser.add_argument('--prior_map', default=None, type=str, help='Prior map used for map-making.')
+parser.add_argument('--add_noise', default=True, type=bool, choices=[True, False], help='Add noise to generated timestream.')
+parser.add_argument('--dirty_map', default=False, type=bool, choices=[True, False], help='Make dirty map.')
+parser.add_argument('--nbin', default=None, type=int, help='Number of bins, used in multi-frequency synthesize.')
+parser.add_argument('--method', default='svd', type=str, choices=['svd', 'tk'], help='Map-making method.')
+parser.add_argument('--normalize', default=True, type=bool, choices=[True, False], help='Whether to normalize the map, only used for dirty map-making.')
+parser.add_argument('--threshold', default=1.0e3, type=float, help='Threshold for dirty map-making, only used for dirty map-making.')
+parser.add_argument('--epsilon', default=0.0001, type=float, help='Regularization parameter for tk.')
+parser.add_argument('--correct_order', default=1, type=int, help='Correction order for tk.')
+parser.add_argument('--save_alm', default=True, type=bool, choices=[True, False], help='Save also alm.')
+parser.add_argument('--tk_deconv', default=False, type=bool, choices=[True, False], help='Apply tk deconvolution.')
+parser.add_argument('--loop_factor', default=0.1, type=float, help='Loop factor used in tk deconvolution.')
+parser.add_argument('--n_iter', default=100, type=int, help='Number of iterations used in tk deconvolution.')
+
+
+args = parser.parse_args()
+args_dict = vars(args)
+
+# set environment var
+os.environ['TL_OUTPUT'] = args_dict['outdir'] + '/'
+
+
+from tlpipe.timestream import map_making1
+
+MM = map_making1.MapMaking
+
+MM.params_init.update(args_dict)
+mm = MM()
+mm.setup()
+mm.next()
+mm.finish()

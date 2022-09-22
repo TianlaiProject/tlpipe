@@ -1,0 +1,62 @@
+#!/usr/bin/env python
+
+"""Detect noise source signal by using periodicity.
+
+Authors: Shifan Zuo
+Date:    2022-09-19
+Email:   sfzuo@bao.ac.cn
+"""
+
+import os
+import logging
+import argparse
+from tlpipe.utils.argparse_action import EvalAction
+
+
+logging.basicConfig(level=logging.INFO)
+
+
+parser = argparse.ArgumentParser(description='Detect noise source signal by using periodicity.')
+parser.add_argument('input_files', type=str, nargs='+', help='Input visibility hdf5 files.')
+parser.add_argument('-o', '--output_files', type=str, nargs='*', default=None, help='Output hdf5 files.')
+parser.add_argument('--outdir', type=str, default='./', help='Output directory.')
+parser.add_argument('-t', '--process_timing', default=False, type=bool, choices=[True, False], help='Show timing of the task.')
+parser.add_argument('--time_start', dest='start', type=int, default=0, help='Select time start index to read.')
+parser.add_argument('--time_stop', dest='stop', type=int, default=None, help='Select time stop index to read.')
+parser.add_argument('--freq_select', type=str, default=(0, None), action=EvalAction, help='Select frequency to read.')
+# parser.add_argument('--pol_select', type=str, default=(0, None), action=EvalAction, help='Select polarization to read.')
+parser.add_argument('--feed_select', type=str, default=(0, None), action=EvalAction, help='Select feeds to read.')
+parser.add_argument('--show_info', default=False, type=bool, choices=[True, False], help='Show informations of internal data.')
+parser.add_argument('--num_mean', default=5, type=int, help='Use the mean of this number of signals.')
+parser.add_argument('--unmasked_only', default=False, type=bool, choices=[True, False], help='Do calibration for unmasked time points only.')
+parser.add_argument('--phs_only', default=True, type=bool, choices=[True, False], help='Do calibration for phase only.')
+parser.add_argument('--save_gain', default=False, type=bool, choices=[True, False], help='Whether save gain to file.')
+parser.add_argument('--gain_file', default='ns_cal/gain.hdf5', type=str, help='The file name to save the gain.')
+parser.add_argument('--plot_gain', default=False, type=bool, choices=[True, False], help='Plot the gain change.')
+parser.add_argument('--phs_unit', default='radian', type=str, choices=['radian', 'degree'], help='Phase unit to use in plot.')
+parser.add_argument('--fig_name', default='ns_cal/gain_change', type=str, help='Figure name prefix.')
+parser.add_argument('--bl_incl', default='all', type=str, action=EvalAction, help='Baselines included to plot, a list of include (bl1, bl2).')
+parser.add_argument('--bl_excl', default=[], type=str, action=EvalAction, help='Baselines excluded to plot, a list of exclude (bl1, bl2).')
+parser.add_argument('--freq_incl', default='all', type=str, action=EvalAction, help='Frequencies included to plot, a list of include frequency indices.')
+parser.add_argument('--freq_excl', default=[], type=str, action=EvalAction, help='Frequencies excluded to plot, a list of exclude frequency indices.')
+parser.add_argument('--rotate_xdate', default=False, type=bool, choices=[True, False], help='True to rotate xaxis date ticks, else half the number of date ticks.')
+parser.add_argument('--feed_no', default=False, type=bool, choices=[True, False], help='True to use feed number (true baseline) else use channel number.')
+parser.add_argument('--order_bl', default=True, type=bool, choices=[True, False], help='True to make small feed no first.')
+
+
+args = parser.parse_args()
+args_dict = vars(args)
+
+# set environment var
+os.environ['TL_OUTPUT'] = args_dict['outdir'] + '/'
+
+
+from tlpipe.timestream import ns_cal
+
+NsCal = ns_cal.NsCal
+
+NsCal.params_init.update(args_dict)
+cal = NsCal()
+cal.setup()
+cal.next()
+cal.finish()
