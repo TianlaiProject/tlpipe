@@ -6,7 +6,7 @@ from . import cylinder
 class TlUnpolarisedCylinder(cylinder.UnpolarisedCylinderTelescope):
     """A telescope describing the Tianlai non-polarized cylinder array."""
 
-    def __init__(self, latitude=45, longitude=0, freqs=[], band_width=None, tsys_flat=50.0, ndays=1.0, accuracy_boost=1.0, l_boost=1.0, bl_range=[0.0, 1.0e7], auto_correlations=False, local_origin=True, lmax=None, mmax=None, cylinder_width=15.0, feedpos=np.zeros((0, 3)), in_cylinder=True, touching=True, cylspacing=0.0, non_commensurate=False, e_width=0.7, h_width=1.0):
+    def __init__(self, latitude=45, longitude=0, freqs=[], band_width=None, tsys_flat=50.0, ndays=1.0, accuracy_boost=1.0, l_boost=1.0, bl_range=[0.0, 1.0e7], auto_correlations=False, local_origin=True, cylinder_width=15.0, feedpos=np.zeros((0, 3)), lmax=None, mmax=None, in_cylinder=True, touching=True, cylspacing=0.0, non_commensurate=False, e_width=0.7, h_width=1.0):
 
         num_feeds = len(feedpos)
         self.feedpos = feedpos[:, :2] # do not care z

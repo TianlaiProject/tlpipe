@@ -99,7 +99,7 @@ class GenMmode(timestream_task.TimestreamTask):
             factor = 0.79 # for xx
             # factor = 0.88 # for yy
             cyl_width = factor * ts.attrs['cywid']
-            tel = tl_cylinder.TlUnpolarisedCylinder(lat, lon, freqs, band_width, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin, lmax, mmax, cyl_width, feedpos)
+            tel = tl_cylinder.TlUnpolarisedCylinder(lat, lon, freqs, band_width, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin, cyl_width, feedpos, lmax, mmax)
         else:
             raise RuntimeError('Unknown array type %s' % ts.attrs['telescope'])
 
