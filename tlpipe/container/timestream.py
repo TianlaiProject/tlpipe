@@ -189,7 +189,7 @@ class Timestream(timestream_common.TimestreamCommon):
         data : np.ndarray or MPIArray
             The data to create a dataset.
         axis_order : tuple
-            A tuple denotes frequency axis of the created dataset.
+            A tuple denotes polarization axis of the created dataset.
         recreate : bool, optional
             If True will recreate a dataset with this name if it already exists,
             else a RuntimeError will be rasised. Default False.
@@ -207,6 +207,216 @@ class Timestream(timestream_common.TimestreamCommon):
         axis_order = axis_order or (self.main_data_axes.index('polarization'),)
 
         self.create_main_axis_ordered_dataset('polarization', name, data, axis_order, recreate, copy_attrs, check_align)
+
+
+    def create_time_and_pol_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False, check_align=True):
+        """Create a time and polarization ordered dataset.
+
+        Parameters
+        ----------
+        name : string
+            Name of the dataset.
+        data : np.ndarray or MPIArray
+            The data to create a dataset.
+        axis_order : tuple
+            A tuple denotes time and polarization axis of the created dataset.
+        recreate : bool, optional
+            If True will recreate a dataset with this name if it already exists,
+            else a RuntimeError will be rasised. Default False.
+        copy_attrs : bool, optional
+            If True, when recreate the dataset, its original attributes will be
+            copyed to the new dataset, else no copy is done. Default Fasle.
+        check_align : bool, optional
+            If True, check time and polarization axis of data align with that of the main data
+            before dataset creating, otherwise create dataset without axis align
+            checking, this may cause the created dataset does not align with the
+            main data. Default True.
+
+        """
+
+        axis_order = axis_order or (self.main_data_axes.index('time'), self.main_data_axes.index('polarization'))
+
+        self.create_main_axis_ordered_dataset(('time', 'polarization'), name, data, axis_order, recreate, copy_attrs, check_align)
+
+
+    def create_freq_and_pol_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False, check_align=True):
+        """Create a frequency and polarization ordered dataset.
+
+        Parameters
+        ----------
+        name : string
+            Name of the dataset.
+        data : np.ndarray or MPIArray
+            The data to create a dataset.
+        axis_order : tuple
+            A tuple denotes frequency and polarization axis of the created dataset.
+        recreate : bool, optional
+            If True will recreate a dataset with this name if it already exists,
+            else a RuntimeError will be rasised. Default False.
+        copy_attrs : bool, optional
+            If True, when recreate the dataset, its original attributes will be
+            copyed to the new dataset, else no copy is done. Default Fasle.
+        check_align : bool, optional
+            If True, check frequency and polarization axis of data align with that of the main data
+            before dataset creating, otherwise create dataset without axis align
+            checking, this may cause the created dataset does not align with the
+            main data. Default True.
+
+        """
+
+        axis_order = axis_order or (self.main_data_axes.index('frequency'), self.main_data_axes.index('polarization'))
+
+        self.create_main_axis_ordered_dataset(('frequency', 'polarization'), name, data, axis_order, recreate, copy_attrs, check_align)
+
+
+    def create_pol_and_bl_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False, check_align=True):
+        """Create a polarization and baseline ordered dataset.
+
+        Parameters
+        ----------
+        name : string
+            Name of the dataset.
+        data : np.ndarray or MPIArray
+            The data to create a dataset.
+        axis_order : tuple
+            A tuple denotes polarization and baseline axis of the created dataset.
+        recreate : bool, optional
+            If True will recreate a dataset with this name if it already exists,
+            else a RuntimeError will be rasised. Default False.
+        copy_attrs : bool, optional
+            If True, when recreate the dataset, its original attributes will be
+            copyed to the new dataset, else no copy is done. Default Fasle.
+        check_align : bool, optional
+            If True, check polarization and baseline axis of data align with that of the main data
+            before dataset creating, otherwise create dataset without axis align
+            checking, this may cause the created dataset does not align with the
+            main data. Default True.
+
+        """
+
+        axis_order = axis_order or (self.main_data_axes.index('polarization'), self.main_data_axes.index('baseline'))
+
+        self.create_main_axis_ordered_dataset(('polarization', 'baseline'), name, data, axis_order, recreate, copy_attrs, check_align)
+
+
+    def create_time_freq_and_pol_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False, check_align=True):
+        """Create a time, frequency and polarization ordered dataset.
+
+        Parameters
+        ----------
+        name : string
+            Name of the dataset.
+        data : np.ndarray or MPIArray
+            The data to create a dataset.
+        axis_order : tuple
+            A tuple denotes time, frequency and polarization axis of the created dataset.
+        recreate : bool, optional
+            If True will recreate a dataset with this name if it already exists,
+            else a RuntimeError will be rasised. Default False.
+        copy_attrs : bool, optional
+            If True, when recreate the dataset, its original attributes will be
+            copyed to the new dataset, else no copy is done. Default Fasle.
+        check_align : bool, optional
+            If True, check time, frequency and polarization axis of data align with that of the main data
+            before dataset creating, otherwise create dataset without axis align
+            checking, this may cause the created dataset does not align with the
+            main data. Default True.
+
+        """
+
+        axis_order = axis_order or (self.main_data_axes.index('time'), self.main_data_axes.index('frequency'), self.main_data_axes.index('polarization'))
+
+        self.create_main_axis_ordered_dataset(('time', 'frequency', 'polarization'), name, data, axis_order, recreate, copy_attrs, check_align)
+
+
+    def create_time_freq_and_bl_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False, check_align=True):
+        """Create a time, frequency and baseline ordered dataset.
+
+        Parameters
+        ----------
+        name : string
+            Name of the dataset.
+        data : np.ndarray or MPIArray
+            The data to create a dataset.
+        axis_order : tuple
+            A tuple denotes time, frequency and baseline axis of the created dataset.
+        recreate : bool, optional
+            If True will recreate a dataset with this name if it already exists,
+            else a RuntimeError will be rasised. Default False.
+        copy_attrs : bool, optional
+            If True, when recreate the dataset, its original attributes will be
+            copyed to the new dataset, else no copy is done. Default Fasle.
+        check_align : bool, optional
+            If True, check time, frequency and baseline axis of data align with that of the main data
+            before dataset creating, otherwise create dataset without axis align
+            checking, this may cause the created dataset does not align with the
+            main data. Default True.
+
+        """
+
+        axis_order = axis_order or (self.main_data_axes.index('time'), self.main_data_axes.index('frequency'), self.main_data_axes.index('baseline'))
+
+        self.create_main_axis_ordered_dataset(('time', 'frequency', 'baseline'), name, data, axis_order, recreate, copy_attrs, check_align)
+
+
+    def create_time_pol_and_bl_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False, check_align=True):
+        """Create a time, polarization and baseline ordered dataset.
+
+        Parameters
+        ----------
+        name : string
+            Name of the dataset.
+        data : np.ndarray or MPIArray
+            The data to create a dataset.
+        axis_order : tuple
+            A tuple denotes time, polarization and baseline axis of the created dataset.
+        recreate : bool, optional
+            If True will recreate a dataset with this name if it already exists,
+            else a RuntimeError will be rasised. Default False.
+        copy_attrs : bool, optional
+            If True, when recreate the dataset, its original attributes will be
+            copyed to the new dataset, else no copy is done. Default Fasle.
+        check_align : bool, optional
+            If True, check time, polarization and baseline axis of data align with that of the main data
+            before dataset creating, otherwise create dataset without axis align
+            checking, this may cause the created dataset does not align with the
+            main data. Default True.
+
+        """
+
+        axis_order = axis_order or (self.main_data_axes.index('time'), self.main_data_axes.index('polarization'), self.main_data_axes.index('baseline'))
+
+        self.create_main_axis_ordered_dataset(('time', 'polarization', 'baseline'), name, data, axis_order, recreate, copy_attrs, check_align)
+
+
+    def create_freq_pol_and_bl_ordered_dataset(self, name, data, axis_order=None, recreate=False, copy_attrs=False, check_align=True):
+        """Create a frequency, polarization and baseline ordered dataset.
+
+        Parameters
+        ----------
+        name : string
+            Name of the dataset.
+        data : np.ndarray or MPIArray
+            The data to create a dataset.
+        axis_order : tuple
+            A tuple denotes frequency, polarization and baseline axis of the created dataset.
+        recreate : bool, optional
+            If True will recreate a dataset with this name if it already exists,
+            else a RuntimeError will be rasised. Default False.
+        copy_attrs : bool, optional
+            If True, when recreate the dataset, its original attributes will be
+            copyed to the new dataset, else no copy is done. Default Fasle.
+        check_align : bool, optional
+            If True, check frequency, polarization and baseline axis of data align with that of the main data
+            before dataset creating, otherwise create dataset without axis align
+            checking, this may cause the created dataset does not align with the
+            main data. Default True.
+
+        """
+
+        axis_order = axis_order or (self.main_data_axes.index('frequency'), self.main_data_axes.index('polarization'), self.main_data_axes.index('baseline'))
+
+        self.create_main_axis_ordered_dataset(('frequency', 'polarization', 'baseline'), name, data, axis_order, recreate, copy_attrs, check_align)
 
 
     def lin2stokes(self):
