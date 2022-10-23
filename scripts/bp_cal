@@ -10,7 +10,7 @@ Email:   sfzuo@bao.ac.cn
 import os
 import logging
 import argparse
-from tlpipe.utils.argparse_action import EvalAction
+from tlpipe.utils.argparse_action import EvalAction, str2bool
 
 
 logging.basicConfig(level=logging.INFO)
@@ -20,20 +20,20 @@ parser = argparse.ArgumentParser(description='Bandpass calibration by using a st
 parser.add_argument('input_files', type=str, nargs='+', help='Input visibility hdf5 files.')
 parser.add_argument('-o', '--output_files', type=str, nargs='*', default=None, help='Output hdf5 files.')
 parser.add_argument('--outdir', type=str, default='./', help='Output directory.')
-parser.add_argument('-t', '--process_timing', default=False, type=bool, choices=[True, False], help='Show timing of the task.')
+parser.add_argument('-t', '--process_timing', default=False, type=str2bool, choices=[True, False], help='Show timing of the task.')
 parser.add_argument('--time_start', dest='start', type=int, default=0, help='Select time start index to read.')
 parser.add_argument('--time_stop', dest='stop', type=int, default=None, help='Select time stop index to read.')
 parser.add_argument('--freq_select', type=str, default=(0, None), action=EvalAction, help='Select frequency to read.')
 parser.add_argument('--pol_select', type=str, default=(0, None), action=EvalAction, help='Select polarization to read.')
 parser.add_argument('--feed_select', type=str, default=(0, None), action=EvalAction, help='Select feeds to read.')
-parser.add_argument('--show_info', default=False, type=bool, choices=[True, False], help='Show informations of internal data.')
+parser.add_argument('--show_info', default=False, type=str2bool, choices=[True, False], help='Show informations of internal data.')
 parser.add_argument('--calibrator', default='cyg', help='The calibrator source to use for bandpass calibration.')
 parser.add_argument('--lower_dt', default=900, type=float, help='Delta t in second away from the peak in left and right ends to be used as baseline noise level.')
 parser.add_argument('--avg_tis', default=7, type=int, help='Average over this number of time indices, to avoid empty data for 5 time indeces noise source ON.')
 parser.add_argument('--kernel_size', default=13, type=int, help='Smoothing kernel size.')
 parser.add_argument('--smooth_type', default='median', choices=['median', 'mean'], help='Smoothing type.')
-parser.add_argument('--apply_bandpass', default=True, type=bool, choices=[True, False], help='Apply the calculated bandpass to data.')
-parser.add_argument('--save_bandpass', default=False, type=bool, choices=[True, False], help='Save the calculated bandpass to file.')
+parser.add_argument('--apply_bandpass', default=True, type=str2bool, choices=[True, False], help='Apply the calculated bandpass to data.')
+parser.add_argument('--save_bandpass', default=False, type=str2bool, choices=[True, False], help='Save the calculated bandpass to file.')
 parser.add_argument('--bandpass_file', default='bandpass/bandpass.hdf5', help='File name of the bandpass to save.')
 
 args = parser.parse_args()
