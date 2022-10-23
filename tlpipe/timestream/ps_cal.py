@@ -652,6 +652,9 @@ class PsCal(timestream_task.TimestreamTask):
                     # in unit K after the calibration
                     ts.vis.attrs['unit'] = 'K'
 
+                    # save src transit_ind
+                    ts.vis.attrs['transit_ind'] = transit_ind
+
                 # save gain to file
                 if save_gain:
                     if tag_output_iter:

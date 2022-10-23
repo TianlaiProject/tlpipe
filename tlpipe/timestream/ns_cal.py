@@ -66,6 +66,7 @@ class NsCal(timestream_task.TimestreamTask):
                     'num_mean': 5, # use the mean of num_mean signals
                     'unmasked_only': False, # cal for unmasked time points only
                     'phs_only': True, # phase cal only
+                    'normalize_amp': True, # amplitue normalization
                     'save_gain': False,
                     'gain_file': 'ns_cal/gain.hdf5',
                     'plot_gain': False, # plot the gain change
@@ -75,6 +76,8 @@ class NsCal(timestream_task.TimestreamTask):
                     'bl_excl': [],
                     'freq_incl': 'all', # or a list of include freq idx
                     'freq_excl': [],
+                    'pol_incl': 'all', # or a list of include pol idx
+                    'pol_excl': [],
                     'rotate_xdate': False, # True to rotate xaxis date ticks, else half the number of date ticks
                     'feed_no': False, # True to use feed number (true baseline) else use channel no
                     'order_bl': True, # True to make small feed no first
@@ -84,7 +87,7 @@ class NsCal(timestream_task.TimestreamTask):
 
     def process(self, rt):
 
-        assert isinstance(rt, RawTimestream), '%s only works for RawTimestream object currently' % self.__class__.__name__
+        # assert isinstance(rt, RawTimestream), '%s only works for RawTimestream object currently' % self.__class__.__name__
 
         if not 'ns_on' in rt.keys():
             raise RuntimeError('No noise source info, can not do noise source calibration')
@@ -100,7 +103,10 @@ class NsCal(timestream_task.TimestreamTask):
         bl_excl = self.params['bl_excl']
         freq_incl = self.params['freq_incl']
         freq_excl = self.params['freq_excl']
+        pol_incl = self.params['pol_incl']
+        pol_excl = self.params['pol_excl']
 
+        is_ts = True if len(rt.local_vis.shape) == 4 else False
         nt = rt.local_vis.shape[0]
         if num_mean <= 0:
             raise RuntimeError('Invalid num_mean = %s' % num_mean)
@@ -122,15 +128,23 @@ class NsCal(timestream_task.TimestreamTask):
             # create dataset to record ns_cal_phase
             ns_cal_phase = np.empty(shp, dtype=dtype)
             ns_cal_phase[:] = np.nan
-            ns_cal_phase = mpiarray.MPIArray.wrap(ns_cal_phase, axis=2, comm=rt.comm)
-            rt.create_freq_and_bl_ordered_dataset('ns_cal_phase', ns_cal_phase, axis_order=(None, 1, 2))
+            if is_ts:
+                ns_cal_phase = mpiarray.MPIArray.wrap(ns_cal_phase, axis=3, comm=rt.comm)
+                rt.create_freq_pol_and_bl_ordered_dataset('ns_cal_phase', ns_cal_phase, axis_order=(None, 1, 2, 3))
+            else:
+                ns_cal_phase = mpiarray.MPIArray.wrap(ns_cal_phase, axis=2, comm=rt.comm)
+                rt.create_freq_and_bl_ordered_dataset('ns_cal_phase', ns_cal_phase, axis_order=(None, 1, 2))
             rt['ns_cal_phase'].attrs['unit'] = 'radians'
             if not phs_only:
                 # create dataset to record ns_cal_amp
                 ns_cal_amp = np.empty(shp, dtype=dtype)
                 ns_cal_amp[:] = np.nan
-                ns_cal_amp = mpiarray.MPIArray.wrap(ns_cal_amp, axis=2, comm=rt.comm)
-                rt.create_freq_and_bl_ordered_dataset('ns_cal_amp', ns_cal_amp, axis_order=(None, 1, 2))
+                if is_ts:
+                    ns_cal_amp = mpiarray.MPIArray.wrap(ns_cal_amp, axis=3, comm=rt.comm)
+                    rt.create_freq_pol_and_bl_ordered_dataset('ns_cal_amp', ns_cal_amp, axis_order=(None, 1, 2, 3))
+                else:
+                    ns_cal_amp = mpiarray.MPIArray.wrap(ns_cal_amp, axis=2, comm=rt.comm)
+                    rt.create_freq_and_bl_ordered_dataset('ns_cal_amp', ns_cal_amp, axis_order=(None, 1, 2))
 
         if bl_incl == 'all':
             bls_plt = [ tuple(bl) for bl in rt.bl ]
@@ -142,20 +156,35 @@ class NsCal(timestream_task.TimestreamTask):
         else:
             freq_plt = [ fi for fi in freq_incl if not fi in freq_excl ]
 
+        if is_ts:
+            if pol_incl == 'all':
+                pol_plt = range(rt.pol.shape[0])
+            else:
+                pol_plt = [ pi for pi in pol_incl if not pi in pol_excl ]
+
         show_progress = self.params['show_progress']
         progress_step = self.params['progress_step']
 
-        rt.freq_and_bl_data_operate(self.cal, full_data=True, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False, num_mean=num_mean, inds=inds, bls_plt=bls_plt, freq_plt=freq_plt)
+        if is_ts:
+            rt.freq_pol_and_bl_data_operate(self.cal, full_data=True, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False, num_mean=num_mean, inds=inds, bls_plt=bls_plt, freq_plt=freq_plt, pol_plt=pol_plt)
+        else:
+            rt.freq_and_bl_data_operate(self.cal, full_data=True, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False, num_mean=num_mean, inds=inds, bls_plt=bls_plt, freq_plt=freq_plt)
 
         if save_gain:
             # gather bl_order to rank0
             bl_order = mpiutil.gather_array(rt['blorder'].local_data, axis=0, root=0, comm=rt.comm)
             # gather ns_cal_phase / ns_cal_amp to rank 0
-            ns_cal_phase = mpiutil.gather_array(rt['ns_cal_phase'].local_data, axis=2, root=0, comm=rt.comm)
+            if is_ts:
+                ns_cal_phase = mpiutil.gather_array(rt['ns_cal_phase'].local_data, axis=3, root=0, comm=rt.comm)
+            else:
+                ns_cal_phase = mpiutil.gather_array(rt['ns_cal_phase'].local_data, axis=2, root=0, comm=rt.comm)
             phs_unit = rt['ns_cal_phase'].attrs['unit']
             rt.delete_a_dataset('ns_cal_phase', reserve_hint=False)
             if not phs_only:
-                ns_cal_amp = mpiutil.gather_array(rt['ns_cal_amp'].local_data, axis=2, root=0, comm=rt.comm)
+                if is_ts:
+                    ns_cal_amp = mpiutil.gather_array(rt['ns_cal_amp'].local_data, axis=3, root=0, comm=rt.comm)
+                else:
+                    ns_cal_amp = mpiutil.gather_array(rt['ns_cal_amp'].local_data, axis=2, root=0, comm=rt.comm)
                 rt.delete_a_dataset('ns_cal_amp', reserve_hint=False)
 
             if tag_output_iter:
@@ -172,15 +201,25 @@ class NsCal(timestream_task.TimestreamTask):
                     f['freq'].attrs['unit'] = rt['freq'].attrs['unit']
                     # save bl
                     f.create_dataset('bl_order', data=bl_order)
+                    # save pol
+                    if is_ts:
+                        f.create_dataset('pol', data=rt['pol'][:])
                     # save ns_cal_time_inds
                     f.create_dataset('ns_cal_time_inds', data=rt['ns_cal_time_inds'][:])
                     # save ns_cal_phase
                     f.create_dataset('ns_cal_phase', data=ns_cal_phase)
                     f['ns_cal_phase'].attrs['unit'] = phs_unit
-                    f['ns_cal_phase'].attrs['dim'] = '(time, freq, bl)'
+                    if is_ts:
+                        f['ns_cal_phase'].attrs['dim'] = '(time, freq, pol, bl)'
+                    else:
+                        f['ns_cal_phase'].attrs['dim'] = '(time, freq, bl)'
                     if not phs_only:
                         # save ns_cal_amp
                         f.create_dataset('ns_cal_amp', data=ns_cal_amp)
+                        if is_ts:
+                            f['ns_cal_amp'].attrs['dim'] = '(time, freq, pol, bl)'
+                        else:
+                            f['ns_cal_amp'].attrs['dim'] = '(time, freq, bl)'
 
             rt.delete_a_dataset('ns_cal_time_inds', reserve_hint=False)
 
@@ -191,6 +230,7 @@ class NsCal(timestream_task.TimestreamTask):
 
         unmasked_only = self.params['unmasked_only']
         phs_only = self.params['phs_only']
+        normalize_amp = self.params['normalize_amp']
         save_gain = self.params['save_gain']
         plot_gain = self.params['plot_gain']
         phs_unit = self.params['phs_unit']
@@ -204,13 +244,22 @@ class NsCal(timestream_task.TimestreamTask):
         inds = kwargs['inds']
         bls_plt = kwargs['bls_plt']
         freq_plt = kwargs['freq_plt']
+        pol_plt = kwargs.get('pol_plt', None)
+
+        is_ts = True if pol_plt is not None else False
 
         if np.prod(vis.shape) == 0 :
             return
 
-        lfi, lbi = li # local freq and bl index
-        fi = gi[0] # freq idx for this cal
-        bl = tuple(fbl[1]) # bl for this cal
+        if is_ts:
+            lfi, lpi, lbi = li # local freq, pol and bl index
+            fi = gi[0] # freq idx for this cal
+            pi = gi[1]
+            bl = tuple(fbl[2]) # bl for this cal
+        else:
+            lfi, lbi = li # local freq and bl index
+            fi = gi[0] # freq idx for this cal
+            bl = tuple(fbl[1]) # bl for this cal
 
         nt = vis.shape[0]
         on_time = rt['ns_on'].attrs['on_time']
@@ -255,23 +304,33 @@ class NsCal(timestream_task.TimestreamTask):
                 continue
             valid_inds.append(ind)
             if save_gain:
-                rt['ns_cal_phase'].local_data[ii, lfi, lbi] = phs
+                if is_ts:
+                    rt['ns_cal_phase'].local_data[ii, lfi, lpi, lbi] = phs
+                else:
+                    rt['ns_cal_phase'].local_data[ii, lfi, lbi] = phs
             phase.append( phs ) # in radians
             if not phs_only:
                 if save_gain:
-                    rt['ns_cal_amp'].local_data[ii, lfi, lbi] = amp_
+                    if is_ts:
+                        rt['ns_cal_amp'].local_data[ii, lfi, lpi, lbi] = amp_
+                    else:
+                        rt['ns_cal_amp'].local_data[ii, lfi, lbi] = amp_
                 amp.append( amp_ )
 
         # not enough valid data to do the ns_cal
         num_valid = len(valid_inds)
         if num_valid <= 3:
-            print('Only have %d valid points, mask all for fi = %d, bl = (%d, %d)...' % (num_valid, fbl[0], fbl[1][0], fbl[1][1]))
+            if is_ts:
+                print('Only have %d valid points, mask all for fi = %d, pol = %s, bl = (%d, %d)...' % (num_valid, fbl[0], fbl[1], fbl[2][0], fbl[2][1]))
+            else:
+                print('Only have %d valid points, mask all for fi = %d, bl = (%d, %d)...' % (num_valid, fbl[0], fbl[1][0], fbl[1][1]))
             vis_mask[:] = True # mask the vis as no ns_cal has done
             return
 
         phase = np.unwrap(phase) # unwrap 2pi discontinuity
         if not phs_only:
-            amp = np.array(amp) / np.median(amp) # normalize
+            if normalize_amp:
+                amp = np.array(amp) / np.median(amp) # normalize
         # split valid_inds into consecutive chunks
         intervals = [0] + (np.where(np.diff(valid_inds) > 5 * period)[0] + 1).tolist() + [num_valid]
         itp_inds = []
@@ -327,6 +386,13 @@ class NsCal(timestream_task.TimestreamTask):
                 # do phase cal for this range of inds
                 vis[i1:i2] = vis[i1:i2] * np.exp(-1.0J * this_itp_phs)
 
+        if is_ts and 'transit_ind' in rt.vis.attrs:
+            transit_ind = rt.vis.attrs['transit_ind']
+            if np.isfinite(all_phase[transit_ind]):
+                vis[:] = vis[:] * np.exp(1.0J * all_phase[transit_ind])
+            else:
+                vis_mask[:] = True
+
         if not phs_only:
             all_amp = np.array([np.nan]*nt)
             for this_inds, this_amp, (i1, i2) in zip(itp_inds, itp_amp, itp_pairs):
@@ -336,7 +402,17 @@ class NsCal(timestream_task.TimestreamTask):
                 # do amp cal for this range of inds
                 vis[i1:i2] = vis[i1:i2] / this_itp_amp
 
+            if is_ts and 'transit_ind' in rt.vis.attrs:
+                transit_ind = rt.vis.attrs['transit_ind']
+                if np.isfinite(all_amp[transit_ind]):
+                    vis[:] = vis[:] / all_amp[transit_ind]
+                else:
+                    vis_mask[:] = True
+
         if plot_gain and (bl in bls_plt and fi in freq_plt):
+            if is_ts:
+                if not (pi in pol_plt):
+                    return
             plt.figure()
             if phs_only:
                 fig, ax = plt.subplots()
@@ -389,14 +465,18 @@ class NsCal(timestream_task.TimestreamTask):
             ax1.set_xlabel(xlabel)
             ax1.set_ylabel(ylabel)
 
-            if feed_no:
-                pol = rt['bl_pol'].local_data[li[1]]
-                bl = tuple(rt['true_blorder'].local_data[li[1]])
-                if order_bl and (bl[0] > bl[1]):
-                    bl = (bl[1], bl[0])
-                fig_name = '%s_%f_%d_%d_%s.png' % (fig_prefix, fbl[0], bl[0], bl[1], rt.pol_dict[pol])
+            if is_ts:
+                pol = rt.pol_dict[pi]
+                fig_name = '%s_%f_%s_%d_%d.png' % (fig_prefix, fbl[0], pol, fbl[1][0], fbl[1][1])
             else:
-                fig_name = '%s_%f_%d_%d.png' % (fig_prefix, fbl[0], fbl[1][0], fbl[1][1])
+                if feed_no:
+                    pol = rt['bl_pol'].local_data[li[1]]
+                    bl = tuple(rt['true_blorder'].local_data[li[1]])
+                    if order_bl and (bl[0] > bl[1]):
+                        bl = (bl[1], bl[0])
+                    fig_name = '%s_%f_%d_%d_%s.png' % (fig_prefix, fbl[0], bl[0], bl[1], rt.pol_dict[pol])
+                else:
+                    fig_name = '%s_%f_%d_%d.png' % (fig_prefix, fbl[0], fbl[1][0], fbl[1][1])
             if tag_output_iter:
                 fig_name = output_path(fig_name, iteration=iteration)
             else:
