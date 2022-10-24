@@ -347,6 +347,18 @@ class Timestream(object):
                     unit_psf = hputil.sphtrans_inv_sky(alm_psf, nside)
                     ### TODO: check hte compute unit_psf
 
+                    # ################################################################################
+                    # # degrade to nside 64
+                    # import healpy as hp
+                    # res_unit_psf = np.zeros_like(unit_psf)
+                    # nf, npol, npix = unit_psf.shape
+                    # nside = hp.npix2nside(npix)
+                    # for fi in range(nf):
+                    #     for pi in range(npol):
+                    #         res_unit_psf[fi, pi] = unit_psf[fi, pi] - hp.ud_grade(hp.ud_grade(unit_psf[fi, pi], 64), nside)
+                    # unit_psf = res_unit_psf  # replace the original unit_psf
+                    # ################################################################################
+
                     # deconv
                     for fi in range(nfreq):
                         clean_ind = max_inds[fi]
