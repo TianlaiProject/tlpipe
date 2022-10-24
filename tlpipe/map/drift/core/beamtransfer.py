@@ -288,7 +288,11 @@ class BeamTransfer(object):
 
             try:
                 f = open(self._picklefile, 'rb')
-                self.telescope = pickle.load(f)
+                try:
+                    self.telescope = pickle.load(f)
+                except UnicodeDecodeError:
+                    # self.telescope = pickle.load(f, encoding='latin1') # for reading python 2 pickle file
+                    self.telescope = pickle.load(f, encoding='bytes') # for reading python 2 pickle file
             except IOError as UnpicklingError:
                 raise Exception("Could not load Telescope object from disk.")
 
