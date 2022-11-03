@@ -36,7 +36,7 @@ class BpCal(timestream_task.TimestreamTask):
                     'bandpass_file': 'bandpass/bandpass.hdf5',
                   }
 
-    prefix = 'bp_'
+    prefix = 'bc_'
 
     def process(self, ts):
 
