@@ -25,7 +25,7 @@ class Flag(timestream_task.TimestreamTask):
     """
 
     params_init = {
-                    'first_threshold': 6.0,
+                    'first_threshold': 12.0,
                     'exp_factor': 1.5,
                     'distribution': 'Rayleigh',
                     'max_threshold_len': 1024,
