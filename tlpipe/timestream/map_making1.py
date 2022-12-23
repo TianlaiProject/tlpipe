@@ -66,10 +66,15 @@ class MapMaking(timestream_task.TimestreamTask):
         n_iter = self.params['n_iter']
 
         bt = tstream.beamtransfer
-        bt.generate()
 
         tel = bt.telescope
+        tel._lmax = None
+        tel._mmax = None
         nside = hputil.nside_for_lmax(tel.lmax, accuracy_boost=tel.accuracy_boost)
+        tel._init_trans(nside)
+
+        bt.generate()
+
         if dirty_map:
             tstream.mapmake_full(nside, 'map_full_dirty.hdf5', nbin, dirty=True, method=method, normalize=normalize, threshold=threshold)
         else:
