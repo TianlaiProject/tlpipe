@@ -900,6 +900,14 @@ class UnpolarisedTelescope(TransitTelescope, metaclass=abc.ABCMeta):
         # NOTE: to have consistent normalization with ps_cal, don't divide_A here
         cvis = self._horizon * fringe * beami * beamj.conjugate()
 
+        # ### use the following code to load a different beam model
+        # import h5py
+        # import healpy as hp
+        # print('Use beam model in bm2_model.hdf5...')
+        # with h5py.File('/path/to/bm2_model.hdf5', 'r') as f:
+        #     bm2 = f['bm2'][:]
+        # cvis = self._horizon * fringe * hp.ud_grade(bm2, hp.npix2nside(len(fringe)))
+
         return cvis
 
 
