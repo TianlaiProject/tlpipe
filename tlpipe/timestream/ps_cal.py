@@ -469,6 +469,7 @@ class PsCal(timestream_task.TimestreamTask):
                         # f.attrs['pol'] = np.array(['xx', 'yy'])
                         f.attrs['pol'] = np.string_(['xx', 'yy']) # np.string_ for python 3
                         f.attrs['feed'] = np.array(feedno)
+                        f.attrs['transit_ind'] = transit_ind
 
                 mpiutil.barrier()
 
