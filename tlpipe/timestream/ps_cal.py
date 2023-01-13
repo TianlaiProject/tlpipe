@@ -529,12 +529,11 @@ class PsCal(timestream_task.TimestreamTask):
                     aa.set_jultime(jt)
                     s.compute(aa)
                     n0[ti] = s.get_crds('top', ncrd=3)
-                if save_phs_change:
-                    n0t = np.zeros((nt, 3))
-                    for ti, jt in enumerate(ts.time[start_ind:end_ind]):
-                        aa.set_jultime(jt)
-                        s.compute(aa)
-                        n0t[ti] = s.get_crds('top', ncrd=3)
+                n0t = np.zeros((nt, 3))
+                for ti, jt in enumerate(ts.time[start_ind:end_ind]):
+                    aa.set_jultime(jt)
+                    s.compute(aa)
+                    n0t[ti] = s.get_crds('top', ncrd=3)
 
                 # get the positions of feeds
                 feedpos = ts['feedpos'][:]
@@ -550,6 +549,7 @@ class PsCal(timestream_task.TimestreamTask):
                 del fpd_inds
                 # create data to save the solved gain for each feed
                 lgain = np.full((len(fpd_linds),), cnan, dtype=Gain.dtype) # gain for each feed
+                lsrc_uvec = np.zeros((nt, len(fpd_linds)), dtype=np.complex128) # \sqrt(lambda^2 * Sc / (2 k_B)) * Ai(n0) * e^(2\pi i n0 \cdot ui)
                 if save_phs_change:
                     lphs = np.full((nt, len(fpd_linds)), np.nan, dtype=Gain.real.dtype) # phase change with time for each feed
 
@@ -585,18 +585,22 @@ class PsCal(timestream_task.TimestreamTask):
                     # correct G
                     Gain.local_array[:] = Gain.local_array.conj()
 
+                Sc = s.get_jys(1.0e-3 * freq)
+                lmd = const.c / (1.0e6*freq)
+                Ais = aa.ants[0].beam.response(n0t.T)
                 # solve for gain
                 for ii, (fi, pi, di) in enumerate(fpd_linds):
+                    ui = (feedpos[di] - feedpos[0]) * (1.0e6*freq[fi]) / const.c # position of this feed (relative to the first feed) in unit of wavelength
+                    lsrc_uvec[:, ii] = np.sqrt((lmd[fi]**2 * 1.0e-26 * Sc[fi]) / (2 * const.k_B)) * Ais[fi] * np.exp(2.0J * np.pi * np.dot(n0t, ui)) # NOTE: 1Jy = 1.0e-26 W m^-2 Hz^-1
                     y = G_abs.local_array[li:hi, ii]
                     inds = np.where(np.isfinite(y))[0]
                     if len(inds) >= max(4, 0.5 * len(y)):
                         # get the approximate magnitude by averaging the central G_abs
                         mag = np.mean(y[inds]) # = \sqrt(lambda^2 * Sc / (2 k_B)) * |gi| Ai
                         # solve phase by least square fit
-                        ui = (feedpos[di] - feedpos[0]) * (1.0e6*freq[fi]) / const.c # position of this feed (relative to the first feed) in unit of wavelength
+                        Gi = Gain.local_array[li:hi, ii]
                         exp_factor = np.exp(2.0J * np.pi * np.dot(n0, ui))
                         ef = exp_factor
-                        Gi = Gain.local_array[li:hi, ii]
                         e_phs = np.dot(ef[inds].conj(), Gi[inds]/y[inds]) / len(inds) # the phase of gi
                         ea = np.abs(e_phs)
                         if np.abs(ea - 1.0) < 0.1:
@@ -623,12 +627,13 @@ class PsCal(timestream_task.TimestreamTask):
                     del lphs
                     if mpiutil.rank0:
                         phs = phs.reshape(nt, nf, 2, nfeed)
+                src_uvec = mpiutil.gather_array(lsrc_uvec, axis=0, root=None, comm=ts.comm)
+                del lsrc_uvec
+                src_uvec = src_uvec.reshape(nt, nf, 2, nfeed)
 
                 # normalize to get the exact gain
-                Sc = s.get_jys(1.0e-3 * freq)
                 # Omega = aa.ants[0].beam.Omega ### TODO: implement Omega for dish
-                Ai = aa.ants[0].beam.response(n0[ci - li])
-                lmd = const.c / (1.0e6*freq)
+                Ai = aa.ants[0].beam.response(n0[ci - li]) # Ai at transit time
                 factor = np.sqrt((lmd**2 * 1.0e-26 * Sc) / (2 * const.k_B)) * Ai # NOTE: 1Jy = 1.0e-26 W m^-2 Hz^-1
                 gain /= factor[:, np.newaxis, np.newaxis]
 
@@ -686,9 +691,23 @@ class PsCal(timestream_task.TimestreamTask):
                             # dset.attrs['pol'] = np.array(['xx', 'yy'])
                             dset.attrs['pol'] = np.string_(['xx', 'yy']) # np.string_ for python 3
                             dset.attrs['feed'] = np.array(feedno)
+                            # save src_uvec
+                            dset = f.create_dataset('src_uvec', data=src_uvec)
+                            dset.attrs['freq'] = freq
+                            # dset.attrs['pol'] = np.array(['xx', 'yy'])
+                            dset.attrs['pol'] = np.string_(['xx', 'yy']) # np.string_ for python 3
+                            dset.attrs['feed'] = np.array(feedno)
+                            dset.attrs['transit_ind'] = transit_ind
+                            dset.attrs['time_inds'] = np.arange(start_ind, end_ind)
                             # save phs
                             if save_phs_change:
-                                f.create_dataset('phs', data=phs)
+                                dset = f.create_dataset('phs', data=phs)
+                                dset.attrs['freq'] = freq
+                                # dset.attrs['pol'] = np.array(['xx', 'yy'])
+                                dset.attrs['pol'] = np.string_(['xx', 'yy']) # np.string_ for python 3
+                                dset.attrs['feed'] = np.array(feedno)
+                                dset.attrs['transit_ind'] = transit_ind
+                                dset.attrs['time_inds'] = np.arange(start_ind, end_ind)
 
                     mpiutil.barrier()
 
