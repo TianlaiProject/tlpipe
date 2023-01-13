@@ -11,7 +11,7 @@ Inheritance diagram
 import numpy as np
 import aipy as ap
 
-from . import constants as const
+from tlpipe.core import constants as const
 from tlpipe.map.drift.telescope import cylbeam
 from tlpipe.map.drift.core import visibility
 from cora.util import coord
@@ -301,14 +301,17 @@ if __name__ == '__main__':
 
     # 1d plot
     plt.figure()
-    plt.plot(x_ang, x_resp[0], 'r', label='East-West')
+    plt.plot(x_ang, x_resp[0], 'r', label='A East-West')
+    plt.plot(x_ang, x_resp[0]**2, 'k', label='A^2 East-West')
     # plt.axvline(x=x_ang[x_ind1], linewidth=0.5, color='r')
     # plt.axvline(x=x_ang[x_ind2], linewidth=0.5, color='r')
-    plt.plot(y_ang, y_resp[0], 'g', label='North-South')
+    plt.plot(y_ang, y_resp[0], 'g', label='A North-South')
+    plt.plot(y_ang, y_resp[0]**2, 'c', label='A^2 North-South')
     plt.axvline(x=y_ang[y_ind1], linewidth=0.5, color='g')
     plt.axvline(x=y_ang[y_ind2], linewidth=0.5, color='g')
+    plt.xlim(0, 180)
     plt.legend()
-    plt.savefig('cy.png')
+    plt.savefig('cy_square.png')
     plt.clf()
 
     xs = np.linspace(-1.0, 1.0, 2000)
