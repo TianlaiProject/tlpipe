@@ -627,7 +627,7 @@ class PsCal(timestream_task.TimestreamTask):
                     del lphs
                     if mpiutil.rank0:
                         phs = phs.reshape(nt, nf, 2, nfeed)
-                src_uvec = mpiutil.gather_array(lsrc_uvec, axis=0, root=None, comm=ts.comm)
+                src_uvec = mpiutil.gather_array(lsrc_uvec, axis=1, root=None, comm=ts.comm)
                 del lsrc_uvec
                 src_uvec = src_uvec.reshape(nt, nf, 2, nfeed)
 
