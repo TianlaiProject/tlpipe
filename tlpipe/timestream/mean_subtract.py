@@ -42,15 +42,17 @@ class Subtract(timestream_task.TimestreamTask):
         if isinstance(ts, RawTimestream):
             func = ts.bl_data_operate
 
-            night_mean = mpiarray.MPIArray.wrap(np.zeros_like(ts.local_vis[0]), axis=1, comm=ts.comm)
-            ts.create_freq_and_bl_ordered_dataset('night_mean', night_mean, axis_order=(1, 2))
-            # ts.create_freq_and_bl_ordered_dataset('night_mean', night_mean, axis_order=None)
+            if save_night_mean:
+                night_mean = mpiarray.MPIArray.wrap(np.zeros_like(ts.local_vis[0]), axis=1, comm=ts.comm)
+                ts.create_freq_and_bl_ordered_dataset('night_mean', night_mean, axis_order=(1, 2))
+                # ts.create_freq_and_bl_ordered_dataset('night_mean', night_mean, axis_order=None)
         elif isinstance(ts, Timestream):
             func = ts.pol_and_bl_data_operate
 
-            night_mean = mpiarray.MPIArray.wrap(np.zeros_like(ts.local_vis[0]), axis=2, comm=ts.comm)
-            ts.create_freq_pol_and_bl_ordered_dataset('night_mean', night_mean, axis_order=(1, 2, 3))
-            # ts.create_freq_pol_and_bl_ordered_dataset('night_mean', night_mean, axis_order=None)
+            if save_night_mean:
+                night_mean = mpiarray.MPIArray.wrap(np.zeros_like(ts.local_vis[0]), axis=2, comm=ts.comm)
+                ts.create_freq_pol_and_bl_ordered_dataset('night_mean', night_mean, axis_order=(1, 2, 3))
+                # ts.create_freq_pol_and_bl_ordered_dataset('night_mean', night_mean, axis_order=None)
 
         func(self.operate, full_data=True)
 
@@ -80,11 +82,15 @@ class Subtract(timestream_task.TimestreamTask):
                     f['night_mean'].attrs['bl_order'] = '/bl_order'
                     f.create_dataset('bl_order', data=bl_order)
 
+            # delete night_mean after save
+            ts.delete_a_dataset('night_mean')
+
         return super(Subtract, self).process(ts)
 
     def operate(self, vis, vis_mask, li, gi, bl, ts, **kwargs):
         """Function that does the actual operation."""
 
+        save_night_mean = self.params['save_night_mean']
         t1, t2 = self.params['time_range']
 
         local_hour = ts['local_hour'].local_data
@@ -98,11 +104,12 @@ class Subtract(timestream_task.TimestreamTask):
 
         mean = np.ma.array(vis[tis], mask=vis_mask[tis]).mean(axis=0)
 
-        if isinstance(ts, RawTimestream):
-            lbi = li # local bl index
-            ts['night_mean'].local_data[:, lbi] = mean
-        elif isinstance(ts, Timestream):
-            lpi, lbi = li # local pol and bl index
-            ts['night_mean'].local_data[:, lpi, lbi] = mean
+        if save_night_mean:
+            if isinstance(ts, RawTimestream):
+                lbi = li # local bl index
+                ts['night_mean'].local_data[:, lbi] = mean
+            elif isinstance(ts, Timestream):
+                lpi, lbi = li # local pol and bl index
+                ts['night_mean'].local_data[:, lpi, lbi] = mean
 
         vis -= mean[np.newaxis, :]
