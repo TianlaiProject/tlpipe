@@ -80,6 +80,7 @@ class PsCal(timestream_task.TimestreamTask):
                     'replace_with_src': False, # replace vis with the subtracted src_vis, only work when subtract_src = True
                     'apply_gain': True,
                     'save_gain': False,
+                    'save_src_uvec': False,
                     'save_phs_change': False,
                     'gain_file': 'gain/gain.hdf5',
                     # 'temperature_convert': False,
@@ -107,6 +108,7 @@ class PsCal(timestream_task.TimestreamTask):
         replace_with_src = self.params['replace_with_src']
         apply_gain = self.params['apply_gain']
         save_gain = self.params['save_gain']
+        save_src_uvec = self.params['save_src_uvec']
         save_phs_change = self.params['save_phs_change']
         gain_file = self.params['gain_file']
         # temperature_convert = self.params['temperature_convert']
@@ -549,7 +551,8 @@ class PsCal(timestream_task.TimestreamTask):
                 del fpd_inds
                 # create data to save the solved gain for each feed
                 lgain = np.full((len(fpd_linds),), cnan, dtype=Gain.dtype) # gain for each feed
-                lsrc_uvec = np.zeros((nt, len(fpd_linds)), dtype=np.complex128) # \sqrt(lambda^2 * Sc / (2 k_B)) * Ai(n0) * e^(2\pi i n0 \cdot ui)
+                if save_src_uvec:
+                    lsrc_uvec = np.zeros((nt, len(fpd_linds)), dtype=np.complex128) # \sqrt(lambda^2 * Sc / (2 k_B)) * Ai(n0) * e^(2\pi i n0 \cdot ui)
                 if save_phs_change:
                     lphs = np.full((nt, len(fpd_linds)), np.nan, dtype=Gain.real.dtype) # phase change with time for each feed
 
@@ -591,7 +594,8 @@ class PsCal(timestream_task.TimestreamTask):
                 # solve for gain
                 for ii, (fi, pi, di) in enumerate(fpd_linds):
                     ui = (feedpos[di] - feedpos[0]) * (1.0e6*freq[fi]) / const.c # position of this feed (relative to the first feed) in unit of wavelength
-                    lsrc_uvec[:, ii] = np.sqrt((lmd[fi]**2 * 1.0e-26 * Sc[fi]) / (2 * const.k_B)) * Ais[fi] * np.exp(2.0J * np.pi * np.dot(n0t, ui)) # NOTE: 1Jy = 1.0e-26 W m^-2 Hz^-1
+                    if save_src_uvec:
+                        lsrc_uvec[:, ii] = np.sqrt((lmd[fi]**2 * 1.0e-26 * Sc[fi]) / (2 * const.k_B)) * Ais[fi] * np.exp(2.0J * np.pi * np.dot(n0t, ui)) # NOTE: 1Jy = 1.0e-26 W m^-2 Hz^-1
                     y = G_abs.local_array[li:hi, ii]
                     inds = np.where(np.isfinite(y))[0]
                     if len(inds) >= max(4, 0.5 * len(y)):
@@ -627,9 +631,11 @@ class PsCal(timestream_task.TimestreamTask):
                     del lphs
                     if mpiutil.rank0:
                         phs = phs.reshape(nt, nf, 2, nfeed)
-                src_uvec = mpiutil.gather_array(lsrc_uvec, axis=1, root=None, comm=ts.comm)
-                del lsrc_uvec
-                src_uvec = src_uvec.reshape(nt, nf, 2, nfeed)
+                if save_src_uvec:
+                    src_uvec = mpiutil.gather_array(lsrc_uvec, axis=1, root=0, comm=ts.comm)
+                    del lsrc_uvec
+                    if mpiutil.rank0:
+                        src_uvec = src_uvec.reshape(nt, nf, 2, nfeed)
 
                 # normalize to get the exact gain
                 # Omega = aa.ants[0].beam.Omega ### TODO: implement Omega for dish
@@ -692,13 +698,18 @@ class PsCal(timestream_task.TimestreamTask):
                             dset.attrs['pol'] = np.string_(['xx', 'yy']) # np.string_ for python 3
                             dset.attrs['feed'] = np.array(feedno)
                             # save src_uvec
-                            dset = f.create_dataset('src_uvec', data=src_uvec)
-                            dset.attrs['freq'] = freq
-                            # dset.attrs['pol'] = np.array(['xx', 'yy'])
-                            dset.attrs['pol'] = np.string_(['xx', 'yy']) # np.string_ for python 3
-                            dset.attrs['feed'] = np.array(feedno)
-                            dset.attrs['transit_ind'] = transit_ind
-                            dset.attrs['time_inds'] = np.arange(start_ind, end_ind)
+                            if save_src_uvec:
+                                dset = f.create_dataset('src_uvec', data=src_uvec)
+                                dset.attrs['freq'] = freq
+                                # dset.attrs['pol'] = np.array(['xx', 'yy'])
+                                dset.attrs['pol'] = np.string_(['xx', 'yy']) # np.string_ for python 3
+                                dset.attrs['feed'] = np.array(feedno)
+                                dset.attrs['transit_ind'] = transit_ind
+                                try:
+                                    dset.attrs['time_inds'] = np.arange(start_ind, end_ind)
+                                except RuntimeError:
+                                    dset.attrs['time_inds'] = '/src_uvec_time_inds'
+                                    f.create_dataset('src_uvec_time_inds', data=np.arange(start_ind, end_ind))
                             # save phs
                             if save_phs_change:
                                 dset = f.create_dataset('phs', data=phs)
@@ -707,7 +718,11 @@ class PsCal(timestream_task.TimestreamTask):
                                 dset.attrs['pol'] = np.string_(['xx', 'yy']) # np.string_ for python 3
                                 dset.attrs['feed'] = np.array(feedno)
                                 dset.attrs['transit_ind'] = transit_ind
-                                dset.attrs['time_inds'] = np.arange(start_ind, end_ind)
+                                try:
+                                    dset.attrs['time_inds'] = np.arange(start_ind, end_ind)
+                                except RuntimeError:
+                                    dset.attrs['time_inds'] = '/phs_time_inds'
+                                    f.create_dataset('phs_time_inds', data=np.arange(start_ind, end_ind))
 
                     mpiutil.barrier()
 
