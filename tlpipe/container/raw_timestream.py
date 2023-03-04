@@ -200,7 +200,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
     def _load_a_common_dataset(self, name):
         ### load a common dataset from the first file
         if name == 'channo' and not self._channel_select is None:
-            self.create_dataset(name, data=self._channel_select)
+            self.create_dataset(name, data=self._channel_select, memmap_path=self._memmap_path)
             memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
         else:
             super(RawTimestream, self)._load_a_common_dataset(name)
@@ -253,7 +253,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
             self.create_bl_ordered_dataset('bl_pol', data=bl_pol)
 
 
-    def separate_pol_and_bl(self, keep_dist_axis=False, destroy_self=False):
+    def separate_pol_and_bl(self, keep_dist_axis=False, via_memmap=False, destroy_self=False):
         """Separate baseline axis to polarization and baseline.
 
         This will create and return a Timestream container holding the polarization
@@ -274,14 +274,14 @@ class RawTimestream(timestream_common.TimestreamCommon):
         original_dist_axis = self.main_data_dist_axis
         if 'baseline' == self.main_data_axes[original_dist_axis]:
             keep_dist_axis = False # can not keep dist axis in this case
-            self.redistribute(0)
+            self.redistribute(0, via_memmap=via_memmap)
 
         # could not keep dist axis if destroy_self == True
         if destroy_self:
             keep_dist_axis = False
 
         # create a Timestream container to hold the pol and bl separated data
-        ts = timestream.Timestream(dist_axis=self.main_data_dist_axis, comm=self.comm)
+        ts = timestream.Timestream(dist_axis=self.main_data_dist_axis, comm=self.comm, memmap_path=self._memmap_path)
 
         feedno = sorted(self['feedno'][:].tolist())
         xchans = [ self['channo'][feedno.index(fd)][0] for fd in feedno ]
@@ -319,7 +319,12 @@ class RawTimestream(timestream_common.TimestreamCommon):
         yx_conj = [ cj for (cj, ind) in yx_list ]
 
         # create a MPIArray to hold the pol and bl separated vis
-        rvis = self.main_data.local_data
+        if not via_memmap:
+            rvis = self.main_data.local_data
+        else:
+            self.main_data.to_disk()
+            sel = [ slice(o, o+s, None) for o, s in zip(self.main_data.local_offset, self.main_data.local_shape) ]
+            rvis = np.memmap(self.main_data._memmap_file, dtype=self.main_data.dtype, mode='r', shape=self.main_data.shape)[tuple(sel)]
         shp = rvis.shape[:2] + (4, len(xx_inds))
         vis = np.empty(shp, dtype=rvis.dtype)
         vis[:, :, 0] = np.where(xx_conj, rvis[:, :, xx_inds].conj(), rvis[:, :, xx_inds]) # xx
@@ -416,9 +421,9 @@ class RawTimestream(timestream_common.TimestreamCommon):
                     ts.create_feed_ordered_dataset(dset_name, dset.data, axis_order)
             else:
                 if dset.common:
-                    ts.create_dataset(dset_name, data=dset)
+                    ts.create_dataset(dset_name, data=dset, memmap_path=ts._memmap_path)
                 elif dset.distributed:
-                    ts.create_dataset(dset_name, data=dset.data, shape=dset.shape, dtype=dset.dtype, distributed=True, distributed_axis=dset.distributed_axis)
+                    ts.create_dataset(dset_name, data=dset.data, shape=dset.shape, dtype=dset.dtype, distributed=True, distributed_axis=dset.distributed_axis, memmap_path=ts._memmap_path)
 
             # copy attrs of this dset
             memh5.copyattrs(dset.attrs, ts[dset_name].attrs)
@@ -434,7 +439,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
 
         # redistribute self to original axis
         if keep_dist_axis:
-            self.redistribute(original_dist_axis)
+            self.redistribute(original_dist_axis, via_memmap=via_memmap)
 
         return ts
 
@@ -442,7 +447,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
     def _copy_a_common_dataset(self, name, other):
         ### copy a common dataset from `other` to self
         if name == 'channo' and not other._subset_channel_select is None:
-            self.create_dataset(name, data=other._subset_channel_select)
+            self.create_dataset(name, data=other._subset_channel_select, memmap_path=self._memmap_path)
             memh5.copyattrs(other[name].attrs, self[name].attrs)
         else:
             super(RawTimestream, self)._copy_a_common_dataset(name, other)

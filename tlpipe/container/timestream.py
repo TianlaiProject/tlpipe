@@ -452,11 +452,11 @@ class Timestream(timestream_common.TimestreamCommon):
             memh5.copyattrs(self.main_data.attrs, attr_dict)
             del self[self.main_data_name]
             # create main data
-            self.create_dataset(self.main_data_name, shape=md.shape, dtype=md.dtype, data=md, distributed=True, distributed_axis=self.main_data_dist_axis)
+            self.create_dataset(self.main_data_name, shape=md.shape, dtype=md.dtype, data=md, distributed=True, distributed_axis=self.main_data_dist_axis, memmap_path=self._memmap_path)
             memh5.copyattrs(attr_dict, self.main_data.attrs)
 
             del self['pol']
-            self.create_dataset('pol', data=np.array([p['I'], p['Q'], p['U'], p['V']]), dtype='i4')
+            self.create_dataset('pol', data=np.array([p['I'], p['Q'], p['U'], p['V']]), dtype='i4', memmap_path=self._memmap_path)
             self['pol'].attrs['pol_type'] = 'stokes'
 
             # redistribute self to original axis
@@ -498,11 +498,11 @@ class Timestream(timestream_common.TimestreamCommon):
             memh5.copyattrs(self.main_data.attrs, attr_dict)
             del self[self.main_data_name]
             # create main data
-            self.create_dataset(self.main_data_name, shape=md.shape, dtype=md.dtype, data=md, distributed=True, distributed_axis=self.main_data_dist_axis)
+            self.create_dataset(self.main_data_name, shape=md.shape, dtype=md.dtype, data=md, distributed=True, distributed_axis=self.main_data_dist_axis, memmap_path=self._memmap_path)
             memh5.copyattrs(attr_dict, self.main_data.attrs)
 
             del self['pol']
-            self.create_dataset('pol', data=np.array([p['xx'], p['yy'], p['xy'], p['yx']]), dtype='i4')
+            self.create_dataset('pol', data=np.array([p['xx'], p['yy'], p['xy'], p['yx']]), dtype='i4', memmap_path=self._memmap_path)
             self['pol'].attrs['pol_type'] = 'linear'
 
             # redistribute self to original axis
@@ -512,7 +512,7 @@ class Timestream(timestream_common.TimestreamCommon):
             raise RuntimeError('Can not convert to linear polarization')
 
 
-    def pol_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
+    def pol_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, via_memmap=False, **kwargs):
         """Data operation along the polarization axis.
 
         Parameters
@@ -541,10 +541,10 @@ class Timestream(timestream_common.TimestreamCommon):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis='polarization', axis_vals=self.pol, full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis='polarization', axis_vals=self.pol, full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, via_memmap=via_memmap, **kwargs)
 
 
-    def time_and_pol_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
+    def time_and_pol_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, via_memmap=False, **kwargs):
         """Data operation along the time and polarization axis.
 
         Parameters
@@ -574,9 +574,9 @@ class Timestream(timestream_common.TimestreamCommon):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=('time', 'polarization'), axis_vals=(self.time, self.pol), full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis=('time', 'polarization'), axis_vals=(self.time, self.pol), full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, via_memmap=via_memmap, **kwargs)
 
-    def freq_and_pol_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
+    def freq_and_pol_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, via_memmap=False, **kwargs):
         """Data operation along the frequency and polarization axis.
 
         Parameters
@@ -606,9 +606,9 @@ class Timestream(timestream_common.TimestreamCommon):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=('frequency', 'polarization'), axis_vals=(self.freq, self.pol), full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis=('frequency', 'polarization'), axis_vals=(self.freq, self.pol), full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, via_memmap=via_memmap, **kwargs)
 
-    def pol_and_bl_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
+    def pol_and_bl_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, via_memmap=False, **kwargs):
         """Data operation along the polarization and baseline axis.
 
         Parameters
@@ -638,9 +638,9 @@ class Timestream(timestream_common.TimestreamCommon):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=('polarization', 'baseline'), axis_vals=(self.pol, self.bl), full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis=('polarization', 'baseline'), axis_vals=(self.pol, self.bl), full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, via_memmap=via_memmap, **kwargs)
 
-    def time_freq_and_pol_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
+    def time_freq_and_pol_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, via_memmap=False, **kwargs):
         """Data operation along the time, frequency and polarization axis.
 
         Parameters
@@ -671,9 +671,9 @@ class Timestream(timestream_common.TimestreamCommon):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=('time', 'frequency', 'polarization'), axis_vals=(self.time, self.freq, self.pol), full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis=('time', 'frequency', 'polarization'), axis_vals=(self.time, self.freq, self.pol), full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, via_memmap=via_memmap, **kwargs)
 
-    def time_freq_and_bl_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
+    def time_freq_and_bl_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, via_memmap=False, **kwargs):
         """Data operation along the time, frequency and baseline axis.
 
         Parameters
@@ -704,9 +704,9 @@ class Timestream(timestream_common.TimestreamCommon):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=('time', 'frequency', 'baseline'), axis_vals=(self.time, self.freq, self.bl), full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis=('time', 'frequency', 'baseline'), axis_vals=(self.time, self.freq, self.bl), full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, via_memmap=via_memmap, **kwargs)
 
-    def time_pol_and_bl_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
+    def time_pol_and_bl_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, via_memmap=False, **kwargs):
         """Data operation along the time, polarization and baseline axis.
 
         Parameters
@@ -737,9 +737,9 @@ class Timestream(timestream_common.TimestreamCommon):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=('time', 'polarization', 'baseline'), axis_vals=(self.time, self.pol, self.bl), full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis=('time', 'polarization', 'baseline'), axis_vals=(self.time, self.pol, self.bl), full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, via_memmap=via_memmap, **kwargs)
 
-    def freq_pol_and_bl_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
+    def freq_pol_and_bl_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, via_memmap=False, **kwargs):
         """Data operation along the frequency, polarization and baseline axis.
 
         Parameters
@@ -770,4 +770,4 @@ class Timestream(timestream_common.TimestreamCommon):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=('frequency', 'polarization', 'baseline'), axis_vals=(self.freq, self.pol, self.bl), full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis=('frequency', 'polarization', 'baseline'), axis_vals=(self.freq, self.pol, self.bl), full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, via_memmap=via_memmap, **kwargs)

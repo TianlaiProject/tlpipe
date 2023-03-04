@@ -50,7 +50,9 @@ class Phs2zen(timestream_task.TimestreamTask):
 
         feedno = ts['feedno'][:].tolist()
 
-        ts.redistribute(0) # make time the dist axis
+        via_memmap = self.params['via_memmap']
+
+        ts.redistribute(0, via_memmap=via_memmap) # make time the dist axis
 
         # array
         aa = ts.array
@@ -87,7 +89,7 @@ class Phs2zen(timestream_task.TimestreamTask):
         show_progress = self.params['show_progress']
         progress_step = self.params['progress_step']
 
-        ts.time_and_bl_data_operate(self.phs, show_progress=show_progress, progress_step=progress_step, aa=aa, s=s)
+        ts.time_and_bl_data_operate(self.phs, via_memmap=via_memmap, show_progress=show_progress, progress_step=progress_step, aa=aa, s=s)
 
         return super(Phs2zen, self).process(ts)
 

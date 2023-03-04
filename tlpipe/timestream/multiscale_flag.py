@@ -38,15 +38,16 @@ class Flag(timestream_task.TimestreamTask):
     prefix = 'mf_'
 
     def process(self, ts):
+        via_memmap = self.params['via_memmap']
 
-        ts.redistribute('baseline')
+        ts.redistribute('baseline', via_memmap=via_memmap)
 
         if isinstance(ts, RawTimestream):
             func = ts.bl_data_operate
         elif isinstance(ts, Timestream):
             func = ts.pol_and_bl_data_operate
 
-        func(self.flag, full_data=True, keep_dist_axis=False)
+        func(self.flag, full_data=True, keep_dist_axis=False, via_memmap=via_memmap)
 
         return super(Flag, self).process(ts)
 

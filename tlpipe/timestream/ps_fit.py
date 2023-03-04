@@ -134,6 +134,7 @@ class PsFit(timestream_task.TimestreamTask):
 
         assert isinstance(ts, Timestream), '%s only works for Timestream object' % self.__class__.__name__
 
+        via_memmap = self.params['via_memmap']
         calibrator = self.params['calibrator']
         catalog = self.params['catalog']
         span = self.params['span']
@@ -146,7 +147,7 @@ class PsFit(timestream_task.TimestreamTask):
         freq_incl = self.params['freq_incl']
         freq_excl = self.params['freq_excl']
 
-        ts.redistribute('baseline')
+        ts.redistribute('baseline', via_memmap=via_memmap)
 
         if bl_incl == 'all':
             bls_plt = [ tuple(bl) for bl in ts.local_bl ]

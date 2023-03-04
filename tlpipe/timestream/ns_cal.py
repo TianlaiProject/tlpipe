@@ -92,7 +92,9 @@ class NsCal(timestream_task.TimestreamTask):
         if not 'ns_on' in rt.keys():
             raise RuntimeError('No noise source info, can not do noise source calibration')
 
-        rt.redistribute('baseline')
+        via_memmap = self.params['via_memmap']
+
+        rt.redistribute('baseline', via_memmap=via_memmap)
 
         num_mean = self.params['num_mean']
         phs_only = self.params['phs_only']
@@ -166,9 +168,9 @@ class NsCal(timestream_task.TimestreamTask):
         progress_step = self.params['progress_step']
 
         if is_ts:
-            rt.freq_pol_and_bl_data_operate(self.cal, full_data=True, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False, num_mean=num_mean, inds=inds, bls_plt=bls_plt, freq_plt=freq_plt, pol_plt=pol_plt)
+            rt.freq_pol_and_bl_data_operate(self.cal, full_data=True, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False, via_memmap=via_memmap, num_mean=num_mean, inds=inds, bls_plt=bls_plt, freq_plt=freq_plt, pol_plt=pol_plt)
         else:
-            rt.freq_and_bl_data_operate(self.cal, full_data=True, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False, num_mean=num_mean, inds=inds, bls_plt=bls_plt, freq_plt=freq_plt)
+            rt.freq_and_bl_data_operate(self.cal, full_data=True, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False, via_memmap=via_memmap, num_mean=num_mean, inds=inds, bls_plt=bls_plt, freq_plt=freq_plt)
 
         if save_gain:
             # gather bl_order to rank0

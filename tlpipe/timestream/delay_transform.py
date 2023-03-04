@@ -53,8 +53,9 @@ class Delay(timestream_task.TimestreamTask):
     prefix = 'dl_'
 
     def process(self, ts):
+        via_memmap = self.params['via_memmap']
 
-        ts.redistribute('baseline')
+        ts.redistribute('baseline', via_memmap=via_memmap)
 
         if isinstance(ts, RawTimestream):
             func = ts.bl_data_operate
@@ -64,7 +65,7 @@ class Delay(timestream_task.TimestreamTask):
         show_progress = self.params['show_progress']
         progress_step = self.params['progress_step']
 
-        func(self.transform, full_data=True, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False)
+        func(self.transform, full_data=True, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False, via_memmap=via_memmap)
 
         return super(Delay, self).process(ts)
 

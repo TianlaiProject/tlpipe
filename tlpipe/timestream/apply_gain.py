@@ -33,6 +33,7 @@ class Apply(timestream_task.TimestreamTask):
 
         assert isinstance(ts, Timestream), '%s only works for Timestream object' % self.__class__.__name__
 
+        via_memmap = self.params['via_memmap']
         gain_file = self.params['gain_file']
         tag_input_iter = self.params['tag_input_iter']
         if tag_input_iter:
@@ -46,7 +47,7 @@ class Apply(timestream_task.TimestreamTask):
             gain_pol = f['gain'].attrs['pol']
             gain_feed = f['gain'].attrs['feed']
 
-        ts.redistribute('baseline')
+        ts.redistribute('baseline', via_memmap=via_memmap)
 
         feedno = ts['feedno'][:].tolist()
         pol = [ ts.pol_dict[p] for p in ts['pol'][:] ] # as string

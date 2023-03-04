@@ -32,7 +32,9 @@ class Sir(timestream_task.TimestreamTask):
 
     def process(self, ts):
 
-        ts.redistribute('baseline')
+        via_memmap = self.params['via_memmap']
+
+        ts.redistribute('baseline', via_memmap=via_memmap)
 
         show_progress = self.params['show_progress']
         progress_step = self.params['progress_step']
@@ -45,7 +47,7 @@ class Sir(timestream_task.TimestreamTask):
             else:
                 func = ts.pol_and_bl_data_operate
 
-        func(self.operate, full_data=True, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False)
+        func(self.operate, full_data=True, via_memmap=via_memmap, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False)
 
         return super(Sir, self).process(ts)
 

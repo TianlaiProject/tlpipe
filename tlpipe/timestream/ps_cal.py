@@ -92,6 +92,7 @@ class PsCal(timestream_task.TimestreamTask):
 
         assert isinstance(ts, Timestream), '%s only works for Timestream object' % self.__class__.__name__
 
+        via_memmap = self.params['via_memmap']
         calibrator = self.params['calibrator']
         catalog = self.params['catalog']
         vis_conj = self.params['vis_conj']
@@ -120,7 +121,7 @@ class PsCal(timestream_task.TimestreamTask):
             if pol_type != 'linear':
                 raise RuntimeError('Can not do ps_cal for pol_type: %s' % pol_type)
 
-            ts.redistribute('baseline')
+            ts.redistribute('baseline', via_memmap=via_memmap)
 
             feedno = ts['feedno'][:].tolist()
             pol = [ ts.pol_dict[p] for p in ts['pol'][:] ] # as string

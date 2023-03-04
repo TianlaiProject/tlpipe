@@ -211,7 +211,7 @@ class TimestreamCommon(container.BasicTod):
     def _load_a_common_dataset(self, name):
         ### load a common dataset from the first file
         if name == 'feedno' and not self._feed_select is None:
-            self.create_dataset(name, data=self._feed_select)
+            self.create_dataset(name, data=self._feed_select, memmap_path=self._memmap_path)
             memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
         elif name in self.feed_ordered_datasets.keys() and not self._feed_select is None:
             fh = self.infiles[0]
@@ -220,7 +220,7 @@ class TimestreamCommon(container.BasicTod):
             feed_axis = self.feed_ordered_datasets[name].index(0)
             slc = [slice(0, None)] * len(fh[name].shape)
             slc[feed_axis] = feed_inds
-            self.create_dataset(name, data=fh[name][tuple(slc)])
+            self.create_dataset(name, data=fh[name][tuple(slc)], memmap_path=self._memmap_path)
             memh5.copyattrs(fh[name].attrs, self[name].attrs)
         else:
             super(TimestreamCommon, self)._load_a_common_dataset(name)
@@ -750,14 +750,14 @@ class TimestreamCommon(container.BasicTod):
             raise ValueError('Feed axis does not align with feedno, can not create a feed ordered dataset %s' % name)
 
         if not name in self.keys():
-            self.create_dataset(name, data=data)
+            self.create_dataset(name, data=data, memmap_path=self._memmap_path)
         else:
             if recreate:
                 if copy_attrs:
                     attr_dict = {} # temporarily save attrs of this dataset
                     copyattrs(self[name].attrs, attr_dict)
                 del self[name]
-                self.create_dataset(name, data=data)
+                self.create_dataset(name, data=data, memmap_path=self._memmap_path)
                 if copy_attrs:
                     copyattrs(attr_dict, self[name].attrs)
             else:
@@ -792,7 +792,7 @@ class TimestreamCommon(container.BasicTod):
         if num != 0 and num != 1:
             raise RuntimeError('Not all feed_ordered_datasets have an aligned feed axis')
 
-    def to_files(self, outfiles, exclude=[], check_status=True, write_hints=True, libver='earliest', chunk_vis=True, chunk_shape=None, chunk_size=64):
+    def to_files(self, outfiles, exclude=[], check_status=True, write_hints=True, via_memmap=False, libver='earliest', chunk_vis=True, chunk_shape=None, chunk_size=64):
         """Save the data hold in this container to files.
 
         Parameters
@@ -831,7 +831,7 @@ class TimestreamCommon(container.BasicTod):
 
         # first redistribute main_time_ordered_datasets to the first axis
         if self.main_data_dist_axis != 0:
-            self.redistribute(0)
+            self.redistribute(0, via_memmap=via_memmap)
 
         # check data is consistent before save
         if check_status:
@@ -927,7 +927,7 @@ class TimestreamCommon(container.BasicTod):
                 # mpiutil.barrier(comm=self.comm)
 
 
-    def data_operate(self, func, op_axis=None, axis_vals=0, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
+    def data_operate(self, func, op_axis=None, axis_vals=0, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, via_memmap=False, **kwargs):
         """An overload data operation interface.
 
         This overloads the method in its super class :class:`container.BasicTod`
@@ -988,7 +988,7 @@ class TimestreamCommon(container.BasicTod):
             data_sel = [ slice(0, None) ] * len(self.main_data_axes)
             if full_data:
                 original_dist_axis = self.main_data_dist_axis
-                self.redistribute(axis)
+                self.redistribute(axis, via_memmap=via_memmap)
             if self.main_data.distributed:
                 lgind = list(self.main_data.data.enumerate(axis))
             else:
@@ -1013,7 +1013,7 @@ class TimestreamCommon(container.BasicTod):
                 else:
                     func(self.local_vis[tuple(data_sel)], self.local_vis_mask[tuple(data_sel)], lind, gind, axis_val, self, **kwargs)
             if full_data and keep_dist_axis:
-                self.redistribute(original_dist_axis)
+                self.redistribute(original_dist_axis, via_memmap=via_memmap)
         elif isinstance(op_axis, tuple):
             axes = [ container.check_axis(axis, self.main_data_axes) for axis in op_axis ]
             data_sel = [ slice(0, None) ] * len(self.main_data_axes)
@@ -1024,7 +1024,7 @@ class TimestreamCommon(container.BasicTod):
                     axes_len = [ shape[axis] for axis in axes ]
                     # choose the longest axis in axes as the new dist axis
                     new_dist_axis = axes[np.argmax(axes_len)]
-                    self.redistribute(new_dist_axis)
+                    self.redistribute(new_dist_axis, via_memmap=via_memmap)
             if self.main_data.distributed:
                 lgind = [ list(self.main_data.data.enumerate(axis)) for axis in axes ]
             else:
@@ -1054,11 +1054,11 @@ class TimestreamCommon(container.BasicTod):
                 else:
                     func(self.local_vis[tuple(data_sel)], self.local_vis_mask[tuple(data_sel)], lind, gind, axis_val, self, **kwargs)
             if full_data and keep_dist_axis:
-                self.redistribute(original_dist_axis)
+                self.redistribute(original_dist_axis, via_memmap=via_memmap)
         else:
             raise ValueError('Invalid op_axis: %s', op_axis)
 
-    def all_data_operate(self, func, copy_data=False, **kwargs):
+    def all_data_operate(self, func, copy_data=False, via_memmap=False, **kwargs):
         """Operation to the whole `vis` and `vis_mask`.
 
         Note since `vis` and `vis_mask` is usually distributed on different
@@ -1078,9 +1078,9 @@ class TimestreamCommon(container.BasicTod):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=None, axis_vals=0, full_data=False, copy_data=copy_data, keep_dist_axis=False, **kwargs)
+        self.data_operate(func, op_axis=None, axis_vals=0, full_data=False, copy_data=copy_data, keep_dist_axis=False, via_memmap=via_memmap, **kwargs)
 
-    def time_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
+    def time_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, via_memmap=False, **kwargs):
         """Data operation along the time axis.
 
         Parameters
@@ -1109,9 +1109,9 @@ class TimestreamCommon(container.BasicTod):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis='time', axis_vals=self.time, full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis='time', axis_vals=self.time, full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, via_memmap=via_memmap, **kwargs)
 
-    def freq_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
+    def freq_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, via_memmap=False, **kwargs):
         """Data operation along the frequency axis.
 
         Parameters
@@ -1140,9 +1140,9 @@ class TimestreamCommon(container.BasicTod):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis='frequency', axis_vals=self.freq, full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis='frequency', axis_vals=self.freq, full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, via_memmap=via_memmap, **kwargs)
 
-    def bl_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
+    def bl_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, via_memmap=False, **kwargs):
         """Data operation along the baseline axis.
 
         Parameters
@@ -1171,9 +1171,9 @@ class TimestreamCommon(container.BasicTod):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis='baseline', axis_vals=self.bl, full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis='baseline', axis_vals=self.bl, full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, via_memmap=via_memmap, **kwargs)
 
-    def time_and_freq_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
+    def time_and_freq_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, via_memmap=False, **kwargs):
         """Data operation along the time and frequency axis.
 
         Parameters
@@ -1203,9 +1203,9 @@ class TimestreamCommon(container.BasicTod):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=('time', 'frequency'), axis_vals=(self.time, self.freq), full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis=('time', 'frequency'), axis_vals=(self.time, self.freq), full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, via_memmap=via_memmap, **kwargs)
 
-    def time_and_bl_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
+    def time_and_bl_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, via_memmap=False, **kwargs):
         """Data operation along the time and baseline axis.
 
         Parameters
@@ -1235,9 +1235,9 @@ class TimestreamCommon(container.BasicTod):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=('time', 'baseline'), axis_vals=(self.time, self.bl), full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis=('time', 'baseline'), axis_vals=(self.time, self.bl), full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, via_memmap=via_memmap, **kwargs)
 
-    def freq_and_bl_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
+    def freq_and_bl_data_operate(self, func, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, via_memmap=False, **kwargs):
         """Data operation along the frequency and baseline axis.
 
         Parameters
@@ -1267,13 +1267,13 @@ class TimestreamCommon(container.BasicTod):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=('frequency', 'baseline'), axis_vals=(self.freq, self.bl), full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, **kwargs)
+        self.data_operate(func, op_axis=('frequency', 'baseline'), axis_vals=(self.freq, self.bl), full_data=full_data, copy_data=copy_data, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=keep_dist_axis, via_memmap=via_memmap, **kwargs)
 
 
     def _copy_a_common_dataset(self, name, other):
         ### copy a common dataset from `other` to self
         if name == 'feedno' and not other._subset_feed_select is None:
-            self.create_dataset(name, data=other._subset_feed_select)
+            self.create_dataset(name, data=other._subset_feed_select, memmap_path=self._memmap_path)
             memh5.copyattrs(other[name].attrs, self[name].attrs)
         elif name in self.feed_ordered_datasets.keys() and not other._subset_feed_select is None:
             feedno = other['feedno'][:].tolist()
@@ -1281,7 +1281,7 @@ class TimestreamCommon(container.BasicTod):
             feed_axis = self.feed_ordered_datasets[name].index(0)
             slc = [slice(0, None)] * len(other[name].shape)
             slc[feed_axis] = feed_inds
-            self.create_dataset(name, data=other[name][tuple(slc)])
+            self.create_dataset(name, data=other[name][tuple(slc)], memmap_path=self._memmap_path)
             memh5.copyattrs(other[name].attrs, self[name].attrs)
         else:
             super(TimestreamCommon, self)._copy_a_common_dataset(name, other)

@@ -35,9 +35,10 @@ class Rebin(timestream_task.TimestreamTask):
 
         assert isinstance(ts, Timestream), '%s only works for Timestream object' % self.__class__.__name__
 
+        via_memmap = self.params['via_memmap']
         bin_number = self.params['bin_number']
 
-        ts.redistribute('baseline')
+        ts.redistribute('baseline', via_memmap=via_memmap)
 
         nt = len(ts.time)
         nfreq = len(ts.freq)

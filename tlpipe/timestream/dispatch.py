@@ -12,6 +12,7 @@ import itertools
 import numpy as np
 import h5py
 from . import timestream_task
+from tlpipe.utils.path_util import output_path
 from tlpipe.core import constants as const
 
 from caput import mpiutil
@@ -171,6 +172,7 @@ class Dispatch(timestream_task.TimestreamTask):
         drop_days = self.params['drop_days']
         mode = self.params['mode']
         dist_axis = self.params['dist_axis']
+        memmap_path = self.params['memmap_path']
 
         ngrp = len(self.input_grps)
 
@@ -218,7 +220,7 @@ class Dispatch(timestream_task.TimestreamTask):
                 print('Not enough span time (less than `extra_inttime`), drop it...')
             return None
 
-        tod = self._Tod_class(input_files, mode, this_start, this_stop, dist_axis)
+        tod = self._Tod_class(input_files, mode, this_start, this_stop, dist_axis, memmap_path=output_path(memmap_path))
 
         tod, _ = self.data_select(tod)
 

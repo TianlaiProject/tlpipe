@@ -114,7 +114,8 @@ class Accum(timestream_task.TimestreamTask):
             self.data.attrs['ndays'] = 1 # record number of days accumulated
         else:
             # make they are distributed along the same axis
-            ts.redistribute(self.data.main_data_dist_axis)
+            via_memmap = self.params['via_memmap']
+            ts.redistribute(self.data.main_data_dist_axis, via_memmap=via_memmap)
             # check for ra, dec
             ra_self = self.data['ra_dec'].local_data[:, 0]
             if mpiutil.rank0 and ra_self[0] > ra_self[1]:

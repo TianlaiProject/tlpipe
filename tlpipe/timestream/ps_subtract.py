@@ -34,11 +34,12 @@ class PsSub(timestream_task.TimestreamTask):
 
     def process(self, ts):
 
+        via_memmap = self.params['via_memmap']
         ps = self.params['ps']
         catalog = self.params['catalog']
         span = self.params['span']
 
-        ts.redistribute('baseline')
+        ts.redistribute('baseline', via_memmap=via_memmap)
 
         int_time = ts.attrs['inttime']
         num_span = np.int(span / int_time)

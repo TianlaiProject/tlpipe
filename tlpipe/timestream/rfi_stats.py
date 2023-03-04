@@ -37,13 +37,14 @@ class Stats(timestream_task.TimestreamTask):
 
     def process(self, ts):
 
+        via_memmap = self.params['via_memmap']
         excl_auto = self.params['excl_auto']
         plot_stats = self.params['plot_stats']
         fig_prefix = self.params['fig_name']
         rotate_xdate = self.params['rotate_xdate']
         tag_output_iter = self.params['tag_output_iter']
 
-        ts.redistribute('baseline')
+        ts.redistribute('baseline', via_memmap=via_memmap)
 
         if ts.local_vis_mask.ndim == 3: # RawTimestream
             if excl_auto:

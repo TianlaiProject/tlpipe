@@ -134,7 +134,7 @@ class BasicTod(memh5.MemDiskGroup):
     _time_ordered_attrs_ = {}
 
 
-    def __init__(self, files=None, mode='r', start=0, stop=None, dist_axis=0, use_hints=True, comm=None):
+    def __init__(self, files=None, mode='r', start=0, stop=None, dist_axis=0, memmap_path=None, use_hints=True, comm=None):
 
         super(BasicTod, self).__init__(data_group=None, distributed=True, comm=comm)
 
@@ -161,6 +161,8 @@ class BasicTod(memh5.MemDiskGroup):
 
         self.main_data_select = [ slice(0, None, None) for i in self._main_data_axes_ ]
         self.subset_data_select = [ slice(0, None, None) for i in self._main_data_axes_ ]
+
+        self._memmap_path = memmap_path
 
     def __del__(self):
         """Closes the opened file handlers."""
@@ -424,7 +426,7 @@ class BasicTod(memh5.MemDiskGroup):
 
         fh = self.infiles[0]
         dset = fh[name]
-        self.create_dataset(name, data=dset, shape=dset.shape, dtype=dset.dtype)
+        self.create_dataset(name, data=dset, shape=dset.shape, dtype=dset.dtype, memmap_path=self._memmap_path)
         # copy attrs of this dset
         memh5.copyattrs(dset.attrs, self[name].attrs)
 
@@ -459,7 +461,7 @@ class BasicTod(memh5.MemDiskGroup):
         if self.main_data_dist_axis in axes:
             # load as a distributed dataset
             # create a distributed dataset to hold the data to be load
-            self.create_dataset(name, shape=shp, dtype=dset_type, distributed=True, distributed_axis=di)
+            self.create_dataset(name, shape=shp, dtype=dset_type, distributed=True, distributed_axis=di, memmap_path=self._memmap_path)
             # copy attrs of this dset
             memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
 
@@ -521,7 +523,7 @@ class BasicTod(memh5.MemDiskGroup):
         else:
             # load as a common dataset
             # create a common dataset to hold the data to be load
-            self.create_dataset(name, shape=shp, dtype=dset_type)
+            self.create_dataset(name, shape=shp, dtype=dset_type, memmap_path=self._memmap_path)
             # copy attrs of this dset
             memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
 
@@ -568,7 +570,7 @@ class BasicTod(memh5.MemDiskGroup):
         if self.main_data_dist_axis == 0:
             # load data as a distributed dataset
             # create a distributed dataset to hold the data to be load
-            self.create_dataset(name, shape=dset_shape, dtype=dset_type, distributed=True, distributed_axis=ti)
+            self.create_dataset(name, shape=dset_shape, dtype=dset_type, distributed=True, distributed_axis=ti, memmap_path=self._memmap_path)
             # copy attrs of this dset
             memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
 
@@ -587,7 +589,7 @@ class BasicTod(memh5.MemDiskGroup):
         else:
             # load data as a common dataset
             # create a common dataset to hold the data to be load
-            self.create_dataset(name, shape=dset_shape, dtype=dset_type)
+            self.create_dataset(name, shape=dset_shape, dtype=dset_type, memmap_path=self._memmap_path)
             # copy attrs of this dset
             memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
 
@@ -762,9 +764,9 @@ class BasicTod(memh5.MemDiskGroup):
 
         if not name in self.keys():
             if self.main_data_dist_axis == 0:
-                self.create_dataset(name, data=data, distributed=True, distributed_axis=time_axis)
+                self.create_dataset(name, data=data, distributed=True, distributed_axis=time_axis, memmap_path=self._memmap_path)
             else:
-                self.create_dataset(name, data=data)
+                self.create_dataset(name, data=data, memmap_path=self._memmap_path)
         else:
             if recreate:
                 if copy_attrs:
@@ -772,9 +774,9 @@ class BasicTod(memh5.MemDiskGroup):
                     memh5.copyattrs(self[name].attrs, attr_dict)
                 del self[name]
                 if self.main_data_dist_axis == 0:
-                    self.create_dataset(name, data=data, distributed=True, distributed_axis=time_axis)
+                    self.create_dataset(name, data=data, distributed=True, distributed_axis=time_axis, memmap_path=self._memmap_path)
                 else:
-                    self.create_dataset(name, data=data)
+                    self.create_dataset(name, data=data, memmap_path=self._memmap_path)
                 if copy_attrs:
                     memh5.copyattrs(attr_dict, self[name].attrs)
             else:
@@ -828,9 +830,9 @@ class BasicTod(memh5.MemDiskGroup):
 
         if not name in self.keys():
             if self.main_data_dist_axis in axes:
-                self.create_dataset(name, data=data, distributed=True, distributed_axis=axis_order.index(self.main_data_dist_axis))
+                self.create_dataset(name, data=data, distributed=True, distributed_axis=axis_order.index(self.main_data_dist_axis), memmap_path=self._memmap_path)
             else:
-                self.create_dataset(name, data=data)
+                self.create_dataset(name, data=data, memmap_path=self._memmap_path)
         else:
             if recreate:
                 if copy_attrs:
@@ -838,9 +840,9 @@ class BasicTod(memh5.MemDiskGroup):
                     memh5.copyattrs(self[name].attrs, attr_dict)
                 del self[name]
                 if self.main_data_dist_axis in axes:
-                    self.create_dataset(name, data=data, distributed=True, distributed_axis=axis_order.index(self.main_data_dist_axis))
+                    self.create_dataset(name, data=data, distributed=True, distributed_axis=axis_order.index(self.main_data_dist_axis), memmap_path=self._memmap_path)
                 else:
-                    self.create_dataset(name, data=data)
+                    self.create_dataset(name, data=data, memmap_path=self._memmap_path)
                 if copy_attrs:
                     memh5.copyattrs(attr_dict, self[name].attrs)
             else:
@@ -995,7 +997,7 @@ class BasicTod(memh5.MemDiskGroup):
 
         mpiutil.barrier(comm=self.comm)
 
-    def redistribute(self, dist_axis):
+    def redistribute(self, dist_axis, via_memmap=False):
         """Redistribute the main time ordered dataset along a specified axis.
 
         This will redistribute the main_data along the specified axis `dis_axis`,
@@ -1024,7 +1026,7 @@ class BasicTod(memh5.MemDiskGroup):
         else:
             # redistribute main data if it exists
             try:
-                self.main_data.redistribute(axis)
+                self.main_data.redistribute(axis, via_memmap=via_memmap)
             except KeyError:
                 pass
             self.main_data_dist_axis = axis
@@ -1109,7 +1111,7 @@ class BasicTod(memh5.MemDiskGroup):
         return dset_shape, dset_type, outfiles_map
 
 
-    def to_files(self, outfiles, exclude=[], check_status=True, write_hints=True, libver='earliest'):
+    def to_files(self, outfiles, exclude=[], check_status=True, write_hints=True, via_memmap=False, libver='earliest'):
         """Save the data hold in this container to files.
 
         Parameters
@@ -1139,7 +1141,7 @@ class BasicTod(memh5.MemDiskGroup):
 
         # first redistribute main_time_ordered_datasets to the first axis
         if self.main_data_dist_axis != 0:
-            self.redistribute(0)
+            self.redistribute(0, via_memmap=via_memmap)
 
         # check data is consistent before save
         if check_status:
@@ -1206,7 +1208,7 @@ class BasicTod(memh5.MemDiskGroup):
     def copy(self):
         """Return a deep copy of this container."""
 
-        cont = self.__class__(dist_axis=self.main_data_dist_axis, comm=self.comm)
+        cont = self.__class__(dist_axis=self.main_data_dist_axis, comm=self.comm, memmap_path=self._memmap_path)
 
         # set hints
         hint_keys = [ key for key in self.__class__.__dict__.keys() if re.match(self.hints_pattern, key) ]
@@ -1219,14 +1221,14 @@ class BasicTod(memh5.MemDiskGroup):
 
         # copy datasets
         for dset_name, dset in self.items():
-            cont.create_dataset(dset_name, data=dset.data.copy())
+            cont.create_dataset(dset_name, data=dset.data.copy(), memmap_path=cont._memmap_path)
             memh5.copyattrs(dset.attrs, cont[dset_name].attrs)
 
         return cont
 
 
 
-    def data_operate(self, func, op_axis=None, axis_vals=0, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, **kwargs):
+    def data_operate(self, func, op_axis=None, axis_vals=0, full_data=False, copy_data=False, show_progress=False, progress_step=None, keep_dist_axis=False, via_memmap=False, **kwargs):
         """A basic data operation interface.
 
         You can use this method to do some constrained operations to the main data
@@ -1283,7 +1285,7 @@ class BasicTod(memh5.MemDiskGroup):
             data_sel = [ slice(0, None) ] * len(self.main_data_axes)
             if full_data:
                 original_dist_axis = self.main_data_dist_axis
-                self.redistribute(axis)
+                self.redistribute(axis, via_memmap=via_memmap)
             if self.main_data.distributed:
                 lgind = self.main_data.data.enumerate(axis)
             else:
@@ -1308,7 +1310,7 @@ class BasicTod(memh5.MemDiskGroup):
                 else:
                     func(self.main_data.local_data[tuple(data_sel)], lind, gind, axis_val, self, **kwargs)
             if full_data and keep_dist_axis:
-                self.redistribute(original_dist_axis)
+                self.redistribute(original_dist_axis, via_memmap=via_memmap)
         elif isinstance(op_axis, tuple):
             axes = [ check_axis(axis, self.main_data_axes) for axis in op_axis ]
             data_sel = [ slice(0, None) ] * len(self.main_data_axes)
@@ -1319,7 +1321,7 @@ class BasicTod(memh5.MemDiskGroup):
                     axes_len = [ shape[axis] for axis in axes ]
                     # choose the longest axis in axes as the new dist axis
                     new_dist_axis = axes[np.argmax(axes_len)]
-                    self.redistribute(new_dist_axis)
+                    self.redistribute(new_dist_axis, via_memmap=via_memmap)
             if self.main_data.distributed:
                 lgind = [ list(self.main_data.data.enumerate(axis)) for axis in axes ]
             else:
@@ -1349,11 +1351,11 @@ class BasicTod(memh5.MemDiskGroup):
                 else:
                     func(self.main_data.local_data[tuple(data_sel)], lind, gind, axis_val, self, **kwargs)
             if full_data and keep_dist_axis:
-                self.redistribute(original_dist_axis)
+                self.redistribute(original_dist_axis, via_memmap=via_memmap)
         else:
             raise ValueError('Invalid op_axis: %s', op_axis)
 
-    def all_data_operate(self, func, copy_data=False, **kwargs):
+    def all_data_operate(self, func, copy_data=False, via_memmap=False, **kwargs):
         """Operation to the whole main data.
 
         Note since the main data is distributed on different processes, `func`
@@ -1373,7 +1375,7 @@ class BasicTod(memh5.MemDiskGroup):
             Any other arguments that will passed to `func`.
 
         """
-        self.data_operate(func, op_axis=None, axis_vals=0, full_data=False, copy_data=copy_data, keep_dist_axis=False, **kwargs)
+        self.data_operate(func, op_axis=None, axis_vals=0, full_data=False, copy_data=copy_data, keep_dist_axis=False, via_memmap=via_memmap, **kwargs)
 
 
     def _copy_a_common_attribute(self, name, other):
@@ -1393,7 +1395,7 @@ class BasicTod(memh5.MemDiskGroup):
 
     def _copy_a_common_dataset(self, name, other):
         ### copy a common dataset from `other` to self
-        self.create_dataset(name, data=other[name].data.copy())
+        self.create_dataset(name, data=other[name].data.copy(), memmap_path=self._memmap_path)
         memh5.copyattrs(other[name].attrs, self[name].attrs)
 
     def _copy_a_main_axes_ordered_dataset(self, name, other):
@@ -1404,13 +1406,13 @@ class BasicTod(memh5.MemDiskGroup):
         shp = [ len(np.arange(ni)[si]) for (ni, si) in zip(other[name].shape, sel) ]
         if not self.main_data_dist_axis in axes:
             # common data set
-            self.create_dataset(name, data=other[name].data[sel].copy())
+            self.create_dataset(name, data=other[name].data[sel].copy(), memmap_path=self._memmap_path)
             memh5.copyattrs(other[name].attrs, self[name].attrs)
         else:
             # distributed data set
             di = axes.index(self.main_data_dist_axis) # index of dist axis
             # create a distributed dataset to hold the sub data set
-            self.create_dataset(name, shape=shp, dtype=other[name].dtype, distributed=True, distributed_axis=di)
+            self.create_dataset(name, shape=shp, dtype=other[name].dtype, distributed=True, distributed_axis=di, memmap_path=self._memmap_path)
             # copy attrs of this dset
             memh5.copyattrs(other[name].attrs, self[name].attrs)
 
@@ -1436,7 +1438,7 @@ class BasicTod(memh5.MemDiskGroup):
 
     def _copy_a_time_ordered_dataset(self, name, other):
         ### copy a time ordered dataset (except those also in main_axes_ordered_datasets) from `other` to self
-        self.create_dataset(name, data=other[name].data.copy())
+        self.create_dataset(name, data=other[name].data.copy(), memmap_path=self._memmap_path)
         memh5.copyattrs(other[name].attrs, self[name].attrs)
 
     def _copy_a_dataset(self, name, other):

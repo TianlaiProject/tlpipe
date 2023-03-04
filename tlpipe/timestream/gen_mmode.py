@@ -48,6 +48,7 @@ class GenMmode(timestream_task.TimestreamTask):
 
     def process(self, ts):
 
+        via_memmap = self.params['via_memmap']
         tsys = self.params['tsys']
         accuracy_boost = self.params['accuracy_boost']
         l_boost = self.params['l_boost']
@@ -65,7 +66,7 @@ class GenMmode(timestream_task.TimestreamTask):
 
         assert isinstance(ts, Timestream), '%s only works for Timestream object' % self.__class__.__name__
 
-        ts.redistribute('time')
+        ts.redistribute('time', via_memmap=via_memmap)
 
         lat = ts.attrs['sitelat']
         # lon = ts.attrs['sitelon']

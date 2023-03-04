@@ -46,6 +46,9 @@ class TimestreamTask(OneAndOne):
                     'start': 0,
                     'stop': None,
                     'dist_axis': 0,
+                    'memmap_path': './memmap',
+                    'via_memmap': False,
+                    'dist_axis': 0,
                     'exclude': [],
                     'check_status': True,
                     'write_hints': True,
@@ -129,13 +132,14 @@ class TimestreamTask(OneAndOne):
         start = self.params['start']
         stop = self.params['stop']
         dist_axis = self.params['dist_axis']
+        memmap_path = self.params['memmap_path']
         tag_input_iter = self.params['tag_input_iter']
 
         if self.iterable and tag_input_iter:
             input_files = input_path(self.input_files, iteration=self.iteration)
         else:
             input_files = self.input_files
-        tod = self._Tod_class(input_files, mode, start, stop, dist_axis)
+        tod = self._Tod_class(input_files, mode, start, stop, dist_axis, memmap_path=output_path(memmap_path))
 
         tod, full_data = self.data_select(tod)
 
@@ -212,6 +216,7 @@ class TimestreamTask(OneAndOne):
     def write_output(self, output):
         """Method for writing time ordered data output. """
 
+        via_memmap = self.params['via_memmap']
         exclude = self.params['exclude']
         check_status = self.params['check_status']
         write_hints = self.params['write_hints']
@@ -228,7 +233,7 @@ class TimestreamTask(OneAndOne):
             output_files = self.output_files
 
         try:
-            output.to_files(output_files, exclude, check_status, write_hints, libver, chunk_vis, chunk_shape, chunk_size)
+            output.to_files(output_files, exclude, check_status, write_hints, via_memmap, libver, chunk_vis, chunk_shape, chunk_size)
         except Exception as e:
             if output_failed_continue:
                 msg = 'Process %d writing output to files failed...' % mpiutil.rank

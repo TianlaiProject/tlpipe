@@ -29,8 +29,9 @@ class Detect(timestream_task.TimestreamTask):
     prefix = 'bd_'
 
     def process(self, ts):
+        via_memmap = self.params['via_memmap']
 
-        ts.redistribute('baseline')
+        ts.redistribute('baseline', via_memmap=via_memmap)
 
         vis = ts.local_vis
         vis_mask = ts.local_vis_mask

@@ -48,6 +48,7 @@ class SimVis(timestream_task.TimestreamTask):
 
         assert isinstance(ts, Timestream), '%s only works for Timestream object' % self.__class__.__name__
 
+        via_memmap = self.params['via_memmap']
         model_maps = self.params['model_maps']
         show_progress = self.params['show_progress']
         progress_step = self.params['progress_step']
@@ -57,7 +58,7 @@ class SimVis(timestream_task.TimestreamTask):
                 print('No sky models provided, will do nothing')
         else:
 
-            ts.redistribute('time')
+            ts.redistribute('time', via_memmap=via_memmap)
 
             freq = ts['freq'][:] # MHz
             nfreq = len(freq)

@@ -33,11 +33,12 @@ class Subtract(timestream_task.TimestreamTask):
 
     def process(self, ts):
 
+        via_memmap = self.params['via_memmap']
         save_night_mean = self.params['save_night_mean']
         night_mean_file = self.params['night_mean_file']
         tag_output_iter = self.params['tag_output_iter']
 
-        ts.redistribute('baseline')
+        ts.redistribute('baseline', via_memmap=via_memmap)
 
         if isinstance(ts, RawTimestream):
             func = ts.bl_data_operate
@@ -54,7 +55,7 @@ class Subtract(timestream_task.TimestreamTask):
                 ts.create_freq_pol_and_bl_ordered_dataset('night_mean', night_mean, axis_order=(1, 2, 3))
                 # ts.create_freq_pol_and_bl_ordered_dataset('night_mean', night_mean, axis_order=None)
 
-        func(self.operate, full_data=True)
+        func(self.operate, full_data=True, via_memmap=via_memmap)
 
         if save_night_mean:
             # gather bl_order to rank0

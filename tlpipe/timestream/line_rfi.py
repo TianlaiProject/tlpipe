@@ -43,10 +43,11 @@ class Flag(timestream_task.TimestreamTask):
 
     def process(self, ts):
 
+        via_memmap = self.params['via_memmap']
         freq_window = self.params['freq_window']
         time_window = self.params['time_window']
 
-        ts.redistribute('baseline')
+        ts.redistribute('baseline', via_memmap=via_memmap)
 
         time = ts.time[:]
         nt = len(time)
@@ -82,7 +83,7 @@ class Flag(timestream_task.TimestreamTask):
         show_progress = self.params['show_progress']
         progress_step = self.params['progress_step']
 
-        func(self.flag, full_data=True, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False, freq_flag=freq_flag, time_flag=time_flag)
+        func(self.flag, full_data=True, via_memmap=via_memmap, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False, freq_flag=freq_flag, time_flag=time_flag)
 
         return super(Flag, self).process(ts)
 

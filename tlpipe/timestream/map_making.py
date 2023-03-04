@@ -76,6 +76,7 @@ class MapMaking(timestream_task.TimestreamTask):
 
     def process(self, ts):
 
+        via_memmap = self.params['via_memmap']
         mask_daytime = self.params['mask_daytime']
         mask_time_range = self.params['mask_time_range']
         tsys = self.params['tsys']
@@ -116,7 +117,7 @@ class MapMaking(timestream_task.TimestreamTask):
         else:
             assert isinstance(ts, Timestream), '%s only works for Timestream object' % self.__class__.__name__
 
-            ts.redistribute('baseline')
+            ts.redistribute('baseline', via_memmap=via_memmap)
 
             lat = ts.attrs['sitelat']
             # lon = ts.attrs['sitelon']

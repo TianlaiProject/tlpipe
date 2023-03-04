@@ -37,8 +37,9 @@ class Flag(timestream_task.TimestreamTask):
 
         nfreq = ts.freq.shape[0] # global shape
         if nfreq >= freq_points:
+            via_memmap = self.params['via_memmap']
 
-            ts.redistribute('time')
+            ts.redistribute('time', via_memmap=via_memmap)
 
             if isinstance(ts, RawTimestream):
                 func = ts.time_and_bl_data_operate
@@ -48,7 +49,7 @@ class Flag(timestream_task.TimestreamTask):
             show_progress = self.params['show_progress']
             progress_step = self.params['progress_step']
 
-            func(self.flag, full_data=True, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False)
+            func(self.flag, full_data=True, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False, via_memmap=via_memmap)
         else:
             warnings.warn('Not enough frequency points to do the flag')
 

@@ -32,13 +32,14 @@ class ReOrder(timestream_task.TimestreamTask):
 
         assert isinstance(ts, Timestream), '%s only works for Timestream object' % self.__class__.__name__
 
+        via_memmap = self.params['via_memmap']
         discard_less = self.params['discard_less']
         nt = ts.vis.shape[0]
         int_time = ts.attrs['inttime']
         if nt * int_time < discard_less * const.sday:
             return None
 
-        ts.redistribute('baseline')
+        ts.redistribute('baseline', via_memmap=via_memmap)
 
         start_ra = ts.vis.attrs['start_ra']
         ra = np.unwrap(ts['ra_dec'][:, 0])

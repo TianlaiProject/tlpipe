@@ -74,6 +74,7 @@ class Closure(timestream_task.TimestreamTask):
 
     def process(self, ts):
 
+        via_memmap = self.params['via_memmap']
         calibrator = self.params['calibrator']
         catalog = self.params['catalog']
         file_prefix = self.params['file_name']
@@ -85,7 +86,7 @@ class Closure(timestream_task.TimestreamTask):
         freq_incl = self.params['freq_incl']
         freq_excl = self.params['freq_excl']
 
-        ts.redistribute('frequency')
+        ts.redistribute('frequency', via_memmap=via_memmap)
 
         if freq_incl == 'all':
             freq_plt = list(range(rt.freq.shape[0]))

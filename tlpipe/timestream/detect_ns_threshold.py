@@ -37,10 +37,11 @@ class Detect(timestream_task.TimestreamTask):
 
         assert isinstance(rt, RawTimestream), '%s only works for RawTimestream object currently' % self.__class__.__name__
 
+        via_memmap = self.params['via_memmap']
         channel = self.params['channel']
         mask_near = max(0, int(self.params['mask_near']))
 
-        rt.redistribute(0) # make time the dist axis
+        rt.redistribute(0, via_memmap=via_memmap) # make time the dist axis
 
         auto_inds = np.where(rt.bl[:, 0]==rt.bl[:, 1])[0].tolist() # inds for auto-correlations
         channels = [ rt.bl[ai, 0] for ai in auto_inds ] # all chosen channels

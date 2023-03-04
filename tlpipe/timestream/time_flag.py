@@ -43,8 +43,9 @@ class Flag(timestream_task.TimestreamTask):
         if time_window % 2 == 0:
             time_window += 1
         if nt >= 2*time_window:
+            via_memmap = self.params['via_memmap']
 
-            ts.redistribute('baseline')
+            ts.redistribute('baseline', via_memmap=via_memmap)
 
             if isinstance(ts, RawTimestream):
                 func = ts.freq_and_bl_data_operate
@@ -54,7 +55,7 @@ class Flag(timestream_task.TimestreamTask):
             show_progress = self.params['show_progress']
             progress_step = self.params['progress_step']
 
-            func(self.flag, full_data=True, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False)
+            func(self.flag, full_data=True, via_memmap=via_memmap, show_progress=show_progress, progress_step=progress_step, keep_dist_axis=False)
         else:
             warnings.warn('Not enough time points to do the smoothing')
 

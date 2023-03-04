@@ -33,6 +33,6 @@ class Rt2ts(timestream_task.TimestreamTask):
 
     def process(self, rt):
 
-        ts = rt.separate_pol_and_bl(self.params['keep_dist_axis'], self.params['destroy_rt'])
+        ts = rt.separate_pol_and_bl(self.params['keep_dist_axis'], self.params['via_memmap'], self.params['destroy_rt'])
 
         return super(Rt2ts, self).process(ts)

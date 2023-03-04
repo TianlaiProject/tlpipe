@@ -28,13 +28,15 @@ class Combine(timestream_task.TimestreamTask):
 
         assert isinstance(ts, Timestream), '%s only works for Timestream object' % self.__class__.__name__
 
+        via_memmap = self.params['via_memmap']
+
         if ts.dist_axis_name == 'polarization':
-            ts.redistribute('baseline')
+            ts.redistribute('baseline', via_memmap=via_memmap)
 
         show_progress = self.params['show_progress']
         progress_step = self.params['progress_step']
 
-        ts.bl_data_operate(self.combine, show_progress=show_progress, progress_step=progress_step,)
+        ts.bl_data_operate(self.combine, show_progress=show_progress, progress_step=progress_step, via_memmap=via_memmap)
 
         # set flag to indicate the combination
         ts['vis_mask'].attrs['combined_mask'] = True

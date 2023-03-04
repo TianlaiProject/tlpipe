@@ -89,7 +89,9 @@ class NsCal(timestream_task.TimestreamTask):
             if pol_type != 'linear':
                 raise RuntimeError('Can not do ns_eigcal for pol_type: %s' % pol_type)
 
-            ts.redistribute('baseline')
+            via_memmap = self.params['via_memmap']
+
+            ts.redistribute('baseline', via_memmap=via_memmap)
 
             nt = ts.local_vis.shape[0]
             freq = ts.freq[:]
