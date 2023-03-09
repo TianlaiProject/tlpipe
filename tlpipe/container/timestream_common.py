@@ -990,7 +990,12 @@ class TimestreamCommon(container.BasicTod):
                 original_dist_axis = self.main_data_dist_axis
                 self.redistribute(axis, via_memmap=via_memmap)
             if self.main_data.distributed:
-                lgind = list(self.main_data.data.enumerate(axis))
+                try:
+                    lgind = list(self.main_data.data.enumerate(axis))
+                except AttributeError:
+                    start = self.main_data.local_offset[axis]
+                    end = start + self.main_data.local_shape[axis]
+                    lgind = list(enumerate(range(start, end)))
             else:
                 lgind = list(enumerate(range(self.main_data.data.shape[axis])))
             if show_progress:
@@ -1026,7 +1031,10 @@ class TimestreamCommon(container.BasicTod):
                     new_dist_axis = axes[np.argmax(axes_len)]
                     self.redistribute(new_dist_axis, via_memmap=via_memmap)
             if self.main_data.distributed:
-                lgind = [ list(self.main_data.data.enumerate(axis)) for axis in axes ]
+                try:
+                    lgind = [ list(self.main_data.data.enumerate(axis)) for axis in axes ]
+                except AttributeError:
+                    lgind = [ list(enumerate(range(self.main_data.local_offset[axis], self.main_data.local_offset[axis] + self.main_data.local_shape[axis]))) for axis in axes ]
             else:
                 lgind = [ list(enumerate(range(self.main_data.data.shape[axis]))) for axis in axes ]
             linds = [ [ li for (li, gi) in lg ] for lg in lgind ]

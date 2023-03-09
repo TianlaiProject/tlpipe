@@ -134,7 +134,7 @@ class BasicTod(memh5.MemDiskGroup):
     _time_ordered_attrs_ = {}
 
 
-    def __init__(self, files=None, mode='r', start=0, stop=None, dist_axis=0, memmap_path=None, use_hints=True, comm=None):
+    def __init__(self, files=None, mode='r', start=0, stop=None, dist_axis=0, memmap_vis=False, memmap_path=None, use_hints=True, comm=None):
 
         super(BasicTod, self).__init__(data_group=None, distributed=True, comm=comm)
 
@@ -162,6 +162,7 @@ class BasicTod(memh5.MemDiskGroup):
         self.main_data_select = [ slice(0, None, None) for i in self._main_data_axes_ ]
         self.subset_data_select = [ slice(0, None, None) for i in self._main_data_axes_ ]
 
+        self._memmap_vis = memmap_vis
         self._memmap_path = memmap_path
 
     def __del__(self):
@@ -461,7 +462,11 @@ class BasicTod(memh5.MemDiskGroup):
         if self.main_data_dist_axis in axes:
             # load as a distributed dataset
             # create a distributed dataset to hold the data to be load
-            self.create_dataset(name, shape=shp, dtype=dset_type, distributed=True, distributed_axis=di, memmap_path=self._memmap_path)
+            # if name == self._main_data_name_:
+            if self._main_data_name_ in name:
+                self.create_dataset(name, shape=shp, dtype=dset_type, distributed=True, distributed_axis=di, memmap=self._memmap_vis, memmap_path=self._memmap_path)
+            else:
+                self.create_dataset(name, shape=shp, dtype=dset_type, distributed=True, distributed_axis=di, memmap_path=self._memmap_path)
             # copy attrs of this dset
             memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
 
@@ -830,7 +835,11 @@ class BasicTod(memh5.MemDiskGroup):
 
         if not name in self.keys():
             if self.main_data_dist_axis in axes:
-                self.create_dataset(name, data=data, distributed=True, distributed_axis=axis_order.index(self.main_data_dist_axis), memmap_path=self._memmap_path)
+                # if name == self._main_data_name_:
+                if self._main_data_name_ in name:
+                    self.create_dataset(name, data=data, distributed=True, distributed_axis=axis_order.index(self.main_data_dist_axis), memmap=self._memmap_vis, memmap_path=self._memmap_path)
+                else:
+                    self.create_dataset(name, data=data, distributed=True, distributed_axis=axis_order.index(self.main_data_dist_axis), memmap_path=self._memmap_path)
             else:
                 self.create_dataset(name, data=data, memmap_path=self._memmap_path)
         else:
@@ -840,7 +849,11 @@ class BasicTod(memh5.MemDiskGroup):
                     memh5.copyattrs(self[name].attrs, attr_dict)
                 del self[name]
                 if self.main_data_dist_axis in axes:
-                    self.create_dataset(name, data=data, distributed=True, distributed_axis=axis_order.index(self.main_data_dist_axis), memmap_path=self._memmap_path)
+                    # if name == self._main_data_name_:
+                    if self._main_data_name_ in name:
+                        self.create_dataset(name, data=data, distributed=True, distributed_axis=axis_order.index(self.main_data_dist_axis), memmap=self._memmap_vis, memmap_path=self._memmap_path)
+                    else:
+                        self.create_dataset(name, data=data, distributed=True, distributed_axis=axis_order.index(self.main_data_dist_axis), memmap_path=self._memmap_path)
                 else:
                     self.create_dataset(name, data=data, memmap_path=self._memmap_path)
                 if copy_attrs:
@@ -1287,7 +1300,12 @@ class BasicTod(memh5.MemDiskGroup):
                 original_dist_axis = self.main_data_dist_axis
                 self.redistribute(axis, via_memmap=via_memmap)
             if self.main_data.distributed:
-                lgind = self.main_data.data.enumerate(axis)
+                try:
+                    lgind = self.main_data.data.enumerate(axis)
+                except AttributeError:
+                    start = self.main_data.local_offset[axis]
+                    end = start + self.main_data.local_shape[axis]
+                    lgind = list(enumerate(range(start, end)))
             else:
                 lgind = enumerate(range(self.main_data.data.shape[axis]))
             if show_progress:
@@ -1323,7 +1341,10 @@ class BasicTod(memh5.MemDiskGroup):
                     new_dist_axis = axes[np.argmax(axes_len)]
                     self.redistribute(new_dist_axis, via_memmap=via_memmap)
             if self.main_data.distributed:
-                lgind = [ list(self.main_data.data.enumerate(axis)) for axis in axes ]
+                try:
+                    lgind = [ list(self.main_data.data.enumerate(axis)) for axis in axes ]
+                except AttributeError:
+                    lgind = [ list(enumerate(range(self.main_data.local_offset[axis], self.main_data.local_offset[axis] + self.main_data.local_shape[axis]))) for axis in axes ]
             else:
                 lgind = [ list(enumerate(range(self.main_data.data.shape[axis]))) for axis in axes ]
             linds = [ [ li for (li, gi) in lg ] for lg in lgind ]

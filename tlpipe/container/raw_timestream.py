@@ -281,7 +281,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
             keep_dist_axis = False
 
         # create a Timestream container to hold the pol and bl separated data
-        ts = timestream.Timestream(dist_axis=self.main_data_dist_axis, comm=self.comm, memmap_path=self._memmap_path)
+        ts = timestream.Timestream(dist_axis=self.main_data_dist_axis, comm=self.comm, memmap_vis=self._memmap_vis, memmap_path=self._memmap_path)
 
         feedno = sorted(self['feedno'][:].tolist())
         xchans = [ self['channo'][feedno.index(fd)][0] for fd in feedno ]
