@@ -27,12 +27,16 @@ class Rt2ts(timestream_task.TimestreamTask):
     params_init = {
                     'keep_dist_axis': False,
                     'destroy_rt': True,
+                    'low_memory_convert': False,
                   }
 
     prefix = 'r2t_'
 
     def process(self, rt):
 
-        ts = rt.separate_pol_and_bl(self.params['keep_dist_axis'], self.params['via_memmap'], self.params['destroy_rt'])
+        if self.params['low_memory_convert']:
+            ts = rt.separate_pol_and_bl_low_memory(self.params['keep_dist_axis'], self.params['via_memmap'], self.params['destroy_rt'])
+        else:
+            ts = rt.separate_pol_and_bl(self.params['keep_dist_axis'], self.params['via_memmap'], self.params['destroy_rt'])
 
         return super(Rt2ts, self).process(ts)

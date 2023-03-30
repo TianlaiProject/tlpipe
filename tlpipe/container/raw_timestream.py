@@ -10,12 +10,14 @@ Inheritance diagram
 """
 
 import re
+import gc
 import itertools
 import numpy as np
 from . import timestream_common
 from . import timestream
 from caput import mpiarray
 from caput import memh5
+from caput import mpiutil
 
 
 class RawTimestream(timestream_common.TimestreamCommon):
@@ -343,6 +345,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
 
         if destroy_self:
             self.delete_a_dataset('vis')
+        gc.collect()
 
         # create a MPIArray to hold the pol and bl separated vis_mask
         rvis_mask = self['vis_mask'].local_data
@@ -361,6 +364,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
 
         if destroy_self:
             self.delete_a_dataset('vis_mask')
+        gc.collect()
 
         # create other datasets needed
         # pol ordered dataset
@@ -391,12 +395,14 @@ class RawTimestream(timestream_common.TimestreamCommon):
             if dset_name == self.main_data_name or dset_name == 'vis_mask':
                 if destroy_self:
                     self.delete_a_dataset(dset_name)
+                gc.collect()
                 # already created above
                 continue
             elif dset_name in self.main_axes_ordered_datasets.keys():
                 if dset_name in self.bl_ordered_datasets.keys():
                     if destroy_self:
                         self.delete_a_dataset(dset_name)
+                    gc.collect()
                     # already created above
                     continue
                 else:
@@ -415,6 +421,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
                 if dset_name == 'channo': # channo no useful for Timestream
                     if destroy_self:
                         self.delete_a_dataset(dset_name)
+                    gc.collect()
                     continue
                 else:
                     axis_order = self.feed_ordered_datasets[dset_name]
@@ -430,6 +437,7 @@ class RawTimestream(timestream_common.TimestreamCommon):
 
             if destroy_self:
                 self.delete_a_dataset(dset_name)
+            gc.collect()
 
         # resume hints of self, error may happen if not do so
         if destroy_self:
@@ -451,3 +459,209 @@ class RawTimestream(timestream_common.TimestreamCommon):
             memh5.copyattrs(other[name].attrs, self[name].attrs)
         else:
             super(RawTimestream, self)._copy_a_common_dataset(name, other)
+
+    def separate_pol_and_bl_low_memory(self, keep_dist_axis=False, via_memmap=False, destroy_self=False):
+        """Separate baseline axis to polarization and baseline.
+
+        This will create and return a Timestream container holding the polarization
+        and baseline separated data.
+
+        Parameters
+        ----------
+        keep_dist_axis : bool, optional
+            Whether to redistribute main data to the original dist axis if the
+            dist axis has changed during the operation. Default False.
+        destroy_self : bool, optional
+            If True, will gradually delete datasets and attributes of self to
+            release memory. Default False.
+
+        """
+
+        # if dist axis is baseline, redistribute it along time
+        original_dist_axis = self.main_data_dist_axis
+        if 'baseline' == self.main_data_axes[original_dist_axis]:
+            keep_dist_axis = False # can not keep dist axis in this case
+            self.redistribute(0, via_memmap=via_memmap)
+
+        # could not keep dist axis if destroy_self == True
+        if destroy_self:
+            keep_dist_axis = False
+
+        # create a Timestream container to hold the pol and bl separated data
+        ts = timestream.Timestream(dist_axis=self.main_data_dist_axis, comm=self.comm, memmap_vis=self._memmap_vis, memmap_path=self._memmap_path)
+
+        feedno = sorted(self['feedno'][:].tolist())
+        xchans = [ self['channo'][feedno.index(fd)][0] for fd in feedno ]
+        ychans = [ self['channo'][feedno.index(fd)][1] for fd in feedno ]
+
+        nfeed = len(feedno)
+        xx_pairs = [ (xchans[i], xchans[j]) for i in range(nfeed) for j in range(i, nfeed) ]
+        yy_pairs = [ (ychans[i], ychans[j]) for i in range(nfeed) for j in range(i, nfeed) ]
+        xy_pairs = [ (xchans[i], ychans[j]) for i in range(nfeed) for j in range(i, nfeed) ]
+        yx_pairs = [ (ychans[i], xchans[j]) for i in range(nfeed) for j in range(i, nfeed) ]
+
+        blorder = [ tuple(bl) for bl in self['blorder'] ]
+        conj_blorder = [ tuple(bl[::-1]) for bl in self['blorder'] ]
+
+        def _get_ind(chp):
+            try:
+                return False, blorder.index(chp)
+            except ValueError:
+                return True, conj_blorder.index(chp)
+        # xx
+        xx_list = [ _get_ind(chp) for chp in xx_pairs ]
+        xx_inds = [ ind for (cj, ind) in xx_list ]
+        xx_conj = [ cj for (cj, ind) in xx_list ]
+        # yy
+        yy_list = [ _get_ind(chp) for chp in yy_pairs ]
+        yy_inds = [ ind for (cj, ind) in yy_list ]
+        yy_conj = [ cj for (cj, ind) in yy_list ]
+        # xy
+        xy_list = [ _get_ind(chp) for chp in xy_pairs ]
+        xy_inds = [ ind for (cj, ind) in xy_list ]
+        xy_conj = [ cj for (cj, ind) in xy_list ]
+        # yx
+        yx_list = [ _get_ind(chp) for chp in yx_pairs ]
+        yx_inds = [ ind for (cj, ind) in yx_list ]
+        yx_conj = [ cj for (cj, ind) in yx_list ]
+
+        # create a MPIArray to hold the pol and bl separated vis
+        if not via_memmap:
+            rvis = self.main_data.local_data
+        else:
+            self.main_data.to_disk()
+            sel = [ slice(o, o+s, None) for o, s in zip(self.main_data.local_offset, self.main_data.local_shape) ]
+            rvis = np.memmap(self.main_data._memmap_file, dtype=self.main_data.dtype, mode='r', shape=self.main_data.shape)[tuple(sel)]
+        tmp_vis_attrs = {}
+        memh5.copyattrs(self.main_data.attrs, tmp_vis_attrs)
+        for r in range(mpiutil.size):
+            if r == mpiutil.rank:
+                shp = rvis.shape[:2] + (4, len(xx_inds))
+                vis = np.empty(shp, dtype=rvis.dtype)
+                vis[:, :, 0] = np.where(xx_conj, rvis[:, :, xx_inds].conj(), rvis[:, :, xx_inds]) # xx
+                vis[:, :, 1] = np.where(yy_conj, rvis[:, :, yy_inds].conj(), rvis[:, :, yy_inds]) # yy
+                vis[:, :, 2] = np.where(xy_conj, rvis[:, :, xy_inds].conj(), rvis[:, :, xy_inds]) # xy
+                vis[:, :, 3] = np.where(yx_conj, rvis[:, :, yx_inds].conj(), rvis[:, :, yx_inds]) # yx
+                if destroy_self:
+                    del rvis
+                    self.delete_a_dataset('vis')
+                gc.collect()
+            mpiutil.barrier(comm=self.comm)
+
+        vis = mpiarray.MPIArray.wrap(vis, axis=self.main_data_dist_axis, comm=self.comm)
+
+        # create main data
+        ts.create_main_data(vis)
+        # copy attrs from rt
+        memh5.copyattrs(tmp_vis_attrs, ts.main_data.attrs)
+        del tmp_vis_attrs
+        # create attrs of this dataset
+        ts.main_data.attrs['dimname'] = 'Time, Frequency, Polarization, Baseline'
+
+        # create a MPIArray to hold the pol and bl separated vis_mask
+        rvis_mask = self['vis_mask'].local_data
+        for r in range(mpiutil.size):
+            if r == mpiutil.rank:
+                shp = rvis_mask.shape[:2] + (4, len(xx_inds))
+                vis_mask = np.empty(shp, dtype=rvis_mask.dtype)
+                vis_mask[:, :, 0] = rvis_mask[:, :, xx_inds] # xx
+                vis_mask[:, :, 1] = rvis_mask[:, :, yy_inds] # yy
+                vis_mask[:, :, 2] = rvis_mask[:, :, xy_inds] # xy
+                vis_mask[:, :, 3] = rvis_mask[:, :, yx_inds] # yx
+                if destroy_self:
+                    del rvis_mask
+                    self.delete_a_dataset('vis_mask')
+                gc.collect()
+            mpiutil.barrier(comm=self.comm)
+
+        vis_mask = mpiarray.MPIArray.wrap(vis_mask, axis=self.main_data_dist_axis, comm=self.comm)
+
+        # create vis_mask
+        axis_order = ts.main_axes_ordered_datasets[ts.main_data_name]
+        ts.create_main_axis_ordered_dataset(axis_order, 'vis_mask', vis_mask, axis_order)
+
+
+        # create other datasets needed
+        # pol ordered dataset
+        p = self.pol_dict
+        ts.create_pol_ordered_dataset('pol', data=np.array([p['xx'], p['yy'], p['xy'], p['yx']], dtype='i4'))
+        ts['pol'].attrs['pol_type'] = 'linear'
+        ts['pol'].attrs['pol_dict'] = '%s' % p
+
+        # bl ordered dataset
+        blorder = np.array([ [feedno[i], feedno[j]] for i in range(nfeed) for j in range(i, nfeed) ])
+        ts.create_bl_ordered_dataset('blorder', data=blorder)
+        # copy attrs of this dset
+        memh5.copyattrs(self['blorder'].attrs, ts['blorder'].attrs)
+        # other bl ordered dataset
+        other_bl_dset = set(self.bl_ordered_datasets.keys()) - {'vis', 'vis_mask', 'blorder', 'true_blorder', 'bl_pol'}
+        if len(other_bl_dset) > 0:
+            raise RuntimeError('Should not have other bl_ordered_datasets %s' % other_bl_dset)
+
+        # copy other attrs
+        for attrs_name, attrs_value in list(self.attrs.items()): # convert to list first as python3 does not allow change dict size during iteration
+            if attrs_name not in self.time_ordered_attrs:
+                ts.attrs[attrs_name] = attrs_value
+            if destroy_self:
+                self.delete_an_attribute(attrs_name)
+
+        # copy other datasets
+        for dset_name, dset in list(self.items()): # convert to list first as python3 does not allow change dict size during iteration
+            if dset_name == self.main_data_name or dset_name == 'vis_mask':
+                if destroy_self:
+                    self.delete_a_dataset(dset_name)
+                gc.collect()
+                # already created above
+                continue
+            elif dset_name in self.main_axes_ordered_datasets.keys():
+                if dset_name in self.bl_ordered_datasets.keys():
+                    if destroy_self:
+                        self.delete_a_dataset(dset_name)
+                    gc.collect()
+                    # already created above
+                    continue
+                else:
+                    axis_order = self.main_axes_ordered_datasets[dset_name]
+                    axis = None
+                    for order in axis_order:
+                        if isinstance(order, int):
+                            axis = order
+                    if axis is None:
+                        raise RuntimeError('Invalid axis order %s for dataset %s' % (axis_order, dset_name))
+                    ts.create_main_axis_ordered_dataset(axis, dset_name, dset.data, axis_order)
+            elif dset_name in self.time_ordered_datasets.keys():
+                axis_order = self.time_ordered_datasets[dset_name]
+                ts.create_time_ordered_dataset(dset_name, dset.data, axis_order)
+            elif dset_name in self.feed_ordered_datasets.keys():
+                if dset_name == 'channo': # channo no useful for Timestream
+                    if destroy_self:
+                        self.delete_a_dataset(dset_name)
+                    gc.collect()
+                    continue
+                else:
+                    axis_order = self.feed_ordered_datasets[dset_name]
+                    ts.create_feed_ordered_dataset(dset_name, dset.data, axis_order)
+            else:
+                if dset.common:
+                    ts.create_dataset(dset_name, data=dset, memmap_path=ts._memmap_path)
+                elif dset.distributed:
+                    ts.create_dataset(dset_name, data=dset.data, shape=dset.shape, dtype=dset.dtype, distributed=True, distributed_axis=dset.distributed_axis, memmap_path=ts._memmap_path)
+
+            # copy attrs of this dset
+            memh5.copyattrs(dset.attrs, ts[dset_name].attrs)
+
+            if destroy_self:
+                self.delete_a_dataset(dset_name)
+            gc.collect()
+
+        # resume hints of self, error may happen if not do so
+        if destroy_self:
+            for key in self.__class__.__dict__.keys():
+                if re.match(self.hints_pattern, key):
+                    setattr(self, key, self.__class__.__dict__[key])
+
+        # redistribute self to original axis
+        if keep_dist_axis:
+            self.redistribute(original_dist_axis, via_memmap=via_memmap)
+
+        return ts
