@@ -1427,7 +1427,7 @@ class BasicTod(memh5.MemDiskGroup):
         shp = [ len(np.arange(ni)[si]) for (ni, si) in zip(other[name].shape, sel) ]
         if not self.main_data_dist_axis in axes:
             # common data set
-            self.create_dataset(name, data=other[name].data[sel].copy(), memmap_path=self._memmap_path)
+            self.create_dataset(name, data=other[name].data[tuple(sel)].copy(), memmap_path=self._memmap_path)
             memh5.copyattrs(other[name].attrs, self[name].attrs)
         else:
             # distributed data set
@@ -1453,7 +1453,7 @@ class BasicTod(memh5.MemDiskGroup):
                 linds = np.intersect1d(sub_inds[si:ei], np.arange(s, e))
                 sel[di] = (linds - s).tolist()
                 sel = [  ( _to_slice_obj(sl) if isinstance(sl, list) else sl ) for sl in sel ]
-                ldata = mpiutil.gather_array(other[name].local_data[sel], axis=di, root=ri, comm=self.comm)
+                ldata = mpiutil.gather_array(other[name].local_data[tuple(sel)], axis=di, root=ri, comm=self.comm)
                 if ri == mpiutil.rank:
                     self[name].local_data[:] = ldata
 
