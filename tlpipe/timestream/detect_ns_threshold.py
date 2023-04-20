@@ -117,7 +117,7 @@ class Detect(timestream_task.TimestreamTask):
                 true_period = np.round(cycle / int_time)
                 if on_time != true_on_time and period != true_period: # inconsistant with the record in the data
                     if mpiutil.rank0:
-                        warnings.warn('Detected noise source info is inconsistant with the record in the data for auto-correlation of Channel: %d: on_time %d != record_on_time %d, period != record_period %d, does not use it' % (this_chan, on_time, true_on_time, period, true_period))
+                        warnings.warn('Detected noise source info is inconsistant with the record in the data for auto-correlation of Channel: %d: on_time %d != record_on_time %d, period %d != record_period %d, does not use it' % (this_chan, on_time, true_on_time, period, true_period))
             elif rt['noisesource'].shape[0] >= 2: # more than 1 noise source
                 if mpiutil.rank0:
                     warnings.warn('More than 1 noise source, do not know how to deal with this currently')
