@@ -232,10 +232,13 @@ class PsCal(timestream_task.TimestreamTask):
                     V0, S = rpca_decomp.decompose(Vmat, rank=1, S=S0, max_iter=rpca_max_iter, threshold='hard', tol=1.0e-6, debug=False)
 
                     if subtract_src:
+                        V0_copy = V0.copy()
+                        # make imag part of auto-correlation to be 0
+                        V0_copy[np.diag_indices(V0.shape[0])] = V0_copy[np.diag_indices(V0.shape[0])].real + 0j
                         if replace_with_src:
-                            ts.local_vis[ti, fi, pol.index(pol_str)] = V0.flat[mis]
+                            ts.local_vis[ti, fi, pol.index(pol_str)] = V0_copy.flat[mis]
                         else:
-                            ts.local_vis[ti, fi, pol.index(pol_str)] -= V0.flat[mis]
+                            ts.local_vis[ti, fi, pol.index(pol_str)] -= V0_copy.flat[mis]
 
                     if (start_ind <= ti + local_time_offset < end_ind) and (apply_gain or save_gain):
                         # use v_ij = gi gj^* \int Ai Aj^* e^(2\pi i n \cdot uij) T(x) d^2n

@@ -429,7 +429,10 @@ class PsCal(timestream_task.TimestreamTask):
                 lv = np.zeros((lsrc_vis.shape[0], nbl), dtype=lsrc_vis.dtype)
                 for bi, (fd1, fd2) in enumerate(bls):
                     b1, b2 = feedno.index(fd1), feedno.index(fd2)
-                    lv[:, bi] = lsrc_vis[:, b1, b2]
+                    if b1 == b2:
+                        lv[:, bi] = lsrc_vis[:, b1, b2].real + 0j# make imag part of auto-correlation to be 0
+                    else:
+                        lv[:, bi] = lsrc_vis[:, b1, b2]
                 lv = mpiarray.MPIArray.wrap(lv, axis=0, comm=ts.comm)
                 lv = lv.redistribute(axis=1).local_array.reshape(nt, nf, 2, -1)
                 if replace_with_src:
