@@ -70,6 +70,7 @@ class PsCal(timestream_task.TimestreamTask):
                     'replace_with_src': False, # replace vis with the subtracted src_vis, only work when subtract_src = True
                     'apply_gain': True,
                     'save_gain': False,
+                    'check_gain': False,
                     'gain_file': 'gain/gain.hdf5',
                   }
 
@@ -91,6 +92,7 @@ class PsCal(timestream_task.TimestreamTask):
         replace_with_src = self.params['replace_with_src']
         apply_gain = self.params['apply_gain']
         save_gain = self.params['save_gain']
+        check_gain = self.params['check_gain']
         gain_file = self.params['gain_file']
         via_memmap = self.params['via_memmap']
 
@@ -356,6 +358,39 @@ class PsCal(timestream_task.TimestreamTask):
                 Ai = aa.ants[0].beam.response(n0[transit_ind - start_ind]) # Ai at transit time
                 factor = np.sqrt((lmd**2 * 1.0e-26 * Sc) / (2 * const.k_B)) * Ai # NOTE: 1Jy = 1.0e-26 W m^-2 Hz^-1
                 gain /= factor[:, np.newaxis, np.newaxis]
+
+                if check_gain:
+                    if nf > 6:
+                        for pi in range(2):
+                            g = np.ma.masked_invalid(np.abs(gain[:, pi, :])).mean(axis=1).filled(np.nan)
+
+                            diffs = []
+
+                            for i in range(2, len(g)):
+                                d = g[i] - g[i-1]
+                                if i < 6:
+                                    if np.isfinite(d):
+                                        diffs.append(d)
+                                else:
+                                    m = np.mean(diffs)
+                                    s = np.std(diffs)
+                                    if np.isfinite(g[i]):
+                                        for j in range(1, i):
+                                            if not np.isfinite(g[i-j]):
+                                                continue
+                                            else:
+                                                d = g[i] - g[i-j]
+
+                                                # print(m, s, np.abs(d - m))
+                                                if np.abs(d - m) > 7.0 * s:
+                                                    g[i] = np.nan
+                                                else:
+                                                    diffs.append(d)
+                                                break
+
+                            oinds = np.where(~np.isfinite(g))[0]
+                            gain[oinds, pi, :] = cnan
+
 
                 # save gain to file
                 if save_gain:
