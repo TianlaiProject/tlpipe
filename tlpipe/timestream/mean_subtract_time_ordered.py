@@ -146,9 +146,27 @@ class Subtract(timestream_task.TimestreamTask):
                         e2, U2 = la.eigh(V2)
                         e2[e2<1.0e-12] = 0.0
 
-                        G = np.dot(U1*e1**0.5, la.pinv(U2*e2**0.5))
+                        try:
+                            G = np.dot(U1*e1**0.5, la.pinv(U2*e2**0.5))
+                            if not np.isfinite(G).all():
+                                # if we could not solve the coupling, subtract night_mean instead
+                                ts.local_vis[ti, fi, pol.index(pol_str)] -= night_mean[fi, pol.index(pol_str)]
+                                continue
+                        except np.linalg.LinAlgError:
+                            # if we could not solve the coupling, subtract night_mean instead
+                            ts.local_vis[ti, fi, pol.index(pol_str)] -= night_mean[fi, pol.index(pol_str)]
+                            continue
 
-                        V = np.dot(la.pinv(G), np.dot(V1, la.pinv(G.T.conj())))
+                        try:
+                            V = np.dot(la.pinv(G), np.dot(V1, la.pinv(G.T.conj())))
+                            if not np.isfinite(V).all():
+                                # if we could not solve the coupling, subtract night_mean instead
+                                ts.local_vis[ti, fi, pol.index(pol_str)] -= night_mean[fi, pol.index(pol_str)]
+                                continue
+                        except np.linalg.LinAlgError:
+                            # if we could not solve the coupling, subtract night_mean instead
+                            ts.local_vis[ti, fi, pol.index(pol_str)] -= night_mean[fi, pol.index(pol_str)]
+                            continue
 
                         # one round diag correction to make diag elements close to each other
                         # -------------------------------------------------------------------
@@ -166,9 +184,27 @@ class Subtract(timestream_task.TimestreamTask):
                         e2, U2 = la.eigh(V2)
                         e2[e2<1.0e-12] = 0.0
 
-                        G = np.dot(U1*e1**0.5, la.pinv(U2*e2**0.5))
+                        try:
+                            G = np.dot(U1*e1**0.5, la.pinv(U2*e2**0.5))
+                            if not np.isfinite(G).all():
+                                # if we could not solve the coupling, subtract night_mean instead
+                                ts.local_vis[ti, fi, pol.index(pol_str)] -= night_mean[fi, pol.index(pol_str)]
+                                continue
+                        except np.linalg.LinAlgError:
+                            # if we could not solve the coupling, subtract night_mean instead
+                            ts.local_vis[ti, fi, pol.index(pol_str)] -= night_mean[fi, pol.index(pol_str)]
+                            continue
 
-                        V = np.dot(la.pinv(G), np.dot(V1, la.pinv(G.T.conj())))
+                        try:
+                            V = np.dot(la.pinv(G), np.dot(V1, la.pinv(G.T.conj())))
+                            if not np.isfinite(V).all():
+                                # if we could not solve the coupling, subtract night_mean instead
+                                ts.local_vis[ti, fi, pol.index(pol_str)] -= night_mean[fi, pol.index(pol_str)]
+                                continue
+                        except np.linalg.LinAlgError:
+                            # if we could not solve the coupling, subtract night_mean instead
+                            ts.local_vis[ti, fi, pol.index(pol_str)] -= night_mean[fi, pol.index(pol_str)]
+                            continue
                         # -------------------------------------------------------------------
 
                         # make imag part of auto-correlation to be 0
