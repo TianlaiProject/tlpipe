@@ -456,15 +456,11 @@ class Timestream(object):
 
     #========== Project into KL-mode basis ==============
 
-    def set_kltransform(self, klname, threshold=None):
+    def set_kltransform(self, klname, kl):
 
         self.klname = klname
-
-        if threshold is None:
-            kl = self.manager.kltransforms[self.klname]
-            threshold = kl.threshold
-
-        self.klthreshold = threshold
+        self.kl = kl
+        self.klthreshold = kl.threshold
 
     def _klfile(self, mi):
         # Pattern to form the `m` ordered file.
@@ -485,7 +481,7 @@ class Timestream(object):
         """Generate the KL modes for the Timestream.
         """
 
-        kl = self.manager.kltransforms[self.klname]
+        kl = self.kl
 
         # Iterate over local m's, project mode and save to disk.
         for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):

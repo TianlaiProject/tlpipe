@@ -851,8 +851,8 @@ class BeamTransfer(object):
             if os.path.exists(self._svdfile(mi)) and not regen:
                 print("m index %i. File: %s exists. Skipping..." % (mi, self._svdfile(mi)))
                 continue
-            else:
-                print('m index %i. Creating SVD file: %s' % (mi, self._svdfile(mi)))
+            # else:
+            #     print('m index %i. Creating SVD file: %s' % (mi, self._svdfile(mi)))
 
             # Open m beams for reading.
             fm = h5py.File(self._mfile(mi), 'r')

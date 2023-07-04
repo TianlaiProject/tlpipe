@@ -3,7 +3,7 @@ import os
 import numpy as np
 import h5py
 
-from caput import mpiutil, config
+from caput import mpiutil#, config
 
 from ..core import kltransform
 
@@ -20,7 +20,13 @@ class DoubleKL(kltransform.KLTransform):
         contaminated.
     """
 
-    foreground_threshold = config.Property(proptype=float, default=100.0)
+    # foreground_threshold = config.Property(proptype=float, default=100.0)
+
+    def __init__(self, bt, subdir=None, subset=True, inverse=False, threshold=0.1, foreground_regulariser=1e-14, use_thermal=True, use_foregrounds=True, use_polarised=False, pol_length=1, foreground_threshold=100.0):
+        self.foreground_threshold = foreground_threshold
+
+        kltransform.KLTransform.__init__(self, bt, subdir, subset, inverse, threshold, foreground_regulariser, use_thermal, use_foregrounds, use_polarised, pol_length)
+
 
     def _transform_m(self, mi):
 

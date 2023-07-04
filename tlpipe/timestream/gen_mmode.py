@@ -39,6 +39,7 @@ class GenMmode(timestream_task.TimestreamTask):
                     'pol': 'xx', # 'yy' or 'I'
                     'beam_dir': 'map/bt',
                     'noise_weight': True,
+                    'skip_svd': True, # set to False if do KL transform
                     'ts_dir': 'map/ts',
                     'ts_name': 'ts',
                     'no_m_zero': True,
@@ -59,6 +60,7 @@ class GenMmode(timestream_task.TimestreamTask):
         pol = self.params['pol']
         beam_dir = output_path(self.params['beam_dir'])
         noise_weight = self.params['noise_weight']
+        skip_svd = self.params['skip_svd']
         ts_dir = output_path(self.params['ts_dir'])
         ts_name = self.params['ts_name']
         no_m_zero = self.params['no_m_zero']
@@ -193,7 +195,7 @@ class GenMmode(timestream_task.TimestreamTask):
         del E
 
         # beamtransfer
-        bt = beamtransfer.BeamTransfer(beam_dir, tel, noise_weight, True)
+        bt = beamtransfer.BeamTransfer(beam_dir, tel, noise_weight, skip_svd)
         # timestream
         tstream = timestream.Timestream(ts_dir, ts_name, bt, no_m_zero)
 

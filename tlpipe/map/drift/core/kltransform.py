@@ -6,7 +6,8 @@ import numpy as np
 import scipy.linalg as la
 import h5py
 
-from caput import config, mpiutil
+# from caput import config, mpiutil
+from caput import mpiutil
 
 from cora.util import hputil
 
@@ -136,7 +137,8 @@ def inv_gen(A):
 
 
 
-class KLTransform(config.Reader):
+# class KLTransform(config.Reader):
+class KLTransform(object):
     """Perform KL transform.
 
     Attributes
@@ -154,20 +156,20 @@ class KLTransform(config.Reader):
         size reg * cf.max(). Default is 2e-15
     """
 
-    subset = config.Property(proptype=bool, default=True, key='subset')
-    inverse = config.Property(proptype=bool, default=False, key='inverse')
+    # subset = config.Property(proptype=bool, default=True, key='subset')
+    # inverse = config.Property(proptype=bool, default=False, key='inverse')
 
-    threshold = config.Property(proptype=float, default=0.1, key='threshold')
+    # threshold = config.Property(proptype=float, default=0.1, key='threshold')
 
-    _foreground_regulariser = config.Property(proptype=float, default=1e-14, key='regulariser')
+    # _foreground_regulariser = config.Property(proptype=float, default=1e-14, key='regulariser')
 
-    use_thermal = config.Property(proptype=bool, default=True)
-    use_foregrounds = config.Property(proptype=bool, default=True)
-    use_polarised = config.Property(proptype=bool, default=True)
+    # use_thermal = config.Property(proptype=bool, default=True)
+    # use_foregrounds = config.Property(proptype=bool, default=True)
+    # use_polarised = config.Property(proptype=bool, default=True)
 
-    pol_length = config.Property(proptype=float, default=None)
+    # pol_length = config.Property(proptype=float, default=None)
 
-    evdir = ""
+    # evdir = ""
 
     _cvfg = None
     _cvsg = None
@@ -178,7 +180,8 @@ class KLTransform(config.Reader):
         return self.evdir + "/ev_m_" + util.natpattern(self.telescope.mmax) + ".hdf5"
 
 
-    def __init__(self, bt, subdir=None):
+    # def __init__(self, bt, subdir=None):
+    def __init__(self, bt, subdir=None, subset=True, inverse=False, threshold=0.1, foreground_regulariser=1e-14, use_thermal=True, use_foregrounds=True, use_polarised=False, pol_length=1):
         self.beamtransfer = bt
         self.telescope = self.beamtransfer.telescope
 
@@ -188,6 +191,15 @@ class KLTransform(config.Reader):
         self.evdir = self.beamtransfer.directory + "/" + subdir
         if mpiutil.rank0 and not os.path.exists(self.evdir):
             os.makedirs(self.evdir)
+
+        self.subset = subset
+        self.inverse = inverse
+        self.threshold = threshold
+        self._foreground_regulariser = foreground_regulariser
+        self.use_thermal = use_thermal
+        self.use_foregrounds = use_foregrounds
+        self.use_polarised = use_polarised
+        self.pol_length = pol_length
 
         # If we're part of an MPI run, synchronise here.
         mpiutil.barrier()
