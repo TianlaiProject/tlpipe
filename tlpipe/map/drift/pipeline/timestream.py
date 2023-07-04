@@ -622,8 +622,9 @@ class Timestream(object):
 
 
 
-    def set_psestimator(self, psname):
+    def set_psestimator(self, psname, ps):
         self.psname = psname
+        self.ps = ps
 
 
     def powerspectrum(self):
@@ -635,7 +636,8 @@ class Timestream(object):
             print("File %s exists. Skipping..." % self._psfile)
             return
 
-        ps = self.manager.psestimators[self.psname]
+        # ps = self.manager.psestimators[self.psname]
+        ps = self.ps
         ps.genbands()
 
         def _q_estimate(mi):
@@ -650,14 +652,22 @@ class Timestream(object):
 
         fisher, bias = ps.fisher_bias()
 
-        powerspectrum =  np.dot(la.inv(fisher), qtotal - bias)
+        try:
+            powerspectrum =  np.dot(la.inv(fisher), qtotal - bias)
+        except np.linalg.LinAlgError:
+            print('Warning: fisher matrxi is singular, use pinv instead')
+            powerspectrum =  np.dot(la.pinv(fisher), qtotal - bias)
 
 
         if mpiutil.rank0:
             with h5py.File(self._psfile, 'w') as f:
 
 
-                cv = la.inv(fisher)
+                try:
+                    cv = la.inv(fisher)
+                except np.linalg.LinAlgError:
+                    print('Warning: fisher matrxi is singular, use pinv instead')
+                    cv = la.pinv(fisher)
                 err = cv.diagonal()**0.5
                 cr = cv / np.outer(err, err)
 

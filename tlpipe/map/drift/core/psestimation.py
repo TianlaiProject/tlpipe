@@ -9,7 +9,8 @@ import h5py
 import numpy as np
 import scipy.linalg as la
 
-from caput import config, mpiutil
+# from caput import config, mpiutil
+from caput import mpiutil
 
 from cora.signal import corr21cm
 
@@ -137,7 +138,8 @@ def decorrelate_ps_file(fname):
 
 
 
-class PSEstimation(config.Reader, metaclass=abc.ABCMeta):
+# class PSEstimation(config.Reader, metaclass=abc.ABCMeta):
+class PSEstimation(metaclass=abc.ABCMeta):
     """Base class for quadratic powerspectrum estimation.
 
     See Tegmark 1997 for details.
@@ -170,21 +172,21 @@ class PSEstimation(config.Reader, metaclass=abc.ABCMeta):
     """
 
 
-    bandtype = config.Property(proptype=str, default='polar')
+    # bandtype = config.Property(proptype=str, default='polar')
 
-    # Properties to control polar bands
-    k_bands = config.Property(proptype=range_config, default=[ {'spacing' : 'linear', 'start' : 0.0, 'stop' : 0.4, 'num' : 20 }])
-    num_theta = config.Property(proptype=int, default=1)
+    # # Properties to control polar bands
+    # k_bands = config.Property(proptype=range_config, default=[ {'spacing' : 'linear', 'start' : 0.0, 'stop' : 0.4, 'num' : 20 }])
+    # num_theta = config.Property(proptype=int, default=1)
 
-    # Properties for cartesian bands
-    kpar_bands = config.Property(proptype=range_config, default=[ {'spacing' : 'linear', 'start' : 0.0, 'stop' : 0.4, 'num' : 20 }])
-    kperp_bands = config.Property(proptype=range_config, default=[ {'spacing' : 'linear', 'start' : 0.0, 'stop' : 0.4, 'num' : 20 }])
+    # # Properties for cartesian bands
+    # kpar_bands = config.Property(proptype=range_config, default=[ {'spacing' : 'linear', 'start' : 0.0, 'stop' : 0.4, 'num' : 20 }])
+    # kperp_bands = config.Property(proptype=range_config, default=[ {'spacing' : 'linear', 'start' : 0.0, 'stop' : 0.4, 'num' : 20 }])
 
-    threshold = config.Property(proptype=float, default=0.0)
+    # threshold = config.Property(proptype=float, default=0.0)
 
-    unit_bands = config.Property(proptype=bool, default=True)
+    # unit_bands = config.Property(proptype=bool, default=True)
 
-    zero_mean = config.Property(proptype=bool, default=True)
+    # zero_mean = config.Property(proptype=bool, default=True)
 
     crosspower = False
 
@@ -194,7 +196,7 @@ class PSEstimation(config.Reader, metaclass=abc.ABCMeta):
     bias = None
 
 
-    def __init__(self, kltrans, subdir="ps"):
+    def __init__(self, kltrans, subdir="ps", bandtype='polar', k_bands=[ {'spacing' : 'linear', 'start' : 0.0, 'stop' : 0.4, 'num' : 20 }], num_theta=1, kpar_bands=[ {'spacing' : 'linear', 'start' : 0.0, 'stop' : 0.4, 'num' : 20 }], kperp_bands=[ {'spacing' : 'linear', 'start' : 0.0, 'stop' : 0.4, 'num' : 20 }], threshold=0.0, unit_bands=True, zero_mean=True):
         """Initialise a PS estimator class.
 
         Parameters
@@ -209,6 +211,15 @@ class PSEstimation(config.Reader, metaclass=abc.ABCMeta):
         self.kltrans = kltrans
         self.telescope = kltrans.telescope
         self.psdir = self.kltrans.evdir + '/' + subdir + '/'
+
+        self.bandtype = bandtype
+        self.k_bands = k_bands
+        self.num_theta = num_theta
+        self.kpar_bands = kpar_bands
+        self.kperp_bands = kperp_bands
+        self.threshold = threshold
+        self.unit_bands = unit_bands
+        self.zero_mean = zero_mean
 
         if mpiutil.rank0 and not os.path.exists(self.psdir):
             os.makedirs(self.psdir)

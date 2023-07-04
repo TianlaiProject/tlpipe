@@ -21,8 +21,13 @@ class PSMonteCarlo(psestimation.PSEstimation):
         The number of samples to draw from each band.
     """
 
-    nsamples = config.Property(proptype=int, default=500)
+    # nsamples = config.Property(proptype=int, default=500)
 
+    def __init__(self, kltrans, subdir="ps", bandtype='polar', k_bands=[ {'spacing' : 'linear', 'start' : 0.0, 'stop' : 0.4, 'num' : 20 }], num_theta=1, kpar_bands=[ {'spacing' : 'linear', 'start' : 0.0, 'stop' : 0.4, 'num' : 20 }], kperp_bands=[ {'spacing' : 'linear', 'start' : 0.0, 'stop' : 0.4, 'num' : 20 }], threshold=0.0, unit_bands=True, zero_mean=True, nsamples=500):
+
+        self.nsamples = nsamples
+
+        return psestimation.PSEstimation.__init__(self, kltrans, subdir, bandtype, k_bands, num_theta, kpar_bands, kperp_bands, threshold, unit_bands, zero_mean)
 
     def gen_sample(self, mi, nsamples=None, noiseonly=False):
         """Generate a random set of KL-data for this m-mode.
@@ -111,9 +116,15 @@ class PSMonteCarloAlt(psestimation.PSEstimation):
         The number of samples to draw from each band.
     """
 
-    nsamples = config.Property(proptype=int, default=500)
-    nswitch = config.Property(proptype=int, default=0) #200
+    # nsamples = config.Property(proptype=int, default=500)
+    # nswitch = config.Property(proptype=int, default=0) #200
 
+    def __init__(self, kltrans, subdir="ps", bandtype='polar', k_bands=[ {'spacing' : 'linear', 'start' : 0.0, 'stop' : 0.4, 'num' : 20 }], num_theta=1, kpar_bands=[ {'spacing' : 'linear', 'start' : 0.0, 'stop' : 0.4, 'num' : 20 }], kperp_bands=[ {'spacing' : 'linear', 'start' : 0.0, 'stop' : 0.4, 'num' : 20 }], threshold=0.0, unit_bands=True, zero_mean=True, nsamples=500, nswitch=0):
+
+        self.nsamples = nsamples
+        self.nswitch = nswitch
+
+        return psestimation.PSEstimation.__init__(self, kltrans, subdir, bandtype, k_bands, num_theta, kpar_bands, kperp_bands, threshold, unit_bands, zero_mean)
 
     def gen_vecs(self, mi):
         """Generate a cache of sample vectors for each bandpower.
