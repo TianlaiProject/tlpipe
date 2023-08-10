@@ -26,11 +26,14 @@ class Detect(timestream_task.TimestreamTask):
 
     """
 
-    params_init = {}
+    params_init = {
+            'check_auto_vis': True # check the imaginary part of auto-corrections
+             }
 
     prefix = 'bd_'
 
     def process(self, ts):
+        check_auto_vis = self.params['check_auto_vis']
         via_memmap = self.params['via_memmap']
         show_progress = self.params['show_progress']
         progress_step = self.params['progress_step']
@@ -47,17 +50,19 @@ class Detect(timestream_task.TimestreamTask):
         if isinstance(ts, RawTimestream):
             is_ts = False
             redistribute_axis = 2
-            for bi, (fi, fj) in enumerate(ts.local_bl):
-                if fi == fj:
-                    vis_mask[..., bi] = np.where(vis[..., bi].imag == 0.0, vis_mask[..., bi], True)
+            if check_auto_vis:
+                for bi, (fi, fj) in enumerate(ts.local_bl):
+                    if fi == fj:
+                        vis_mask[..., bi] = np.where(vis[..., bi].imag == 0.0, vis_mask[..., bi], True)
         elif isinstance(ts, Timestream):
             is_ts = True
             redistribute_axis = 3
-            for bi, (fi, fj) in enumerate(ts.local_bl):
-                for pi, pol in enumerate(ts.local_pol):
-                    pol = ts.pol_dict[pol]
-                    if fi == fj and pol in ['xx', 'yy']:
-                        vis_mask[..., pi, bi] = np.where(vis[..., pi, bi].imag == 0.0, vis_mask[..., pi, bi], True)
+            if check_auto_vis:
+                for bi, (fi, fj) in enumerate(ts.local_bl):
+                    for pi, pol in enumerate(ts.local_pol):
+                        pol = ts.pol_dict[pol]
+                        if fi == fj and pol in ['xx', 'yy']:
+                            vis_mask[..., pi, bi] = np.where(vis[..., pi, bi].imag == 0.0, vis_mask[..., pi, bi], True)
 
         # mask bl that have no signal
         problematic_bls = []
