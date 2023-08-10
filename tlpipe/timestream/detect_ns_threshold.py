@@ -73,17 +73,28 @@ class Detect(timestream_task.TimestreamTask):
             tt_mean = mpiutil.gather_array(np.ma.mean(vis, axis=-1).filled(0), root=None)
             tt_mean_sort = np.sort(tt_mean)
             tt_mean_sort = tt_mean_sort[tt_mean_sort > 0]
-            ttms_div = tt_mean_sort[1:] / tt_mean_sort[:-1]
-            ind = np.argmax(ttms_div)
-            if ind > 0 and ttms_div[ind] > 2.0 * max(ttms_div[ind-1], ttms_div[ind+1]):
-                sep = np.sqrt(tt_mean_sort[ind] * tt_mean_sort[ind+1])
-                break
 
-            # ttms_diff = np.diff(tt_mean_sort)
-            # ind = np.argmax(ttms_diff)
-            # if ind > 0 and ttms_diff[ind] > 2.0 * max(ttms_diff[ind-1], ttms_diff[ind+1]):
+            ttms_div = tt_mean_sort[1:] / tt_mean_sort[:-1]
+            ind_div = np.argmax(ttms_div)
+            # if ind > 0 and ind + 1 < len(ttms_div) and ttms_div[ind] > 2.0 * max(ttms_div[ind-1], ttms_div[ind+1]):
+            #     sep = np.sqrt(tt_mean_sort[ind] * tt_mean_sort[ind+1])
+            #     break
+
+            ttms_diff = np.diff(tt_mean_sort)
+            ind_diff = np.argmax(ttms_diff)
+            # if ind > 0 and ind + 1 < len(ttms_diff) and ttms_diff[ind] > 2.0 * max(ttms_diff[ind-1], ttms_diff[ind+1]):
             #     sep = 0.5 * (tt_mean_sort[ind] + tt_mean_sort[ind+1])
             #     break
+
+            # print(ind_div, ind_diff)
+            if ind_div == ind_diff:
+                ind = ind_div
+                if ind > 0 and ind + 1 < len(ttms_div) and ttms_div[ind] > 2.0 * max(ttms_div[ind-1], ttms_div[ind+1]):
+                    sep = np.sqrt(tt_mean_sort[ind] * tt_mean_sort[ind+1]) # more robust than 0.5 * (tt_mean_sort[ind] + tt_mean_sort[ind+1])
+                    break
+                # if ind > 0 and ind + 1 < len(ttms_diff) and ttms_diff[ind] > 2.0 * max(ttms_diff[ind-1], ttms_diff[ind+1]):
+                #     sep = 0.5 * (tt_mean_sort[ind] + tt_mean_sort[ind+1])
+                #     break
         else:
             raise RuntimeError('Failed to get the threshold to separate ns signal out')
 
