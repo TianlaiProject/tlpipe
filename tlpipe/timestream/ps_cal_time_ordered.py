@@ -215,7 +215,7 @@ class PsCal(timestream_task.TimestreamTask):
                     # set invalid val to 0
                     invalid = ~np.isfinite(Vmat) # a bool array
                     # if too many masks
-                    if np.where(invalid)[0].shape[0] > 0.3 * nfeed**2:
+                    if np.where(invalid)[0].shape[0] > 0.5 * nfeed**2:
                         continue
                     Vmat[invalid] = 0
                     # if all are zeros
