@@ -151,7 +151,7 @@ class BasicTod(memh5.MemDiskGroup):
                 if 'hints' in f.attrs.keys():
                     try:
                         hints = pickle.loads(f.attrs['hints'])
-                    TypeError:
+                    except TypeError:
                         hints = pickle.loads(f.attrs['hints'].encode())
                     for key, val in hints.items():
                         setattr(self, key, val)
