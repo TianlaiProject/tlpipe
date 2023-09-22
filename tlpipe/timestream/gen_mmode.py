@@ -116,11 +116,11 @@ class GenMmode(timestream_task.TimestreamTask):
         if mpiutil.rank0:
             # large array only in rank0 to save memory
             mmode = np.zeros((2*tel.mmax+1, nfreq, nuq), dtype=np.complex128)
-            N = np.zeros((nfreq, nuq), dtype=np.int) # number of accumulate terms
+            N = np.zeros((nfreq, nuq), dtype=int) # number of accumulate terms
 
         # mmode of a specific unique pair
         mmodeqi = np.zeros((2*tel.mmax+1, nfreq), dtype=np.complex128)
-        Nqi = np.zeros((nfreq), dtype=np.int) # number of accumulate terms
+        Nqi = np.zeros((nfreq), dtype=int) # number of accumulate terms
 
         start_ra = ts.vis.attrs['start_ra']
         ra = mpiutil.gather_array(ts['ra_dec'].local_data[:, 0], root=None)
@@ -131,7 +131,7 @@ class GenMmode(timestream_task.TimestreamTask):
             ind = ind + 1
 
         # get number of int_time in one sidereal day
-        num_int = np.int(np.around(1.0 * const.sday / ts.attrs['inttime']))
+        num_int = int(np.around(1.0 * const.sday / ts.attrs['inttime']))
         nt = ts.vis.shape[0]
         nt1 = min(num_int, nt-ind)
 
@@ -169,7 +169,7 @@ class GenMmode(timestream_task.TimestreamTask):
                     M[local_inds<ind, :] = True
                     M[local_inds>=ind+nt1, :] = True
                     V = np.where(M, 0, V) # fill masked values with 0
-                    v = np.logical_not(M).astype(np.int) # 1 for valid, 0 for invalid
+                    v = np.logical_not(M).astype(int) # 1 for valid, 0 for invalid
                     # mmode[:, :, qi] += np.dot(E, V)
                     # N[:, qi] += np.sum(v, axis=0)
                     mmodeqi += np.dot(E, V)

@@ -98,7 +98,7 @@ class Stats(timestream_task.TimestreamTask):
             x_vals = np.array([ (datetime.utcfromtimestamp(s) + timedelta(hours=8)) for s in ts['sec1970'][:] ])
             xlabel = '%s' % x_vals[0].date()
             x_vals = mdates.date2num(x_vals)
-            ax.plot(x_vals, 100*time_mask/np.float(nf*nb))
+            ax.plot(x_vals, 100*time_mask/float(nf*nb))
             ax.xaxis_date()
             date_format = mdates.DateFormatter('%H:%M')
             ax.xaxis.set_major_formatter(date_format)
@@ -124,7 +124,7 @@ class Stats(timestream_task.TimestreamTask):
 
             # plot freq_mask
             plt.figure()
-            plt.plot(ts.freq[:], 100*freq_mask/np.float(nt*nb))
+            plt.plot(ts.freq[:], 100*freq_mask/float(nt*nb))
             plt.grid(True)
             plt.xlabel(r'$\nu$ / MHz')
             plt.ylabel(r'RFI (%)')

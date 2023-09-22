@@ -154,7 +154,10 @@ class PsCal(timestream_task.TimestreamTask):
             transit_time = a.phs.ephem2juldate(next_transit) # Julian date
             # get time zone
             pattern = '[-+]?\d+'
-            tz = re.search(pattern, ts.attrs['timezone'].decode('ascii')).group() # ts.attrs['timezone'] is bytes in python3
+            try:
+                tz = re.search(pattern, ts.attrs['timezone'].decode('ascii')).group() # ts.attrs['timezone'] is bytes in python3
+            except AttributeError:
+                tz = re.search(pattern, ts.attrs['timezone']).group() # ts.attrs['timezone'] is str in python3.10
             tz = int(tz)
             local_next_transit = ephem.Date(next_transit + tz * ephem.hour) # plus 8h to get Beijing time
             # if transit_time > ts['jul_date'][-1]:
@@ -180,8 +183,8 @@ class PsCal(timestream_task.TimestreamTask):
             ### may need to improve in the future
             transit_ind = transit_inds[0]
             int_time = ts.attrs['inttime'] # second
-            start_ind = transit_ind - np.int(span / int_time)
-            end_ind = transit_ind + np.int(span / int_time) + 1 # plus 1 to make transit_ind is at the center
+            start_ind = transit_ind - int(span / int_time)
+            end_ind = transit_ind + int(span / int_time) + 1 # plus 1 to make transit_ind is at the center
 
             start_ind = max(0, start_ind)
             end_ind = min(end_ind, ts.vis.shape[0])

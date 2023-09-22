@@ -141,7 +141,7 @@ class PSMonteCarloAlt(psestimation.PSEstimation):
         cf = (evals + 1.0)**-0.5
 
         # Generate random set of Z_2 vectors
-        xv = 2*(np.random.rand(evals.size, self.nsamples) <= 0.5).astype(np.float) - 1.0
+        xv = 2*(np.random.rand(evals.size, self.nsamples) <= 0.5).astype(np.float64) - 1.0
 
         # Multiply by C^-1 factorization
         xv1 = cf[:, np.newaxis] * xv

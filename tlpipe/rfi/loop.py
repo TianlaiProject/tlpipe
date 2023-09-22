@@ -99,7 +99,7 @@ class LocalOutlierProbability(object):
 
         self._data = data.copy() # does not change the input data
         self._data_inds = list(range(n_data))
-        self._slots = np.zeros(n_data, dtype=np.int) # 0 for taken, -1 for empty
+        self._slots = np.zeros(n_data, dtype=int) # 0 for taken, -1 for empty
         self._n_data = n_data
         self._d2_matrix = d2_matrix
 
@@ -146,7 +146,7 @@ class LocalOutlierProbability(object):
                     tmp_d2_matrix = np.zeros((2*self._n_data, 2*self._n_data), dtype=self._d2_matrix.dtype)
                     tmp_d2_matrix[:self._d2_matrix.shape[0], :self._d2_matrix.shape[1]] = self._d2_matrix
                     self._d2_matrix = tmp_d2_matrix
-                    tmp_slots = np.full((2*self._n_data,), -1, dtype=np.int)
+                    tmp_slots = np.full((2*self._n_data,), -1, dtype=int)
                     tmp_slots[:self._slots.shape[0]] = self._slots
                     self._slots = tmp_slots
 

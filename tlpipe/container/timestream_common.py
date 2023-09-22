@@ -513,7 +513,10 @@ class TimestreamCommon(container.BasicTod):
     def is_dish(self):
         """True if data is get from dish array."""
         try:
-            return b'Dish' in self.attrs['telescope']
+            try:
+                return b'Dish' in self.attrs['telescope']
+            except TypeError:
+                return 'Dish' in self.attrs['telescope']
         except KeyError:
             raise KeyError('Attribute telescope does not exist, try to load it first')
 
@@ -521,7 +524,10 @@ class TimestreamCommon(container.BasicTod):
     def is_cylinder(self):
         """True if data is get from cylinder array."""
         try:
-            return b'Cylinder' in self.attrs['telescope']
+            try:
+                return b'Cylinder' in self.attrs['telescope']
+            except TypeError:
+                return 'Cylinder' in self.attrs['telescope']
         except KeyError:
             raise KeyError('Attribute telescope does not exist, try to load it first')
 

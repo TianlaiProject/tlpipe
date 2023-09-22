@@ -60,8 +60,8 @@ def savitzky_golay(y, window_size, order, deriv=0, rate=1):
 
     """
     try:
-        window_size = np.abs(np.int(window_size))
-        order = np.abs(np.int(order))
+        window_size = np.abs(int(window_size))
+        order = np.abs(int(order))
     except ValueError as msg:
         raise ValueError("window_size and order have to be of type int")
 

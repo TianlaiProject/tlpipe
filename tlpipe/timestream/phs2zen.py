@@ -59,7 +59,10 @@ class Phs2zen(timestream_task.TimestreamTask):
 
         try:
             # convert an observing time to the ra_dec of the array pointing of that time
-            src_time = get_ephdate(source, tzone=ts.attrs['timezone'].decode('ascii')) # utc time
+            try:
+                src_time = get_ephdate(source, tzone=ts.attrs['timezone'].decode('ascii')) # utc time
+            except AttributeError:
+                src_time = get_ephdate(source, tzone=ts.attrs['timezone']) # utc time
             aa.date = str(ephem.Date(src_time)) # utc time
             # print('date:', aa.date)
             antpointing = np.radians(ts['antpointing'][-1, :, :]) # radians

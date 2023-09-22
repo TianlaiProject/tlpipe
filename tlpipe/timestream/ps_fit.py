@@ -206,9 +206,9 @@ class PsFit(timestream_task.TimestreamTask):
         ### may need to improve in the future
         transit_ind = transit_inds[0]
         int_time = ts.attrs['inttime'] # second
-        start_ind = max(0, transit_ind - np.int(span / int_time))
-        end_ind = min(len(ts.local_time), transit_ind + np.int(span / int_time))
-        num_shift = np.int(shift / int_time)
+        start_ind = max(0, transit_ind - int(span / int_time))
+        end_ind = min(len(ts.local_time), transit_ind + int(span / int_time))
+        num_shift = int(shift / int_time)
         num_shift = min(num_shift, end_ind - start_ind)
 
         ############################################

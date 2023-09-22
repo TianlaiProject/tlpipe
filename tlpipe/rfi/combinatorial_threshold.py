@@ -34,11 +34,11 @@ class CombinatorialThreshold(object):
         if time_freq_vis_mask is None:
             self.vis_mask = np.where(np.isfinite(self.vis), False, True)
         elif self.vis.shape == time_freq_vis_mask.shape:
-            self.vis_mask = time_freq_vis_mask.astype(np.bool)
+            self.vis_mask = time_freq_vis_mask.astype(bool)
         else:
             raise ValueError('Invalid time_freq_vis_mask')
 
-        max_log2_length = np.int(np.ceil(np.log2(max_threshold_length))) + 1
+        max_log2_length = int(np.ceil(np.log2(max_threshold_length))) + 1
         time_lengths = [ 2**i for i in range(max_log2_length) ]
         freq_lengths = [ 2**i for i in range(max_log2_length) ]
         # include nt, nf in lengths

@@ -42,8 +42,8 @@ class PsSub(timestream_task.TimestreamTask):
         ts.redistribute('baseline', via_memmap=via_memmap)
 
         int_time = ts.attrs['inttime']
-        num_span = np.int(span / int_time)
-        num_int = np.int(np.ceil(1.0 * const.sday / int_time)) # of one sidereal day
+        num_span = int(span / int_time)
+        num_int = int(np.ceil(1.0 * const.sday / int_time)) # of one sidereal day
         nt = len(ts.local_time)
         if nt > num_int:
             raise RuntimeError('Now can only process data less than one sidereal day')

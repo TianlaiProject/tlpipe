@@ -149,7 +149,10 @@ class BasicTod(memh5.MemDiskGroup):
             fl = ensure_file_list(files)[0]
             with h5py.File(fl, 'r') as f:
                 if 'hints' in f.attrs.keys():
-                    hints = pickle.loads(f.attrs['hints'])
+                    try:
+                        hints = pickle.loads(f.attrs['hints'])
+                    TypeError:
+                        hints = pickle.loads(f.attrs['hints'].encode())
                     for key, val in hints.items():
                         setattr(self, key, val)
 
@@ -975,7 +978,10 @@ class BasicTod(memh5.MemDiskGroup):
         """Create a new history entry."""
 
         if self.history and history != '':
-            self.attrs['history'] += np.bytes_('\n' + history)
+            try:
+                self.attrs['history'] += np.bytes_('\n' + history)
+            except TypeError:
+                self.attrs['history'] += ('\n' + history)
 
     def info(self):
         """List basic information of the data hold by this container."""

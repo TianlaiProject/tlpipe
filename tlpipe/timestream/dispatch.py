@@ -201,8 +201,8 @@ class Dispatch(timestream_task.TimestreamTask):
             del tmp_tod
 
         iteration = self.iteration if self.iterable else 0
-        this_start = self.abs_start + np.int(np.around(iteration * days * const.sday / self.int_time))
-        this_stop = min(self.abs_stop, self.abs_start + np.int(np.around((iteration+1) * days * const.sday / self.int_time)) + 2*extra_inttime)
+        this_start = self.abs_start + int(np.around(iteration * days * const.sday / self.int_time))
+        this_stop = min(self.abs_stop, self.abs_start + int(np.around((iteration+1) * days * const.sday / self.int_time)) + 2*extra_inttime)
         if  this_stop >= self.abs_stop:
             self.next_grp = True
             self.grp_cnt += 1

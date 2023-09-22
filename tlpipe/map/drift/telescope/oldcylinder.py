@@ -84,7 +84,7 @@ class CylinderTelescope(telescope.TransitTelescope):
             # Construct array of baseline separations in complex representation
             bl1 = (self.feedpositions[f_ind[0]] - self.feedpositions[f_ind[1]])
 
-            ic_mask = np.where(bl1[..., 0] != 0.0, np.ones(fshape, dtype=np.bool), np.zeros(fshape, dtype=np.bool))
+            ic_mask = np.where(bl1[..., 0] != 0.0, np.ones(fshape, dtype=bool), np.zeros(fshape, dtype=bool))
             base_mask = np.logical_and(base_mask, ic_mask)
             base_map = telescope._remap_keyarray(base_map, base_mask)
 

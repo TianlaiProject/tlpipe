@@ -696,8 +696,8 @@ class BeamTransfer(object):
 
             print("Dividing calculation of %f GB array into %i sections." % (np.prod(dsize) * 16.0 / 2**30.0, nsections))
 
-            b_sec = np.array_split(np.arange(self.telescope.npairs, dtype=np.int), nsections)
-            f_sec = np.array_split(fi * np.ones(self.telescope.npairs, dtype=np.int), nsections)
+            b_sec = np.array_split(np.arange(self.telescope.npairs, dtype=int), nsections)
+            f_sec = np.array_split(fi * np.ones(self.telescope.npairs, dtype=int), nsections)
 
             # Iterate over each section, generating transfers and save them.
             for si in range(nsections):

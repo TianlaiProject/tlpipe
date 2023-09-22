@@ -49,7 +49,7 @@ class ReOrder(timestream_task.TimestreamTask):
             ind = ind + 1
 
         # get number of int_time in one sidereal day
-        num_int = np.int(np.around(1.0 * const.sday / ts.attrs['inttime']))
+        num_int = int(np.around(1.0 * const.sday / ts.attrs['inttime']))
         nt1 = min(num_int, nt-ind)
 
         # for vis

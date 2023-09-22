@@ -82,7 +82,10 @@ class BpCal(timestream_task.TimestreamTask):
         transit_time = a.phs.ephem2juldate(next_transit) # Julian date
         # get time zone
         pattern = '[-+]?\d+'
-        tz = re.search(pattern, ts.attrs['timezone'].decode('ascii')).group() # ts.attrs['timezone'] is bytes in python3
+        try:
+            tz = re.search(pattern, ts.attrs['timezone'].decode('ascii')).group() # ts.attrs['timezone'] is bytes in python3
+        except AttributeError:
+            tz = re.search(pattern, ts.attrs['timezone']).group() # ts.attrs['timezone'] is str in python3.10
         tz = int(tz)
         local_next_transit = ephem.Date(next_transit + tz * ephem.hour) # plus 8h to get Beijing time
         # if transit_time > ts['jul_date'][-1]:
@@ -97,8 +100,8 @@ class BpCal(timestream_task.TimestreamTask):
         ### now only use the first transit point to do the cal
         ### may need to improve in the future
         int_time = ts.attrs['inttime'] # second
-        start_ind = transit_ind - np.int(lower_dt / int_time) - avg_tis // 2
-        end_ind = transit_ind + np.int(lower_dt / int_time) + avg_tis // 2
+        start_ind = transit_ind - int(lower_dt / int_time) - avg_tis // 2
+        end_ind = transit_ind + int(lower_dt / int_time) + avg_tis // 2
 
         if start_ind < 0:
             raise RuntimeError('Data does not contain the left lower end')

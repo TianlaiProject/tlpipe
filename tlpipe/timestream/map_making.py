@@ -217,7 +217,7 @@ class MapMaking(timestream_task.TimestreamTask):
                 if time_avg == 'avg':
                     nt_m = float(nt) / phi_size
                     # roll data to have phi=0 near the first
-                    roll_len = np.int(np.around(0.5*nt_m))
+                    roll_len = int(np.around(0.5*nt_m))
                     local_vis[:] = np.roll(local_vis[:], roll_len, axis=0)
                     if interp == 'none':
                         local_vis_mask[:] = np.roll(local_vis_mask[:], roll_len, axis=0)
@@ -270,7 +270,7 @@ class MapMaking(timestream_task.TimestreamTask):
                 # mask daytime data
                 if mask_daytime:
                     day_or_night = np.where(ts['local_hour'][:]>=mask_time_range[0] & ts['local_hour'][:]<=mask_time_range[1], True, False)
-                    day_inds = np.where(np.repeat(day_or_night, phi_size).reshape(nt, phi_size).astype(np.int).sum(axis=1).astype(bool))[0]
+                    day_inds = np.where(np.repeat(day_or_night, phi_size).reshape(nt, phi_size).astype(int).sum(axis=1).astype(bool))[0]
                     vis[day_inds] = 0
 
                 del ts # no longer need ts
