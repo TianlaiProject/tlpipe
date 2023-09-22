@@ -46,7 +46,7 @@ sir_ext = Extension(
 
 
 
-REQUIRES = ['numpy', 'scipy', 'matplotlib', 'h5py', 'healpy', 'pyephem', 'aipy', 'caput', 'cora']
+REQUIRES = ['numpy', 'scipy', 'matplotlib', 'h5py', 'healpy', 'pyephem', 'aipy', 'caput', 'cora', 'pathos']
 
 # Don't install requirements if on ReadTheDocs build system.
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
