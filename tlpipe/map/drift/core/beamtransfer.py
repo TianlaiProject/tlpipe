@@ -1176,6 +1176,119 @@ class BeamTransfer(object):
 
         return vecb
 
+    def solve_cl_tk(self, mi, v, eps=0.01):
+        """Solve C_l(\nu, \nu') using the Tikhonov regularization method.
+
+        Parameters
+        ----------
+        mi : integer
+            Mode index to fetch for.
+        v : np.ndarray
+            Sky data vector packed as [freq, baseline, polarisation]
+
+        Returns
+        -------
+        cl : np.ndarray
+            Solved C_l.
+        """
+
+        beam = self.beam_m(mi) # shape (nfreq, 2, npairs, npol_sky, lmax+1)
+
+        nfreq = self.nfreq
+        nl = self.telescope.lmax + 1 - mi # do not include l < m
+        npl = self.telescope.num_pol_sky * nl
+        beam = beam[:, :, :, :, mi:].reshape((nfreq, self.ntel, npl))
+
+        cl = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, nfreq, nfreq), dtype=np.float64)
+        v = v.reshape((nfreq, self.ntel))
+
+        for fi1 in range(nfreq):
+            Bf1 = beam[fi1] # all zeros for l < m
+            BBf1 = np.dot(Bf1.T.conj(), Bf1) # B^* B
+            Bvf1 = np.dot(Bf1.T.conj(), v[fi1]) # B^* v
+
+            for fi2 in range(fi1, nfreq):
+                Bf2 = beam[fi2] # all zeros for l < m
+                BBf2 = np.dot(Bf2.T.conj(), Bf2) # B^* B
+                Bvf2 = np.dot(Bf2.T.conj(), v[fi2]) # B^* v
+
+                BB = BBf1 * np.conj(BBf2)
+                np.fill_diagonal(BB, eps + np.diag(BB)) # (B^* B + eps I)
+                Bv = Bvf1 * np.conj(Bvf2)
+
+                try:
+                    BBi = la.pinv(BB) # (B^* B + eps I)^-1
+                except np.linalg.linalg.LinAlgError:
+                    print('Compute pinv of BB failed for mi = %d, fi1 = %d, fi2 = %d' % (mi, fi1, fi2))
+                    continue
+                chat = np.dot(BBi, Bv).real # keep only real part
+                cl[:, mi:, fi1, fi2] = chat.reshape(self.telescope.num_pol_sky, nl)
+
+        return cl
+
+    def solve_cl_allm_tk(self, vs, eps=0.01):
+        """Solve C_l(\nu, \nu') using the Tikhonov regularization method.
+
+        Parameters
+        ----------
+        vs : a list of np.ndarray
+            Each v is a sky data vector packed as [freq, baseline, polarisation]
+
+        Returns
+        -------
+        cl : np.ndarray
+            Solved C_l.
+        """
+
+        nm = len(vs) # numbe of ms
+        nfreq = self.nfreq
+        nl = self.telescope.lmax + 1
+        npl = self.telescope.num_pol_sky * nl
+
+        cl_diag = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, nfreq, nfreq), dtype=np.float64)
+        cl_tk = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, nfreq, nfreq), dtype=np.float64)
+
+        for fi1 in range(nfreq):
+            for fi2 in range(fi1, nfreq):
+                BB = np.zeros((npl, npl), dtype=np.complex128)
+                Bv = np.zeros(npl, dtype=np.complex128)
+
+                for mi in range(nm):
+                    beam = self.beam_m(mi) # shape (nfreq, 2, npairs, npol_sky, lmax+1)
+                    beam = beam.reshape((nfreq, self.ntel, npl))
+                    v = vs[mi].reshape((nfreq, self.ntel))
+
+                    Bf1 = beam[fi1] # all zeros for l < m
+                    BBf1 = np.dot(Bf1.T.conj(), Bf1) # B^* B
+                    Bvf1 = np.dot(Bf1.T.conj(), v[fi1]) # B^* v
+
+                    Bf2 = beam[fi2] # all zeros for l < m
+                    BBf2 = np.dot(Bf2.T.conj(), Bf2) # B^* B
+                    Bvf2 = np.dot(Bf2.T.conj(), v[fi2]) # B^* v
+
+                    BB += BBf1 * np.conj(BBf2)
+                    Bv += Bvf1 * np.conj(Bvf2)
+
+                # # save BB to file for analysis
+                # with h5py.File('BB.hdf5', 'w') as f:
+                #     f.create_dataset('BB', data=BB)
+                #     f.create_dataset('Bv', data=Bv)
+
+                # approximation solution
+                cl_diag[:, :, fi1, fi2] = (Bv.real / np.diag(BB.real)).reshape(self.telescope.num_pol_sky, nl)
+
+                np.fill_diagonal(BB, eps + np.diag(BB)) # (B^* B + eps I)
+                try:
+                    BBi = la.pinv(BB) # (B^* B + eps I)^-1
+                except np.linalg.linalg.LinAlgError:
+                    print('Compute pinv of BB failed for fi1 = %d, fi2 = %d' % (fi1, fi2))
+                    continue
+                chat = np.dot(BBi, Bv).real # keep only real part
+                cl_tk[:, :, fi1, fi2] = chat.reshape(self.telescope.num_pol_sky, nl)
+
+        return cl_tk, cl_diag
+
+
     _cache_dict = dict()
 
     # def tk_deconv(self, fi, mi, alm_ps, eps=0.01):

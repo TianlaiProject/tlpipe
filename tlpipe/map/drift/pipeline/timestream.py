@@ -416,6 +416,47 @@ class Timestream(object):
 
         mpiutil.barrier()
 
+    def solve_cl(self, clname, eps=0.01, prior_cl_file=None):
+
+        nfreq = self.telescope.nfreq
+
+        if prior_cl_file is not None:
+            # read in the prior cl
+            with h5py.File(prior_cl_file, 'r') as f:
+                prior_cl = f['cl'][:] # shape (npol, nl, nfreq, nfreq)
+
+
+        def _solve_clm(mi):
+
+            print("Solving %i" % mi)
+
+            mmode = self.mmode(mi)
+            clmode = self.beamtransfer.solve_cl_tk(mi, mmode, eps=eps)
+
+            return clmode
+
+        # solve cl for each single m
+        clm_list = mpiutil.parallel_map(_solve_clm, list(range(self.telescope.mmax + 1)), root=0, method='rand')
+
+        if mpiutil.rank0:
+
+            # solve cl with all ms
+            vs = [ self.mmode(mi) for mi in range(self.telescope.mmax+1) ]
+            # TODO: parallelize this latter
+            cl_tk, cl_diag = self.beamtransfer.solve_cl_allm_tk(vs, eps=eps)
+
+            with h5py.File(self.output_directory + '/' + clname, 'w') as f:
+                f.create_dataset('/clm', data=np.array(clm_list))
+                f['/clm'].attrs['dim'] = 'm, pol, l, freq, freq'
+                f.create_dataset('/cl_tk', data=np.array(cl_tk))
+                f['/cl_tk'].attrs['dim'] = 'pol, l, freq, freq'
+                f.create_dataset('/cl_diag', data=np.array(cl_diag))
+                f['/cl_diag'].attrs['dim'] = 'pol, l, freq, freq'
+                f.attrs['polarization'] = np.string_(['I', 'Q', 'U', 'V'])[:self.beamtransfer.telescope.num_pol_sky] # np.string_ for python 3
+                f.attrs['frequency'] = self.beamtransfer.telescope.frequencies
+
+        mpiutil.barrier()
+
 
     def mapmake_svd(self, nside, mapname):
 
