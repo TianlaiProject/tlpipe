@@ -570,6 +570,18 @@ class TimestreamCommon(container.BasicTod):
         return aa
 
     @property
+    def feedpos(self):
+        """Fixed feeds position."""
+        if self.is_cylinder:
+            fdp1 = [ [-30.0, -12.4 + i * 12.4 / (31 - 1), 0.0] for i in range(31) ]
+            fdp2 = [ [-15.0, -12.4 + i * 12.4 / (32 - 1), 0.0] for i in range(32) ]
+            fdp3 = [ [0.0, -12.4 + i * 12.4 / (33 - 1), 0.0] for i in range(33) ]
+            # return np.array(fdp1 + fdp2 + fdp3)
+            return -np.array(fdp1 + fdp2 + fdp3)
+        else:
+            raise NotImplementedError
+
+    @property
     def is_continuous(self):
         """Data is observed continuous in time?"""
         return self['sec1970'].attrs["continuous"]

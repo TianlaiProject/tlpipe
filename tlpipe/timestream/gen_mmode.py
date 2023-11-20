@@ -32,6 +32,7 @@ class GenMmode(timestream_task.TimestreamTask):
                     'tsys': 50.0,
                     'accuracy_boost': 1.0,
                     'l_boost': 1.0,
+                    'use_feedpos_in_file': True,
                     'bl_range': [0.0, 1.0e7],
                     'auto_correlations': False,
                     'lmax': None, # max l to compute
@@ -53,6 +54,7 @@ class GenMmode(timestream_task.TimestreamTask):
         tsys = self.params['tsys']
         accuracy_boost = self.params['accuracy_boost']
         l_boost = self.params['l_boost']
+        use_feedpos_in_file = self.params['use_feedpos_in_file']
         bl_range = self.params['bl_range']
         auto_correlations = self.params['auto_correlations']
         lmax = self.params['lmax']
@@ -88,7 +90,11 @@ class GenMmode(timestream_task.TimestreamTask):
         az = np.degrees(az)
         alt = np.degrees(alt)
         pointing = [az, alt, 0.0]
-        feedpos = ts['feedpos'][:]
+        if use_feedpos_in_file:
+            feedpos = ts['feedpos'][:]
+        else:
+            # used the fixed feedpos
+            feedpos = ts.feedpos
 
         if ts.is_dish:
             from tlpipe.map.drift.telescope import tl_dish
@@ -116,11 +122,11 @@ class GenMmode(timestream_task.TimestreamTask):
         if mpiutil.rank0:
             # large array only in rank0 to save memory
             mmode = np.zeros((2*tel.mmax+1, nfreq, nuq), dtype=np.complex128)
-            N = np.zeros((nfreq, nuq), dtype=int) # number of accumulate terms
+            N = np.zeros((nfreq, nuq), dtype=float) # number of accumulate terms
 
         # mmode of a specific unique pair
         mmodeqi = np.zeros((2*tel.mmax+1, nfreq), dtype=np.complex128)
-        Nqi = np.zeros((nfreq), dtype=int) # number of accumulate terms
+        Nqi = np.zeros((nfreq), dtype=float) # number of accumulate terms
 
         start_ra = ts.vis.attrs['start_ra']
         ra = mpiutil.gather_array(ts['ra_dec'].local_data[:, 0], root=None)
@@ -169,9 +175,11 @@ class GenMmode(timestream_task.TimestreamTask):
                     M[local_inds<ind, :] = True
                     M[local_inds>=ind+nt1, :] = True
                     V = np.where(M, 0, V) # fill masked values with 0
-                    v = np.logical_not(M).astype(int) # 1 for valid, 0 for invalid
-                    # mmode[:, :, qi] += np.dot(E, V)
-                    # N[:, qi] += np.sum(v, axis=0)
+                    v = np.logical_not(M).astype(float) # 1 for valid, 0 for invalid
+                    if 'local_hour_factor' in ts.keys():
+                        a = ts['local_hour_factor'].local_data
+                        V *= a[:, np.newaxis]
+                        v *= a[:, np.newaxis]
                     mmodeqi += np.dot(E, V)
                     Nqi += np.sum(v, axis=0)
 
@@ -208,9 +216,6 @@ class GenMmode(timestream_task.TimestreamTask):
                 mmode1[mi, :, 1] = mmode[tel.mmax-mi].conj()
 
             del mmode
-
-            # normalize mmode
-            # mmode1 /= N[np.newaxis, :, np.newaxis, :]
 
             # save mmode to file
             mmode_dir = tstream.output_directory + '/mmodes'

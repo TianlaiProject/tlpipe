@@ -28,6 +28,7 @@ class GenBeam(timestream_task.TimestreamTask):
                     'tsys': 50.0,
                     'accuracy_boost': 1.0,
                     'l_boost': 1.0,
+                    'use_feedpos_in_file': True,
                     'bl_range': [0.0, 1.0e7],
                     'auto_correlations': False,
                     'beam_dir': 'map/bt',
@@ -42,6 +43,7 @@ class GenBeam(timestream_task.TimestreamTask):
         tsys = self.params['tsys']
         accuracy_boost = self.params['accuracy_boost']
         l_boost = self.params['l_boost']
+        use_feedpos_in_file = self.params['use_feedpos_in_file']
         bl_range = self.params['bl_range']
         auto_correlations = self.params['auto_correlations']
         beam_dir = output_path(self.params['beam_dir'])
@@ -71,7 +73,11 @@ class GenBeam(timestream_task.TimestreamTask):
         az = np.degrees(az)
         alt = np.degrees(alt)
         pointing = [az, alt, 0.0]
-        feedpos = ts['feedpos'][:]
+        if use_feedpos_in_file:
+            feedpos = ts['feedpos'][:]
+        else:
+            # used the fixed feedpos
+            feedpos = ts.feedpos
 
         if ts.is_dish:
             from tlpipe.map.drift.telescope import tl_dish
