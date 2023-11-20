@@ -1148,7 +1148,10 @@ class BeamTransfer(object):
         for bi in range(nbin):
             B = beam[s[bi]:e[bi]].reshape(-1, npl) # all zeros for l < m
             BB = np.dot(B.T.conj(), B) # B^* B
-            np.fill_diagonal(BB, eps + np.diag(BB)) # (B^* B + eps I)
+
+            BBd = np.diag(BB).real
+            # np.fill_diagonal(BB, eps + BBd) # (B^* B + eps I)
+            np.fill_diagonal(BB, eps * np.cos(BBd / BBd.max()) + BBd) # (B^* B + eps cos(BBd / max(BBd)))
             vec1 = vec[s[bi]:e[bi]].reshape(-1)
             try:
                 BBi = la.pinv(BB) # (B^* B + eps I)^-1
