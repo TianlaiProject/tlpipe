@@ -32,7 +32,7 @@ class SurfaceFitMethod(object, metaclass=abc.ABCMeta):
         if time_freq_vis_mask is None:
             self.vis_mask = np.where(np.isfinite(self.vis), False, True)
         elif self.vis.shape == time_freq_vis_mask.shape:
-            self.vis_mask = time_freq_vis_mask.astype(np.bool)
+            self.vis_mask = time_freq_vis_mask.astype(bool)
         else:
             raise ValueError('Invalid time_freq_vis_mask')
 
