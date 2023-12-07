@@ -66,6 +66,7 @@ class PsCal(timestream_task.TimestreamTask):
                     'span': 10, # time points
                     'reserve_high_gain': False, # if True, will not flag those gain significantly higher than mean value, only flag significantly lower ones
                     'rpca_max_iter': 200, # max iteration number for rpca decomposition
+                    'use_feedpos_in_file': True,
                     'subtract_src': False, # subtract vis of the calibrator from data
                     'replace_with_src': False, # replace vis with the subtracted src_vis, only work when subtract_src = True
                     'apply_gain': True,
@@ -86,6 +87,7 @@ class PsCal(timestream_task.TimestreamTask):
         zero_diag = self.params['zero_diag']
         span = self.params['span']
         rpca_max_iter = self.params['rpca_max_iter']
+        use_feedpos_in_file = self.params['use_feedpos_in_file']
         reserve_high_gain = self.params['reserve_high_gain']
         tag_output_iter = self.params['tag_output_iter']
         subtract_src = self.params['subtract_src']
@@ -289,7 +291,11 @@ class PsCal(timestream_task.TimestreamTask):
                     n0[ti] = s.get_crds('top', ncrd=3)
 
                 # get the positions of feeds
-                feedpos = ts['feedpos'][:]
+                if use_feedpos_in_file:
+                    feedpos = ts['feedpos'][:]
+                else:
+                    # used the fixed feedpos
+                    feedpos = ts.feedpos
 
                 # create data to save the solved gain for each feed
                 gain = np.full((nf, 2, nfeed), cnan, dtype=Gain.dtype) # gain for each feed

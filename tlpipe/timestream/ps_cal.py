@@ -72,6 +72,7 @@ class PsCal(timestream_task.TimestreamTask):
                     'span': 60, # second
                     'reserve_high_gain': False, # if True, will not flag those gain significantly higher than mean value, only flag significantly lower ones
                     'rpca_max_iter': 200, # max iteration number for rpca decomposition
+                    'use_feedpos_in_file': True,
                     'plot_figs': False,
                     'fig_name': 'gain/gain',
                     'save_src_vis': False, # save the extracted calibrator visibility
@@ -100,6 +101,7 @@ class PsCal(timestream_task.TimestreamTask):
         zero_diag = self.params['zero_diag']
         span = self.params['span']
         rpca_max_iter = self.params['rpca_max_iter']
+        use_feedpos_in_file = self.params['use_feedpos_in_file']
         reserve_high_gain = self.params['reserve_high_gain']
         plot_figs = self.params['plot_figs']
         fig_prefix = self.params['fig_name']
@@ -547,7 +549,11 @@ class PsCal(timestream_task.TimestreamTask):
                     n0t[ti] = s.get_crds('top', ncrd=3)
 
                 # get the positions of feeds
-                feedpos = ts['feedpos'][:]
+                if use_feedpos_in_file:
+                    feedpos = ts['feedpos'][:]
+                else:
+                    # used the fixed feedpos
+                    feedpos = ts.feedpos
 
                 # wrap and redistribute Gain and flagged G_abs
                 Gain = mpiarray.MPIArray.wrap(lGain, axis=0, comm=ts.comm)
