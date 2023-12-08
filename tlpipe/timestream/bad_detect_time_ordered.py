@@ -87,7 +87,7 @@ class Detect(timestream_task.TimestreamTask):
             this_vis_mask = mpiarray.MPIArray.wrap(this_vis_mask, axis=0, comm=ts.comm).redistribute(axis=redistribute_axis)
 
             if this_vis.local_array.shape[-1] != 0:
-                bi = i * chunk_size.size + mpiutil.rank
+                bi = i * chunk_size + mpiutil.rank
                 bl = tuple(ts.bl[bi])
 
                 if isinstance(ts, RawTimestream):
@@ -112,7 +112,7 @@ class Detect(timestream_task.TimestreamTask):
                             problematic_bls.append((bl, pol))
 
             this_vis_mask = this_vis_mask.redistribute(axis=0)
-            ts.local_vis_mask[..., i*chunk_size.size:(i+1)*chunk_size] = this_vis_mask.local_array
+            ts.local_vis_mask[..., i*chunk_size:(i+1)*chunk_size] = this_vis_mask.local_array
 
         # gather list
         problematic_bls = mpiutil.gather_list(problematic_bls, comm=ts.comm)
