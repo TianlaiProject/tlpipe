@@ -57,6 +57,7 @@ class NsCal(timestream_task.TimestreamTask):
     """
 
     params_init = {
+                    'chunk_size': 512,
                     'num_mean': 5, # use the mean of num_mean signals
                     'unmasked_only': False, # cal for unmasked time points only
                     'phs_only': True, # phase cal only
@@ -72,6 +73,7 @@ class NsCal(timestream_task.TimestreamTask):
         if not 'ns_on' in rt.keys():
             raise RuntimeError('No noise source info, can not do noise source calibration')
 
+        chunk_size = self.params['chunk_size']
         num_mean = self.params['num_mean']
         phs_only = self.params['phs_only']
         show_progress = self.params['show_progress']
@@ -100,7 +102,8 @@ class NsCal(timestream_task.TimestreamTask):
             inds = inds[:-1]
 
         nbl = len(rt.bl) # number of baselines
-        n, r = nbl // mpiutil.size, nbl % mpiutil.size # number of iterations
+        chunk_size = min(chunk_size, mpiutil.size)
+        n, r = nbl // chunk_size, nbl % chunk_size # number of iterations
         if r != 0:
             n = n + 1
         if show_progress and mpiutil.rank0:
@@ -109,23 +112,23 @@ class NsCal(timestream_task.TimestreamTask):
             if show_progress and mpiutil.rank0:
                 pg.show(i)
 
-            this_vis = rt.local_vis[..., i*mpiutil.size:(i+1)*mpiutil.size].copy()
+            this_vis = rt.local_vis[..., i*chunk_size:(i+1)*chunk_size].copy()
             this_vis = mpiarray.MPIArray.wrap(this_vis, axis=0, comm=rt.comm).redistribute(axis=redistribute_axis)
-            this_vis_mask = rt.local_vis_mask[..., i*mpiutil.size:(i+1)*mpiutil.size].copy()
+            this_vis_mask = rt.local_vis_mask[..., i*chunk_size:(i+1)*chunk_size].copy()
             this_vis_mask = mpiarray.MPIArray.wrap(this_vis_mask, axis=0, comm=rt.comm).redistribute(axis=redistribute_axis)
             if this_vis.local_array.shape[-1] != 0:
                 if isinstance(rt, RawTimestream):
                     for fi in range(this_vis.local_array.shape[1]):
-                        self.cal(this_vis.local_array[:, fi, 0], this_vis_mask.local_array[:, fi, 0], 0, 0, 0, rt, is_ts=is_ts, inds=inds, pol=rt['bl_pol'][i*mpiutil.size+mpiutil.rank], bl=rt['true_blorder'][i*mpiutil.size+mpiutil.rank])
+                        self.cal(this_vis.local_array[:, fi, 0], this_vis_mask.local_array[:, fi, 0], 0, 0, 0, rt, is_ts=is_ts, inds=inds, pol=rt['bl_pol'][i*chunk_size+mpiutil.rank], bl=rt['true_blorder'][i*chunk_size+mpiutil.rank])
                 elif isinstance(rt, Timestream):
                     for fi in range(this_vis.local_array.shape[1]):
                         for pi in range(this_vis.local_array.shape[2]):
-                            self.cal(this_vis.local_array[:, fi, pi, 0], this_vis_mask.local_array[:, fi, pi, 0], 0, 0, 0, rt, is_ts=is_ts, inds=inds, pol=pi, bl=rt['blorder'][i*mpiutil.size+mpiutil.rank])
+                            self.cal(this_vis.local_array[:, fi, pi, 0], this_vis_mask.local_array[:, fi, pi, 0], 0, 0, 0, rt, is_ts=is_ts, inds=inds, pol=pi, bl=rt['blorder'][i*chunk_size+mpiutil.rank])
 
             this_vis = this_vis.redistribute(axis=0)
-            rt.local_vis[..., i*mpiutil.size:(i+1)*mpiutil.size] = this_vis.local_array
+            rt.local_vis[..., i*chunk_size:(i+1)*chunk_size] = this_vis.local_array
             this_vis_mask = this_vis_mask.redistribute(axis=0)
-            rt.local_vis_mask[..., i*mpiutil.size:(i+1)*mpiutil.size] = this_vis_mask.local_array
+            rt.local_vis_mask[..., i*chunk_size:(i+1)*chunk_size] = this_vis_mask.local_array
 
 
         return super(NsCal, self).process(rt)

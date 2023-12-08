@@ -38,6 +38,7 @@ class Plot(timestream_task.TimestreamTask):
     """
 
     params_init = {
+                    'chunk_size': 512,
                     'bl_incl': 'all', # or a list of include (bl1, bl2)
                     'bl_excl': [],
                     'flag_mask': False,
@@ -61,6 +62,7 @@ class Plot(timestream_task.TimestreamTask):
     prefix = 'pwf_'
 
     def process(self, ts):
+        chunk_size = self.params['chunk_size']
         via_memmap = self.params['via_memmap']
         show_progress = self.params['show_progress']
         progress_step = self.params['progress_step']
@@ -77,8 +79,10 @@ class Plot(timestream_task.TimestreamTask):
         else:
             ns_on = None
         sec1970 = mpiutil.gather_array(ts['sec1970'].local_data, root=None, comm=ts.comm)
+
         nbl = len(ts.bl) # number of baselines
-        n, r = nbl // mpiutil.size, nbl % mpiutil.size # number of iterations
+        chunk_size = min(chunk_size, mpiutil.size)
+        n, r = nbl // chunk_size, nbl % chunk_size # number of iterations
         if r != 0:
             n = n + 1
         if show_progress and mpiutil.rank0:
@@ -87,16 +91,16 @@ class Plot(timestream_task.TimestreamTask):
             if show_progress and mpiutil.rank0:
                 pg.show(i)
 
-            this_vis = ts.local_vis[..., i*mpiutil.size:(i+1)*mpiutil.size].copy()
+            this_vis = ts.local_vis[..., i*chunk_size:(i+1)*chunk_size].copy()
             this_vis = mpiarray.MPIArray.wrap(this_vis, axis=0, comm=ts.comm).redistribute(axis=redistribute_axis)
-            this_vis_mask = ts.local_vis_mask[..., i*mpiutil.size:(i+1)*mpiutil.size].copy()
+            this_vis_mask = ts.local_vis_mask[..., i*chunk_size:(i+1)*chunk_size].copy()
             this_vis_mask = mpiarray.MPIArray.wrap(this_vis_mask, axis=0, comm=ts.comm).redistribute(axis=redistribute_axis)
             if this_vis.local_array.shape[-1] != 0:
                 if isinstance(ts, RawTimestream):
-                    self.plot(this_vis.local_array[..., 0], this_vis_mask.local_array[..., 0], 0, 0, 0, ts, ns_on=ns_on, sec1970=sec1970, pol=ts['bl_pol'][i*mpiutil.size+mpiutil.rank], bl=ts['true_blorder'][i*mpiutil.size+mpiutil.rank], chpair=ts['blorder'][i*mpiutil.size+mpiutil.rank])
+                    self.plot(this_vis.local_array[..., 0], this_vis_mask.local_array[..., 0], 0, 0, 0, ts, ns_on=ns_on, sec1970=sec1970, pol=ts['bl_pol'][i*chunk_size+mpiutil.rank], bl=ts['true_blorder'][i*chunk_size+mpiutil.rank], chpair=ts['blorder'][i*chunk_size+mpiutil.rank])
                 elif isinstance(ts, Timestream):
                     for pi in range(this_vis.local_array.shape[2]):
-                        self.plot(this_vis.local_array[..., pi, 0], this_vis_mask.local_array[..., pi, 0], 0, 0, 0, ts, ns_on=ns_on, sec1970=sec1970, pol=pi, bl=ts['blorder'][i*mpiutil.size+mpiutil.rank], chpair=None)
+                        self.plot(this_vis.local_array[..., pi, 0], this_vis_mask.local_array[..., pi, 0], 0, 0, 0, ts, ns_on=ns_on, sec1970=sec1970, pol=pi, bl=ts['blorder'][i*chunk_size+mpiutil.rank], chpair=None)
 
         return super(Plot, self).process(ts)
 

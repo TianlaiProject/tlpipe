@@ -27,12 +27,14 @@ class Detect(timestream_task.TimestreamTask):
     """
 
     params_init = {
+            'chunk_size': 512,
             'check_auto_vis': True # check the imaginary part of auto-corrections
              }
 
     prefix = 'bd_'
 
     def process(self, ts):
+        chunk_size = self.params['chunk_size']
         check_auto_vis = self.params['check_auto_vis']
         via_memmap = self.params['via_memmap']
         show_progress = self.params['show_progress']
@@ -69,7 +71,8 @@ class Detect(timestream_task.TimestreamTask):
         bad_bls = []
 
         nbl = len(ts.bl) # number of baselines
-        n, r = nbl // mpiutil.size, nbl % mpiutil.size # number of iterations
+        chunk_size = min(chunk_size, mpiutil.size)
+        n, r = nbl // chunk_size, nbl % chunk_size # number of iterations
         if r != 0:
             n = n + 1
         if show_progress and mpiutil.rank0:
@@ -78,13 +81,13 @@ class Detect(timestream_task.TimestreamTask):
             if show_progress and mpiutil.rank0:
                 pg.show(i)
 
-            this_vis = ts.local_vis[..., i*mpiutil.size:(i+1)*mpiutil.size].copy()
+            this_vis = ts.local_vis[..., i*chunk_size:(i+1)*chunk_size].copy()
             this_vis = mpiarray.MPIArray.wrap(this_vis, axis=0, comm=ts.comm).redistribute(axis=redistribute_axis)
-            this_vis_mask = ts.local_vis_mask[..., i*mpiutil.size:(i+1)*mpiutil.size].copy()
+            this_vis_mask = ts.local_vis_mask[..., i*chunk_size:(i+1)*chunk_size].copy()
             this_vis_mask = mpiarray.MPIArray.wrap(this_vis_mask, axis=0, comm=ts.comm).redistribute(axis=redistribute_axis)
 
             if this_vis.local_array.shape[-1] != 0:
-                bi = i * mpiutil.size + mpiutil.rank
+                bi = i * chunk_size.size + mpiutil.rank
                 bl = tuple(ts.bl[bi])
 
                 if isinstance(ts, RawTimestream):
@@ -109,7 +112,7 @@ class Detect(timestream_task.TimestreamTask):
                             problematic_bls.append((bl, pol))
 
             this_vis_mask = this_vis_mask.redistribute(axis=0)
-            ts.local_vis_mask[..., i*mpiutil.size:(i+1)*mpiutil.size] = this_vis_mask.local_array
+            ts.local_vis_mask[..., i*chunk_size.size:(i+1)*chunk_size] = this_vis_mask.local_array
 
         # gather list
         problematic_bls = mpiutil.gather_list(problematic_bls, comm=ts.comm)
