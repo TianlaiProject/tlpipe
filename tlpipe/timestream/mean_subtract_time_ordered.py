@@ -61,6 +61,9 @@ class Subtract(timestream_task.TimestreamTask):
         # vis_sum = np.ma.sum(np.ma.array(ts.local_vis[tis], mask=ts.local_vis_mask[tis]), axis=0, keepdims=True).filled(0)
         # vis_cnt = np.logical_not(ts.local_vis_mask[tis]).astype(int).sum(axis=0, keepdims=True)
 
+        # vis_sum = mpiutil.gather_array(vis_sum, axis=0, root=0, comm=ts.comm)
+        # vis_cnt = mpiutil.gather_array(vis_cnt, axis=0, root=0, comm=ts.comm)
+
         # use the following iteration to save memmory usage
         vis_sum = np.zeros((1,)+ts.local_vis.shape[1:], dtype=ts.local_vis.dtype)
         vis_cnt = np.zeros_like(vis_sum, dtype='i4')
@@ -69,13 +72,21 @@ class Subtract(timestream_task.TimestreamTask):
             vis_sum += vis_ti.filled(0)
             vis_cnt += (~vis_ti.mask).astype('i4')
 
-        vis_sum = mpiutil.gather_array(vis_sum, axis=0, root=0, comm=ts.comm)
-        vis_cnt = mpiutil.gather_array(vis_cnt, axis=0, root=0, comm=ts.comm)
+        # accumulate vis_sum from all processes by Reduce
+        if mpiutil.size > 1: # more than one processes
+            if mpiutil.rank0:
+                # use IN_PLACE to reuse the vis_sum and vis_cnt array
+                mpiutil.world.Reduce(mpiutil.IN_PLACE, vis_sum, op=mpiutil.SUM, root=0)
+                mpiutil.world.Reduce(mpiutil.IN_PLACE, vis_cnt, op=mpiutil.SUM, root=0)
+            else:
+                mpiutil.world.Reduce(vis_sum, vis_sum, op=mpiutil.SUM, root=0)
+                mpiutil.world.Reduce(vis_cnt, vis_cnt, op=mpiutil.SUM, root=0)
 
         if mpiutil.rank0:
-            vis_sum = vis_sum.sum(axis=0, keepdims=False)
-            vis_cnt = vis_cnt.sum(axis=0, keepdims=False)
-            night_mean = np.where(vis_cnt==0, 0, vis_sum/vis_cnt)
+            # vis_sum = vis_sum.sum(axis=0, keepdims=False)
+            # vis_cnt = vis_cnt.sum(axis=0, keepdims=False)
+            # night_mean = np.where(vis_cnt==0, 0, vis_sum/vis_cnt)
+            night_mean = np.where(vis_cnt==0, 0, vis_sum/vis_cnt)[0]
 
             if save_night_mean:
                 if tag_output_iter:
