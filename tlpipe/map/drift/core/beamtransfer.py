@@ -1226,6 +1226,8 @@ class BeamTransfer(object):
                     continue
                 chat = np.dot(BBi, Bv).real # keep only real part
                 cl[:, mi:, fi1, fi2] = chat.reshape(self.telescope.num_pol_sky, nl)
+                if fi1 != fi2:
+                    cl[:, mi:, fi2, fi1] = cl[:, mi:, fi1, fi2]
 
         return cl
 
@@ -1288,6 +1290,10 @@ class BeamTransfer(object):
                     continue
                 chat = np.dot(BBi, Bv).real # keep only real part
                 cl_tk[:, :, fi1, fi2] = chat.reshape(self.telescope.num_pol_sky, nl)
+
+                if fi1 != fi2:
+                    cl_diag[:, :, fi2, fi1] = cl_diag[:, :, fi1, fi2]
+                    cl_tk[:, :, fi2, fi1] = cl_tk[:, :, fi1, fi2]
 
         return cl_tk, cl_diag
 
