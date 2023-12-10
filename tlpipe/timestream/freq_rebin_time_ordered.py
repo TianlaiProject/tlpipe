@@ -28,6 +28,7 @@ class Rebin(timestream_task.TimestreamTask):
 
     params_init = {
                     'bin_number': 16,
+                    'chunk_size': 32,
                   }
 
     prefix = 'rb_'
@@ -38,6 +39,7 @@ class Rebin(timestream_task.TimestreamTask):
 
         via_memmap = self.params['via_memmap']
         bin_number = self.params['bin_number']
+        chunk_size = self.params['chunk_size']
 
         ts.redistribute('time', via_memmap=via_memmap)
 
@@ -53,8 +55,17 @@ class Rebin(timestream_task.TimestreamTask):
             memh5.copyattrs(ts['vis_mask'].attrs, tmp_vis_mask_attrs)
             memh5.copyattrs(ts['freq'].attrs, tmp_freq_attrs)
 
-            for r in range(mpiutil.size):
-                if r == mpiutil.rank:
+            ranks = np.arange(mpiutil.size)
+            np.random.shuffle(ranks)
+            ranks = mpiutil.bcast(ranks, root=0, comm=ts.comm)
+
+            chunk_size = min(chunk_size, mpiutil.size)
+            n, r = mpiutil.size // chunk_size, mpiutil.size % chunk_size # number of iterations
+            if r != 0:
+                n = n + 1
+            for i in range(n):
+                if mpiutil.rank in ranks[i*chunk_size:(i+1)*chunk_size]:
+                    # print(f'iter {i} rank {mpiutil.rank} run...')
                     repeat_inds = np.repeat(np.arange(nfreq), bin_number)
                     num, start, end = mpiutil.split_m(nfreq*bin_number, bin_number)
                     freq = np.zeros(bin_number, dtype=ts.freq.dtype)
