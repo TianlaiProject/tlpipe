@@ -96,8 +96,12 @@ def decompose(M, rank=1, S=None, lmbda=None, threshold='hard', max_iter=100, tol
 
         s1 = la.eigh(res, eigvals_only=True, eigvals=(d-1, d-1))
         # L may be under noise
-        if s[-1] < 0.2 * s1[-1]:
-            res = M
+        try:
+            if s[-1] < 0.2 * s1[-1]:
+                res = M
+        except IndexError:
+            # s1 may be an empty array
+            pass
 
         if not fixed_lmbda:
             # the universal threshold: sigma * (2 * log(d*d))**0.5
