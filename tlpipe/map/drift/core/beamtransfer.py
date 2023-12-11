@@ -1268,17 +1268,15 @@ class BeamTransfer(object):
             Bv = np.zeros(npl, dtype=np.complex128)
 
             for mi in range(nm):
-                beam = self.beam_m(mi) # shape (nfreq, 2, npairs, npol_sky, lmax+1)
-                beam = beam.reshape((nfreq, self.ntel, npl))
-                v = vs[mi].reshape((nfreq, self.ntel))
-
-                Bf1 = beam[fi1] # all zeros for l < m
+                Bf1 = self.beam_m(mi, fi1).reshape((self.ntel, npl))
+                v1 = vs[mi][fi1].reshape((self.ntel,))
                 BBf1 = np.dot(Bf1.T.conj(), Bf1) # B^* B
-                Bvf1 = np.dot(Bf1.T.conj(), v[fi1]) # B^* v
+                Bvf1 = np.dot(Bf1.T.conj(), v1) # B^* v
 
-                Bf2 = beam[fi2] # all zeros for l < m
+                Bf2 = self.beam_m(mi, fi2).reshape((self.ntel, npl))
+                v2 = vs[mi][fi2].reshape((self.ntel,))
                 BBf2 = np.dot(Bf2.T.conj(), Bf2) # B^* B
-                Bvf2 = np.dot(Bf2.T.conj(), v[fi2]) # B^* v
+                Bvf2 = np.dot(Bf2.T.conj(), v2) # B^* v
 
                 BB += BBf1 * np.conj(BBf2)
                 Bv += Bvf1 * np.conj(Bvf2)
