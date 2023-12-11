@@ -108,7 +108,7 @@ class DoubleKL(kltransform.KLTransform):
             return ta
 
         if mpiutil.rank0:
-            print("Creating eigenvalues file (process 0 only).")
+            print("Creating eigenvalues file (process 0 only).", flush=True)
 
         mlist = list(range(self.telescope.mmax+1))
         shape = (2, self.beamtransfer.ndofmax)
@@ -117,7 +117,7 @@ class DoubleKL(kltransform.KLTransform):
 
         if mpiutil.rank0:
             if os.path.exists(self.evdir + "/evals.hdf5"):
-                print("File: %s exists. Skipping..." % (self.evdir + "/evals.hdf5"))
+                print("File: %s exists. Skipping..." % (self.evdir + "/evals.hdf5"), flush=True)
                 return
 
             f = h5py.File(self.evdir + "/evals.hdf5", 'w')
