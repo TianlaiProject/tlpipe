@@ -438,12 +438,11 @@ class Timestream(object):
         # # solve cl for each single m
         # clm_list = mpiutil.parallel_map(_solve_clm, list(range(self.telescope.mmax + 1)), root=0, method='rand')
 
-        if mpiutil.rank0:
+        # solve cl with all ms
+        vs = [ self.mmode(mi) for mi in range(self.telescope.mmax+1) ]
+        cl_tk, cl_diag = self.beamtransfer.solve_cl_allm_tk(vs, eps=eps)
 
-            # solve cl with all ms
-            vs = [ self.mmode(mi) for mi in range(self.telescope.mmax+1) ]
-            # TODO: parallelize this latter
-            cl_tk, cl_diag = self.beamtransfer.solve_cl_allm_tk(vs, eps=eps)
+        if mpiutil.rank0:
 
             with h5py.File(self.output_directory + '/' + clname, 'w') as f:
                 # f.create_dataset('/clm', data=np.array(clm_list))

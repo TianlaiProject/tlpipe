@@ -1252,50 +1252,70 @@ class BeamTransfer(object):
         nl = self.telescope.lmax + 1
         npl = self.telescope.num_pol_sky * nl
 
-        cl_diag = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, nfreq, nfreq), dtype=np.float64)
-        cl_tk = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, nfreq, nfreq), dtype=np.float64)
-
+        fi1s = []
+        fi2s = []
         for fi1 in range(nfreq):
             for fi2 in range(fi1, nfreq):
-                BB = np.zeros((npl, npl), dtype=np.complex128)
-                Bv = np.zeros(npl, dtype=np.complex128)
+                fi1s.append(fi1)
+                fi2s.append(fi2)
 
-                for mi in range(nm):
-                    beam = self.beam_m(mi) # shape (nfreq, 2, npairs, npol_sky, lmax+1)
-                    beam = beam.reshape((nfreq, self.ntel, npl))
-                    v = vs[mi].reshape((nfreq, self.ntel))
+        lfi1s = mpiutil.scatter_array(np.array(fi1s))
+        lfi2s = mpiutil.scatter_array(np.array(fi2s))
+        lcld = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, len(lfi1s)), dtype=np.float64)
+        lclt = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, len(lfi1s)), dtype=np.float64)
+        for li, (fi1, fi2) in enumerate(zip(lfi1s, lfi2s)):
+            BB = np.zeros((npl, npl), dtype=np.complex128)
+            Bv = np.zeros(npl, dtype=np.complex128)
 
-                    Bf1 = beam[fi1] # all zeros for l < m
-                    BBf1 = np.dot(Bf1.T.conj(), Bf1) # B^* B
-                    Bvf1 = np.dot(Bf1.T.conj(), v[fi1]) # B^* v
+            for mi in range(nm):
+                beam = self.beam_m(mi) # shape (nfreq, 2, npairs, npol_sky, lmax+1)
+                beam = beam.reshape((nfreq, self.ntel, npl))
+                v = vs[mi].reshape((nfreq, self.ntel))
 
-                    Bf2 = beam[fi2] # all zeros for l < m
-                    BBf2 = np.dot(Bf2.T.conj(), Bf2) # B^* B
-                    Bvf2 = np.dot(Bf2.T.conj(), v[fi2]) # B^* v
+                Bf1 = beam[fi1] # all zeros for l < m
+                BBf1 = np.dot(Bf1.T.conj(), Bf1) # B^* B
+                Bvf1 = np.dot(Bf1.T.conj(), v[fi1]) # B^* v
 
-                    BB += BBf1 * np.conj(BBf2)
-                    Bv += Bvf1 * np.conj(Bvf2)
+                Bf2 = beam[fi2] # all zeros for l < m
+                BBf2 = np.dot(Bf2.T.conj(), Bf2) # B^* B
+                Bvf2 = np.dot(Bf2.T.conj(), v[fi2]) # B^* v
 
-                # # save BB to file for analysis
-                # with h5py.File('BB.hdf5', 'w') as f:
-                #     f.create_dataset('BB', data=BB)
-                #     f.create_dataset('Bv', data=Bv)
+                BB += BBf1 * np.conj(BBf2)
+                Bv += Bvf1 * np.conj(Bvf2)
 
-                # approximation solution
-                cl_diag[:, :, fi1, fi2] = (Bv.real / np.diag(BB.real)).reshape(self.telescope.num_pol_sky, nl)
+            # # save BB to file for analysis
+            # with h5py.File('BB.hdf5', 'w') as f:
+            #     f.create_dataset('BB', data=BB)
+            #     f.create_dataset('Bv', data=Bv)
 
-                np.fill_diagonal(BB, eps + np.diag(BB)) # (B^* B + eps I)
-                try:
-                    BBi = la.pinv(BB) # (B^* B + eps I)^-1
-                except np.linalg.linalg.LinAlgError:
-                    print('Compute pinv of BB failed for fi1 = %d, fi2 = %d' % (fi1, fi2), flush=True)
-                    continue
-                chat = np.dot(BBi, Bv).real # keep only real part
-                cl_tk[:, :, fi1, fi2] = chat.reshape(self.telescope.num_pol_sky, nl)
+            # approximation solution
+            lcld[:, :, li] = (Bv.real / np.diag(BB.real)).reshape(self.telescope.num_pol_sky, nl)
+
+            np.fill_diagonal(BB, eps + np.diag(BB)) # (B^* B + eps I)
+            try:
+                BBi = la.pinv(BB) # (B^* B + eps I)^-1
+            except np.linalg.linalg.LinAlgError:
+                print('Compute pinv of BB failed for fi1 = %d, fi2 = %d' % (fi1, fi2), flush=True)
+                continue
+            chat = np.dot(BBi, Bv).real # keep only real part
+            lclt[:, :, li] = chat.reshape(self.telescope.num_pol_sky, nl)
+
+        cld = mpiutil.gather_array(lcld, axis=2, root=0)
+        clt = mpiutil.gather_array(lclt, axis=2, root=0)
+
+        if mpiutil.rank0:
+            cl_diag = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, nfreq, nfreq), dtype=np.float64)
+            cl_tk = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, nfreq, nfreq), dtype=np.float64)
+            for i, (fi1, fi2) in enumerate(zip(fi1s, fi2s)):
+                cl_diag[:, :, fi1, fi2] = cld[:, :, i]
+                cl_tk[:, :, fi1, fi2] = clt[:, :, i]
 
                 if fi1 != fi2:
                     cl_diag[:, :, fi2, fi1] = cl_diag[:, :, fi1, fi2]
                     cl_tk[:, :, fi2, fi1] = cl_tk[:, :, fi1, fi2]
+        else:
+            cl_diag = None
+            cl_tk = None
 
         return cl_tk, cl_diag
 
