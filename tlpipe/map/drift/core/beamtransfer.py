@@ -1264,6 +1264,8 @@ class BeamTransfer(object):
         lcld = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, len(lfi1s)), dtype=np.float64)
         lclt = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, len(lfi1s)), dtype=np.float64)
         for li, (fi1, fi2) in enumerate(zip(lfi1s, lfi2s)):
+            if mpiutil.rank0:
+                print(f'{li} of {len(lfi1s)}...', flush=True)
             BB = np.zeros((npl, npl), dtype=np.complex128)
             Bv = np.zeros(npl, dtype=np.complex128)
 
