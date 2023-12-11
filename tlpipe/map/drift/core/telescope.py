@@ -622,7 +622,7 @@ class TransitTelescope(object, metaclass=abc.ABCMeta):
         # Generate the array for the Transfer functions
 
         tshape = bl_indices.shape + (self.num_pol_sky, lside+1, 2*lside+1)
-        print("Size: %i elements. Memory %f GB." % (np.prod(tshape), 2*np.prod(tshape) * 8.0 / 2**30))
+        print("Size: %i elements. Memory %f GB." % (np.prod(tshape), 2*np.prod(tshape) * 8.0 / 2**30), flush=True)
         tarray = np.zeros(tshape, dtype=np.complex128)
 
         # Sort the baselines by ascending lmax and iterate through in that
@@ -903,7 +903,7 @@ class UnpolarisedTelescope(TransitTelescope, metaclass=abc.ABCMeta):
         # ### use the following code to load a different beam model
         # import h5py
         # import healpy as hp
-        # print('Use beam model in bm2_model.hdf5...')
+        # print('Use beam model in bm2_model.hdf5...', flush=True)
         # with h5py.File('/path/to/bm2_model.hdf5', 'r') as f:
         #     bm2 = f['bm2'][:]
         # cvis = self._horizon * fringe * hp.ud_grade(bm2, hp.npix2nside(len(fringe)))

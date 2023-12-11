@@ -137,7 +137,7 @@ class Timestream(object):
 
         if os.path.exists(self.output_directory + "/mmodes/COMPLETED_M"):
             if mpiutil.rank0:
-                print("******* m-files already generated ********")
+                print("******* m-files already generated ********", flush=True)
             return
 
         tel = self.telescope
@@ -226,7 +226,7 @@ class Timestream(object):
         for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
 
             if os.path.exists(self._svdfile(mi)):
-                print("File %s exists. Skipping..." % self._svdfile(mi))
+                print("File %s exists. Skipping..." % self._svdfile(mi), flush=True)
                 continue
 
             tm = self.mmode(mi).reshape(self.telescope.nfreq, 2*self.telescope.npairs)
@@ -267,7 +267,7 @@ class Timestream(object):
 
         def _make_alm(mi):
 
-            print("Making %i" % mi)
+            print("Making %i" % mi, flush=True)
 
             mmode = self.mmode(mi)
             if dirty:
@@ -321,7 +321,7 @@ class Timestream(object):
                 max_inds = np.zeros(nfreq, dtype=int)
                 max_vals = np.zeros(nfreq, dtype=skymap.dtype)
                 for ii in range(n_iter):
-                    print('deconv: %d of %d...' % (ii, n_iter))
+                    print('deconv: %d of %d...' % (ii, n_iter), flush=True)
                     sys.stdout.flush()
                     sys.stderr.flush()
                     alm_psf = np.zeros((nbin, self.telescope.num_pol_sky, self.telescope.lmax + 1, self.telescope.lmax + 1), dtype=np.complex128)
@@ -428,7 +428,7 @@ class Timestream(object):
 
         # def _solve_clm(mi):
 
-        #     print("Solving %i" % mi)
+        #     print("Solving %i" % mi, flush=True)
 
         #     mmode = self.mmode(mi)
         #     clmode = self.beamtransfer.solve_cl_tk(mi, mmode, eps=eps)
@@ -528,7 +528,7 @@ class Timestream(object):
         for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
 
             if os.path.exists(self._klfile(mi)):
-                print("File %s exists. Skipping..." % self._klfile(mi))
+                print("File %s exists. Skipping..." % self._klfile(mi), flush=True)
                 continue
 
             svdm = self.mmode_svd(mi) #.reshape(self.telescope.nfreq, 2*self.telescope.npairs)
@@ -555,7 +555,7 @@ class Timestream(object):
             return evf
 
         if mpiutil.rank0:
-            print("Creating eigenvalues file (process 0 only).")
+            print("Creating eigenvalues file (process 0 only).", flush=True)
 
         mlist = list(range(self.telescope.mmax+1))
         shape = (self.beamtransfer.ndofmax, )
@@ -564,7 +564,7 @@ class Timestream(object):
         if mpiutil.rank0:
             fname =  self.output_directory + ("/klmodes_%s_%f.hdf5"% (self.klname, self.klthreshold))
             if os.path.exists(fname):
-                print("File: %s exists. Skipping..." % (fname))
+                print("File: %s exists. Skipping..." % (fname), flush=True)
                 return
 
             with h5py.File(fname, 'w') as f:
@@ -602,7 +602,7 @@ class Timestream(object):
 
         if os.path.exists(mapfile):
             if mpiutil.rank0:
-                print("File %s exists. Skipping...")
+                print("File %s exists. Skipping...", flush=True)
             return
 
         kl = self.manager.kltransforms[self.klname]
@@ -611,7 +611,7 @@ class Timestream(object):
             raise Exception("Need the inverse to make a meaningful map.")
 
         def _make_alm(mi):
-            print("Making %i" % mi)
+            print("Making %i" % mi, flush=True)
 
             klmode = self.mmode_kl(mi)
 
@@ -674,7 +674,7 @@ class Timestream(object):
 
 
         if os.path.exists(self._psfile):
-            print("File %s exists. Skipping..." % self._psfile)
+            print("File %s exists. Skipping..." % self._psfile, flush=True)
             return
 
         # ps = self.manager.psestimators[self.psname]
@@ -696,7 +696,7 @@ class Timestream(object):
         try:
             powerspectrum =  np.dot(la.inv(fisher), qtotal - bias)
         except np.linalg.LinAlgError:
-            print('Warning: fisher matrxi is singular, use pinv instead')
+            print('Warning: fisher matrxi is singular, use pinv instead', flush=True)
             powerspectrum =  np.dot(la.pinv(fisher), qtotal - bias)
 
 
@@ -707,7 +707,7 @@ class Timestream(object):
                 try:
                     cv = la.inv(fisher)
                 except np.linalg.LinAlgError:
-                    print('Warning: fisher matrxi is singular, use pinv instead')
+                    print('Warning: fisher matrxi is singular, use pinv instead', flush=True)
                     cv = la.pinv(fisher)
                 err = cv.diagonal()**0.5
                 cr = cv / np.outer(err, err)
@@ -766,7 +766,7 @@ class Timestream(object):
         # Save pickled telescope object
         if mpiutil.rank0:
             with open(self._picklefile, 'wb') as f:
-                print("=== Saving Timestream object. ===")
+                print("=== Saving Timestream object. ===", flush=True)
                 pickle.dump(self, f)
 
 
@@ -784,7 +784,7 @@ class Timestream(object):
         tmp_obj = cls(tsdir, tsname, 'bt')
 
         with open(tmp_obj._picklefile, 'rb') as f:
-            print("=== Loading Timestream object. ===")
+            print("=== Loading Timestream object. ===", flush=True)
             return pickle.load(f)
 
     #====================================================
@@ -796,7 +796,7 @@ def cross_powerspectrum(timestreams, psname, psfile):
     import scipy.linalg as la
 
     if os.path.exists(psfile):
-        print("File %s exists. Skipping..." % psfile)
+        print("File %s exists. Skipping..." % psfile, flush=True)
         return
 
     products = timestreams[0].manager
@@ -813,7 +813,7 @@ def cross_powerspectrum(timestreams, psname, psfile):
         for ti in range(nstream):
             for tj in range(ti+1, nstream):
 
-                print("Making m=%i (%i, %i)" % (mi, ti, tj))
+                print("Making m=%i (%i, %i)" % (mi, ti, tj), flush=True)
 
                 si = timestreams[ti]
                 sj = timestreams[tj]

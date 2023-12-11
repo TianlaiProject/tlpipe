@@ -85,13 +85,13 @@ def svd_gen(A, errmsg=None, *args, **kwargs):
         try:
             res = la.svd(At, *args, **kwargs)
         except la.LinAlgError as e:
-            print("Failed completely. %s" % errmsg)
+            print("Failed completely. %s" % errmsg, flush=True)
             raise e
 
         if errmsg is None:
-            print("Matrix SVD did not converge. Regularised.")
+            print("Matrix SVD did not converge. Regularised.", flush=True)
         else:
-            print("Matrix SVD did not converge (%s)." % errmsg)
+            print("Matrix SVD did not converge (%s)." % errmsg, flush=True)
 
     return res
 
@@ -109,7 +109,7 @@ def matrix_image(A, rtol=1e-8, atol=None, errmsg=""):
 
     except la.LinAlgError as e:
         # Try QR with pivoting
-        print("SVD1 not converged. %s" % errmsg)
+        print("SVD1 not converged. %s" % errmsg, flush=True)
 
         q, r, p = la.qr(A, pivoting=True, mode='economic')
 
@@ -121,7 +121,7 @@ def matrix_image(A, rtol=1e-8, atol=None, errmsg=""):
             spectrum = s
 
         except la.LinAlgError as e:
-            print("SVD2 not converged. %s" % errmsg)
+            print("SVD2 not converged. %s" % errmsg, flush=True)
 
             image = q
             spectrum = np.abs(r.diagonal())
@@ -149,7 +149,7 @@ def matrix_nullspace(A, rtol=1e-8, atol=None, errmsg=""):
 
     except la.LinAlgError as e:
         # Try QR with pivoting
-        print("SVD1 not converged. %s" % errmsg)
+        print("SVD1 not converged. %s" % errmsg, flush=True)
 
         q, r, p = la.qr(A, pivoting=True, mode='full')
 
@@ -161,7 +161,7 @@ def matrix_nullspace(A, rtol=1e-8, atol=None, errmsg=""):
             spectrum = s
 
         except la.LinAlgError as e:
-            print("SVD2 not converged. %s" % errmsg)
+            print("SVD2 not converged. %s" % errmsg, flush=True)
 
             nullspace = q
             spectrum = np.abs(r.diagonal())
@@ -284,7 +284,7 @@ class BeamTransfer(object):
 
         if self.telescope is None:
             if mpiutil.rank0:
-                print("Attempting to read telescope from disk...")
+                print("Attempting to read telescope from disk...", flush=True)
 
             try:
                 f = open(self._picklefile, 'rb')
@@ -623,7 +623,7 @@ class BeamTransfer(object):
         # Save pickled telescope object
         if mpiutil.rank0:
             with open(self._picklefile, 'wb') as f:
-                print("=== Saving Telescope object. ===")
+                print("=== Saving Telescope object. ===", flush=True)
                 pickle.dump(self.telescope, f)
 
         self._generate_mfiles(regen)
@@ -637,7 +637,7 @@ class BeamTransfer(object):
         et = time.time()
 
         if mpiutil.rank0:
-            print("***** Beam generation time: %f" % (et - st))
+            print("***** Beam generation time: %f" % (et - st), flush=True)
 
 
     generate_cache = generate # For compatibility with old code
@@ -671,10 +671,10 @@ class BeamTransfer(object):
         for fi in mpiutil.mpirange(self.nfreq, method='rand'):
 
             if os.path.exists(self._ffile(fi)) and not regen:
-                print("f index %i. File: %s exists. Skipping..." % (fi, self._ffile(fi)))
+                print("f index %i. File: %s exists. Skipping..." % (fi, self._ffile(fi)), flush=True)
                 continue
             else:
-                print('f index %i. Creating file: %s' % (fi, self._ffile(fi)))
+                print('f index %i. Creating file: %s' % (fi, self._ffile(fi)), flush=True)
 
             f = h5py.File(self._ffile(fi), 'w')
 
@@ -694,14 +694,14 @@ class BeamTransfer(object):
             # Divide into roughly 5 GB chunks
             nsections = int(np.ceil(np.prod(dsize) * 16.0 / 2**30.0 / self._mem_switch))
 
-            print("Dividing calculation of %f GB array into %i sections." % (np.prod(dsize) * 16.0 / 2**30.0, nsections))
+            print("Dividing calculation of %f GB array into %i sections." % (np.prod(dsize) * 16.0 / 2**30.0, nsections), flush=True)
 
             b_sec = np.array_split(np.arange(self.telescope.npairs, dtype=int), nsections)
             f_sec = np.array_split(fi * np.ones(self.telescope.npairs, dtype=int), nsections)
 
             # Iterate over each section, generating transfers and save them.
             for si in range(nsections):
-                print("Calculating section %i of %i...." % (si, nsections))
+                print("Calculating section %i of %i...." % (si, nsections), flush=True)
                 b_ind, f_ind = b_sec[si], f_sec[si]
                 tarray = self.telescope.transfer_matrices(b_ind, f_ind)
                 dset[(b_ind[0]):(b_ind[-1]+1), ..., :(self.telescope.mmax+1)] = tarray[..., :(self.telescope.mmax+1)]
@@ -720,7 +720,7 @@ class BeamTransfer(object):
 
         if os.path.exists(self.directory + '/beam_m/COMPLETED') and not regen:
             if mpiutil.rank0:
-                print("******* m-files already generated ********")
+                print("******* m-files already generated ********", flush=True)
             return
 
         st = time.time()
@@ -740,7 +740,7 @@ class BeamTransfer(object):
         num_chunks = int(np.ceil(1.0 * nfb / num_fb_per_chunk))  # Number of chunks to break the calculation into
 
         if mpiutil.rank0:
-            print("Splitting into %i chunks...." % num_chunks)
+            print("Splitting into %i chunks...." % num_chunks, flush=True)
 
         # The local m sections
         # lm, sm, em = mpiutil.split_local(self.telescope.mmax+1)
@@ -749,7 +749,7 @@ class BeamTransfer(object):
         for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
 
             if os.path.exists(self._mfile(mi)) and not regen:
-                print("m index %i. File: %s exists. Skipping..." % (mi, self._mfile(mi)))
+                print("m index %i. File: %s exists. Skipping..." % (mi, self._mfile(mi)), flush=True)
                 continue
 
             f = h5py.File(self._mfile(mi), 'w')
@@ -772,7 +772,7 @@ class BeamTransfer(object):
         for ci, fbrange in enumerate(mpiutil.split_m(nfb, num_chunks).T):
 
             if mpiutil.rank0:
-                print("Starting chunk %i of %i" % (ci+1, num_chunks))
+                print("Starting chunk %i of %i" % (ci+1, num_chunks), flush=True)
 
             # Unpack freq-baselines range into num, start and end
             fbnum, fbstart, fbend = fbrange
@@ -803,7 +803,7 @@ class BeamTransfer(object):
                 del tarray
 
             if mpiutil.rank0:
-                print("Transposing and writing chunk.")
+                print("Transposing and writing chunk.", flush=True)
 
             # Perform an in memory MPI transpose to get the m-ordered array
             m_array = mpiutil.transpose_blocks(fb_array, (fbnum, 2, self.telescope.num_pol_sky, self.telescope.lmax + 1, self.telescope.mmax + 1))
@@ -835,7 +835,7 @@ class BeamTransfer(object):
             open(self.directory + '/beam_m/COMPLETED', 'a').close()
 
             # Print out timing
-            print("=== MPI transpose took %f s ===" % (et - st))
+            print("=== MPI transpose took %f s ===" % (et - st), flush=True)
 
 
 
@@ -849,10 +849,10 @@ class BeamTransfer(object):
         for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
 
             if os.path.exists(self._svdfile(mi)) and not regen:
-                print("m index %i. File: %s exists. Skipping..." % (mi, self._svdfile(mi)))
+                print("m index %i. File: %s exists. Skipping..." % (mi, self._svdfile(mi)), flush=True)
                 continue
             # else:
-            #     print('m index %i. Creating SVD file: %s' % (mi, self._svdfile(mi)))
+            #     print('m index %i. Creating SVD file: %s' % (mi, self._svdfile(mi)), flush=True)
 
             # Open m beams for reading.
             fm = h5py.File(self._mfile(mi), 'r')
@@ -1156,7 +1156,7 @@ class BeamTransfer(object):
             try:
                 BBi = la.pinv(BB) # (B^* B + eps I)^-1
             except np.linalg.linalg.LinAlgError:
-                print('Compute pinv of BB failed for mi = %d, bi = %d' % (mi, bi))
+                print('Compute pinv of BB failed for mi = %d, bi = %d' % (mi, bi), flush=True)
                 continue
             if mmode0 is not None:
                 vecb[bi, :, mi:] = np.dot(BBi, np.dot(B.T.conj(), vec1) + eps * mmode0[bi]).reshape(self.telescope.num_pol_sky, nl)
@@ -1222,7 +1222,7 @@ class BeamTransfer(object):
                 try:
                     BBi = la.pinv(BB) # (B^* B + eps I)^-1
                 except np.linalg.linalg.LinAlgError:
-                    print('Compute pinv of BB failed for mi = %d, fi1 = %d, fi2 = %d' % (mi, fi1, fi2))
+                    print('Compute pinv of BB failed for mi = %d, fi1 = %d, fi2 = %d' % (mi, fi1, fi2), flush=True)
                     continue
                 chat = np.dot(BBi, Bv).real # keep only real part
                 cl[:, mi:, fi1, fi2] = chat.reshape(self.telescope.num_pol_sky, nl)
@@ -1286,7 +1286,7 @@ class BeamTransfer(object):
                 try:
                     BBi = la.pinv(BB) # (B^* B + eps I)^-1
                 except np.linalg.linalg.LinAlgError:
-                    print('Compute pinv of BB failed for fi1 = %d, fi2 = %d' % (fi1, fi2))
+                    print('Compute pinv of BB failed for fi1 = %d, fi2 = %d' % (fi1, fi2), flush=True)
                     continue
                 chat = np.dot(BBi, Bv).real # keep only real part
                 cl_tk[:, :, fi1, fi2] = chat.reshape(self.telescope.num_pol_sky, nl)
@@ -1306,7 +1306,7 @@ class BeamTransfer(object):
     #     valley long wavelength array.
     #     """
 
-    #     # print(self._cache_dict.keys())
+    #     # print(self._cache_dict.keys(), flush=True)
 
     #     if (fi, mi) in self._cache_dict:
     #         BB, BBi = self._cache_dict[(fi, mi)]
@@ -1321,7 +1321,7 @@ class BeamTransfer(object):
     #         try:
     #             BBi = la.pinv(BB) # (B^* B + eps I)^-1
     #         except np.linalg.linalg.LinAlgError:
-    #             print('Compute pinv of BB failed for mi = %d, bi = %d' % (mi, bi))
+    #             print('Compute pinv of BB failed for mi = %d, bi = %d' % (mi, bi), flush=True)
     #             BBi = np.zeros_like(BB)
 
     #         # cach BBi
@@ -1346,7 +1346,7 @@ class BeamTransfer(object):
         try:
             BBi = la.pinv(BB) # (B^* B + eps I)^-1
         except np.linalg.linalg.LinAlgError:
-            print('Compute pinv of BB failed for mi = %d, bi = %d' % (mi, bi))
+            print('Compute pinv of BB failed for mi = %d, bi = %d' % (mi, bi), flush=True)
             BBi = np.zeros_like(BB)
 
         return np.dot(BBi, BB1)
@@ -1357,7 +1357,7 @@ class BeamTransfer(object):
         valley long wavelength array.
         """
 
-        # print(self._cache_dict.keys())
+        # print(self._cache_dict.keys(), flush=True)
 
         if (fi, mi) in self._cache_dict:
             BBiBB = self._cache_dict[(fi, mi)]
@@ -1745,10 +1745,10 @@ class BeamTransferTempSVD(BeamTransfer):
         for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
 
             if os.path.exists(self._svdfile(mi)) and not regen:
-                print("m index %i. File: %s exists. Skipping..." % (mi, self._svdfile(mi)))
+                print("m index %i. File: %s exists. Skipping..." % (mi, self._svdfile(mi)), flush=True)
                 continue
             else:
-                print('m index %i. Creating SVD file: %s' % (mi, self._svdfile(mi)))
+                print('m index %i. Creating SVD file: %s' % (mi, self._svdfile(mi)), flush=True)
 
             # Open m beams for reading.
             fm = h5py.File(self._mfile(mi), 'r')
@@ -1839,10 +1839,10 @@ class BeamTransferFullSVD(BeamTransfer):
         for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
 
             if os.path.exists(self._svdfile(mi)) and not regen:
-                print("m index %i. File: %s exists. Skipping..." % (mi, self._svdfile(mi)))
+                print("m index %i. File: %s exists. Skipping..." % (mi, self._svdfile(mi)), flush=True)
                 continue
             else:
-                print('m index %i. Creating SVD file: %s' % (mi, self._svdfile(mi)))
+                print('m index %i. Creating SVD file: %s' % (mi, self._svdfile(mi)), flush=True)
 
             # Open m beams for reading.
             fm = h5py.File(self._mfile(mi), 'r')

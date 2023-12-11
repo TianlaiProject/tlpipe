@@ -259,7 +259,7 @@ class PSEstimation(metaclass=abc.ABCMeta):
         and the angular powerspectrum.
         """
 
-        print("Generating bands...")
+        print("Generating bands...", flush=True)
 
         cr = corr21cm.Corr21cm()
         cr.ps_2d = False
@@ -336,7 +336,7 @@ class PSEstimation(metaclass=abc.ABCMeta):
             self.make_clzz_array()
 
 
-        print("Done.")
+        print("Done.", flush=True)
 
 
     def make_clzz(self, pk):
@@ -360,7 +360,7 @@ class PSEstimation(metaclass=abc.ABCMeta):
         clzz = skymodel.im21cm_model(self.telescope.lmax, self.telescope.frequencies,
                                      self.telescope.num_pol_sky, cr = crt, temponly=True)
 
-        print("Rank: %i - Finished making band." % mpiutil.rank)
+        print("Rank: %i - Finished making band." % mpiutil.rank, flush=True)
         return clzz
 
 
@@ -406,12 +406,12 @@ class PSEstimation(metaclass=abc.ABCMeta):
         """
 
         if self.num_evals(mi) > 0:
-            print("Making fisher (for m=%i)." % mi)
+            print("Making fisher (for m=%i)." % mi, flush=True)
 
             fisher, bias = self._work_fisher_bias_m(mi)
 
         else:
-            print("No evals (for m=%i), skipping." % mi)
+            print("No evals (for m=%i), skipping." % mi, flush=True)
 
             fisher = np.zeros((self.nbands, self.nbands), dtype=np.complex128)
             bias = np.zeros((self.nbands,), dtype=np.complex128)
@@ -454,12 +454,12 @@ class PSEstimation(metaclass=abc.ABCMeta):
 
         if mpiutil.rank0:
             st = time.time()
-            print("======== Starting PS calculation ========")
+            print("======== Starting PS calculation ========", flush=True)
 
         ffile = self.psdir +'/fisher.hdf5'
 
         if os.path.exists(ffile) and not regen:
-            print(("Fisher matrix file: %s exists. Skipping..." % ffile))
+            print(("Fisher matrix file: %s exists. Skipping..." % ffile), flush=True)
             return
 
         mpiutil.barrier()
@@ -480,7 +480,7 @@ class PSEstimation(metaclass=abc.ABCMeta):
         # Write out all the PS estimation products
         if mpiutil.rank0:
             et = time.time()
-            print("======== Ending PS calculation (time=%f) ========" % (et - st))
+            print("======== Ending PS calculation (time=%f) ========" % (et - st), flush=True)
 
             # Check to see ensure that Fisher matrix isn't all zeros.
             if not (self.fisher == 0).all():
@@ -687,7 +687,7 @@ class PSExact(PSEstimation):
             self._bp_cache = []
 
         for i in range(len(self.clarray)):
-            print("Generating cache for m=%i band=%i" % (mi, i))
+            print("Generating cache for m=%i band=%i" % (mi, i), flush=True)
             projm = self.makeproj(mi, i)
 
             ## Don't generate cache for small enough matrices
@@ -695,7 +695,7 @@ class PSExact(PSEstimation):
                 self._bp_cache.append(projm)
 
             else:
-                print("Creating cache file:" + self._cfile % (mi, i))
+                print("Creating cache file:" + self._cfile % (mi, i), flush=True)
                 f = h5py.File(self._cfile % (mi, i), 'w')
                 f.create_dataset('proj', data=projm)
                 f.close()
@@ -717,7 +717,7 @@ class PSExact(PSEstimation):
 
             fn = self._cfile % (mi, i)
             if os.path.exists(fn):
-                print("Deleting cache file:" + fn)
+                print("Deleting cache file:" + fn, flush=True)
                 os.remove(self._cfile % (mi, i))
 
 
