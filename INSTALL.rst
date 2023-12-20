@@ -3,8 +3,7 @@ Installation
 
 Python version
 --------------
-The package works only with python 2 with version >= 2.75. Python 3 does not
-supported currently.
+The package works only with python 2 with version >= 2.75. To use Python 3, you should switch to zuo/python3 branch.
 
 Prerequisites
 -------------
