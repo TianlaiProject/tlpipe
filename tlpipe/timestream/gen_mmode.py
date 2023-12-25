@@ -226,6 +226,10 @@ class GenMmode(timestream_task.TimestreamTask):
                         f['/mmode'][:] += mmode1[mi]
                 with h5py.File(mmode_dir + '/count.hdf5', 'r+') as f:
                     f['count'][:] += N
+
+                # save the tstream object if there is no one
+                if not os.path.isfile(tstream._picklefile):
+                    tstream.save()
             else:
                 for mi in range(tel.mmax+1):
                     # make directory for each m-mode
