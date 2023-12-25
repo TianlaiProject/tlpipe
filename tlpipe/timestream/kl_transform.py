@@ -63,6 +63,8 @@ class KL(timestream_task.TimestreamTask):
         else:
             raise ValueError(f'Unknown kl_name: {kl_name}')
 
+        tstream.beamtransfer.skip_svd = False
+        tstream.beamtransfer.generate() # ensure to generate svd files before kl
         tstream.generate_mmodes_svd()
 
         tstream.set_kltransform(kl_name, kl)
