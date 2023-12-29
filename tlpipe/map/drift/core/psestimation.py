@@ -326,9 +326,11 @@ class PSEstimation(metaclass=abc.ABCMeta):
             # Need slightly awkward double lambda because of loop closure scaling.
             self.band_pk = [ (lambda bandt: (lambda k, mu: cr.ps_vv(k) * bandt(k, mu)))(band) for band in self.band_func]
             self.band_power = np.ones_like(self.k_center)
+            self.ps_vv = cr.ps_vv(self.k_center)
         else:
             self.band_pk = self.band_func
             self.band_power = cr.ps_vv(self.k_center)
+            self.ps_vv = self.band_power.copy()
 
         # Use new parallel map to speed up computaiton of bands
         if self.clarray is None:
@@ -504,6 +506,7 @@ class PSEstimation(metaclass=abc.ABCMeta):
 
 
             f.create_dataset('band_power', data=self.band_power)
+            f.create_dataset('ps_vv', data=self.ps_vv)
 
             if self.bandtype == 'polar':
                 f.create_dataset('k_start', data=self.k_start)
