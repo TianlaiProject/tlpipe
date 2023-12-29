@@ -40,7 +40,10 @@ def h5_info(args):
                     attrs_value = pickle.loads(attrs_value) # unpickle pickled data
                 except:
                     pass
-                print('/.attrs["%s"]:' % (attrs_name), attrs_value)
+                try:
+                    print('/.attrs["%s"]:' % (attrs_name), attrs_value)
+                except UnicodeEncodeError:
+                    print('/.attrs["%s"]:' % (attrs_name), attrs_value.encode('utf-8', 'ignore').decode('utf-8'))
             f.visititems(print_info)
         print('-' * 60)
 
