@@ -43,7 +43,7 @@ class DoubleKL(kltransform.KLTransform):
         cs, cn = [ cv.reshape(nside, nside) for cv in self.sn_covariance(mi) ]
 
         # Find joint eigenbasis and transformation matrix
-        evals, evecs2, ac = kltransform.eigh_gen(cs, cn)
+        evals, evecs2, ac = kltransform.eigh_gen(cs, cn, message=f"m = {mi}; KL step 1")
         evecs = evecs2.T.conj()
 
         # Get the indices that extract the high S/F ratio modes
@@ -69,7 +69,7 @@ class DoubleKL(kltransform.KLTransform):
             cn = np.dot(evecs, np.dot(cn, evecs.T.conj()))
 
             # Find the eigenbasis and the transformation into it.
-            evals, evecs2, ac = kltransform.eigh_gen(cs, cn)
+            evals, evecs2, ac = kltransform.eigh_gen(cs, cn, message=f"m = {mi}; KL step 2")
             evecs = np.dot(evecs2.T.conj(), evecs)
 
             # Construct the inverse if required.
