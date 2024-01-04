@@ -711,8 +711,10 @@ class Timestream(object):
                 err = cv.diagonal()**0.5
                 cr = cv / np.outer(err, err)
 
+                # save qtotal (q_b), bias (b_b), then p_a = \sum_b M_ab (q_b - b_b)
                 f.create_dataset('fisher', data=fisher)
-                #f.create_dataset('bias', data=self.bias)
+                f.create_dataset('qtotal', data=qtotal)
+                f.create_dataset('bias', data=self.bias)
                 f.create_dataset('covariance', data=cv)
                 f.create_dataset('error', data=err)
                 f.create_dataset('correlation', data=cr)
@@ -720,7 +722,7 @@ class Timestream(object):
                 f.create_dataset('bandpower', data=ps.band_power)
                 #f.create_dataset('k_start', data=ps.k_start)
                 #f.create_dataset('k_end', data=ps.k_end)
-                #f.create_dataset('k_center', data=ps.k_center)
+                f.create_dataset('k_center', data=ps.k_center)
                 #f.create_dataset('psvalues', data=ps.psvalues)
 
                 f.create_dataset('powerspectrum', data=powerspectrum)
@@ -831,9 +833,9 @@ def cross_powerspectrum(timestreams, psname, psfile):
     fisher, bias = ps.fisher_bias()
 
     # Subtract bias and reshape into new array
-    qtotal = (qtotal - bias).reshape(nstream**2, ps.nbands).T
+    qtotal1 = (qtotal - bias).reshape(nstream**2, ps.nbands).T
 
-    powerspectrum =  np.dot(la.inv(fisher), qtotal)
+    powerspectrum =  np.dot(la.inv(fisher), qtotal1)
     powerspectrum = powerspectrum.T.reshape(nstream, nstream, ps.nbands)
 
 
@@ -844,8 +846,10 @@ def cross_powerspectrum(timestreams, psname, psfile):
             err = cv.diagonal()**0.5
             cr = cv / np.outer(err, err)
 
+            # save qtotal (q_b), bias (b_b), then p_a = \sum_b M_ab (q_b - b_b)
             f.create_dataset('fisher', data=fisher)
-            #f.create_dataset('bias', data=self.bias)
+            f.create_dataset('qtotal', data=qtotal)
+            f.create_dataset('bias', data=self.bias)
             f.create_dataset('covariance', data=cv)
             f.create_dataset('error', data=err)
             f.create_dataset('correlation', data=cr)
@@ -853,7 +857,7 @@ def cross_powerspectrum(timestreams, psname, psfile):
             f.create_dataset('bandpower', data=ps.band_power)
             #f.create_dataset('k_start', data=ps.k_start)
             #f.create_dataset('k_end', data=ps.k_end)
-            #f.create_dataset('k_center', data=ps.k_center)
+            f.create_dataset('k_center', data=ps.k_center)
             #f.create_dataset('psvalues', data=ps.psvalues)
 
             f.create_dataset('powerspectrum', data=powerspectrum)
