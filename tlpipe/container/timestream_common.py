@@ -358,14 +358,17 @@ class TimestreamCommon(container.BasicTod):
             if 'time' == self.main_data_axes[self.main_data_dist_axis]:
                 az_alt = az_alt.local_array
                 ra_dec = ra_dec.local_array
-                az0 = mpiutil.bcast(az_alt[0, 0], root=0, comm=self.comm)
-                alt0 = mpiutil.bcast(az_alt[0, 1], root=0, comm=self.comm)
-                dec0 = mpiutil.bcast(ra_dec[0, 1], root=0, comm=self.comm)
-                if np.allclose(az_alt[:, 0], az0) and np.allclose(az_alt[:, 1], alt0):
+                az0 = az_alt[0, 0] if mpiutil.rank0 else 0
+                alt0 = az_alt[0, 1] if mpiutil.rank0 else 0
+                dec0 = ra_dec[0, 1] if mpiutil.rank0 else 0
+                az0 = mpiutil.bcast(az0, root=0, comm=self.comm)
+                alt0 = mpiutil.bcast(alt0, root=0, comm=self.comm)
+                dec0 = mpiutil.bcast(dec0, root=0, comm=self.comm)
+                if az_alt.shape[0] == 0 or (az_alt.shape[0] > 0 and np.allclose(az_alt[:, 0], az0) and np.allclose(az_alt[:, 1], alt0)):
                     local_same_pointing = 1
                 else:
                     local_same_pointing = 0
-                if np.allclose(ra_dec[:, 1], dec0):
+                if ra_dec.shape[0] == 0 or (ra_dec.shape[0] > 0 and np.allclose(ra_dec[:, 1], dec0)):
                     local_same_dec = 1
                 else:
                     local_same_dec = 0
