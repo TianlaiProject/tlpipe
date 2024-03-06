@@ -1149,6 +1149,18 @@ class BeamTransfer(object):
             B = beam[s[bi]:e[bi]].reshape(-1, npl) # all zeros for l < m
             BB = np.dot(B.T.conj(), B) # B^* B
 
+            # # construct difference operator matrix
+            # DD = np.zeros((nl, nl))
+            # di = np.diag_indices_from(DD)
+            # diu = (di[0][:-1], (di[1]+1)[:-1])
+            # dil = ((di[0]+1)[:-1], di[1][:-1])
+            # DD[di] = 2
+            # DD[diu] = -1
+            # DD[dil] = -1
+            # DD[0, 0] = 1
+            # DD[-1, -1] = 1
+            # BB += (1.0e-3 * DD + 1.0e-3 * np.eye(nl))
+
             BBd = np.diag(BB).real
             if np.isfinite(BBd.max()) and BBd.max() > 0.0:
                 np.fill_diagonal(BB, eps * np.cos(BBd / BBd.max()) + BBd) # (B^* B + eps cos(BBd / max(BBd)))
