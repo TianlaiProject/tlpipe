@@ -285,7 +285,7 @@ class Timestream(object):
             return sphmode
 
         if not (method == 'tk' and tk_deconv and map_to_deconv is not None):
-            alm_list = mpiutil.parallel_map(_make_alm, list(range(self.telescope.mmax + 1)), root=0, method='rand')
+            alm_list = mpiutil.parallel_map(_make_alm, list(range(self.telescope.mmax + 1)), return_numpy_array=True, root=0, method='rand')
 
         if mpiutil.rank0:
 
@@ -436,7 +436,7 @@ class Timestream(object):
         #     return clmode
 
         # # solve cl for each single m
-        # clm_list = mpiutil.parallel_map(_solve_clm, list(range(self.telescope.mmax + 1)), root=0, method='rand')
+        # clm_list = mpiutil.parallel_map(_solve_clm, list(range(self.telescope.mmax + 1)), return_numpy_array=True, root=0, method='rand')
 
         # solve cl with all ms
         vs = [ self.mmode(mi) for mi in range(self.telescope.mmax+1) ]
@@ -469,7 +469,7 @@ class Timestream(object):
 
             return sphmode
 
-        alm_list = mpiutil.parallel_map(_make_alm, list(range(self.telescope.mmax + 1)), root=0, method='rand')
+        alm_list = mpiutil.parallel_map(_make_alm, list(range(self.telescope.mmax + 1)), return_numpy_array=True, root=0, method='rand')
 
         if mpiutil.rank0:
 
@@ -626,7 +626,7 @@ class Timestream(object):
 
             return sphmode
 
-        alm_list = mpiutil.parallel_map(_make_alm, list(range(self.telescope.mmax + 1)), root=0, method='rand')
+        alm_list = mpiutil.parallel_map(_make_alm, list(range(self.telescope.mmax + 1)), return_numpy_array=True, root=0, method='rand')
 
         if mpiutil.rank0:
 
@@ -686,7 +686,7 @@ class Timestream(object):
 
         # Determine whether to use m=0 or not
         mlist = list(range(1 if self.no_m_zero else 0, self.telescope.mmax + 1))
-        qvals = mpiutil.parallel_map(_q_estimate, mlist)
+        qvals = mpiutil.parallel_map(_q_estimate, mlist, return_numpy_array=True)
 
         qtotal = np.array(qvals).sum(axis=0)
 
@@ -826,7 +826,7 @@ def cross_powerspectrum(timestreams, psname, psfile):
 
     # Determine whether to use m=0 or not
     mlist = list(range(1 if timestreams[0].no_m_zero else 0, products.telescope.mmax + 1))
-    qvals = mpiutil.parallel_map(_q_estimate, mlist)
+    qvals = mpiutil.parallel_map(_q_estimate, mlist, return_numpy_array=True)
 
     qtotal = np.array(qvals).sum(axis=0)
 
