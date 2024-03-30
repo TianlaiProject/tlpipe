@@ -110,7 +110,7 @@ class Timestream(object):
         return self._mdir(mi) + '/mode.hdf5'
 
 
-    def mmode(self, mi):
+    def mmode(self, mi, fi=None):
         """Fetch the timestream m-mode for a specified m.
 
         Parameters
@@ -125,6 +125,8 @@ class Timestream(object):
         """
 
         with h5py.File(self._mfile(mi), 'r') as f:
+            if fi is not None:
+                return f['mmode'][fi]
             return f['mmode'][:]
 
 
@@ -439,8 +441,8 @@ class Timestream(object):
         # clm_list = mpiutil.parallel_map(_solve_clm, list(range(self.telescope.mmax + 1)), return_numpy_array=True, root=0, method='rand')
 
         # solve cl with all ms
-        vs = [ self.mmode(mi) for mi in range(self.telescope.mmax+1) ]
-        cl_tk, cl_diag = self.beamtransfer.solve_cl_allm_tk(vs, eps=eps)
+        # vs = [ self.mmode(mi) for mi in range(self.telescope.mmax+1) ]
+        cl_tk, cl_diag = self.beamtransfer.solve_cl_allm_tk(self, eps=eps)
 
         if mpiutil.rank0:
 

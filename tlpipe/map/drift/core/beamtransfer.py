@@ -1245,13 +1245,13 @@ class BeamTransfer(object):
 
         return cl
 
-    def solve_cl_allm_tk(self, vs, eps=0.01):
+    def solve_cl_allm_tk(self, ts, eps=0.01):
         """Solve C_l(\nu, \nu') using the Tikhonov regularization method.
 
         Parameters
         ----------
-        vs : a list of np.ndarray
-            Each v is a sky data vector packed as [freq, baseline, polarisation]
+        ts : timestream.Timestream instance
+            Instance of timestream.Timestream.
 
         Returns
         -------
@@ -1259,8 +1259,8 @@ class BeamTransfer(object):
             Solved C_l.
         """
 
-        nm = len(vs) # numbe of ms
         nfreq = self.nfreq
+        nm = self.telescope.mmax + 1 # numbe of ms
         nl = self.telescope.lmax + 1
         npl = self.telescope.num_pol_sky * nl
 
@@ -1283,12 +1283,12 @@ class BeamTransfer(object):
 
             for mi in range(nm):
                 Bf1 = self.beam_m(mi, fi1).reshape((self.ntel, npl))
-                v1 = vs[mi][fi1].reshape((self.ntel,))
+                v1 = ts.mmode(mi, fi1).reshape((self.ntel,))
                 BBf1 = np.dot(Bf1.T.conj(), Bf1) # B^* B
                 Bvf1 = np.dot(Bf1.T.conj(), v1) # B^* v
 
                 Bf2 = self.beam_m(mi, fi2).reshape((self.ntel, npl))
-                v2 = vs[mi][fi2].reshape((self.ntel,))
+                v2 = ts.mmode(mi, fi2).reshape((self.ntel,))
                 BBf2 = np.dot(Bf2.T.conj(), Bf2) # B^* B
                 Bvf2 = np.dot(Bf2.T.conj(), v2) # B^* v
 
