@@ -475,7 +475,7 @@ class PsCal(timestream_task.TimestreamTask):
                         f.attrs['dim'] = 'time, freq, pol, feed, feed'
                         try:
                             f.attrs['time'] = ts.time[start_ind:end_ind]
-                        except RuntimeError:
+                        except (RuntimeError, OSError):
                             f.create_dataset('time', data=ts.time[start_ind:end_ind])
                             f.attrs['time'] = '/time'
                         f.attrs['freq'] = freq
@@ -729,7 +729,7 @@ class PsCal(timestream_task.TimestreamTask):
                             dset.attrs['dim'] = 'time, freq, pol, feed'
                             try:
                                 dset.attrs['time'] = ts.time[start_ind:end_ind]
-                            except RuntimeError:
+                            except (RuntimeError, OSError):
                                 f.create_dataset('time', data=ts.time[start_ind:end_ind])
                                 dset.attrs['time'] = '/time'
                             dset.attrs['freq'] = freq
@@ -755,7 +755,7 @@ class PsCal(timestream_task.TimestreamTask):
                                 dset.attrs['transit_ind'] = transit_ind
                                 try:
                                     dset.attrs['time_inds'] = np.arange(start_ind, end_ind)
-                                except RuntimeError:
+                                except (RuntimeError, OSError):
                                     dset.attrs['time_inds'] = '/src_uvec_time_inds'
                                     f.create_dataset('src_uvec_time_inds', data=np.arange(start_ind, end_ind))
                             # save phs
@@ -768,7 +768,7 @@ class PsCal(timestream_task.TimestreamTask):
                                 dset.attrs['transit_ind'] = transit_ind
                                 try:
                                     dset.attrs['time_inds'] = np.arange(start_ind, end_ind)
-                                except RuntimeError:
+                                except (RuntimeError, OSError):
                                     dset.attrs['time_inds'] = '/phs_time_inds'
                                     f.create_dataset('phs_time_inds', data=np.arange(start_ind, end_ind))
 

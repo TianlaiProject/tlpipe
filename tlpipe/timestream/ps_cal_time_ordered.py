@@ -414,7 +414,7 @@ class PsCal(timestream_task.TimestreamTask):
                         dset.attrs['dim'] = 'time, freq, pol, feed'
                         try:
                             dset.attrs['time'] = time[start_ind:end_ind]
-                        except RuntimeError:
+                        except (RuntimeError, OSError):
                             f.create_dataset('time', data=time[start_ind:end_ind])
                             dset.attrs['time'] = '/time'
                         dset.attrs['freq'] = freq
