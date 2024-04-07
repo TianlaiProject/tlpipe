@@ -58,6 +58,7 @@ class SolveCl(timestream_task.TimestreamTask):
 
         bt.generate()
 
+        tstream.generate_Bv()
         tstream.solve_cl('cl.hdf5', eps=eps, prior_cl_file=prior_cl)
 
         return tstream

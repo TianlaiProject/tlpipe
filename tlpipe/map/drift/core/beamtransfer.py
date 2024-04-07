@@ -243,6 +243,10 @@ class BeamTransfer(object):
         # Pattern to form the `m` ordered file.
         return self._mdir(mi) + '/beam.hdf5'
 
+    def _BBfile(self, mi):
+        # Pattern to form the `m` ordered file.
+        return self._mdir(mi) + '/BB.hdf5'
+
     def _fdir(self, fi):
         # Pattern to form the `freq` ordered file.
         pat = self.directory + "/beam_f/" + util.natpattern(self.telescope.nfreq)
@@ -335,6 +339,25 @@ class BeamTransfer(object):
         """
 
         return self._load_beam_m(mi, fi=fi)
+
+    def BB_m(self, mi, fi=None):
+        """ Fetch B.T.conj() @ B for a given m.
+
+        Parameters
+        ----------
+        mi : integer
+            m-mode to fetch.
+        fi : integer
+            frequency block to fetch. fi=None (default) returns all.
+
+        Returns
+        -------
+        BB : np.ndarray (nfreq, npol_sky*(lmax+1), npol_sky*(lmax+1))
+        """
+        with h5py.File(self._BBfile(mi), 'r') as f:
+            if fi is not None:
+                return f['BB_m'][fi]
+            return f['BB_m'][:]
 
     #===================================================
 
@@ -627,6 +650,7 @@ class BeamTransfer(object):
                 pickle.dump(self.telescope, f)
 
         self._generate_mfiles(regen)
+        self._generate_BBfiles(regen)
 
         if not self.skip_svd:
             self._generate_svdfiles(regen)
@@ -837,6 +861,27 @@ class BeamTransfer(object):
             # Print out timing
             print("=== MPI transpose took %f s ===" % (et - st), flush=True)
 
+
+    def _generate_BBfiles(self, regen=False):
+        ## Generate B.T.conj() @ B for each frequency
+
+        for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
+
+            if os.path.exists(self._BBfile(mi)) and not regen:
+                print("m index %i. File: %s exists. Skipping..." % (mi, self._BBfile(mi)), flush=True)
+                continue
+            # else:
+            #     print('m index %i. Creating BB file: %s' % (mi, self._BBfile(mi)), flush=True)
+
+            # Open m beams for reading.
+            with h5py.File(self._mfile(mi), 'r') as f1, h5py.File(self._BBfile(mi), 'w') as f2:
+                beam = f1['beam_m'][:]
+                nfreq, npn, npairs, npol_sky, nl = beam.shape
+                B = beam.reshape(nfreq, npn*npairs, npol_sky*nl)
+                BB = np.einsum('...ij,...jk->...ik', B.transpose(0, 2, 1).conj(), B)
+                f2.create_dataset('BB_m', data=BB)
+
+        mpiutil.barrier()
 
 
     def _generate_svdfiles(self, regen=False):
@@ -1193,15 +1238,15 @@ class BeamTransfer(object):
 
         return vecb
 
-    def solve_cl_tk(self, mi, v, eps=0.01):
+    def solve_cl_tk(self, mi, ts, eps=0.01):
         """Solve C_l(\nu, \nu') using the Tikhonov regularization method.
 
         Parameters
         ----------
         mi : integer
             Mode index to fetch for.
-        v : np.ndarray
-            Sky data vector packed as [freq, baseline, polarisation]
+        ts : timestream.Timestream instance
+            Instance of timestream.Timestream.
 
         Returns
         -------
@@ -1209,25 +1254,28 @@ class BeamTransfer(object):
             Solved C_l.
         """
 
-        beam = self.beam_m(mi) # shape (nfreq, 2, npairs, npol_sky, lmax+1)
+        # beam = self.beam_m(mi) # shape (nfreq, 2, npairs, npol_sky, lmax+1)
 
         nfreq = self.nfreq
         nl = self.telescope.lmax + 1 - mi # do not include l < m
         npl = self.telescope.num_pol_sky * nl
-        beam = beam[:, :, :, :, mi:].reshape((nfreq, self.ntel, npl))
+        # beam = beam[:, :, :, :, mi:].reshape((nfreq, self.ntel, npl))
 
         cl = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, nfreq, nfreq), dtype=np.float64)
-        v = v.reshape((nfreq, self.ntel))
 
         for fi1 in range(nfreq):
-            Bf1 = beam[fi1] # all zeros for l < m
-            BBf1 = np.dot(Bf1.T.conj(), Bf1) # B^* B
-            Bvf1 = np.dot(Bf1.T.conj(), v[fi1]) # B^* v
+            # Bf1 = beam[fi1] # all zeros for l < m
+            # BBf1 = np.dot(Bf1.T.conj(), Bf1) # B^* B
+            # Bvf1 = np.dot(Bf1.T.conj(), ts.mmode(mi, fi1)) # B^* v
+            BBf1 = self.BB_m(mi, fi1)
+            Bvf1 = ts.Bv_m(mi, fi1)
 
             for fi2 in range(fi1, nfreq):
-                Bf2 = beam[fi2] # all zeros for l < m
-                BBf2 = np.dot(Bf2.T.conj(), Bf2) # B^* B
-                Bvf2 = np.dot(Bf2.T.conj(), v[fi2]) # B^* v
+                # Bf2 = beam[fi2] # all zeros for l < m
+                # BBf2 = np.dot(Bf2.T.conj(), Bf2) # B^* B
+                # Bvf2 = np.dot(Bf2.T.conj(), ts.mmode(mi, fi2)) # B^* v
+                BBf2 = self.BB_m(mi, fi2)
+                Bvf2 = ts.Bv_m(mi, fi2)
 
                 BB = BBf1 * np.conj(BBf2)
                 np.fill_diagonal(BB, eps + np.diag(BB)) # (B^* B + eps I)
@@ -1282,18 +1330,21 @@ class BeamTransfer(object):
             Bv = np.zeros(npl, dtype=np.complex128)
 
             for mi in range(nm):
-                Bf1 = self.beam_m(mi, fi1).reshape((self.ntel, npl))
-                v1 = ts.mmode(mi, fi1).reshape((self.ntel,))
-                BBf1 = np.dot(Bf1.T.conj(), Bf1) # B^* B
-                Bvf1 = np.dot(Bf1.T.conj(), v1) # B^* v
+                # Bf1 = self.beam_m(mi, fi1).reshape((self.ntel, npl))
+                # v1 = ts.mmode(mi, fi1).reshape((self.ntel,))
+                # BBf1 = np.dot(Bf1.T.conj(), Bf1) # B^* B
+                # Bvf1 = np.dot(Bf1.T.conj(), v1) # B^* v
 
-                Bf2 = self.beam_m(mi, fi2).reshape((self.ntel, npl))
-                v2 = ts.mmode(mi, fi2).reshape((self.ntel,))
-                BBf2 = np.dot(Bf2.T.conj(), Bf2) # B^* B
-                Bvf2 = np.dot(Bf2.T.conj(), v2) # B^* v
+                # Bf2 = self.beam_m(mi, fi2).reshape((self.ntel, npl))
+                # v2 = ts.mmode(mi, fi2).reshape((self.ntel,))
+                # BBf2 = np.dot(Bf2.T.conj(), Bf2) # B^* B
+                # Bvf2 = np.dot(Bf2.T.conj(), v2) # B^* v
 
-                BB += BBf1 * np.conj(BBf2)
-                Bv += Bvf1 * np.conj(Bvf2)
+                # BB += BBf1 * np.conj(BBf2)
+                # Bv += Bvf1 * np.conj(Bvf2)
+
+                BB += self.BB_m(mi, fi1) * np.conj(self.BB_m(mi, fi2))
+                Bv += ts.Bv_m(mi, fi1) * np.conj(ts.Bv_m(mi, fi2))
 
             # # save BB to file for analysis
             # with h5py.File('BB.hdf5', 'w') as f:
@@ -1371,9 +1422,10 @@ class BeamTransfer(object):
         valley long wavelength array.
         """
 
-        B = self.beam_m(mi)[fi] # shape (2, npairs, npol_sky, lmax+1)
-        B = B.reshape(self.ntel, self.nsky) # shape (ntel, nsky)
-        BB = np.dot(B.T.conj(), B) # B^* B
+        # B = self.beam_m(mi)[fi] # shape (2, npairs, npol_sky, lmax+1)
+        # B = B.reshape(self.ntel, self.nsky) # shape (ntel, nsky)
+        # BB = np.dot(B.T.conj(), B) # B^* B
+        BB = self.BB_m(mi, fi)
         BB1 = BB.copy()
         # BBa = np.dot(BB, alm_ps) # will modify BB in next step, so save (BB a) here
         np.fill_diagonal(BB, eps + np.diag(BB)) # (B^* B + eps I)

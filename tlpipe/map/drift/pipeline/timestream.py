@@ -110,6 +110,11 @@ class Timestream(object):
         return self._mdir(mi) + '/mode.hdf5'
 
 
+    def _Bvfile(self, mi):
+        # Pattern to form the `m` ordered file.
+        return self._mdir(mi) + '/Bv.hdf5'
+
+
     def mmode(self, mi, fi=None):
         """Fetch the timestream m-mode for a specified m.
 
@@ -128,6 +133,25 @@ class Timestream(object):
             if fi is not None:
                 return f['mmode'][fi]
             return f['mmode'][:]
+
+
+    def Bv_m(self, mi, fi=None):
+        """Fetch B.T.conj() @ v for a specified m.
+
+        Parameters
+        ----------
+        mi : integer
+            m-mode to load.
+
+        Returns
+        -------
+        Bv : np.ndarray[nfreq, npol_sky*(lmax+1)]
+        """
+
+        with h5py.File(self._Bvfile(mi), 'r') as f:
+            if fi is not None:
+                return f['Bv_m'][fi]
+            return f['Bv_m'][:]
 
 
     def generate_mmodes(self):
@@ -186,6 +210,27 @@ class Timestream(object):
 
             # Make file marker that the m's have been correctly generated:
             open(self.output_directory + "/mmodes/COMPLETED_M", 'a').close()
+
+        mpiutil.barrier()
+
+    def generate_Bv(self, regen=False):
+        """Calculate B.T.conj() @ v for each frequency."""
+
+        for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
+            if os.path.exists(self._Bvfile(mi)) and not regen:
+                print("m index %i. File: %s exists. Skipping..." % (mi, self._Bvfile(mi)), flush=True)
+                continue
+            # else:
+            #     print('m index %i. Creating Bv file: %s' % (mi, self._Bvfile(mi)), flush=True)
+
+            # Open m beams for reading.
+            with h5py.File(self.beamtransfer._mfile(mi), 'r') as f1, h5py.File(self._mfile(mi), 'r') as f2, h5py.File(self._Bvfile(mi), 'w') as f3:
+                beam = f1['beam_m'][:]
+                nfreq, npn, npairs, npol_sky, nl = beam.shape
+                B = beam.reshape(nfreq, npn*npairs, npol_sky*nl)
+                v = f2['mmode'][:].reshape(nfreq, npn*npairs)
+                Bv = np.einsum('...ij,...j->...i', B.transpose(0, 2, 1).conj(), v)
+                f3.create_dataset('Bv_m', data=Bv)
 
         mpiutil.barrier()
 
