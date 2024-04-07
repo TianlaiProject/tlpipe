@@ -225,12 +225,24 @@ class Timestream(object):
 
             # Open m beams for reading.
             with h5py.File(self.beamtransfer._mfile(mi), 'r') as f1, h5py.File(self._mfile(mi), 'r') as f2, h5py.File(self._Bvfile(mi), 'w') as f3:
-                beam = f1['beam_m'][:]
-                nfreq, npn, npairs, npol_sky, nl = beam.shape
-                B = beam.reshape(nfreq, npn*npairs, npol_sky*nl)
-                v = f2['mmode'][:].reshape(nfreq, npn*npairs)
-                Bv = np.einsum('...ij,...j->...i', B.transpose(0, 2, 1).conj(), v)
-                f3.create_dataset('Bv_m', data=Bv)
+                nfreq, npn, npairs, npol_sky, nl = f1['beam_m'].shape
+                Bv_shp = (nfreq, npol_sky*nl)
+                f3.create_dataset('Bv_m', Bv_shp, dtype=np.complex128)
+                try:
+                    # ### for test
+                    # raise np.core._exceptions._ArrayMemoryError(Bv_shp, np.complex128)
+
+                    beam = f1['beam_m'][:]
+                    B = beam.reshape(nfreq, npn*npairs, npol_sky*nl)
+                    v = f2['mmode'][:].reshape(nfreq, npn*npairs)
+                    Bv = np.einsum('...ij,...j->...i', B.transpose(0, 2, 1).conj(), v)
+                    # f3.create_dataset('Bv_m', data=Bv)
+                    f3['Bv_m'][:] = Bv
+                except np.core._exceptions._ArrayMemoryError:
+                    for fi in range(nfreq):
+                        B = f1['beam_m'][fi].reshape(npn*npairs, npol_sky*nl)
+                        v = f2['mmode'][fi].reshape(npn*npairs)
+                        f3['Bv_m'][fi] = B.T.conj() @ v
 
         mpiutil.barrier()
 
