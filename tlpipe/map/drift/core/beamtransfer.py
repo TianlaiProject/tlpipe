@@ -865,6 +865,9 @@ class BeamTransfer(object):
     def _generate_BBfiles(self, regen=False):
         ## Generate B.T.conj() @ B for each frequency
 
+        if mpiutil.rank0:
+            print('Generating BB files...', flush=True)
+
         for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
 
             if os.path.exists(self._BBfile(mi)) and not regen:
@@ -873,27 +876,40 @@ class BeamTransfer(object):
             # else:
             #     print('m index %i. Creating BB file: %s' % (mi, self._BBfile(mi)), flush=True)
 
-            # Open m beams for reading.
-            with h5py.File(self._mfile(mi), 'r') as f1, h5py.File(self._BBfile(mi), 'w') as f2:
+            # # Open m beams for reading.
+            # with h5py.File(self._mfile(mi), 'r') as f1, h5py.File(self._BBfile(mi), 'w') as f2:
+            #     nfreq, npn, npairs, npol_sky, nl = f1['beam_m'].shape
+            #     BB_shp = (nfreq, npol_sky*nl, npol_sky*nl)
+            #     f2.create_dataset('BB_m', BB_shp, dtype=np.complex128)
+            #     try:
+            #         # ### for test
+            #         # raise np.core._exceptions._ArrayMemoryError(BB_shp, np.complex128)
+
+            #         beam = f1['beam_m'][:]
+            #         B = beam.reshape(nfreq, npn*npairs, npol_sky*nl)
+            #         BB = np.einsum('...ij,...jk->...ik', B.transpose(0, 2, 1).conj(), B)
+            #         # f2.create_dataset('BB_m', data=BB)
+            #         f2['BB_m'][:] = BB
+            #     except np.core._exceptions._ArrayMemoryError:
+            #         for fi in range(nfreq):
+            #             B = f1['beam_m'][fi].reshape(npn*npairs, npol_sky*nl)
+            #             f2['BB_m'][fi] = B.T.conj() @ B
+
+            # slower but more memory effective way
+            with h5py.File(self._mfile(mi), 'r') as f1:
                 nfreq, npn, npairs, npol_sky, nl = f1['beam_m'].shape
-                BB_shp = (nfreq, npol_sky*nl, npol_sky*nl)
+            BB_shp = (nfreq, npol_sky*nl, npol_sky*nl)
+            with h5py.File(self._BBfile(mi), 'w') as f2:
                 f2.create_dataset('BB_m', BB_shp, dtype=np.complex128)
-                try:
-                    # ### for test
-                    # raise np.core._exceptions._ArrayMemoryError(BB_shp, np.complex128)
-
-                    beam = f1['beam_m'][:]
-                    B = beam.reshape(nfreq, npn*npairs, npol_sky*nl)
-                    BB = np.einsum('...ij,...jk->...ik', B.transpose(0, 2, 1).conj(), B)
-                    # f2.create_dataset('BB_m', data=BB)
-                    f2['BB_m'][:] = BB
-                except np.core._exceptions._ArrayMemoryError:
-                    for fi in range(nfreq):
-                        B = f1['beam_m'][fi].reshape(npn*npairs, npol_sky*nl)
-                        f2['BB_m'][fi] = B.T.conj() @ B
-
+            for fi in range(nfreq):
+                B = self.beam_m(mi, fi).reshape(npn*npairs, npol_sky*nl)
+                with h5py.File(self._BBfile(mi), 'r+') as f2:
+                    f2['BB_m'][fi] = B.T.conj() @ B
 
         mpiutil.barrier()
+
+        if mpiutil.rank0:
+            print('Generating BB files Done', flush=True)
 
 
     def _generate_svdfiles(self, regen=False):

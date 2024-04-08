@@ -216,6 +216,9 @@ class Timestream(object):
     def generate_Bv(self, regen=False):
         """Calculate B.T.conj() @ v for each frequency."""
 
+        if mpiutil.rank0:
+            print('Generating Bv files...', flush=True)
+
         for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
             if os.path.exists(self._Bvfile(mi)) and not regen:
                 print("m index %i. File: %s exists. Skipping..." % (mi, self._Bvfile(mi)), flush=True)
@@ -223,28 +226,43 @@ class Timestream(object):
             # else:
             #     print('m index %i. Creating Bv file: %s' % (mi, self._Bvfile(mi)), flush=True)
 
-            # Open m beams for reading.
-            with h5py.File(self.beamtransfer._mfile(mi), 'r') as f1, h5py.File(self._mfile(mi), 'r') as f2, h5py.File(self._Bvfile(mi), 'w') as f3:
-                nfreq, npn, npairs, npol_sky, nl = f1['beam_m'].shape
-                Bv_shp = (nfreq, npol_sky*nl)
-                f3.create_dataset('Bv_m', Bv_shp, dtype=np.complex128)
-                try:
-                    # ### for test
-                    # raise np.core._exceptions._ArrayMemoryError(Bv_shp, np.complex128)
+            # # Open m beams for reading.
+            # with h5py.File(self.beamtransfer._mfile(mi), 'r') as f1, h5py.File(self._mfile(mi), 'r') as f2, h5py.File(self._Bvfile(mi), 'w') as f3:
+            #     nfreq, npn, npairs, npol_sky, nl = f1['beam_m'].shape
+            #     Bv_shp = (nfreq, npol_sky*nl)
+            #     f3.create_dataset('Bv_m', Bv_shp, dtype=np.complex128)
+            #     try:
+            #         # ### for test
+            #         # raise np.core._exceptions._ArrayMemoryError(Bv_shp, np.complex128)
 
-                    beam = f1['beam_m'][:]
-                    B = beam.reshape(nfreq, npn*npairs, npol_sky*nl)
-                    v = f2['mmode'][:].reshape(nfreq, npn*npairs)
-                    Bv = np.einsum('...ij,...j->...i', B.transpose(0, 2, 1).conj(), v)
-                    # f3.create_dataset('Bv_m', data=Bv)
-                    f3['Bv_m'][:] = Bv
-                except np.core._exceptions._ArrayMemoryError:
-                    for fi in range(nfreq):
-                        B = f1['beam_m'][fi].reshape(npn*npairs, npol_sky*nl)
-                        v = f2['mmode'][fi].reshape(npn*npairs)
-                        f3['Bv_m'][fi] = B.T.conj() @ v
+            #         beam = f1['beam_m'][:]
+            #         B = beam.reshape(nfreq, npn*npairs, npol_sky*nl)
+            #         v = f2['mmode'][:].reshape(nfreq, npn*npairs)
+            #         Bv = np.einsum('...ij,...j->...i', B.transpose(0, 2, 1).conj(), v)
+            #         # f3.create_dataset('Bv_m', data=Bv)
+            #         f3['Bv_m'][:] = Bv
+            #     except np.core._exceptions._ArrayMemoryError:
+            #         for fi in range(nfreq):
+            #             B = f1['beam_m'][fi].reshape(npn*npairs, npol_sky*nl)
+            #             v = f2['mmode'][fi].reshape(npn*npairs)
+            #             f3['Bv_m'][fi] = B.T.conj() @ v
+
+            # slower but more memory effective way
+            with h5py.File(self.beamtransfer._mfile(mi), 'r') as f1:
+                nfreq, npn, npairs, npol_sky, nl = f1['beam_m'].shape
+            Bv_shp = (nfreq, npol_sky*nl)
+            with h5py.File(self._Bvfile(mi), 'w') as f2:
+                f2.create_dataset('Bv_m', Bv_shp, dtype=np.complex128)
+            for fi in range(nfreq):
+                B = self.beamtransfer.beam_m(mi, fi).reshape(npn*npairs, npol_sky*nl)
+                v = self.mmode(mi, fi).reshape(npn*npairs)
+                with h5py.File(self._Bvfile(mi), 'r+') as f2:
+                    f2['Bv_m'][fi] = B.T.conj() @ v
 
         mpiutil.barrier()
+
+        if mpiutil.rank0:
+            print('Generating Bv files Done', flush=True)
 
     #====================================================
 
