@@ -517,7 +517,7 @@ class Timestream(object):
 
         # solve cl with all ms
         # vs = [ self.mmode(mi) for mi in range(self.telescope.mmax+1) ]
-        cl_tk, cl_diag = self.beamtransfer.solve_cl_allm_tk(self, eps=eps)
+        cl_tk, cl_diag, cl_prior = self.beamtransfer.solve_cl_allm_tk(self, eps=eps)
 
         if mpiutil.rank0:
 
@@ -528,6 +528,8 @@ class Timestream(object):
                 f['/cl_tk'].attrs['dim'] = 'pol, l, freq, freq'
                 f.create_dataset('/cl_diag', data=np.array(cl_diag))
                 f['/cl_diag'].attrs['dim'] = 'pol, l, freq, freq'
+                f.create_dataset('/cl_prior', data=np.array(cl_prior))
+                f['/cl_prior'].attrs['dim'] = 'pol, l, freq, freq'
                 f.attrs['polarization'] = np.string_(['I', 'Q', 'U', 'V'])[:self.beamtransfer.telescope.num_pol_sky] # np.string_ for python 3
                 f.attrs['frequency'] = self.beamtransfer.telescope.frequencies
 
