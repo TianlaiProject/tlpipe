@@ -94,15 +94,6 @@ def decompose(M, rank=1, S=None, lmbda=None, threshold='hard', max_iter=100, tol
 
         res = M - L
 
-        s1 = la.eigh(res, eigvals_only=True, eigvals=(d-1, d-1))
-        # L may be under noise
-        try:
-            if s[-1] < 0.2 * s1[-1]:
-                res = M
-        except IndexError:
-            # s1 may be an empty array
-            pass
-
         if not fixed_lmbda:
             # the universal threshold: sigma * (2 * log(d*d))**0.5
             th = (2.0 * np.log10(d * d))**0.5 * MAD(res)
@@ -121,6 +112,12 @@ def decompose(M, rank=1, S=None, lmbda=None, threshold='hard', max_iter=100, tol
             S = shrink(res, lmbda)
 
         S[~np.isfinite(S)] = 0 # set invalid val to 0
+
+        s1 = la.eigh(res, eigvals_only=True, eigvals=(d-1, d-1))
+        # L may be under noise
+        if len(s1) == 0 or s[-1] < 0.12 * s1[-1]:
+            L = np.zeros_like(M)
+            return L, S
 
         tol1 = (la.norm(L - L_old, ord='fro') + la.norm(S - S_old, ord='fro')) / MF
         if tol1 < tol:
