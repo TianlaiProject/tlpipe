@@ -234,6 +234,41 @@ class CylinderBeam(ap.fit.Beam):
 
         return resp
 
+    def response_fit(self, xyz, width, fwhm_x, fwhm_y):
+        """Beam response across active band for specified topocentric coordinates.
+
+        This uses the beam model implemented in driftscan package.
+
+        Parameters
+        ----------
+        xyz : array like, of shape (3, ...)
+            Unit direction vector in topocentric coordinates (x=E, y=N, z=UP).
+            `xyz` may be arrays of multiple coordinates.
+
+
+        Returns
+        -------
+        Returns 'x' linear polarization (rotate pi/2 for 'y') of shape (nfreq, ...).
+
+        """
+
+        xyz, fi = xyz
+        xyz = np.array(xyz)
+
+        lat = np.radians(44.15268333) # exact value not important
+        lon = np.radians(91.80686667) # exact value not important
+        zenith = np.array([0.5*np.pi - lat, lon])
+
+        m = top2eq_m(lat, lon) # conversion matrix
+        shp = xyz.shape
+        p_eq = np.dot(m, xyz.reshape(3, -1)).reshape(shp) # point_direction in equatorial coord
+        p_eq = coord.cart_to_sph(p_eq.T) # to theta, phi
+
+        # cylinder width in wavelength
+        width = width / (const.c / (1.0e9 * self.freqs[fi]))
+        resp = cylbeam.beam_amp(p_eq, zenith, width, fwhm_x, fwhm_y)
+
+        return resp
 
 
 class Antenna(ap.pol.Antenna):
