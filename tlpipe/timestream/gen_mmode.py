@@ -32,12 +32,13 @@ class GenMmode(timestream_task.TimestreamTask):
                     'tsys': 50.0,
                     'accuracy_boost': 1.0,
                     'l_boost': 1.0,
+                    'use_fitted_beam_params': True,
                     'use_feedpos_in_file': True,
                     'bl_range': [0.0, 1.0e7],
                     'auto_correlations': False,
                     'lmax': None, # max l to compute
                     'mmax': None, # max m to compute
-                    'pol': 'xx', # 'yy' or 'I'
+                    'pol': 'xx', # or 'yy'
                     'beam_dir': 'map/bt',
                     'noise_weight': True,
                     'skip_svd': True, # set to False if do KL transform
@@ -54,6 +55,7 @@ class GenMmode(timestream_task.TimestreamTask):
         tsys = self.params['tsys']
         accuracy_boost = self.params['accuracy_boost']
         l_boost = self.params['l_boost']
+        use_fitted_beam_params = self.params['use_fitted_beam_params']
         use_feedpos_in_file = self.params['use_feedpos_in_file']
         bl_range = self.params['bl_range']
         auto_correlations = self.params['auto_correlations']
@@ -96,6 +98,17 @@ class GenMmode(timestream_task.TimestreamTask):
             # used the fixed feedpos
             feedpos = ts.feedpos
 
+        # pols to consider
+        pol_str = [ ts.pol_dict[p] for p in ts['pol'][:] ] # as string
+        if pol == 'xx' or pol == 'yy':
+            pis = [ pol_str.index(pol) ]
+        elif pol == 'I':
+            pis = [ pol_str.index('xx'), pol_str.index('yy') ]
+            raise RuntimeError('pol can only be xx or yy now')
+        else:
+            raise ValueError('Invalid pol: %s' % pol)
+        pi = pis[0]
+
         if ts.is_dish:
             from tlpipe.map.drift.telescope import tl_dish
 
@@ -104,11 +117,20 @@ class GenMmode(timestream_task.TimestreamTask):
         elif ts.is_cylinder:
             from tlpipe.map.drift.telescope import tl_cylinder
 
-            # factor = 1.2 # suppose an illumination efficiency, keep same with that in timestream_common
-            factor = 0.79 # for xx
-            # factor = 0.88 # for yy
-            cyl_width = factor * ts.attrs['cywid']
-            tel = tl_cylinder.TlUnpolarisedCylinder(lat, lon, freqs, band_width, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin, cyl_width, feedpos, lmax, mmax)
+            if 'beam_params' in ts.keys() and use_fitted_beam_params:
+                beam_params = ts['beam_params'].local_data[:, pi, :]
+                cyl_width = beam_params[:, 0]
+                fwhm_x = beam_params[:, 1]
+                fwhm_y = beam_params[:, 2]
+            else:
+                # factor = 1.2 # suppose an illumination efficiency, keep same with that in timestream_common
+                factor = 0.79 # for xx
+                # factor = 0.88 # for yy
+                cyl_width = factor * ts.attrs['cywid']
+                cyl_width = np.array([cyl_width] * nfreq)
+                fwhm_x = np.array([0.7] * nfreq)
+                fwhm_y = np.array([1.0] * nfreq)
+            tel = tl_cylinder.TlUnpolarisedCylinder(lat, lon, freqs, band_width, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin, cyl_width, feedpos, lmax, mmax, True, True, 0.0, False, fwhm_x, fwhm_y)
         else:
             raise RuntimeError('Unknown array type %s' % ts.attrs['telescope'])
 
@@ -147,15 +169,6 @@ class GenMmode(timestream_task.TimestreamTask):
         local_phi = ts['ra_dec'].local_data[:, 0]
         # the Fourier transfom matrix
         E = np.exp(-1.0J * np.outer(np.arange(-tel.mmax, tel.mmax+1), local_phi)) # e^(- i m phi)
-
-        # pols to consider
-        pol_str = [ ts.pol_dict[p] for p in ts['pol'][:] ] # as string
-        if pol == 'xx' or pol == 'yy':
-            pis = [ pol_str.index(pol) ]
-        elif pol == 'I':
-            pis = [ pol_str.index('xx'), pol_str.index('yy') ]
-        else:
-            raise ValueError('Invalid pol: %s' % pol)
 
         # compute mmodes for each unique pair
         for qi in range(nuq):
@@ -203,9 +216,9 @@ class GenMmode(timestream_task.TimestreamTask):
         del E
 
         # beamtransfer
-        bt = beamtransfer.BeamTransfer(beam_dir, tel, noise_weight, skip_svd)
+        bt = beamtransfer.BeamTransfer(f'{beam_dir}_{pol}', tel, noise_weight, skip_svd)
         # timestream
-        tstream = timestream.Timestream(ts_dir, ts_name, bt, no_m_zero)
+        tstream = timestream.Timestream(f'{ts_dir}_{pol}', ts_name, bt, no_m_zero)
 
         if mpiutil.rank0:
             # reshape mmode toseparate positive and negative ms

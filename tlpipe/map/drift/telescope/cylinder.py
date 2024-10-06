@@ -54,7 +54,7 @@ class CylinderTelescope(telescope.TransitTelescope):
 
         self.num_cylinders= num_cylinders
         self.num_feeds = num_feeds
-        self.cylinder_width=cylinder_width
+        self.cylinder_width = cylinder_width
         self.feed_spacing = feed_spacing
         self.in_cylinder = in_cylinder
         self.touching = touching
@@ -77,7 +77,8 @@ class CylinderTelescope(telescope.TransitTelescope):
     ## u-width property override
     @property
     def u_width(self):
-        return self.cylinder_width
+        # return self.cylinder_width
+        return 15.0
 
     ## v-width property override
     @property
@@ -205,8 +206,9 @@ class UnpolarisedCylinderTelescope(CylinderTelescope, telescope.SimpleUnpolarise
             complex.
         """
 
-        return cylbeam.beam_amp(self._angpos, self.zenith,
-            self.cylinder_width / self.wavelengths[freq], self.fwhm_h, self.fwhm_h)
+        # return cylbeam.beam_amp(self._angpos, self.zenith,
+        #     self.cylinder_width / self.wavelengths[freq], self.fwhm_h, self.fwhm_h)
+        return cylbeam.beam_amp(self._angpos, self.zenith, self.cylinder_width[freq] / self.wavelengths[freq], self.fwhm_e[freq], self.fwhm_h[freq])
 
 
 

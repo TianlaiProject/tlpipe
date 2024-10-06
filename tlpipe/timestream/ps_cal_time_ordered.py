@@ -19,6 +19,7 @@ from tlpipe.container.timestream import Timestream
 from tlpipe.core import constants as const
 
 from caput import mpiutil
+from caput import mpiarray
 from tlpipe.utils.path_util import output_path
 from tlpipe.utils import rpca_decomp
 from tlpipe.cal import calibrators
@@ -68,6 +69,7 @@ class PsCal(timestream_task.TimestreamTask):
                     'rpca_max_iter': 200, # max iteration number for rpca decomposition
                     'use_feedpos_in_file': True,
                     'subtract_src': False, # subtract vis of the calibrator from data
+                    'create_src_vis': False,  # create a src_vis dataset to save the subtracted src vis, only work when subtract_src = True
                     'replace_with_src': False, # replace vis with the subtracted src_vis, only work when subtract_src = True
                     'apply_gain': True,
                     'save_gain': False,
@@ -91,6 +93,7 @@ class PsCal(timestream_task.TimestreamTask):
         reserve_high_gain = self.params['reserve_high_gain']
         tag_output_iter = self.params['tag_output_iter']
         subtract_src = self.params['subtract_src']
+        create_src_vis = self.params['create_src_vis']
         replace_with_src = self.params['replace_with_src']
         apply_gain = self.params['apply_gain']
         save_gain = self.params['save_gain']
@@ -177,6 +180,13 @@ class PsCal(timestream_task.TimestreamTask):
         if vis_conj:
             ts.local_vis[:] = ts.local_vis.conj()
 
+        # create src_vis dataset if needed
+        if subtract_src and create_src_vis:
+            src_vis = np.zeros_like(ts.local_vis)
+            src_vis = mpiarray.MPIArray.wrap(src_vis, axis=ts.main_data_dist_axis)
+            axis_order = ts.main_axes_ordered_datasets[ts.main_data_name]
+            ts.create_main_axis_ordered_dataset(axis_order, 'src_vis', src_vis, axis_order)
+
         nt = end_ind - start_ind
         freq = ts.freq[:] # MHz
         nf = len(freq)
@@ -246,6 +256,9 @@ class PsCal(timestream_task.TimestreamTask):
                             ts.local_vis[ti, fi, pol.index(pol_str)] = V0_copy.flat[mis]
                         else:
                             ts.local_vis[ti, fi, pol.index(pol_str)] -= V0_copy.flat[mis]
+
+                        if create_src_vis:
+                            ts['src_vis'].local_data[ti, fi, pol.index(pol_str)] = V0_copy.flat[mis]
 
                     if (start_ind <= ti + local_time_offset < end_ind) and (apply_gain or save_gain):
                         # use v_ij = gi gj^* \int Ai Aj^* e^(2\pi i n \cdot uij) T(x) d^2n
@@ -447,8 +460,12 @@ class PsCal(timestream_task.TimestreamTask):
                                 if fd1 == fd2:
                                     # auto-correlation should be real
                                     ts.local_vis[:, fi, pi, bi] /= (g1 * np.conj(g2)).real
+                                    if 'src_vis' in ts.keys():
+                                        ts['src_vis'].local_data[:, fi, pi, bi] /= (g1 * np.conj(g2)).real
                                 else:
                                     ts.local_vis[:, fi, pi, bi] /= (g1 * np.conj(g2))
+                                    if 'src_vis' in ts.keys():
+                                        ts['src_vis'].local_data[:, fi, pi, bi] /= (g1 * np.conj(g2))
                             else:
                                 # mask the un-calibrated vis
                                 ts.local_vis_mask[:, fi, pi, bi] = True
