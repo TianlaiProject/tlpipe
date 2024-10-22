@@ -113,11 +113,11 @@ def decompose(M, rank=1, S=None, lmbda=None, threshold='hard', max_iter=100, tol
 
         S[~np.isfinite(S)] = 0 # set invalid val to 0
 
-        s1 = la.eigh(res, eigvals_only=True, eigvals=(d-1, d-1))
-        # L may be under noise
-        if len(s1) == 0 or s[-1] < 0.12 * s1[-1]:
-            L = np.zeros_like(M)
-            return L, S
+        # s1 = la.eigh(res, eigvals_only=True, eigvals=(d-1, d-1))
+        # # L may be under noise
+        # if len(s1) == 0 or s[-1] < 0.12 * s1[-1]:
+        #     L = np.zeros_like(M)
+        #     return L, S
 
         tol1 = (la.norm(L - L_old, ord='fro') + la.norm(S - S_old, ord='fro')) / MF
         if tol1 < tol:
@@ -130,5 +130,11 @@ def decompose(M, rank=1, S=None, lmbda=None, threshold='hard', max_iter=100, tol
 
     else:
         print('Exit with max_iter: %d, tol: %g >= %g' % (it, tol1, tol))
+
+    s1 = la.eigh(M - L, eigvals_only=True, eigvals=(d-1, d-1))
+    # L may be under noise
+    if len(s1) == 0 or s[-1] < 0.12 * s1[-1]:
+        L = np.zeros_like(M)
+        return L, S
 
     return L, S
