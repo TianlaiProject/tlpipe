@@ -16,6 +16,7 @@ from tlpipe.container.timestream import Timestream
 from tlpipe.core import constants as const
 
 from caput import mpiutil
+from tlpipe.utils.path_util import input_path
 from tlpipe.utils.path_util import output_path
 from tlpipe.map.drift.core import beamtransfer
 from tlpipe.map.drift.pipeline import timestream
@@ -33,6 +34,8 @@ class GenMmode(timestream_task.TimestreamTask):
                     'accuracy_boost': 1.0,
                     'l_boost': 1.0,
                     'use_fitted_beam_params': True,
+                    'use_beam_params_in_file': False, # only when use_fitted_beam_params is False
+                    'beam_params_file': 'beam_params.hdf5',
                     'use_feedpos_in_file': True,
                     'bl_range': [0.0, 1.0e7],
                     'auto_correlations': False,
@@ -56,6 +59,8 @@ class GenMmode(timestream_task.TimestreamTask):
         accuracy_boost = self.params['accuracy_boost']
         l_boost = self.params['l_boost']
         use_fitted_beam_params = self.params['use_fitted_beam_params']
+        use_beam_params_in_file = self.params['use_beam_params_in_file']
+        beam_params_file = self.params['beam_params_file']
         use_feedpos_in_file = self.params['use_feedpos_in_file']
         bl_range = self.params['bl_range']
         auto_correlations = self.params['auto_correlations']
@@ -118,10 +123,21 @@ class GenMmode(timestream_task.TimestreamTask):
             from tlpipe.map.drift.telescope import tl_cylinder
 
             if 'beam_params' in ts.keys() and use_fitted_beam_params:
+                if mpiutil.rank0:
+                    print('Use fitted beam params')
                 beam_params = ts['beam_params'].local_data[:, pi, :]
                 cyl_width = beam_params[:, 0]
                 fwhm_x = beam_params[:, 1]
                 fwhm_y = beam_params[:, 2]
+            elif use_beam_params_in_file:
+                beam_params_name = input_path(beam_params_file)
+                if mpiutil.rank0:
+                    print(f'Use beam params in file {beam_params_name}')
+                with h5py.File(beam_params_file, 'r') as f:
+                    beam_params = f['beam_params'][:, pi, :]
+                    cyl_width = beam_params[:, 0]
+                    fwhm_x = beam_params[:, 1]
+                    fwhm_y = beam_params[:, 2]
             else:
                 # factor = 1.2 # suppose an illumination efficiency, keep same with that in timestream_common
                 factor = 0.79 # for xx

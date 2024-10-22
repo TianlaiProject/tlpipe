@@ -37,6 +37,8 @@ class BeamFit(timestream_task.TimestreamTask):
                     'srcs': ['cyg', 'cas', 'crab'],
                     'span': 100, # time points
                     'bli': 0, # use which baseline to fit the beam
+                    'save_beam_params': False, # save fitted beam params to file
+                    'beam_params_file': 'beam_fit/beam_params.hdf5', # save fitted beam params to file
                     'del_src_vis': True, # delete src_vis after fitting
                     'chunk_size': 512,
                     'plot_figs': False,
@@ -53,6 +55,8 @@ class BeamFit(timestream_task.TimestreamTask):
         srcs = self.params['srcs']
         span = self.params['span']
         bli = self.params['bli']
+        save_beam_params = self.params['save_beam_params']
+        beam_params_file = self.params['beam_params_file']
         del_src_vis = self.params['del_src_vis']
         tag_output_iter = self.params['tag_output_iter']
         via_memmap = self.params['via_memmap']
@@ -193,10 +197,13 @@ class BeamFit(timestream_task.TimestreamTask):
                         vind = np.where(np.isfinite(tv))[0]
                         n0vs.append(n0[vind])
                         tvvs.append(tv[vind]/Sc[fi])
-                    popt, pcov = curve_fit(func, np.concatenate(n0vs, axis=0), np.concatenate(tvvs), bounds=([10.0, 0.2, 0.2], [20.0, 3.0, 3.0]))
-                    print(popt)
+                    try:
+                        popt, pcov = curve_fit(func, np.concatenate(n0vs, axis=0), np.concatenate(tvvs), bounds=([10.0, 0.2, 0.2], [20.0, 3.0, 3.0]))
+                        # print(popt)
 
-                    beam_params[fi, pi] = np.array(popt)
+                        beam_params[fi, pi] = np.array(popt)
+                    except ValueError:
+                        beam_params[fi, pi] = np.array([15.0, 1.8, 2.0]) # use reference value in case of fitting error
 
                     if plot_figs:
                         fig_name = f'{fig_prefix}_fi{fi:03d}_{gain_pd[pi]}.png'
@@ -217,6 +224,20 @@ class BeamFit(timestream_task.TimestreamTask):
                         plt.ylabel('Amplitude of vis [K]', fontsize=14)
                         plt.savefig(fig_name)
                         plt.close()
+
+            # save beam_params to file
+            if save_beam_params:
+                if tag_output_iter:
+                    bf_name = output_path(beam_params_file, iteration=self.iteration)
+                else:
+                    bf_name = output_path(beam_params_file)
+
+                with h5py.File(bf_name, 'w') as f:
+                    f.create_dataset('beam_params', data=beam_params)
+                    f['beam_params'].attrs['dims'] = '(freq, pol, params)'
+                    f['beam_params'].attrs['freq'] = freq
+                    f['beam_params'].attrs['pol'] = 'XX, YY'
+                    f['beam_params'].attrs['params'] = 'width, fwhm_x, fwhm_y'
 
         # create a frequency ordered data to save beam_params
         if not mpiutil.rank0:
