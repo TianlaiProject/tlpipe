@@ -39,6 +39,7 @@ class BeamFit(timestream_task.TimestreamTask):
                     'bli': 0, # use which baseline to fit the beam
                     'save_beam_params': False, # save fitted beam params to file
                     'beam_params_file': 'beam_fit/beam_params.hdf5', # save fitted beam params to file
+                    'fit_with_src_vis': True, # fit beam parameters with src_vis if True, else with vis
                     'del_src_vis': True, # delete src_vis after fitting
                     'chunk_size': 512,
                     'plot_figs': False,
@@ -50,19 +51,21 @@ class BeamFit(timestream_task.TimestreamTask):
     def process(self, ts):
 
         assert isinstance(ts, Timestream), '%s only works for Timestream object' % self.__class__.__name__
-        assert 'src_vis' in ts.keys(), 'No src_vis to do beam fit'
-
         srcs = self.params['srcs']
         span = self.params['span']
         bli = self.params['bli']
         save_beam_params = self.params['save_beam_params']
         beam_params_file = self.params['beam_params_file']
+        fit_with_src_vis = self.params['fit_with_src_vis']
         del_src_vis = self.params['del_src_vis']
         tag_output_iter = self.params['tag_output_iter']
         via_memmap = self.params['via_memmap']
         chunk_size = self.params['chunk_size']
         plot_figs = self.params['plot_figs']
         fig_prefix = self.params['fig_name']
+
+        if fit_with_src_vis:
+            assert 'src_vis' in ts.keys(), 'No src_vis to do beam fit'
 
         ts.redistribute('time', via_memmap=via_memmap)
 
@@ -153,8 +156,10 @@ class BeamFit(timestream_task.TimestreamTask):
             # factor = (lmd**2 * 1.0e-26 * Sc) / (2 * const.k_B) * Ai**2 # NOTE: 1Jy = 1.0e-26 W m^-2 Hz^-1
             # fit = factor[0]
 
-            # transit_vis = ts.vis.data.global_slice[start_ind:end_ind, :, :2, :] # only XX and YY pol
-            transit_vis = ts['src_vis'].data.global_slice[start_ind:end_ind, :, :2, :] # only XX and YY pol
+            if not fit_with_src_vis:
+                transit_vis = ts.vis.data.global_slice[start_ind:end_ind, :, :2, :] # only XX and YY pol
+            else:
+                transit_vis = ts['src_vis'].data.global_slice[start_ind:end_ind, :, :2, :] # only XX and YY pol
             transit_vis_mask = ts.vis_mask.data.global_slice[start_ind:end_ind, :, :2, :] # only XX and YY pol
 
             if transit_vis is None:
@@ -169,7 +174,7 @@ class BeamFit(timestream_task.TimestreamTask):
             transit_vis_masks.append(transit_vis_mask)
 
         # delete src_vis to save memory
-        if del_src_vis:
+        if del_src_vis and 'src_vis' in ts.keys():
             ts.delete_a_dataset('src_vis', reserve_hint=False)
 
         # average over bl
@@ -181,6 +186,7 @@ class BeamFit(timestream_task.TimestreamTask):
                 transit_viss[si] = np.ma.abs(np.ma.array(transit_vis[:, :, :, bli], mask=transit_vis_mask[:, :, :, bli])).filled(np.nan)
 
             beam_params = np.zeros((nf, 2, 3)) # to save the fitted beam params
+            beam_params_fitted = np.zeros((nf, 2), dtype=bool) # successfully fitted or not
 
             fwhm_factor = 2.0 * np.pi / 3.0
             lmd = const.c / (1.0e6*freq)
@@ -202,11 +208,18 @@ class BeamFit(timestream_task.TimestreamTask):
                         # print(popt)
 
                         beam_params[fi, pi] = np.array(popt)
+                        fitted = True
+                        beam_params_fitted[fi, pi] = True
                     except ValueError:
-                        beam_params[fi, pi] = np.array([15.0, 1.8, 2.0]) # use reference value in case of fitting error
+                        popt0 = [15.0, 1.8, 2.0]
+                        beam_params[fi, pi] = np.array(popt0) # use reference value in case of fitting error
+                        fitted = False
 
                     if plot_figs:
-                        fig_name = f'{fig_prefix}_fi{fi:03d}_{gain_pd[pi]}.png'
+                        if fitted:
+                            fig_name = f'{fig_prefix}_fi{fi:03d}_{gain_pd[pi]}.png'
+                        else:
+                            fig_name = f'{fig_prefix}_fi{fi:03d}_{gain_pd[pi]}_unfitted.png'
                         if tag_output_iter:
                             fig_name = output_path(fig_name, iteration=self.iteration)
                         else:
@@ -217,7 +230,10 @@ class BeamFit(timestream_task.TimestreamTask):
                         plt.figure()
                         for s, n0, Sc, transit_vis, c in zip(srcs, n0s, Scs, transit_viss, ['r', 'g', 'b']):
                             plt.plot(xt, transit_vis[:, fi, pi], c, label=s)
-                            plt.plot(xt, Sc[fi] * func(n0, *popt), c, lw=2)
+                            if fitted:
+                                plt.plot(xt, Sc[fi] * func(n0, *popt), c, lw=2)
+                            else:
+                                plt.plot(xt, Sc[fi] * func(n0, *popt0), c, lw=2)
                             plt.plot(xt, (lmd[fi]**2 * 1.0e-26 * Sc[fi]) / (2 * const.k_B) * aa.ants[0].beam.response(n0.T)[0]**2, c+'--')
                         plt.legend()
                         plt.xlabel('Time [Minutes]', fontsize=14)
@@ -238,6 +254,7 @@ class BeamFit(timestream_task.TimestreamTask):
                     f['beam_params'].attrs['freq'] = freq
                     f['beam_params'].attrs['pol'] = 'XX, YY'
                     f['beam_params'].attrs['params'] = 'width, fwhm_x, fwhm_y'
+                    f.create_dataset('beam_params_fitted', data=beam_params_fitted)
 
         # create a frequency ordered data to save beam_params
         if not mpiutil.rank0:
