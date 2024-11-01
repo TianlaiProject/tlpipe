@@ -323,6 +323,11 @@ if __name__ == '__main__':
     print('om:', cyl_beam.Omega)
     x_resp = cyl_beam.response(xz.T)
     y_resp = cyl_beam.response(yz.T)
+    # fwhm_factor = 2.0 * np.pi / 3.0
+    # w, fx, fy = 13.99884661,  1.88838088,  2.40883107 # for xx
+    # # w, fx, fy = 14.6314643 ,  1.77521623,  2.52011359 # for yy
+    # x_resp = cyl_beam.response_fit((xz.T, 0), w, fwhm_factor*fx, fwhm_factor*fy).reshape(1, -1)
+    # y_resp = cyl_beam.response_fit((yz.T, 0), w, fwhm_factor*fx, fwhm_factor*fy).reshape(1, -1)
 
     x_inds = np.where(x_resp>=0.5)[1]
     x_ind1, x_ind2 = x_inds[0], x_inds[-1]
@@ -347,6 +352,7 @@ if __name__ == '__main__':
     plt.xlim(0, 180)
     plt.legend()
     plt.savefig('cy_square.png')
+    # plt.savefig('cy_square_fit.png')
     plt.clf()
 
     xs = np.linspace(-1.0, 1.0, 2000)
