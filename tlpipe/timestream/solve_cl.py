@@ -39,6 +39,7 @@ class SolveCl(timestream_task.TimestreamTask):
                     'ts_name': 'ts',
                     'prior_cl': None, # or 'prior_cl.hdf5'
                     'epsilon': 0.0001, # regularization parameter for tk
+                    'nbin': 1,  # synthesize for nbin freqs, use this if multi-freq synthesize
                   }
 
     prefix = 'sc_'
@@ -46,6 +47,7 @@ class SolveCl(timestream_task.TimestreamTask):
     def process(self, tstream):
 
         prior_cl = self.params['prior_cl']
+        nbin = self.params['nbin']
         eps = self.params['epsilon']
 
         bt = tstream.beamtransfer
@@ -59,7 +61,7 @@ class SolveCl(timestream_task.TimestreamTask):
         bt.generate()
 
         tstream.generate_Bv()
-        tstream.solve_cl('cl.hdf5', eps=eps, prior_cl_file=prior_cl)
+        tstream.solve_cl('cl.hdf5', nbin=nbin, eps=eps, prior_cl_file=prior_cl)
 
         return tstream
 

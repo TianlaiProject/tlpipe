@@ -33,7 +33,7 @@ class MapMaking(timestream_task.TimestreamTask):
                     'prior_map': None, # or 'prior.hdf5'
                     'add_noise': True,
                     'dirty_map': False,
-                    'nbin': None, # use this if multi-freq synthesize
+                    'nbin': 1, # map synthesize for nbin freqs, use this if multi-freq synthesize
                     'method': 'svd', # or tk
                     'normalize': True, # only used for dirty map-making
                     'threshold': 1.0e3, # only used for dirty map-making
@@ -74,6 +74,8 @@ class MapMaking(timestream_task.TimestreamTask):
         tel._init_trans(nside)
 
         bt.generate()
+
+        tstream.generate_Bv()
 
         if dirty_map:
             tstream.mapmake_full(nside, 'map_full_dirty.hdf5', nbin, dirty=True, method=method, normalize=normalize, threshold=threshold)

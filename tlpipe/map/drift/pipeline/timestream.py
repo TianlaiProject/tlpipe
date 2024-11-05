@@ -321,24 +321,16 @@ class Timestream(object):
 
     #======== Make map from uncleaned stream ============
 
-    def mapmake_full(self, nside, mapname, nbin=None, dirty=False, method='svd', normalize=True, threshold=1.0e3, eps=0.01, correct_order=0, prior_map_file=None, save_alm=False, tk_deconv=False, map_to_deconv=None, loop_factor=0.1, n_iter=100):
+    def mapmake_full(self, nside, mapname, nbin=1, dirty=False, method='svd', normalize=True, threshold=1.0e3, eps=0.01, correct_order=0, prior_map_file=None, save_alm=False, tk_deconv=False, map_to_deconv=None, loop_factor=0.1, n_iter=100):
 
         nfreq = self.telescope.nfreq
-        if nbin is None:
-            nbin = nfreq
-        else:
-            if (nbin < 1 or nbin > nfreq): # invalid nbin
-                nbin = nfreq
-            else:
-                nbin = int(nbin)
-
         if prior_map_file is not None:
             # read in the prior sky map
             with h5py.File(prior_map_file, 'r') as f:
-                prior_map = f['map'][:] # shape (nbin, npol, npix)
+                prior_map = f['map'][:] # shape (nfreq, npol, npix)
 
             # alm of the prior map
-            alm0 = hputil.sphtrans_sky(prior_map, lmax=self.telescope.lmax).reshape(nbin, self.telescope.num_pol_sky, self.telescope.lmax+1, self.telescope.lmax+1) # shape (nbin, npol, lmax+1, lmax+1)
+            alm0 = hputil.sphtrans_sky(prior_map, lmax=self.telescope.lmax).reshape(nfreq, self.telescope.num_pol_sky, self.telescope.lmax+1, self.telescope.lmax+1) # shape (nfreq, npol, lmax+1, lmax+1)
         else:
             alm0 = None
 
@@ -355,7 +347,7 @@ class Timestream(object):
                 elif method == 'tk':
                     # sphmode = self.beamtransfer.project_vector_telescope_to_sky_tk(mi, mmode, nbin, eps=eps)
                     mmode0 = alm0[:, :, :, mi] if alm0 is not None else None
-                    sphmode = self.beamtransfer.project_vector_telescope_to_sky_tk(mi, mmode, nbin, eps=eps, correct_order=correct_order, mmode0=mmode0)
+                    sphmode = self.beamtransfer.project_vector_telescope_to_sky_tk(mi, self, nbin, eps=eps, correct_order=correct_order, mmode0=mmode0)
                 else:
                     raise ValueError('Unknown map-making method %s' % method)
 
@@ -366,12 +358,7 @@ class Timestream(object):
 
         if mpiutil.rank0:
 
-            # get center freq of each bin
-            n, s, e = mpiutil.split_m(nfreq, nbin)
-            cfreqs = np.array([ self.beamtransfer.telescope.frequencies[(s[i]+e[i])//2] for i in range(nbin) ])
-
-            alm = np.zeros((nbin, self.telescope.num_pol_sky, self.telescope.lmax + 1,
-                            self.telescope.lmax + 1), dtype=np.complex128)
+            alm = np.zeros((nfreq, self.telescope.num_pol_sky, self.telescope.lmax + 1, self.telescope.lmax + 1), dtype=np.complex128)
 
             if not (method == 'tk' and tk_deconv and map_to_deconv is not None):
                 # mlist = range(1 if self.no_m_zero else 0, self.telescope.mmax + 1)
@@ -401,7 +388,7 @@ class Timestream(object):
                     print('deconv: %d of %d...' % (ii, n_iter), flush=True)
                     sys.stdout.flush()
                     sys.stderr.flush()
-                    alm_psf = np.zeros((nbin, self.telescope.num_pol_sky, self.telescope.lmax + 1, self.telescope.lmax + 1), dtype=np.complex128)
+                    alm_psf = np.zeros((nfreq, self.telescope.num_pol_sky, self.telescope.lmax + 1, self.telescope.lmax + 1), dtype=np.complex128)
                     for fi in range(nfreq):
                         max_i = np.argmax(residual_map[fi, 0]) # index of the max pixel
                         max_inds[fi] = max_i
@@ -473,16 +460,18 @@ class Timestream(object):
 
                 skymap = hputil.sphtrans_inv_sky(alm, nside)
 
+                freqs = self.beamtransfer.telescope.frequencies
+
                 with h5py.File(self.output_directory + '/' + mapname, 'w') as f:
                     f.create_dataset('/map', data=skymap)
                     f.attrs['dim'] = 'freq, pol, pix'
-                    f.attrs['frequency'] = cfreqs
+                    f.attrs['frequency'] = freqs
                     f.attrs['polarization'] = np.string_(['I', 'Q', 'U', 'V'])[:self.beamtransfer.telescope.num_pol_sky] # np.string_ for python 3
 
                     if save_alm:
                         f.create_dataset('/alm', data=alm1)
                         f.attrs['dim'] = 'freq, pol, l, m'
-                        f.attrs['frequency'] = cfreqs
+                        f.attrs['frequency'] = freqs
                         f.attrs['polarization'] = np.string_(['I', 'Q', 'U', 'V'])[:self.beamtransfer.telescope.num_pol_sky] # np.string_ for python 3
 
             if method == 'tk' and tk_deconv:
@@ -493,7 +482,7 @@ class Timestream(object):
 
         mpiutil.barrier()
 
-    def solve_cl(self, clname, eps=0.01, prior_cl_file=None):
+    def solve_cl(self, clname, nbin=1, eps=0.01, prior_cl_file=None):
 
         nfreq = self.telescope.nfreq
 
@@ -517,7 +506,7 @@ class Timestream(object):
 
         # solve cl with all ms
         # vs = [ self.mmode(mi) for mi in range(self.telescope.mmax+1) ]
-        cl_tk, cl_diag, cl_prior = self.beamtransfer.solve_cl_allm_tk(self, eps=eps)
+        cl_tk, cl_diag, cl_prior = self.beamtransfer.solve_cl_allm_tk(self, nbin=nbin, eps=eps)
 
         if mpiutil.rank0:
 

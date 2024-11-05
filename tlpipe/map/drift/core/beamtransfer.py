@@ -19,6 +19,8 @@ import os
 import time
 import warnings
 import pickle
+import operator
+import functools
 
 import numpy as np
 import scipy.linalg as la
@@ -1184,7 +1186,7 @@ class BeamTransfer(object):
 
     project_vector_backward = project_vector_telescope_to_sky
 
-    def project_vector_telescope_to_sky_tk(self, mi, vec, nbin=None, eps=0.01, correct_order=0, mmode0=None):
+    def project_vector_telescope_to_sky_tk(self, mi, ts, nbin=1, eps=0.01, correct_order=0, mmode0=None):
         """Invert a vector from the telescope space onto the sky using
         the Tikhonov regularization method. This is the map-making process.
 
@@ -1192,8 +1194,8 @@ class BeamTransfer(object):
         ----------
         mi : integer
             Mode index to fetch for.
-        vec : np.ndarray
-            Sky data vector packed as [freq, baseline, polarisation]
+        ts : timestream.Timestream instance
+            Instance of timestream.Timestream.
 
         Returns
         -------
@@ -1201,68 +1203,48 @@ class BeamTransfer(object):
             Sky vector to return.
         """
 
-        beam = self.beam_m(mi) # shape (nfreq, 2, npairs, npol_sky, lmax+1)
-
         nfreq = self.nfreq
         nl = self.telescope.lmax + 1 - mi # do not include l < m
         npl = self.telescope.num_pol_sky * nl
-        beam = beam[:, :, :, :, mi:].reshape((nfreq, self.ntel, npl))
 
         # if prior mmode not None
         if mmode0 is not None:
             mmode0 = mmode0[:, :, mi:].reshape((nfreq, npl))
 
-        n, s, e = mpiutil.split_m(nfreq, nbin)
+        vecb = np.zeros((nfreq, self.telescope.num_pol_sky, self.telescope.lmax + 1), dtype=np.complex128)
 
-        vecb = np.zeros((nbin, self.telescope.num_pol_sky, self.telescope.lmax + 1), dtype=np.complex128)
-        vec = vec.reshape((nfreq, self.ntel))
-        # vec = vec[:, 0] # positive m only
+        for fi in range(nfreq):
+            sfi = max(0, fi - nbin//2)
+            efi = min(fi - nbin//2 + nbin, nfreq)
+            BB = functools.reduce(operator.add, ( self.BB_m(mi, fi_) for fi_ in range(sfi, efi) )) # B^* B
+            Bv = functools.reduce(operator.add, ( ts.Bv_m(mi, fi_) for fi_ in range(sfi, efi) )) # B^* v
+            BB = BB[mi:, mi:]
+            Bv = Bv[mi:]
 
-        for bi in range(nbin):
-            B = beam[s[bi]:e[bi]].reshape(-1, npl) # all zeros for l < m
-            BB = np.dot(B.T.conj(), B) # B^* B
-
-            # # construct difference operator matrix
-            # DD = np.zeros((nl, nl))
-            # di = np.diag_indices_from(DD)
-            # diu = (di[0][:-1], (di[1]+1)[:-1])
-            # dil = ((di[0]+1)[:-1], di[1][:-1])
-            # DD[di] = 2
-            # DD[diu] = -1
-            # DD[dil] = -1
-            # DD[0, 0] = 1
-            # DD[-1, -1] = 1
-            # BB += (1.0e-3 * DD + 1.0e-3 * np.eye(nl))
 
             BBd = np.diag(BB).real
             if np.isfinite(BBd.max()) and BBd.max() > 0.0:
                 np.fill_diagonal(BB, eps * np.cos(BBd / BBd.max()) + BBd) # (B^* B + eps cos(BBd / max(BBd)))
             else:
                 np.fill_diagonal(BB, eps + BBd) # (B^* B + eps I)
-            vec1 = vec[s[bi]:e[bi]].reshape(-1)
+
             try:
                 BBi = la.pinv(BB) # (B^* B + eps I)^-1
             except np.linalg.linalg.LinAlgError:
-                print('Compute pinv of BB failed for mi = %d, bi = %d' % (mi, bi), flush=True)
+                print('Compute pinv of BB failed for mi = %d, fi = %d' % (mi, fi), flush=True)
                 continue
+
             if mmode0 is not None:
-                vecb[bi, :, mi:] = np.dot(BBi, np.dot(B.T.conj(), vec1) + eps * mmode0[bi]).reshape(self.telescope.num_pol_sky, nl)
+                vecb[fi, :, mi:] = np.dot(BBi, Bv + eps * mmode0[fi]).reshape(self.telescope.num_pol_sky, nl)
             else:
-                # vecb[bi] = np.dot(BBi, np.dot(B.T.conj(), vec1))
-
-                # BBi *= -eps # -eps (B^* B + eps I)^-1
-                # np.fill_diagonal(BBi, 1.0 + np.diag(BB))  # I - eps (B^* B + eps I)^-1
-                # vecb[bi] = np.dot(la.pinv(BBi), vecb[bi].flatten()) # [ I - eps (B^* B + eps I)^-1 ]^-1 a
-
-                # or
-                ahat = np.dot(BBi, np.dot(B.T.conj(), vec1))
-                vecb[bi, :, mi:] = ahat.reshape(self.telescope.num_pol_sky, nl) # the zero-th order, no correction
+                ahat = np.dot(BBi, Bv)
+                vecb[fi, :, mi:] = ahat.reshape(self.telescope.num_pol_sky, nl) # the zero-th order, no correction
                 if correct_order > 0:
                     Delta = eps * BBi # eps (B^* B + eps I)^-1
                     Da = ahat # to save the previous order Delta**(i-1) * ahat
                     for i in range(1, correct_order+1):
                         Da = np.dot(Delta, Da)
-                        vecb[bi, :, mi:] += Da.reshape(self.telescope.num_pol_sky, nl) # high order correction
+                        vecb[fi, :, mi:] += Da.reshape(self.telescope.num_pol_sky, nl) # high order correction
 
         return vecb
 
@@ -1321,7 +1303,7 @@ class BeamTransfer(object):
 
         return cl
 
-    def solve_cl_allm_tk(self, ts, eps=0.01):
+    def solve_cl_allm_tk(self, ts, nbin=1, eps=0.01):
         """Solve C_l(\nu, \nu') using the Tikhonov regularization method.
 
         Parameters
@@ -1355,6 +1337,12 @@ class BeamTransfer(object):
         for li, (fi1, fi2) in enumerate(zip(lfi1s, lfi2s)):
             if mpiutil.rank0:
                 print(f'{li} of {len(lfi1s)}...', flush=True)
+
+            sfi1 = max(0, fi1 - nbin//2)
+            efi1 = min(fi1 - nbin//2 + nbin, nfreq)
+            sfi2 = max(0, fi2 - nbin//2)
+            efi2 = min(fi2 - nbin//2 + nbin, nfreq)
+
             BB = np.zeros((npl, npl), dtype=np.complex128)
             Bv = np.zeros(npl, dtype=np.complex128)
 
@@ -1372,8 +1360,15 @@ class BeamTransfer(object):
                 # BB += BBf1 * np.conj(BBf2)
                 # Bv += Bvf1 * np.conj(Bvf2)
 
-                BB += self.BB_m(mi, fi1) * np.conj(self.BB_m(mi, fi2))
-                Bv += ts.Bv_m(mi, fi1) * np.conj(ts.Bv_m(mi, fi2))
+                BBfi1 = functools.reduce(operator.add, ( self.BB_m(mi, fi) for fi in range(sfi1, efi1) )) # B^* B
+                BBfi2 = functools.reduce(operator.add, ( self.BB_m(mi, fi) for fi in range(sfi2, efi2) )) # B^* B
+                Bvfi1 = functools.reduce(operator.add, ( ts.Bv_m(mi, fi) for fi in range(sfi1, efi1) )) # B^* v
+                Bvfi2 = functools.reduce(operator.add, ( ts.Bv_m(mi, fi) for fi in range(sfi2, efi2) )) # B^* v
+
+                # BB += self.BB_m(mi, fi1) * np.conj(self.BB_m(mi, fi2))
+                # Bv += ts.Bv_m(mi, fi1) * np.conj(ts.Bv_m(mi, fi2))
+                BB += BBfi1 * np.conj(BBfi2)
+                Bv += Bvfi1 * np.conj(Bvfi2)
 
             # # save BB to file for analysis
             # with h5py.File('BB.hdf5', 'w') as f:
