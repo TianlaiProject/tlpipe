@@ -20,6 +20,7 @@ from tlpipe.core import constants as const
 
 from caput import mpiutil
 from caput import mpiarray
+from tlpipe.utils.path_util import input_path
 from tlpipe.utils.path_util import output_path
 from tlpipe.utils import rpca_decomp
 from tlpipe.cal import calibrators
@@ -71,6 +72,8 @@ class PsCal(timestream_task.TimestreamTask):
                     'subtract_src': False, # subtract vis of the calibrator from data
                     'create_src_vis': False,  # create a src_vis dataset to save the subtracted src vis, only work when subtract_src = True
                     'replace_with_src': False, # replace vis with the subtracted src_vis, only work when subtract_src = True
+                    'use_beam_params_in_file': False,
+                    'beam_params_file': 'beam_params.hdf5',
                     'apply_gain': True,
                     'save_gain': False,
                     'check_gain': False,
@@ -95,6 +98,8 @@ class PsCal(timestream_task.TimestreamTask):
         subtract_src = self.params['subtract_src']
         create_src_vis = self.params['create_src_vis']
         replace_with_src = self.params['replace_with_src']
+        use_beam_params_in_file = self.params['use_beam_params_in_file']
+        beam_params_file = self.params['beam_params_file']
         apply_gain = self.params['apply_gain']
         save_gain = self.params['save_gain']
         check_gain = self.params['check_gain']
@@ -377,9 +382,26 @@ class PsCal(timestream_task.TimestreamTask):
 
                 # normalize to get the exact gain
                 # Omega = aa.ants[0].beam.Omega ### TODO: implement Omega for dish
-                Ai = aa.ants[0].beam.response(n0[transit_ind - start_ind]) # Ai at transit time
-                factor = np.sqrt((lmd**2 * 1.0e-26 * Sc) / (2 * const.k_B)) * Ai # NOTE: 1Jy = 1.0e-26 W m^-2 Hz^-1
-                gain /= factor[:, np.newaxis, np.newaxis]
+                if not use_beam_params_in_file:
+                    Ai = aa.ants[0].beam.response(n0[transit_ind - start_ind]) # (nfreq,), Ai at transit time
+                    factor = np.sqrt((lmd**2 * 1.0e-26 * Sc) / (2 * const.k_B)) * Ai # NOTE: 1Jy = 1.0e-26 W m^-2 Hz^-1
+                    gain /= factor[:, np.newaxis, np.newaxis]
+                else:
+                    beam_params_name = input_path(beam_params_file)
+                    if mpiutil.rank0:
+                        print(f'Use beam params in file {beam_params_name}')
+                    with h5py.File(beam_params_file, 'r') as f:
+                        beam_params = f['beam_params'][:, :, :]
+                        cyl_width = beam_params[:, :, 0] # (nfreq, npol) with npol = 2
+                        fwhm_x = beam_params[:, :, 1] # (nfreq, npol) with npol = 2
+                        fwhm_y = beam_params[:, :, 2] # (nfreq, npol) with npol = 2
+
+                    Ai_x = np.array([ aa.ants[0].beam.response_fit((n0[transit_ind - start_ind], fi), w, fx, fy) for (fi, w, fx, fy) in zip(range(nf), cyl_width[:, 0], fwhm_x[:, 0], fwhm_y[:, 0]) ]) # (nfreq,)
+                    Ai_y = np.array([ aa.ants[0].beam.response_fit((n0[transit_ind - start_ind], fi), w, fx, fy) for (fi, w, fx, fy) in zip(range(nf), cyl_width[:, 1], fwhm_x[:, 1], fwhm_y[:, 1]) ]) # (nfreq,)
+                    factor_x = np.sqrt((lmd**2 * 1.0e-26 * Sc) / (2 * const.k_B)) * Ai_x # NOTE: 1Jy = 1.0e-26 W m^-2 Hz^-1
+                    factor_y = np.sqrt((lmd**2 * 1.0e-26 * Sc) / (2 * const.k_B)) * Ai_y # NOTE: 1Jy = 1.0e-26 W m^-2 Hz^-1
+                    gain[:, 0, :] /= factor_x[:, np.newaxis]
+                    gain[:, 1, :] /= factor_y[:, np.newaxis]
 
                 if check_gain:
                     if nf > 6:
