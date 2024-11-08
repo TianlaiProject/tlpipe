@@ -42,7 +42,8 @@ class Subtract(timestream_task.TimestreamTask):
 
         ts.redistribute('time', via_memmap=via_memmap)
 
-        t1, t2 = self.params['time_range']
+        time_range = self.params['time_range']
+        t1, t2 = time_range
 
         local_hour = ts['local_hour'].local_data
         if 'ns_on' in ts.keys():
@@ -56,6 +57,9 @@ class Subtract(timestream_task.TimestreamTask):
             tis1 = np.where(np.logical_and(local_hour>=t1, local_hour<=24.0, ns_on==False))[0]
             tis2 = np.where(np.logical_and(local_hour>=0.0, local_hour<=t2, ns_on==False))[0]
             tis = np.concatenate([tis1, tis2])
+
+        if len(tis) == 0:
+            raise RuntimeError(f'No data in the spicified time range: {time_range}, no mean can be subtracted')
 
         # may use too much memory
         # vis_sum = np.ma.sum(np.ma.array(ts.local_vis[tis], mask=ts.local_vis_mask[tis]), axis=0, keepdims=True).filled(0)
