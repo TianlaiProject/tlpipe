@@ -35,7 +35,7 @@ class BeamFit(timestream_task.TimestreamTask):
 
     params_init = {
                     'srcs': ['cyg', 'cas', 'crab'],
-                    'span': 100, # time points
+                    'span': 80, # time points
                     'bli': 0, # use which baseline to fit the beam
                     'save_beam_params': False, # save fitted beam params to file
                     'beam_params_file': 'beam_fit/beam_params.hdf5', # save fitted beam params to file
@@ -203,17 +203,21 @@ class BeamFit(timestream_task.TimestreamTask):
                         vind = np.where(np.isfinite(tv))[0]
                         n0vs.append(n0[vind])
                         tvvs.append(tv[vind]/Sc[fi])
+
+                    # p0 = [15.0, 1.8, 2.0]
+                    p0 = [15.0, 1.9, 2.4]
                     try:
-                        popt, pcov = curve_fit(func, np.concatenate(n0vs, axis=0), np.concatenate(tvvs), bounds=([10.0, 0.2, 0.2], [20.0, 3.0, 3.0]))
+                        popt, pcov = curve_fit(func, np.concatenate(n0vs, axis=0), np.concatenate(tvvs), p0=p0, bounds=([10.0, 1.2, 1.2], [20.0, 3.0, 3.0]))
                         # print(popt)
 
                         beam_params[fi, pi] = np.array(popt)
                         fitted = True
                         beam_params_fitted[fi, pi] = True
                     except ValueError:
-                        popt0 = [15.0, 1.8, 2.0]
+                        popt0 = p0
                         beam_params[fi, pi] = np.array(popt0) # use reference value in case of fitting error
                         fitted = False
+                        beam_params_fitted[fi, pi] = False
 
                     if plot_figs:
                         if fitted:
