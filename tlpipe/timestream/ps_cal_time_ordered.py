@@ -396,8 +396,9 @@ class PsCal(timestream_task.TimestreamTask):
                         fwhm_x = beam_params[:, :, 1] # (nfreq, npol) with npol = 2
                         fwhm_y = beam_params[:, :, 2] # (nfreq, npol) with npol = 2
 
-                    Ai_x = np.array([ aa.ants[0].beam.response_fit((n0[transit_ind - start_ind], fi), w, fx, fy) for (fi, w, fx, fy) in zip(range(nf), cyl_width[:, 0], fwhm_x[:, 0], fwhm_y[:, 0]) ]) # (nfreq,)
-                    Ai_y = np.array([ aa.ants[0].beam.response_fit((n0[transit_ind - start_ind], fi), w, fx, fy) for (fi, w, fx, fy) in zip(range(nf), cyl_width[:, 1], fwhm_x[:, 1], fwhm_y[:, 1]) ]) # (nfreq,)
+                    fwhm_factor = 2.0 * np.pi / 3.0
+                    Ai_x = np.array([ aa.ants[0].beam.response_fit((n0[transit_ind - start_ind], fi), w, fwhm_factor*fx, fwhm_factor*fy) for (fi, w, fx, fy) in zip(range(nf), cyl_width[:, 0], fwhm_x[:, 0], fwhm_y[:, 0]) ]) # (nfreq,)
+                    Ai_y = np.array([ aa.ants[0].beam.response_fit((n0[transit_ind - start_ind], fi), w, fwhm_factor*fx, fwhm_factor*fy) for (fi, w, fx, fy) in zip(range(nf), cyl_width[:, 1], fwhm_x[:, 1], fwhm_y[:, 1]) ]) # (nfreq,)
                     factor_x = np.sqrt((lmd**2 * 1.0e-26 * Sc) / (2 * const.k_B)) * Ai_x # NOTE: 1Jy = 1.0e-26 W m^-2 Hz^-1
                     factor_y = np.sqrt((lmd**2 * 1.0e-26 * Sc) / (2 * const.k_B)) * Ai_y # NOTE: 1Jy = 1.0e-26 W m^-2 Hz^-1
                     gain[:, 0, :] /= factor_x[:, np.newaxis]
