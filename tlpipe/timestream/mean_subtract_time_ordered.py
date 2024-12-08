@@ -58,7 +58,7 @@ class Subtract(timestream_task.TimestreamTask):
             tis2 = np.where(np.logical_and(local_hour>=0.0, local_hour<=t2, ns_on==False))[0]
             tis = np.concatenate([tis1, tis2])
 
-        if len(tis) == 0:
+        if set(mpiutil.gather_list([len(tis)], root=None, comm=ts.comm)) == {0}:
             raise RuntimeError(f'No data in the spicified time range: {time_range}, no mean can be subtracted')
 
         # may use too much memory
