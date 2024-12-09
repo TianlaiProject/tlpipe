@@ -496,6 +496,7 @@ class BasicTod(memh5.MemDiskGroup):
                 if self.main_data_dist_axis == 0:
                     for rg in self.rank_groups:
                         if self.rank in rg:
+                            print(f'rank {self.rank} load {name}...', flush=True)
                             # load data from all files as a distributed dataset
                             st = 0
                             for fi, start, stop in infiles_map:
@@ -765,10 +766,14 @@ class BasicTod(memh5.MemDiskGroup):
         # load in top level attrs
         for attr_name in fh.attrs.keys():
             if attr_name != 'hints':
+                if self.rank0:
+                    print(f'Loading attrs {attr_name}...', flush=True)
                 self._load_an_attribute(attr_name)
 
         # load in top level datasets
         for dset_name in fh.keys():
+            if self.rank0:
+                print(f'Loading dataset {dset_name}...', flush=True)
             self._load_a_dataset(dset_name)
 
 
