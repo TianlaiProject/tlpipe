@@ -134,13 +134,18 @@ class BasicTod(memh5.MemDiskGroup):
     _time_ordered_attrs_ = {}
 
 
-    def __init__(self, files=None, mode='r', start=0, stop=None, dist_axis=0, memmap_vis=False, memmap_path=None, use_hints=True, comm=None):
+    def __init__(self, files=None, mode='r', start=0, stop=None, dist_axis=0, memmap_vis=False, memmap_path=None, use_hints=True, comm=None, num_rank_groups=16):
 
         super(BasicTod, self).__init__(data_group=None, distributed=True, comm=comm)
 
         self.nproc = 1 if self.comm is None else self.comm.size
         self.rank = 0 if self.comm is None else self.comm.rank
         self.rank0 = True if self.rank == 0 else False
+        # self.rank_groups = list(itertools.batched(range(self.nproc), num_rank_groups)) # for python3.12+
+        ng, r = self.nproc // num_rank_groups, self.nproc % num_rank_groups
+        self.rank_groups = [ list(range(i*num_rank_groups, (i+1)*num_rank_groups)) for i in range(ng) ]
+        if r != 0:
+            self.rank_groups.append(list(range(ng*num_rank_groups, self.nproc)))
 
         # hints pattern to match hint class attributes defined above
         self.hints_pattern = re.compile(r"(^_[^_]+_$)|(^_[^_]\w*[^_]_$)")
@@ -408,14 +413,20 @@ class BasicTod(memh5.MemDiskGroup):
         ### load a common attribute from the first file
 
         fh = self.infiles[0]
-        self.attrs[name] = fh.attrs[name]
+        for rg in self.rank_groups:
+            if self.rank in rg:
+                self.attrs[name] = fh.attrs[name]
+            mpiutil.barrier(comm=self.comm)
 
     def _load_a_time_ordered_attribute(self, name):
         ### load a time ordered attribute from all the file
 
         self.attrs[name] = []
-        for fh in self.infiles:
-            self.attrs[name].append(fh.attrs[name])
+        for rg in self.rank_groups:
+            if self.rank in rg:
+                for fh in self.infiles:
+                    self.attrs[name].append(fh.attrs[name])
+            mpiutil.barrier(comm=self.comm)
 
     def _load_an_attribute(self, name):
         ### load an attribute (either a commmon or a time ordered)
@@ -430,9 +441,14 @@ class BasicTod(memh5.MemDiskGroup):
 
         fh = self.infiles[0]
         dset = fh[name]
-        self.create_dataset(name, data=dset, shape=dset.shape, dtype=dset.dtype, memmap_path=self._memmap_path)
-        # copy attrs of this dset
-        memh5.copyattrs(dset.attrs, self[name].attrs)
+        # self.create_dataset(name, data=dset, shape=dset.shape, dtype=dset.dtype, memmap_path=self._memmap_path)
+        self.create_dataset(name, shape=dset.shape, dtype=dset.dtype, memmap_path=self._memmap_path)
+        for rg in self.rank_groups:
+            if self.rank in rg:
+                self[name].local_data[:] = dset[:]
+                # copy attrs of this dset
+                memh5.copyattrs(dset.attrs, self[name].attrs)
+            mpiutil.barrier(comm=self.comm)
 
     def _load_a_main_axes_ordered_dataset(self, name):
         ### load a main_axes_ordered_dataset from the first file if it is not time
@@ -470,11 +486,141 @@ class BasicTod(memh5.MemDiskGroup):
                 self.create_dataset(name, shape=shp, dtype=dset_type, distributed=True, distributed_axis=di, memmap=self._memmap_vis, memmap_path=self._memmap_path)
             else:
                 self.create_dataset(name, shape=shp, dtype=dset_type, distributed=True, distributed_axis=di, memmap_path=self._memmap_path)
-            # copy attrs of this dset
-            memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
+            for rg in self.rank_groups:
+                if self.rank in rg:
+                    # copy attrs of this dset
+                    memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
+                mpiutil.barrier(comm=self.comm)
 
             if 0 in axes:
                 if self.main_data_dist_axis == 0:
+                    for rg in self.rank_groups:
+                        if self.rank in rg:
+                            # load data from all files as a distributed dataset
+                            st = 0
+                            for fi, start, stop in infiles_map:
+                                et = st + (stop - start)
+                                fsel[ti] = slice(start, stop)
+                                msel[ti] = slice(st, et)
+                                st = et
+                                fh = self.infiles[fi]
+                                if np.prod(self[name].local_data[tuple(msel)].shape) > 0:
+                                    # only read in data if non-empty, may get error otherwise
+                                    fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
+                                    self[name].local_data[tuple(msel)] = fh[name][tuple(fsel)]
+                        mpiutil.barrier(comm=self.comm)
+
+                else:
+                    # load data from all files as a distributed dataset
+                    linds = mpiutil.mpilist(np.arange(dset_shape[di])[fsel[di]].tolist(), comm=self.comm)
+                    fsel[di] = linds
+
+                    for rg in self.rank_groups:
+                        if self.rank in rg:
+                            # load data from all files
+                            st = 0
+                            for fi, fh in enumerate(self.infiles):
+                                num_ts = fh[name].shape[0]
+                                if self.num_infiles == 1:
+                                    et = st + last_stop - first_start
+                                    fsel[ti] = slice(first_start, last_stop)
+                                elif self.num_infiles > 1:
+                                    if fi == 0:
+                                        et = st + (num_ts - first_start)
+                                        fsel[ti] = slice(first_start, None)
+                                    elif fi == self.num_infiles-1:
+                                        et = st + last_stop
+                                        fsel[ti] = slice(0, last_stop)
+                                    else:
+                                        et = st + num_ts
+                                        fsel[ti] = slice(0, None)
+
+                                msel[ti] = slice(st, et)
+                                st = et
+                                if np.prod(self[name].local_data[tuple(msel)].shape) > 0:
+                                    fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
+                                    self[name].local_data[tuple(msel)] = fh[name][tuple(fsel)]
+                        mpiutil.barrier(comm=self.comm)
+
+            else:
+                if self.main_data_dist_axis == 0:
+                    raise RuntimeError('Something wrong happened, this would never occur')
+                else:
+                    # load data from the first file as a distributed dataset
+                    linds = mpiutil.mpilist(np.arange(dset_shape[di])[fsel[di]].tolist(), comm=self.comm)
+                    fsel[di] = linds
+                    for rg in self.rank_groups:
+                        if self.rank in rg:
+                            if np.prod(self[name].local_data.shape) > 0:
+                                fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
+                                self[name].local_data[:] = self.infiles[0][name][tuple(fsel)]
+                        mpiutil.barrier(comm=self.comm)
+
+        else:
+            # load as a common dataset
+            # create a common dataset to hold the data to be load
+            self.create_dataset(name, shape=shp, dtype=dset_type, memmap_path=self._memmap_path)
+            for rg in self.rank_groups:
+                if self.rank in rg:
+                    # copy attrs of this dset
+                    memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
+                mpiutil.barrier(comm=self.comm)
+
+            if 0 in axes:
+                for rg in self.rank_groups:
+                    if self.rank in rg:
+                        # load data from all files
+                        st = 0
+                        for fi, fh in enumerate(self.infiles):
+                            num_ts = fh[name].shape[0]
+                            if self.num_infiles == 1:
+                                et = st + last_stop - first_start
+                                fsel[ti] = slice(first_start, last_stop)
+                            elif self.num_infiles > 1:
+                                if fi == 0:
+                                    et = st + (num_ts - first_start)
+                                    fsel[ti] = slice(first_start, None)
+                                elif fi == self.num_infiles-1:
+                                    et = st + last_stop
+                                    fsel[ti] = slice(0, last_stop)
+                                else:
+                                    et = st + num_ts
+                                    fsel[ti] = slice(0, None)
+
+                            msel[ti] = slice(st, et)
+                            st = et
+                            if np.prod(self[name][tuple(msel)].shape) > 0:
+                                fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
+                                self[name][tuple(msel)] = fh[name][tuple(fsel)] # not a distributed dataset
+                    mpiutil.barrier(comm=self.comm)
+
+            else:
+                for rg in self.rank_groups:
+                    if self.rank in rg:
+                        # load data from the first file
+                        if np.prod(self[name][:].shape) > 0:
+                            fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
+                            self[name][:] = self.infiles[0][name][tuple(fsel)] # not a distributed dataset
+                    mpiutil.barrier(comm=self.comm)
+
+    def _load_a_time_ordered_dataset(self, name):
+        ### load a time ordered dataset (except those also in main_axes_ordered_datasets) from all files
+
+        dset_shape, dset_type, infiles_map = self._get_input_info(name, 0, None)
+        axes = self.time_ordered_datasets[name]
+        ti = axes.index(0) # index of 0 axis
+        fsel = [ slice(0, None, None) for i in dset_shape ] # for data in file
+        msel = [ slice(0, None, None) for i in dset_shape ] # for data in memory
+
+        if self.main_data_dist_axis == 0:
+            # load data as a distributed dataset
+            # create a distributed dataset to hold the data to be load
+            self.create_dataset(name, shape=dset_shape, dtype=dset_type, distributed=True, distributed_axis=ti, memmap_path=self._memmap_path)
+            for rg in self.rank_groups:
+                if self.rank in rg:
+                    # copy attrs of this dset
+                    memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
+
                     # load data from all files as a distributed dataset
                     st = 0
                     for fi, start, stop in infiles_map:
@@ -487,13 +633,17 @@ class BasicTod(memh5.MemDiskGroup):
                             # only read in data if non-empty, may get error otherwise
                             fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
                             self[name].local_data[tuple(msel)] = fh[name][tuple(fsel)]
+                mpiutil.barrier(comm=self.comm)
+        else:
+            # load data as a common dataset
+            # create a common dataset to hold the data to be load
+            self.create_dataset(name, shape=dset_shape, dtype=dset_type, memmap_path=self._memmap_path)
+            for rg in self.rank_groups:
+                if self.rank in rg:
+                    # copy attrs of this dset
+                    memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
 
-                else:
-                    # load data from all files as a distributed dataset
-                    linds = mpiutil.mpilist(np.arange(dset_shape[di])[fsel[di]].tolist(), comm=self.comm)
-                    fsel[di] = linds
-
-                    # load data from all files
+                    # load data from all files as a common dataset
                     st = 0
                     for fi, fh in enumerate(self.infiles):
                         num_ts = fh[name].shape[0]
@@ -513,117 +663,10 @@ class BasicTod(memh5.MemDiskGroup):
 
                         msel[ti] = slice(st, et)
                         st = et
-                        if np.prod(self[name].local_data[tuple(msel)].shape) > 0:
+                        if np.prod(self[name][tuple(msel)].shape) > 0:
                             fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
-                            self[name].local_data[tuple(msel)] = fh[name][tuple(fsel)]
-
-            else:
-                if self.main_data_dist_axis == 0:
-                    raise RuntimeError('Something wrong happened, this would never occur')
-                else:
-                    # load data from the first file as a distributed dataset
-                    linds = mpiutil.mpilist(np.arange(dset_shape[di])[fsel[di]].tolist(), comm=self.comm)
-                    fsel[di] = linds
-                    if np.prod(self[name].local_data.shape) > 0:
-                        fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
-                        self[name].local_data[:] = self.infiles[0][name][tuple(fsel)]
-
-        else:
-            # load as a common dataset
-            # create a common dataset to hold the data to be load
-            self.create_dataset(name, shape=shp, dtype=dset_type, memmap_path=self._memmap_path)
-            # copy attrs of this dset
-            memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
-
-            if 0 in axes:
-                # load data from all files
-                st = 0
-                for fi, fh in enumerate(self.infiles):
-                    num_ts = fh[name].shape[0]
-                    if self.num_infiles == 1:
-                        et = st + last_stop - first_start
-                        fsel[ti] = slice(first_start, last_stop)
-                    elif self.num_infiles > 1:
-                        if fi == 0:
-                            et = st + (num_ts - first_start)
-                            fsel[ti] = slice(first_start, None)
-                        elif fi == self.num_infiles-1:
-                            et = st + last_stop
-                            fsel[ti] = slice(0, last_stop)
-                        else:
-                            et = st + num_ts
-                            fsel[ti] = slice(0, None)
-
-                    msel[ti] = slice(st, et)
-                    st = et
-                    if np.prod(self[name][tuple(msel)].shape) > 0:
-                        fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
-                        self[name][tuple(msel)] = fh[name][tuple(fsel)] # not a distributed dataset
-
-            else:
-                # load data from the first file
-                if np.prod(self[name][:].shape) > 0:
-                    fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
-                    self[name][:] = self.infiles[0][name][tuple(fsel)] # not a distributed dataset
-
-    def _load_a_time_ordered_dataset(self, name):
-        ### load a time ordered dataset (except those also in main_axes_ordered_datasets) from all files
-
-        dset_shape, dset_type, infiles_map = self._get_input_info(name, 0, None)
-        axes = self.time_ordered_datasets[name]
-        ti = axes.index(0) # index of 0 axis
-        fsel = [ slice(0, None, None) for i in dset_shape ] # for data in file
-        msel = [ slice(0, None, None) for i in dset_shape ] # for data in memory
-
-        if self.main_data_dist_axis == 0:
-            # load data as a distributed dataset
-            # create a distributed dataset to hold the data to be load
-            self.create_dataset(name, shape=dset_shape, dtype=dset_type, distributed=True, distributed_axis=ti, memmap_path=self._memmap_path)
-            # copy attrs of this dset
-            memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
-
-            # load data from all files as a distributed dataset
-            st = 0
-            for fi, start, stop in infiles_map:
-                et = st + (stop - start)
-                fsel[ti] = slice(start, stop)
-                msel[ti] = slice(st, et)
-                st = et
-                fh = self.infiles[fi]
-                if np.prod(self[name].local_data[tuple(msel)].shape) > 0:
-                    # only read in data if non-empty, may get error otherwise
-                    fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
-                    self[name].local_data[tuple(msel)] = fh[name][tuple(fsel)]
-        else:
-            # load data as a common dataset
-            # create a common dataset to hold the data to be load
-            self.create_dataset(name, shape=dset_shape, dtype=dset_type, memmap_path=self._memmap_path)
-            # copy attrs of this dset
-            memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
-
-            # load data from all files as a common dataset
-            st = 0
-            for fi, fh in enumerate(self.infiles):
-                num_ts = fh[name].shape[0]
-                if self.num_infiles == 1:
-                    et = st + last_stop - first_start
-                    fsel[ti] = slice(first_start, last_stop)
-                elif self.num_infiles > 1:
-                    if fi == 0:
-                        et = st + (num_ts - first_start)
-                        fsel[ti] = slice(first_start, None)
-                    elif fi == self.num_infiles-1:
-                        et = st + last_stop
-                        fsel[ti] = slice(0, last_stop)
-                    else:
-                        et = st + num_ts
-                        fsel[ti] = slice(0, None)
-
-                msel[ti] = slice(st, et)
-                st = et
-                if np.prod(self[name][tuple(msel)].shape) > 0:
-                    fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
-                    self[name][tuple(msel)] = fh[name][tuple(fsel)] # not a distributed dataset
+                            self[name][tuple(msel)] = fh[name][tuple(fsel)] # not a distributed dataset
+                mpiutil.barrier(comm=self.comm)
 
     def _load_a_dataset(self, name):
         ### load a dataset (either a commmon or a main axis ordered or a time ordered)

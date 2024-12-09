@@ -203,7 +203,10 @@ class RawTimestream(timestream_common.TimestreamCommon):
         ### load a common dataset from the first file
         if name == 'channo' and not self._channel_select is None:
             self.create_dataset(name, data=self._channel_select, memmap_path=self._memmap_path)
-            memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
+            for rg in self.rank_groups:
+                if self.rank in rg:
+                    memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
+                mpiutil.barrier(comm=self.comm)
         else:
             super(RawTimestream, self)._load_a_common_dataset(name)
 

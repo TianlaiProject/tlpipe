@@ -174,6 +174,7 @@ class Dispatch(timestream_task.TimestreamTask):
         dist_axis = self.params['dist_axis']
         memmap_vis = self.params['memmap_vis']
         memmap_path = self.params['memmap_path']
+        num_rank_groups = self.params['num_rank_groups']
 
         ngrp = len(self.input_grps)
 
@@ -221,7 +222,7 @@ class Dispatch(timestream_task.TimestreamTask):
                 print('Not enough span time (less than `extra_inttime`), drop it...')
             return None
 
-        tod = self._Tod_class(input_files, mode, this_start, this_stop, dist_axis, memmap_vis=memmap_vis, memmap_path=output_path(memmap_path))
+        tod = self._Tod_class(input_files, mode, this_start, this_stop, dist_axis, memmap_vis=memmap_vis, memmap_path=output_path(memmap_path), num_rank_groups=num_rank_groups)
 
         tod, _ = self.data_select(tod)
 

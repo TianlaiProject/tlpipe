@@ -215,13 +215,22 @@ class TimestreamCommon(container.BasicTod):
             memh5.copyattrs(self.infiles[0][name].attrs, self[name].attrs)
         elif name in self.feed_ordered_datasets.keys() and not self._feed_select is None:
             fh = self.infiles[0]
-            feedno = fh['feedno'][:].tolist()
+            for rg in self.rank_groups:
+                if self.rank in rg:
+                    feedno = fh['feedno'][:].tolist()
+                mpiutil.barrier(comm=self.comm)
             feed_inds = [ feedno.index(fd) for fd in self._feed_select ]
             feed_axis = self.feed_ordered_datasets[name].index(0)
             slc = [slice(0, None)] * len(fh[name].shape)
             slc[feed_axis] = feed_inds
-            self.create_dataset(name, data=fh[name][tuple(slc)], memmap_path=self._memmap_path)
-            memh5.copyattrs(fh[name].attrs, self[name].attrs)
+            for rg in self.rank_groups:
+                if self.rank in rg:
+                    local_data = fh[name][tuple(slc)]
+                    local_attrs = fh[name].attrs
+                mpiutil.barrier(comm=self.comm)
+            self.create_dataset(name, data=local_data, memmap_path=self._memmap_path)
+            # memh5.copyattrs(fh[name].attrs, self[name].attrs)
+            self[name].attrs = local_attrs
         else:
             super(TimestreamCommon, self)._load_a_common_dataset(name)
 
@@ -274,12 +283,15 @@ class TimestreamCommon(container.BasicTod):
 
         if 'sec1970' not in self.keys():
             # generate sec1970
-            int_time = self.infiles[0].attrs['inttime']
             sec1970s = []
             nts = []
-            for fh in self.infiles:
-                sec1970s.append(fh.attrs['sec1970'])
-                nts.append(fh[self.main_data_name].shape[0])
+            for rg in self.rank_groups:
+                if self.rank in rg:
+                    int_time = self.infiles[0].attrs['inttime']
+                    for fh in self.infiles:
+                        sec1970s.append(fh.attrs['sec1970'])
+                        nts.append(fh[self.main_data_name].shape[0])
+                mpiutil.barrier(comm=self.comm)
             sec1970 = np.zeros(sum(nts), dtype=np.float64) # precision float32 is not enough
             cum_nts = np.cumsum([0] + nts)
             for idx, (nt, sec) in enumerate(zip(nts, sec1970s)):
