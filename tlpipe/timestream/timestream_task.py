@@ -135,7 +135,7 @@ class TimestreamTask(OneAndOne):
         dist_axis = self.params['dist_axis']
         memmap_vis = self.params['memmap_vis']
         memmap_path = self.params['memmap_path']
-        num_rank_groups = self.params['number_rank_groups']
+        num_rank_groups = self.params['num_rank_groups']
         tag_input_iter = self.params['tag_input_iter']
 
         if self.iterable and tag_input_iter:
