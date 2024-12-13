@@ -16,6 +16,7 @@ from tlpipe.container.timestream import Timestream
 from tlpipe.core import constants as const
 
 from caput import mpiutil
+from caput import mpiarray
 from tlpipe.utils.path_util import input_path
 from tlpipe.utils.path_util import output_path
 from tlpipe.map.drift.core import beamtransfer
@@ -157,10 +158,10 @@ class GenMmode(timestream_task.TimestreamTask):
         nuq = len(unqpairs) # number of unique pairs
 
         # to save m-mode
-        if mpiutil.rank0:
-            # large array only in rank0 to save memory
-            mmode = np.zeros((2*tel.mmax+1, nfreq, nuq), dtype=np.complex128)
-            N = np.zeros((nfreq, nuq), dtype=float) # number of accumulate terms
+        # create an distributed array mmode to save memory use
+        mmode = mpiarray.MPIArray((tel.mmax+1, nfreq, 2, nuq), axis=0, comm=ts.comm, dtype=np.complex128)
+        mis = mpiarray.MPIArray.from_numpy_array(np.arange(tel.mmax+1), axis=0, root=None, comm=ts.comm)
+        N = np.zeros((nfreq, nuq), dtype=float) # number of accumulate terms
 
         # mmode of a specific unique pair
         mmodeqi = np.zeros((2*tel.mmax+1, nfreq), dtype=np.complex128)
@@ -214,7 +215,7 @@ class GenMmode(timestream_task.TimestreamTask):
 
             mpiutil.barrier()
 
-            # accumulate mmode from all processes by Reduce
+            # accumulate mmode from all processes to rank0 by Reduce
             if mpiutil.size > 1: # more than one processes
                 if mpiutil.rank0:
                     # use IN_PLACE to reuse the mmode and N array
@@ -224,9 +225,17 @@ class GenMmode(timestream_task.TimestreamTask):
                     mpiutil.world.Reduce(mmodeqi, mmodeqi, op=mpiutil.SUM, root=0)
                     mpiutil.world.Reduce(Nqi, Nqi, op=mpiutil.SUM, root=0)
 
-            if mpiutil.rank0:
-                mmode[:, :, qi] = mmodeqi
-                N[:, qi] = Nqi
+            # reshape mmode toseparate positive and negative ms
+            mmodeqi1 = np.zeros((tel.mmax+1, nfreq, 2), dtype=mmodeqi.dtype)
+            mmodeqi1[0, :, 0] = mmodeqi[tel.mmax]
+            for mi in range(1, tel.mmax+1):
+                mmodeqi1[mi, :, 0] = mmodeqi[tel.mmax+mi]
+                mmodeqi1[mi, :, 1] = mmodeqi[tel.mmax-mi].conj()
+
+            # NOTE: only rank0 has correct mmodeqi1 after accumulation
+            lmmodeqi1 = mpiutil.scatter_array(mmodeqi1, axis=0, root=0, comm=ts.comm)
+            mmode.local_array[:, :, :, qi] = lmmodeqi1
+            N[:, qi] = Nqi
 
         del ts
         del E
@@ -236,47 +245,37 @@ class GenMmode(timestream_task.TimestreamTask):
         # timestream
         tstream = timestream.Timestream(f'{ts_dir}_{pol}', ts_name, bt, no_m_zero)
 
-        if mpiutil.rank0:
-            # reshape mmode toseparate positive and negative ms
-            mmode1 = np.zeros((tel.mmax+1, nfreq, 2, nuq), dtype=mmode.dtype)
-            mmode1[0, :, 0] = mmode[tel.mmax]
-            for mi in range(1, tel.mmax+1):
-                mmode1[mi, :, 0] = mmode[tel.mmax+mi]
-                mmode1[mi, :, 1] = mmode[tel.mmax-mi].conj()
-
-            del mmode
-
-            # save mmode to file
-            mmode_dir = tstream.output_directory + '/mmodes'
+        # save mmode to file
+        mmode_dir = tstream.output_directory + '/mmodes'
+        for i, mi in enumerate(mis.local_array[:]):
             if os.path.exists(mmode_dir + '/COMPLETED_M'):
-                # update the already existing mmodes
-                for mi in range(tel.mmax+1):
-                    with h5py.File(tstream._mfile(mi), 'r+') as f:
-                        f['/mmode'][:] += mmode1[mi]
+                with h5py.File(tstream._mfile(mi), 'r+') as f:
+                    f['/mmode'][:] += mmode.local_array[i]
+            else:
+                # make directory for each m-mode
+                if not os.path.exists(tstream._mdir(mi)):
+                    os.makedirs(tstream._mdir(mi))
+
+                # create the m-file and save the result.
+                with h5py.File(tstream._mfile(mi), 'w') as f:
+                    f.create_dataset('/mmode', data=mmode.local_array[i])
+                    f.attrs['m'] = mi
+
+        mpiutil.barrier()
+
+        if mpiutil.rank0:
+            if os.path.exists(mmode_dir + '/COMPLETED_M'):
                 with h5py.File(mmode_dir + '/count.hdf5', 'r+') as f:
                     f['count'][:] += N
-
-                # save the tstream object if there is no one
-                if not os.path.isfile(tstream._picklefile):
-                    tstream.save()
             else:
-                for mi in range(tel.mmax+1):
-                    # make directory for each m-mode
-                    if not os.path.exists(tstream._mdir(mi)):
-                        os.makedirs(tstream._mdir(mi))
-
-                    # create the m-file and save the result.
-                    with h5py.File(tstream._mfile(mi), 'w') as f:
-                        f.create_dataset('/mmode', data=mmode1[mi])
-                        f.attrs['m'] = mi
-
                 with h5py.File(mmode_dir + '/count.hdf5', 'w') as f:
                     f.create_dataset('count', data=N)
 
                 # Make file marker that the m's have been correctly generated:
                 open(mmode_dir + '/COMPLETED_M', 'a').close()
 
-                # save the tstream object
+            # save the tstream object if there is no one
+            if not os.path.isfile(tstream._picklefile):
                 tstream.save()
 
         mpiutil.barrier()
