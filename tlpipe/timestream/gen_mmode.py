@@ -181,7 +181,7 @@ class GenMmode(timestream_task.TimestreamTask):
         nt1 = min(num_int, nt-ind)
 
         inds = np.arange(nt)
-        local_inds = mpiutil.scatter_array(inds, root=None)
+        local_inds = mpiutil.scatter_array(inds, root=None, comm=ts.comm)
 
         local_phi = ts['ra_dec'].local_data[:, 0]
         # the Fourier transfom matrix
@@ -215,15 +215,11 @@ class GenMmode(timestream_task.TimestreamTask):
 
             mpiutil.barrier()
 
-            # accumulate mmode from all processes to rank0 by Reduce
+            # accumulate mmode from all processes by AllReduce
             if mpiutil.size > 1: # more than one processes
-                if mpiutil.rank0:
-                    # use IN_PLACE to reuse the mmode and N array
-                    mpiutil.world.Reduce(mpiutil.IN_PLACE, mmodeqi, op=mpiutil.SUM, root=0)
-                    mpiutil.world.Reduce(mpiutil.IN_PLACE, Nqi, op=mpiutil.SUM, root=0)
-                else:
-                    mpiutil.world.Reduce(mmodeqi, mmodeqi, op=mpiutil.SUM, root=0)
-                    mpiutil.world.Reduce(Nqi, Nqi, op=mpiutil.SUM, root=0)
+                # use IN_PLACE to reuse the mmode and N array
+                mpiutil.world.Allreduce(mpiutil.IN_PLACE, mmodeqi, op=mpiutil.SUM)
+                mpiutil.world.Allreduce(mpiutil.IN_PLACE, Nqi, op=mpiutil.SUM)
 
             # reshape mmode toseparate positive and negative ms
             mmodeqi1 = np.zeros((tel.mmax+1, nfreq, 2), dtype=mmodeqi.dtype)
@@ -232,9 +228,9 @@ class GenMmode(timestream_task.TimestreamTask):
                 mmodeqi1[mi, :, 0] = mmodeqi[tel.mmax+mi]
                 mmodeqi1[mi, :, 1] = mmodeqi[tel.mmax-mi].conj()
 
-            # NOTE: only rank0 has correct mmodeqi1 after accumulation
-            lmmodeqi1 = mpiutil.scatter_array(mmodeqi1, axis=0, root=0, comm=ts.comm)
-            mmode.local_array[:, :, :, qi] = lmmodeqi1
+            # lmmodeqi1 = mpiutil.scatter_array(mmodeqi1, axis=0, root=None, comm=ts.comm)
+            # mmode.local_array[:, :, :, qi] = lmmodeqi1
+            mmode.local_array[:, :, :, qi] = mmodeqi1[mis.local_array]
             N[:, qi] = Nqi
 
         del ts
