@@ -445,7 +445,10 @@ class BasicTod(memh5.MemDiskGroup):
         self.create_dataset(name, shape=dset.shape, dtype=dset.dtype, memmap_path=self._memmap_path)
         for rg in self.rank_groups:
             if self.rank in rg:
-                self[name].local_data[:] = dset[:]
+                # self[name].local_data[:] = dset[:]
+                if np.prod(self[name].local_data.shape) > 0:
+                    # dset.read_direct(self[name].local_data, np.s_[:], np.s_[:])
+                    dset.read_direct(self[name].local_data)
                 # copy attrs of this dset
                 memh5.copyattrs(dset.attrs, self[name].attrs)
             mpiutil.barrier(comm=self.comm)
@@ -496,7 +499,8 @@ class BasicTod(memh5.MemDiskGroup):
                 if self.main_data_dist_axis == 0:
                     for rg in self.rank_groups:
                         if self.rank in rg:
-                            print(f'rank {self.rank} load {name}...', flush=True)
+                            if self._main_data_name_ == name:
+                                print(f'rank {self.rank} load {name}...', flush=True)
                             # load data from all files as a distributed dataset
                             st = 0
                             for fi, start, stop in infiles_map:
@@ -508,7 +512,8 @@ class BasicTod(memh5.MemDiskGroup):
                                 if np.prod(self[name].local_data[tuple(msel)].shape) > 0:
                                     # only read in data if non-empty, may get error otherwise
                                     fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
-                                    self[name].local_data[tuple(msel)] = fh[name][tuple(fsel)]
+                                    # self[name].local_data[tuple(msel)] = fh[name][tuple(fsel)]
+                                    fh[name].read_direct(self[name].local_data, tuple(fsel), tuple(msel))
                         mpiutil.barrier(comm=self.comm)
 
                 else:
@@ -540,7 +545,8 @@ class BasicTod(memh5.MemDiskGroup):
                                 st = et
                                 if np.prod(self[name].local_data[tuple(msel)].shape) > 0:
                                     fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
-                                    self[name].local_data[tuple(msel)] = fh[name][tuple(fsel)]
+                                    # self[name].local_data[tuple(msel)] = fh[name][tuple(fsel)]
+                                    fh[name].read_direct(self[name].local_data, tuple(fsel), tuple(msel))
                         mpiutil.barrier(comm=self.comm)
 
             else:
@@ -554,7 +560,8 @@ class BasicTod(memh5.MemDiskGroup):
                         if self.rank in rg:
                             if np.prod(self[name].local_data.shape) > 0:
                                 fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
-                                self[name].local_data[:] = self.infiles[0][name][tuple(fsel)]
+                                # self[name].local_data[:] = self.infiles[0][name][tuple(fsel)]
+                                self.infiles[0][name].read_direct(self[name].local_data, tuple(fsel), np.s_[:])
                         mpiutil.barrier(comm=self.comm)
 
         else:
@@ -592,7 +599,8 @@ class BasicTod(memh5.MemDiskGroup):
                             st = et
                             if np.prod(self[name][tuple(msel)].shape) > 0:
                                 fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
-                                self[name][tuple(msel)] = fh[name][tuple(fsel)] # not a distributed dataset
+                                # self[name][tuple(msel)] = fh[name][tuple(fsel)] # not a distributed dataset
+                                fh[name].read_direct(self[name].local_data, tuple(fsel), tuple(msel))
                     mpiutil.barrier(comm=self.comm)
 
             else:
@@ -601,7 +609,8 @@ class BasicTod(memh5.MemDiskGroup):
                         # load data from the first file
                         if np.prod(self[name][:].shape) > 0:
                             fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
-                            self[name][:] = self.infiles[0][name][tuple(fsel)] # not a distributed dataset
+                            # self[name][:] = self.infiles[0][name][tuple(fsel)] # not a distributed dataset
+                            self.infiles[0][name].read_direct(self[name].local_data, tuple(fsel), np.s_[:])
                     mpiutil.barrier(comm=self.comm)
 
     def _load_a_time_ordered_dataset(self, name):
@@ -633,7 +642,8 @@ class BasicTod(memh5.MemDiskGroup):
                         if np.prod(self[name].local_data[tuple(msel)].shape) > 0:
                             # only read in data if non-empty, may get error otherwise
                             fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
-                            self[name].local_data[tuple(msel)] = fh[name][tuple(fsel)]
+                            # self[name].local_data[tuple(msel)] = fh[name][tuple(fsel)]
+                            fh[name].read_direct(self[name].local_data, tuple(fsel), tuple(msel))
                 mpiutil.barrier(comm=self.comm)
         else:
             # load data as a common dataset
@@ -666,7 +676,8 @@ class BasicTod(memh5.MemDiskGroup):
                         st = et
                         if np.prod(self[name][tuple(msel)].shape) > 0:
                             fsel = [  ( _to_slice_obj(s) if isinstance(s, list) else s ) for s in fsel ]
-                            self[name][tuple(msel)] = fh[name][tuple(fsel)] # not a distributed dataset
+                            # self[name][tuple(msel)] = fh[name][tuple(fsel)] # not a distributed dataset
+                            fh[name].read_direct(self[name].local_data, tuple(fsel), tuple(msel))
                 mpiutil.barrier(comm=self.comm)
 
     def _load_a_dataset(self, name):
