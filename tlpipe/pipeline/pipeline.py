@@ -365,6 +365,7 @@ import warnings
 import shutil
 import itertools
 import datetime
+import gc
 
 from caput import mpiutil
 from tlpipe.kiyopy import parse_ini
@@ -591,6 +592,8 @@ class Manager(object):
                     sys.stdout.flush()
                     sys.stderr.flush()
 
+                # garbage collect to release memory
+                gc.collect()
 
     def _setup_task(self, task):
         """Set up a pipeline task from the spec given in the tasks list."""
