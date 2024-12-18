@@ -334,27 +334,36 @@ class Timestream(object):
         else:
             alm0 = None
 
-        def _make_alm(mi):
+        def _make_alm(mfi):
 
-            print("Making %i" % mi, flush=True)
+            print(f"Making {mfi}", flush=True)
 
-            mmode = self.mmode(mi)
-            if dirty:
-                sphmode = self.beamtransfer.project_vector_backward_dirty(mi, mmode, nbin, normalize, threshold)
+            if (not dirty) and method == 'tk':
+                mi, fi = mfi
+                mmode0 = alm0[fi, :, :, mi] if alm0 is not None else None
+                sphmode = self.beamtransfer.project_vector_telescope_to_sky_tk(mfi, self, nbin, eps=eps, correct_order=correct_order, mmode0=mmode0)
             else:
-                if method == 'svd':
-                    sphmode = self.beamtransfer.project_vector_telescope_to_sky(mi, mmode, nbin)
-                elif method == 'tk':
-                    # sphmode = self.beamtransfer.project_vector_telescope_to_sky_tk(mi, mmode, nbin, eps=eps)
-                    mmode0 = alm0[:, :, :, mi] if alm0 is not None else None
-                    sphmode = self.beamtransfer.project_vector_telescope_to_sky_tk(mi, self, nbin, eps=eps, correct_order=correct_order, mmode0=mmode0)
-                else:
-                    raise ValueError('Unknown map-making method %s' % method)
+                raise NotImplementedError('Not implemented yet')
+
+            # mmode = self.mmode(mi)
+            # if dirty:
+            #     sphmode = self.beamtransfer.project_vector_backward_dirty(mi, mmode, nbin, normalize, threshold)
+            # else:
+            #     if method == 'svd':
+            #         sphmode = self.beamtransfer.project_vector_telescope_to_sky(mi, mmode, nbin)
+            #     elif method == 'tk':
+            #         # sphmode = self.beamtransfer.project_vector_telescope_to_sky_tk(mi, mmode, nbin, eps=eps)
+            #         mmode0 = alm0[:, :, :, mi] if alm0 is not None else None
+            #         sphmode = self.beamtransfer.project_vector_telescope_to_sky_tk(mi, self, nbin, eps=eps, correct_order=correct_order, mmode0=mmode0)
+            #     else:
+            #         raise ValueError('Unknown map-making method %s' % method)
 
             return sphmode
 
         if not (method == 'tk' and tk_deconv and map_to_deconv is not None):
-            alm_list = mpiutil.parallel_map(_make_alm, list(range(self.telescope.mmax + 1)), return_numpy_array=True, root=0, method='rand')
+            # alm_list = mpiutil.parallel_map(_make_alm, list(range(self.telescope.mmax + 1)), return_numpy_array=True, root=0, method='rand')
+            mflist1, mflist2 = itertools.tee(itertools.product(range(self.telescope.mmax + 1), range(nfreq)))
+            alm_list = mpiutil.parallel_map(_make_alm, mflist1, return_numpy_array=True, root=0, method='rand')
 
         if mpiutil.rank0:
 
@@ -362,11 +371,11 @@ class Timestream(object):
 
             if not (method == 'tk' and tk_deconv and map_to_deconv is not None):
                 # mlist = range(1 if self.no_m_zero else 0, self.telescope.mmax + 1)
-                mlist = list(range(self.telescope.mmax + 1))
+                # mlist = list(range(self.telescope.mmax + 1))
 
-                for mi in mlist:
+                for ii, (mi, fi) in enumerate(mflist2):
 
-                    alm[..., mi] = alm_list[mi]
+                    alm[fi, :, :, mi] = alm_list[ii]
 
                 if save_alm:
                     alm1 = alm.copy()

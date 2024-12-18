@@ -1186,7 +1186,7 @@ class BeamTransfer(object):
 
     project_vector_backward = project_vector_telescope_to_sky
 
-    def project_vector_telescope_to_sky_tk(self, mi, ts, nbin=1, eps=0.01, correct_order=0, mmode0=None):
+    def project_vector_telescope_to_sky_tk(self, mfi, ts, nbin=1, eps=0.01, correct_order=0, mmode0=None):
         """Invert a vector from the telescope space onto the sky using
         the Tikhonov regularization method. This is the map-making process.
 
@@ -1203,48 +1203,52 @@ class BeamTransfer(object):
             Sky vector to return.
         """
 
+        mi, fi = mfi
+
         nfreq = self.nfreq
         nl = self.telescope.lmax + 1 - mi # do not include l < m
         npl = self.telescope.num_pol_sky * nl
 
         # if prior mmode not None
         if mmode0 is not None:
-            mmode0 = mmode0[:, :, mi:].reshape((nfreq, npl))
+            # mmode0 = mmode0[:, :, mi:].reshape((nfreq, npl))
+            mmode0 = mmode0[:, mi:].reshape((npl,))
 
-        vecb = np.zeros((nfreq, self.telescope.num_pol_sky, self.telescope.lmax + 1), dtype=np.complex128)
-
-        for fi in range(nfreq):
-            sfi = max(0, fi - nbin//2)
-            efi = min(fi - nbin//2 + nbin, nfreq)
-            BB = functools.reduce(operator.add, ( self.BB_m(mi, fi_) for fi_ in range(sfi, efi) )) # B^* B
-            Bv = functools.reduce(operator.add, ( ts.Bv_m(mi, fi_) for fi_ in range(sfi, efi) )) # B^* v
-            BB = BB[mi:, mi:]
-            Bv = Bv[mi:]
+        # vecb = np.zeros((nfreq, self.telescope.num_pol_sky, self.telescope.lmax + 1), dtype=np.complex128)
+        vecb = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1), dtype=np.complex128)
 
 
-            BBd = np.diag(BB).real
-            if np.isfinite(BBd.max()) and BBd.max() > 0.0:
-                np.fill_diagonal(BB, eps * np.cos(BBd / BBd.max()) + BBd) # (B^* B + eps cos(BBd / max(BBd)))
-            else:
-                np.fill_diagonal(BB, eps + BBd) # (B^* B + eps I)
+        sfi = max(0, fi - nbin//2)
+        efi = min(fi - nbin//2 + nbin, nfreq)
+        BB = functools.reduce(operator.add, ( self.BB_m(mi, fi_) for fi_ in range(sfi, efi) )) # B^* B
+        Bv = functools.reduce(operator.add, ( ts.Bv_m(mi, fi_) for fi_ in range(sfi, efi) )) # B^* v
+        BB = BB[mi:, mi:]
+        Bv = Bv[mi:]
 
-            try:
-                BBi = la.pinv(BB) # (B^* B + eps I)^-1
-            except np.linalg.linalg.LinAlgError:
-                print('Compute pinv of BB failed for mi = %d, fi = %d' % (mi, fi), flush=True)
-                continue
 
-            if mmode0 is not None:
-                vecb[fi, :, mi:] = np.dot(BBi, Bv + eps * mmode0[fi]).reshape(self.telescope.num_pol_sky, nl)
-            else:
-                ahat = np.dot(BBi, Bv)
-                vecb[fi, :, mi:] = ahat.reshape(self.telescope.num_pol_sky, nl) # the zero-th order, no correction
-                if correct_order > 0:
-                    Delta = eps * BBi # eps (B^* B + eps I)^-1
-                    Da = ahat # to save the previous order Delta**(i-1) * ahat
-                    for i in range(1, correct_order+1):
-                        Da = np.dot(Delta, Da)
-                        vecb[fi, :, mi:] += Da.reshape(self.telescope.num_pol_sky, nl) # high order correction
+        BBd = np.diag(BB).real
+        if np.isfinite(BBd.max()) and BBd.max() > 0.0:
+            np.fill_diagonal(BB, eps * np.cos(BBd / BBd.max()) + BBd) # (B^* B + eps cos(BBd / max(BBd)))
+        else:
+            np.fill_diagonal(BB, eps + BBd) # (B^* B + eps I)
+
+        try:
+            BBi = la.pinv(BB) # (B^* B + eps I)^-1
+        except np.linalg.linalg.LinAlgError:
+            print('Compute pinv of BB failed for mi = %d, fi = %d' % (mi, fi), flush=True)
+            return vecb
+
+        if mmode0 is not None:
+            vecb[:, mi:] = np.dot(BBi, Bv + eps * mmode0).reshape(self.telescope.num_pol_sky, nl)
+        else:
+            ahat = np.dot(BBi, Bv)
+            vecb[:, mi:] = ahat.reshape(self.telescope.num_pol_sky, nl) # the zero-th order, no correction
+            if correct_order > 0:
+                Delta = eps * BBi # eps (B^* B + eps I)^-1
+                Da = ahat # to save the previous order Delta**(i-1) * ahat
+                for i in range(1, correct_order+1):
+                    Da = np.dot(Delta, Da)
+                    vecb[:, mi:] += Da.reshape(self.telescope.num_pol_sky, nl) # high order correction
 
         return vecb
 
