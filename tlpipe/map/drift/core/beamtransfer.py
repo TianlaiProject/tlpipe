@@ -246,8 +246,16 @@ class BeamTransfer(object):
         return self._mdir(mi) + '/beam.hdf5'
 
     def _BBfile(self, mi):
-        # Pattern to form the `m` ordered file.
+        # Pattern to form the `m` ordered B.T.conj() @ B file.
         return self._mdir(mi) + '/BB.hdf5'
+
+    def _BBxfile(self):
+        # Pattern to form the (B.T.conj() @ B) * (B.T.conj() @ B).conj() file
+        return  self.directory + "/beam_m/" + 'BBx.hdf5'
+
+    def _Bvxfile(self):
+        # Pattern to form the (B.T.conj() @ v) * (B.T.conj() @ v).conj() file
+        return  self.directory + "/beam_m/" + 'Bvx.hdf5'
 
     def _fdir(self, fi):
         # Pattern to form the `freq` ordered file.
@@ -360,6 +368,48 @@ class BeamTransfer(object):
             if fi is not None:
                 return f['BB_m'][fi]
             return f['BB_m'][:]
+
+    def BBx(self, fi1=None, fi2=None):
+        """ Fetch (B.T.conj() @ B)[fi1] * (B.T.conj() @ B).conj()[fi2].
+
+        Parameters
+        ----------
+        fi1, fi2 : integer
+            frequency block to fetch. fi=None (default) returns all.
+
+        Returns
+        -------
+        BBx : np.ndarray (nfreq, nfreq, npol_sky*(lmax+1), npol_sky*(lmax+1))
+        """
+        with h5py.File(self._BBxfile(), 'r') as f:
+            if fi1 is not None and fi2 is not None:
+                return f['BBx'][fi1, fi2]
+            elif fi1 is not None:
+                return f['BBx'][fi1]
+            elif fi2 is not None:
+                return f['BBx'][:, fi2]
+            return f['BBx'][:]
+
+    def Bvx(self, fi1=None, fi2=None):
+        """ Fetch (B.T.conj() @ v)[fi1] * (B.T.conj() @ v).conj()[fi2].
+
+        Parameters
+        ----------
+        fi1, fi2 : integer
+            frequency block to fetch. fi=None (default) returns all.
+
+        Returns
+        -------
+        Bvx : np.ndarray (nfreq, nfreq, npol_sky*(lmax+1))
+        """
+        with h5py.File(self._Bvxfile(), 'r') as f:
+            if fi1 is not None and fi2 is not None:
+                return f['Bvx'][fi1, fi2]
+            elif fi1 is not None:
+                return f['Bvx'][fi1]
+            elif fi2 is not None:
+                return f['Bvx'][:, fi2]
+            return f['Bvx'][:]
 
     #===================================================
 
@@ -870,45 +920,39 @@ class BeamTransfer(object):
         if mpiutil.rank0:
             print('Generating BB files...', flush=True)
 
-        for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
+        nm = self.telescope.mmax + 1 # numbe of ms
+        mis = mpiutil.mpirange(nm, method='rand') # a list mi's for this rank
 
-            if os.path.exists(self._BBfile(mi)) and not regen:
-                print("m index %i. File: %s exists. Skipping..." % (mi, self._BBfile(mi)), flush=True)
-                continue
-            # else:
-            #     print('m index %i. Creating BB file: %s' % (mi, self._BBfile(mi)), flush=True)
+        gs = 16 # group size
+        num_nodes = len(mpiutil.shared_rank_groups()) # number of unique nodes
+        if num_nodes < gs:
+            all_ranks = np.random.permutation(mpiutil.size) # a list of permuted rank no.
+            all_ranks = mpiutil.bcast(all_ranks, root=0) # make all ranks have the same list
 
-            # # Open m beams for reading.
-            # with h5py.File(self._mfile(mi), 'r') as f1, h5py.File(self._BBfile(mi), 'w') as f2:
-            #     nfreq, npn, npairs, npol_sky, nl = f1['beam_m'].shape
-            #     BB_shp = (nfreq, npol_sky*nl, npol_sky*nl)
-            #     f2.create_dataset('BB_m', BB_shp, dtype=np.complex128)
-            #     try:
-            #         # ### for test
-            #         # raise np.core._exceptions._ArrayMemoryError(BB_shp, np.complex128)
+            ng, r = mpiutil.size // gs, mpiutil.size % gs
+            rank_groups = [ all_ranks[i*gs:(i+1)*gs] for i in range(ng) ]
+            if r != 0:
+                rank_groups.append(all_ranks[ng*gs:])
+        else:
+            rank_groups = mpiutil.not_shared_rank_groups()
 
-            #         beam = f1['beam_m'][:]
-            #         B = beam.reshape(nfreq, npn*npairs, npol_sky*nl)
-            #         BB = np.einsum('...ij,...jk->...ik', B.transpose(0, 2, 1).conj(), B)
-            #         # f2.create_dataset('BB_m', data=BB)
-            #         f2['BB_m'][:] = BB
-            #     except np.core._exceptions._ArrayMemoryError:
-            #         for fi in range(nfreq):
-            #             B = f1['beam_m'][fi].reshape(npn*npairs, npol_sky*nl)
-            #             f2['BB_m'][fi] = B.T.conj() @ B
+        for rg in rank_groups:
+            if mpiutil.rank in rg:
+                for mi in mis:
+                    if os.path.exists(self._BBfile(mi)) and not regen:
+                        print("m index %i. File: %s exists. Skipping..." % (mi, self._BBfile(mi)), flush=True)
+                        continue
+                    # else:
+                    #     print('m index %i. Creating BB file: %s' % (mi, self._BBfile(mi)), flush=True)
 
-            # slower but more memory effective way
-            with h5py.File(self._mfile(mi), 'r') as f1:
-                nfreq, npn, npairs, npol_sky, nl = f1['beam_m'].shape
-            BB_shp = (nfreq, npol_sky*nl, npol_sky*nl)
-            with h5py.File(self._BBfile(mi), 'w') as f2:
-                f2.create_dataset('BB_m', BB_shp, dtype=np.complex128)
-            for fi in range(nfreq):
-                B = self.beam_m(mi, fi).reshape(npn*npairs, npol_sky*nl)
-                with h5py.File(self._BBfile(mi), 'r+') as f2:
-                    f2['BB_m'][fi] = B.T.conj() @ B
+                    # Open m beams for reading.
+                    with h5py.File(self._mfile(mi), 'r') as f1, h5py.File(self._BBfile(mi), 'w') as f2:
+                        nfreq, npn, npairs, npol_sky, nl = f1['beam_m'].shape
+                        B = f1['beam_m'][:].reshape(nfreq, npn*npairs, npol_sky*nl)
+                        BB = np.einsum('...ij,...ik->...jk', B.conj(), B)
+                        f2.create_dataset('BB_m', data=BB)
 
-        mpiutil.barrier()
+            mpiutil.barrier()
 
         if mpiutil.rank0:
             print('Generating BB files Done', flush=True)
@@ -1326,6 +1370,100 @@ class BeamTransfer(object):
         nl = self.telescope.lmax + 1
         npl = self.telescope.num_pol_sky * nl
 
+        nbin = min(nbin, nfreq)
+
+        if mpiutil.rank0:
+            # create BBx file first filled with 0
+            with h5py.File(self._BBxfile(), 'w') as f:
+                f.create_dataset('BBx', shape=(nfreq, nfreq, npl, npl), dtype=np.complex128, fillvalue=0.0+0.0J)
+            # create Bvx file first filled with 0
+            with h5py.File(self._Bvxfile(), 'w') as f:
+                f.create_dataset('Bvx', shape=(nfreq, nfreq, npl), dtype=np.complex128, fillvalue=0.0+0.0J)
+
+        mpiutil.barrier()
+
+        mis = list(range(nm))
+        rm = nm % mpiutil.size
+        if rm != 0:
+            mis += [-1] * (mpiutil.size - rm)
+        mis = mpiutil.mpilist(mis, method='rand') # a list mi's for this rank, each rank has same length
+
+        gs = 16 # group size
+        num_nodes = len(mpiutil.shared_rank_groups()) # number of unique nodes
+        if num_nodes < gs:
+            all_ranks = np.random.permutation(mpiutil.size) # a list of permuted rank no.
+            all_ranks = mpiutil.bcast(all_ranks, root=0) # make all ranks have the same list
+
+            ng, r = mpiutil.size // gs, mpiutil.size % gs
+            rank_groups = [ all_ranks[i*gs:(i+1)*gs] for i in range(ng) ]
+            if r != 0:
+                rank_groups.append(all_ranks[ng*gs:])
+        else:
+            rank_groups = mpiutil.not_shared_rank_groups()
+        comm = mpiutil.world
+        if comm is None:
+            comms = [ mpiutil ]
+        else:
+            comms = [ comm.Create(comm.Get_group().Incl(rg)) for rg in rank_groups ]
+
+        # compute BBx and Bvx
+        for ci, rg in enumerate(rank_groups):
+            if mpiutil.rank in rg:
+                for mi in mis:
+                    if mi == -1: # invalid mi
+                        for fi in range(nfreq + 1): # + 1 to accout for the write of Bvx
+                            for rk in rg:
+                                if mpiutil.rank == rk:
+                                    pass
+                                comms[ci].barrier() # inner barrier
+                    else:
+                        print(f'Computing {mi} ...')
+                        BB1 = self.BB_m(mi) # (nfreq, nl, nl)
+                        Bv1 = ts.Bv_m(mi) # (nfreq, nl)
+                        if nbin > 1:
+                            BB = np.empty_like(BB1)
+                            Bv = np.empty_like(Bv1)
+                            for fi in range(nfreq):
+                                sfi = max(0, fi - nbin//2)
+                                efi = min(fi - nbin//2 + nbin, nfreq)
+                                BB[fi] = BB1[sfi:efi].mean(axis=0)
+                                Bv[fi] = Bv1[sfi:efi].mean(axis=0)
+                            del BB1
+                            del Bv1
+                        else:
+                            BB = BB1
+                            Bv = Bv1
+                        # compute BBx, iterate along freq to reduce memory consumption
+                        for fi in range(nfreq):
+                            BBxfi = BB[fi:fi+1, np.newaxis, :, :] * BB.conj() # (1, nfreq, nl, nl)
+                            for rk in rg:
+                                if mpiutil.rank == rk: # only let one process write
+                                    # write BBxfi to file
+                                    with h5py.File(self._BBxfile(), 'r+') as f:
+                                        f['BBx'][fi:fi+1] += BBxfi
+                                        f.flush()
+                                comms[ci].barrier() # inner barrier
+
+                        del BB
+                        del BBxfi
+
+                        # compute Bvx, Bvx is not very large
+                        Bvx = Bv[:, np.newaxis, :] * Bv.conj() # (nfreq, nfreq, nl)
+                        for rk in rg:
+                            if mpiutil.rank == rk: # only let one process write
+                                # write Bvx to file
+                                with h5py.File(self._Bvxfile(), 'r+') as f:
+                                    f['Bvx'][:] += Bvx
+                                    f.flush()
+                            comms[ci].barrier() # inner barrier
+
+                        del Bv
+                        del Bvx
+
+            mpiutil.barrier() # outer barrier
+
+
+        # compute cl
         fi1s = []
         fi2s = []
         for fi1 in range(nfreq):
@@ -1342,37 +1480,8 @@ class BeamTransfer(object):
             if mpiutil.rank0:
                 print(f'{li} of {len(lfi1s)}...', flush=True)
 
-            sfi1 = max(0, fi1 - nbin//2)
-            efi1 = min(fi1 - nbin//2 + nbin, nfreq)
-            sfi2 = max(0, fi2 - nbin//2)
-            efi2 = min(fi2 - nbin//2 + nbin, nfreq)
-
-            BB = np.zeros((npl, npl), dtype=np.complex128)
-            Bv = np.zeros(npl, dtype=np.complex128)
-
-            for mi in range(nm):
-                # Bf1 = self.beam_m(mi, fi1).reshape((self.ntel, npl))
-                # v1 = ts.mmode(mi, fi1).reshape((self.ntel,))
-                # BBf1 = np.dot(Bf1.T.conj(), Bf1) # B^* B
-                # Bvf1 = np.dot(Bf1.T.conj(), v1) # B^* v
-
-                # Bf2 = self.beam_m(mi, fi2).reshape((self.ntel, npl))
-                # v2 = ts.mmode(mi, fi2).reshape((self.ntel,))
-                # BBf2 = np.dot(Bf2.T.conj(), Bf2) # B^* B
-                # Bvf2 = np.dot(Bf2.T.conj(), v2) # B^* v
-
-                # BB += BBf1 * np.conj(BBf2)
-                # Bv += Bvf1 * np.conj(Bvf2)
-
-                BBfi1 = functools.reduce(operator.add, ( self.BB_m(mi, fi) for fi in range(sfi1, efi1) )) # B^* B
-                BBfi2 = functools.reduce(operator.add, ( self.BB_m(mi, fi) for fi in range(sfi2, efi2) )) # B^* B
-                Bvfi1 = functools.reduce(operator.add, ( ts.Bv_m(mi, fi) for fi in range(sfi1, efi1) )) # B^* v
-                Bvfi2 = functools.reduce(operator.add, ( ts.Bv_m(mi, fi) for fi in range(sfi2, efi2) )) # B^* v
-
-                # BB += self.BB_m(mi, fi1) * np.conj(self.BB_m(mi, fi2))
-                # Bv += ts.Bv_m(mi, fi1) * np.conj(ts.Bv_m(mi, fi2))
-                BB += BBfi1 * np.conj(BBfi2)
-                Bv += Bvfi1 * np.conj(Bvfi2)
+            BB = self.BBx(fi1, fi2)
+            Bv = self.Bvx(fi1, fi2)
 
             # # save BB to file for analysis
             # with h5py.File('BB.hdf5', 'w') as f:
