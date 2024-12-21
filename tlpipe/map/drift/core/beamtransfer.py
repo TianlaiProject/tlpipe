@@ -927,7 +927,8 @@ class BeamTransfer(object):
         num_nodes = len(mpiutil.shared_rank_groups()) # number of unique nodes
         if num_nodes < gs:
             all_ranks = np.random.permutation(mpiutil.size) # a list of permuted rank no.
-            all_ranks = mpiutil.bcast(all_ranks, root=0) # make all ranks have the same list
+            if mpiutil.size > 1:
+                mpiutil.world.Bcast(all_ranks, root=0) # make all ranks have the same list
 
             ng, r = mpiutil.size // gs, mpiutil.size % gs
             rank_groups = [ all_ranks[i*gs:(i+1)*gs] for i in range(ng) ]
@@ -1392,7 +1393,8 @@ class BeamTransfer(object):
         num_nodes = len(mpiutil.shared_rank_groups()) # number of unique nodes
         if num_nodes < gs:
             all_ranks = np.random.permutation(mpiutil.size) # a list of permuted rank no.
-            all_ranks = mpiutil.bcast(all_ranks, root=0) # make all ranks have the same list
+            if mpiutil.size > 1:
+                mpiutil.world.Bcast(all_ranks, root=0) # make all ranks have the same list
 
             ng, r = mpiutil.size // gs, mpiutil.size % gs
             rank_groups = [ all_ranks[i*gs:(i+1)*gs] for i in range(ng) ]
@@ -1410,12 +1412,15 @@ class BeamTransfer(object):
         for ci, rg in enumerate(rank_groups):
             if mpiutil.rank in rg:
                 for mi in mis:
-                    this_mis = mpiutil.gather_list([mi])
+                    if comms[ci] is not None and comms[ci].size > 1:
+                        this_mis = mpiutil.gather_list([mi], comm=comms[ci])
+                    else:
+                        this_mis = [mi]
                     if set(this_mis) == {-1}:
                         # all mi are -1, no need to compute
                         continue
                     if mi != -1:
-                        print(f'Computing {mi} ...')
+                        print(f'Computing {mi} ...', flush=True)
                         BB1 = self.BB_m(mi) # (nfreq, nl, nl)
                         Bv1 = ts.Bv_m(mi) # (nfreq, nl)
                         if nbin > 1:
