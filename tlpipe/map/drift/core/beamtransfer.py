@@ -21,6 +21,7 @@ import warnings
 import pickle
 import operator
 import functools
+import gc
 
 import numpy as np
 import scipy.linalg as la
@@ -783,6 +784,7 @@ class BeamTransfer(object):
                 dset[(b_ind[0]):(b_ind[-1]+1), ..., :(self.telescope.mmax+1)] = tarray[..., :(self.telescope.mmax+1)]
                 dset[(b_ind[0]):(b_ind[-1]+1), ..., (-self.telescope.mmax):]  = tarray[..., (-self.telescope.mmax):]
                 del tarray
+                gc.collect()
 
             f.close()
 
@@ -877,6 +879,7 @@ class BeamTransfer(object):
                 fb_array[:, 0, ..., 0] = tarray[..., 0]
 
                 del tarray
+                gc.collect()
 
             if mpiutil.rank0:
                 print("Transposing and writing chunk.", flush=True)
@@ -885,6 +888,7 @@ class BeamTransfer(object):
             m_array = mpiutil.transpose_blocks(fb_array, (fbnum, 2, self.telescope.num_pol_sky, self.telescope.lmax + 1, self.telescope.mmax + 1))
 
             del fb_array
+            gc.collect()
 
             # Write out the current set of chunks into the m-files.
             # for lmi, mi in enumerate(range(sm, em)):
@@ -900,6 +904,7 @@ class BeamTransfer(object):
                         mfile['beam_m'][fi, :, bi] = m_array[fbl, ..., lmi]
 
             del m_array
+            gc.collect()
 
         mpiutil.barrier()
 
@@ -1148,6 +1153,7 @@ class BeamTransfer(object):
         # spherical transform the map to alm
         alm = hputil.sphtrans_sky(ps, lmax=tel.lmax)
         del ps
+        gc.collect()
 
         # compute a_psf
         a_psf = np.zeros((tel.nfreq, 1, tel.lmax+1, tel.lmax+1), dtype=np.complex128)
@@ -1160,6 +1166,7 @@ class BeamTransfer(object):
 
         del alm
         del beam
+        gc.collect()
 
         if no_m_zero:
             a_psf[:, 0] = 0
@@ -1433,6 +1440,7 @@ class BeamTransfer(object):
                                 Bv[fi] = Bv1[sfi:efi].mean(axis=0)
                             del BB1
                             del Bv1
+                            gc.collect()
                         else:
                             BB = BB1
                             Bv = Bv1
@@ -1454,9 +1462,17 @@ class BeamTransfer(object):
                                 f['BBx'][fi:fi+1] += BBxfi
                                 f.flush()
 
+                        # make sync here
+                        if comms[ci] is not None and comms[ci].size > 1:
+                            comms[ci].barrier()
+
+                        del BBxfi
+                        gc.collect()
+
                     if mi != -1:
                         del BB
-                    del BBxfi
+                    # del BBxfi
+                    gc.collect()
 
                     # compute Bvx, Bvx is not very large
                     if mi != -1:
@@ -1475,9 +1491,14 @@ class BeamTransfer(object):
                             f['Bvx'][:] += Bvx
                             f.flush()
 
+                    # make sync here, not necessarily need here
+                    if comms[ci] is not None and comms[ci].size > 1:
+                        comms[ci].barrier()
+
                     if mi!= -1:
                         del Bv
                     del Bvx
+                    gc.collect()
 
             mpiutil.barrier() # outer barrier
 
