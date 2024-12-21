@@ -1402,7 +1402,7 @@ class BeamTransfer(object):
             rank_groups = mpiutil.not_shared_rank_groups()
         comm = mpiutil.world
         if comm is None:
-            comms = [ mpiutil ]
+            comms = [ None ]
         else:
             comms = [ comm.Create(comm.Get_group().Incl(rg)) for rg in rank_groups ]
 
@@ -1410,13 +1410,7 @@ class BeamTransfer(object):
         for ci, rg in enumerate(rank_groups):
             if mpiutil.rank in rg:
                 for mi in mis:
-                    if mi == -1: # invalid mi
-                        for fi in range(nfreq + 1): # + 1 to accout for the write of Bvx
-                            for rk in rg:
-                                if mpiutil.rank == rk:
-                                    pass
-                                comms[ci].barrier() # inner barrier
-                    else:
+                    if mi != -1:
                         print(f'Computing {mi} ...')
                         BB1 = self.BB_m(mi) # (nfreq, nl, nl)
                         Bv1 = ts.Bv_m(mi) # (nfreq, nl)
@@ -1433,32 +1427,48 @@ class BeamTransfer(object):
                         else:
                             BB = BB1
                             Bv = Bv1
-                        # compute BBx, iterate along freq to reduce memory consumption
-                        for fi in range(nfreq):
+                    # compute BBx, iterate along freq to reduce memory consumption
+                    for fi in range(nfreq):
+                        if mi != -1:
                             BBxfi = BB[fi:fi+1, np.newaxis, :, :] * BB.conj() # (1, nfreq, nl, nl)
-                            for rk in rg:
-                                if mpiutil.rank == rk: # only let one process write
-                                    # write BBxfi to file
-                                    with h5py.File(self._BBxfile(), 'r+') as f:
-                                        f['BBx'][fi:fi+1] += BBxfi
-                                        f.flush()
-                                comms[ci].barrier() # inner barrier
+                        else:
+                            BBxfi = np.zeros((1, nfreq, nl, nl), dtype=np.complex128)
+                        # reduce BBxfi to rank0 of comms[ci]
+                        if comms[ci] is not None and comms[ci].size > 1:
+                            if comms[ci].rank == 0:
+                                comms[ci].Reduce(mpiutil.IN_PLACE, BBxfi, root=0, op=mpiutil.SUM)
+                            else:
+                                comms[ci].Reduce(BBxfi, BBxfi, root=0, op=mpiutil.SUM)
+                        # write BBxfi to file
+                        if comms[ci] is None or comms[ci].rank == 0:
+                            with h5py.File(self._BBxfile(), 'r+') as f:
+                                f['BBx'][fi:fi+1] += BBxfi
+                                f.flush()
 
+                    if mi != -1:
                         del BB
-                        del BBxfi
+                    del BBxfi
 
-                        # compute Bvx, Bvx is not very large
+                    # compute Bvx, Bvx is not very large
+                    if mi != -1:
                         Bvx = Bv[:, np.newaxis, :] * Bv.conj() # (nfreq, nfreq, nl)
-                        for rk in rg:
-                            if mpiutil.rank == rk: # only let one process write
-                                # write Bvx to file
-                                with h5py.File(self._Bvxfile(), 'r+') as f:
-                                    f['Bvx'][:] += Bvx
-                                    f.flush()
-                            comms[ci].barrier() # inner barrier
+                    else:
+                        Bvx = np.zeros((nfreq, nfreq, nl), dtype=np.complex128)
+                    # reduce Bvx to rank0 of comms[ci]
+                    if comms[ci] is not None and comms[ci].size > 1:
+                        if comms[ci].rank == 0:
+                            comms[ci].Reduce(mpiutil.IN_PLACE, Bvx, root=0, op=mpiutil.SUM)
+                        else:
+                            comms[ci].Reduce(Bvx, Bvx, root=0, op=mpiutil.SUM)
+                    # write Bvx to file
+                    if comms[ci] is None or comms[ci].rank == 0:
+                        with h5py.File(self._Bvxfile(), 'r+') as f:
+                            f['Bvx'][:] += Bvx
+                            f.flush()
 
+                    if mi!= -1:
                         del Bv
-                        del Bvx
+                    del Bvx
 
             mpiutil.barrier() # outer barrier
 
