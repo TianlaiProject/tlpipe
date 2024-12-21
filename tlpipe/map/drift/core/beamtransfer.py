@@ -1410,6 +1410,10 @@ class BeamTransfer(object):
         for ci, rg in enumerate(rank_groups):
             if mpiutil.rank in rg:
                 for mi in mis:
+                    this_mis = mpiutil.gather_list([mi])
+                    if set(this_mis) == {-1}:
+                        # all mi are -1, no need to compute
+                        continue
                     if mi != -1:
                         print(f'Computing {mi} ...')
                         BB1 = self.BB_m(mi) # (nfreq, nl, nl)
