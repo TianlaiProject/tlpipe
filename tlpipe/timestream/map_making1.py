@@ -95,7 +95,7 @@ class MapMaking(timestream_task.TimestreamTask):
             ts_name = self.params['ts_name']
             if mpiutil.rank0:
                 print('Try to load tstream from %s/%s' % (ts_dir, ts_name))
-            rank_groups = mpiutil.not_shared_rank_groups()
+            rank_groups = mpiutil.shared_rank_groups()
             for ci, rg in enumerate(rank_groups):
                 if mpiutil.rank in rg:
                     tstream = timestream.Timestream.load(ts_dir, ts_name)

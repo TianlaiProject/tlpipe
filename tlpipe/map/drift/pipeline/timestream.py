@@ -491,7 +491,7 @@ class Timestream(object):
 
         mpiutil.barrier()
 
-    def solve_cl(self, clname, nbin=1, eps=0.01, prior_cl_file=None):
+    def solve_cl(self, clname, nbin=1, eps=0.01, prior_cl_file=None, group_size=16, merge_number=1):
 
         nfreq = self.telescope.nfreq
 
@@ -515,7 +515,7 @@ class Timestream(object):
 
         # solve cl with all ms
         # vs = [ self.mmode(mi) for mi in range(self.telescope.mmax+1) ]
-        cl_tk, cl_diag, cl_prior = self.beamtransfer.solve_cl_allm_tk(self, nbin=nbin, eps=eps)
+        cl_tk, cl_diag, cl_prior = self.beamtransfer.solve_cl_allm_tk(self, nbin=nbin, eps=eps, group_size=group_size, merge_number=merge_number)
 
         if mpiutil.rank0:
 

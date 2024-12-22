@@ -1359,7 +1359,7 @@ class BeamTransfer(object):
 
         return cl
 
-    def solve_cl_allm_tk(self, ts, nbin=1, eps=0.01):
+    def solve_cl_allm_tk(self, ts, nbin=1, eps=0.01, group_size=16, merge_number=1):
         """Solve C_l(\nu, \nu') using the Tikhonov regularization method.
 
         Parameters
@@ -1396,7 +1396,7 @@ class BeamTransfer(object):
             mis += [-1] * (mpiutil.size - rm)
         mis = mpiutil.mpilist(mis, method='rand') # a list mi's for this rank, each rank has same length
 
-        gs = 16 # group size
+        gs = group_size # group size
         num_nodes = len(mpiutil.shared_rank_groups()) # number of unique nodes
         if num_nodes < gs:
             all_ranks = np.random.permutation(mpiutil.size) # a list of permuted rank no.
@@ -1409,6 +1409,7 @@ class BeamTransfer(object):
                 rank_groups.append(all_ranks[ng*gs:])
         else:
             rank_groups = mpiutil.not_shared_rank_groups()
+        rank_groups = mpiutil.merge_rank_groups(rank_groups, merge_number=merge_number)
         comm = mpiutil.world
         if comm is None:
             comms = [ None ]
@@ -1458,6 +1459,7 @@ class BeamTransfer(object):
                                 comms[ci].Reduce(BBxfi, BBxfi, root=0, op=mpiutil.SUM)
                         # write BBxfi to file
                         if comms[ci] is None or comms[ci].rank == 0:
+                            print(f'rank {mpiutil.rank} writes data with fi = {fi} to file...', flush=True)
                             with h5py.File(self._BBxfile(), 'r+') as f:
                                 f['BBx'][fi:fi+1] += BBxfi
                                 f.flush()
