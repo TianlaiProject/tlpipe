@@ -1383,10 +1383,10 @@ class BeamTransfer(object):
         if mpiutil.rank0:
             # create BBx file first filled with 0
             with h5py.File(self._BBxfile(), 'w') as f:
-                f.create_dataset('BBx', shape=(nfreq, nfreq, npl, npl), dtype=np.complex128, fillvalue=0.0+0.0J)
+                f.create_dataset('BBx', shape=(nfreq, nfreq, npl, npl), dtype=np.complex128, chunks=(1, 1, npl, npl), fillvalue=0.0+0.0J)
             # create Bvx file first filled with 0
             with h5py.File(self._Bvxfile(), 'w') as f:
-                f.create_dataset('Bvx', shape=(nfreq, nfreq, npl), dtype=np.complex128, fillvalue=0.0+0.0J)
+                f.create_dataset('Bvx', shape=(nfreq, nfreq, npl), dtype=np.complex128, chunks=(1, nfreq, npl), fillvalue=0.0+0.0J)
 
         mpiutil.barrier()
 
@@ -1427,7 +1427,7 @@ class BeamTransfer(object):
                         # all mi are -1, no need to compute
                         continue
                     if mi != -1:
-                        print(f'Computing {mi} ...', flush=True)
+                        print(f'Computing {mi} on {mpiutil.hostname} ...', flush=True)
                         BB1 = self.BB_m(mi) # (nfreq, nl, nl)
                         Bv1 = ts.Bv_m(mi) # (nfreq, nl)
                         if nbin > 1:
