@@ -825,7 +825,7 @@ class TimestreamCommon(container.BasicTod):
         if num != 0 and num != 1:
             raise RuntimeError('Not all feed_ordered_datasets have an aligned feed axis')
 
-    def to_files(self, outfiles, exclude=[], check_status=True, write_hints=True, via_memmap=False, libver='earliest', chunk_vis=True, chunk_shape=None, chunk_size=64):
+    def to_files(self, outfiles, exclude=[], check_status=True, write_hints=True, via_memmap=False, libver='earliest', chunk_vis=True):
         """Save the data hold in this container to files.
 
         Parameters
@@ -850,12 +850,6 @@ class TimestreamCommon(container.BasicTod):
         chunk_vis : bool, optional
             If True, dataset 'vis' and 'vis_mask' in the saved files will be
             chunked. Default True.
-        chunk_shape : None or tuple
-            The chunk shape to use for dataset 'vis' and 'vis_mask'. If None,
-            the chunk shape will be determined by `chunk_size`. Default None.
-        chunk_size : integer
-            If `chunk_shape` is None, then dataset 'vis' and 'vis_mask' will be
-            chunked to be approximately this size in unit KB.
 
         """
 
@@ -872,24 +866,8 @@ class TimestreamCommon(container.BasicTod):
 
         # get the appropriate chunk for vis
         if chunk_vis:
-            if not chunk_shape is None:
-                chunk_shape = tuple(chunk_shape)
-                assert len(chunk_shape) == len(self.vis.shape), 'Invalid chunk_shape %s for vis shape %s' % (chunk_shape, self.vis.shape)
-            else:
-                if len(self.vis.shape) == 3:
-                    num_freq = self.vis.shape[1]
-                    num_pol = 1
-                elif len(self.vis.shape) == 4:
-                    num_freq = self.vis.shape[1]
-                    num_pol = self.vis.shape[2]
-                else:
-                    raise RuntimeError('Unknown shape %s of vis' % self.vis.shape)
-
-                tc = chunk_size * 2**10 / (self.local_vis.itemsize * num_freq * num_pol)
-                if len(self.vis.shape) == 3:
-                    chunk_shape = (tc, num_freq, 1)
-                else:
-                    chunk_shape = (tc, num_freq, num_pol, 1)
+             # chunk along time axis to get best efficiency for time ordered read and write
+            chunk_shape = (1,) + self.vis.shape[1:]
 
         # split output files among procs
         for fi, outfile in mpiutil.mpilist(list(enumerate(outfiles)), method='rand', comm=self.comm):

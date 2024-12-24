@@ -54,9 +54,7 @@ class TimestreamTask(OneAndOne):
                     'check_status': True,
                     'write_hints': True,
                     'libver': 'earliest', # earliest to have best backward compatibility
-                    'chunk_vis': False, # chunk vis and vis_mask in saved files
-                    'chunk_shape': None,
-                    'chunk_size': 64, # KB
+                    'chunk_vis': True, # chunk vis and vis_mask in saved files
                     'output_failed_continue': False, # continue to run if output to files failed
                     'time_select': (0, None),
                     'freq_select': (0, None),
@@ -225,8 +223,6 @@ class TimestreamTask(OneAndOne):
         write_hints = self.params['write_hints']
         libver = self.params['libver']
         chunk_vis = self.params['chunk_vis']
-        chunk_shape = self.params['chunk_shape']
-        chunk_size = self.params['chunk_size']
         output_failed_continue = self.params['output_failed_continue']
         tag_output_iter = self.params['tag_output_iter']
 
@@ -236,7 +232,7 @@ class TimestreamTask(OneAndOne):
             output_files = self.output_files
 
         try:
-            output.to_files(output_files, exclude, check_status, write_hints, via_memmap, libver, chunk_vis, chunk_shape, chunk_size)
+            output.to_files(output_files, exclude, check_status, write_hints, via_memmap, libver, chunk_vis)
         except Exception as e:
             if output_failed_continue:
                 msg = 'Process %d writing output to files failed...' % mpiutil.rank
