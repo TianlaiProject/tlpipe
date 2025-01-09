@@ -23,6 +23,7 @@ from tlpipe.core import constants as const
 from caput import mpiutil
 from caput import mpiarray
 from tlpipe.utils.path_util import output_path
+from tlpipe.utils import progress
 # import matplotlib.pyplot as plt
 
 
@@ -123,62 +124,64 @@ class Stacking(timestream_task.TimestreamTask):
 
                 fi = i * chunk_size + mpiutil.rank # freq index of this rank
 
-                for si, (ra0, dec0, z0) in enumerate(zip(src_ra, src_dec, src_z)):
-                # for ra0, dec0, z0 in zip(src_ra[:10], src_dec[:10], src_z[:10]):
-                # for ra0, dec0, z0 in zip(src_ra[:1000], src_dec[:1000], src_z[:1000]):
-                    freq0 = nu_21 / (z0 + 1)
-                    if freq0 < freq[0] or freq0 > freq[-1]:
-                        # not inside this freq band
-                        continue
+                if fi < nfreq:
+                    for si, (ra0, dec0, z0) in enumerate(zip(src_ra, src_dec, src_z)):
+                    # for ra0, dec0, z0 in zip(src_ra[:10], src_dec[:10], src_z[:10]):
+                    # for si, (ra0, dec0, z0) in enumerate(zip(src_ra[:1000], src_dec[:1000], src_z[:1000])):
+                        freq0 = nu_21 / (z0 + 1)
+                        if freq0 < freq[0] or freq0 > freq[-1]:
+                            # not inside this freq band
+                            continue
 
-                    fi0 = np.argmin(np.abs(freq - freq0))
+                        fi0 = np.argmin(np.abs(freq - freq0))
 
-                    # 创建一个SkyCoord对象，表示ICRS坐标
-                    # icrs_coords = SkyCoord(ra=ra0*u.degree, dec=dec0*u.degree, frame='icrs')
-                    icrs_coords = SkyCoord(ra=ra0*u.degree, dec=dec0*u.degree, frame='icrs', obstime=obs_time)
-                    # 转换到CIRS坐标
-                    cirs_coords = icrs_coords.transform_to('cirs')
-                    # ra, dec in CIRS
-                    ra0 = cirs_coords.ra.degree
-                    dec0 = cirs_coords.dec.degree
+                        # 创建一个SkyCoord对象，表示ICRS坐标
+                        # icrs_coords = SkyCoord(ra=ra0*u.degree, dec=dec0*u.degree, frame='icrs')
+                        icrs_coords = SkyCoord(ra=ra0*u.degree, dec=dec0*u.degree, frame='icrs', obstime=obs_time)
+                        # 转换到CIRS坐标
+                        cirs_coords = icrs_coords.transform_to('cirs')
+                        # ra, dec in CIRS
+                        ra0 = cirs_coords.ra.degree
+                        dec0 = cirs_coords.dec.degree
 
-                    ra0, dec0 = np.radians(ra0), np.radians(dec0) # radian
-                    ti = np.argmin(np.abs(ra0 - vis_ra))
+                        ra0, dec0 = np.radians(ra0), np.radians(dec0) # radian
+                        ti = np.argmin(np.abs(ra0 - vis_ra))
 
-                    if ti >= span and ti + span < nt:
+                        if ti >= span and ti + span < nt:
 
-                        if fi == 0:
-                            sis.append(si)
-                            fis.append(fi0)
+                            if fi == 0:
+                                sis.append(si)
+                                fis.append(fi0)
 
-                        bfm_xx1 = np.ma.masked_all((2*span+1, 1), dtype=np.complex128)
-                        bfm_yy1 = np.ma.masked_all((2*span+1, 1), dtype=np.complex128)
+                            bfm_xx1 = np.ma.masked_all((2*span+1, 1), dtype=np.complex128)
+                            bfm_yy1 = np.ma.masked_all((2*span+1, 1), dtype=np.complex128)
 
-                        # beam-forming for this src
-                        # construct a aipy.FixedRadioBody for this pixel
-                        s = a.fit.RadioFixedBody(ra0, dec0)
-                        # get topocentric coord of this src
-                        aa.set_jultime(vis_time[ti])
-                        s.compute(aa)
-                        n0 = s.get_crds('top', ncrd=3)
-                        uij = (feedpos[bls[:, 0]-1] - feedpos[bls[:, 1]-1]) * (1.0e6*freq[fi]) / const.c # shp = (nbl, 3)
-                        eun = np.exp(-2.0J * np.pi * np.dot(uij, n0)) # shp = (nbl,)
+                            # beam-forming for this src
+                            # construct a aipy.FixedRadioBody for this pixel
+                            s = a.fit.RadioFixedBody(ra0, dec0)
+                            # get topocentric coord of this src
+                            aa.set_jultime(vis_time[ti])
+                            s.compute(aa)
+                            n0 = s.get_crds('top', ncrd=3)
+                            uij = (feedpos[bls[:, 0]-1] - feedpos[bls[:, 1]-1]) * (1.0e6*freq[fi]) / const.c # shp = (nbl, 3)
+                            eun = np.exp(-2.0J * np.pi * np.dot(uij, n0)) # shp = (nbl,)
 
-                        for ii, ti1 in enumerate(range(ti-span, ti+span+1)):
-                            this_vis_xx = np.ma.array(this_vis.local_array[ti1, 0, 0, :], mask=this_vis_mask.local_array[ti1, 0, 0, :])
-                            this_vis_yy = np.ma.array(this_vis.local_array[ti1, 0, 1, :], mask=this_vis_mask.local_array[ti1, 0, 1, :])
-                            this_vis_xx_fs = this_vis_xx * eun # fringe-stopping
-                            this_vis_yy_fs = this_vis_yy * eun # fringe-stopping
-                            # bfm_xx1[ii] = this_vis_xx_fs.mean().real
-                            # bfm_yy1[ii] = this_vis_yy_fs.mean().real
-                            bfm_xx1[ii] = this_vis_xx_fs.mean()
-                            bfm_yy1[ii] = this_vis_yy_fs.mean()
+                            for ii, ti1 in enumerate(range(ti-span, ti+span+1)):
+                                this_vis_xx = np.ma.array(this_vis.local_array[ti1, 0, 0, :], mask=this_vis_mask.local_array[ti1, 0, 0, :])
+                                this_vis_yy = np.ma.array(this_vis.local_array[ti1, 0, 1, :], mask=this_vis_mask.local_array[ti1, 0, 1, :])
+                                this_vis_xx_fs = this_vis_xx * eun # fringe-stopping
+                                this_vis_yy_fs = this_vis_yy * eun # fringe-stopping
+                                # bfm_xx1[ii] = this_vis_xx_fs.mean().real
+                                # bfm_yy1[ii] = this_vis_yy_fs.mean().real
+                                bfm_xx1[ii] = this_vis_xx_fs.mean()
+                                bfm_yy1[ii] = this_vis_yy_fs.mean()
 
-                        this_bfm_xx.append(np.ma.abs(bfm_xx1.mean(axis=0)).filled(np.nan))
-                        this_bfm_yy.append(np.ma.abs(bfm_yy1.mean(axis=0)).filled(np.nan))
+                            this_bfm_xx.append(np.ma.abs(bfm_xx1.mean(axis=0)).filled(np.nan))
+                            this_bfm_yy.append(np.ma.abs(bfm_yy1.mean(axis=0)).filled(np.nan))
 
-                this_bfm_xx = [ np.array(this_bfm_xx) ] # shp = (nsrc, nfreq) with nfreq = 1
-                this_bfm_yy = [ np.array(this_bfm_yy) ] # shp = (nsrc, nfreq) with nfreq = 1
+                if len(this_bfm_xx) > 0:
+                    this_bfm_xx = [ np.array(this_bfm_xx) ] # shp = (nsrc, nfreq) with nfreq = 1
+                    this_bfm_yy = [ np.array(this_bfm_yy) ] # shp = (nsrc, nfreq) with nfreq = 1
 
             # gather fi, this_bfm__xx, this_bfm_yy to rank0
             this_bfm_xx = mpiutil.gather_list(this_bfm_xx, root=0, comm=ts.comm)
