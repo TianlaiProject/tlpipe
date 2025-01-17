@@ -72,6 +72,8 @@ class PsCal(timestream_task.TimestreamTask):
                     'span': 60, # second
                     'reserve_high_gain': False, # if True, will not flag those gain significantly higher than mean value, only flag significantly lower ones
                     'rpca_max_iter': 200, # max iteration number for rpca decomposition
+                    'truncate_under_noise': True,
+                    'under_noise_threshold': 0.12,
                     'use_feedpos_in_file': True,
                     'plot_figs': False,
                     'fig_name': 'gain/gain',
@@ -101,6 +103,8 @@ class PsCal(timestream_task.TimestreamTask):
         zero_diag = self.params['zero_diag']
         span = self.params['span']
         rpca_max_iter = self.params['rpca_max_iter']
+        truncate_under_noise = self.params['truncate_under_noise']
+        under_noise_threshold = self.params['under_noise_threshold']
         use_feedpos_in_file = self.params['use_feedpos_in_file']
         reserve_high_gain = self.params['reserve_high_gain']
         plot_figs = self.params['plot_figs']
@@ -288,7 +292,7 @@ class PsCal(timestream_task.TimestreamTask):
                 diff = Vmat - med
                 S0 = np.where(np.abs(diff)>3.0*rpca_decomp.MAD(Vmat), diff, 0)
                 # stable PCA decomposition
-                V0, S = rpca_decomp.decompose(Vmat, rank=1, S=S0, max_iter=rpca_max_iter, threshold='hard', tol=1.0e-6, debug=False)
+                V0, S = rpca_decomp.decompose(Vmat, rank=1, S=S0, max_iter=rpca_max_iter, threshold='hard', tol=1.0e-6, truncate_under_noise=truncate_under_noise, under_noise_threshold=under_noise_threshold, debug=False)
 
                 # # find abnormal values in S
                 # # first check diagonal elements

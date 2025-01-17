@@ -48,7 +48,7 @@ def shrink(a, lmbda):
     return sign(a) * np.maximum(np.abs(a) - lmbda, 0.0) # work for both real and complex
 
 
-def decompose(M, rank=1, S=None, lmbda=None, threshold='hard', max_iter=100, tol=1.0e-8, check_hermitian=False, debug=False):
+def decompose(M, rank=1, S=None, lmbda=None, threshold='hard', max_iter=100, tol=1.0e-8, check_hermitian=False, truncate_under_noise=True, under_noise_threshold=0.12, debug=False):
     """Stable principal component decomposition of an Hermitian matrix."""
 
     if check_hermitian:
@@ -131,10 +131,11 @@ def decompose(M, rank=1, S=None, lmbda=None, threshold='hard', max_iter=100, tol
     else:
         print('Exit with max_iter: %d, tol: %g >= %g' % (it, tol1, tol))
 
-    s1 = la.eigh(M - L, eigvals_only=True, eigvals=(d-1, d-1))
-    # L may be under noise
-    if len(s1) == 0 or s[-1] < 0.12 * s1[-1]:
-        L = np.zeros_like(M)
-        return L, S
+    if truncate_under_noise:
+        s1 = la.eigh(M - L, eigvals_only=True, eigvals=(d-1, d-1))
+        # L may be under noise
+        if len(s1) == 0 or s[-1] < under_noise_threshold * s1[-1]:
+            L = np.zeros_like(M)
+            return L, S
 
     return L, S
