@@ -229,8 +229,8 @@ class TimestreamCommon(container.BasicTod):
                     local_attrs = fh[name].attrs
                 mpiutil.barrier(comm=self.comm)
             self.create_dataset(name, data=local_data, memmap_path=self._memmap_path)
-            # memh5.copyattrs(fh[name].attrs, self[name].attrs)
-            self[name].attrs = local_attrs
+            memh5.copyattrs(local_attrs, self[name].attrs)
+            # self[name].attrs = local_attrs
         else:
             super(TimestreamCommon, self)._load_a_common_dataset(name)
 
