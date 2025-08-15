@@ -82,14 +82,20 @@ class BeamFit(timestream_task.TimestreamTask):
         transit_vis_masks = []
         for calibrator in srcs:
             # get the calibrator
-            try:
-                s = calibrators.get_src(calibrator)
-            except KeyError:
-                if mpiutil.rank0:
-                    print('Calibrator %s is unavailable, available calibrators are:')
-                    for key, d in calibrators.src_data.items():
-                        print('%8s  ->  %12s' % (key, d[0]))
-                raise RuntimeError('Calibrator %s is unavailable')
+            if calibrator == 'Sun':
+                srclist, cutoff, catalogs = a.scripting.parse_srcs(calibrator, 'misc')
+                cat = a.src.get_catalog(srclist, cutoff, catalogs)
+                assert(len(cat) == 1), 'Allow only one calibrator'
+                s = list(cat.values())[0]
+            else:
+                try:
+                    s = calibrators.get_src(calibrator)
+                except KeyError:
+                    if mpiutil.rank0:
+                        print('Calibrator %s is unavailable, available calibrators are:')
+                        for key, d in calibrators.src_data.items():
+                            print('%8s  ->  %12s' % (key, d[0]))
+                    raise RuntimeError('Calibrator %s is unavailable')
             if mpiutil.rank0:
                 print('Try to calibrate with %s...' % s.src_name)
 
@@ -149,7 +155,11 @@ class BeamFit(timestream_task.TimestreamTask):
                 n0[ti] = s.get_crds('top', ncrd=3)
             n0s.append(n0)
 
-            Sc = s.get_jys(1.0e-3 * freq)
+            if calibrator == 'Sun':
+                s.update_jys(1.0e-3 * freq)
+                Sc = s.get_jys()
+            else:
+                Sc = s.get_jys(1.0e-3 * freq)
             Scs.append(Sc)
             # lmd = const.c / (1.0e6*freq)
             # Ai = aa.ants[0].beam.response(n0.T)
