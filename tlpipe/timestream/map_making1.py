@@ -78,7 +78,7 @@ class MapMaking(timestream_task.TimestreamTask):
         tstream.generate_Bv()
 
         if dirty_map:
-            tstream.mapmake_full(nside, 'map_full_dirty.hdf5', nbin, dirty=True, method=method, normalize=normalize, threshold=threshold)
+            tstream.mapmake_full(nside, 'map_full_dirty.hdf5', nbin, dirty=True, method=method, normalize=normalize, threshold=threshold, eps=eps, loop_factor=loop_factor, n_iter=n_iter)
         else:
             tstream.mapmake_full(nside, 'map_full.hdf5', nbin, dirty=False, method=method, normalize=normalize, threshold=threshold, eps=eps, correct_order=correct_order, prior_map_file=prior_map, save_alm=save_alm, tk_deconv=tk_deconv, loop_factor=loop_factor, n_iter=n_iter)
 

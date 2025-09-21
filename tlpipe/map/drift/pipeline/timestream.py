@@ -4,7 +4,8 @@ import pickle
 
 import h5py
 import numpy as np
-# import healpy as hp
+from scipy import linalg as la
+import healpy as hp
 
 from caput import mpiutil
 
@@ -359,6 +360,113 @@ class Timestream(object):
             #         raise ValueError('Unknown map-making method %s' % method)
 
             return sphmode
+
+
+        if dirty:
+            lside = self.telescope.lmax + 1
+
+            with h5py.File('/tianlai/zuoshifan/cyl_20180322/output_6days_single_freq_mapmaking/map/check_psf/ps_alm.hdf5', 'r') as f:
+                thetas = f['alm'].attrs['theta']
+                phis = f['alm'].attrs['phi']
+                alm = f['alm'][:, :lside, :lside]
+
+            dmaps = [] # save original dirty map
+            cvals = [] # save value of clean components
+            cpis = [] # save index of clean components
+            cmaps = [] # save the recovered clean map
+            rmaps = [] # save residual map
+            rcmaps = [] # save cleaned residual map
+            rcdmaps = [] # save diagonal cleaned residual map
+            for fi in range(nfreq):
+                Bv = np.zeros((lside, lside), dtype=complex)
+                for mi in range(self.telescope.mmax + 1):
+                    Bv[:, mi] = self.Bv_m(mi, fi)
+                dmap0 = hputil.sphtrans_inv_real(Bv, nside) # original dirty map
+                dmap = dmap0.copy() # deconv on this copy
+                # deconv
+                BB = np.zeros((lside, lside, lside), dtype=complex)
+                for mi in range(self.telescope.mmax + 1):
+                    BB[:, :, mi] = self.beamtransfer.BB_m(mi, fi)
+                cval = []
+                cpi = []
+                for i in range(n_iter):
+                    if i % 10 == 0:
+                        print(f'Iteration {i}, max {np.max(dmap)}, std {np.std(dmap)} ...', flush=True)
+                    hi = np.argmax(dmap)
+                    cpi.append(hi)
+
+                    ### direct compute alm_ps, may be slow
+                    # ps_map = np.zeros_like(dmap)
+                    # ps_map[hi] = 1.0
+                    # alm_ps = hputil.sphtrans_real(ps_map)[:lside, :lside]
+                    ###
+
+                    ### use pre-computed alm_ps
+                    tht0, phi0 = hp.pix2ang(nside, hi, nest=False, lonlat=False) # radians
+                    ti = np.argmin(np.abs(thetas - tht0))
+                    dphi = phi0 - phis[ti] # radians
+                    alm_ps = alm[ti] * np.exp(-1.0J * dphi * np.arange(lside))[np.newaxis, :]
+                    ###
+
+                    alm_psf = np.einsum('ijk, jk -> ik', BB, alm_ps)
+                    psf_map = hputil.sphtrans_inv_real(alm_psf, nside) # psf for a point
+                    cval1 = loop_factor * (dmap[hi] / psf_map[hi]) # value of clean component
+                    dmap -= cval1 * psf_map
+                    cval.append(cval1)
+
+                # recover clean map from clean components
+                cmap = np.zeros_like(dmap)
+                for i in range(n_iter):
+                    cmap[cpi[i]] += cval[i]
+                calm = hputil.sphtrans_real(cmap)[:lside, :lside]
+                # BBd = np.diagonal(BB, offset=0, axis1=0, axis2=1).T # NOTE the transpose here
+                BBd = BB[np.diag_indices(lside)] # equivalent but easier way
+                calm = BBd * calm / (BBd + eps)
+                cmap = hputil.sphtrans_inv_real(calm, nside) # the recovered cmap
+
+                # recover diagonal cleaned residual map
+                ralm = hputil.sphtrans_real(dmap)[:lside, :lside]
+                rcdalm = ralm / (BBd + eps) # diagonal approximation inversion
+                rcdmap = hputil.sphtrans_inv_real(rcdalm, nside) # the recovered rcdmap
+
+                # recover cleaned residual map
+                for mi in range(self.telescope.mmax + 1):
+                    BBm = BB[:, :, mi].copy()
+                    BBm[np.diag_indices(lside)] += eps
+                    ralm[:, mi] = la.pinv(BBm) @ ralm[:, mi] # exact inversion, ovorwrite reuse ralm
+                rcmap = hputil.sphtrans_inv_real(ralm, nside) # the recovered rcmap
+
+                dmaps.append(dmap0)
+                cvals.append(np.array(cval))
+                cpis.append(np.array(cpi))
+                cmaps.append(cmap)
+                rmaps.append(dmap)
+                rcdmaps.append(rcdmap)
+                rcmaps.append(rcmap)
+            if mpiutil.rank0:
+                dmaps = np.array(dmaps).reshape(nfreq, 1, -1)
+                rmaps = np.array(rmaps).reshape(nfreq, 1, -1)
+                cmaps = np.array(cmaps).reshape(nfreq, 1, -1)
+                rcdmaps = np.array(rcdmaps).reshape(nfreq, 1, -1)
+                rcmaps = np.array(rcmaps).reshape(nfreq, 1, -1)
+                cvals = np.array(cvals)
+                cpis = np.array(cpis)
+                freqs = self.beamtransfer.telescope.frequencies
+                with h5py.File(self.output_directory + '/' + mapname, 'w') as f:
+                    f.create_dataset('dmap', data=dmaps)
+                    f.create_dataset('rmap', data=rmaps)
+                    f.create_dataset('cmap', data=cmaps)
+                    f.create_dataset('rcdmap', data=rcdmaps)
+                    f.create_dataset('rcmap', data=rcmaps)
+                    f.create_dataset('cval', data=cvals)
+                    f.create_dataset('cpi', data=cpis)
+                    f.create_dataset('freq', data=freqs)
+                    # f.create_dataset('map', data=dmaps)
+                    # f['map'].attrs['dim'] = 'freq, pol, pix'
+                    # f['map'].attrs['frequency'] = freqs
+                    # f['map'].attrs['polarization'] = np.string_(['I', 'Q', 'U', 'V'])[:self.beamtransfer.telescope.num_pol_sky] # np.string_ for python 3
+
+            return
 
         if not (method == 'tk' and tk_deconv and map_to_deconv is not None):
             # alm_list = mpiutil.parallel_map(_make_alm, list(range(self.telescope.mmax + 1)), return_numpy_array=True, root=0, method='rand')
