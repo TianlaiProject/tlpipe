@@ -2,6 +2,7 @@ import abc
 import warnings
 
 import numpy as np
+import healpy as hp
 
 # from caput import time as ctime
 
@@ -898,13 +899,23 @@ class UnpolarisedTelescope(TransitTelescope, metaclass=abc.ABCMeta):
         # cvis = self._horizon * fringe * beami * beamj.conjugate() / omega_A
 
         # NOTE: to have consistent normalization with ps_cal, don't divide_A here
-        cvis = self._horizon * fringe * beami * beamj.conjugate()
+        # cvis = self._horizon * fringe * beami * beamj.conjugate()
+        bm2 = beami * beamj.conjugate()
+        cvis = self._horizon * fringe * hp.ud_grade(bm2, hp.npix2nside(len(fringe)))
 
         # ### use the following code to load a different beam model
         # import h5py
         # import healpy as hp
         # print('Use beam model in bm2_model.hdf5...', flush=True)
         # with h5py.File('/path/to/bm2_model.hdf5', 'r') as f:
+        #     bm2 = f['bm2'][:]
+        # cvis = self._horizon * fringe * hp.ud_grade(bm2, hp.npix2nside(len(fringe)))
+
+        # ### use the following code to load a different beam model
+        # import h5py
+        # import healpy as hp
+        # print('Use beam model in drone_beam2_YY_rotate.hdf5...', flush=True)
+        # with h5py.File('/home/zuoshifan/programming/python/21cmcosmology/tlpipe/tlpipe/map/drift/core/drone_beam2_YY_rotate.hdf5', 'r') as f:
         #     bm2 = f['bm2'][:]
         # cvis = self._horizon * fringe * hp.ud_grade(bm2, hp.npix2nside(len(fringe)))
 

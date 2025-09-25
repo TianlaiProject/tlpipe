@@ -34,6 +34,8 @@ class GenMmode(timestream_task.TimestreamTask):
                     'tsys': 50.0,
                     'accuracy_boost': 1.0,
                     'l_boost': 1.0,
+                    'use_beam': None, # use specified beam model, take hightes prioriety if given
+                    'use_beam_freq_offset': 0, # freq offset of the used specified beam model
                     'use_fitted_beam_params': True,
                     'use_beam_params_in_file': False, # only when use_fitted_beam_params is False
                     'beam_params_file': 'beam_params.hdf5',
@@ -59,6 +61,8 @@ class GenMmode(timestream_task.TimestreamTask):
         tsys = self.params['tsys']
         accuracy_boost = self.params['accuracy_boost']
         l_boost = self.params['l_boost']
+        use_beam = self.params['use_beam']
+        use_beam_freq_offset = self.params['use_beam_freq_offset']
         use_fitted_beam_params = self.params['use_fitted_beam_params']
         use_beam_params_in_file = self.params['use_beam_params_in_file']
         beam_params_file = self.params['beam_params_file']
@@ -147,7 +151,7 @@ class GenMmode(timestream_task.TimestreamTask):
                 cyl_width = np.array([cyl_width] * nfreq)
                 fwhm_x = np.array([0.7] * nfreq)
                 fwhm_y = np.array([1.0] * nfreq)
-            tel = tl_cylinder.TlUnpolarisedCylinder(lat, lon, freqs, band_width, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin, cyl_width, feedpos, lmax, mmax, True, True, 0.0, False, fwhm_x, fwhm_y)
+            tel = tl_cylinder.TlUnpolarisedCylinder(lat, lon, freqs, band_width, tsys, ndays, accuracy_boost, l_boost, bl_range, auto_correlations, local_origin, cyl_width, feedpos, lmax, mmax, True, True, 0.0, False, fwhm_x, fwhm_y, use_beam, use_beam_freq_offset)
         else:
             raise RuntimeError('Unknown array type %s' % ts.attrs['telescope'])
 

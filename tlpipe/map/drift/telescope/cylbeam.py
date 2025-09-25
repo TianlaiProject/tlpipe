@@ -187,6 +187,10 @@ def beam_amp(angpos, zenith, width, fwhm_x, fwhm_y, rot=[0.0, 0.0, 0.0]):
     ns_amp = yplane(np.arcsin(np.dot(cvec, yhat)))
 
     return (ew_amp * ns_amp * horizon)
+    # return (ew_amp * np.ones_like(ns_amp) * horizon) ### for check
+    # return (np.abs(ew_amp * ns_amp)**0.5 * horizon) ### for check
+    # return ((ew_amp * ns_amp)**2 * horizon) ### for check
+    # return horizon ### for check
 
 
 def beam_x(angpos, zenith, width, fwhm_e, fwhm_h, rot=[0.0, 0.0, 0.0]):
