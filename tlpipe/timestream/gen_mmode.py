@@ -9,6 +9,7 @@ Inheritance diagram
 """
 
 import os
+import shutil
 import numpy as np
 import h5py
 from . import timestream_task
@@ -51,6 +52,7 @@ class GenMmode(timestream_task.TimestreamTask):
                     'ts_dir': 'map/ts',
                     'ts_name': 'ts',
                     'no_m_zero': True,
+                    'backup_ts': False, # backup timestream at each iteration
                   }
 
     prefix = 'gm_'
@@ -78,6 +80,7 @@ class GenMmode(timestream_task.TimestreamTask):
         ts_dir = output_path(self.params['ts_dir'])
         ts_name = self.params['ts_name']
         no_m_zero = self.params['no_m_zero']
+        backup_ts = self.params['backup_ts']
 
 
         assert isinstance(ts, Timestream), '%s only works for Timestream object' % self.__class__.__name__
@@ -277,6 +280,10 @@ class GenMmode(timestream_task.TimestreamTask):
             # save the tstream object if there is no one
             if not os.path.isfile(tstream._picklefile):
                 tstream.save()
+
+            # backup timestream at each iteratiion
+            if backup_ts:
+                shutil.copytree(tstream.output_directory, f'{tstream.output_directory}_bk_{self.iteration}')
 
         mpiutil.barrier()
 
