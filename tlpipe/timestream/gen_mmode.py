@@ -53,6 +53,7 @@ class GenMmode(timestream_task.TimestreamTask):
                     'ts_name': 'ts',
                     'no_m_zero': True,
                     'backup_ts': False, # backup timestream at each iteration
+                    'keep_ts_bk_num': 1, # only keep this number of recent ts backup and remove all old ones, only work when backup_ts is True
                   }
 
     prefix = 'gm_'
@@ -81,6 +82,7 @@ class GenMmode(timestream_task.TimestreamTask):
         ts_name = self.params['ts_name']
         no_m_zero = self.params['no_m_zero']
         backup_ts = self.params['backup_ts']
+        keep_ts_bk_num = self.params['keep_ts_bk_num']
 
 
         assert isinstance(ts, Timestream), '%s only works for Timestream object' % self.__class__.__name__
@@ -284,6 +286,9 @@ class GenMmode(timestream_task.TimestreamTask):
             # backup timestream at each iteratiion
             if backup_ts:
                 shutil.copytree(tstream.output_directory, f'{tstream.output_directory}_bk_{self.iteration}')
+                # remove old backups
+                for i in range(self.iteration - keep_ts_bk_num + 1):
+                    shutil.rmtree(f'{tstream.output_directory}_bk_{i}', ignore_errors=True)
 
         mpiutil.barrier()
 
