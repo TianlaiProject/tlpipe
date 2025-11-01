@@ -1,6 +1,8 @@
 import os
 import sys
 import pickle
+import psutil
+import gc
 
 import h5py
 import numpy as np
@@ -220,50 +222,126 @@ class Timestream(object):
         if mpiutil.rank0:
             print('Generating Bv files...', flush=True)
 
-        for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
+        nm = self.telescope.mmax + 1 # numbe of ms
+        num_nodes = len(mpiutil.shared_rank_groups()) # number of unique nodes
+
+        mis = np.random.permutation(nm) # a list of permuted mi
+        if mpiutil.size > 1:
+            mpiutil.world.Bcast(mis, root=0) # make all ranks have the same list
+
+        # split mis to each node
+        n, s, e = mpiutil.split_m(nm, num_nodes)
+
+        nm_per_node = 1 # number of mis that can run on a single node
+
+        # get available memory of the node
+        if mpiutil.rank0:
+            mem = psutil.virtual_memory()
+            available_mem = mem.available # in byte
+
+            with h5py.File(self.beamtransfer._mfile(1), 'r') as f:
+                B_mem = np.prod(f['beam_m'].shape) * 16 # in byre
+
+            nm_per_node = int(available_mem / B_mem) // 2 # 2 for B.conj() and extra space
+
+            if nm_per_node < 1:
+                nm_per_node = 1
+                print('Maybe not enough memory for computing Bv...', flush=True)
+
+            print(f'Each node can simultaneously compute {nm_per_node} Bvs...', flush=True)
+
+        nm_per_node = mpiutil.bcast(nm_per_node, root=0)
+
+        # distribute mis to each rank
+        this_mis = []
+        for ni in range(num_nodes): # iter for each node
+            mis_for_ni = mis[s[ni]:e[ni]] # mis for this node
+            srg = mpiutil.shared_rank_groups()[ni] # rank groups in this node
+            parts = min(len(srg), nm_per_node) # plit to this parts
+            n1, s1, e1 = mpiutil.split_m(len(mis_for_ni), parts)
+            for pi in range(parts):
+                if mpiutil.rank == srg[pi]:
+                    this_mis.extend(mis_for_ni[s1[pi]:e1[pi]].tolist())
+
+        for ii, mi in enumerate(this_mis):
+            if mpiutil.rank0:
+                print(f'Compute {ii} of {len(this_mis)} for Bv...', flush=True)
+
             if os.path.exists(self._Bvfile(mi)) and not regen:
                 print("m index %i. File: %s exists. Skipping..." % (mi, self._Bvfile(mi)), flush=True)
                 continue
             # else:
             #     print('m index %i. Creating Bv file: %s' % (mi, self._Bvfile(mi)), flush=True)
 
-            # # Open m beams for reading.
-            # with h5py.File(self.beamtransfer._mfile(mi), 'r') as f1, h5py.File(self._mfile(mi), 'r') as f2, h5py.File(self._Bvfile(mi), 'w') as f3:
-            #     nfreq, npn, npairs, npol_sky, nl = f1['beam_m'].shape
-            #     Bv_shp = (nfreq, npol_sky*nl)
-            #     f3.create_dataset('Bv_m', Bv_shp, dtype=np.complex128)
-            #     try:
-            #         # ### for test
-            #         # raise np.core._exceptions._ArrayMemoryError(Bv_shp, np.complex128)
-
-            #         beam = f1['beam_m'][:]
-            #         B = beam.reshape(nfreq, npn*npairs, npol_sky*nl)
-            #         v = f2['mmode'][:].reshape(nfreq, npn*npairs)
-            #         Bv = np.einsum('...ij,...j->...i', B.transpose(0, 2, 1).conj(), v)
-            #         # f3.create_dataset('Bv_m', data=Bv)
-            #         f3['Bv_m'][:] = Bv
-            #     except np.core._exceptions._ArrayMemoryError:
-            #         for fi in range(nfreq):
-            #             B = f1['beam_m'][fi].reshape(npn*npairs, npol_sky*nl)
-            #             v = f2['mmode'][fi].reshape(npn*npairs)
-            #             f3['Bv_m'][fi] = B.T.conj() @ v
-
-            # slower but more memory effective way
-            with h5py.File(self.beamtransfer._mfile(mi), 'r') as f1:
+            # Open m beams for reading.
+            with h5py.File(self.beamtransfer._mfile(mi), 'r') as f1, h5py.File(self._mfile(mi), 'r') as f2, h5py.File(self._Bvfile(mi), 'w') as f3:
                 nfreq, npn, npairs, npol_sky, nl = f1['beam_m'].shape
-            Bv_shp = (nfreq, npol_sky*nl)
-            with h5py.File(self._Bvfile(mi), 'w') as f2:
-                f2.create_dataset('Bv_m', Bv_shp, dtype=np.complex128)
-            for fi in range(nfreq):
-                B = self.beamtransfer.beam_m(mi, fi).reshape(npn*npairs, npol_sky*nl)
-                v = self.mmode(mi, fi).reshape(npn*npairs)
-                with h5py.File(self._Bvfile(mi), 'r+') as f2:
-                    f2['Bv_m'][fi] = B.T.conj() @ v
+                Bv_shp = (nfreq, npol_sky*nl)
+                f3.create_dataset('Bv_m', Bv_shp, dtype=np.complex128, fillvalue=complex(0, 0))
+
+                Bconj = f1['beam_m'][:, :, :, :, mi:].conj().reshape(nfreq, npn*npairs, -1)
+                v = f2['mmode'][:].reshape(nfreq, npn*npairs)
+                Bv = np.einsum('...ij,...i->...j', Bconj, v)
+                f3['Bv_m'][:, mi:] = Bv
+
+            del Bconj # for running more than one process, a process still hold the data after it finish
+            del Bv # for running more than one process, a process still hold the data after it finish
+            del v # for running more than one process, a process still hold the data after it finish
+            gc.collect()
+
 
         mpiutil.barrier()
 
         if mpiutil.rank0:
             print('Generating Bv files Done', flush=True)
+
+
+
+
+        # for mi in mpiutil.mpirange(self.telescope.mmax + 1, method='rand'):
+        #     if os.path.exists(self._Bvfile(mi)) and not regen:
+        #         print("m index %i. File: %s exists. Skipping..." % (mi, self._Bvfile(mi)), flush=True)
+        #         continue
+        #     # else:
+        #     #     print('m index %i. Creating Bv file: %s' % (mi, self._Bvfile(mi)), flush=True)
+
+        #     # # Open m beams for reading.
+        #     # with h5py.File(self.beamtransfer._mfile(mi), 'r') as f1, h5py.File(self._mfile(mi), 'r') as f2, h5py.File(self._Bvfile(mi), 'w') as f3:
+        #     #     nfreq, npn, npairs, npol_sky, nl = f1['beam_m'].shape
+        #     #     Bv_shp = (nfreq, npol_sky*nl)
+        #     #     f3.create_dataset('Bv_m', Bv_shp, dtype=np.complex128)
+        #     #     try:
+        #     #         # ### for test
+        #     #         # raise np.core._exceptions._ArrayMemoryError(Bv_shp, np.complex128)
+
+        #     #         beam = f1['beam_m'][:]
+        #     #         B = beam.reshape(nfreq, npn*npairs, npol_sky*nl)
+        #     #         v = f2['mmode'][:].reshape(nfreq, npn*npairs)
+        #     #         Bv = np.einsum('...ij,...j->...i', B.transpose(0, 2, 1).conj(), v)
+        #     #         # f3.create_dataset('Bv_m', data=Bv)
+        #     #         f3['Bv_m'][:] = Bv
+        #     #     except np.core._exceptions._ArrayMemoryError:
+        #     #         for fi in range(nfreq):
+        #     #             B = f1['beam_m'][fi].reshape(npn*npairs, npol_sky*nl)
+        #     #             v = f2['mmode'][fi].reshape(npn*npairs)
+        #     #             f3['Bv_m'][fi] = B.T.conj() @ v
+
+        #     # slower but more memory effective way
+        #     with h5py.File(self.beamtransfer._mfile(mi), 'r') as f1:
+        #         nfreq, npn, npairs, npol_sky, nl = f1['beam_m'].shape
+        #     Bv_shp = (nfreq, npol_sky*nl)
+        #     with h5py.File(self._Bvfile(mi), 'w') as f2:
+        #         f2.create_dataset('Bv_m', Bv_shp, dtype=np.complex128)
+        #     for fi in range(nfreq):
+        #         B = self.beamtransfer.beam_m(mi, fi).reshape(npn*npairs, npol_sky*nl)
+        #         v = self.mmode(mi, fi).reshape(npn*npairs)
+        #         with h5py.File(self._Bvfile(mi), 'r+') as f2:
+        #             f2['Bv_m'][fi] = B.T.conj() @ v
+
+        # mpiutil.barrier()
+
+        # if mpiutil.rank0:
+        #     print('Generating Bv files Done', flush=True)
 
     #====================================================
 
@@ -381,6 +459,21 @@ class Timestream(object):
                 Bv = np.zeros((lside, lside), dtype=complex)
                 for mi in range(self.telescope.mmax + 1):
                     Bv[:, mi] = self.Bv_m(mi, fi)
+                    # # ### for check
+                    # with h5py.File(self.beamtransfer._mfile(mi), 'r') as f1:
+                    #     nfreq, npn, npairs, npol_sky, nl = f1['beam_m'].shape
+                    # B = self.beamtransfer.beam_m(mi, fi)[:, :, :, mi:].reshape(npn*npairs, -1)
+                    # U, s, VT = la.svd(B, full_matrices=False)
+                    # eps = 0.1
+                    # # eps = 0.01
+                    # print(f'eps = {eps}', flush=True)
+                    # s += eps
+                    # # B = (U * s) @ VT
+                    # Bi = (VT.T.conj() * (1.0 / s)) @ U.T.conj()
+                    # v = self.mmode(mi, fi).reshape(npn*npairs)
+                    # # Bv[:, mi] = B.T.conj() @ v
+                    # Bv[mi:, mi] = Bi @ v
+                    # # ### for check
                 dmap0 = hputil.sphtrans_inv_real(Bv, nside) # original dirty map
                 dmap = dmap0.copy() # deconv on this copy
                 # deconv
