@@ -48,7 +48,8 @@ class TlUnpolarisedCylinder(cylinder.UnpolarisedCylinderTelescope):
             complex.
         """
         if self.use_beam:
-            print(f'Use beam model in {self.use_beam}...', flush=True)
+            if feed == 0 and freq == 0:
+                print(f'Use beam model in {self.use_beam}...', flush=True)
             with h5py.File(self.use_beam, 'r') as f:
                 bm2 = f['bm2'][freq + self.use_beam_freq_offset]
             return np.abs(bm2)**0.5

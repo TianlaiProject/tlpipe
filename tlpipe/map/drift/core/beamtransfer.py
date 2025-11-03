@@ -938,6 +938,9 @@ class BeamTransfer(object):
 
         nm_per_node = 1 # number of mis that can run on a single node
 
+        # release un-used memory bofre get available memory
+        gc.collect()
+
         # get available memory of the node
         if mpiutil.rank0:
             mem = psutil.virtual_memory()
