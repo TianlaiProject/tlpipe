@@ -1499,55 +1499,49 @@ class BeamTransfer(object):
         lfi1s = mpiutil.scatter_array(np.array(fi1s))
         lfi2s = mpiutil.scatter_array(np.array(fi2s))
 
+        # pre-read all frequency slices of BB and Bv from all file in one round
+        BBfs = dict()
+        Bvfs = dict()
+        for mi in range(nm):
+            with h5py.File(self._BBfile(mi), 'r') as f1, h5py.File(ts._Bvfile(mi), 'r') as f2:
+                for fi in np.union1d(lfi1s, lfi2s):
+                    sfi = max(0, fi - nbin//2)
+                    efi = min(fi - nbin//2 + nbin, nfreq)
+                    BBfs[(mi, fi)] = f1['BB_m'][sfi:efi, mi:, mi:].mean(axis=0)
+                    Bvfs[(mi, fi)] = f2['Bv_m'][sfi:efi, mi:].mean(axis=0)
+
+        # # constant the number of processes read files simultaneously
+        # for gi, rg in enumerate(rank_groups):
+        #     if mpiutil.rank0:
+        #         print(f'File reading round {gi} of {len(rank_groups)}...', flush=True)
+        #     if mpiutil.rank in rg:
+        #         for mi in range(nm):
+        #             with h5py.File(self._BBfile(mi), 'r') as f1, h5py.File(ts._Bvfile(mi), 'r') as f2:
+        #                 for fi in np.union1d(lfi1s, lfi2s):
+        #                     sfi = max(0, fi - nbin//2)
+        #                     efi = min(fi - nbin//2 + nbin, nfreq)
+        #                     BBfs[(mi, fi)] = f1['BB_m'][sfi:efi, mi:, mi:].mean(axis=0)
+        #                     Bvfs[(mi, fi)] = f2['Bv_m'][sfi:efi, mi:].mean(axis=0)
+
+        #     mpiutil.barrier()
+
+
         lcld = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, len(lfi1s)), dtype=np.float64)
         lclt = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, len(lfi1s)), dtype=np.float64)
         lclp = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, len(lfi1s)), dtype=np.float64) # use the solved lcld as a prior
-
-        num_lfi1s_rank0 = mpiutil.bcast(len(lfi1s), root=0)
-        lfi1s = lfi1s.tolist() + [-1] * (num_lfi1s_rank0 - len(lfi1s)) # make all ranks have same number of lfi1s
-        lfi2s = lfi2s.tolist() + [-1] * (num_lfi1s_rank0 - len(lfi2s)) # make all ranks have same number of lfi2s
 
         for li, (fi1, fi2) in enumerate(zip(lfi1s, lfi2s)):
             if mpiutil.rank0:
                 print(f'{li} of {len(lfi1s)}...', flush=True)
 
-            if fi1 == -1 or fi2 == -1:
-                compute = False
-            else:
-                compute = True
+            BB = np.zeros((npl, npl), dtype=complex) # BBf1 * BBf2.conj() for (fi1, fi2)
+            # BBf2 * BBf1.conj() = (BBf1 * BBf2.conj()).conj()
+            Bv = np.zeros((npl,), dtype=complex) # Bvf1 * Bvf2.conj() for (fi1, fi2)
+            # Bvf2 * Bvf1.conj() = (Bvf1 * Bvf2.conj()).conj()
 
-            if compute:
-                sfi1 = max(0, fi1 - nbin//2)
-                efi1 = min(fi1 - nbin//2 + nbin, nfreq)
-                sfi2 = max(0, fi2 - nbin//2)
-                efi2 = min(fi2 - nbin//2 + nbin, nfreq)
-
-                BB = np.zeros((npl, npl), dtype=complex) # BBf1 * BBf2.conj() for (fi1, fi2)
-                # BBf2 * BBf1.conj() = (BBf1 * BBf2.conj()).conj()
-                Bv = np.zeros((npl,), dtype=complex) # Bvf1 * Bvf2.conj() for (fi1, fi2)
-                # Bvf2 * Bvf1.conj() = (Bvf1 * Bvf2.conj()).conj()
-
-            # constant the number of processes read files simultaneously
-            for gi, rg in enumerate(rank_groups):
-                if mpiutil.rank0:
-                    print(f'    Inner {gi} of {len(rank_groups)}...', flush=True)
-                if mpiutil.rank in rg:
-                    if compute:
-                        for mi in range(nm):
-                            with h5py.File(self._BBfile(mi), 'r') as f:
-                                BBf1 = f['BB_m'][sfi1:efi1, mi:, mi:].mean(axis=0)
-                                BBf2 = f['BB_m'][sfi2:efi2, mi:, mi:].mean(axis=0)
-                            BB[mi:, mi:] += BBf1 * BBf2.conj()
-
-                            with h5py.File(ts._Bvfile(mi), 'r') as f:
-                                Bvf1 = f['Bv_m'][sfi1:efi1, mi:].mean(axis=0)
-                                Bvf2 = f['Bv_m'][sfi2:efi2, mi:].mean(axis=0)
-                            Bv[mi:] += Bvf1 * Bvf2.conj()
-
-                mpiutil.barrier()
-
-            if not compute:
-                continue
+            for mi in range(nm):
+                BB[mi:, mi:] += BBfs[(mi, fi1)] * BBfs[(mi, fi2)].conj()
+                Bv[mi:] += Bvfs[(mi, fi1)] * Bvfs[(mi, fi2)].conj()
 
             # # save BB to file for analysis
             # with h5py.File('BB.hdf5', 'w') as f:
@@ -1568,6 +1562,10 @@ class BeamTransfer(object):
             lclt[:, :, li] = chatt.reshape(self.telescope.num_pol_sky, nl)
             chatp = np.dot(BBi, Bv + eps * chatd).real # keep only real part
             lclp[:, :, li] = chatp.reshape(self.telescope.num_pol_sky, nl)
+
+        del BBfs
+        del Bvfs
+        gc.collect()
 
 
         cld = mpiutil.gather_array(lcld, axis=2, root=0)
