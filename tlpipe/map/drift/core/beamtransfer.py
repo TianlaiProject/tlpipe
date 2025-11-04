@@ -1528,7 +1528,9 @@ class BeamTransfer(object):
                 # Bvf2 * Bvf1.conj() = (Bvf1 * Bvf2.conj()).conj()
 
             # constant the number of processes read files simultaneously
-            for rg in rank_groups:
+            for gi, rg in enumerate(rank_groups):
+                if mpiutil.rank0:
+                    print(f'    Inner {gi} of {len(rank_groups)}...', flush=True)
                 if mpiutil.rank in rg:
                     if compute:
                         for mi in range(nm):
