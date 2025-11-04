@@ -1470,134 +1470,21 @@ class BeamTransfer(object):
         nl = self.telescope.lmax + 1
         npl = self.telescope.num_pol_sky * nl
 
+        if nbin < 1:
+            nbin = 1
         nbin = min(nbin, nfreq)
 
-        if mpiutil.rank0:
-            # create BBx file first filled with 0
-            with h5py.File(self._BBxfile(), 'w') as f:
-                f.create_dataset('BBx', shape=(nfreq, nfreq, npl, npl), dtype=np.complex128, chunks=(1, 1, npl, npl), fillvalue=0.0+0.0J)
-            # create Bvx file first filled with 0
-            with h5py.File(self._Bvxfile(), 'w') as f:
-                f.create_dataset('Bvx', shape=(nfreq, nfreq, npl), dtype=np.complex128, chunks=(1, nfreq, npl), fillvalue=0.0+0.0J)
+        # if mpiutil.rank0:
+        #     # create BBx file first filled with 0
+        #     with h5py.File(self._BBxfile(), 'w') as f:
+        #         f.create_dataset('BBx', shape=(nfreq, nfreq, npl, npl), dtype=np.complex128, chunks=(1, 1, npl, npl), fillvalue=0.0+0.0J)
+        #     # create Bvx file first filled with 0
+        #     with h5py.File(self._Bvxfile(), 'w') as f:
+        #         f.create_dataset('Bvx', shape=(nfreq, nfreq, npl), dtype=np.complex128, chunks=(1, nfreq, npl), fillvalue=0.0+0.0J)
 
-        mpiutil.barrier()
-
-        mis = list(range(nm))
-        rm = nm % mpiutil.size
-        if rm != 0:
-            mis += [-1] * (mpiutil.size - rm)
-        mis = mpiutil.mpilist(mis, method='rand') # a list mi's for this rank, each rank has same length
-
-        gs = group_size # group size
-        num_nodes = len(mpiutil.shared_rank_groups()) # number of unique nodes
-        if num_nodes < gs:
-            all_ranks = np.random.permutation(mpiutil.size) # a list of permuted rank no.
-            if mpiutil.size > 1:
-                mpiutil.world.Bcast(all_ranks, root=0) # make all ranks have the same list
-
-            ng, r = mpiutil.size // gs, mpiutil.size % gs
-            rank_groups = [ all_ranks[i*gs:(i+1)*gs] for i in range(ng) ]
-            if r != 0:
-                rank_groups.append(all_ranks[ng*gs:])
-        else:
-            rank_groups = mpiutil.not_shared_rank_groups()
-        rank_groups = mpiutil.merge_rank_groups(rank_groups, merge_number=merge_number)
-        comm = mpiutil.world
-        if comm is None:
-            comms = [ None ]
-        else:
-            comms = [ comm.Create(comm.Get_group().Incl(rg)) for rg in rank_groups ]
-
-        # compute BBx and Bvx
-        for ci, rg in enumerate(rank_groups):
-            if mpiutil.rank in rg:
-                for mi in mis:
-                    if comms[ci] is not None and comms[ci].size > 1:
-                        this_mis = mpiutil.gather_list([mi], comm=comms[ci])
-                    else:
-                        this_mis = [mi]
-                    if set(this_mis) == {-1}:
-                        # all mi are -1, no need to compute
-                        continue
-                    if mi != -1:
-                        print(f'Computing {mi} on {mpiutil.hostname} ...', flush=True)
-                        BB1 = self.BB_m(mi) # (nfreq, nl, nl)
-                        Bv1 = ts.Bv_m(mi) # (nfreq, nl)
-                        if nbin > 1:
-                            BB = np.empty_like(BB1)
-                            Bv = np.empty_like(Bv1)
-                            for fi in range(nfreq):
-                                sfi = max(0, fi - nbin//2)
-                                efi = min(fi - nbin//2 + nbin, nfreq)
-                                BB[fi] = BB1[sfi:efi].mean(axis=0)
-                                Bv[fi] = Bv1[sfi:efi].mean(axis=0)
-                            del BB1
-                            del Bv1
-                            gc.collect()
-                        else:
-                            BB = BB1
-                            Bv = Bv1
-                    # compute BBx, iterate along freq to reduce memory consumption
-                    for fi in range(nfreq):
-                        if mi != -1:
-                            BBxfi = BB[fi:fi+1, np.newaxis, :, :] * BB.conj() # (1, nfreq, nl, nl)
-                        else:
-                            BBxfi = np.zeros((1, nfreq, nl, nl), dtype=np.complex128)
-                        # reduce BBxfi to rank0 of comms[ci]
-                        if comms[ci] is not None and comms[ci].size > 1:
-                            if comms[ci].rank == 0:
-                                comms[ci].Reduce(mpiutil.IN_PLACE, BBxfi, root=0, op=mpiutil.SUM)
-                            else:
-                                comms[ci].Reduce(BBxfi, BBxfi, root=0, op=mpiutil.SUM)
-                        # write BBxfi to file
-                        if comms[ci] is None or comms[ci].rank == 0:
-                            print(f'rank {mpiutil.rank} writes data with fi = {fi} to file...', flush=True)
-                            with h5py.File(self._BBxfile(), 'r+') as f:
-                                f['BBx'][fi:fi+1] += BBxfi
-                                f.flush()
-
-                        # make sync here
-                        if comms[ci] is not None and comms[ci].size > 1:
-                            comms[ci].barrier()
-
-                        del BBxfi
-                        gc.collect()
-
-                    if mi != -1:
-                        del BB
-                    # del BBxfi
-                    gc.collect()
-
-                    # compute Bvx, Bvx is not very large
-                    if mi != -1:
-                        Bvx = Bv[:, np.newaxis, :] * Bv.conj() # (nfreq, nfreq, nl)
-                    else:
-                        Bvx = np.zeros((nfreq, nfreq, nl), dtype=np.complex128)
-                    # reduce Bvx to rank0 of comms[ci]
-                    if comms[ci] is not None and comms[ci].size > 1:
-                        if comms[ci].rank == 0:
-                            comms[ci].Reduce(mpiutil.IN_PLACE, Bvx, root=0, op=mpiutil.SUM)
-                        else:
-                            comms[ci].Reduce(Bvx, Bvx, root=0, op=mpiutil.SUM)
-                    # write Bvx to file
-                    if comms[ci] is None or comms[ci].rank == 0:
-                        with h5py.File(self._Bvxfile(), 'r+') as f:
-                            f['Bvx'][:] += Bvx
-                            f.flush()
-
-                    # make sync here, not necessarily need here
-                    if comms[ci] is not None and comms[ci].size > 1:
-                        comms[ci].barrier()
-
-                    if mi!= -1:
-                        del Bv
-                    del Bvx
-                    gc.collect()
-
-            mpiutil.barrier() # outer barrier
+        # mpiutil.barrier()
 
 
-        # compute cl
         fi1s = []
         fi2s = []
         for fi1 in range(nfreq):
@@ -1607,15 +1494,34 @@ class BeamTransfer(object):
 
         lfi1s = mpiutil.scatter_array(np.array(fi1s))
         lfi2s = mpiutil.scatter_array(np.array(fi2s))
+
         lcld = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, len(lfi1s)), dtype=np.float64)
         lclt = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, len(lfi1s)), dtype=np.float64)
         lclp = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, len(lfi1s)), dtype=np.float64) # use the solved lcld as a prior
+
         for li, (fi1, fi2) in enumerate(zip(lfi1s, lfi2s)):
             if mpiutil.rank0:
                 print(f'{li} of {len(lfi1s)}...', flush=True)
 
-            BB = self.BBx(fi1, fi2)
-            Bv = self.Bvx(fi1, fi2)
+            sfi1 = max(0, fi1 - nbin//2)
+            efi1 = min(fi1 - nbin//2 + nbin, nfreq)
+            sfi2 = max(0, fi2 - nbin//2)
+            efi2 = min(fi2 - nbin//2 + nbin, nfreq)
+
+            BB = np.zeros((npl, npl), dtype=complex) # BBf1 * BBf2.conj() for (fi1, fi2)
+            # BBf2 * BBf1.conj() = (BBf1 * BBf2.conj()).conj()
+            Bv = np.zeros((npl,), dtype=complex) # Bvf1 * Bvf2.conj() for (fi1, fi2)
+            # Bvf2 * Bvf1.conj() = (Bvf1 * Bvf2.conj()).conj()
+            for mi in range(nm):
+                with h5py.File(self._BBfile(mi), 'r') as f:
+                    BBf1 = f['BB_m'][sfi1:efi1, mi:, mi:].mean(axis=0)
+                    BBf2 = f['BB_m'][sfi2:efi2, mi:, mi:].mean(axis=0)
+                BB[mi:, mi:] += BBf1 * BBf2.conj()
+
+                with h5py.File(ts._Bvfile(mi), 'r') as f:
+                    Bvf1 = f['Bv_m'][sfi1:efi1, mi:].mean(axis=0)
+                    Bvf2 = f['Bv_m'][sfi2:efi2, mi:].mean(axis=0)
+                Bv[mi:] += Bvf1 * Bvf2.conj()
 
             # # save BB to file for analysis
             # with h5py.File('BB.hdf5', 'w') as f:
@@ -1637,9 +1543,15 @@ class BeamTransfer(object):
             chatp = np.dot(BBi, Bv + eps * chatd).real # keep only real part
             lclp[:, :, li] = chatp.reshape(self.telescope.num_pol_sky, nl)
 
+
         cld = mpiutil.gather_array(lcld, axis=2, root=0)
         clt = mpiutil.gather_array(lclt, axis=2, root=0)
         clp = mpiutil.gather_array(lclp, axis=2, root=0)
+
+        del lcld
+        del lclt
+        del lclp
+        gc.collect()
 
         if mpiutil.rank0:
             cl_diag = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, nfreq, nfreq), dtype=np.float64)
@@ -1660,6 +1572,188 @@ class BeamTransfer(object):
             cl_prior = None
 
         return cl_tk, cl_diag, cl_prior
+
+
+
+
+        # mis = list(range(nm))
+        # rm = nm % mpiutil.size
+        # if rm != 0:
+        #     mis += [-1] * (mpiutil.size - rm)
+        # mis = mpiutil.mpilist(mis, method='rand') # a list mi's for this rank, each rank has same length
+
+        # gs = group_size # group size
+        # num_nodes = len(mpiutil.shared_rank_groups()) # number of unique nodes
+        # if num_nodes < gs:
+        #     all_ranks = np.random.permutation(mpiutil.size) # a list of permuted rank no.
+        #     if mpiutil.size > 1:
+        #         mpiutil.world.Bcast(all_ranks, root=0) # make all ranks have the same list
+
+        #     ng, r = mpiutil.size // gs, mpiutil.size % gs
+        #     rank_groups = [ all_ranks[i*gs:(i+1)*gs] for i in range(ng) ]
+        #     if r != 0:
+        #         rank_groups.append(all_ranks[ng*gs:])
+        # else:
+        #     rank_groups = mpiutil.not_shared_rank_groups()
+        # rank_groups = mpiutil.merge_rank_groups(rank_groups, merge_number=merge_number)
+        # comm = mpiutil.world
+        # if comm is None:
+        #     comms = [ None ]
+        # else:
+        #     comms = [ comm.Create(comm.Get_group().Incl(rg)) for rg in rank_groups ]
+
+        # # compute BBx and Bvx
+        # for ci, rg in enumerate(rank_groups):
+        #     if mpiutil.rank in rg:
+        #         for mi in mis:
+        #             if comms[ci] is not None and comms[ci].size > 1:
+        #                 this_mis = mpiutil.gather_list([mi], comm=comms[ci])
+        #             else:
+        #                 this_mis = [mi]
+        #             if set(this_mis) == {-1}:
+        #                 # all mi are -1, no need to compute
+        #                 continue
+        #             if mi != -1:
+        #                 print(f'Computing {mi} on {mpiutil.hostname} ...', flush=True)
+        #                 BB1 = self.BB_m(mi) # (nfreq, nl, nl)
+        #                 Bv1 = ts.Bv_m(mi) # (nfreq, nl)
+        #                 if nbin > 1:
+        #                     BB = np.empty_like(BB1)
+        #                     Bv = np.empty_like(Bv1)
+        #                     for fi in range(nfreq):
+        #                         sfi = max(0, fi - nbin//2)
+        #                         efi = min(fi - nbin//2 + nbin, nfreq)
+        #                         BB[fi] = BB1[sfi:efi].mean(axis=0)
+        #                         Bv[fi] = Bv1[sfi:efi].mean(axis=0)
+        #                     del BB1
+        #                     del Bv1
+        #                     gc.collect()
+        #                 else:
+        #                     BB = BB1
+        #                     Bv = Bv1
+        #             # compute BBx, iterate along freq to reduce memory consumption
+        #             for fi in range(nfreq):
+        #                 if mi != -1:
+        #                     BBxfi = BB[fi:fi+1, np.newaxis, :, :] * BB.conj() # (1, nfreq, nl, nl)
+        #                 else:
+        #                     BBxfi = np.zeros((1, nfreq, nl, nl), dtype=np.complex128)
+        #                 # reduce BBxfi to rank0 of comms[ci]
+        #                 if comms[ci] is not None and comms[ci].size > 1:
+        #                     if comms[ci].rank == 0:
+        #                         comms[ci].Reduce(mpiutil.IN_PLACE, BBxfi, root=0, op=mpiutil.SUM)
+        #                     else:
+        #                         comms[ci].Reduce(BBxfi, BBxfi, root=0, op=mpiutil.SUM)
+        #                 # write BBxfi to file
+        #                 if comms[ci] is None or comms[ci].rank == 0:
+        #                     print(f'rank {mpiutil.rank} writes data with fi = {fi} to file...', flush=True)
+        #                     with h5py.File(self._BBxfile(), 'r+') as f:
+        #                         f['BBx'][fi:fi+1] += BBxfi
+        #                         f.flush()
+
+        #                 # make sync here
+        #                 if comms[ci] is not None and comms[ci].size > 1:
+        #                     comms[ci].barrier()
+
+        #                 del BBxfi
+        #                 gc.collect()
+
+        #             if mi != -1:
+        #                 del BB
+        #             # del BBxfi
+        #             gc.collect()
+
+        #             # compute Bvx, Bvx is not very large
+        #             if mi != -1:
+        #                 Bvx = Bv[:, np.newaxis, :] * Bv.conj() # (nfreq, nfreq, nl)
+        #             else:
+        #                 Bvx = np.zeros((nfreq, nfreq, nl), dtype=np.complex128)
+        #             # reduce Bvx to rank0 of comms[ci]
+        #             if comms[ci] is not None and comms[ci].size > 1:
+        #                 if comms[ci].rank == 0:
+        #                     comms[ci].Reduce(mpiutil.IN_PLACE, Bvx, root=0, op=mpiutil.SUM)
+        #                 else:
+        #                     comms[ci].Reduce(Bvx, Bvx, root=0, op=mpiutil.SUM)
+        #             # write Bvx to file
+        #             if comms[ci] is None or comms[ci].rank == 0:
+        #                 with h5py.File(self._Bvxfile(), 'r+') as f:
+        #                     f['Bvx'][:] += Bvx
+        #                     f.flush()
+
+        #             # make sync here, not necessarily need here
+        #             if comms[ci] is not None and comms[ci].size > 1:
+        #                 comms[ci].barrier()
+
+        #             if mi!= -1:
+        #                 del Bv
+        #             del Bvx
+        #             gc.collect()
+
+        #     mpiutil.barrier() # outer barrier
+
+
+        # # compute cl
+        # fi1s = []
+        # fi2s = []
+        # for fi1 in range(nfreq):
+        #     for fi2 in range(fi1, nfreq):
+        #         fi1s.append(fi1)
+        #         fi2s.append(fi2)
+
+        # lfi1s = mpiutil.scatter_array(np.array(fi1s))
+        # lfi2s = mpiutil.scatter_array(np.array(fi2s))
+        # lcld = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, len(lfi1s)), dtype=np.float64)
+        # lclt = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, len(lfi1s)), dtype=np.float64)
+        # lclp = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, len(lfi1s)), dtype=np.float64) # use the solved lcld as a prior
+        # for li, (fi1, fi2) in enumerate(zip(lfi1s, lfi2s)):
+        #     if mpiutil.rank0:
+        #         print(f'{li} of {len(lfi1s)}...', flush=True)
+
+        #     BB = self.BBx(fi1, fi2)
+        #     Bv = self.Bvx(fi1, fi2)
+
+        #     # # save BB to file for analysis
+        #     # with h5py.File('BB.hdf5', 'w') as f:
+        #     #     f.create_dataset('BB', data=BB)
+        #     #     f.create_dataset('Bv', data=Bv)
+
+        #     # approximation solution
+        #     chatd = Bv.real / np.diag(BB.real)
+        #     lcld[:, :, li] = chatd.reshape(self.telescope.num_pol_sky, nl)
+
+        #     np.fill_diagonal(BB, eps + np.diag(BB)) # (B^* B + eps I)
+        #     try:
+        #         BBi = la.pinv(BB) # (B^* B + eps I)^-1
+        #     except np.linalg.linalg.LinAlgError:
+        #         print('Compute pinv of BB failed for fi1 = %d, fi2 = %d' % (fi1, fi2), flush=True)
+        #         continue
+        #     chatt = np.dot(BBi, Bv).real # keep only real part
+        #     lclt[:, :, li] = chatt.reshape(self.telescope.num_pol_sky, nl)
+        #     chatp = np.dot(BBi, Bv + eps * chatd).real # keep only real part
+        #     lclp[:, :, li] = chatp.reshape(self.telescope.num_pol_sky, nl)
+
+        # cld = mpiutil.gather_array(lcld, axis=2, root=0)
+        # clt = mpiutil.gather_array(lclt, axis=2, root=0)
+        # clp = mpiutil.gather_array(lclp, axis=2, root=0)
+
+        # if mpiutil.rank0:
+        #     cl_diag = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, nfreq, nfreq), dtype=np.float64)
+        #     cl_tk = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, nfreq, nfreq), dtype=np.float64)
+        #     cl_prior = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, nfreq, nfreq), dtype=np.float64)
+        #     for i, (fi1, fi2) in enumerate(zip(fi1s, fi2s)):
+        #         cl_diag[:, :, fi1, fi2] = cld[:, :, i]
+        #         cl_tk[:, :, fi1, fi2] = clt[:, :, i]
+        #         cl_prior[:, :, fi1, fi2] = clp[:, :, i]
+
+        #         if fi1 != fi2:
+        #             cl_diag[:, :, fi2, fi1] = cl_diag[:, :, fi1, fi2]
+        #             cl_tk[:, :, fi2, fi1] = cl_tk[:, :, fi1, fi2]
+        #             cl_prior[:, :, fi2, fi1] = cl_prior[:, :, fi1, fi2]
+        # else:
+        #     cl_diag = None
+        #     cl_tk = None
+        #     cl_prior = None
+
+        # return cl_tk, cl_diag, cl_prior
 
 
     _cache_dict = dict()
