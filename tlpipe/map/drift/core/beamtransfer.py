@@ -1485,6 +1485,10 @@ class BeamTransfer(object):
         # mpiutil.barrier()
 
 
+        rank_groups = mpiutil.not_shared_rank_groups()
+        rank_groups = mpiutil.merge_rank_groups(rank_groups, merge_number=16)
+
+
         fi1s = []
         fi2s = []
         for fi1 in range(nfreq):
@@ -1499,29 +1503,49 @@ class BeamTransfer(object):
         lclt = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, len(lfi1s)), dtype=np.float64)
         lclp = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, len(lfi1s)), dtype=np.float64) # use the solved lcld as a prior
 
+        num_lfi1s_rank0 = mpiutil.bcast(len(lfi1s), root=0)
+        lfi1s = lfi1s.tolist() + [-1] * (num_lfi1s_rank0 - len(lfi1s)) # make all ranks have same number of lfi1s
+        lfi2s = lfi2s.tolist() + [-1] * (num_lfi1s_rank0 - len(lfi2s)) # make all ranks have same number of lfi2s
+
         for li, (fi1, fi2) in enumerate(zip(lfi1s, lfi2s)):
             if mpiutil.rank0:
                 print(f'{li} of {len(lfi1s)}...', flush=True)
 
-            sfi1 = max(0, fi1 - nbin//2)
-            efi1 = min(fi1 - nbin//2 + nbin, nfreq)
-            sfi2 = max(0, fi2 - nbin//2)
-            efi2 = min(fi2 - nbin//2 + nbin, nfreq)
+            if fi1 == -1 or fi2 == -1:
+                compute = False
+            else:
+                compute = True
 
-            BB = np.zeros((npl, npl), dtype=complex) # BBf1 * BBf2.conj() for (fi1, fi2)
-            # BBf2 * BBf1.conj() = (BBf1 * BBf2.conj()).conj()
-            Bv = np.zeros((npl,), dtype=complex) # Bvf1 * Bvf2.conj() for (fi1, fi2)
-            # Bvf2 * Bvf1.conj() = (Bvf1 * Bvf2.conj()).conj()
-            for mi in range(nm):
-                with h5py.File(self._BBfile(mi), 'r') as f:
-                    BBf1 = f['BB_m'][sfi1:efi1, mi:, mi:].mean(axis=0)
-                    BBf2 = f['BB_m'][sfi2:efi2, mi:, mi:].mean(axis=0)
-                BB[mi:, mi:] += BBf1 * BBf2.conj()
+            if compute:
+                sfi1 = max(0, fi1 - nbin//2)
+                efi1 = min(fi1 - nbin//2 + nbin, nfreq)
+                sfi2 = max(0, fi2 - nbin//2)
+                efi2 = min(fi2 - nbin//2 + nbin, nfreq)
 
-                with h5py.File(ts._Bvfile(mi), 'r') as f:
-                    Bvf1 = f['Bv_m'][sfi1:efi1, mi:].mean(axis=0)
-                    Bvf2 = f['Bv_m'][sfi2:efi2, mi:].mean(axis=0)
-                Bv[mi:] += Bvf1 * Bvf2.conj()
+                BB = np.zeros((npl, npl), dtype=complex) # BBf1 * BBf2.conj() for (fi1, fi2)
+                # BBf2 * BBf1.conj() = (BBf1 * BBf2.conj()).conj()
+                Bv = np.zeros((npl,), dtype=complex) # Bvf1 * Bvf2.conj() for (fi1, fi2)
+                # Bvf2 * Bvf1.conj() = (Bvf1 * Bvf2.conj()).conj()
+
+            # constant the number of processes read files simultaneously
+            for rg in rank_groups:
+                if mpiutil.rank in rg:
+                    if compute:
+                        for mi in range(nm):
+                            with h5py.File(self._BBfile(mi), 'r') as f:
+                                BBf1 = f['BB_m'][sfi1:efi1, mi:, mi:].mean(axis=0)
+                                BBf2 = f['BB_m'][sfi2:efi2, mi:, mi:].mean(axis=0)
+                            BB[mi:, mi:] += BBf1 * BBf2.conj()
+
+                            with h5py.File(ts._Bvfile(mi), 'r') as f:
+                                Bvf1 = f['Bv_m'][sfi1:efi1, mi:].mean(axis=0)
+                                Bvf2 = f['Bv_m'][sfi2:efi2, mi:].mean(axis=0)
+                            Bv[mi:] += Bvf1 * Bvf2.conj()
+
+                mpiutil.barrier()
+
+            if not compute:
+                continue
 
             # # save BB to file for analysis
             # with h5py.File('BB.hdf5', 'w') as f:
