@@ -1485,8 +1485,19 @@ class BeamTransfer(object):
         # mpiutil.barrier()
 
 
-        # rank_groups = mpiutil.not_shared_rank_groups()
-        # rank_groups = mpiutil.merge_rank_groups(rank_groups, merge_number=16)
+        gs = group_size # group size
+        num_nodes = len(mpiutil.shared_rank_groups()) # number of unique nodes
+        if num_nodes < gs:
+            all_ranks = np.random.permutation(mpiutil.size) # a list of permuted rank no.
+            if mpiutil.size > 1:
+                mpiutil.world.Bcast(all_ranks, root=0) # make all ranks have the same list
+
+            ng, r = mpiutil.size // gs, mpiutil.size % gs
+            rank_groups = [ all_ranks[i*gs:(i+1)*gs] for i in range(ng) ]
+            if r != 0:
+                rank_groups.append(all_ranks[ng*gs:])
+        else:
+            rank_groups = mpiutil.not_shared_rank_groups()
 
 
         fi1s = []
@@ -1508,12 +1519,18 @@ class BeamTransfer(object):
                 print(f'mi = {mi} of {nm}...', flush=True)
 
             # pre-read needed frequency slices of BB and Bv for this rank
-            with h5py.File(self._BBfile(mi), 'r') as f1, h5py.File(ts._Bvfile(mi), 'r') as f2:
-                for fi in np.union1d(lfi1s, lfi2s):
-                    sfi = max(0, fi - nbin//2)
-                    efi = min(fi - nbin//2 + nbin, nfreq)
-                    BBfs[fi] = f1['BB_m'][sfi:efi, mi:, mi:].mean(axis=0)
-                    Bvfs[fi] = f2['Bv_m'][sfi:efi, mi:].mean(axis=0)
+            # constrain the number of ranks reading at the same time
+            for gi, rg in enumerate(rank_groups):
+                if mpiutil.rank0:
+                    print(f'    gi = {gi} of {len(rank_groups)}...', flush=True)
+                if mpiutil.rank in rg:
+                    with h5py.File(self._BBfile(mi), 'r') as f1, h5py.File(ts._Bvfile(mi), 'r') as f2:
+                        for fi in np.union1d(lfi1s, lfi2s):
+                            sfi = max(0, fi - nbin//2)
+                            efi = min(fi - nbin//2 + nbin, nfreq)
+                            BBfs[fi] = f1['BB_m'][sfi:efi, mi:, mi:].mean(axis=0)
+                            Bvfs[fi] = f2['Bv_m'][sfi:efi, mi:].mean(axis=0)
+                mpiutil.barrier()
 
             # compute BBx and Bvx for all (fi1, fi2) pairs hold by this rank
             for (fi1, fi2) in zip(lfi1s, lfi2s):
