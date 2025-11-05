@@ -1485,8 +1485,8 @@ class BeamTransfer(object):
         # mpiutil.barrier()
 
 
-        rank_groups = mpiutil.not_shared_rank_groups()
-        rank_groups = mpiutil.merge_rank_groups(rank_groups, merge_number=16)
+        # rank_groups = mpiutil.not_shared_rank_groups()
+        # rank_groups = mpiutil.merge_rank_groups(rank_groups, merge_number=16)
 
 
         fi1s = []
@@ -1499,31 +1499,34 @@ class BeamTransfer(object):
         lfi1s = mpiutil.scatter_array(np.array(fi1s))
         lfi2s = mpiutil.scatter_array(np.array(fi2s))
 
-        # pre-read all frequency slices of BB and Bv from all file in one round
         BBfs = dict()
         Bvfs = dict()
+        BBxffs = dict()
+        Bvxffs = dict()
         for mi in range(nm):
+            if mpiutil.rank0:
+                print(f'mi = {mi} of {nm}...', flush=True)
+
+            # pre-read needed frequency slices of BB and Bv for this rank
             with h5py.File(self._BBfile(mi), 'r') as f1, h5py.File(ts._Bvfile(mi), 'r') as f2:
                 for fi in np.union1d(lfi1s, lfi2s):
                     sfi = max(0, fi - nbin//2)
                     efi = min(fi - nbin//2 + nbin, nfreq)
-                    BBfs[(mi, fi)] = f1['BB_m'][sfi:efi, mi:, mi:].mean(axis=0)
-                    Bvfs[(mi, fi)] = f2['Bv_m'][sfi:efi, mi:].mean(axis=0)
+                    BBfs[fi] = f1['BB_m'][sfi:efi, mi:, mi:].mean(axis=0)
+                    Bvfs[fi] = f2['Bv_m'][sfi:efi, mi:].mean(axis=0)
 
-        # # constant the number of processes read files simultaneously
-        # for gi, rg in enumerate(rank_groups):
-        #     if mpiutil.rank0:
-        #         print(f'File reading round {gi} of {len(rank_groups)}...', flush=True)
-        #     if mpiutil.rank in rg:
-        #         for mi in range(nm):
-        #             with h5py.File(self._BBfile(mi), 'r') as f1, h5py.File(ts._Bvfile(mi), 'r') as f2:
-        #                 for fi in np.union1d(lfi1s, lfi2s):
-        #                     sfi = max(0, fi - nbin//2)
-        #                     efi = min(fi - nbin//2 + nbin, nfreq)
-        #                     BBfs[(mi, fi)] = f1['BB_m'][sfi:efi, mi:, mi:].mean(axis=0)
-        #                     Bvfs[(mi, fi)] = f2['Bv_m'][sfi:efi, mi:].mean(axis=0)
+            # compute BBx and Bvx for all (fi1, fi2) pairs hold by this rank
+            for (fi1, fi2) in zip(lfi1s, lfi2s):
+                if mi == 0:
+                    BBxffs[(fi1, fi2)] = BBfs[fi1] * BBfs[fi2].conj()
+                    Bvxffs[(fi1, fi2)] = Bvfs[fi1] * Bvfs[fi2].conj()
+                else:
+                    BBxffs[(fi1, fi2)][mi:, mi:] += BBfs[fi1] * BBfs[fi2].conj()
+                    Bvxffs[(fi1, fi2)][mi:] += Bvfs[fi1] * Bvfs[fi2].conj()
 
-        #     mpiutil.barrier()
+        del BBfs
+        del Bvfs
+        gc.collect()
 
 
         lcld = np.zeros((self.telescope.num_pol_sky, self.telescope.lmax + 1, len(lfi1s)), dtype=np.float64)
@@ -1534,14 +1537,10 @@ class BeamTransfer(object):
             if mpiutil.rank0:
                 print(f'{li} of {len(lfi1s)}...', flush=True)
 
-            BB = np.zeros((npl, npl), dtype=complex) # BBf1 * BBf2.conj() for (fi1, fi2)
+            BB = BBxffs[(fi1, fi2)] # BBf1 * BBf2.conj() for (fi1, fi2)
             # BBf2 * BBf1.conj() = (BBf1 * BBf2.conj()).conj()
-            Bv = np.zeros((npl,), dtype=complex) # Bvf1 * Bvf2.conj() for (fi1, fi2)
+            Bv = Bvxffs[(fi1, fi2)] # Bvf1 * Bvf2.conj() for (fi1, fi2)
             # Bvf2 * Bvf1.conj() = (Bvf1 * Bvf2.conj()).conj()
-
-            for mi in range(nm):
-                BB[mi:, mi:] += BBfs[(mi, fi1)] * BBfs[(mi, fi2)].conj()
-                Bv[mi:] += Bvfs[(mi, fi1)] * Bvfs[(mi, fi2)].conj()
 
             # # save BB to file for analysis
             # with h5py.File('BB.hdf5', 'w') as f:
@@ -1563,8 +1562,8 @@ class BeamTransfer(object):
             chatp = np.dot(BBi, Bv + eps * chatd).real # keep only real part
             lclp[:, :, li] = chatp.reshape(self.telescope.num_pol_sky, nl)
 
-        del BBfs
-        del Bvfs
+        del BBxffs
+        del Bvxffs
         gc.collect()
 
 
