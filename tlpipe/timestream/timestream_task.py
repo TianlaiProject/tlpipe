@@ -50,6 +50,7 @@ class TimestreamTask(OneAndOne):
                     'memmap_path': './memmap',
                     'via_memmap': False,
                     'num_rank_groups': 16,
+                    'merge_number': 6,
                     'exclude': [],
                     'check_status': True,
                     'write_hints': True,
@@ -134,13 +135,14 @@ class TimestreamTask(OneAndOne):
         memmap_vis = self.params['memmap_vis']
         memmap_path = self.params['memmap_path']
         num_rank_groups = self.params['num_rank_groups']
+        merge_number = self.params['merge_number']
         tag_input_iter = self.params['tag_input_iter']
 
         if self.iterable and tag_input_iter:
             input_files = input_path(self.input_files, iteration=self.iteration)
         else:
             input_files = self.input_files
-        tod = self._Tod_class(input_files, mode, start, stop, dist_axis, memmap_vis=memmap_vis, memmap_path=output_path(memmap_path), num_rank_groups=num_rank_groups)
+        tod = self._Tod_class(input_files, mode, start, stop, dist_axis, memmap_vis=memmap_vis, memmap_path=output_path(memmap_path), num_rank_groups=num_rank_groups, merge_number=merge_number)
 
         tod, full_data = self.data_select(tod)
 

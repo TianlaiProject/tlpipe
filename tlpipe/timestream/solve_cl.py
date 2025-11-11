@@ -41,7 +41,7 @@ class SolveCl(timestream_task.TimestreamTask):
                     'epsilon': 0.0001, # regularization parameter for tk
                     'nbin': 1,  # synthesize for nbin freqs, use this if multi-freq synthesize
                     'group_size': 16,  # rank group size
-                    'merge_number': 1,  # adjacent number of groups to merge in rank groups
+                    'merge_number': 6,  # adjacent number of groups to merge in rank groups
                   }
 
     prefix = 'sc_'

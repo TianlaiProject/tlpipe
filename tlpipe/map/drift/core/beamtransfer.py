@@ -1451,7 +1451,7 @@ class BeamTransfer(object):
 
         return cl
 
-    def solve_cl_allm_tk(self, ts, nbin=1, eps=0.01, group_size=16, merge_number=1):
+    def solve_cl_allm_tk(self, ts, nbin=1, eps=0.01, group_size=16, merge_number=6):
         """Solve C_l(\nu, \nu') using the Tikhonov regularization method.
 
         Parameters
@@ -1498,6 +1498,7 @@ class BeamTransfer(object):
                 rank_groups.append(all_ranks[ng*gs:])
         else:
             rank_groups = mpiutil.not_shared_rank_groups()
+        rank_groups = mpiutil.merge_rank_groups(rank_groups, merge_number=merge_number)
 
 
         fi1s = []

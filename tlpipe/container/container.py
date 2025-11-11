@@ -134,7 +134,7 @@ class BasicTod(memh5.MemDiskGroup):
     _time_ordered_attrs_ = {}
 
 
-    def __init__(self, files=None, mode='r', start=0, stop=None, dist_axis=0, memmap_vis=False, memmap_path=None, use_hints=True, comm=None, num_rank_groups=16):
+    def __init__(self, files=None, mode='r', start=0, stop=None, dist_axis=0, memmap_vis=False, memmap_path=None, use_hints=True, comm=None, num_rank_groups=16, merge_number=6):
 
         super(BasicTod, self).__init__(data_group=None, distributed=True, comm=comm)
 
@@ -142,10 +142,18 @@ class BasicTod(memh5.MemDiskGroup):
         self.rank = 0 if self.comm is None else self.comm.rank
         self.rank0 = True if self.rank == 0 else False
         # self.rank_groups = list(itertools.batched(range(self.nproc), num_rank_groups)) # for python3.12+
-        ng, r = self.nproc // num_rank_groups, self.nproc % num_rank_groups
-        self.rank_groups = [ list(range(i*num_rank_groups, (i+1)*num_rank_groups)) for i in range(ng) ]
-        if r != 0:
-            self.rank_groups.append(list(range(ng*num_rank_groups, self.nproc)))
+        num_nodes = len(mpiutil.shared_rank_groups()) # number of unique nodes
+        if num_nodes < num_rank_groups:
+            all_ranks = np.random.permutation(mpiutil.size) # a list of permuted rank no.
+            if mpiutil.size > 1:
+                mpiutil.world.Bcast(all_ranks, root=0) # make all ranks have the same list
+            ng, r = mpiutil.size // num_rank_groups, mpiutil.size % num_rank_groups
+            rank_groups = [ all_ranks[i*num_rank_groups:(i+1)*num_rank_groups] for i in range(ng) ]
+            if r != 0:
+                rank_groups.append(all_ranks[ng*num_rank_groups:])
+        else:
+            rank_groups = mpiutil.not_shared_rank_groups()
+        self.rank_groups = mpiutil.merge_rank_groups(rank_groups, merge_number=merge_number)
 
         # hints pattern to match hint class attributes defined above
         self.hints_pattern = re.compile(r"(^_[^_]+_$)|(^_[^_]\w*[^_]_$)")
