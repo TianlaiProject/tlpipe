@@ -21,6 +21,7 @@ import warnings
 import pickle
 import operator
 import functools
+import itertools
 import psutil
 import gc
 
@@ -927,75 +928,75 @@ class BeamTransfer(object):
             print('Generating BB files...', flush=True)
 
         nm = self.telescope.mmax + 1 # numbe of ms
+        mis = np.arange(nm)
+
+        rank_groups = mpiutil.shared_rank_groups()
         num_nodes = len(mpiutil.shared_rank_groups()) # number of unique nodes
 
-        mis = np.random.permutation(nm) # a list of permuted mi
-        if mpiutil.size > 1:
-            mpiutil.world.Bcast(mis, root=0) # make all ranks have the same list
+        while(len(mis) > 0):
 
-        # split mis to each node
-        n, s, e = mpiutil.split_m(nm, num_nodes)
+            nm_per_node = 1 # number of mis that can run on a single node
 
-        nm_per_node = 1 # number of mis that can run on a single node
-
-        # release un-used memory bofre get available memory
-        gc.collect()
-
-        # get available memory of the node
-        if mpiutil.rank0:
-            mem = psutil.virtual_memory()
-            available_mem = mem.available # in byte
-
-            with h5py.File(self._mfile(1), 'r') as f:
-                B_mem = np.prod(f['beam_m'].shape) * 16 # in byre
-
-            nm_per_node = int(available_mem / B_mem) // 3 # 3 for B, B.conj() and extra space
-
-            if nm_per_node < 1:
-                nm_per_node = 1
-                print('Maybe not enough memory for computing BB...', flush=True)
-
-            print(f'Each node can simultaneously compute {nm_per_node} BBs...', flush=True)
-
-        nm_per_node = mpiutil.bcast(nm_per_node, root=0)
-
-        # distribute mis to each rank
-        this_mis = []
-        for ni in range(num_nodes): # iter for each node
-            mis_for_ni = mis[s[ni]:e[ni]] # mis for this node
-            srg = mpiutil.shared_rank_groups()[ni] # rank groups in this node
-            parts = min(len(srg), nm_per_node) # plit to this parts
-            n1, s1, e1 = mpiutil.split_m(len(mis_for_ni), parts)
-            for pi in range(parts):
-                if mpiutil.rank == srg[pi]:
-                    this_mis.extend(mis_for_ni[s1[pi]:e1[pi]].tolist())
-
-        for ii, mi in enumerate(this_mis):
-            if mpiutil.rank0:
-                print(f'Compute {ii} of {len(this_mis)} for BB...', flush=True)
-
-            if os.path.exists(self._BBfile(mi)) and not regen:
-                print("m index %i. File: %s exists. Skipping..." % (mi, self._BBfile(mi)), flush=True)
-                continue
-            # else:
-            #     print('m index %i. Creating BB file: %s' % (mi, self._BBfile(mi)), flush=True)
-
-            # Open m beams for reading.
-            with h5py.File(self._mfile(mi), 'r') as f1, h5py.File(self._BBfile(mi), 'w') as f2:
-                nfreq, npn, npairs, npol_sky, nl = f1['beam_m'].shape
-                # B = f1['beam_m'][:].reshape(nfreq, npn*npairs, npol_sky*nl)
-                # BB = np.einsum('...ij,...ik->...jk', B.conj(), B)
-                # f2.create_dataset('BB_m', data=BB)
-                B = f1['beam_m'][:, :, :, :, mi:].reshape(nfreq, npn*npairs, -1)
-                BB = np.einsum('...ij,...ik->...jk', B.conj(), B)
-                f2.create_dataset('BB_m', shape=(nfreq, npol_sky*nl, npol_sky*nl), dtype=BB.dtype, fillvalue=complex(0, 0))
-                f2['BB_m'][:, mi:, mi:] = BB
-
-            del B # for running more than one process, a process still hold the data after it finish
-            del BB # for running more than one process, a process still hold the data after it finish
+            # release un-used memory bofre get available memory
             gc.collect()
 
-        mpiutil.barrier()
+            # get available memory of the node
+            if mpiutil.rank0:
+                mem = psutil.virtual_memory()
+                available_mem = mem.available # in byte
+
+                mi_ = max(1, mis[0])
+                with h5py.File(self._mfile(mi_), 'r') as f:
+                    nfreq, npn, npairs, npol_sky, nl = f['beam_m'].shape
+                    B_mem = nfreq * npn * npairs * npol_sky * (nl - mi_) * 16 # in byre
+
+                nm_per_node = int(available_mem / B_mem / 2.5) # 2.5 for B, B.conj() and extra space
+
+                if nm_per_node < 1:
+                    nm_per_node = 1
+                    print('Maybe not enough memory for computing BB...', flush=True)
+
+                print(f'Each node can simultaneously compute {nm_per_node} BBs...', flush=True)
+
+            nm_per_node = mpiutil.bcast(nm_per_node, root=0)
+
+            # distribute mis to each rank
+            this_mis = []
+            for ni in range(num_nodes): # iter for each node
+                extended_rgs = list(itertools.chain(*itertools.repeat(rank_groups[ni], (nm_per_node // len(rank_groups[ni])) + 1)))
+                for i in range(nm_per_node):
+                    if mpiutil.rank == extended_rgs[i]:
+                        if num_nodes*i + ni < len(mis):
+                            this_mis.append(mis[num_nodes*i + ni])
+
+            mis = mis[(num_nodes * nm_per_node):] # drop already allocated mis
+
+            for ii, mi in enumerate(this_mis):
+                if mpiutil.rank0:
+                    print(f'Compute mi = {mi}, {ii} of {len(this_mis)} for BB...', flush=True)
+
+                if os.path.exists(self._BBfile(mi)) and not regen:
+                    print("m index %i. File: %s exists. Skipping..." % (mi, self._BBfile(mi)), flush=True)
+                    continue
+                # else:
+                #     print('m index %i. Creating BB file: %s' % (mi, self._BBfile(mi)), flush=True)
+
+                # Open m beams for reading.
+                with h5py.File(self._mfile(mi), 'r') as f1, h5py.File(self._BBfile(mi), 'w') as f2:
+                    nfreq, npn, npairs, npol_sky, nl = f1['beam_m'].shape
+                    # B = f1['beam_m'][:].reshape(nfreq, npn*npairs, npol_sky*nl)
+                    # BB = np.einsum('...ij,...ik->...jk', B.conj(), B)
+                    # f2.create_dataset('BB_m', data=BB)
+                    B = f1['beam_m'][:, :, :, :, mi:].reshape(nfreq, npn*npairs, -1)
+                    BB = np.einsum('...ij,...ik->...jk', B.conj(), B)
+                    f2.create_dataset('BB_m', shape=(nfreq, npol_sky*nl, npol_sky*nl), dtype=BB.dtype, fillvalue=complex(0, 0))
+                    f2['BB_m'][:, mi:, mi:] = BB
+
+                del B # for running more than one process, a process still hold the data after it finish
+                del BB # for running more than one process, a process still hold the data after it finish
+                gc.collect()
+
+            mpiutil.barrier()
 
         if mpiutil.rank0:
             print('Generating BB files Done', flush=True)
